@@ -25,6 +25,10 @@
 //   setTerrainView   -> (protocol 14) the view every tile is drawn in from now on, and the tile on screen built again in
 //                       it from what the player holds (WmvTerrainSession.RebuildShown; no framing), answered
 //                       terrainViewApplied
+//   loadWorld        -> (protocol 16) a world: the tile and its world models, or a WMO-only map's world model with no tile
+//                       (WmvTerrainSession, WmvTerrainSessionWorld.cs); the world models built and placed by WmvWorldModels
+//                       through MainWorldView, on the terrain layer under the same scene root, culled per group every frame
+//   inspectWorldModel-> (protocol 16) a WMO-only map's footprint (WmvMapTiles.InspectWorldModel), answered at once
 //   setWorldCamera   -> (protocol 15) the world view's camera: "fly" puts the free camera (WmvFlyCamera) at a position of
 //                       the game's world frame -- on the ground under it (TerrainHeight on the shown tile's own mesh) plus
 //                       an eye height when no z is given -- converted with the tile's floating origin; "overview" frames
@@ -78,6 +82,18 @@ public partial class WmvMain
     WmvFlyCamera fly;                     // the world view's free camera (protocol 15), on the main camera, off until asked for
     WmvIpcClient.WorldCameraRequest owedCamera;   // a loadTerrainTile's camera, placed when that load's tile is shown
     int owedCameraLoad;
+    // Protocol 16: a tile's world load places its camera once its world models are settled (they do not exist at the tile's
+    // commit, and the camera stands on their floors): from TerrainTileBuilt, not ShowTile.
+    bool owedCameraAtBuilt;
+    // The tile world load whose world models are not settled yet (0: none): a camera asked for meanwhile waits for them too
+    // (it stands on their floors), as the load's own camera does.
+    int settlingLoad;
+    WmvWorldModels worldModels;           // the world scene's world models (protocol 16)
+    // Protocol 16: the world view's frame times (unscaled, milliseconds), the last WorldFrameWindow frames since it was
+    // last entered, for runtimeState's distribution.
+    public const int WorldFrameWindow = 600;
+    readonly float[] worldFrameMs = new float[WorldFrameWindow];
+    int worldFrames, worldFrameNext;
 
     /// <summary>The ApplyViewportOrbitOverride tag of the terrain framing: the only one honoured in the terrain view.</summary>
     const string TerrainOverrideTag = "terrain: ";
@@ -102,6 +118,9 @@ public partial class WmvMain
         terrain = new WmvTerrainSession(new MainTerrainView(this), ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded,
                                         s => Debug.Log("WMV: " + s),
                                         a => System.Threading.ThreadPool.QueueUserWorkItem(_ => a()), WmvTerrainDebug.TimeoutMs);
+        worldModels = new WmvWorldModels(TerrainSceneRoot());
+        terrain.WorldView = new MainWorldView(this);
+        UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering += CullWorldModels;
         WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
             Debug.LogWarning("WMV: [terrain] " + note);
@@ -124,12 +143,34 @@ public partial class WmvMain
         ipc.OnInspectMapTiles = HandleInspectMapTiles;
         ipc.OnSetTerrainView = HandleSetTerrainView;
         ipc.OnSetWorldCamera = HandleSetWorldCamera;
+        ipc.OnInspectWorldModel = HandleInspectWorldModel;
+    }
+
+    /// <summary>inspectWorldModel: a WMO-only map's footprint (WmvMapTiles.InspectWorldModel), answered at once.</summary>
+    void HandleInspectWorldModel(WmvIpcClient.WorldModelRequest request)
+    {
+        WmvIpcClient.WorldModelInspectReport r = WmvMapTiles.InspectWorldModel(request);
+        Debug.Log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                "WMV: [terrain] inspectWorldModel {0}: map {1}, WMO {2} ({3} bytes): {4}{5}; {6} group(s) ({7} interior); root box " +
+                                "({8:0.##}, {9:0.##}, {10:0.##})..({11:0.##}, {12:0.##}, {13:0.##}); {14:0.###} ms", r.Inspection, r.MapId, r.WmoFileDataID,
+                                r.Bytes, r.Status, string.IsNullOrEmpty(r.Reason) ? "" : " (" + r.Reason + ")", r.Groups, r.InteriorGroups,
+                                r.RootBox[0], r.RootBox[1], r.RootBox[2], r.RootBox[3], r.RootBox[4], r.RootBox[5], r.ParseMs));
+        ipc.ReportWorldModelInspected(r);
     }
 
     /// <summary>setWorldCamera: the camera placed or switched now, answered. The user's latest choice wins: a camera a load
     /// in flight still carries is not placed when that load's tile comes.</summary>
     void HandleSetWorldCamera(WmvIpcClient.WorldCameraRequest request)
     {
+        // A tile's world models still coming (the tile on screen, its load not reported): the camera waits for them, as the
+        // load's own did -- placed now it would stand on the terrain under a floor not built yet.
+        if (settlingLoad != 0 && terrain != null && terrain.Loading && terrain.ShownLoad == settlingLoad && request != null && request.Mode == "fly")
+        {
+            owedCamera = request;
+            owedCameraLoad = settlingLoad;
+            Debug.Log("WMV: [terrain] world camera " + request + " waits for the world models of load " + settlingLoad);
+            return;
+        }
         owedCamera = null;
         WmvIpcClient.WorldCameraReport r = PlaceWorldCamera(request);
         ipc.ReportWorldCameraApplied(r);
@@ -146,7 +187,10 @@ public partial class WmvMain
         var r = new WmvIpcClient.WorldCameraReport { Request = q != null ? q.Request : 0, Mode = q != null ? q.Mode ?? "" : "" };
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
         TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
+        WmvWorldScene scene = terrain != null ? terrain.World : null;
         r.Load = tile != null ? tile.Load : 0;
+        if (tile == null && scene != null && scene.Kind == "globalWmo")
+            return PlaceWorldModelCamera(q, r, scene);
         if (q == null || (q.Mode != "fly" && q.Mode != "overview"))
             r.Reason = "\"" + r.Mode + "\" is not a camera mode (fly, overview)";
         else if (tile == null || tile.Root == null || !TerrainViewActive)
@@ -166,11 +210,22 @@ public partial class WmvMain
         {
             double eye = q.EyeHeight > 0f ? q.EyeHeight : 2.0;
             r.GroundZ = TerrainHeight.At(mesh, q.X, q.Y);
-            double z;
+            double z, modelZ, modelFloor;
+            string modelWhy;
             if (q.HasZ)
             {
                 z = q.Z;
                 r.Reason = "at the height asked for";
+            }
+            else if (WorldModelStand(q.X, q.Y, eye, r.GroundZ, out modelZ, out modelFloor, out modelWhy))
+            {
+                // Protocol 16: a world model's floor at or above the terrain's ground there (a street, a room) is where the point
+                // stands, never the terrain under it.
+                z = modelZ;
+                r.Ground = true;
+                r.Reason = modelWhy + (double.IsNaN(r.GroundZ) ? "" : string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                                                                      "; the terrain's ground there {0:0.##}", r.GroundZ));
+                r.GroundZ = modelFloor;
             }
             else if (!double.IsNaN(r.GroundZ))
             {
@@ -203,6 +258,202 @@ public partial class WmvMain
         return r;
     }
 
+    /// <summary>
+    /// The world models' floor to stand on at (x, y) in a tile's scene (protocol 16): over every world model of the scene, its
+    /// lowest floor at or above the terrain's ground there less half a yard (WorldModelGeometry.GroundFloor: the street, or a
+    /// building's ground floor -- not a cellar under the ground, not a tower room or a roof), the lowest of them; z is it plus
+    /// the eye height. False when no world model has a floor there (the terrain's ground then).
+    /// </summary>
+    bool WorldModelStand(double x, double y, double eye, double ground, out double z, out double floor, out string reason)
+    {
+        z = floor = double.NaN;
+        reason = "";
+        WmvWorldScene scene = terrain != null ? terrain.World : null;
+        if (scene == null || scene.Geometries.Count == 0)
+            return false;
+        double minFloor = double.IsNaN(ground) ? double.NegativeInfinity : ground - 0.5;
+        bool found = false;
+        foreach (WorldModelGeometry g in scene.Geometries)
+        {
+            double sz, sf;
+            bool covered;
+            string why;
+            if (!g.GroundFloor(x, y, eye, minFloor, out sz, out sf, out covered, out why))
+                continue;
+            if (!found || sf < floor)
+            {
+                found = true;
+                floor = sf;
+                z = sz;
+                reason = "world model " + g.Placement.FileDataID + " (uniqueId " + g.Placement.UniqueId + "): " + why;
+            }
+        }
+        if (!found)
+            return false;
+        // The world models together, as GroundFloor does within one: another model's floor layered over the one chosen (a
+        // platform on a street) is climbed onto, and the nearest surface above of any model limits the eye.
+        double stand = floor;
+        for (int k = 0; k < 16; k++)
+        {
+            double next = double.PositiveInfinity;
+            foreach (WorldModelGeometry g in scene.Geometries)
+            {
+                double f;
+                if (g.FloorAbove(x, y, stand + 0.05, out f) && f < next)
+                    next = f;
+            }
+            if (double.IsInfinity(next) || next - stand > eye + 0.5)
+                break;
+            stand = next;
+        }
+        double ceiling = double.PositiveInfinity;
+        foreach (WorldModelGeometry g in scene.Geometries)
+        {
+            double c;
+            if (g.CeilingAbove(x, y, stand + 0.05, out c) && c < ceiling)
+                ceiling = c;
+        }
+        if (stand != floor)
+            reason += string.Format(System.Globalization.CultureInfo.InvariantCulture, "; on another world model's floor over it, {0:0.##}", stand);
+        floor = stand;
+        z = stand + (double.IsInfinity(ceiling) ? eye : System.Math.Min(eye, System.Math.Max(0.5, ceiling - stand - 0.5)));
+        return true;
+    }
+
+    /// <summary>
+    /// The camera in a WMO-only map's scene (protocol 16; no tile): "overview" frames the world model; "fly" with Start puts
+    /// the free camera at the world model's start point (its own geometry: WorldModelGeometry.StartPoint); "fly" at (X, Y)
+    /// refuses a point outside the scene's box and stands on the highest covered floor under it (WorldModelGeometry.StandOn)
+    /// plus the eye height, or at the Z asked for. Converted with the scene's floating origin, as its instances were.
+    /// </summary>
+    WmvIpcClient.WorldCameraReport PlaceWorldModelCamera(WmvIpcClient.WorldCameraRequest q, WmvIpcClient.WorldCameraReport r, WmvWorldScene scene)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        r.Load = scene.Load;
+        double x = 0, y = 0, z = 0;
+        float yaw = q != null ? q.Yaw : 0f, pitch = q != null ? q.Pitch : 0f;
+        bool place = false;
+        if (q == null || (q.Mode != "fly" && q.Mode != "overview"))
+            r.Reason = "\"" + r.Mode + "\" is not a camera mode (fly, overview)";
+        else if (!TerrainViewActive)
+            r.Reason = "no world is on screen";
+        else if (q.Mode == "overview")
+        {
+            FrameWorldScene(scene);
+            r.Status = "applied";
+            r.Reason = "the world model framed";
+        }
+        else if (q.Start)
+        {
+            WorldPoint start;
+            double startYaw;
+            string why;
+            if (terrain.WorldStart(out start, out startYaw, out why))
+            {
+                x = start.X;
+                y = start.Y;
+                z = start.Z;
+                yaw = (float)startYaw;   // along the start room's longer side, level
+                pitch = 0f;
+                r.Reason = "at the world model's start point: " + why;
+                place = true;
+            }
+            else
+                r.Reason = "the world model's geometry offers no start point: " + why;
+        }
+        else if (!scene.Contains(q.X, q.Y))
+            r.Reason = string.Format(inv, "({0:0.###}, {1:0.###}) is not inside the world model's box (({2:0.##}, {3:0.##})..({4:0.##}, {5:0.##}))",
+                                     q.X, q.Y, scene.BoxMin.X, scene.BoxMin.Y, scene.BoxMax.X, scene.BoxMax.Y);
+        else
+        {
+            x = q.X;
+            y = q.Y;
+            double eye = q.EyeHeight > 0f ? q.EyeHeight : 2.0;
+            if (q.HasZ)
+            {
+                z = q.Z;
+                r.Reason = "at the height asked for";
+                place = true;
+            }
+            else
+            {
+                // The highest covered floor under the point, over every world model of the scene.
+                bool found = false;
+                double bestFloor = double.NegativeInfinity, bestZ = 0;
+                string bestWhy = "no floor of the world model under the point";
+                foreach (WorldModelGeometry g in scene.Geometries)
+                {
+                    double sz, sf;
+                    string why;
+                    if (g.StandOn(x, y, eye, out sz, out sf, out why) && sf > bestFloor)
+                    {
+                        found = true;
+                        bestFloor = sf;
+                        bestZ = sz;
+                        bestWhy = why;
+                    }
+                }
+                if (found)
+                {
+                    z = bestZ;
+                    r.Ground = true;
+                    r.GroundZ = bestFloor;
+                    r.Reason = bestWhy;
+                    place = true;
+                }
+                else
+                    r.Reason = bestWhy;
+            }
+        }
+        if (place)
+        {
+            double ux, uy, uz;
+            WorldToUnity.PositionD(x, y, z, scene.Origin, out ux, out uy, out uz);
+            Vector3 position = TerrainSceneRoot().position + new Vector3((float)ux, (float)uy, (float)uz);
+            terrainViewMode.ApplyFly(position, yaw, pitch);
+            r.Status = "applied";
+            r.X = x;
+            r.Y = y;
+            r.Z = z;
+            r.Yaw = fly.Current.Yaw;
+            r.Pitch = fly.Current.Pitch;
+        }
+        Debug.Log(string.Format(inv, "WMV: [terrain] world camera {0} (world model of load {1}): {2}{3}{4}", q != null ? q.ToString() : "(none)",
+                                scene.Load, r.Status, string.IsNullOrEmpty(r.Reason) ? "" : " -- " + r.Reason,
+                                r.Status == "applied" && r.Mode == "fly" ? string.Format(inv, "; at ({0:0.###}, {1:0.###}, {2:0.###}), Unity {3}", r.X, r.Y,
+                                                                                         r.Z, fly.transform.position) : ""));
+        return r;
+    }
+
+    /// <summary>The world view frames a scene with no tile: its instances' box, as a tile is framed (FrameMapObject).</summary>
+    void FrameWorldScene(WmvWorldScene scene)
+    {
+        terrainViewMode.StopFly();
+        bool have = false;
+        var frame = new Bounds();
+        foreach (WmvWorldInstance i in scene.Instances)
+        {
+            if (!i.HasBounds) continue;
+            if (!have) { frame = i.Bounds; have = true; }
+            else frame.Encapsulate(i.Bounds);
+        }
+        if (!have)
+            frame = new Bounds(TerrainSceneRoot().position, Vector3.one * 10f);
+        terrainFrame = frame;
+        haveTerrainFrame = true;
+        orbit.FrameMapObject(frame);
+        Camera cam = Camera.main;
+        lastFramed = frame;
+        lastFramedAspect = cam != null ? cam.aspect : 1f;
+        haveLastFramed = true;
+        lastFramedKept = false;
+        ApplyViewportOrbitOverride(TerrainOverrideTag);
+        Debug.Log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            "WMV: [terrain] framed the world model of load {0} on centre {1} radius {2:F1}: distance {3:F1}, yaw {4} pitch {5}, clip planes {6:F3} .. {7:F1}",
+            scene.Load, frame.center, frame.extents.magnitude, orbit.distance, orbit.yaw, orbit.pitch, cam != null ? cam.nearClipPlane : 0f,
+            cam != null ? cam.farClipPlane : 0f));
+    }
+
     /// <summary>The free camera for the input trace (WmvInputTrace): "" while it is off; else its state (the keys, the input
     /// it read), "|", and where it is -- in the game's world frame when a tile is on screen.</summary>
     string TraceCameraLine()
@@ -227,6 +478,16 @@ public partial class WmvMain
         x = y = z = 0.0;
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
         TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
+        WmvWorldScene scene = terrain != null ? terrain.World : null;
+        if ((tile == null || tile.Root == null || mesh == null) && scene != null && scene.Kind == "globalWmo")
+        {
+            // A scene with no tile: relative to the scene root, with the scene's origin.
+            Vector3 v = fly.transform.position - TerrainSceneRoot().position;
+            x = v.z + scene.Origin.X;
+            y = scene.Origin.Y - v.x;
+            z = v.y + scene.Origin.Z;
+            return true;
+        }
         if (tile == null || tile.Root == null || mesh == null)
             return false;
         Vector3 u = fly.transform.position - tile.Root.transform.position;
@@ -248,7 +509,20 @@ public partial class WmvMain
     /// framing, in the same frame) and answered.</summary>
     void PlaceOwedCamera(WmvRuntimeTerrainTile tile)
     {
-        if (owedCamera == null || tile == null || tile.Load != owedCameraLoad)
+        if (tile == null)
+            return;
+        if (owedCameraAtBuilt && owedCamera != null && tile.Load == owedCameraLoad)
+        {
+            Debug.Log("WMV: [terrain] load " + tile.Load + ": its camera (" + owedCamera + ") waits for the world models, the tile framed meanwhile");
+            return;
+        }
+        PlaceOwedCamera(tile.Load);
+    }
+
+    /// <summary>The camera a load carried, placed now that its scene is shown (a tile, or a WMO-only map's world model).</summary>
+    void PlaceOwedCamera(int load)
+    {
+        if (owedCamera == null || load != owedCameraLoad)
             return;
         WmvIpcClient.WorldCameraRequest q = owedCamera;
         owedCamera = null;
@@ -333,11 +607,14 @@ public partial class WmvMain
 
     void HandleLoadTerrainTile(WmvIpcClient.TerrainTileCommand cmd)
     {
-        status.Set(string.Format("Terrain tile requested: map {0} tile {1}_{2} (load {3})", cmd.MapId, cmd.TileX, cmd.TileY, cmd.Load));
+        status.Set(cmd.GlobalWmo ? string.Format("World model requested: map {0} (load {1})", cmd.MapId, cmd.Load)
+                                 : string.Format("Terrain tile requested: map {0} tile {1}_{2} (load {3})", cmd.MapId, cmd.TileX, cmd.TileY, cmd.Load));
         DropModelWorkForTerrain("superseded by terrain load " + cmd.Load);
         // The latest load's camera only: an earlier load's, never placed, goes with that load.
         owedCamera = cmd.Camera;
         owedCameraLoad = cmd.Load;
+        owedCameraAtBuilt = cmd.World && !cmd.GlobalWmo;
+        settlingLoad = owedCameraAtBuilt ? cmd.Load : 0;
         terrain.Load(cmd);
     }
 
@@ -389,10 +666,28 @@ public partial class WmvMain
     {
         if (terrain != null)
             terrain.Pump(WmvIpcClient.NowSeconds * 1000.0);
+        // The world view's frame times (the view off: none kept, the next entry starts over).
+        if (TerrainViewActive)
+        {
+            worldFrameMs[worldFrameNext] = Time.unscaledDeltaTime * 1000f;
+            worldFrameNext = (worldFrameNext + 1) % WorldFrameWindow;
+            if (worldFrames < WorldFrameWindow) worldFrames++;
+        }
+        else
+            worldFrames = worldFrameNext = 0;
+    }
+
+    /// <summary>The world models' group culling, for the main camera as it renders (after every camera of the frame has
+    /// moved, and for a capture's own aspect): WmvWorldModels.Cull.</summary>
+    void CullWorldModels(UnityEngine.Rendering.ScriptableRenderContext context, Camera cam)
+    {
+        if (cam != null && cam == Camera.main && worldModels != null && worldModels.InstanceCount > 0 && TerrainViewActive)
+            worldModels.Cull(cam);
     }
 
     void DisposeTerrain()
     {
+        UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= CullWorldModels;
         if (terrain != null)
             terrain.Dispose();
         if (terrainSceneRoot != null)
@@ -545,7 +840,14 @@ public partial class WmvMain
         status.Set(string.Format("Terrain tile {0}_{1} of map {2}: {3} vertices, {4} triangles, {5} hole cell(s); material {6} -- {7} ({8})",
                                  tile.TileX, tile.TileY, tile.MapId, mesh.Vertices, mesh.Triangles, mesh.HoleCells,
                                  mat != null ? TerrainTileMaterial.TileStateName(mat.State) : "none", WhatTheViewShows(tile),
-                                 WmvTerrainDebug.ViewNames[(int)tile.View]));
+                                 WmvTerrainDebug.ViewNames[(int)tile.View]) +
+                   (terrain.World != null && terrain.World.Instances.Count > 0
+                        ? string.Format("; {0} world model instance(s) of {1} world model(s)", terrain.World.Instances.Count, terrain.World.Prototypes.Count)
+                        : ""));
+        // A tile's world load: its camera now that its world models are settled (owedCameraAtBuilt), before the capture.
+        if (settlingLoad == tile.Load)
+            settlingLoad = 0;
+        PlaceOwedCamera(tile.Load);
         if (WmvTerrainDebug.DumpName != null)
             WriteTerrainDump(tile, mesh, cmd, rootFileDataID, WmvTerrainDebug.DumpName);
         System.Action<string> log = s => Debug.Log("WMV: [terrain] " + s);
@@ -677,14 +979,51 @@ public partial class WmvMain
         r.TerrainTextures = WmvRuntimeTerrainTile.LiveTextures;
         r.TerrainTextureBytes = WmvRuntimeTerrainTile.LiveTextureBytes;
         r.TerrainAlphaArrays = WmvRuntimeTerrainTile.LiveAlphaArrays;
+        // Protocol 16: the world models (their own tallies, never WmvRuntimeMapObject.Live).
+        r.WorldInstances = WmvWorldModels.LiveInstances;
+        r.WorldModels = WmvWorldModels.LivePrototypes;
+        r.WorldMeshes = WmvWorldModels.LiveMeshes;
+        r.WorldMaterials = WmvWorldModels.LiveMaterials;
+        r.WorldTextures = WmvWorldModels.LiveTextures;
+        r.WorldGpuGeometryBytes = WmvWorldModels.LiveGpuGeometryBytes;
+        r.WorldGpuTextureBytes = WmvWorldModels.LiveGpuTextureBytes;
+        // The culling of the last frame drawn, while world models are on screen (none: 0, never the last scene's counts).
+        bool culling = worldModels != null && worldModels.InstanceCount > 0 && TerrainViewActive;
+        r.WorldGroups = culling ? worldModels.Groups : 0;
+        r.WorldGroupsVisible = culling ? worldModels.GroupsVisible : 0;
+        r.WorldGroupsCulled = culling ? worldModels.GroupsCulled : 0;
+        r.WorldInstancesCulled = culling ? worldModels.InstancesCulled : 0;
+        WmvWorldScene scene = terrain != null ? terrain.World : null;
+        r.WorldLoad = scene != null ? scene.Load : 0;
+        r.WorldKind = scene != null ? scene.Kind : "";
+        r.WorldFrames = worldFrames;
+        if (worldFrames > 0)
+        {
+            var sorted = new float[worldFrames];
+            System.Array.Copy(worldFrameMs, sorted, worldFrames);
+            System.Array.Sort(sorted);
+            r.WorldFrameMsMedian = sorted[worldFrames / 2];
+            r.WorldFrameMsP95 = sorted[System.Math.Min(worldFrames - 1, (int)System.Math.Ceiling(0.95 * worldFrames) - 1)];
+            r.WorldFrameMsMax = sorted[worldFrames - 1];
+        }
     }
 
-    /// <summary>The capture's log line in the terrain view: the tile, not the hidden model.</summary>
+    /// <summary>The capture's log line in the terrain view: the tile and the world models placed with it (or a WMO-only
+    /// map's world model), not the hidden model.</summary>
     void LogTerrainShot(string name, Texture2D tex, string busy)
     {
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
+        WmvWorldScene scene = terrain != null ? terrain.World : null;
         Camera cam = Camera.main;
         var inv = System.Globalization.CultureInfo.InvariantCulture;
+        string what = WhatTheViewShows(tile);
+        if (scene != null && scene.Instances.Count > 0)
+        {
+            string models = string.Format(inv, "{0} world model instance(s) of {1} world model(s), {2} of {3} group(s) drawn ({4} culled) -- {5}",
+                                          scene.Instances.Count, scene.Prototypes.Count, worldModels.GroupsVisible, worldModels.Groups,
+                                          worldModels.GroupsCulled, WorldModelsLabel);
+            what = tile == null ? string.Format(inv, "map {0} world model (load {1}): {2}", scene.MapId, scene.Load, models) : what + "; plus " + models;
+        }
         Debug.Log(string.Format(inv,
             "WMV: viewport shot {0} #{1} -- {2}x{3}: {15}, terrain {4}, view {5}{6}; " +
             "camera at ({7:F3}, {8:F3}, {9:F3}), {10}, field of view {11:0.##}, aspect {12:F3}, mask {13}{14}",
@@ -697,7 +1036,7 @@ public partial class WmvMain
                                     : string.Format(inv, "pivot ({0:F3}, {1:F3}, {2:F3}) yaw {3:0.##} pitch {4:0.##} distance {5:F3}",
                                                     orbit.pivot.x, orbit.pivot.y, orbit.pivot.z, orbit.yaw, orbit.pitch, orbit.distance),
             cam != null ? cam.fieldOfView : 0f, cam != null ? cam.aspect : 0f, cam != null ? cam.cullingMask : 0,
-            busy == null ? "" : "; taken while " + busy, WhatTheViewShows(tile)));
+            busy == null ? "" : "; taken while " + busy, what));
     }
 
     // ---------------------------------------------------------------- -wmvTerrainDump
@@ -844,6 +1183,52 @@ public partial class WmvMain
             main.TerrainTileBuilt(tile, mesh, content, command, rootFileDataID);
         }
     }
+
+    // ---------------------------------------------------------------- the world models' Unity side (protocol 16)
+
+    sealed class MainWorldView : IWmvWorldModelView
+    {
+        readonly WmvMain main;
+
+        public MainWorldView(WmvMain main) { this.main = main; }
+
+        public WmvWorldPrototype BuildPrototype(uint fileDataID, Wmv.Wow.WmoRoot root, Wmv.Wow.WmoGroup[] groups,
+                                                Dictionary<uint, WmvWmoTexture> textures)
+        {
+            return main.worldModels.BuildPrototype(fileDataID, root, groups, textures);
+        }
+
+        public WmvWorldInstance PlaceInstance(WmvWorldPrototype prototype, WorldModelPlacement placement, WorldOrigin origin, int load)
+        {
+            return main.worldModels.Place(prototype, placement, origin, load);
+        }
+
+        public void DisposeInstance(WmvWorldInstance instance) { main.worldModels.DisposeInstance(instance); }
+
+        public void DisposePrototype(WmvWorldPrototype prototype) { main.worldModels.DisposePrototype(prototype); }
+
+        public void ShowWorld(WmvWorldScene scene)
+        {
+            main.SetViewMode(true, "the world model of map " + scene.MapId + ", load " + scene.Load);
+            main.FrameWorldScene(scene);
+            main.PlaceOwedCamera(scene.Load);
+        }
+
+        public void WorldBuilt(WmvWorldScene scene)
+        {
+            main.status.Set(string.Format("World model of map {0}: {1} instance(s), {2} world model(s) -- {3}", scene.MapId, scene.Instances.Count,
+                                          scene.Prototypes.Count, WorldModelsLabel));
+            main.RequestViewportShot();
+        }
+
+        public void ReportWorldShown(WmvIpcClient.WorldShownReport report) { main.ipc.ReportWorldShown(report); }
+
+        public void ReportWorldProgress(WmvIpcClient.WorldProgressReport report) { main.ipc.ReportWorldProgress(report); }
+    }
+
+    /// <summary>What a picture of placed world models is (the status line and the capture's log line).</summary>
+    public const string WorldModelsLabel = "WORLD MODELS (the Buildings renderer's WMO materials under its preview key and fill, without its shadow maps; " +
+                                           "no WoW lighting, doodads, liquids, sky or fog)";
 }
 
 /// <summary>

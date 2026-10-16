@@ -75,6 +75,11 @@
 // Testable without WmvMain: the host requests, the report, the log, the worker and the Unity side are injected; the
 // self-test (WmvLifecycleSelfTest.TerrainTests) runs the worker synchronously and simulates frames by calling Pump.
 // Every step is logged with the "[terrain]" prefix.
+//
+// WORLD LOADS (protocol 16, stage 06): loadWorld places world models too -- the tile's MODF records (its obj0 ADT) or a
+// WMO-only map's global record with no tile. WmvTerrainSessionWorld.cs has that half of the session and its rules; this
+// file keeps the tile's, with the hooks the world needs (the obj0 request, the world's requests beside the tile's K, the
+// scene's world models disposed with its tiles, the report waiting for the world).
 
 using System;
 using System.Collections.Generic;
@@ -106,7 +111,7 @@ public interface IWmvTerrainView
     bool DrawsPlainDiagnostic { get; }
 }
 
-public sealed class WmvTerrainSession
+public sealed partial class WmvTerrainSession
 {
     /// <summary>A load not adopted this long after the first Pump that saw it fails (the default; -wmvTerrainTimeoutMs
     /// sets another within MinTimeoutMs..MaxTimeoutMs).</summary>
@@ -121,7 +126,9 @@ public sealed class WmvTerrainSession
     /// <summary>The material reason of a load whose host states no texture limits (a protocol-12 host).</summary>
     public const string NoTexturesOffered = "the host serves no terrain textures (protocol 12)";
 
-    enum Phase { Wdt, Files, Adopted }
+    // Wdt, then Files (the tile's) and Adopted (the tile committed); a WMO-only map's world load goes from Wdt to World
+    // (no tile: its world model is being fetched and built).
+    enum Phase { Wdt, Files, Adopted, World }
 
     /// <summary>One request the load waits for.</summary>
     sealed class Request
@@ -129,6 +136,10 @@ public sealed class WmvTerrainSession
         public string Id, Role;
         public int FileDataID;
         public double AskedMs;
+        // A world load's world-model request (counted against MaxWorldOutstanding, not K), and what it is for.
+        public bool World;
+        public Model Model;
+        public int Group = -1;
     }
 
     sealed class Job
@@ -173,8 +184,10 @@ public sealed class WmvTerrainSession
         public double TexturesFirstAskedMs = -1, TexturesLastDoneMs = -1;
         public WmvTerrainTileContent Content;
         public List<string> RetiredIds = new List<string>();
+        // Protocol 16: the load's world models (null for a terrain load).
+        public WorldWork World;
 
-        public string Tile2 { get { return Cmd.TileX + "_" + Cmd.TileY; } }
+        public string Tile2 { get { return Cmd.GlobalWmo ? "(no tile: a world model)" : Cmd.TileX + "_" + Cmd.TileY; } }
     }
 
     /// <summary>An unanswered request of a load that has ended: its id, its load and role, and how the load ended (the
@@ -303,8 +316,12 @@ public sealed class WmvTerrainSession
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes };
         if (cmd.TexturesOffered)
             j.Support = WmvTerrainFormatSupport.Query();
+        if (cmd.World)
+            j.World = new WorldWork { Global = cmd.GlobalWmo, Frame = cmd.GlobalWmo ? PlacementFrame.Global : PlacementFrame.Tile };
         current = j;
         string bad = CommandProblem(cmd);
+        if (bad == null && cmd.World && worldView == null)
+            bad = "this player has no world-model view (WorldView is not set)";
         if (bad != null)
         {
             Fail(j, bad);
@@ -532,9 +549,14 @@ public sealed class WmvTerrainSession
                 case RoleWdt: OnWdt(j, r, q); break;
                 case RoleRootAdt: OnRoot(j, r, q); break;
                 case RoleTex0Adt: OnTex0(j, r, q); break;
+                case RoleObj0Adt: OnObj0(j, r, q); break;
+                case RoleWmoRoot: OnWmoRoot(j, r, q); break;
+                case RoleWmoGroup: OnWmoGroup(j, r, q); break;
+                case RoleWmoTexture: OnWmoTexture(j, r, q); break;
                 default: OnTexture(j, r, q); break;
             }
             Advance(j);
+            AdvanceWorld(j);
         }
         catch (Exception e)
         {
@@ -578,14 +600,27 @@ public sealed class WmvTerrainSession
             return;
         if (double.IsNaN(j.StartedAtMs))
             j.StartedAtMs = nowMs;
-        if (j.Phase != Phase.Adopted)
+        if (j.Phase == Phase.Wdt || j.Phase == Phase.Files)
         {
             if (nowMs - j.StartedAtMs > timeoutMs)
                 Fail(j, "timed out after " + (timeoutMs / 1000.0).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
                         " s waiting for " + WaitingFor(j));
             return;
         }
-        if (frame >= j.AdoptFrame + 2)
+        // A world load's world models: one prototype built a frame, the world's own timeout, its progress (the report
+        // waits for every placement to settle).
+        if (j.World != null && !PumpWorld(j, nowMs))
+            return;
+        if (j != current)
+            return;
+        if (j.Phase == Phase.World)
+        {
+            // A WMO-only map's world model: reported once its scene has been on screen two frames.
+            if (j.World.Done && frame >= j.World.LastCommitFrame + 2)
+                FinishWorld(j);
+            return;
+        }
+        if (frame >= j.AdoptFrame + 2 && (j.World == null || (j.World.Done && frame >= j.World.LastCommitFrame + 2)))
             FinishBuilt(j);
     }
 
@@ -596,12 +631,18 @@ public sealed class WmvTerrainSession
             case RoleWdt: return "WDT";
             case RoleRootAdt: return "root ADT";
             case RoleTex0Adt: return "tex0 ADT";
+            case RoleObj0Adt: return "obj0 ADT";
+            case RoleWmoRoot: return "world-model root";
+            case RoleWmoGroup: return "world-model group";
+            case RoleWmoTexture: return "world-model texture";
             default: return "texture";
         }
     }
 
     static string WaitingFor(Job j)
     {
+        if (j.Phase == Phase.World && j.World != null)
+            return WorldWaitingFor(j);
         if (j.Pending.Count > 0)
         {
             var parts = new List<string>();
@@ -625,16 +666,30 @@ public sealed class WmvTerrainSession
     {
         if (cmd.Load <= 0)
             return "loadTerrainTile carries no load serial (" + cmd.Load + ")";
-        if (cmd.TileX < 0 || cmd.TileX >= TerrainCoordinates.TilesPerSide || cmd.TileY < 0 || cmd.TileY >= TerrainCoordinates.TilesPerSide)
+        if (cmd.World && !cmd.WorldModelsOffered)
+            return "loadWorld states no world-model budget (maxWmoModelsPerLoad)";
+        if (!cmd.GlobalWmo &&
+            (cmd.TileX < 0 || cmd.TileX >= TerrainCoordinates.TilesPerSide || cmd.TileY < 0 || cmd.TileY >= TerrainCoordinates.TilesPerSide))
             return string.Format("tile {0}_{1} is outside 0..63", cmd.TileX, cmd.TileY);
         if (cmd.WdtFileDataID <= 0)
             return "loadTerrainTile names no WDT FileDataID (" + cmd.WdtFileDataID + ")";
         return null;
     }
 
+    /// <summary>The tile's requests out (its K): pending tile requests and textures being prepared -- a world load's
+    /// world-model requests are counted apart (MaxWorldOutstanding).</summary>
+    static int TileOut(Job j)
+    {
+        int n = j.Preparing;
+        foreach (Request q in j.Pending)
+            if (!q.World)
+                n++;
+        return n;
+    }
+
     void Ask(Job j, string role, int fileDataID)
     {
-        if (j.Pending.Count + j.Preparing >= MaxOutstanding)
+        if (TileOut(j) >= MaxOutstanding)
             throw new InvalidOperationException("load " + j.Cmd.Load + " already has " + MaxOutstanding + " requests out");
         double at = j.Clock.Elapsed.TotalMilliseconds;
         string id = requestMapAsset(role, fileDataID, j.Cmd.Load, j.Cmd.AssetEpoch);
@@ -712,6 +767,12 @@ public sealed class WmvTerrainSession
             return;
         }
         j.WdtParseMs = sw.Elapsed.TotalMilliseconds;
+        if (cmd.GlobalWmo)
+        {
+            // A WMO-only map: no tile, its WDT's global record placed (WmvTerrainSessionWorld.cs).
+            StartGlobalWorld(j, wdt);
+            return;
+        }
         if (!wdt.TileExists(cmd.TileX, cmd.TileY))
         {
             Fail(j, "no tile at " + j.Tile2 + " (MAIN flag clear)");
@@ -751,6 +812,9 @@ public sealed class WmvTerrainSession
         }
         if (j.MaterialUnavailable != null)
             Log("load {0}: no tex0 asked for: {1}", cmd.Load, j.MaterialUnavailable);
+        // A world load: the tile's obj0 ADT (MAID word 1: its MODF records), beside the root and the tex0.
+        if (j.World != null)
+            AskObj0(j, files[WdtTileFileRole.Obj0Adt]);
     }
 
     void OnRoot(Job j, WmvIpcClient.AssetResponse r, Request q)
@@ -913,7 +977,7 @@ public sealed class WmvTerrainSession
         }
         if (j.MaterialDone)
             AskTextures(j);
-        if (j.Mesh != null && j.Root != null && j.MaterialDone && j.ToAsk.Count == 0 && j.Pending.Count == 0 && j.Preparing == 0)
+        if (j.Mesh != null && j.Root != null && j.MaterialDone && j.ToAsk.Count == 0 && TileOut(j) == 0)
             Adopt(j);
     }
 
@@ -1027,7 +1091,7 @@ public sealed class WmvTerrainSession
 
     void AskTextures(Job j)
     {
-        while (j.ToAsk.Count > 0 && j.Pending.Count + j.Preparing < MaxOutstanding)
+        while (j.ToAsk.Count > 0 && TileOut(j) < MaxOutstanding)
         {
             uint id = j.ToAsk.Dequeue();
             if (j.TexturesFirstAskedMs < 0)
@@ -1156,6 +1220,11 @@ public sealed class WmvTerrainSession
             ForgetShownInputs();
             shownMesh = j.Mesh;
             shownContent = j.Content;
+            // A world load's scene: its world models are placed beside the tile, relative to the tile's own origin (the
+            // scene's one floating origin), as they come (WmvTerrainSessionWorld.cs). DisposeTiles above took the last
+            // scene's world models with its tiles.
+            if (j.World != null)
+                BeginTileWorld(j);
             committed = true;
             Log("load {0}: committed tile {1} of map {2} ({3} replaced{4}); Unity objects built in {5:0.###} ms; live terrain tiles {6}",
                 cmd.Load, j.Tile2, cmd.MapId, replaced,
@@ -1182,7 +1251,10 @@ public sealed class WmvTerrainSession
         }
         finally
         {
-            j.Dead = true;    // the load takes no answer or worker result any more
+            // The load takes no answer or worker result any more -- but a world load's world models still do, until its
+            // report (their requests are its own, and every one is retired when it ends).
+            if (j.World == null || !committed)
+                j.Dead = true;
         }
         // The textures the build uploaded dropped their prepared data as they went up (WmvTerrainTexture.Upload); the
         // others' stay with the shown tile's inputs while a view may still draw them (RebuildShown), and go with the tile.
@@ -1193,7 +1265,10 @@ public sealed class WmvTerrainSession
         j.Phase = Phase.Adopted;
         j.AdoptFrame = frame;
         j.AdoptedMs = j.Clock.Elapsed.TotalMilliseconds;
-        Log("load {0}: on screen from frame {1}; reported after frames {2} and {3} have started", cmd.Load, frame, frame + 1, frame + 2);
+        Log("load {0}: on screen from frame {1}; reported after frames {2} and {3} have started{4}", cmd.Load, frame, frame + 1, frame + 2,
+            j.World != null ? ", and once its world models are settled" : "");
+        if (j.World != null && committed)
+            TileWorldShown(j);
     }
 
     /// <summary>The prepared texture data are the tile's now (or nobody's): dropped, so the job holds no file bytes.</summary>
@@ -1293,6 +1368,8 @@ public sealed class WmvTerrainSession
         }
         if (j.MaterialDone || status == "built")
             r.Material = MaterialReport(j);
+        if (j.World != null)
+            FillWorldReport(j, r, status);
         try { view.Sample(r); }
         catch (Exception e) { Log("load {0}: sampling the counters failed: {1}", cmd.Load, e.Message); }
         ReportsSent++;
@@ -1309,6 +1386,8 @@ public sealed class WmvTerrainSession
             r.RequestsRetired > 0 ? " (" + string.Join(", ", r.RetiredRequestIds.ToArray()) + ")" : "");
         if (r.Material != null)
             LogMaterial(cmd.Load, r.Material);
+        if (r.World)
+            LogWorld(cmd.Load, r);
         report(r);
     }
 
@@ -1397,19 +1476,25 @@ public sealed class WmvTerrainSession
     void Retire(Job j, string ended)
     {
         foreach (Request q in j.Pending)
-        {
-            retired[retiredNext] = new RetiredRequest { RequestId = q.Id, Role = q.Role ?? "", Load = j.Cmd.Load, Ended = ended };
-            retiredNext = (retiredNext + 1) % RetiredCapacity;
-            if (retiredCount < RetiredCapacity)
-                retiredCount++;
-            RetiredTotal++;
-            lastRetired = q.Id;
-            j.RetiredIds.Add(q.Id);
-            Log("load {0}: request {1} ({2}) retired unanswered (the load ended \"{3}\"); {4} retired request(s) remembered, {5} retired in all",
-                j.Cmd.Load, q.Id, q.Role, ended, retiredCount, RetiredTotal);
-        }
+            RetireRequest(j, q, ended);
         j.Pending.Clear();
         j.ToAsk.Clear();
+        if (j.World != null)
+            EndWorld(j, ended);
+    }
+
+    /// <summary>One unanswered request into the retired ring (the caller takes it off the load's pending list).</summary>
+    void RetireRequest(Job j, Request q, string ended)
+    {
+        retired[retiredNext] = new RetiredRequest { RequestId = q.Id, Role = q.Role ?? "", Load = j.Cmd.Load, Ended = ended };
+        retiredNext = (retiredNext + 1) % RetiredCapacity;
+        if (retiredCount < RetiredCapacity)
+            retiredCount++;
+        RetiredTotal++;
+        lastRetired = q.Id;
+        j.RetiredIds.Add(q.Id);
+        Log("load {0}: request {1} ({2}) retired unanswered (the load ended \"{3}\"); {4} retired request(s) remembered, {5} retired in all",
+            j.Cmd.Load, q.Id, q.Role, ended, retiredCount, RetiredTotal);
     }
 
     /// <summary>The retired request with this id, newest first; false when the ring does not hold it.</summary>
@@ -1428,7 +1513,8 @@ public sealed class WmvTerrainSession
         return false;
     }
 
-    /// <summary>Dispose every tile of the scene except `keep`; returns how many went.</summary>
+    /// <summary>Dispose every tile of the scene except `keep`, and the scene's world models with them; returns how many
+    /// tiles went.</summary>
     int DisposeTiles(WmvRuntimeTerrainTile keep)
     {
         int n = 0;
@@ -1440,6 +1526,7 @@ public sealed class WmvTerrainSession
             n++;
         }
         tiles.Clear();
+        DisposeWorldScene();
         return n;
     }
 

@@ -44,7 +44,7 @@ builder, the orbit camera, and the IPC asset path.
 
 ## 3. The gap, feature by feature
 
-| Feature of the video | Today (after Stage 05) | Milestone |
+| Feature of the video | Today (after Stage 06) | Milestone |
 |---|---|---|
 | Map list with search | done | 05 |
 | Overhead map from minimap images | done in 05 (see 4) | 05 |
@@ -52,8 +52,8 @@ builder, the orbit camera, and the IPC asset path.
 | Load World at the target | one tile at the target | 05 (one tile), 08 (the tiles around) |
 | Loading progress by file count | the state line only | 08 (with streaming, where counts matter) |
 | Free-flying camera | done in 05 | 05 |
-| World-model-only maps (instances) entered from Maps | listed, not enterable | 06 |
-| World models placed on terrain (MODF) | no | 06 |
+| World-model-only maps (instances) entered from Maps | done in 06 (old-form WDTs: unsupported) | 06 |
+| World models placed on terrain (MODF) | done in 06 (the loaded tile's) | 06 |
 | Doodads (MDDF, WMO doodad sets) | no | 07 |
 | Several tiles, streaming around the camera | no (single tile) | 08 |
 | Liquids (MH2O, WMO MLIQ) | no | 09 |

@@ -121,7 +121,7 @@ void MapsViewer::Left()
   // The terrain belongs to this viewer: leaving it takes the tile away, and a load still being built with it (the
   // player's model view comes back as it was). Always -- whatever this viewer's own phase says (a load can still be in
   // flight behind an unavailable tile picked after it): clearTerrain to a player with nothing does nothing.
-  const bool had = m_load != 0 || m_shownX >= 0 || m_tilePhase == TilePhase::Loading || m_tilePhase == TilePhase::Loaded;
+  const bool had = m_load != 0 || worldOnScreen() || m_tilePhase == TilePhase::Loading || m_tilePhase == TilePhase::Loaded;
   m_viewer->ClearTerrain("the Maps viewer was left");
   if (had)
   {
@@ -130,6 +130,7 @@ void MapsViewer::Left()
   }
   m_load = 0;
   m_shownX = m_shownY = m_shownMap = -1;
+  m_shownGlobal = false;
   m_shownView.clear();
   leaveWorld();
   LOG_INFO << "[maps] left; the terrain cleared" << (minimapsLoading() ? "; the minimap pictures wait for the viewer's return" : "");
@@ -145,6 +146,7 @@ void MapsViewer::ClientReplaced()
   resetMap();
   resetTile();
   m_shownX = m_shownY = m_shownMap = -1;
+  m_shownGlobal = false;
   m_shownView.clear();
   leaveWorld();
   m_mapDetail = "A client is being loaded.";
@@ -158,6 +160,7 @@ void MapsViewer::ClientLoaded()
   resetMap();
   resetTile();
   m_shownX = m_shownY = m_shownMap = -1;
+  m_shownGlobal = false;
   m_shownView.clear();
   leaveWorld();
   changed();
@@ -166,10 +169,11 @@ void MapsViewer::ClientLoaded()
 void MapsViewer::resetMap()
 {
   stopMinimaps();
-  if (m_readTicket != 0)
+  if (m_readTicket != 0 || m_wmoReadTicket != 0)
     if (UnityIpcServer * s = ipc())
       s->cancelViewerReads();
   m_readTicket = 0;
+  m_wmoReadTicket = 0;
   m_readDeferred = false;   // (a later pick defers again if it must; a pick without a WDT read must not inherit it)
   m_mapId = -1;
   m_mapName.clear();
@@ -196,6 +200,17 @@ void MapsViewer::resetMap()
   m_globalWmoRecords = 0;
   m_globalWmoFileDataID = 0;
   m_globalWmoPath.clear();
+  m_globalOnly = false;
+  m_globalRecord = UnityIpcServer::MapTilesInspection::GlobalRecord();
+  m_footprintPhase = FootprintPhase::None;
+  m_footprintDetail.clear();
+  m_wmoBytes.clear();
+  m_wmoMd5.clear();
+  for (double & v : m_footprintRoot)
+    v = 0.0;
+  m_footprintBoxes.clear();
+  m_footprintFlags.clear();
+  m_footprintInterior = 0;
   m_hasTarget = false;
   m_targetHasZ = false;
 }
@@ -206,6 +221,9 @@ void MapsViewer::resetTile()
   m_tileX = m_tileY = -1;
   m_tileDetail.clear();
   m_load = 0;
+  m_loadShown = false;
+  m_progress = UnityIpcServer::WorldProgress();
+  m_worldDetail.clear();
 }
 
 // ---------------------------------------------------------------- a map picked
@@ -216,13 +234,27 @@ void MapsViewer::SelectMap(int mapId)
   clock.start();
   if (mapId == m_mapId && m_mapPhase != MapPhase::Failed && m_mapPhase != MapPhase::None &&
       m_mapPhase != MapPhase::WaitingPlayer)
-    return;   // picked again: nothing to do (a failed one, or one waiting for the player, is read again)
+  {
+    // Picked again: nothing to do (a failed one, or one waiting for the player, is read again) -- except a WMO-only map
+    // whose world model could not be read or waited for the player: that read is tried again, as a failed map's is.
+    if (worldModelMap() && m_wmoReadTicket == 0 &&
+        (m_footprintPhase == FootprintPhase::Failed || m_footprintPhase == FootprintPhase::WaitingPlayer))
+    {
+      LOG_INFO << "[maps] map" << m_mapId << "picked again: its world model is read again";
+      m_wmoBytes.clear();
+      m_footprintClock.start();
+      beginWorldModelRead();
+      changed();
+    }
+    return;
+  }
   // Another map: the terrain of the one before goes with it -- the tile on screen and a load still being built --, so
   // the viewport only ever shows a tile of the map whose grid is shown.
-  if (mapId != m_mapId && (m_load != 0 || m_shownX >= 0 || m_tilePhase == TilePhase::Loading))
+  if (mapId != m_mapId && (m_load != 0 || worldOnScreen() || m_tilePhase == TilePhase::Loading))
   {
     m_viewer->ClearTerrain("another map was picked");
     m_shownX = m_shownY = m_shownMap = -1;
+    m_shownGlobal = false;
     m_shownView.clear();
   }
   if (mapId != m_mapId)
@@ -356,10 +388,19 @@ void MapsViewer::OnWdtRead(MapAssetWorker::Result & result)
     readDeferredWdt();
     return;
   }
+  // A WMO-only map's world model (its root, for the footprint).
+  if (result.ticket != 0 && result.ticket == m_wmoReadTicket)
+  {
+    m_wmoReadTicket = 0;
+    onWorldModelRead(result);
+    readDeferredWdt();
+    return;
+  }
   if (result.ticket == 0 || result.ticket != m_readTicket)
   {
-    LOG_INFO << "[maps] a" << (result.role == "minimap" ? "minimap" : "WDT") << "read (ticket" << (qulonglong)result.ticket
-             << ") of an earlier pick came back: dropped";
+    LOG_INFO << "[maps] a"
+             << (result.role == "minimap" ? "minimap" : result.role == "mapsWmoRoot" ? "world-model root" : "WDT")
+             << "read (ticket" << (qulonglong)result.ticket << ") of an earlier pick came back: dropped";
     readDeferredWdt();
     return;
   }
@@ -446,12 +487,22 @@ void MapsViewer::OnPlayerReady()
     m_tileDetail = "The Unity viewport was restarted. Enter world to load the world again.";
   }
   m_load = 0;
+  m_loadShown = false;
   m_shownX = m_shownY = m_shownMap = -1;
+  m_shownGlobal = false;
   leaveWorld();
   if ((m_mapPhase == MapPhase::WaitingPlayer || m_mapPhase == MapPhase::Inspecting) && !m_wdtBytes.isEmpty())
     sendInspection();
   else if (m_mapPhase == MapPhase::WaitingPlayer && m_mapId >= 0 && m_readTicket == 0)
     beginRead();   // the WDT waited for a server to take its read back
+  // A WMO-only map's world model: handed to the new player again (it has not seen the one before's), or read now.
+  if (worldModelMap())
+  {
+    if ((m_footprintPhase == FootprintPhase::WaitingPlayer || m_footprintPhase == FootprintPhase::Inspecting) && !m_wmoBytes.isEmpty())
+      sendWorldModelInspection();
+    else if (m_footprintPhase == FootprintPhase::WaitingPlayer && m_wmoReadTicket == 0)
+      beginWorldModelRead();
+  }
   pumpMinimaps();  // a load in flight held the pictures back, and the restart ended it without a report
   changed();
 }
@@ -516,12 +567,17 @@ void MapsViewer::buildGrid(const UnityIpcServer::MapTilesInspection & r)
   m_globalWmoRecords = r.globalWmoRecords;
   m_globalWmoFileDataID = r.globalWmoFileDataID;
   m_globalWmoPath = r.globalWmoPath;
-  if (r.kind == "GlobalWmo")
-    m_mapDetail = QString("This map has no terrain tiles: it is one world model (%1). Entering a world model in the world view "
-                          "is a later stage (world models in the world, docs/world-viewer/roadmap.md); it can be viewed in "
-                          "Buildings.").arg(m_globalWmoFileDataID ? QString("WMO FileDataID %1").arg(m_globalWmoFileDataID)
-                                                                 : !m_globalWmoPath.isEmpty() ? m_globalWmoPath
-                                                                                              : QString("its file is not named"));
+  m_globalOnly = r.kind == "GlobalWmo";
+  m_globalRecord = r.globalRecord;
+  if (m_globalOnly)
+  {
+    // A WMO-ONLY MAP (protocol 16): its world model's root is read now, for the footprint the overhead map draws.
+    m_mapDetail = QString("This map has no terrain tiles: it is one world model (%1).")
+                    .arg(m_globalWmoFileDataID ? QString("WMO FileDataID %1").arg(m_globalWmoFileDataID)
+                                               : !m_globalWmoPath.isEmpty() ? m_globalWmoPath : QString("its file is not named"));
+    m_footprintClock.start();
+    beginWorldModelRead();
+  }
   else if (r.kind == "Empty" || m_tilesInWdt == 0)
     m_mapDetail = "This map's WDT names no terrain tile.";
   else if (m_tilesAvailable == 0)
@@ -535,6 +591,144 @@ void MapsViewer::buildGrid(const UnityIpcServer::MapTilesInspection & r)
            << m_timings.pickToGridMs << "ms from the pick (player parse" << r.parseMs << "ms, round trip"
            << m_timings.inspectRoundTripMs << "ms)";
   startMinimaps(r);
+}
+
+// ---------------------------------------------------------------- a WMO-only map's world model (protocol 16)
+
+void MapsViewer::beginWorldModelRead()
+{
+  UnityIpcServer * s = ipc();
+  const auto stop = [this](FootprintPhase phase, const QString & why) {
+    m_footprintPhase = phase;
+    m_footprintDetail = why;
+    LOG_INFO << "[maps] map" << m_mapId << ": its world model is not read --" << why;
+  };
+  if (m_globalWmoFileDataID == 0)
+    return stop(FootprintPhase::Unsupported,
+                QString("This map's WDT names its world model by a path only (%1), not by a FileDataID: an old-form WDT, which "
+                        "the world view does not enter (unsupported).")
+                  .arg(m_globalWmoPath.isEmpty() ? QString("no path either") : m_globalWmoPath));
+  if (!s || !s->isListening() || !s->isUnityReady())
+    return stop(FootprintPhase::WaitingPlayer, "Waiting for the Unity viewport: the world model is read with it.");
+  if (!s->playerPlacesWorldModels())
+    return stop(FootprintPhase::WaitingPlayer,
+                QString("The Unity renderer build in use speaks protocol %1; entering a world model needs protocol 16. Rebuild "
+                        "the player from Tools\\UnityRendererProject.").arg(s->playerProtocolVersion()));
+  if (!m_globalRecord.present)
+    return stop(FootprintPhase::Failed, "The map's tile table carried no record of where its world model is placed.");
+  if (!m_viewer->m_mapAssetWorker || m_viewer->m_mapAssetWorker->stopped())
+    return stop(FootprintPhase::Failed, "The map asset worker is not running.");
+  if (!m_viewer->EnsureMapAssetLease(m_epoch, m_generation))
+    return stop(FootprintPhase::Failed, "The client's storage is not open.");
+  MapAssetWorker::Job job;
+  job.fileDataID = (int)m_globalWmoFileDataID;
+  job.maxBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+  job.epoch = m_epoch;
+  job.generation = m_generation;
+  job.role = "mapsWmoRoot";
+  if (!s->submitViewerRead(job))
+    return stop(FootprintPhase::Failed, "The map asset worker refused the read.");
+  m_wmoReadTicket = job.ticket;
+  m_footprintPhase = FootprintPhase::Reading;
+  m_footprintDetail = "Reading the world model.";
+  LOG_INFO << "[maps] map" << m_mapId << ": world model" << m_globalWmoFileDataID << "read by the map asset worker (ticket"
+           << (qulonglong)job.ticket << ")";
+}
+
+void MapsViewer::onWorldModelRead(MapAssetWorker::Result & result)
+{
+  if (!clientCurrent(m_epoch, m_generation))
+  {
+    LOG_INFO << "[maps] the world-model read of map" << m_mapId << "came back for another client (epoch" << m_epoch << "): dropped";
+    return;
+  }
+  if (!worldModelMap() || m_footprintPhase != FootprintPhase::Reading)
+  {
+    LOG_INFO << "[maps] a world-model read came back while none was waited for: dropped";
+    return;
+  }
+  const auto fail = [this](const QString & why) {
+    m_footprintPhase = FootprintPhase::Failed;
+    m_footprintDetail = why;
+    LOG_INFO << "[maps] map" << m_mapId << ":" << why;
+    changed();
+  };
+  if (result.outcome != MapAssetWorker::Result::Outcome::Read)
+    return fail("The world model was not read (" + MapAssetWorker::outcomeName(result.outcome) + "): " + result.detail);
+  const wow::WdtInspection & i = result.inspection;
+  if (i.state != wow::WdtAvailability::Available)
+    return fail(QString("The world model (FileDataID %1) is ").arg(m_globalWmoFileDataID) +
+                wow::WorldMapCatalog::availabilityName(i.state) + ": " + i.detail);
+  const QString kind = ModelViewer::mapAssetKindProblem("wmoRoot", result.bytes);
+  if (!kind.isEmpty())
+    return fail(QString("FileDataID %1 was read, but it is ").arg(m_globalWmoFileDataID) + kind);
+  if (i.contentKey.size() != 32)
+    return fail(QString("internal error: FileDataID %1 was read as available without its content key").arg(m_globalWmoFileDataID));
+  m_wmoBytes = result.bytes;
+  m_wmoMd5 = i.contentKey;
+  LOG_INFO << "[maps] map" << m_mapId << ": world model" << m_globalWmoFileDataID << "read by the worker," << i.bytes
+           << "bytes, content key" << i.contentKey << "checked; waited" << result.waitMs << "ms, read" << result.workMs << "ms";
+  sendWorldModelInspection();
+  changed();
+}
+
+void MapsViewer::sendWorldModelInspection()
+{
+  UnityIpcServer * s = ipc();
+  if (!s || !s->isUnityReady() || !s->playerPlacesWorldModels())
+  {
+    m_footprintPhase = FootprintPhase::WaitingPlayer;
+    m_footprintDetail = s && s->isUnityReady()
+                          ? QString("The Unity renderer build in use speaks protocol %1; entering a world model needs protocol 16.")
+                              .arg(s->playerProtocolVersion())
+                          : QString("Waiting for the Unity viewport to read the world model.");
+    return;
+  }
+  if (!s->sendInspectWorldModel(m_inspection, m_mapId, (int)m_globalWmoFileDataID, m_epoch, m_wmoMd5, m_wmoBytes, m_globalRecord))
+  {
+    m_footprintPhase = FootprintPhase::Failed;
+    m_footprintDetail = "The world model could not be handed to the Unity viewport: it is not reading what it is sent.";
+    return;
+  }
+  m_footprintPhase = FootprintPhase::Inspecting;
+  m_footprintDetail = "Reading the world model's groups.";
+}
+
+void MapsViewer::OnWorldModelInspected(const UnityIpcServer::WorldModelInspection & r)
+{
+  if (r.inspection != m_inspection || !worldModelMap() || m_footprintPhase != FootprintPhase::Inspecting)
+  {
+    LOG_INFO << "[maps] a world-model footprint (inspection" << r.inspection << ") of an earlier pick came back: dropped";
+    return;
+  }
+  if (r.mapId != m_mapId || r.assetEpoch != m_epoch || r.wmoFileDataID != (int)m_globalWmoFileDataID ||
+      !clientCurrent(m_epoch, m_generation))
+  {
+    LOG_INFO << "[maps] a world-model footprint for map" << r.mapId << "WMO" << r.wmoFileDataID << "epoch" << r.assetEpoch
+             << "came back; map" << m_mapId << "epoch" << m_epoch << "is picked: dropped";
+    return;
+  }
+  m_wmoBytes.clear();
+  if (r.status != "inspected" || !r.valid)
+  {
+    m_footprintPhase = FootprintPhase::Failed;
+    m_footprintDetail = "The world model could not be read: " + (r.status != "inspected" ? r.reason : r.problem);
+    changed();
+    return;
+  }
+  for (int k = 0; k < 6; k++)
+    m_footprintRoot[k] = r.rootBox[k];
+  m_footprintBoxes = r.groupBoxes;
+  m_footprintFlags = r.groupFlags;
+  m_footprintInterior = r.interiorGroups;
+  m_footprintPhase = FootprintPhase::Ready;
+  m_footprintDetail.clear();
+  m_timings.footprintMs = msOf(m_footprintClock);
+  LOG_INFO << "[maps] map" << m_mapId << ": world model" << m_globalWmoFileDataID << "--" << r.groups << "group(s)," << r.interiorGroups
+           << "interior; placed box X" << r.rootBox[0] << "to" << r.rootBox[3] << ", Y" << r.rootBox[1] << "to" << r.rootBox[4]
+           << ", Z" << r.rootBox[2] << "to" << r.rootBox[5] << "; the footprint came" << m_timings.footprintMs
+           << "ms after the grid (player parse" << r.parseMs << "ms)";
+  changed();
 }
 
 // ---------------------------------------------------------------- the overhead map's pictures
@@ -796,6 +990,35 @@ void MapsViewer::SetTargetAt(int tx, int ty, double fx, double fy)
 
 bool MapsViewer::SetTarget(double x, double y, bool hasZ, double z)
 {
+  // A WMO-only map: a point inside its world model's placed box (no tile).
+  if (worldModelMap())
+  {
+    const double * b = m_footprintRoot;
+    if (!hasFootprint() || !std::isfinite(x) || !std::isfinite(y) || (hasZ && !std::isfinite(z)) || x < b[0] || x > b[3] ||
+        y < b[1] || y > b[4])
+    {
+      m_tileDetail = hasFootprint() ? QString("X %1, Y %2 is outside the world model (X %3 to %4, Y %5 to %6).")
+                                        .arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(b[0], 0, 'f', 1).arg(b[3], 0, 'f', 1)
+                                        .arg(b[1], 0, 'f', 1).arg(b[4], 0, 'f', 1)
+                                    : m_footprintDetail.isEmpty() ? QString("The world model's footprint is not known yet.")
+                                                                  : m_footprintDetail;
+      changed();
+      return false;
+    }
+    m_hasTarget = true;
+    m_targetX = x;
+    m_targetY = y;
+    m_targetHasZ = hasZ;
+    m_targetZ = hasZ ? z : 0.0;
+    if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded)
+    {
+      m_tilePhase = TilePhase::None;
+      m_tileDetail.clear();
+    }
+    LOG_INFO << "[maps] target" << targetLine();
+    changed();
+    return true;
+  }
   int tx, ty;
   if (!hasGrid() || !std::isfinite(x) || !std::isfinite(y) || (hasZ && !std::isfinite(z)) || !tileOf(x, y, tx, ty))
   {
@@ -826,10 +1049,33 @@ bool MapsViewer::SetTarget(double x, double y, bool hasZ, double z)
   return true;
 }
 
+void MapsViewer::ClearTarget()
+{
+  if (!m_hasTarget)
+    return;
+  m_hasTarget = false;
+  m_targetHasZ = false;
+  m_targetZ = 0.0;
+  if (!worldModelMap())
+  {
+    // A tile map's target is its tile pick: none now. A load in flight goes on, and what is on screen stays.
+    m_tileX = m_tileY = -1;
+    if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded)
+      m_tilePhase = TilePhase::None;
+  }
+  if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded)
+    m_tileDetail.clear();
+  LOG_INFO << "[maps] target cleared";
+  changed();
+}
+
 QString MapsViewer::targetLine() const
 {
   if (!m_hasTarget)
     return QString();
+  if (worldModelMap())
+    return QString("X %1  Y %2  Z %3").arg(m_targetX, 0, 'f', 1).arg(m_targetY, 0, 'f', 1)
+      .arg(m_targetHasZ ? QString::number(m_targetZ, 'f', 1) : QString("on the floor"));
   int tx, ty;
   tileOf(m_targetX, m_targetY, tx, ty);
   return QString("Tile %1, %2  X %3  Y %4  Z %5").arg(tx).arg(ty).arg(m_targetX, 0, 'f', 1).arg(m_targetY, 0, 'f', 1)
@@ -843,8 +1089,19 @@ bool MapsViewer::canEnter(QString & why) const
   int tx, ty;
   if (!hasGrid())
     why = m_mapId < 0 ? QString("Pick a map first.") : m_mapDetail.isEmpty() ? QString("The map's tiles are not known yet.") : m_mapDetail;
-  else if (m_globalWmoRecords > 0 && m_tilesInWdt == 0)
-    why = m_mapDetail;
+  else if (m_globalOnly)
+  {
+    // A WMO-only map (protocol 16): its footprint known; a target is optional (none: the world model's start point).
+    if (m_footprintPhase != FootprintPhase::Ready)
+      why = m_footprintDetail.isEmpty() ? QString("The world model's footprint is not known yet.") : m_footprintDetail;
+    else if (!s || !s->isUnityReady())
+      why = "The Unity viewport is not ready.";
+    else if (!s->playerPlacesWorldModels())
+      why = QString("The Unity renderer build in use speaks protocol %1; entering a world model needs protocol 16.")
+              .arg(s->playerProtocolVersion());
+    else if (m_viewer->m_clientLoading || UnityAssetAccess::isClientLoading())
+      why = "A client is being loaded.";
+  }
   else if (!m_hasTarget)
     why = "Click the overhead map, or type X and Y, to set where to enter the world.";
   else if (!tileOf(m_targetX, m_targetY, tx, ty) || tileState(tx, ty) != TileState::Available)
@@ -862,8 +1119,24 @@ bool MapsViewer::targetOnShownTile() const
   return m_hasTarget && m_shownX >= 0 && m_shownMap == m_mapId && tileOf(m_targetX, m_targetY, tx, ty) && tx == m_shownX && ty == m_shownY;
 }
 
+UnityIpcServer::WorldCamera MapsViewer::startCamera()
+{
+  // The world model's own start point (the player's, from its geometry): x, y, z and the heading are the player's.
+  UnityIpcServer::WorldCamera c;
+  c.request = ++m_cameraSerial;
+  c.mode = "fly";
+  c.start = true;
+  c.yaw = m_lookYaw;
+  c.pitch = m_lookPitch;
+  c.eyeHeight = EyeHeight;
+  return c;
+}
+
 UnityIpcServer::WorldCamera MapsViewer::flyCameraOnShownTile()
 {
+  // A WMO-only map's world model: at the target, else at its start point.
+  if (m_shownGlobal)
+    return m_hasTarget ? flyCameraAtTarget() : startCamera();
   // At the target when it is on the tile on screen; else at that tile's middle, on the ground (a target typed for another
   // tile waits for Enter world, and the free camera never leaves the tile it stands on).
   if (targetOnShownTile())
@@ -901,13 +1174,59 @@ void MapsViewer::EnterWorld()
     return;
   }
   UnityIpcServer * s = ipc();
+  if (m_globalOnly)
+  {
+    // A WMO-only map (protocol 16): its world model, no tile; the free camera at the target, standing on the highest floor
+    // under it, or -- no target -- at the world model's own start point.
+    UnityIpcServer::WorldCamera camera = m_hasTarget ? flyCameraAtTarget() : startCamera();
+    m_cameraMode = CameraMode::Fly;
+    if (m_shownGlobal && m_shownMap == m_mapId && (m_tilePhase == TilePhase::Loaded || m_loadShown))
+    {
+      s->sendSetWorldCamera(camera);
+      m_cameraRequest = camera.request;
+      m_entering = true;
+      m_cameraDetail = m_hasTarget ? "Placing the camera at the target." : "Placing the camera at the world model's start point.";
+      changed();
+      return;
+    }
+    QElapsedTimer clock;
+    clock.start();
+    const int load = m_viewer->RequestWorld(m_mapId, -1, -1, true, (int)m_globalWmoFileDataID, why, true, &camera);
+    m_timings.requestMs = msOf(clock);
+    if (load <= 0)
+    {
+      m_tilePhase = TilePhase::Failed;
+      m_tileDetail = "The world model could not be entered: " + why;
+      changed();
+      return;
+    }
+    m_load = load;
+    m_loadShown = false;
+    m_progress = UnityIpcServer::WorldProgress();
+    m_worldDetail = "The world model is being read.";
+    m_tilePhase = TilePhase::Loading;
+    m_tileDetail = "Entering the world model: its root, groups and textures are being read and built.";
+    m_entering = true;
+    m_cameraRequest = camera.request;
+    m_cameraDetail = m_hasTarget ? QString("The free camera goes to the target when the world model is shown.")
+                                 : QString("The free camera goes to the world model's start point when it is shown.");
+    m_loadClock.start();
+    LOG_INFO << "[maps] Enter world in map" << m_mapId << "'s world model" << m_globalWmoFileDataID
+             << (m_hasTarget ? "at " + targetLine() : QString("at its start point")) << ": load" << load << "("
+             << m_timings.requestMs << "ms on this thread, no WDT read)";
+    changed();
+    return;
+  }
   const bool flies = s->playerFliesWorld();
+  // Protocol 16: the tile with the world models its obj0 ADT places; an older player the tile alone.
+  const bool worldModels = s->playerPlacesWorldModels();
   int tx, ty;
   tileOf(m_targetX, m_targetY, tx, ty);
   UnityIpcServer::WorldCamera camera = flies ? flyCameraAtTarget() : UnityIpcServer::WorldCamera();
   m_cameraMode = CameraMode::Fly;
-  // The target's tile on screen already: only the camera moves.
-  if (m_tilePhase == TilePhase::Loaded && m_shownX == tx && m_shownY == ty && m_shownMap == m_mapId)
+  // The target's tile on screen already (its world models perhaps still loading): only the camera moves.
+  if ((m_tilePhase == TilePhase::Loaded || (m_tilePhase == TilePhase::Loading && m_loadShown)) && m_shownX == tx && m_shownY == ty &&
+      m_shownMap == m_mapId)
   {
     if (!flies)
     {
@@ -926,7 +1245,8 @@ void MapsViewer::EnterWorld()
   }
   QElapsedTimer clock;
   clock.start();
-  const int load = m_viewer->RequestTerrainTile(m_mapId, tx, ty, why, true, flies ? &camera : nullptr);
+  const int load = worldModels ? m_viewer->RequestWorld(m_mapId, tx, ty, false, 0, why, true, flies ? &camera : nullptr)
+                               : m_viewer->RequestTerrainTile(m_mapId, tx, ty, why, true, flies ? &camera : nullptr);
   m_timings.requestMs = msOf(clock);
   if (load <= 0)
   {
@@ -939,8 +1259,13 @@ void MapsViewer::EnterWorld()
   m_tileX = tx;
   m_tileY = ty;
   m_load = load;
+  m_loadShown = false;
+  m_progress = UnityIpcServer::WorldProgress();
+  m_worldDetail = worldModels ? QString("Its world models are read once the tile is shown.") : QString();
   m_tilePhase = TilePhase::Loading;
-  m_tileDetail = "Entering the world at tile " + tileName(tx, ty) + ": its terrain and textures are being read and built.";
+  m_tileDetail = "Entering the world at tile " + tileName(tx, ty) +
+                 (worldModels ? QString(": its terrain, textures and world models are being read and built.")
+                              : QString(": its terrain and textures are being read and built."));
   m_entering = true;
   m_cameraRequest = flies ? camera.request : 0;
   m_cameraDetail = flies ? QString("The free camera goes to the target when the tile is shown.")
@@ -948,7 +1273,8 @@ void MapsViewer::EnterWorld()
                                    "from above.");
   m_loadClock.start();
   LOG_INFO << "[maps] Enter world at" << targetLine() << ": tile" << tileName(tx, ty) << "requested, load" << load << "("
-           << m_timings.requestMs << "ms on this thread, no WDT read)" << (flies ? "with the free camera" : "without a camera");
+           << m_timings.requestMs << "ms on this thread, no WDT read)" << (flies ? "with the free camera" : "without a camera")
+           << (worldModels ? "and its world models" : "");
   changed();
 }
 
@@ -978,7 +1304,7 @@ void MapsViewer::leaveWorld()
 void MapsViewer::SetCameraMode(CameraMode mode)
 {
   UnityIpcServer * s = ipc();
-  if (!m_worldShown || m_shownX < 0 || !s || !s->playerFliesWorld())
+  if (!m_worldShown || !worldOnScreen() || !s || !s->playerFliesWorld())
   {
     m_cameraMode = mode;
     changed();
@@ -1003,7 +1329,7 @@ void MapsViewer::Look(double yaw, double pitch)
   m_lookYaw = yaw;
   m_lookPitch = pitch;
   UnityIpcServer * s = ipc();
-  if (!m_worldShown || m_shownX < 0 || !s || !s->playerFliesWorld())
+  if (!m_worldShown || !worldOnScreen() || !s || !s->playerFliesWorld())
     return;
   const UnityIpcServer::WorldCamera c = flyCameraOnShownTile();
   if (s->sendSetWorldCamera(c))
@@ -1021,7 +1347,8 @@ void MapsViewer::OnWorldCameraApplied(const UnityIpcServer::WorldCameraApplied &
   // The camera Enter world sent with the load is placed when the player shows the tile, a moment before the load is
   // reported built: its answer is held until that report, so the world takes the viewport with its tile known (never
   // with the "Loading tile" notice over the player's first frame), and not at all when the load ends otherwise.
-  if (a.load != 0 && a.load == m_load && m_tilePhase == TilePhase::Loading)
+  // A world load (protocol 16) is shown before its report (worldShown): its camera is held until then, not until the report.
+  if (a.load != 0 && a.load == m_load && m_tilePhase == TilePhase::Loading && !m_loadShown)
   {
     m_heldCamera = a;
     m_cameraHeld = true;
@@ -1045,11 +1372,12 @@ void MapsViewer::applyCamera(const UnityIpcServer::WorldCameraApplied & a)
     m_cameraZ = a.z;
     m_cameraMode = a.mode == "overview" ? CameraMode::Overview : CameraMode::Fly;
     m_cameraDetail = a.mode == "overview"
-                       ? QString("Tile overview.")
+                       ? (m_shownGlobal ? QString("The world model, framed.") : QString("Tile overview."))
                        : QString("Free camera at X %1  Y %2  Z %3%4. Drag to look, the wheel to fly forwards and back; W A S D, "
                                  "Q and E once a click in the viewport has given it the keys.")
                            .arg(a.x, 0, 'f', 1).arg(a.y, 0, 'f', 1).arg(a.z, 0, 'f', 1)
-                           .arg(a.ground ? QString(" (on the ground, %1, plus %2)").arg(a.groundZ, 0, 'f', 1).arg(EyeHeight, 0, 'f', 1)
+                           .arg(a.ground ? QString(" (on the %1, %2, plus %3)").arg(m_shownGlobal ? "floor" : "ground")
+                                             .arg(a.groundZ, 0, 'f', 1).arg(EyeHeight, 0, 'f', 1)
                                          : a.hasGroundZ ? QString() : QString(" (%1)").arg(a.reason));
   }
   else
@@ -1075,12 +1403,39 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
   }
   m_timings.loadMs = msOf(m_loadClock);
   m_timings.playerTotalMs = r.totalMs;
-  const QString t = tileName(r.tileX, r.tileY);
-  if (r.status == "built")
+  const bool global = r.hasWorld && r.worldKind == "globalWmo";
+  const QString t = global ? QString("(the world model)") : tileName(r.tileX, r.tileY);
+  // The world models' outcome (protocol 16), whatever the load's status.
+  if (r.hasWorld)
+  {
+    if (r.worldState == "none")
+      m_worldDetail = "The tile places no world model.";
+    else
+      m_worldDetail = QString("World models %1: %2 of %3 placement(s) placed").arg(r.worldState).arg(r.worldPlaced).arg(r.worldPlacements) +
+                      (r.worldFailed > 0 ? QString(", %1 failed").arg(r.worldFailed) : QString()) +
+                      (r.worldUnsupported > 0 ? QString(", %1 unsupported").arg(r.worldUnsupported) : QString()) +
+                      (r.worldNotRequested > 0 ? QString(", %1 not requested (over the budgets)").arg(r.worldNotRequested) : QString()) +
+                      (r.worldEnded > 0 ? QString(", %1 ended with the load").arg(r.worldEnded) : QString()) +
+                      QString("; %1 world model(s), %2 group file(s), %3 texture(s).").arg(r.worldModels).arg(r.worldGroupFiles)
+                        .arg(r.worldTextures) +
+                      (r.worldReason.isEmpty() ? QString() : " " + r.worldReason);
+  }
+  if (r.status == "built" && global)
+  {
+    m_tilePhase = TilePhase::Loaded;
+    m_shownX = m_shownY = -1;
+    m_shownGlobal = true;
+    m_shownMap = r.mapId;
+    m_shownView = r.view;
+    m_tileDetail = "The world model loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + m_worldDetail +
+                   " No doodads, liquids or lighting.";
+  }
+  else if (r.status == "built")
   {
     m_tilePhase = TilePhase::Loaded;
     m_shownX = r.tileX;
     m_shownY = r.tileY;
+    m_shownGlobal = false;
     m_shownMap = r.mapId;
     m_shownView = r.view;
     QString material;
@@ -1103,12 +1458,13 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
       geometry += QString(" %1 chunk(s) of geometry are not supported and not drawn.").arg(r.chunksUnsupported);
     if (r.holeCells > 0)
       geometry += QString(" %1 hole cell(s).").arg(r.holeCells);
-    m_tileDetail = "Tile " + t + " loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + material + geometry;
+    m_tileDetail = "Tile " + t + " loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + material + geometry +
+                   (r.hasWorld ? " " + m_worldDetail : QString());
   }
   else if (r.status == "failed")
   {
     m_tilePhase = TilePhase::Failed;
-    m_tileDetail = "Tile " + t + " could not be loaded: " + r.reason +
+    m_tileDetail = (global ? QString("The world model could not be loaded: ") : "Tile " + t + " could not be loaded: ") + r.reason +
                    (r.hostState.isEmpty() ? QString() : " (the host answered " + r.hostState + ": " + r.hostDetail + ")");
   }
   else if (r.status == "superseded")
@@ -1124,9 +1480,11 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
   if (r.status != "built")
   {
     m_load = 0;
-    // Enter world ended without a world: the overhead map stays, with why.
+    // Enter world ended without a world: the overhead map stays, with why (a load shown before it ended keeps what it put
+    // on screen until a newer load or a clear takes it away); the camera it carried does not come now.
     m_entering = false;
     m_cameraRequest = 0;
+    m_loadShown = false;
   }
   else if (m_entering && m_cameraRequest == 0)
   {
@@ -1149,15 +1507,86 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
   changed();
 }
 
+void MapsViewer::OnWorldShown(const UnityIpcServer::WorldShown & w)
+{
+  if (m_load == 0 || w.load != m_load)
+  {
+    if (w.load > 0)
+      LOG_INFO << "[maps] load" << w.load << "was shown after this viewer moved on (now waiting for load" << m_load << "): not shown";
+    return;
+  }
+  m_loadShown = true;
+  m_timings.worldShownMs = msOf(m_loadClock);
+  if (w.kind == "globalWmo")
+  {
+    m_shownX = m_shownY = -1;
+    m_shownGlobal = true;
+  }
+  else
+  {
+    m_shownX = w.tileX;
+    m_shownY = w.tileY;
+    m_shownGlobal = false;
+  }
+  m_shownMap = w.mapId;
+  // A tile's placements are counted once its obj0 is read: none yet is not "none" (the load's report says how many).
+  m_worldDetail = w.placements > 0 ? QString("World models: %1 placement(s) of %2 world model(s) loading.").arg(w.placements).arg(w.models)
+                                   : QString("World models: the tile's placements are being read.");
+  // The camera the load carried, held for this (OnWorldCameraApplied); a player without the free camera shows it framed.
+  if (m_cameraHeld)
+  {
+    m_cameraHeld = false;
+    if (m_heldCamera.load == w.load && m_heldCamera.request == m_cameraRequest)
+      applyCamera(m_heldCamera);
+  }
+  else if (m_entering && m_cameraRequest == 0)
+  {
+    m_entering = false;
+    m_worldShown = true;
+    m_cameraMode = CameraMode::Overview;
+  }
+  else if (m_entering && w.kind == "tile")
+  {
+    // A tile's world load: its camera is placed once its world models are settled (it stands on their floors); the world
+    // has the viewport meanwhile, the tile framed, its world models appearing as they are built.
+    m_worldShown = true;
+    m_cameraMode = CameraMode::Overview;
+    m_cameraDetail = "The world models are being placed; the free camera goes to the target once they are.";
+  }
+  LOG_INFO << "[maps] load" << w.load << "shown after" << m_timings.worldShownMs << "ms (" << w.kind
+           << (w.kind == "tile" ? tileName(w.tileX, w.tileY) : QString()) << "):" << m_worldDetail;
+  changed();
+}
+
+QString MapsViewer::progressLine(const UnityIpcServer::WorldProgress & p) const
+{
+  return QString("World models: %1 of %2 built").arg(p.modelsBuilt).arg(p.models) +
+         (p.modelsFailed > 0 ? QString(", %1 failed").arg(p.modelsFailed) : QString()) +
+         (p.modelsUnsupported > 0 ? QString(", %1 unsupported").arg(p.modelsUnsupported) : QString()) +
+         QString("; %1 of %2 placement(s) placed; %3 of %4 file(s) read (%5 MB); %6.")
+           .arg(p.placed).arg(p.placements).arg(p.filesAnswered).arg(p.filesAsked).arg(p.bytesReceived / 1048576.0, 0, 'f', 1)
+           .arg(p.phase);
+}
+
+void MapsViewer::OnWorldProgress(const UnityIpcServer::WorldProgress & p)
+{
+  if (m_load == 0 || p.load != m_load)
+    return;
+  m_progress = p;
+  m_worldDetail = progressLine(p);
+  changed();
+}
+
 void MapsViewer::ClearTerrain()
 {
-  if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded && m_shownX < 0)
+  if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded && !worldOnScreen())
     return;
   m_viewer->ClearTerrain("the Maps viewer's Clear terrain");
   m_tilePhase = TilePhase::Cleared;
   m_tileDetail = "The world was cleared. Enter world to load it again.";
   m_load = 0;
   m_shownX = m_shownY = m_shownMap = -1;
+  m_shownGlobal = false;
   m_shownView.clear();
   leaveWorld();
   LOG_INFO << "[maps] terrain cleared";
@@ -1199,7 +1628,7 @@ void MapsViewer::OnTerrainViewApplied(const UnityIpcServer::TerrainViewApplied &
   for (const DisplayMode & m : displayModes())
     if (a.view == m.view)
       label = m.label;
-  if (a.status == "applied" && m_shownX < 0)
+  if (a.status == "applied" && !worldOnScreen())
     m_viewDetail = QString("%1: applies to the next tile loaded.").arg(label);   // the tile went since (cleared, left)
   else if (a.status == "applied")
   {
@@ -1223,6 +1652,19 @@ QString MapsViewer::statusLine() const
     return m_mapDetail.isEmpty() ? QString("No map selected.") : m_mapDetail;
   if (m_mapPhase != MapPhase::Ready)
     return m_mapDetail;
+  if (m_globalOnly)
+  {
+    // A WMO-only map: its world model and footprint.
+    QString w = m_mapDetail;
+    if (m_footprintPhase == FootprintPhase::Ready)
+      w += QString(" %1 group(s), %2 interior; X %3 to %4, Y %5 to %6, Z %7 to %8.").arg(m_footprintFlags.size())
+             .arg(m_footprintInterior).arg(m_footprintRoot[0], 0, 'f', 1).arg(m_footprintRoot[3], 0, 'f', 1)
+             .arg(m_footprintRoot[1], 0, 'f', 1).arg(m_footprintRoot[4], 0, 'f', 1).arg(m_footprintRoot[2], 0, 'f', 1)
+             .arg(m_footprintRoot[5], 0, 'f', 1);
+    else if (!m_footprintDetail.isEmpty())
+      w += " " + m_footprintDetail;
+    return w;
+  }
   QString s = QString("%1 of %2 tiles available.").arg(m_tilesAvailable).arg(m_tilesInWdt);
   if (m_minimapsWanted > 0)
     s += minimapsLoading() ? QString(" Minimap pictures: %1 of %2.").arg(m_minimapsLoaded).arg(m_minimapsWanted)
@@ -1272,6 +1714,36 @@ bool MapsViewer::viewportNotice(QString & title, QString & detail) const
       return true;
     case MapPhase::Ready:
       break;
+  }
+  if (m_globalOnly)
+  {
+    // A WMO-only map: its footprint, then its world load.
+    switch (m_tilePhase)
+    {
+      case TilePhase::None:
+      case TilePhase::Cleared:
+      case TilePhase::Unavailable:
+        title = m_footprintPhase == FootprintPhase::Ready ? QString("No world entered") : map + " cannot be entered yet";
+        detail = m_footprintPhase != FootprintPhase::Ready ? m_footprintDetail
+                 : m_tilePhase == TilePhase::Cleared ? m_tileDetail
+                 : QString("Click the world model's footprint to set where to enter it, or Enter world to start inside it.");
+        return true;
+      case TilePhase::Loading:
+        title = "Loading the world model";
+        detail = map + ": " + (m_worldDetail.isEmpty() ? m_tileDetail : m_worldDetail);
+        return true;
+      case TilePhase::Failed:
+        title = "The world model could not be loaded";
+        detail = m_tileDetail;
+        return true;
+      case TilePhase::Superseded:
+        title = "The world model's load was replaced";
+        detail = m_tileDetail;
+        return true;
+      case TilePhase::Loaded:
+        return false;
+    }
+    return false;
   }
   const QString t = m_tileX >= 0 ? tileName(m_tileX, m_tileY) : QString();
   switch (m_tilePhase)

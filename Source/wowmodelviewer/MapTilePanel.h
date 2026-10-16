@@ -14,6 +14,11 @@
  * kept as one mosaic bitmap over the map's box (a thumbnail per tile, drawn into it once as it comes), so a paint is one
  * stretched copy of it however many tiles show. Without a grid it shows why (MapsViewer::viewportNotice).
  *
+ * A WMO-ONLY MAP (protocol 16): no tile grid -- the world model's FOOTPRINT instead, fitted to the window, north up: its
+ * placed box, and every group's box seen from above (interior groups apart from exterior ones, the higher drawn over the
+ * lower), the target and the camera after a flight, a north mark and a scale bar. A click inside the world model's box
+ * sets the target there; a double-click also enters the world; the arrow keys move the target, Enter enters.
+ *
  * MapTilePanel: under the map list in Browse while the Maps viewer is on -- the map picked (its name, MapID, directory and
  * WDT), its state, the target (typed X, Y and Z, or the point clicked), Enter world and Back to map, the camera (the free
  * camera or the tile's overview), the display mode and Clear terrain. Owns no state of its own: MapsViewer does.
@@ -61,6 +66,16 @@ public:
   int cellSize() const { return m_cell; }
   // The hovered tile changed (the panel's hover line follows).
   std::function<void()> onHover;
+  // A WMO-only map's footprint: the world point (yards) at a point of this window (false: outside the world model's box),
+  // and the window point of a world point (the tests click it); the world point under the mouse (false: none).
+  bool FootprintPointAt(const wxPoint & p, double & x, double & y) const;
+  wxPoint FootprintPoint(double x, double y) const;
+  bool footprintHover(double & x, double & y) const
+  {
+    x = m_hoverWX;
+    y = m_hoverWY;
+    return m_hoverWorld;
+  }
   // Pictures came (MapsViewer::onImagesChanged): drawn into the mosaic at the next paint, at most one every RepaintMs.
   void ImagesChanged();
   static const int RepaintMs = 100;
@@ -77,6 +92,11 @@ private:
   void OnSize(wxSizeEvent & event);
   void updateMosaic();
   void hoverTo(int x, int y);
+  // The footprint's fit: yards to pixels, and the window point of the box's north-west corner (x max, y max).
+  bool footprintFit(double & scale, double & left, double & top) const;
+  void paintFootprint(wxDC & dc);
+  void footprintMouse(wxMouseEvent & event);
+  void footprintKey(wxKeyEvent & event);
 
   MapsViewer * m_maps;
   bool m_whole = false;
@@ -96,6 +116,8 @@ private:
   int m_mx0 = 0, m_my0 = 0, m_mx1 = -1, m_my1 = -1;
   std::vector<bool> m_inMosaic;
   wxTimer m_repaintTimer;
+  bool m_hoverWorld = false;         // the footprint: the world point under the mouse
+  double m_hoverWX = 0.0, m_hoverWY = 0.0;
 };
 
 class MapTilePanel : public wxPanel
@@ -134,6 +156,7 @@ private:
   wxStaticText * m_viewNote = nullptr;
   UiButton * m_clear = nullptr;
   bool m_refreshQueued = false;   // a size event's refresh waits (one at a time)
+  int m_laidOutHeight = -1;       // the height the Browse pane last laid the panel out for
   bool m_fieldsEdited = false;    // the user typed in a target field since the target was last shown in them
 };
 

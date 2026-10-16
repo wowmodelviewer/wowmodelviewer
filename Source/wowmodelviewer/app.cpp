@@ -6111,6 +6111,67 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
   ended.endedStatus = "failed";
   ModelViewer::TerrainRequest plainTex0 = rooted;   // a load without textures whose tex0 somehow counts as served
   plainTex0.tex0Served = true;
+  // WORLD MODELS (protocol 16): a world load of a tile -- its WDT not served yet; then its root and tex0 served, the obj0
+  // not asked for; then the obj0 served; then a root served -- and a WMO-only map's load (no tile).
+  const auto worldBudgets = [](ModelViewer::TerrainRequest & t) {
+    t.world = true;
+    t.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+    t.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+    t.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+    t.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+    t.maxWmoTexturesPerLoad = UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+    t.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+    t.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+  };
+  ModelViewer::TerrainRequest worldNoWdt = textures;
+  worldBudgets(worldNoWdt);
+  ModelViewer::TerrainRequest world = texTex0;
+  worldBudgets(world);
+  ModelViewer::TerrainRequest worldObj0 = world;
+  worldObj0.obj0Asked = true;
+  worldObj0.obj0FileDataID = 777623;
+  worldObj0.obj0Served = true;
+  worldObj0.reads = 4;
+  ModelViewer::TerrainRequest worldRoot = worldObj0;
+  worldRoot.wmoRootIds = {108631};
+  worldRoot.wmoRootsServed = 1;
+  worldRoot.wmoBytesRead = 35288;
+  worldRoot.reads = 5;
+  ModelViewer::TerrainRequest worldGroup = worldRoot;
+  worldGroup.wmoGroupIds = {108632};
+  worldGroup.wmoBytesRead += 439544;
+  worldGroup.reads = 6;
+  ModelViewer::TerrainRequest worldModels64 = worldObj0, worldGroups1024 = worldRoot, worldTextures1024 = worldRoot;
+  for (int i = 0; i < UnityIpcServer::MAX_WMO_MODELS_PER_LOAD; i++)
+    worldModels64.wmoRootIds.push_back(5000000 + i);
+  for (int i = 0; i < UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD; i++)
+    worldGroups1024.wmoGroupIds.push_back(6000000 + i);
+  for (int i = 0; i < UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD; i++)
+    worldTextures1024.wmoTextureIds.push_back(7000000 + i);
+  worldModels64.reads = 4 + UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+  worldGroups1024.reads = 5 + UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+  worldTextures1024.reads = 5 + UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+  ModelViewer::TerrainRequest worldBytesSpent = worldRoot, worldBytesNear = worldRoot, worldTexturesReserved = worldRoot;
+  worldBytesSpent.wmoBytesRead = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+  worldBytesNear.wmoBytesRead = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD - 1000;
+  worldTexturesReserved.wmoTextureBytesRead = 120 * 1024 * 1024;
+  worldTexturesReserved.wmoTextureBytesReserved = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+  ModelViewer::TerrainRequest worldReads = worldRoot;   // the world-model reads a world load may make, all made
+  worldReads.worldReads = 1 + UnityIpcServer::MAX_WMO_MODELS_PER_LOAD + UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD +
+                          UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+  worldReads.reads = 3 + worldReads.worldReads;
+  ModelViewer::TerrainRequest worldTerrainReads = worldRoot;   // a world load whose terrain roles read 3 + 128 files
+  worldTerrainReads.worldReads = 2;
+  worldTerrainReads.reads = 3 + UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD + worldTerrainReads.worldReads;
+  ModelViewer::TerrainRequest global = current;
+  worldBudgets(global);
+  global.globalWmo = true;
+  global.globalWmoFileDataID = 108631;
+  ModelViewer::TerrainRequest globalWdt = global;
+  globalWdt.wdtServed = true;
+  globalWdt.reads = 1;
+  ModelViewer::TerrainRequest globalUnknown = globalWdt;
+  globalUnknown.globalWmoFileDataID = 0;
   const int epochNow = 7;
   // load -1000 leaves "load" out of the request.
   const auto request = [](int load, int epoch, const QString & role, int fileDataID) {
@@ -6136,11 +6197,14 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
     qint64 maxBytes = -1;   // the read's limit a request that goes on to the read must have (-1: not checked)
   };
   const qint64 mapLimit = UnityIpcServer::MAX_MAP_ASSET_BYTES, textureLimit = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  const qint64 wmoLimit = UnityIpcServer::MAX_WMO_FILE_BYTES, wmoTextureLimit = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+  const QString worldReadsAllowed = QString::number(1 + UnityIpcServer::MAX_WMO_MODELS_PER_LOAD + UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD +
+                                                    UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD);
   const Case cases[] = {
     {"the current load's WDT goes on to the read, at most the map-file limit", request(5, 7, "wdt", 775971), &current, true,
      false, "", "", mapLimit},
     {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused",
-     "unknown role \"x\" (wdt, rootAdt, tex0Adt or texture)"},
+     "unknown role \"x\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup or wmoTexture)"},
     {"another WDT is refused", request(5, 7, "wdt", 775972), &current, true, false, "refused",
      "WDT is FileDataID 775971, not 775972"},
     {"FileDataID 0 is refused", request(5, 7, "wdt", 0), &current, true, false, "refused", "FileDataID 0 names no file"},
@@ -6219,6 +6283,68 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
      "load 5 was reported failed"},
     {"an earlier load is stale as before, not \"reported\"", request(4, 7, "texture", 187115), &ended, true, false, "stale",
      "request load 4, current 5"},
+    // WORLD MODELS (protocol 16).
+    {"an obj0 ADT for a load that is not a world load is refused", request(5, 7, "obj0Adt", 777623), &texTex0, true, false,
+     "refused", "load 5 is not a world load: no obj0Adt is served for it"},
+    {"a world-model root for a load that is not a world load is refused", request(5, 7, "wmoRoot", 108631), &texTex0, true,
+     false, "refused", "load 5 is not a world load: no wmoRoot is served for it"},
+    {"an obj0 ADT before the load's WDT was served is refused", request(5, 7, "obj0Adt", 777623), &worldNoWdt, true, false,
+     "refused", "load 5's WDT has not been served, so no obj0 ADT is"},
+    {"the obj0 ADT after the WDT goes on to the read, at most the map-file limit", request(5, 7, "obj0Adt", 777623), &world,
+     true, false, "", "", mapLimit},
+    {"a second obj0 ADT request is refused", request(5, 7, "obj0Adt", 777623), &worldObj0, true, false, "refused",
+     "has asked for its obj0 ADT (777623) already: one obj0 ADT per load"},
+    {"a world-model root before the obj0 was served is refused", request(5, 7, "wmoRoot", 108631), &world, true, false,
+     "refused", "load 5's obj0 ADT has not been served, so no world-model root is"},
+    {"a world-model root after the obj0 goes on to the read, at most the world-model file limit",
+     request(5, 7, "wmoRoot", 108631), &worldObj0, true, false, "", "", wmoLimit},
+    {"a world-model root asked for before is refused", request(5, 7, "wmoRoot", 108631), &worldRoot, true, false, "refused",
+     "has asked for world-model root 108631 before: each root once per load"},
+    {"the 65th world-model root is refused", request(5, 7, "wmoRoot", 108631), &worldModels64, true, false, "refused",
+     "has asked for 64 world-model roots: at most 64 per load, not 108631"},
+    {"a group file before any root was served is refused", request(5, 7, "wmoGroup", 108632), &worldObj0, true, false,
+     "refused", "load 5 has been served no world-model root, so no world-model group file is"},
+    {"a group file after a root goes on to the read, at most the world-model file limit", request(5, 7, "wmoGroup", 108632),
+     &worldRoot, true, false, "", "", wmoLimit},
+    {"a group file asked for before is refused", request(5, 7, "wmoGroup", 108632), &worldGroup, true, false, "refused",
+     "has asked for world-model group file 108632 before"},
+    {"the 1,025th group file is refused", request(5, 7, "wmoGroup", 108632), &worldGroups1024, true, false, "refused",
+     "has asked for 1024 world-model group files: at most 1024 per load"},
+    {"a world-model texture before any root was served is refused", request(5, 7, "wmoTexture", 187115), &worldObj0, true,
+     false, "refused", "so no world-model texture is"},
+    {"a world-model texture after a root goes on to the read, at most its limit", request(5, 7, "wmoTexture", 187115),
+     &worldRoot, true, false, "", "", wmoTextureLimit},
+    {"the 1,025th world-model texture is refused", request(5, 7, "wmoTexture", 187115), &worldTextures1024, true, false,
+     "refused", "has asked for 1024 world-model textures: at most 1024 per load"},
+    {"root and group bytes spent: a group file is refused", request(5, 7, "wmoGroup", 108633), &worldBytesSpent, true, false,
+     "refused", "load 5 has read 134217728 bytes of world-model roots and groups: at most 134217728 per load"},
+    {"a group file near the byte cap is read with what is left of it", request(5, 7, "wmoGroup", 108633), &worldBytesNear, true,
+     false, "", "", 1000},
+    {"world-model texture bytes read and reserved by reads in flight spend the budget: refused, both named",
+     request(5, 7, "wmoTexture", 187127), &worldTexturesReserved, true, false, "refused",
+     "has read 125829120 bytes of world-model textures and reserved 8388608 for reads in flight: at most 134217728 per load"},
+    {"a world load's world-model reads stop at 1 + 64 + 1024 + 1024", request(5, 7, "wmoGroup", 108633), &worldReads, true,
+     false, "refused", "world-model files: at most " + worldReadsAllowed + " per load (1 obj0 + 64 roots + 1024 groups + 1024 "
+     "textures)"},
+    {"a world load's terrain reads stop at 3 + 128 whatever its world allowance: a WDT is refused",
+     request(5, 7, "wdt", 775971), &worldTerrainReads, true, false, "refused",
+     "load 5 has read 131 files: at most 131 per load (3 + 128 textures)"},
+    {"... and its world-model reads go on apart", request(5, 7, "wmoGroup", 108633), &worldTerrainReads, true, false, "", "",
+     wmoLimit},
+    {"a WMO-only map's load: a root ADT is refused (no tile)", request(5, 7, "rootAdt", 778037), &globalWdt, true, false,
+     "refused", "load 5 is a WMO-only map's: it has no tile, so no rootAdt is served"},
+    {"a WMO-only map's load: an obj0 ADT is refused (no tile)", request(5, 7, "obj0Adt", 777623), &globalWdt, true, false,
+     "refused", "it has no tile, so no obj0Adt is served"},
+    {"a WMO-only map's load: a terrain texture is refused (no tile)", request(5, 7, "texture", 187115), &globalWdt, true, false,
+     "refused", "it has no tile, so no texture is served"},
+    {"a WMO-only map's load: its world model before the WDT was served is refused", request(5, 7, "wmoRoot", 108631), &global,
+     true, false, "refused", "load 5's WDT has not been served, so no world-model root is"},
+    {"a WMO-only map's load: its world model after the WDT goes on to the read", request(5, 7, "wmoRoot", 108631), &globalWdt,
+     true, false, "", "", wmoLimit},
+    {"a WMO-only map's load: another world model is refused", request(5, 7, "wmoRoot", 108632), &globalWdt, true, false,
+     "refused", "load 5 is a WMO-only map's: its world model is FileDataID 108631, not 108632"},
+    {"a WMO-only map's load whose world model is not known: one root goes on to the read", request(5, 7, "wmoRoot", 108632),
+     &globalUnknown, true, false, "", "", wmoLimit},
   };
   for (const Case & c : cases)
   {
@@ -6345,6 +6471,57 @@ static void checkMapAssetAccounting(TerrainTestLog & tally)
     tally.check("accounting: a load's reads of any role stop at 3 + 128", read == 131 && t.reads == 131,
                 QString("%1 WDT reads of 200 asked, %2 counted").arg(read).arg(t.reads));
   }
+  {
+    // A world load's allowance is its world roles' alone: its WDT asked for over and over still stops at 3 + 128.
+    ModelViewer::TerrainRequest t = base;
+    t.world = true;
+    t.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+    t.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+    t.maxWmoTexturesPerLoad = UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+    int read = 0;
+    for (int i = 0; i < 3000; i++)
+      read += serve(t, "wdt", 775971, 294988, true).isEmpty() ? 1 : 0;
+    tally.check("accounting: a world load's WDT re-reads stop at 3 + 128 too (the world allowance is apart)",
+                read == 131 && t.reads == 131 && t.worldReads == 0,
+                QString("%1 WDT reads of 3000 asked, %2 counted, %3 world").arg(read).arg(t.reads).arg(t.worldReads));
+  }
+  {
+    // WORLD MODELS (protocol 16): a world load in the order the player asks -- WDT, root, tex0, obj0, then a root whose
+    // kind fails (not served: no group after it, and not asked again), another root served, its group and texture. The
+    // bytes are counted by budget: roots and groups apart from textures.
+    ModelViewer::TerrainRequest t = base;
+    t.world = true;
+    t.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+    t.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+    t.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+    t.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+    t.maxWmoTexturesPerLoad = UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+    t.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+    t.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+    const QString rootBeforeObj0 = serve(t, "wmoRoot", 108631, 35288, true);
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "rootAdt", 778037, 329922, true);
+    serve(t, "tex0Adt", 778040, 1286682, true);
+    const QString obj0 = serve(t, "obj0Adt", 777623, 111876, true);
+    const QString badRoot = serve(t, "wmoRoot", 108632, 439544, false);   // a group read as a root: its kind fails
+    const QString groupAfterBad = serve(t, "wmoGroup", 108633, 439544, true);
+    const QString badRootAgain = serve(t, "wmoRoot", 108632, 439544, true);
+    const QString root = serve(t, "wmoRoot", 108631, 35288, true);
+    const QString group = serve(t, "wmoGroup", 108633, 439544, true);
+    const QString texture = serve(t, "wmoTexture", 187115, 88580, true);
+    tally.check("accounting: a world load's world-model files in order; a root that failed its kind serves no group and is "
+                "not asked again; the bytes counted by budget",
+                rootBeforeObj0 == "refused" && obj0.isEmpty() && t.obj0Served && badRoot.isEmpty() && groupAfterBad == "refused" &&
+                  badRootAgain == "refused" && root.isEmpty() && group.isEmpty() && texture.isEmpty() &&
+                  t.wmoRootsServed == 1 && t.wmoRootIds.size() == 2 && t.wmoGroupIds.size() == 1 && t.wmoTextureIds.size() == 1 &&
+                  t.wmoBytesRead == 439544 + 35288 + 439544 && t.wmoTextureBytesRead == 88580 && t.reads == 8,
+                QString("root before the obj0 \"%1\", obj0 \"%2\", a root that fails \"%3\", a group after it \"%4\", that root "
+                        "again \"%5\", another root \"%6\", its group \"%7\", a texture \"%8\"; ")
+                  .arg(rootBeforeObj0).arg(obj0).arg(badRoot).arg(groupAfterBad).arg(badRootAgain).arg(root).arg(group).arg(texture) +
+                  QString("%1 root(s) served of %2 asked, %3 group(s), %4 texture(s); %5 root and group bytes, %6 texture bytes; "
+                          "%7 reads").arg(t.wmoRootsServed).arg(t.wmoRootIds.size()).arg(t.wmoGroupIds.size())
+                    .arg(t.wmoTextureIds.size()).arg(t.wmoBytesRead).arg(t.wmoTextureBytesRead).arg(t.reads));
+  }
 }
 
 // The kind check after a read (ModelViewer::mapAssetKindProblem) on made-up bytes: a tex0 head (MVER, MAMP), a root head
@@ -6355,6 +6532,10 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
   const QByteArray root("REVM\x04\x00\x00\x00\x12\x00\x00\x00RDHM\x40\x00\x00\x00", 20);
   const QByteArray blp("BLP2\x01\x00\x00\x00\x02\x08\x07\x01", 12);
   const QByteArray longMver("REVM\xff\x00\x00\x00\x12\x00\x00\x00PMAM", 16);
+  // WORLD MODELS (protocol 16): an obj0 head (MVER, MDDF), a WMO root head (MVER, MOHD), a WMO group head (MVER, MOGP).
+  const QByteArray obj0("REVM\x04\x00\x00\x00\x12\x00\x00\x00" "FDDM\x00\x00\x00\x00", 20);
+  const QByteArray wmoRoot("REVM\x04\x00\x00\x00\x11\x00\x00\x00" "DHOM\x40\x00\x00\x00", 20);
+  const QByteArray wmoGroup("REVM\x04\x00\x00\x00\x11\x00\x00\x00" "PGOM\x80\x00\x00\x00", 20);
   struct Case
   {
     const char * name;
@@ -6376,6 +6557,19 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
     {"two bytes are not a BLP2 texture", "texture", QByteArray("BL"), "it starts with 2 bytes only"},
     {"no kind is checked for a WDT", "wdt", blp, ""},
     {"no kind is checked for a root ADT", "rootAdt", tex0, ""},
+    {"an obj0 head passes as an obj0 ADT", "obj0Adt", obj0, ""},
+    {"a tex0 head is not an obj0 ADT (its second chunk named)", "obj0Adt", tex0,
+     "not an obj0 ADT: second chunk PMAM (hex 50 4d 41 4d), not MDDF (FDDM)"},
+    {"a WMO root head passes as a world-model root", "wmoRoot", wmoRoot, ""},
+    {"a WMO group head is not a world-model root", "wmoRoot", wmoGroup,
+     "not a world-model root: second chunk PGOM (hex 50 47 4f 4d), not MOHD (DHOM)"},
+    {"a BLP is not a world-model root", "wmoRoot", blp, "not a world-model root: first chunk BLP2 (hex 42 4c 50 32), not MVER (REVM)"},
+    {"a WMO group head passes as a world-model group", "wmoGroup", wmoGroup, ""},
+    {"a WMO root head is not a world-model group", "wmoGroup", wmoRoot,
+     "not a world-model group: second chunk DHOM (hex 44 48 4f 4d), not MOGP (PGOM)"},
+    {"an MVER whose size runs past the file is not a world-model group", "wmoGroup", longMver, "leaves no second chunk in 16 bytes"},
+    {"a BLP2 head passes as a world-model texture", "wmoTexture", blp, ""},
+    {"a WMO root is not a BLP2 world-model texture", "wmoTexture", wmoRoot, "not a BLP2 texture: it starts with REVM"},
   };
   for (const Case & c : cases)
   {
@@ -9835,8 +10029,26 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //                                            SelectWMOFile: what a row click runs)
 //   holdroot | holdwdt | release             the server's read hook: the next terrain load's root ADT / WDT read held in
 //                                            the map asset worker (UnityIpcServer::testHoldNextMapRead), or let go
-//   holdclose                                the last step: the read held, the player left running, the window closed
-//                                            with the read in flight (THE SHUTDOWN CHECK of the terrain test)
+//   holdclose[:<role>]                       the last step: the read held, the player left running, the window closed
+//                                            with the read in flight (THE SHUTDOWN CHECK of the terrain test); role
+//                                            rootAdt by default, or a world-model role (obj0Adt, wmoRoot, wmoGroup,
+//                                            wmoTexture: the world taken away and entered again at the target first)
+//   closeworld[:<phase>]                     the last step (protocol 16): the world taken away and entered again at the
+//                                            target, the window closed as soon as the player reports its world models in
+//                                            that phase (worldProgress; "building" by default) -- a close during their
+//                                            construction
+//   waitfootprint[:<ms>]                     (protocol 16) until a WMO-only map's footprint is known (or why not)
+//   clickfp:<fx>:<fy> | dclickfp:<fx>:<fy>   a click (a double-click: and Enter world) on the footprint, at fractions of
+//                                            the world model's box (fx east of its west edge, fy south of its north edge)
+//   worldreport                              (protocol 16) the last load's report: its world, counted, and that there is one
+//   waitshown[:<ms>]                         (protocol 16) until the current world load is on screen (worldShown), its
+//                                            world models perhaps still loading
+//   expect:footprint:<phase> | worldstate:<state> | worldkind:<kind> | placed:<n> | worldinstances:<n> | camerainworld |
+//          cameratarget (the camera placed at the target's X and Y, within a hundredth of a yard) |
+//          cameraz:<lo>:<hi> (the camera placed, its Z between lo and hi)
+//                                            (protocol 16) the footprint's phase; the last report's world state and kind,
+//                                            at least n placements placed; the player's world-model instances; the free
+//                                            camera inside the world model's box
 //   expect:<what>[:<args>]                   map:<phase> | grid:<x>:<y>:<state> | tile:<phase> | mode:<mode> |
 //                                            notice:<words> | terrain:<0|1> | listed:<n> | shownview:<view>
 //   wait:<ms> | shot:<name> | state          pump; a picture of the window (PrintWindow, <out>_<name>.png); the
@@ -10001,6 +10213,21 @@ namespace
     return "?";
   }
 
+  QString footprintPhaseName(MapsViewer::FootprintPhase p)
+  {
+    switch (p)
+    {
+      case MapsViewer::FootprintPhase::None:          return "none";
+      case MapsViewer::FootprintPhase::WaitingPlayer: return "waitingplayer";
+      case MapsViewer::FootprintPhase::Reading:       return "reading";
+      case MapsViewer::FootprintPhase::Inspecting:    return "inspecting";
+      case MapsViewer::FootprintPhase::Ready:         return "ready";
+      case MapsViewer::FootprintPhase::Failed:        return "failed";
+      case MapsViewer::FootprintPhase::Unsupported:   return "unsupported";
+    }
+    return "?";
+  }
+
   QString tileStateKey(MapsViewer::TileState s)
   {
     switch (s)
@@ -10030,6 +10257,8 @@ namespace
     o["playerTotalMs"] = t.playerTotalMs;
     o["viewMs"] = t.viewMs;
     o["rebuildMs"] = t.rebuildMs;
+    o["worldShownMs"] = t.worldShownMs;
+    o["footprintMs"] = t.footprintMs;
     o["uiUpdateMs"] = t.uiUpdateMs;
     o["uiUpdateMaxMs"] = t.uiUpdateMaxMs;
     return o;
@@ -10094,6 +10323,36 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     if (previousRuntime)
       previousRuntime(s);
   };
+  // WORLD MODELS (protocol 16): the last load's report, its worldShown and the progress seen, for the expectations.
+  UnityIpcServer::TerrainTileReport lastReport;
+  bool haveReport = false;
+  UnityIpcServer::WorldShown lastShown;
+  int shownSeen = 0, progressSeen = 0;
+  QString lastPhase, wantPhase;
+  bool wantPhaseSeen = false;   // closeworld: the phase it waits for came (several progress lines can come in one pump)
+  std::function<void(const UnityIpcServer::TerrainTileReport &)> previousReport = ipc->onTerrainTileLoaded;
+  ipc->onTerrainTileLoaded = [&](const UnityIpcServer::TerrainTileReport & r) {
+    lastReport = r;
+    haveReport = true;
+    if (previousReport)
+      previousReport(r);
+  };
+  std::function<void(const UnityIpcServer::WorldShown &)> previousShown = ipc->onWorldShown;
+  ipc->onWorldShown = [&](const UnityIpcServer::WorldShown & w) {
+    lastShown = w;
+    shownSeen++;
+    if (previousShown)
+      previousShown(w);
+  };
+  std::function<void(const UnityIpcServer::WorldProgress &)> previousProgress = ipc->onWorldProgress;
+  ipc->onWorldProgress = [&](const UnityIpcServer::WorldProgress & w) {
+    lastPhase = w.phase;
+    if (!wantPhase.isEmpty() && w.phase == wantPhase && w.load == maps->load())
+      wantPhaseSeen = true;
+    progressSeen++;
+    if (previousProgress)
+      previousProgress(w);
+  };
   const auto sample = [&](const QString & label) {
     QJsonObject o;
     o["label"] = label;
@@ -10101,6 +10360,23 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     const int q = ipc->requestRuntimeState();
     if (q > 0 && pumpUntil([&]() { return stateAnswered == q; }, 5000))
     {
+      o["worldInstances"] = lastState.worldInstances;
+      o["worldModels"] = lastState.worldModels;
+      o["worldMeshes"] = lastState.worldMeshes;
+      o["worldMaterials"] = lastState.worldMaterials;
+      o["worldTextures"] = lastState.worldTextures;
+      o["worldGpuGeometryBytes"] = (double)lastState.worldGpuGeometryBytes;
+      o["worldGpuTextureBytes"] = (double)lastState.worldGpuTextureBytes;
+      o["worldGroups"] = lastState.worldGroups;
+      o["worldGroupsVisible"] = lastState.worldGroupsVisible;
+      o["worldGroupsCulled"] = lastState.worldGroupsCulled;
+      o["worldInstancesCulled"] = lastState.worldInstancesCulled;
+      o["worldLoad"] = lastState.worldLoad;
+      o["worldKind"] = lastState.worldKind;
+      o["worldFrames"] = lastState.worldFrames;
+      o["worldFrameMsMedian"] = lastState.worldFrameMsMedian;
+      o["worldFrameMsP95"] = lastState.worldFrameMsP95;
+      o["worldFrameMsMax"] = lastState.worldFrameMsMax;
       o["liveTerrainTiles"] = lastState.liveTerrainTiles;
       o["terrainView"] = lastState.terrainView;
       o["terrainMeshes"] = lastState.terrainMeshes;
@@ -10136,7 +10412,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   const QStringList seq = spec.split(',', QString::SkipEmptyParts);
   LOG_INFO << "[maps-test] client" << frame->mapCatalog()->client().product << frame->mapCatalog()->client().build
            << "sequence:" << spec;
-  bool holdClose = false;
+  bool holdClose = false, closeWorld = false;
+  QString holdRole = "rootAdt";
   for (int s = 0; s < seq.size(); s++)
   {
     const QString step = seq[s].trimmed();
@@ -10367,7 +10644,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     }
     else if (kind == "target")
     {
-      // target:<X>:<Y>[:<Z>]: the coordinates typed into the panel's fields, and Enter pressed in one of them.
+      // target:<X>:<Y>[:<Z>]: the coordinates typed into the panel's fields, and Enter pressed in one of them ("target:"
+      // alone: the fields emptied).
       MapTilePanel * panel = fc->mapPanel();
       const QStringList v = arg.split(':');
       for (int a = 0; a < 3; a++)
@@ -10380,10 +10658,14 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       panel->targetField(0)->ProcessWindowEvent(enter);
       pump(200);
       rec["target"] = maps->targetLine();
-      tally.check(label + ": the typed coordinates are the target", maps->hasTarget() &&
-                                                                    std::fabs(maps->targetX() - v.value(0).toDouble()) < 0.01 &&
-                                                                    std::fabs(maps->targetY() - v.value(1).toDouble()) < 0.01,
-                  maps->hasTarget() ? maps->targetLine() : maps->tileDetail());
+      if (arg.isEmpty())   // target: with nothing after it -- the fields emptied: no target
+        tally.check(label + ": the emptied fields clear the target", !maps->hasTarget(),
+                    maps->hasTarget() ? maps->targetLine() : QString("no target"));
+      else
+        tally.check(label + ": the typed coordinates are the target", maps->hasTarget() &&
+                                                                      std::fabs(maps->targetX() - v.value(0).toDouble()) < 0.01 &&
+                                                                      std::fabs(maps->targetY() - v.value(1).toDouble()) < 0.01,
+                    maps->hasTarget() ? maps->targetLine() : maps->tileDetail());
     }
     else if (kind == "enter" || kind == "enterov")
     {
@@ -10510,8 +10792,11 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       choice->ProcessWindowEvent(picked);
       pump(1500);
       rec["cameraDetail"] = maps->cameraDetail();
+      // (A WMO-only map's overview frames its world model: "The world model, framed.")
       tally.check(label + ": the camera is switched", (maps->cameraMode() == MapsViewer::CameraMode::Overview) == (index == 1) &&
-                                                          maps->cameraDetail().startsWith(index == 1 ? "Tile overview" : "Free camera"),
+                                                          maps->cameraDetail().startsWith(index == 1 ? (maps->worldModelShown() ? "The world model"
+                                                                                                                                : "Tile overview")
+                                                                                                     : "Free camera"),
                   maps->cameraDetail());
     }
     else if (kind == "look")
@@ -10786,6 +11071,147 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         fc->SelectWMOFile(file);
       pump(6000);
     }
+    else if (kind == "waitfootprint")
+    {
+      // WORLD MODELS (protocol 16): a WMO-only map's footprint, known or why not.
+      const long ms = arg.isEmpty() ? 30000 : arg.toLong();
+      pumpUntil([&]() {
+        const MapsViewer::FootprintPhase p = maps->footprintPhase();
+        return p == MapsViewer::FootprintPhase::Ready || p == MapsViewer::FootprintPhase::Failed ||
+               p == MapsViewer::FootprintPhase::Unsupported;
+      }, ms);
+      pump(200);
+      const double * b = maps->footprintRootBox();
+      rec["footprint"] = footprintPhaseName(maps->footprintPhase());
+      rec["footprintDetail"] = maps->footprintDetail();
+      rec["groups"] = maps->footprintGroups();
+      rec["interiorGroups"] = maps->footprintInteriorGroups();
+      rec["rootBox"] = QJsonArray({ b[0], b[1], b[2], b[3], b[4], b[5] });
+      rec["footprintMs"] = maps->timings().footprintMs;
+      tally.check(label + ": the world model's footprint is known, or why not",
+                  maps->footprintPhase() != MapsViewer::FootprintPhase::Reading &&
+                    maps->footprintPhase() != MapsViewer::FootprintPhase::Inspecting && maps->worldModelMap(),
+                  QString("%1: %2 group(s), %3 interior; X %4 to %5, Y %6 to %7 -- %8").arg(footprintPhaseName(maps->footprintPhase()))
+                    .arg(maps->footprintGroups()).arg(maps->footprintInteriorGroups()).arg(b[0], 0, 'f', 1).arg(b[3], 0, 'f', 1)
+                    .arg(b[1], 0, 'f', 1).arg(b[4], 0, 'f', 1).arg(maps->statusLine()));
+    }
+    else if (kind == "clickfp" || kind == "dclickfp")
+    {
+      // A click on the footprint at fractions of the world model's box (east of its west edge, south of its north edge).
+      const double fx = arg.section(':', 0, 0).toDouble(), fy = arg.section(':', 1, 1).toDouble();
+      const double * b = maps->footprintRootBox();
+      const double wx = b[3] - fy * (b[3] - b[0]), wy = b[4] - fx * (b[4] - b[1]);
+      MapTileGrid * grid = frame->mapOverview->grid();
+      const wxPoint at = grid->FootprintPoint(wx, wy);
+      HWND h = (HWND)grid->GetHWND();
+      if (kind == "dclickfp")
+      {
+        PostMessage(h, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONUP, 0, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONDBLCLK, MK_LBUTTON, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONUP, 0, MAKELPARAM(at.x, at.y));
+      }
+      else
+        postClick(h, at);
+      const bool done = pumpUntil([&]() { return maps->hasTarget() && std::fabs(maps->targetX() - wx) < 2.0 &&
+                                                 std::fabs(maps->targetY() - wy) < 2.0 &&
+                                                 (kind == "clickfp" || maps->entering() || maps->worldShown()); }, 5000);
+      rec["target"] = maps->targetLine();
+      tally.check(label + QString(": the %1 on the footprint sets the target there%2").arg(kind == "dclickfp" ? "double-click" : "click")
+                    .arg(kind == "dclickfp" ? QString(" and enters the world model") : QString()),
+                  done, QString("asked X %1 Y %2 (window %3,%4); %5").arg(wx, 0, 'f', 1).arg(wy, 0, 'f', 1).arg(at.x).arg(at.y)
+                          .arg(maps->hasTarget() ? maps->targetLine() : maps->tileDetail()));
+    }
+    else if (kind == "waitshown")
+    {
+      // The current world load on screen (worldShown) while its world models may still be loading.
+      const long ms = arg.isEmpty() ? 60000 : arg.toLong();
+      const bool shown = pumpUntil([&]() { return maps->load() > 0 && shownSeen > 0 && lastShown.load == maps->load(); }, ms);
+      rec["phase"] = lastPhase;
+      rec["tilePhase"] = tilePhaseName(maps->tilePhase());
+      tally.check(label + ": the world load is on screen", shown,
+                  QString("load %1 shown %2; world models \"%3\", the load %4").arg(maps->load()).arg(shown ? "yes" : "no")
+                    .arg(lastPhase).arg(tilePhaseName(maps->tilePhase())));
+    }
+    else if (kind == "worldreport")
+    {
+      // The last load's report, its world counted.
+      rec["haveReport"] = haveReport;
+      rec["shownSeen"] = shownSeen;
+      rec["progressSeen"] = progressSeen;
+      if (haveReport)
+      {
+        rec["load"] = lastReport.load;
+        rec["status"] = lastReport.status;
+        rec["hasWorld"] = lastReport.hasWorld;
+        rec["worldKind"] = lastReport.worldKind;
+        rec["worldState"] = lastReport.worldState;
+        rec["worldReason"] = lastReport.worldReason;
+        rec["records"] = lastReport.worldRecords;
+        rec["placements"] = lastReport.worldPlacements;
+        rec["placed"] = lastReport.worldPlaced;
+        rec["failed"] = lastReport.worldFailed;
+        rec["unsupported"] = lastReport.worldUnsupported;
+        rec["notRequested"] = lastReport.worldNotRequested;
+        rec["ended"] = lastReport.worldEnded;
+        rec["models"] = lastReport.worldModels;
+        rec["modelsBuilt"] = lastReport.worldModelsBuilt;
+        rec["groupFiles"] = lastReport.worldGroupFiles;
+        rec["groupFilesMissing"] = lastReport.worldGroupFilesMissing;
+        rec["textures"] = lastReport.worldTextures;
+        rec["texturesDecoded"] = lastReport.worldTexturesDecoded;
+        rec["texturesMissing"] = lastReport.worldTexturesMissing;
+        rec["fileBytes"] = (double)lastReport.worldFileBytes;
+        rec["textureBytes"] = (double)lastReport.worldTextureBytes;
+        rec["gpuGeometryBytes"] = (double)lastReport.worldGpuGeometryBytes;
+        rec["gpuTextureBytes"] = (double)lastReport.worldGpuTextureBytes;
+        rec["shownMs"] = lastReport.worldShownMs;
+        rec["fetchMs"] = lastReport.worldFetchMs;
+        rec["parseMs"] = lastReport.worldParseMs;
+        rec["decodeMs"] = lastReport.worldDecodeMs;
+        rec["buildMs"] = lastReport.worldBuildMs;
+        rec["buildMaxMs"] = lastReport.worldBuildMaxMs;
+        rec["placeMs"] = lastReport.worldPlaceMs;
+        rec["totalMs"] = lastReport.totalMs;
+        rec["start"] = lastReport.worldStart;
+        if (lastReport.worldStart)
+          rec["startPoint"] = QJsonArray({ lastReport.worldStartPoint[0], lastReport.worldStartPoint[1], lastReport.worldStartPoint[2] });
+      }
+      tally.check(label + ": the load was reported, with its world", haveReport && lastReport.hasWorld,
+                  haveReport ? "load " + QString::number(lastReport.load) + " " + lastReport.status + "; " + lastReport.describeWorld()
+                             : QString("no report"));
+    }
+    else if (kind == "closeworld")
+    {
+      // The last step: the world entered again at the target, the window closed while its world models are in the phase
+      // asked for (THE SHUTDOWN of a world load in flight; the destructor's log says the rest).
+      if (s != seq.size() - 1)
+      {
+        tally.check(label, false, "closeworld must be the last step");
+        continue;
+      }
+      const QString phase = arg.isEmpty() ? QString("building") : arg;
+      maps->ClearTerrain();
+      pump(500);
+      lastPhase.clear();
+      wantPhase = phase;
+      wantPhaseSeen = false;
+      UiButton * enter = frame->mapOverview->enterButton();
+      if (!maps->showsOverview())
+        maps->BackToMap();
+      wxCommandEvent clicked(wxEVT_BUTTON, enter->GetId());
+      clicked.SetEventObject(enter);
+      enter->ProcessWindowEvent(clicked);
+      const bool reached = pumpUntil([&]() { return wantPhaseSeen || maps->tilePhase() != MapsViewer::TilePhase::Loading; }, 60000);
+      rec["phase"] = lastPhase;
+      rec["tilePhase"] = tilePhaseName(maps->tilePhase());
+      const bool inFlight = reached && wantPhaseSeen && maps->tilePhase() == MapsViewer::TilePhase::Loading;
+      tally.check(label + ": the window is closed while the world models are " + phase, inFlight,
+                  QString("\"%1\" seen %2, the last phase \"%3\", the load %4").arg(phase).arg(wantPhaseSeen ? "yes" : "no").arg(lastPhase)
+                    .arg(tilePhaseName(maps->tilePhase())));
+      LOG_INFO << "[maps-test] closeworld: the window is closed now, the world load" << maps->load() << "in phase" << lastPhase;
+      closeWorld = true;
+    }
     else if (kind == "holdroot" || kind == "holdwdt")
       ipc->testHoldNextMapRead(kind == "holdroot" ? "rootAdt" : "wdt");
     else if (kind == "waitheld")
@@ -10815,6 +11241,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         continue;
       }
       holdClose = true;
+      holdRole = arg.isEmpty() ? QString("rootAdt") : arg;
     }
     else if (kind == "expect")
     {
@@ -10895,6 +11322,49 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         QString why;
         const bool can = maps->canEnter(why);
         tally.check(label, can == (a1 == "yes"), can ? QString("can enter") : why);
+      }
+      // WORLD MODELS (protocol 16).
+      else if (what == "footprint")
+        tally.check(label, footprintPhaseName(maps->footprintPhase()) == a1,
+                    footprintPhaseName(maps->footprintPhase()) + " -- " + maps->footprintDetail());
+      else if (what == "worldstate")
+        tally.check(label, haveReport && lastReport.worldState == a1, haveReport ? lastReport.describeWorld() : QString("no report"));
+      else if (what == "worldkind")
+        tally.check(label, haveReport && lastReport.worldKind == a1, haveReport ? lastReport.describeWorld() : QString("no report"));
+      else if (what == "placed")
+        tally.check(label, haveReport && lastReport.worldPlaced >= a1.toInt(),
+                    haveReport ? QString("%1 of %2 placed").arg(lastReport.worldPlaced).arg(lastReport.worldPlacements)
+                               : QString("no report"));
+      else if (what == "worldinstances")
+      {
+        const QJsonObject o = sample(label);
+        tally.check(label, o.value("worldInstances").toInt(-1) == a1.toInt(),
+                    QString("world-model instances %1, prototypes %2, meshes %3, materials %4, textures %5")
+                      .arg(o.value("worldInstances").toInt(-1)).arg(o.value("worldModels").toInt(-1)).arg(o.value("worldMeshes").toInt(-1))
+                      .arg(o.value("worldMaterials").toInt(-1)).arg(o.value("worldTextures").toInt(-1)));
+      }
+      else if (what == "camerainworld")
+      {
+        const double * b = maps->footprintRootBox();
+        const bool inside = maps->cameraPlaced() && maps->cameraX() >= b[0] && maps->cameraX() <= b[3] && maps->cameraY() >= b[1] &&
+                            maps->cameraY() <= b[4] && maps->cameraZ() >= b[2] && maps->cameraZ() <= b[5];
+        tally.check(label, inside, QString("camera at X %1 Y %2 Z %3; the box X %4 to %5, Y %6 to %7, Z %8 to %9")
+                                     .arg(maps->cameraX(), 0, 'f', 2).arg(maps->cameraY(), 0, 'f', 2).arg(maps->cameraZ(), 0, 'f', 2)
+                                     .arg(b[0], 0, 'f', 1).arg(b[3], 0, 'f', 1).arg(b[1], 0, 'f', 1).arg(b[4], 0, 'f', 1)
+                                     .arg(b[2], 0, 'f', 1).arg(b[5], 0, 'f', 1));
+      }
+      else if (what == "cameraz")
+        tally.check(label, maps->cameraPlaced() && maps->cameraZ() >= a1.toDouble() && maps->cameraZ() <= a2.toDouble(),
+                    QString("camera %1 at Z %2: %3").arg(maps->cameraPlaced() ? "placed" : "not placed")
+                      .arg(maps->cameraZ(), 0, 'f', 2).arg(maps->cameraDetail()));
+      else if (what == "cameratarget")
+      {
+        const bool at = maps->cameraPlaced() && maps->hasTarget() && std::abs(maps->cameraX() - maps->targetX()) <= 0.01 &&
+                        std::abs(maps->cameraY() - maps->targetY()) <= 0.01;
+        tally.check(label, at, QString("camera %1 at X %2 Y %3; target %4 X %5 Y %6")
+                                 .arg(maps->cameraPlaced() ? "placed" : "not placed").arg(maps->cameraX(), 0, 'f', 3)
+                                 .arg(maps->cameraY(), 0, 'f', 3).arg(maps->hasTarget() ? "set" : "not set")
+                                 .arg(maps->targetX(), 0, 'f', 3).arg(maps->targetY(), 0, 'f', 3));
       }
       else
         tally.check(label, false, "unknown expectation");
@@ -11080,6 +11550,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       o["map"] = maps->mapId();
       o["tile"] = maps->shownTileX() >= 0 ? QString("%1_%2").arg(maps->shownTileX()).arg(maps->shownTileY()) : QString();
       o["view"] = maps->shownView();
+      o["worldModel"] = maps->worldModelShown();
+      o["worldDetail"] = maps->worldDetail();
       shots.append(o);
       tally.check(label + ": the picture is written", ok, QString("%1 (%2 x %3, viewport mean %4)").arg(path).arg(size.width())
                                                             .arg(size.height()).arg(mean, 0, 'f', 1));
@@ -11123,21 +11595,42 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
               tally.failed, tally.skipped);
   std::fflush(stdout);
   ipc->onRuntimeState = previousRuntime;
+  ipc->onTerrainTileLoaded = previousReport;
+  ipc->onWorldShown = previousShown;
+  ipc->onWorldProgress = previousProgress;
   g_pumpBusy = nullptr;
+  if (closeWorld)
+    return tally.failed;   // the player left running: the frame's destructor closes it with the world load in flight
   if (holdClose)
   {
     // A tile requested with its root ADT read held in the worker, then the window closed (the frame's destructor) with
-    // the read in flight and the player running: THE SHUTDOWN CHECK watches the destructor.
-    ipc->testHoldNextMapRead("rootAdt");
+    // the read in flight and the player running: THE SHUTDOWN CHECK watches the destructor. A world-model role (protocol
+    // 16): the world taken away and entered again at the target, the first read of that role held.
+    ipc->testHoldNextMapRead(holdRole);
     int x0 = -1, y0 = -1;
-    for (int ty = 0; ty < 64 && x0 < 0; ty++)
+    const bool worldRole = holdRole == "obj0Adt" || holdRole.startsWith("wmo");
+    for (int ty = 0; ty < 64 && x0 < 0 && !worldRole; ty++)
       for (int tx = 0; tx < 64 && x0 < 0; tx++)
         if (maps->tileState(tx, ty) == MapsViewer::TileState::Available && !(tx == maps->shownTileX() && ty == maps->shownTileY()))
         {
           x0 = tx;
           y0 = ty;
         }
-    if (x0 >= 0)
+    if (worldRole)
+    {
+      maps->ClearTerrain();
+      pump(500);
+      if (!maps->showsOverview())
+        maps->BackToMap();
+      UiButton * enter = frame->mapOverview->enterButton();
+      wxCommandEvent clicked(wxEVT_BUTTON, enter->GetId());
+      clicked.SetEventObject(enter);
+      enter->ProcessWindowEvent(clicked);
+      wxStopWatch w;
+      while (!ipc->testMapReadHeld() && w.Time() < 60000)
+        pumpIpc(ipc, 1);
+    }
+    else if (x0 >= 0)
     {
       // On the overhead map: the tile clicked, then Enter world.
       if (!maps->showsOverview())
@@ -11158,7 +11651,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         pumpIpc(ipc, 1);
     }
     const bool held = ipc->testMapReadHeld() && ipc->mapReadsInFlight() >= 1;
-    LOG_INFO << "[maps-test] holdclose: tile" << x0 << y0 << "requested, its root ADT read held in the worker:" << (held ? "yes" : "no");
+    LOG_INFO << "[maps-test] holdclose:" << (worldRole ? "the world entered again at the target" : QString("tile %1 %2 requested").arg(x0).arg(y0))
+             << ", its" << holdRole << "read held in the worker:" << (held ? "yes" : "no");
     if (held)
     {
       g_shutdownCheck = ShutdownCheck();

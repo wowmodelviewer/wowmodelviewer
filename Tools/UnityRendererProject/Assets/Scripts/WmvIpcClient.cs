@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 13 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 16 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
@@ -17,7 +17,12 @@
 // and runtimeState's terrain fields -- see WmvTerrainSession; 13 added terrain textures: loadTerrainTile's
 // maxTextureBytes, maxTextureBytesPerLoad and maxTexturesPerLoad, getMapAsset's roles "tex0Adt" and "texture",
 // terrainTileLoaded's requestsRetired, retiredRequestIds and material, and runtimeState's terrainTextures,
-// terrainTextureBytes and terrainAlphaArrays).
+// terrainTextureBytes and terrainAlphaArrays; 14 added the Maps viewer: inspectMapTiles / mapTilesInspected and
+// setTerrainView / terrainViewApplied; 15 added the minimap ids and the global WMO in the tile table, the camera on
+// loadTerrainTile, and setWorldCamera / worldCameraApplied; 16 added world models in the world -- loadWorld (a tile and
+// its MODF world models, or a WMO-only map's global world model), getMapAsset's roles "obj0Adt", "wmoRoot", "wmoGroup"
+// and "wmoTexture", worldShown, worldProgress, terrainTileLoaded's world fields, the global record in mapTilesInspected,
+// inspectWorldModel / worldModelInspected, and runtimeState's world fields -- see WmvTerrainSession and WmvWorldModels).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -91,6 +96,18 @@
 //     distinct id once (both roles ask for role "texture"); at most WmvTerrainSession.MaxOutstanding requests of a load
 //     are out at once (a texture counts until its upload data are ready). Asked only when loadTerrainTile states a
 //     maxTextureBytes (a protocol-12 host states none)
+//   getMapAsset           { ..., role:"obj0Adt"|"wmoRoot"|"wmoGroup"|"wmoTexture", fileDataID }  (protocol 16)
+//     a world load's files: the tile's obj0 ADT (MAID word 1, its MODF), each world model's root, its LOD0 group files
+//     and the textures its drawn materials sample; at most WmvTerrainSession.MaxWorldOutstanding of them out at once,
+//     beside the tile's own MaxOutstanding
+//   worldShown            { load, mapId, kind:"tile"|"globalWmo", tileX, tileY, placements, models, shownMs,
+//                           originWorld:[X,Y,Z] }                                                 (protocol 16)
+//   worldProgress         { load, phase, placements, models, modelsRequested, modelsParsed, modelsBuilt, modelsFailed,
+//                           modelsUnsupported, modelsNotRequested, placed, placementsFailed, filesAsked, filesAnswered,
+//                           bytesReceived, elapsedMs }                                           (protocol 16)
+//   worldModelInspected   { inspection, status, reason, mapId, wmoFileDataID, assetEpoch, wmoBytes, md5, groups,
+//                           interiorGroups, parseMs, rootBox:[6], extents:[6], groupBoxes (base64 floats),
+//                           groupFlags (base64 u32) }                                            (protocol 16)
 //   terrainTileLoaded     { load, status:"built"|"failed"|"superseded"|"cleared", reason, hostState, hostDetail,
 //                           mapId, tileX, tileY, wdtFileDataID, rootFileDataID, wdtBytes, rootBytes, wdtMd5, rootMd5,
 //                           chunks, chunksBuilt, chunksSkipped, chunksUnsupported, vertices, triangles, holeCells,
@@ -196,6 +213,19 @@
 //     the view every terrain tile is drawn in from now on (WmvTerrainDebug.SetRuntimeView: one of its names but
 //     texturedplainweights, or "auto"); the tile on screen is built again in it from what the player holds, nothing
 //     asked of the host (WmvTerrainSession.RebuildShown), the camera left where it is; answered by terrainViewApplied
+//   loadWorld { what loadTerrainTile carries, worldModels:true, globalWmo, maxWmoFileBytes, maxWmoBytesPerLoad,
+//               maxWmoTextureBytes, maxWmoTextureBytesPerLoad, maxWmoTexturesPerLoad, maxWmoModelsPerLoad,
+//               maxWmoGroupsPerLoad, maxWmoPlacementsPerLoad }                     (protocol 16, world models)
+//     a world: the tile and the world models its obj0 ADT places (MODF), or -- globalWmo -- a WMO-only map's one world
+//     model, no tile (docs/world-viewer/06-world-models-in-world.md). The player asks getMapAsset "obj0Adt" (once,
+//     after the WDT), "wmoRoot", "wmoGroup" and "wmoTexture" within the budgets; answers worldShown when the scene first
+//     has something on screen, worldProgress as its world models come, and exactly one terrainTileLoaded with the
+//     world's outcome when every placement is settled
+//   inspectWorldModel { inspection, mapId, wmoFileDataID, assetEpoch, md5, wmoPosition, wmoRotation, wmoExtentsMin,
+//                       wmoExtentsMax, wmoFlags, wmoScale, wmoUniqueId, encoding:"binary", payloadBytes }
+//                     <payloadBytes raw WMO root bytes><newline>                     (protocol 16)
+//     a WMO-only map's world model and the WDT record that places it: answered by worldModelInspected with its placed
+//     root box and group boxes (the Maps viewer's footprint; WmvMapTiles.InspectWorldModel)
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets,
 //                   hasSubmeshVisible, submeshCount, submeshVisible:[0|1,...] }  (pushed, no request)
@@ -256,7 +286,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 15;
+    public const int ProtocolVersion = 16;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -280,6 +310,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<MapTilesRequest> OnInspectMapTiles;          // what a WDT says of its tiles (protocol 14)
     public Action<string> OnSetTerrainView;                    // the view terrain is drawn in (protocol 14)
     public Action<WorldCameraRequest> OnSetWorldCamera;        // place the world view's camera, or switch it (protocol 15)
+    public Action<WorldModelRequest> OnInspectWorldModel;      // a WMO-only map's world model: its footprint (protocol 16)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -513,19 +544,184 @@ public class WmvIpcClient : MonoBehaviour
         // Protocol 15: where the world view's camera goes when this tile is put on screen (the Maps viewer's Enter world);
         // null: the tile is framed as before (the overview).
         public WorldCameraRequest Camera;
+        // Protocol 16 (loadWorld, docs/world-viewer/06-world-models-in-world.md): World -- the load places world models: the
+        // tile's MODF records (its obj0 ADT), or, with GlobalWmo, the WDT's global record of a WMO-only map (no tile). The
+        // world-model budgets the host states and enforces; a loadTerrainTile states none and places nothing.
+        public bool World, GlobalWmo;
+        public int MaxWmoFileBytes;          // one world-model root or group file
+        public int MaxWmoBytesPerLoad;       // root and group bytes the host reads for one load
+        public int MaxWmoTextureBytes;       // one world-model texture
+        public int MaxWmoTextureBytesPerLoad;
+        public int MaxWmoTexturesPerLoad;    // world-model texture ids one load may ask for
+        public int MaxWmoModelsPerLoad;      // unique world models (roots) one load may ask for
+        public int MaxWmoGroupsPerLoad;      // group files one load may ask for
+        public int MaxWmoPlacementsPerLoad;  // placements one load places
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
 
+        /// <summary>The load places world models (a protocol-16 loadWorld with its budgets).</summary>
+        public bool WorldModelsOffered { get { return World && MaxWmoModelsPerLoad > 0; } }
+
         public override string ToString()
         {
-            return string.Format("load {0} epoch {1} map {2} ({3}) tile {4}_{5} wdt {6} (by {7}{8}) client {9} {10} maxAssetBytes {11}{12}",
-                                 Load, AssetEpoch, MapId, MapDirectory, TileX, TileY, WdtFileDataID, WdtResolvedBy,
-                                 string.IsNullOrEmpty(WdtPath) ? "" : " " + WdtPath, Product, Build, MaxAssetBytes,
+            return string.Format("load {0} epoch {1} map {2} ({3}) {4} wdt {5} (by {6}{7}) client {8} {9} maxAssetBytes {10}{11}{12}",
+                                 Load, AssetEpoch, MapId, MapDirectory, GlobalWmo ? "global world model" : "tile " + TileX + "_" + TileY,
+                                 WdtFileDataID, WdtResolvedBy, string.IsNullOrEmpty(WdtPath) ? "" : " " + WdtPath, Product, Build, MaxAssetBytes,
                                  TexturesOffered ? string.Format(" maxTextureBytes {0} maxTextureBytesPerLoad {1} maxTexturesPerLoad {2}",
                                                                  MaxTextureBytes, MaxTextureBytesPerLoad, MaxTexturesPerLoad)
-                                                 : " (no textures offered)");
+                                                 : " (no textures offered)",
+                                 WorldModelsOffered
+                                     ? string.Format("; world models: maxWmoFileBytes {0} maxWmoBytesPerLoad {1} maxWmoTextureBytes {2} " +
+                                                     "maxWmoTextureBytesPerLoad {3} maxWmoTexturesPerLoad {4} maxWmoModelsPerLoad {5} " +
+                                                     "maxWmoGroupsPerLoad {6} maxWmoPlacementsPerLoad {7}", MaxWmoFileBytes, MaxWmoBytesPerLoad,
+                                                     MaxWmoTextureBytes, MaxWmoTextureBytesPerLoad, MaxWmoTexturesPerLoad, MaxWmoModelsPerLoad,
+                                                     MaxWmoGroupsPerLoad, MaxWmoPlacementsPerLoad)
+                                     : World ? "; world models asked for, but no budget stated" : "");
         }
+    }
+
+    /// <summary>inspectWorldModel (protocol 16): a WMO-only map's global world model -- its root's bytes as the map asset
+    /// worker read and checked them, and the WDT's MODF record the player stated in mapTilesInspected -- for the footprint
+    /// the Maps viewer draws (WmvMapTiles.InspectWorldModel). Positions as stored (file frame), angles in degrees.</summary>
+    public class WorldModelRequest
+    {
+        public int Inspection, MapId, WmoFileDataID, AssetEpoch;
+        public string Md5 = "", Encoding = "";
+        public byte[] Bytes;
+        public float[] Position = new float[3], Rotation = new float[3], ExtentsMin = new float[3], ExtentsMax = new float[3];
+        public int Flags, ScaleRaw;
+        public uint UniqueId;
+    }
+
+    /// <summary>worldModelInspected (protocol 16): the world model's placed root box and every group's placed box (world
+    /// frame), for the overhead map's footprint.</summary>
+    public class WorldModelInspectReport
+    {
+        public int Inspection, MapId, WmoFileDataID, AssetEpoch;
+        public string Status = "failed", Reason = "";   // "inspected" | "failed"
+        public string Md5 = "";
+        public long Bytes = -1;
+        public int Groups;                              // MOHD's group count
+        public int InteriorGroups;
+        public double[] RootBox = new double[6];        // placed MOHD box: min x, y, z, max x, y, z (world frame)
+        public double[] Extents = new double[6];        // the record's extents as the world box they are
+        public float[] GroupBoxes;                      // Groups x 6 floats, world frame (min then max)
+        public uint[] GroupFlags;                       // Groups MOGI flags
+        public double ParseMs = -1;
+    }
+
+    public void ReportWorldModelInspected(WorldModelInspectReport r) { Send(WorldModelInspectedLine(r)); }
+
+    /// <summary>The worldModelInspected line (also for the self-test): the group boxes and flags travel as base64 of little-
+    /// endian floats and u32s (at most 1,024 groups: a root with more is refused by WmvMapTiles.InspectWorldModel).</summary>
+    public static string WorldModelInspectedLine(WorldModelInspectReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"worldModelInspected\",\"inspection\":").Append(r.Inspection)
+          .Append(",\"status\":\"").Append(Escape(r.Status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"')
+          .Append(",\"mapId\":").Append(r.MapId)
+          .Append(",\"wmoFileDataID\":").Append(r.WmoFileDataID)
+          .Append(",\"assetEpoch\":").Append(r.AssetEpoch)
+          .Append(",\"wmoBytes\":").Append(r.Bytes)
+          .Append(",\"md5\":\"").Append(Escape(r.Md5 ?? "")).Append('"')
+          .Append(",\"groups\":").Append(r.Groups)
+          .Append(",\"interiorGroups\":").Append(r.InteriorGroups)
+          .Append(",\"parseMs\":").Append(r.ParseMs.ToString("0.###", inv));
+        AppendDoubles(sb, "rootBox", r.RootBox);
+        AppendDoubles(sb, "extents", r.Extents);
+        if (r.GroupBoxes != null)
+        {
+            var b = new byte[r.GroupBoxes.Length * 4];
+            Buffer.BlockCopy(r.GroupBoxes, 0, b, 0, b.Length);
+            sb.Append(",\"groupBoxes\":\"").Append(Convert.ToBase64String(b)).Append('"');
+        }
+        if (r.GroupFlags != null)
+            sb.Append(",\"groupFlags\":\"").Append(Convert.ToBase64String(U32Bytes(r.GroupFlags))).Append('"');
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    static void AppendDoubles(StringBuilder sb, string key, double[] v)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        sb.Append(",\"").Append(key).Append("\":[");
+        // JSON has no NaN or infinity (a malformed file's number would make the whole line unreadable): null instead.
+        for (int i = 0; v != null && i < v.Length; i++)
+            sb.Append(i > 0 ? "," : "").Append(double.IsNaN(v[i]) || double.IsInfinity(v[i]) ? "null" : v[i].ToString("R", inv));
+        sb.Append(']');
+    }
+
+    /// <summary>worldShown (protocol 16): a world load's scene has something on screen -- its tile committed, or a WMO-only
+    /// map's world model placed -- and its camera placed; the load goes on until its terrainTileLoaded (the world models
+    /// still loading). Sent once per load, never on a timer.</summary>
+    public class WorldShownReport
+    {
+        public int Load, MapId, TileX = -1, TileY = -1;
+        public string Kind = "tile";                    // "tile" | "globalWmo"
+        public double[] Origin = new double[3];         // the scene's floating origin (world frame)
+        public int Placements, Models;                  // placements planned, unique world models among them
+        public double ShownMs = -1;                     // from the load's start
+    }
+
+    public void ReportWorldShown(WorldShownReport r) { Send(WorldShownLine(r)); }
+
+    public static string WorldShownLine(WorldShownReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"worldShown\",\"load\":").Append(r.Load)
+          .Append(",\"mapId\":").Append(r.MapId)
+          .Append(",\"kind\":\"").Append(Escape(r.Kind ?? "")).Append('"')
+          .Append(",\"tileX\":").Append(r.TileX)
+          .Append(",\"tileY\":").Append(r.TileY)
+          .Append(",\"placements\":").Append(r.Placements)
+          .Append(",\"models\":").Append(r.Models)
+          .Append(",\"shownMs\":").Append(r.ShownMs.ToString("0.###", inv));
+        AppendDoubles(sb, "originWorld", r.Origin);
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    /// <summary>worldProgress (protocol 16): a world load's world models, counted -- sent when a phase begins and at most
+    /// every WmvTerrainSession.ProgressIntervalMs while the load is in flight (never after its report).</summary>
+    public class WorldProgressReport
+    {
+        public int Load;
+        public string Phase = "";                       // the world models' phase, WmvTerrainSession.WorldPhase names
+        public int Placements, Models, ModelsRequested, ModelsParsed, ModelsBuilt, ModelsFailed, ModelsUnsupported, ModelsNotRequested;
+        public int Placed, PlacementsFailed;
+        public int FilesAsked, FilesAnswered;
+        public long BytesReceived;
+        public double ElapsedMs;
+    }
+
+    public void ReportWorldProgress(WorldProgressReport r) { Send(WorldProgressLine(r)); }
+
+    public static string WorldProgressLine(WorldProgressReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"worldProgress\",\"load\":").Append(r.Load)
+          .Append(",\"phase\":\"").Append(Escape(r.Phase ?? "")).Append('"')
+          .Append(",\"placements\":").Append(r.Placements)
+          .Append(",\"models\":").Append(r.Models)
+          .Append(",\"modelsRequested\":").Append(r.ModelsRequested)
+          .Append(",\"modelsParsed\":").Append(r.ModelsParsed)
+          .Append(",\"modelsBuilt\":").Append(r.ModelsBuilt)
+          .Append(",\"modelsFailed\":").Append(r.ModelsFailed)
+          .Append(",\"modelsUnsupported\":").Append(r.ModelsUnsupported)
+          .Append(",\"modelsNotRequested\":").Append(r.ModelsNotRequested)
+          .Append(",\"placed\":").Append(r.Placed)
+          .Append(",\"placementsFailed\":").Append(r.PlacementsFailed)
+          .Append(",\"filesAsked\":").Append(r.FilesAsked)
+          .Append(",\"filesAnswered\":").Append(r.FilesAnswered)
+          .Append(",\"bytesReceived\":").Append(r.BytesReceived)
+          .Append(",\"elapsedMs\":").Append(r.ElapsedMs.ToString("0.#", inv))
+          .Append('}');
+        return sb.ToString();
     }
 
     /// <summary>The world view's camera, as the host asks for it (protocol 15: setWorldCamera, and loadTerrainTile's camera).
@@ -541,11 +737,16 @@ public class WmvIpcClient : MonoBehaviour
         public bool HasZ;
         public float Yaw, Pitch;
         public float EyeHeight;
+        // Protocol 16: "start inside" -- the camera where the world model's own geometry offers a covered floor (a WMO-only
+        // map entered without a target; WorldModelGeometry.StartPoint), X, Y, Z and the angles ignored.
+        public bool Start;
 
         public override string ToString()
         {
             var inv = System.Globalization.CultureInfo.InvariantCulture;
-            return Mode == "fly"
+            return Mode == "fly" && Start
+                ? string.Format(inv, "request {0} fly at the world model's start point", Request)
+                : Mode == "fly"
                 ? string.Format(inv, "request {0} fly at ({1:0.###}, {2:0.###}, {3}) yaw {4:0.#} pitch {5:0.#} eye {6:0.##}", Request, X, Y,
                                 HasZ ? Z.ToString("0.###", inv) : "ground", Yaw, Pitch, EyeHeight)
                 : string.Format(inv, "request {0} {1}", Request, Mode);
@@ -588,6 +789,15 @@ public class WmvIpcClient : MonoBehaviour
         return sb.ToString();
     }
 
+    /// <summary>Three floats of a host line's array (missing entries 0).</summary>
+    static float[] Floats3(float[] v)
+    {
+        var r = new float[3];
+        for (int i = 0; v != null && i < 3 && i < v.Length; i++)
+            r[i] = v[i];
+        return r;
+    }
+
     /// <summary>The camera a host line states (setWorldCamera, or loadTerrainTile's), or null when it states none.</summary>
     static WorldCameraRequest CameraFrom(Msg msg)
     {
@@ -596,7 +806,7 @@ public class WmvIpcClient : MonoBehaviour
         return new WorldCameraRequest
         {
             Request = msg.cameraRequest, Mode = msg.cameraMode, X = msg.cameraX, Y = msg.cameraY, Z = msg.cameraZ,
-            HasZ = msg.cameraHasZ, Yaw = msg.cameraYaw, Pitch = msg.cameraPitch, EyeHeight = msg.cameraEyeHeight,
+            HasZ = msg.cameraHasZ, Yaw = msg.cameraYaw, Pitch = msg.cameraPitch, EyeHeight = msg.cameraEyeHeight, Start = msg.cameraStart,
         };
     }
 
@@ -830,6 +1040,20 @@ public class WmvIpcClient : MonoBehaviour
         public double cameraX, cameraY, cameraZ;
         public bool cameraHasZ;
         public float cameraYaw, cameraPitch, cameraEyeHeight;
+        public bool cameraStart;      // protocol 16: the world model's start point
+        // protocol 16: loadWorld's world models and budgets, and inspectWorldModel's record (flat, as the camera)
+        public bool worldModels;
+        public bool globalWmo;
+        public int maxWmoFileBytes, maxWmoBytesPerLoad, maxWmoTextureBytes, maxWmoTextureBytesPerLoad, maxWmoTexturesPerLoad;
+        public int maxWmoModelsPerLoad, maxWmoGroupsPerLoad, maxWmoPlacementsPerLoad;
+        public int wmoFileDataID;
+        public float[] wmoPosition;
+        public float[] wmoRotation;
+        public float[] wmoExtentsMin;
+        public float[] wmoExtentsMax;
+        public int wmoFlags;
+        public int wmoScale;
+        public long wmoUniqueId;
         public string state;          // assetResponse to getMapAsset: the host's decision
         public string detail;
         public double readMs;
@@ -1336,6 +1560,36 @@ public class WmvIpcClient : MonoBehaviour
                 });
                 break;
 
+            // A world (protocol 16): what loadTerrainTile carries, and the world models -- the tile's MODF records, or a WMO-only
+            // map's global world model with no tile -- within the budgets the host states.
+            case "loadWorld":
+                cache.SetEpoch(msg.assetEpoch);
+                OnLoadTerrainTile?.Invoke(new TerrainTileCommand
+                {
+                    Load = msg.load, AssetEpoch = msg.assetEpoch, MapId = msg.mapId, MapDirectory = msg.mapDirectory ?? "",
+                    Product = msg.product ?? "", Build = msg.build ?? "", WdtFileDataID = msg.wdtFileDataID,
+                    WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.globalWmo ? -1 : msg.tileX,
+                    TileY = msg.globalWmo ? -1 : msg.tileY, MaxAssetBytes = msg.maxAssetBytes, MaxTextureBytes = msg.maxTextureBytes,
+                    MaxTextureBytesPerLoad = msg.maxTextureBytesPerLoad, MaxTexturesPerLoad = msg.maxTexturesPerLoad,
+                    Camera = CameraFrom(msg), World = true, GlobalWmo = msg.globalWmo, MaxWmoFileBytes = msg.maxWmoFileBytes,
+                    MaxWmoBytesPerLoad = msg.maxWmoBytesPerLoad, MaxWmoTextureBytes = msg.maxWmoTextureBytes,
+                    MaxWmoTextureBytesPerLoad = msg.maxWmoTextureBytesPerLoad, MaxWmoTexturesPerLoad = msg.maxWmoTexturesPerLoad,
+                    MaxWmoModelsPerLoad = msg.maxWmoModelsPerLoad, MaxWmoGroupsPerLoad = msg.maxWmoGroupsPerLoad,
+                    MaxWmoPlacementsPerLoad = msg.maxWmoPlacementsPerLoad,
+                });
+                break;
+
+            case "inspectWorldModel":
+                OnInspectWorldModel?.Invoke(new WorldModelRequest
+                {
+                    Inspection = msg.inspection, MapId = msg.mapId, WmoFileDataID = msg.wmoFileDataID, AssetEpoch = msg.assetEpoch,
+                    Md5 = msg.md5 ?? "", Bytes = msg.payload, Encoding = msg.encoding ?? "",
+                    Position = Floats3(msg.wmoPosition), Rotation = Floats3(msg.wmoRotation), ExtentsMin = Floats3(msg.wmoExtentsMin),
+                    ExtentsMax = Floats3(msg.wmoExtentsMax), Flags = msg.wmoFlags, ScaleRaw = msg.wmoScale,
+                    UniqueId = (uint)msg.wmoUniqueId,
+                });
+                break;
+
             case "clearTerrain":
                 OnClearTerrain?.Invoke(msg.reason ?? "");
                 break;
@@ -1767,6 +2021,38 @@ public class WmvIpcClient : MonoBehaviour
         public TerrainMaterialReport Material;          // null: not sent (a load that ended before its material was built)
         // Protocol 14: the view the tile was drawn in (WmvTerrainDebug.ViewNames), "" when no tile was built.
         public string View = "";
+        // Protocol 16: a world load's world models (nothing written for a terrain load).
+        public bool World;
+        public string WorldKind = "";                   // "tile" | "globalWmo"
+        public string WorldState = "";                  // "complete" | "partial" | "none" | "failed" | "ended"
+        public string WorldReason = "";
+        public int WorldRecords, WorldPlacements, WorldPlaced, WorldFailed, WorldUnsupported, WorldNotRequested, WorldEnded;
+        public int WorldModels, WorldModelsBuilt, WorldModelsFailed, WorldModelsNotRequested;
+        public int WorldGroupFiles, WorldGroupFilesMissing, WorldTextures, WorldTexturesDecoded, WorldTexturesMissing;
+        public long WorldFileBytes, WorldTextureBytes, WorldGpuGeometryBytes, WorldGpuTextureBytes;
+        public double WorldShownMs = -1, WorldFetchMs = -1, WorldParseMs = -1, WorldDecodeMs = -1, WorldBuildMs = -1, WorldPlaceMs = -1;
+        public double WorldBuildMaxMs = -1;             // the longest single prototype build (one frame's main-thread cost)
+        public double[] WorldOrigin = new double[3];
+        public bool WorldStart;                         // a start point was found in a global world model's geometry
+        public double[] WorldStartPoint = new double[3];
+        public string WorldStartReason = "";
+        public List<WorldPlacementReport> WorldPlacementList = new List<WorldPlacementReport>();
+    }
+
+    /// <summary>One placement in terrainTileLoaded's world (at most WmvTerrainSession.ReportPlacementsMax listed): its
+    /// state, the record, the world box its extents state, and the world box its built instance's renderers cover.</summary>
+    public class WorldPlacementReport
+    {
+        public uint UniqueId;
+        public int FileDataID, Records = 1;
+        public string State = "", Reason = "";          // "placed" | "failed" | "unsupported" | "notRequested" | "ended"
+        public double[] Position = new double[3];       // W, world frame
+        public float[] Rotation = new float[3];         // as stored (degrees)
+        public double Scale = 1.0;
+        public double[] Extents = new double[6];        // the record's extents as a world box
+        public bool HasRendered;
+        public double[] Rendered = new double[6];       // the built instance's renderer bounds, back in the world frame
+        public int Groups, GroupsDrawn;
     }
 
     /// <summary>inspectMapTiles (protocol 14): a map's WDT bytes and the content key the host checked them against.</summary>
@@ -1797,6 +2083,12 @@ public class WmvIpcClient : MonoBehaviour
         public int GlobalWmoRecords;                    // MODF records in the WDT
         public uint GlobalWmoFileDataID;                // 0 when the record names a path, or nothing resolvable
         public string GlobalWmoPath = "";
+        // Protocol 16: the first global record itself, as stored (file frame, degrees), for inspectWorldModel and the
+        // footprint; HasGlobalRecord false without one.
+        public bool HasGlobalRecord;
+        public float[] GlobalPosition = new float[3], GlobalRotation = new float[3], GlobalExtentsMin = new float[3], GlobalExtentsMax = new float[3];
+        public int GlobalFlags, GlobalScaleRaw;
+        public uint GlobalUniqueId;
         public double ParseMs = -1;
     }
 
@@ -1844,8 +2136,28 @@ public class WmvIpcClient : MonoBehaviour
         sb.Append(",\"globalWmoRecords\":").Append(r.GlobalWmoRecords)
           .Append(",\"globalWmoFileDataID\":").Append(r.GlobalWmoFileDataID)
           .Append(",\"globalWmoPath\":\"").Append(Escape(r.GlobalWmoPath ?? "")).Append('"');
+        if (r.HasGlobalRecord)
+        {
+            sb.Append(",\"globalRecord\":true");
+            AppendFloats(sb, "globalPosition", r.GlobalPosition);
+            AppendFloats(sb, "globalRotation", r.GlobalRotation);
+            AppendFloats(sb, "globalExtentsMin", r.GlobalExtentsMin);
+            AppendFloats(sb, "globalExtentsMax", r.GlobalExtentsMax);
+            sb.Append(",\"globalFlags\":").Append(r.GlobalFlags)
+              .Append(",\"globalScale\":").Append(r.GlobalScaleRaw)
+              .Append(",\"globalUniqueId\":").Append(r.GlobalUniqueId);
+        }
         sb.Append('}');
         return sb.ToString();
+    }
+
+    static void AppendFloats(StringBuilder sb, string key, float[] v)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        sb.Append(",\"").Append(key).Append("\":[");
+        for (int i = 0; v != null && i < v.Length; i++)
+            sb.Append(i > 0 ? "," : "").Append(float.IsNaN(v[i]) || float.IsInfinity(v[i]) ? "null" : v[i].ToString("R", inv));
+        sb.Append(']');
     }
 
     static byte[] U32Bytes(uint[] v)
@@ -1991,8 +2303,76 @@ public class WmvIpcClient : MonoBehaviour
         // Protocol 14.
         if (!string.IsNullOrEmpty(r.View))
             sb.Append(",\"view\":\"").Append(Escape(r.View)).Append('"');
+        // Protocol 16.
+        if (r.World)
+            AppendWorld(sb, r);
         sb.Append('}');
         return sb.ToString();
+    }
+
+    static void AppendWorld(StringBuilder sb, TerrainTileReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        sb.Append(",\"world\":{\"kind\":\"").Append(Escape(r.WorldKind ?? "")).Append('"')
+          .Append(",\"state\":\"").Append(Escape(r.WorldState ?? "")).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.WorldReason ?? "")).Append('"')
+          .Append(",\"records\":").Append(r.WorldRecords)
+          .Append(",\"placements\":").Append(r.WorldPlacements)
+          .Append(",\"placed\":").Append(r.WorldPlaced)
+          .Append(",\"failed\":").Append(r.WorldFailed)
+          .Append(",\"unsupported\":").Append(r.WorldUnsupported)
+          .Append(",\"notRequested\":").Append(r.WorldNotRequested)
+          .Append(",\"ended\":").Append(r.WorldEnded)
+          .Append(",\"models\":").Append(r.WorldModels)
+          .Append(",\"modelsBuilt\":").Append(r.WorldModelsBuilt)
+          .Append(",\"modelsFailed\":").Append(r.WorldModelsFailed)
+          .Append(",\"modelsNotRequested\":").Append(r.WorldModelsNotRequested)
+          .Append(",\"groupFiles\":").Append(r.WorldGroupFiles)
+          .Append(",\"groupFilesMissing\":").Append(r.WorldGroupFilesMissing)
+          .Append(",\"textures\":").Append(r.WorldTextures)
+          .Append(",\"texturesDecoded\":").Append(r.WorldTexturesDecoded)
+          .Append(",\"texturesMissing\":").Append(r.WorldTexturesMissing)
+          .Append(",\"fileBytes\":").Append(r.WorldFileBytes)
+          .Append(",\"textureBytes\":").Append(r.WorldTextureBytes)
+          .Append(",\"gpuGeometryBytes\":").Append(r.WorldGpuGeometryBytes)
+          .Append(",\"gpuTextureBytes\":").Append(r.WorldGpuTextureBytes);
+        AppendDoubles(sb, "originWorld", r.WorldOrigin);
+        sb.Append(",\"start\":").Append(r.WorldStart ? "true" : "false");
+        if (r.WorldStart)
+        {
+            AppendDoubles(sb, "startPoint", r.WorldStartPoint);
+            sb.Append(",\"startReason\":\"").Append(Escape(r.WorldStartReason ?? "")).Append('"');
+        }
+        sb.Append(",\"timings\":{");
+        int timings = 0;
+        AppendTiming(sb, ref timings, "shownMs", r.WorldShownMs);
+        AppendTiming(sb, ref timings, "fetchMs", r.WorldFetchMs);
+        AppendTiming(sb, ref timings, "parseMs", r.WorldParseMs);
+        AppendTiming(sb, ref timings, "decodeMs", r.WorldDecodeMs);
+        AppendTiming(sb, ref timings, "buildMs", r.WorldBuildMs);
+        AppendTiming(sb, ref timings, "buildMaxMs", r.WorldBuildMaxMs);
+        AppendTiming(sb, ref timings, "placeMs", r.WorldPlaceMs);
+        sb.Append("},\"list\":[");
+        for (int i = 0; r.WorldPlacementList != null && i < r.WorldPlacementList.Count; i++)
+        {
+            WorldPlacementReport p = r.WorldPlacementList[i];
+            sb.Append(i > 0 ? ",{" : "{").Append("\"uniqueId\":").Append(p.UniqueId)
+              .Append(",\"fileDataID\":").Append(p.FileDataID)
+              .Append(",\"records\":").Append(p.Records)
+              .Append(",\"state\":\"").Append(Escape(p.State ?? "")).Append('"')
+              .Append(",\"reason\":\"").Append(Escape(p.Reason ?? "")).Append('"')
+              .Append(",\"scale\":").Append(p.Scale.ToString("R", inv))
+              .Append(",\"groups\":").Append(p.Groups)
+              .Append(",\"groupsDrawn\":").Append(p.GroupsDrawn);
+            AppendDoubles(sb, "position", p.Position);
+            sb.Append(",\"rotation\":[").Append(p.Rotation[0].ToString("R", inv)).Append(',').Append(p.Rotation[1].ToString("R", inv))
+              .Append(',').Append(p.Rotation[2].ToString("R", inv)).Append(']');
+            AppendDoubles(sb, "extents", p.Extents);
+            if (p.HasRendered)
+                AppendDoubles(sb, "rendered", p.Rendered);
+            sb.Append('}');
+        }
+        sb.Append("]}");
     }
 
     static void AppendMaterial(StringBuilder sb, TerrainMaterialReport m)
@@ -2093,6 +2473,18 @@ public class WmvIpcClient : MonoBehaviour
         // uploaded) and the tiles' alpha arrays (WmvRuntimeTerrainTile.LiveTextures and friends; 0 with no tile).
         public int TerrainTextures, TerrainAlphaArrays;
         public long TerrainTextureBytes;
+        // Protocol 16: the world scene's world models (WmvWorldModels' tallies; 0 with none): instances placed, the unique
+        // world models (prototypes) they share, the Unity objects those hold, their GPU bytes, and the group culling as of
+        // the last frame.
+        public int WorldInstances, WorldModels, WorldMeshes, WorldMaterials, WorldTextures;
+        public long WorldGpuGeometryBytes, WorldGpuTextureBytes;
+        public int WorldGroups, WorldGroupsVisible, WorldGroupsCulled, WorldInstancesCulled;
+        public int WorldLoad;                    // the world load the instances belong to, 0 for none
+        public string WorldKind;                 // "tile" | "globalWmo" | "" (no world scene)
+        // The world view's frame times: its last frames (at most WmvMain.WorldFrameWindow since it was last entered), their
+        // median, 95th percentile and longest, in milliseconds (0 frames: the view was not on).
+        public int WorldFrames;
+        public double WorldFrameMsMedian, WorldFrameMsP95, WorldFrameMsMax;
     }
 
     /// <summary>
@@ -2151,7 +2543,24 @@ public class WmvIpcClient : MonoBehaviour
              ",\"terrainTimeoutMs\":" + r.TerrainTimeoutMs +
              ",\"terrainTextures\":" + r.TerrainTextures +
              ",\"terrainTextureBytes\":" + r.TerrainTextureBytes +
-             ",\"terrainAlphaArrays\":" + r.TerrainAlphaArrays + "}");
+             ",\"terrainAlphaArrays\":" + r.TerrainAlphaArrays +
+             ",\"worldInstances\":" + r.WorldInstances +
+             ",\"worldModels\":" + r.WorldModels +
+             ",\"worldMeshes\":" + r.WorldMeshes +
+             ",\"worldMaterials\":" + r.WorldMaterials +
+             ",\"worldTextures\":" + r.WorldTextures +
+             ",\"worldGpuGeometryBytes\":" + r.WorldGpuGeometryBytes +
+             ",\"worldGpuTextureBytes\":" + r.WorldGpuTextureBytes +
+             ",\"worldGroups\":" + r.WorldGroups +
+             ",\"worldGroupsVisible\":" + r.WorldGroupsVisible +
+             ",\"worldGroupsCulled\":" + r.WorldGroupsCulled +
+             ",\"worldInstancesCulled\":" + r.WorldInstancesCulled +
+             ",\"worldLoad\":" + r.WorldLoad +
+             ",\"worldKind\":\"" + Escape(r.WorldKind ?? "") + "\"" +
+             ",\"worldFrames\":" + r.WorldFrames +
+             ",\"worldFrameMsMedian\":" + r.WorldFrameMsMedian.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+             ",\"worldFrameMsP95\":" + r.WorldFrameMsP95.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+             ",\"worldFrameMsMax\":" + r.WorldFrameMsMax.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

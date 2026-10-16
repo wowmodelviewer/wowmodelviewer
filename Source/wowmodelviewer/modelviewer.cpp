@@ -2429,6 +2429,16 @@ void ModelViewer::CreateUnityViewport()
     if (m_maps)
       m_maps->OnWorldCameraApplied(applied);
   };
+  // WORLD MODELS IN THE WORLD (protocol 16): a world load's scene on screen, its progress, and a WMO-only map's footprint.
+  unityRendererHost->ipc()->onWorldShown = [this](const UnityIpcServer::WorldShown & shown) { OnWorldShown(shown); };
+  unityRendererHost->ipc()->onWorldProgress = [this](const UnityIpcServer::WorldProgress & progress) {
+    if (m_maps)
+      m_maps->OnWorldProgress(progress);
+  };
+  unityRendererHost->ipc()->onWorldModelInspected = [this](const UnityIpcServer::WorldModelInspection & inspection) {
+    if (m_maps)
+      m_maps->OnWorldModelInspected(inspection);
+  };
 }
 
 bool ModelViewer::EnsureUnityViewportCentre()
@@ -3625,10 +3635,50 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
   // the tile; the host vouches for the client, the load, the order, the kind and the limits.)
   const QString role = request.value("role").toString();
   const int fileDataID = request.value("fileDataID").toInt(0);
-  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture")
-    return refused("unknown role \"" + role + "\" (wdt, rootAdt, tex0Adt or texture)");
+  const bool worldRole = role == "obj0Adt" || role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture";
+  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture" && !worldRole)
+    return refused("unknown role \"" + role + "\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup or wmoTexture)");
   if (fileDataID <= 0)
     return refused(QString("FileDataID %1 names no file").arg(fileDataID));
+  // WORLD MODELS (protocol 16): a world load's files only; a WMO-only map's load has no tile.
+  if (worldRole && !current->world)
+    return refused(QString("load %1 is not a world load: no %2 is served for it").arg(load).arg(role));
+  if (current->globalWmo && (role == "rootAdt" || role == "tex0Adt" || role == "texture" || role == "obj0Adt"))
+    return refused(QString("load %1 is a WMO-only map's: it has no tile, so no %2 is served").arg(load).arg(role));
+  if (role == "obj0Adt" && !current->wdtServed)
+    return refused(QString("load %1's WDT has not been served, so no obj0 ADT is").arg(load));
+  if (role == "obj0Adt" && current->obj0Asked)
+    return refused(QString("load %1 has asked for its obj0 ADT (%2) already: one obj0 ADT per load, asked once (this request: %3)")
+                     .arg(load).arg(current->obj0FileDataID).arg(fileDataID));
+  if (role == "wmoRoot")
+  {
+    if (current->globalWmo && !current->wdtServed)
+      return refused(QString("load %1's WDT has not been served, so no world-model root is").arg(load));
+    if (!current->globalWmo && !current->obj0Served)
+      return refused(QString("load %1's obj0 ADT has not been served, so no world-model root is").arg(load));
+    if (current->globalWmo && current->globalWmoFileDataID > 0 && fileDataID != current->globalWmoFileDataID)
+      return refused(QString("load %1 is a WMO-only map's: its world model is FileDataID %2, not %3")
+                       .arg(load).arg(current->globalWmoFileDataID).arg(fileDataID));
+    if (std::find(current->wmoRootIds.begin(), current->wmoRootIds.end(), fileDataID) != current->wmoRootIds.end())
+      return refused(QString("load %1 has asked for world-model root %2 before: each root once per load").arg(load).arg(fileDataID));
+    if ((int)current->wmoRootIds.size() >= current->maxWmoModelsPerLoad)
+      return refused(QString("load %1 has asked for %2 world-model roots: at most %3 per load, not %4")
+                       .arg(load).arg(current->wmoRootIds.size()).arg(current->maxWmoModelsPerLoad).arg(fileDataID));
+  }
+  if (role == "wmoGroup" || role == "wmoTexture")
+  {
+    const bool group = role == "wmoGroup";
+    const std::vector<int> & ids = group ? current->wmoGroupIds : current->wmoTextureIds;
+    const int most = group ? current->maxWmoGroupsPerLoad : current->maxWmoTexturesPerLoad;
+    const QString what = group ? "world-model group file" : "world-model texture";
+    if (current->wmoRootsServed <= 0)
+      return refused(QString("load %1 has been served no world-model root, so no %2 is").arg(load).arg(what));
+    if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
+      return refused(QString("load %1 has asked for %2 %3 before: each once per load").arg(load).arg(what).arg(fileDataID));
+    if ((int)ids.size() >= most)
+      return refused(QString("load %1 has asked for %2 %3s: at most %4 per load, not %5")
+                       .arg(load).arg(ids.size()).arg(what).arg(most).arg(fileDataID));
+  }
   if (role == "wdt" && fileDataID != current->wdtFileDataID)
     return refused(QString("load %1's WDT is FileDataID %2, not %3").arg(load).arg(current->wdtFileDataID).arg(fileDataID));
   if (role == "rootAdt" && !current->wdtServed)
@@ -3655,12 +3705,42 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
       return refused(QString("load %1 has asked for %2 textures: at most %3 per load, not %4")
                        .arg(load).arg(current->textureIds.size()).arg(current->maxTexturesPerLoad).arg(fileDataID));
   }
-  // However the roles add up, a load reads at most its WDT, root and tex0 and one file per texture id.
-  const int readsAllowed = 3 + std::max(0, current->maxTexturesPerLoad);
-  if (current->reads >= readsAllowed)
-    return refused(QString("load %1 has read %2 files: at most %3 per load (3 + %4 textures)")
-                     .arg(load).arg(current->reads).arg(readsAllowed).arg(std::max(0, current->maxTexturesPerLoad)));
+  // However the roles add up, a load reads at most its WDT, root and tex0 and one file per texture id; a world load also
+  // its obj0 and one file per world-model root, group and texture id. The two are capped apart, so the world's allowance
+  // never lets the terrain roles be read again past theirs (a WDT asked for over and over).
+  if (worldRole)
+  {
+    const int worldAllowed = 1 + std::max(0, current->maxWmoModelsPerLoad) + std::max(0, current->maxWmoGroupsPerLoad) +
+                             std::max(0, current->maxWmoTexturesPerLoad);
+    if (current->worldReads >= worldAllowed)
+      return refused(QString("load %1 has read %2 world-model files: at most %3 per load (1 obj0 + %4 roots + %5 groups + %6 "
+                             "textures)")
+                       .arg(load).arg(current->worldReads).arg(worldAllowed).arg(std::max(0, current->maxWmoModelsPerLoad))
+                       .arg(std::max(0, current->maxWmoGroupsPerLoad)).arg(std::max(0, current->maxWmoTexturesPerLoad)));
+  }
+  else
+  {
+    const int terrainReads = current->reads - current->worldReads;
+    const int readsAllowed = 3 + std::max(0, current->maxTexturesPerLoad);
+    if (terrainReads >= readsAllowed)
+      return refused(QString("load %1 has read %2 files: at most %3 per load (3 + %4 textures)")
+                       .arg(load).arg(terrainReads).arg(readsAllowed).arg(std::max(0, current->maxTexturesPerLoad)));
+  }
   d.maxBytes = current->maxAssetBytes;
+  if (role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture")
+  {
+    // The load's world-model bytes, as its terrain textures' (below): the reads in flight count with their limits.
+    const bool texture = role == "wmoTexture";
+    const qint64 read = texture ? current->wmoTextureBytesRead : current->wmoBytesRead;
+    const qint64 reserved = texture ? current->wmoTextureBytesReserved : current->wmoBytesReserved;
+    const qint64 budget = texture ? current->maxWmoTextureBytesPerLoad : current->maxWmoBytesPerLoad;
+    const QString what = texture ? "world-model textures" : "world-model roots and groups";
+    if (read + reserved >= budget)
+      return refused(reserved > 0 ? QString("load %1 has read %2 bytes of %3 and reserved %4 for reads in flight: at most %5 per load")
+                                      .arg(load).arg(read).arg(what).arg(reserved).arg(budget)
+                                  : QString("load %1 has read %2 bytes of %3: at most %4 per load").arg(load).arg(read).arg(what).arg(budget));
+    d.maxBytes = std::min(texture ? current->maxWmoTextureBytes : current->maxWmoFileBytes, budget - read - reserved);
+  }
   if (role == "texture")
   {
     // The texture bytes a load may read: refused once they are spent, otherwise a read that cannot overrun them (a file
@@ -3685,6 +3765,8 @@ void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject &
   const QString role = request.value("role").toString();
   const int fileDataID = request.value("fileDataID").toInt(0);
   current.reads++;
+  if (role == "obj0Adt" || role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture")
+    current.worldReads++;
   // The first root ADT the load asks for is the only one it may have; the tex0 is asked for once, whatever comes of it;
   // a texture id once.
   if (role == "rootAdt")
@@ -3696,6 +3778,17 @@ void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject &
   }
   else if (role == "texture")
     current.textureIds.push_back(fileDataID);
+  else if (role == "obj0Adt")
+  {
+    current.obj0Asked = true;
+    current.obj0FileDataID = fileDataID;
+  }
+  else if (role == "wmoRoot")
+    current.wmoRootIds.push_back(fileDataID);
+  else if (role == "wmoGroup")
+    current.wmoGroupIds.push_back(fileDataID);
+  else if (role == "wmoTexture")
+    current.wmoTextureIds.push_back(fileDataID);
 }
 
 void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available)
@@ -3706,6 +3799,16 @@ void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & r
     current.wdtServed = true;
   else if (role == "tex0Adt" && available)
     current.tex0Served = true;
+  else if (role == "obj0Adt" && available)
+    current.obj0Served = true;
+  else if (role == "wmoRoot" || role == "wmoGroup")
+  {
+    current.wmoBytesRead += std::max<qint64>(0, bytesRead);
+    if (role == "wmoRoot" && available)
+      current.wmoRootsServed++;
+  }
+  else if (role == "wmoTexture")
+    current.wmoTextureBytesRead += std::max<qint64>(0, bytesRead);
 }
 
 QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray & bytes)
@@ -3735,17 +3838,38 @@ QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray 
       return "not a tex0 ADT: second chunk " + code((int)second) + ", not MAMP (PMAM)";
     return QString();
   }
-  if (role == "texture")
+  if (role == "texture" || role == "wmoTexture")
   {
     if (!bytes.startsWith("BLP2"))
       return "not a BLP2 texture: it starts with " + (bytes.size() < 4 ? QString("%1 bytes only").arg(bytes.size()) : code(0));
+    return QString();
+  }
+  // WORLD MODELS (protocol 16): MVER, then the chunk every file of the kind opens with -- an obj0 ADT's MDDF, a WMO root's
+  // MOHD, a WMO group's MOGP (docs/world-viewer/06-world-models-in-world.md section 6; every obj0 of the audit's windows
+  // opens MVER MDDF, docs/world-viewer/00-audit.md 4.4).
+  const char * second = role == "obj0Adt" ? "FDDM" : role == "wmoRoot" ? "DHOM" : role == "wmoGroup" ? "PGOM" : nullptr;
+  if (second)
+  {
+    const QString kind = role == "obj0Adt" ? "an obj0 ADT" : role == "wmoRoot" ? "a world-model root" : "a world-model group";
+    const QString want = role == "obj0Adt" ? "MDDF (FDDM)" : role == "wmoRoot" ? "MOHD (DHOM)" : "MOGP (PGOM)";
+    if (bytes.size() < 8 || !bytes.startsWith("REVM"))
+      return "not " + kind + ": first chunk " + (bytes.size() < 4 ? QString("missing (%1 bytes)").arg(bytes.size()) : code(0)) +
+             ", not MVER (REVM)";
+    quint32 size = 0;
+    for (int i = 3; i >= 0; i--)
+      size = (size << 8) | (unsigned char)bytes[4 + i];
+    const qint64 at = 8 + (qint64)size;
+    if (at + 4 > bytes.size())
+      return QString("not %1: the MVER chunk (size %2) leaves no second chunk in %3 bytes").arg(kind).arg(size).arg(bytes.size());
+    if (bytes.mid((int)at, 4) != second)
+      return "not " + kind + ": second chunk " + code((int)at) + ", not " + want;
     return QString();
   }
   return QString();
 }
 
 bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command,
-                                     QString & why, bool wdtInspected)
+                                     QString & why, bool wdtInspected, bool noTile)
 {
   why.clear();
   command = UnityIpcServer::TerrainTileCommand();
@@ -3765,7 +3889,9 @@ bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcSe
                           : QString("there is no map catalogue"));
   if (!catalog->belongsToActiveClient())
     return refuse("the map catalogue is not the loaded client's");
-  if (tileX < 0 || tileX > 63 || tileY < 0 || tileY > 63)
+  if (noTile)
+    tileX = tileY = -1;
+  else if (tileX < 0 || tileX > 63 || tileY < 0 || tileY > 63)
     return refuse("tile " + tile + " is outside a map's 64 x 64 tile grid");
   const wow::MapEntry * entry = catalog->find(mapId);
   if (!entry)
@@ -3803,8 +3929,21 @@ bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcSe
 int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected,
                                     const UnityIpcServer::WorldCamera * camera)
 {
+  return RequestLoad(mapId, tileX, tileY, false, false, 0, why, wdtInspected, camera);
+}
+
+int ModelViewer::RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
+                              bool wdtInspected, const UnityIpcServer::WorldCamera * camera)
+{
+  return RequestLoad(mapId, tileX, tileY, true, globalWmo, globalWmoFileDataID, why, wdtInspected, camera);
+}
+
+int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
+                             bool wdtInspected, const UnityIpcServer::WorldCamera * camera)
+{
   why.clear();
-  const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
+  const bool noTile = world && globalWmo;
+  const QString tile = noTile ? QString("(its world model)") : QString("%1_%2").arg(tileX).arg(tileY);
   const auto refuse = [&why, mapId, &tile](const QString & reason) {
     why = reason;
     LOG_WARNING << "[unity-terrain] map" << mapId << "tile" << tile << "not requested:" << reason;
@@ -3816,9 +3955,12 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
   if (!ipc->playerDrawsTerrain())
     return refuse(QString("the Unity player speaks protocol %1, and drawing terrain needs protocol 12")
                     .arg(ipc->playerProtocolVersion()));
+  if (world && !ipc->playerPlacesWorldModels())
+    return refuse(QString("the Unity player speaks protocol %1, and placing world models needs protocol 16")
+                    .arg(ipc->playerProtocolVersion()));
   UnityIpcServer::TerrainTileCommand command;
   QString unresolved;
-  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved, wdtInspected))
+  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved, wdtInspected, noTile))
     return refuse(unresolved);
   command.load = m_terrainLoadSerial + 1;
   command.assetEpoch = UnityAssetAccess::clientEpoch();
@@ -3832,7 +3974,10 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
   }
   if (camera)
     command.camera = *camera;
-  if (!ipc->sendLoadTerrainTile(command))
+  // WORLD MODELS (protocol 16): the budgets are the command's defaults (UnityIpcServer::MAX_WMO_*).
+  command.world = world;
+  command.globalWmo = noTile;
+  if (!(world ? ipc->sendLoadWorld(command) : ipc->sendLoadTerrainTile(command)))
     return refuse("the load could not be sent to the player");
   // Raised only now that the load is out: the serial counts the loads the player was sent.
   m_terrainLoadSerial = command.load;
@@ -3848,6 +3993,19 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
   request.maxTextureBytes = command.maxTextureBytes;
   request.maxTextureBytesPerLoad = command.maxTextureBytesPerLoad;
   request.maxTexturesPerLoad = command.maxTexturesPerLoad;
+  if (world)
+  {
+    request.world = true;
+    request.globalWmo = noTile;
+    request.globalWmoFileDataID = noTile ? globalWmoFileDataID : 0;
+    request.maxWmoFileBytes = command.maxWmoFileBytes;
+    request.maxWmoBytesPerLoad = command.maxWmoBytesPerLoad;
+    request.maxWmoTextureBytes = command.maxWmoTextureBytes;
+    request.maxWmoTextureBytesPerLoad = command.maxWmoTextureBytesPerLoad;
+    request.maxWmoTexturesPerLoad = command.maxWmoTexturesPerLoad;
+    request.maxWmoModelsPerLoad = command.maxWmoModelsPerLoad;
+    request.maxWmoGroupsPerLoad = command.maxWmoGroupsPerLoad;
+  }
   m_terrainRequest = request;
   // The player drops the model or world model it was building for this (the latest command wins; the one it shows stays,
   // hidden), so the waits for either end here. A model dropped so is one the player finished without, and what it shows
@@ -3865,7 +4023,11 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
     m_playerContent = PlayerContent::Unknown;
   // With the time this thread spent reading the WDT whole before the load went out (ResolveTerrainTile's inspection).
   const wow::MapEntry * entry = m_mapCatalog->find(mapId);
-  LOG_INFO << "[unity-terrain] load" << command.load << ": map" << mapId << command.mapDirectory << "tile" << tile << "WDT"
+  LOG_INFO << "[unity-terrain] load" << command.load << ": map" << mapId << command.mapDirectory << "tile" << tile
+           << (world ? (noTile ? QString("-- a WMO-only map's world model (WMO %1)").arg(globalWmoFileDataID)
+                               : QString("with its world models"))
+                     : QString())
+           << "WDT"
            << command.wdtFileDataID
            << (command.wdtResolvedBy == "path" ? "(the storage root's FileDataID for " + command.wdtPath + ")"
                                                : QString("(Map.db2's FileDataID)"))
@@ -3957,8 +4119,13 @@ UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject
   // Accounted before the read, whatever comes of it: the read itself is what the load's limits count. A texture's
   // limit is held against the load's budget until its result comes (decideMapAssetRequest).
   noteMapAssetRead(m_terrainRequest, request);
-  if (request.value("role").toString() == "texture")
+  const QString role = request.value("role").toString();
+  if (role == "texture")
     m_terrainRequest.textureBytesReserved += decision.maxBytes;
+  else if (role == "wmoRoot" || role == "wmoGroup")
+    m_terrainRequest.wmoBytesReserved += decision.maxBytes;
+  else if (role == "wmoTexture")
+    m_terrainRequest.wmoTextureBytesReserved += decision.maxBytes;
   d.read = true;
   d.fileDataID = request.value("fileDataID").toInt(0);
   d.maxBytes = decision.maxBytes;
@@ -4051,6 +4218,10 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
   const bool currentLoad = m_terrainRequest.load > 0 && request.value("load").toInt(0) == m_terrainRequest.load;
   if (currentLoad && role == "texture")
     m_terrainRequest.textureBytesReserved = std::max<qint64>(0, m_terrainRequest.textureBytesReserved - result.maxBytes);
+  else if (currentLoad && (role == "wmoRoot" || role == "wmoGroup"))
+    m_terrainRequest.wmoBytesReserved = std::max<qint64>(0, m_terrainRequest.wmoBytesReserved - result.maxBytes);
+  else if (currentLoad && role == "wmoTexture")
+    m_terrainRequest.wmoTextureBytesReserved = std::max<qint64>(0, m_terrainRequest.wmoTextureBytesReserved - result.maxBytes);
   const bool wasRead = result.outcome == MapAssetWorker::Result::Outcome::Read;
   const wow::WdtInspection & inspection = result.inspection;
   if (wasRead)
@@ -4175,13 +4346,22 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
   const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
   if (report.status == "built")
   {
-    LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "tile" << tile << ":" << report.chunksBuilt
-             << "of" << report.chunks << "chunks," << report.triangles << "triangles," << report.holeCells << "hole cells in"
-             << report.totalMs << "ms;"
-             << (report.hasMaterial ? "material " + report.materialState +
-                                        (report.materialReason.isEmpty() ? QString() : " (" + report.materialReason + ")")
-                                    : QString("geometry only (the player reports no material)"))
-             << "-- no liquids, doodads or buildings";
+    if (report.hasWorld && report.worldKind == "globalWmo")
+      LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "(its world model, no tile) in" << report.totalMs
+               << "ms; world" << report.worldState << ":" << report.worldPlaced << "of" << report.worldPlacements
+               << "placement(s) placed -- no doodads, liquids or lighting";
+    else
+      LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "tile" << tile << ":" << report.chunksBuilt
+               << "of" << report.chunks << "chunks," << report.triangles << "triangles," << report.holeCells << "hole cells in"
+               << report.totalMs << "ms;"
+               << (report.hasMaterial ? "material " + report.materialState +
+                                          (report.materialReason.isEmpty() ? QString() : " (" + report.materialReason + ")")
+                                      : QString("geometry only (the player reports no material)"))
+               << (report.hasWorld ? QString("-- world models %1: %2 of %3 placement(s) placed, %4 failed, %5 unsupported, %6 not "
+                                             "requested; no liquids or doodads")
+                                       .arg(report.worldState).arg(report.worldPlaced).arg(report.worldPlacements)
+                                       .arg(report.worldFailed).arg(report.worldUnsupported).arg(report.worldNotRequested)
+                                   : QString("-- no liquids, doodads or buildings"));
     m_playerContent = PlayerContent::Terrain;
     UpdateUnityViewportState();
   }
@@ -4197,6 +4377,19 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
       UpdateUnityViewportState();
     }
   }
+}
+
+void ModelViewer::OnWorldShown(const UnityIpcServer::WorldShown & shown)
+{
+  // The current world load's scene is on screen (the tile, or a WMO-only map's world model): the player shows terrain from
+  // now on, whatever comes of the world models still loading. An earlier load's is not what the player shows.
+  if (shown.load != 0 && shown.load == m_terrainRequest.load && !m_terrainRequest.ended && m_playerContent != PlayerContent::Terrain)
+  {
+    m_playerContent = PlayerContent::Terrain;
+    UpdateUnityViewportState();
+  }
+  if (m_maps)
+    m_maps->OnWorldShown(shown);
 }
 
 void ModelViewer::TerrainTestRaiseLoadWithoutSending()

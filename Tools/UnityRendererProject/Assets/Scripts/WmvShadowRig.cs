@@ -158,11 +158,21 @@ public class WmvShadowRig : MonoBehaviour
         // A terrain tile is never drawn into either map (its own diagnostic shader reads neither), and the window is
         // never fitted to it: both rig cameras see what the view sees less the terrain layer, and a view that sees
         // nothing else -- the terrain view (WmvMainTerrain) -- costs no rig render at all, whatever was framed before.
+        // There the key and fill directions are published all the same, as this camera's (AnchoredDir, below): the world
+        // models placed in that view (WmvWorldModels, Wmv/Wmo) are lit as the Buildings view lights a world model -- without
+        // its shadow and contact maps -- never by a direction the last model-view frame left behind, nor by the shader's
+        // camera-relative fallback (which floods every wall facing the camera).
         int mask = WmvTerrainBuilder.WithoutTerrain(view.cullingMask);
         if (!hasBounds || mask == 0)
         {
             Shader.SetGlobalFloat("_WmvShadowValid", 0f);
             Shader.SetGlobalFloat("_WmvContactValid", 0f);
+            if (mask == 0)
+            {
+                Vector3 key = AnchoredDir(view, KeyDirView, WorldAnchor), fill = AnchoredDir(view, FillDirView, WorldAnchor);
+                Shader.SetGlobalVector("_WmvKeyDirWorld", new Vector4(key.x, key.y, key.z, 0f));
+                Shader.SetGlobalVector("_WmvFillDirWorld", new Vector4(fill.x, fill.y, fill.z, 0f));
+            }
             return;
         }
         EnsureResources();

@@ -27,6 +27,15 @@
 // Measured fit: MODF 201/202 within 0.1 yd (the misfit, uniqueId 2848560 / WMO 112871, is a root
 // box that disagrees with its own group box); MLDX 25,621/25,648 within 0.5 yd. Not every record
 // fits; nothing here hides that.
+//
+// THE WDT'S GLOBAL MODF (stage 06, docs/world-viewer/06-world-models-in-world.md section 2.3) is the same
+// record in a frame WITHOUT the map-centre offset: W = (-p[2], -p[0], p[1]), the same rotation and scale.
+// Evidence, all four clients: the client's own AreaTrigger positions on map 34 and map 429 lie inside the
+// global WMO's group boxes under exactly that rule (8 of 8 on Dire Maul, with the yaw: Era's file stores
+// the model turned 180 degrees and its record carries a1 = 180; the other clients store a1 = 0), and the
+// record's extents equal the placed root box under it; with the map-centre offset every such position
+// would lie some 17,000 yards away. Every modern-form record is at position (0, 0, 0): a non-zero
+// position in this frame is INFERRED, not observed.
 
 using System;
 
@@ -214,11 +223,91 @@ namespace Wmv.Wow.World
         }
     }
 
+    /// <summary>The frame a MODF record's position and extents are stored in.</summary>
+    public enum PlacementFrame
+    {
+        /// <summary>An ADT's obj0 MODF: relative to the map's north-west corner (the map-centre offset 32T applies).</summary>
+        Tile,
+        /// <summary>A WMO-only WDT's MODF: relative to the world origin (no offset; see the file header).</summary>
+        Global,
+    }
+
     /// <summary>The proven placement transform (audit 6.3, 6.4), double precision, game frame.</summary>
     public static class PlacementTransform
     {
         /// <summary>32 tiles: the map centre (corner of tile 32,32) in world units.</summary>
         public const double MapHalf = 32.0 * TerrainCoordinates.TileSize;
+
+        /// <summary>The offset a frame's positions and extents are stored against: MapHalf for a tile's records, 0 for
+        /// the WDT's global record.</summary>
+        public static double Offset(PlacementFrame frame) { return frame == PlacementFrame.Tile ? MapHalf : 0.0; }
+
+        /// <summary>File-frame position p -> world, in the frame the record was stored in.</summary>
+        public static WorldPoint ToWorld(WorldFloat3 p, PlacementFrame frame)
+        {
+            double h = Offset(frame);
+            return new WorldPoint(h - p.C, h - p.A, p.B);
+        }
+
+        /// <summary>world = W + scale * R * model, in the frame the record was stored in.</summary>
+        public static WorldPoint Transform(WorldFloat3 position, WorldFloat3 rotation, double scale, WorldPoint model, PlacementFrame frame)
+        {
+            return Apply(Rotation(rotation), ToWorld(position, frame), scale, model);
+        }
+
+        /// <summary>The world box a model box makes once placed, in the frame the record was stored in.</summary>
+        public static void PlacedBox(WorldFloat3 position, WorldFloat3 rotation, double scale, WorldPoint modelMin, WorldPoint modelMax,
+                                     PlacementFrame frame, out WorldPoint min, out WorldPoint max)
+        {
+            double[] m = Rotation(rotation);
+            WorldPoint w = ToWorld(position, frame);
+            min = new WorldPoint(double.MaxValue, double.MaxValue, double.MaxValue);
+            max = new WorldPoint(double.MinValue, double.MinValue, double.MinValue);
+            for (int k = 0; k < 8; k++)
+            {
+                var corner = new WorldPoint((k & 1) == 0 ? modelMin.X : modelMax.X, (k & 2) == 0 ? modelMin.Y : modelMax.Y,
+                                            (k & 4) == 0 ? modelMin.Z : modelMax.Z);
+                WorldPoint q = Apply(m, w, scale, corner);
+                min = new WorldPoint(Math.Min(min.X, q.X), Math.Min(min.Y, q.Y), Math.Min(min.Z, q.Z));
+                max = new WorldPoint(Math.Max(max.X, q.X), Math.Max(max.Y, q.Y), Math.Max(max.Z, q.Z));
+            }
+        }
+
+        /// <summary>MODF extents (file frame) as the world box they are, in the frame the record was stored in.</summary>
+        public static void ExtentsToWorld(WorldFloat3 extentsMin, WorldFloat3 extentsMax, PlacementFrame frame, out WorldPoint min, out WorldPoint max)
+        {
+            double h = Offset(frame);
+            min = new WorldPoint(h - extentsMax.C, h - extentsMax.A, extentsMin.B);
+            max = new WorldPoint(h - extentsMin.C, h - extentsMin.A, extentsMax.B);
+        }
+
+        /// <summary>
+        /// A world rotation R (row-major, game frame) as the rotation of a mesh already in Unity's axes: U = M * R * M^T with
+        /// M the model-space map unity = (-y, z, x) (WowCoordinateConverter, WorldToUnity). M is orthogonal with det -1, so
+        /// U is a proper rotation (det +1) and a converted mesh turned by U keeps its winding. Row-major 3x3.
+        /// </summary>
+        public static double[] UnityRotation(double[] r)
+        {
+            // M rows: (0,-1,0), (0,0,1), (1,0,0). (M R M^T)[i][j] = sum_k,l M[i][k] R[k][l] M[j][l].
+            var m = new[] { 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0 };
+            var u = new double[9];
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                {
+                    double s = 0.0;
+                    for (int k = 0; k < 3; k++)
+                        for (int l = 0; l < 3; l++)
+                            s += m[3 * i + k] * r[3 * k + l] * m[3 * j + l];
+                    u[3 * i + j] = s;
+                }
+            return u;
+        }
+
+        /// <summary>The determinant of a row-major 3x3.</summary>
+        public static double Determinant(double[] a)
+        {
+            return a[0] * (a[4] * a[8] - a[5] * a[7]) - a[1] * (a[3] * a[8] - a[5] * a[6]) + a[2] * (a[3] * a[7] - a[4] * a[6]);
+        }
 
         /// <summary>File-frame position p -> world (32T - p[2], 32T - p[0], p[1]).</summary>
         public static WorldPoint ToWorld(WorldFloat3 p)

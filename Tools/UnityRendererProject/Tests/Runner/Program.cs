@@ -55,6 +55,15 @@ static class Program
         else
             failures += TerrainMaterialCorpusTests.Run(corpus, Console.WriteLine);
 
+        // Stage 06: the world-model placement layer, synthetic, then on the real client bytes of the world06 corpus.
+        Console.WriteLine("== WorldModelTests (placement frames, Unity rotation, plan, floor and start point; synthetic)");
+        failures += WorldModelTests.RunAll(Console.WriteLine);
+        Console.WriteLine("== WorldModelCorpusTests (world-model placement on real client bytes)");
+        if (string.IsNullOrEmpty(corpus))
+            Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
+        else
+            failures += WorldModelCorpusTests.Run(corpus, Console.WriteLine);
+
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))
         {

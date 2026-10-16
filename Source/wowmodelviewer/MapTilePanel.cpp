@@ -283,6 +283,227 @@ void MapTileGrid::updateMosaic()
   m_mosaicSerial = m_maps->imagesSerial();
 }
 
+// ---------------------------------------------------------------- a WMO-only map's footprint
+
+bool MapTileGrid::footprintFit(double & scale, double & left, double & top) const
+{
+  if (!m_maps->hasFootprint())
+    return false;
+  const double * b = m_maps->footprintRootBox();
+  // North up (x grows up the window), east to the right (y, west, grows to the left); a margin round the box, room for
+  // the legend under it.
+  const wxSize size = GetClientSize();
+  const int margin = FromDIP(16);
+  const int legendH = 2 * (GetTextExtent(wxT("Ag")).y + FromDIP(4)) + FromDIP(6);
+  const double spanX = std::max(1e-3, b[3] - b[0]), spanY = std::max(1e-3, b[4] - b[1]);
+  const double availW = std::max(1, size.x - 2 * margin), availH = std::max(1, size.y - 2 * margin - legendH);
+  scale = std::min(availW / spanY, availH / spanX);
+  left = margin + (availW - spanY * scale) / 2.0;
+  top = margin + (availH - spanX * scale) / 2.0;
+  return scale > 0.0 && std::isfinite(scale);
+}
+
+bool MapTileGrid::FootprintPointAt(const wxPoint & p, double & x, double & y) const
+{
+  double scale, left, top;
+  if (!footprintFit(scale, left, top))
+    return false;
+  const double * b = m_maps->footprintRootBox();
+  y = b[4] - (p.x + 0.5 - left) / scale;
+  x = b[3] - (p.y + 0.5 - top) / scale;
+  return x >= b[0] && x <= b[3] && y >= b[1] && y <= b[4];
+}
+
+wxPoint MapTileGrid::FootprintPoint(double x, double y) const
+{
+  double scale, left, top;
+  if (!footprintFit(scale, left, top))
+    return wxPoint(-1, -1);
+  const double * b = m_maps->footprintRootBox();
+  return wxPoint((int)std::floor(left + (b[4] - y) * scale), (int)std::floor(top + (b[3] - x) * scale));
+}
+
+void MapTileGrid::paintFootprint(wxDC & dc)
+{
+  const UiStyle::Palette & p = UiStyle::palette();
+  const wxSize size = GetClientSize();
+  double scale, left, top;
+  if (!footprintFit(scale, left, top))
+  {
+    // Not known yet, or not to be had: why, in the middle.
+    QString title, detail;
+    m_maps->viewportNotice(title, detail);
+    if (title.isEmpty())
+      title = "The world model";
+    if (detail.isEmpty())
+      detail = m_maps->footprintDetail();
+    dc.SetFont(UiStyle::font(UiStyle::Type::Section));
+    dc.SetTextForeground(p.text);
+    const wxSize te = dc.GetTextExtent(qs(title));
+    dc.DrawText(qs(title), (size.x - te.x) / 2, size.y / 2 - te.y - FromDIP(4));
+    dc.SetFont(GetFont());
+    dc.SetTextForeground(p.textSecondary);
+    const wxSize de = dc.GetTextExtent(qs(detail));
+    dc.DrawText(qs(detail), std::max(FromDIP(4), (size.x - de.x) / 2), size.y / 2 + FromDIP(4));
+    return;
+  }
+  const double * b = m_maps->footprintRootBox();
+  const auto px = [&](double x, double y) {
+    return wxPoint((int)std::floor(left + (b[4] - y) * scale), (int)std::floor(top + (b[3] - x) * scale));
+  };
+  // The world model's placed box.
+  const wxPoint nw = px(b[3], b[4]), se = px(b[0], b[1]);
+  dc.SetPen(wxPen(mix(p.panelBackground, p.text, 0.45), 1, wxPENSTYLE_SHORT_DASH));
+  dc.SetBrush(wxBrush(mix(p.panelBackground, p.controlBackground, 0.6)));
+  dc.DrawRectangle(nw.x, nw.y, std::max(1, se.x - nw.x), std::max(1, se.y - nw.y));
+  // The groups from above, the lower first (a higher group's box is drawn over the ones under it).
+  const std::vector<float> & boxes = m_maps->footprintGroupBoxes();
+  const std::vector<quint32> & flags = m_maps->footprintGroupFlags();
+  const int groups = (int)flags.size();
+  std::vector<int> order;
+  for (int g = 0; g < groups && (size_t)(6 * g + 5) < boxes.size(); g++)
+    order.push_back(g);
+  std::sort(order.begin(), order.end(), [&boxes](int a, int c) { return boxes[6 * a + 5] < boxes[6 * c + 5]; });
+  const wxColour interiorFill = mix(p.controlBackground, p.accent, 0.35), interiorLine = p.accent;
+  const wxColour exteriorFill = mix(p.controlBackground, p.textSecondary, 0.25), exteriorLine = mix(p.panelBackground, p.text, 0.55);
+  for (int g : order)
+  {
+    const float * v = &boxes[6 * g];
+    const bool interior = (flags[g] & 0x2000) != 0;
+    const wxPoint a = px(v[3], v[4]), c = px(v[0], v[1]);
+    dc.SetPen(wxPen(interior ? interiorLine : exteriorLine));
+    dc.SetBrush(wxBrush(interior ? interiorFill : exteriorFill));
+    dc.DrawRectangle(a.x, a.y, std::max(1, c.x - a.x), std::max(1, c.y - a.y));
+  }
+  // North, and a scale bar of a round length about a fifth of the box.
+  dc.SetTextForeground(p.textSecondary);
+  dc.SetPen(wxPen(p.textSecondary, std::max(1, FromDIP(2))));
+  const int nx = FromDIP(14), ny = FromDIP(8);
+  dc.DrawLine(nx, ny + FromDIP(18), nx, ny);
+  dc.DrawLine(nx, ny, nx - FromDIP(4), ny + FromDIP(6));
+  dc.DrawLine(nx, ny, nx + FromDIP(4), ny + FromDIP(6));
+  dc.DrawText(wxT("N"), nx + FromDIP(6), ny);
+  const double want = std::max(1.0, (b[4] - b[1]) / 5.0);
+  double bar = 1.0;
+  for (double step : { 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1000.0 })
+    if (step <= want)
+      bar = step;
+  const int barPx = (int)std::lround(bar * scale);
+  const int bx = size.x - barPx - FromDIP(16), by = FromDIP(12);
+  dc.DrawLine(bx, by, bx + barPx, by);
+  dc.DrawLine(bx, by - FromDIP(3), bx, by + FromDIP(3));
+  dc.DrawLine(bx + barPx, by - FromDIP(3), bx + barPx, by + FromDIP(3));
+  const wxString barText = wxString::Format(wxT("%g yd"), bar);
+  dc.DrawText(barText, bx + (barPx - dc.GetTextExtent(barText).x) / 2, by + FromDIP(4));
+  // The target (a marker) and the camera after a flight (a diamond).
+  if (m_maps->hasTarget())
+  {
+    const wxPoint pt = px(m_maps->targetX(), m_maps->targetY());
+    const int r = std::max(4, FromDIP(6));
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.SetPen(wxPen(p.panelBackground, std::max(3, FromDIP(3))));
+    dc.DrawCircle(pt, r);
+    dc.SetPen(wxPen(p.accent, std::max(2, FromDIP(2))));
+    dc.DrawCircle(pt, r);
+    dc.DrawLine(pt.x - r - FromDIP(4), pt.y, pt.x - r + FromDIP(2), pt.y);
+    dc.DrawLine(pt.x + r - FromDIP(2), pt.y, pt.x + r + FromDIP(4), pt.y);
+    dc.DrawLine(pt.x, pt.y - r - FromDIP(4), pt.x, pt.y - r + FromDIP(2));
+    dc.DrawLine(pt.x, pt.y + r - FromDIP(2), pt.x, pt.y + r + FromDIP(4));
+  }
+  if (m_maps->cameraPlaced() && m_maps->worldModelShown())
+  {
+    const wxPoint pt = px(m_maps->cameraX(), m_maps->cameraY());
+    const int r = std::max(3, FromDIP(5));
+    const wxPoint diamond[4] = { wxPoint(pt.x, pt.y - r), wxPoint(pt.x + r, pt.y), wxPoint(pt.x, pt.y + r), wxPoint(pt.x - r, pt.y) };
+    dc.SetPen(wxPen(p.panelBackground));
+    dc.SetBrush(wxBrush(p.warning));
+    dc.DrawPolygon(4, diamond);
+  }
+  // The legend.
+  int lx = FromDIP(2), ly = se.y + FromDIP(10);
+  const int sw = GetTextExtent(wxT("Ag")).y;
+  const struct
+  {
+    wxColour fill, line;
+    wxString text;
+  } keys[] = {
+    { interiorFill, interiorLine, wxString::Format(_("Interior group (%d)"), m_maps->footprintInteriorGroups()) },
+    { exteriorFill, exteriorLine, wxString::Format(_("Exterior group (%d)"), groups - m_maps->footprintInteriorGroups()) },
+  };
+  for (const auto & k : keys)
+  {
+    const wxSize e = dc.GetTextExtent(k.text);
+    dc.SetPen(wxPen(k.line));
+    dc.SetBrush(wxBrush(k.fill));
+    dc.DrawRectangle(lx, ly, sw, sw);
+    dc.DrawText(k.text, lx + sw + FromDIP(4), ly);
+    lx += sw + FromDIP(4) + e.x + FromDIP(10);
+  }
+  const wxString extent = wxString::Format(_("X %.1f to %.1f, Y %.1f to %.1f, Z %.1f to %.1f"), b[0], b[3], b[1], b[4], b[2], b[5]);
+  dc.DrawText(extent, FromDIP(2), ly + sw + FromDIP(4));
+}
+
+void MapTileGrid::footprintMouse(wxMouseEvent & event)
+{
+  // A click sets the target at the point clicked inside the world model's box; a double-click also enters the world.
+  double x = 0.0, y = 0.0;
+  const bool on = event.GetEventType() != wxEVT_LEAVE_WINDOW && FootprintPointAt(event.GetPosition(), x, y);
+  if (on != m_hoverWorld || (on && (x != m_hoverWX || y != m_hoverWY)))
+  {
+    m_hoverWorld = on;
+    m_hoverWX = x;
+    m_hoverWY = y;
+    if (onHover)
+      onHover();
+  }
+  if (event.GetEventType() == wxEVT_LEFT_DOWN)
+  {
+    SetFocus();
+    event.Skip();
+    return;
+  }
+  if (event.GetEventType() == wxEVT_LEFT_DCLICK)
+  {
+    if (on && m_maps->SetTarget(x, y, false, 0.0))
+      m_maps->EnterWorld();
+    return;
+  }
+  if (event.GetEventType() == wxEVT_LEFT_UP && on)
+    m_maps->SetTarget(x, y, false, 0.0);
+  event.Skip();
+}
+
+void MapTileGrid::footprintKey(wxKeyEvent & event)
+{
+  // The arrows move the target a fortieth of the world model's box (from its middle when there is none); Enter enters.
+  const double * b = m_maps->footprintRootBox();
+  double x = m_maps->hasTarget() ? m_maps->targetX() : (b[0] + b[3]) / 2.0;
+  double y = m_maps->hasTarget() ? m_maps->targetY() : (b[1] + b[4]) / 2.0;
+  const double step = std::max(0.5, std::max(b[3] - b[0], b[4] - b[1]) / 40.0);
+  switch (event.GetKeyCode())
+  {
+    case WXK_LEFT:  y += step; break;   // west
+    case WXK_RIGHT: y -= step; break;   // east
+    case WXK_UP:    x += step; break;   // north
+    case WXK_DOWN:  x -= step; break;   // south
+    case WXK_RETURN:
+    case WXK_NUMPAD_ENTER:
+    case WXK_SPACE:
+      if (!event.IsAutoRepeat())
+        m_maps->EnterWorld();
+      return;
+    default:
+      event.Skip();
+      return;
+  }
+  if (!m_maps->hasTarget())
+  {
+    x = (b[0] + b[3]) / 2.0;
+    y = (b[1] + b[4]) / 2.0;
+  }
+  m_maps->SetTarget(std::min(std::max(x, b[0]), b[3]), std::min(std::max(y, b[1]), b[4]), false, 0.0);
+}
+
 void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
 {
   wxAutoBufferedPaintDC dc(this);
@@ -291,6 +512,13 @@ void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
   dc.Clear();
   dc.SetFont(GetFont());
   const wxSize size = GetClientSize();
+
+  // A WMO-only map: its world model's footprint, not the tile grid.
+  if (m_maps->worldModelMap())
+  {
+    paintFootprint(dc);
+    return;
+  }
 
   // No grid: why, in the middle (the viewport's notice words).
   if (!m_maps->hasGrid())
@@ -510,7 +738,7 @@ void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
 
 void MapTileGrid::OnWheel(wxMouseEvent & event)
 {
-  if (!m_maps->hasGrid() || event.GetWheelRotation() == 0)
+  if (!m_maps->hasGrid() || m_maps->worldModelMap() || event.GetWheelRotation() == 0)
     return;
   int tx = -1, ty = -1;
   layoutCells();
@@ -542,6 +770,12 @@ void MapTileGrid::hoverTo(int x, int y)
 
 void MapTileGrid::OnMouse(wxMouseEvent & event)
 {
+  if (m_maps->worldModelMap())
+  {
+    footprintMouse(event);
+    return;
+  }
+  m_hoverWorld = false;
   // A drag moves a zoomed grid; a press and release without one is a click (the target); a double-click enters the world.
   if (event.GetEventType() == wxEVT_LEFT_DOWN)
   {
@@ -595,7 +829,12 @@ void MapTileGrid::OnMouse(wxMouseEvent & event)
 
 void MapTileGrid::OnKey(wxKeyEvent & event)
 {
-  if (!m_maps->hasGrid())
+  if (m_maps->hasFootprint())
+  {
+    footprintKey(event);
+    return;
+  }
+  if (!m_maps->hasGrid() || m_maps->worldModelMap())
   {
     event.Skip();
     return;
@@ -652,8 +891,9 @@ MapTilePanel::MapTilePanel(wxWindow * parent, MapsViewer * maps)
     t->SetToolTip(tip);
     return t;
   };
-  m_tx = field(wxT("mapTargetX"), _("World X (yards, north positive), as the game's coordinates give it"));
-  m_ty = field(wxT("mapTargetY"), _("World Y (yards, west positive)"));
+  m_tx = field(wxT("mapTargetX"), _("World X (yards, north positive), as the game's coordinates give it; X and Y "
+                                     "both empty: no target"));
+  m_ty = field(wxT("mapTargetY"), _("World Y (yards, west positive); X and Y both empty: no target"));
   m_tz = field(wxT("mapTargetZ"), _("Height (yards); empty: on the ground"));
   m_tz->SetHint(_("ground"));
   m_target = UiStyle::secondaryLabel(this, wxEmptyString);
@@ -753,6 +993,13 @@ bool MapTilePanel::ApplyTargetFields()
 {
   double x = 0.0, y = 0.0, z = 0.0;
   const bool hasZ = !m_tz->GetValue().Trim(true).Trim(false).IsEmpty();
+  // All three emptied: no target (a WMO-only map is entered at its start point again).
+  if (!hasZ && m_tx->GetValue().Trim(true).Trim(false).IsEmpty() && m_ty->GetValue().Trim(true).Trim(false).IsEmpty())
+  {
+    m_fieldsEdited = false;
+    m_maps->ClearTarget();
+    return true;
+  }
   if (!parseNumber(m_tx->GetValue(), x) || !parseNumber(m_ty->GetValue(), y) || (hasZ && !parseNumber(m_tz->GetValue(), z)))
   {
     setLabel(m_target, _("X and Y must be numbers (yards), and Z a number or empty for the ground."));
@@ -802,12 +1049,23 @@ void MapTilePanel::Refresh2()
     if (m_tz->GetValue() != z) m_tz->ChangeValue(z);
   }
   setLabel(m_target, m_maps->hasTarget() ? qs(m_maps->targetLine())
-                                         : m_maps->hasGrid() ? _("Click the overhead map, or type X and Y, to set where to enter the world.")
-                                                             : wxString());
+                     : m_maps->worldModelMap() ? _("Click the world model's footprint, or type X and Y, to set where to enter it; "
+                                                   "Enter world without a target (X and Y empty) starts at its start point.")
+                     : m_maps->hasGrid() ? _("Click the overhead map, or type X and Y, to set where to enter the world.")
+                                         : wxString());
+  const wxString zHint = m_maps->worldModelMap() ? _("floor") : _("ground");
+  if (m_tz->GetHint() != zHint)
+    m_tz->SetHint(zHint);
   QString why;
   const bool canEnter = m_maps->canEnter(why);
   m_enter->Enable(canEnter || m_fieldsEdited);
-  m_enter->SetToolTip(canEnter ? _("Load the world at the target and put the free camera there") : qs(why));
+  const wxString enterTip = !canEnter ? qs(why)
+                            : m_maps->worldModelMap() && !m_maps->hasTarget()
+                              ? _("Load the world model and put the free camera at its start point")
+                            : m_maps->worldModelMap() ? _("Load the world model and put the free camera at the target")
+                                                      : _("Load the world at the target and put the free camera there");
+  if (m_enter->GetToolTipText() != enterTip)
+    m_enter->SetToolTip(enterTip);
   m_back->Enable(m_maps->worldShown());
   QString tile;
   switch (m_maps->tilePhase())
@@ -816,7 +1074,8 @@ void MapTilePanel::Refresh2()
       tile = m_maps->hasTarget() && !canEnter ? why : QString();
       break;
     case MapsViewer::TilePhase::Loading:
-      tile = m_maps->tileDetail();
+      // A world load (protocol 16): its world models' progress under it.
+      tile = m_maps->tileDetail() + (m_maps->worldDetail().isEmpty() ? QString() : "\n" + m_maps->worldDetail());
       break;
     default:
       tile = m_maps->tileDetail();
@@ -827,10 +1086,31 @@ void MapTilePanel::Refresh2()
   if (m_camera->GetSelection() != cameraIndex)
     m_camera->SetSelection(cameraIndex);
   m_camera->Enable(m_maps->worldShown());
+  const wxString overview = m_maps->worldModelMap() ? _("World model overview") : _("Tile overview");
+  if (m_camera->GetString(1) != overview)
+    m_camera->SetString(1, overview);
+  const wxString cameraTip = m_maps->worldModelMap()
+                               ? _("The free camera flies from the target, or the world model's start point; the overview "
+                                   "shows the whole world model from outside")
+                               : _("The free camera flies from the target; the overview shows the whole tile from above");
+  if (m_camera->GetToolTipText() != cameraTip)
+    m_camera->SetToolTip(cameraTip);
+  // The display modes draw the terrain: a WMO-only map has none.
+  m_view->Enable(!m_maps->worldModelMap());
   setLabel(m_cameraNote, qs(m_maps->cameraDetail()));
   setLabel(m_viewNote, qs(m_maps->viewDetail()));
   if (m_view->GetSelection() != m_maps->displayMode())
     m_view->SetSelection(m_maps->displayMode());
-  m_clear->Enable(m_maps->shownTileX() >= 0 || m_maps->tilePhase() == MapsViewer::TilePhase::Loading);
+  m_clear->Enable(m_maps->shownTileX() >= 0 || m_maps->worldModelShown() || m_maps->tilePhase() == MapsViewer::TilePhase::Loading);
   Layout();
+  // A text that grew or shrank by lines (a world load's result is several) changes the height the panel needs: the Browse
+  // pane lays it out again, the map list taking the rest -- only then, not on every refresh.
+  const int height = GetSizer()->GetMinSize().y;
+  if (height != m_laidOutHeight)
+  {
+    m_laidOutHeight = height;
+    InvalidateBestSize();
+    if (GetParent())
+      GetParent()->Layout();
+  }
 }

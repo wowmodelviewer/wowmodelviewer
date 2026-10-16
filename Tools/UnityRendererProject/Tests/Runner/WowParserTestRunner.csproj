@@ -29,6 +29,8 @@
     <Compile Include="..\TerrainMaterialCorpusTests.cs" />
     <Compile Include="..\WorldCorpusValidation.cs" />
     <Compile Include="..\MapContractCheck.cs" />
+    <Compile Include="..\WorldModelTests.cs" />
+    <Compile Include="..\WorldModelCorpusTests.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>
