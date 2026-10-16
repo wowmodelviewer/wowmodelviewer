@@ -286,6 +286,44 @@
  *   "materialBuildMs" } }. runtimeState adds "terrainTextures" (live terrain textures), "terrainTextureBytes" (their GPU
  *   size, estimated) and "terrainAlphaArrays".
  *
+ * WORLD MODELS IN THE WORLD (protocol 16, docs/world-viewer/06-world-models-in-world.md). A world load places WMOs:
+ *   WMV -> player  { "type":"loadWorld", <every field of loadTerrainTile>, "worldModels":true, "globalWmo":false,
+ *                    "maxWmoFileBytes":..., "maxWmoBytesPerLoad":..., "maxWmoTextureBytes":..., "maxWmoTextureBytesPerLoad":...,
+ *                    "maxWmoTexturesPerLoad":..., "maxWmoModelsPerLoad":..., "maxWmoGroupsPerLoad":...,
+ *                    "maxWmoPlacementsPerLoad":... }
+ *   player -> WMV  { "type":"worldShown", "load":3, "mapId":0, "kind":"tile"|"globalWmo", "tileX":30, "tileY":47,
+ *                    "placements":27, "models":17, "shownMs":..., "originWorld":[X,Y,Z] }
+ *                  { "type":"worldProgress", "load":3, "phase":"...", "placements":..., "models":..., "modelsRequested":...,
+ *                    "modelsParsed":..., "modelsBuilt":..., "modelsFailed":..., "modelsUnsupported":...,
+ *                    "modelsNotRequested":..., "placed":..., "placementsFailed":..., "filesAsked":..., "filesAnswered":...,
+ *                    "bytesReceived":..., "elapsedMs":... }
+ *                  terrainTileLoaded adds "world":{ "kind", "state":"complete"|"partial"|"none"|"failed"|"ended", "reason",
+ *                    "records", "placements", "placed", "failed", "unsupported", "notRequested", "ended", "models",
+ *                    "modelsBuilt", "modelsFailed", "modelsNotRequested", "groupFiles", "groupFilesMissing", "textures",
+ *                    "texturesDecoded", "texturesMissing", "fileBytes", "textureBytes", "gpuGeometryBytes",
+ *                    "gpuTextureBytes", "originWorld", "start", "startPoint", "startReason", "timings":{...},
+ *                    "list":[{ uniqueId, fileDataID, records, state, reason, scale, groups, groupsDrawn, position,
+ *                    rotation, extents, rendered }] }
+ * A tile load ("globalWmo" false) is a loadTerrainTile that also places the world models its obj0 ADT's MODF names; a
+ * WMO-only map's load ("globalWmo" true) has no tile: the WDT's one global world model, placed in the global frame. The
+ * player asks getMapAsset "obj0Adt" (once, after the WDT; a tile load only), "wmoRoot" (after the obj0, or after the WDT
+ * for a WMO-only map -- then only the WDT's world model, which the host names), "wmoGroup" and "wmoTexture" (after a root
+ * was served; each id once), within the budgets the load states and the host enforces (MAX_WMO_* below; the bytes of
+ * reads in flight reserved, as terrain textures'). worldShown is sent once, when the scene first has something on
+ * screen (the tile's commit, or the world model's instance) and the camera the load carried is placed: the host gives
+ * the world the viewport then -- the world models may still be loading. The load still gets exactly one
+ * terrainTileLoaded, when every placement is settled. A WorldCamera may ask for "start" (cameraStart): the world model's
+ * own start point (a WMO-only map entered without a target). inspectWorldModel { inspection, mapId, wmoFileDataID,
+ * assetEpoch, md5, wmoPosition, wmoRotation, wmoExtentsMin, wmoExtentsMax, wmoFlags, wmoScale, wmoUniqueId, binary
+ * payload: the root } -- a WMO-only map's world model and the WDT record that places it -- is answered by
+ * worldModelInspected { inspection, status, reason, mapId, wmoFileDataID, assetEpoch, wmoBytes, md5, groups,
+ * interiorGroups, parseMs, rootBox[6], extents[6], groupBoxes (base64 floats, 6 per group), groupFlags (base64 u32) }:
+ * the Maps viewer's footprint. mapTilesInspected adds the WDT's global record ("globalRecord", "globalPosition",
+ * "globalRotation", "globalExtentsMin", "globalExtentsMax", "globalFlags", "globalScale", "globalUniqueId"). runtimeState
+ * adds worldInstances, worldModels, worldMeshes, worldMaterials, worldTextures, worldGpuGeometryBytes,
+ * worldGpuTextureBytes, worldGroups, worldGroupsVisible, worldGroupsCulled, worldInstancesCulled, worldLoad, worldKind.
+ * An older player is sent loadTerrainTile (no world models: the Stage 05 behaviour) and no inspectWorldModel.
+ *
  * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
  * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
  * a read). A request is decided and accounted only when it is served, so one whose load ended while it waited is
@@ -393,7 +431,7 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 15;
+  static const int PROTOCOL_VERSION = 16;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -406,6 +444,21 @@ public:
   static const int MAX_TERRAIN_TEXTURE_BYTES = 8 * 1024 * 1024;
   static const int MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD = 128 * 1024 * 1024;
   static const int MAX_TERRAIN_TEXTURES_PER_LOAD = 128;
+  // WORLD MODELS IN THE WORLD (protocol 16): the budgets a world load states and the host enforces, from the census in
+  // docs/world-viewer/06-world-models-in-world.md section 6 (the four clients' tile 30_47 and the WMO-only maps 34 and
+  // 429): one root or group file at most 4 MiB (the largest group read is 2,432,598 bytes, Classic Beta 7962574's; the
+  // largest root 438,824), a load's root and group bytes at most 128 MiB (the most is about 53 MB, Classic Beta 30_47);
+  // one texture at most 8 MiB (the largest is 2,098,324), a load's texture bytes at most 128 MiB (the most is about 48 MB,
+  // Retail 30_47, counted per world model) and 1,024 texture ids (the most is 727); 64 unique world models (the most is
+  // 17), 1,024 group files (the most is 306, Classic Era's Stormwind) and 256 placements (the most is 27).
+  static const int MAX_WMO_FILE_BYTES = 4 * 1024 * 1024;
+  static const int MAX_WMO_BYTES_PER_LOAD = 128 * 1024 * 1024;
+  static const int MAX_WMO_TEXTURE_BYTES = 8 * 1024 * 1024;
+  static const int MAX_WMO_TEXTURE_BYTES_PER_LOAD = 128 * 1024 * 1024;
+  static const int MAX_WMO_TEXTURES_PER_LOAD = 1024;
+  static const int MAX_WMO_MODELS_PER_LOAD = 64;
+  static const int MAX_WMO_GROUPS_PER_LOAD = 1024;
+  static const int MAX_WMO_PLACEMENTS_PER_LOAD = 256;
   // THE MAP ASSET QUEUE: requests waiting at most; the bytes a poll reads before it stops serving; the size over which a
   // file read ends its poll's serving; the polls whose timing is kept.
   static const int MAP_ASSET_QUEUE_MAX = 16;
@@ -507,6 +560,9 @@ public:
   bool playerInspectsMapTiles() const { return m_client && m_unityReady && m_playerProtocol >= 14; }
   // Protocol 15: the Maps viewer's overhead map (the minimap ids in the tile table) and the world view's free camera.
   bool playerFliesWorld() const { return m_client && m_unityReady && m_playerProtocol >= 15; }
+  // Protocol 16: world models in the world (WORLD MODELS IN THE WORLD above): loadWorld, worldShown, worldProgress,
+  // inspectWorldModel, the world-model getMapAsset roles and the camera's start point.
+  bool playerPlacesWorldModels() const { return m_client && m_unityReady && m_playerProtocol >= 16; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -714,6 +770,22 @@ public:
     int terrainTextures = -1;              // terrain textures alive (the shown tile's), 0 with no tile
     long long terrainTextureBytes = -1;    // their GPU size, as the player estimates it
     int terrainAlphaArrays = -1;           // terrain alpha arrays alive
+    // Protocol 16 (WORLD MODELS IN THE WORLD above): the world models' own tallies (never the Buildings model's).
+    int worldInstances = -1;               // world-model instances alive (placed)
+    int worldModels = -1;                  // world-model prototypes alive (one per unique world model)
+    int worldMeshes = -1;                  // their Meshes, Materials and Textures (shared by the instances)
+    int worldMaterials = -1;
+    int worldTextures = -1;
+    long long worldGpuGeometryBytes = -1;  // the GPU size of their geometry and textures, as the player estimates it
+    long long worldGpuTextureBytes = -1;
+    int worldGroups = -1;                  // group renderers of the instances, and of them drawn and culled last frame
+    int worldGroupsVisible = -1;
+    int worldGroupsCulled = -1;
+    int worldInstancesCulled = -1;
+    int worldLoad = -1;                    // the world load the instances belong to, 0 for none
+    QString worldKind;                     // "tile" / "globalWmo" / "" (none)
+    int worldFrames = -1;                  // the world view's last frames kept (at most 600 since it was entered)
+    double worldFrameMsMedian = -1.0, worldFrameMsP95 = -1.0, worldFrameMsMax = -1.0;   // their frame times
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -769,6 +841,9 @@ public:
     bool hasZ = false;
     double yaw = 0.0, pitch = 0.0;
     double eyeHeight = 2.0;
+    // Protocol 16: "fly" at the world model's own start point (a WMO-only map entered without a target); x, y, z and the
+    // angles are then the player's.
+    bool start = false;
   };
 
   struct TerrainTileCommand
@@ -793,8 +868,23 @@ public:
     // Protocol 15: where the world view's camera goes when this load's tile is put on screen (sent only when camera.mode
     // is set and the player flies the world; otherwise the tile is framed as before).
     WorldCamera camera;
+    // Protocol 16 (WORLD MODELS IN THE WORLD above): a world load -- sent as loadWorld by sendLoadWorld, never by
+    // sendLoadTerrainTile. globalWmo: a WMO-only map's world model, no tile (tileX and tileY then -1).
+    bool world = false;
+    bool globalWmo = false;
+    int maxWmoFileBytes = MAX_WMO_FILE_BYTES;
+    int maxWmoBytesPerLoad = MAX_WMO_BYTES_PER_LOAD;
+    int maxWmoTextureBytes = MAX_WMO_TEXTURE_BYTES;
+    int maxWmoTextureBytesPerLoad = MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+    int maxWmoTexturesPerLoad = MAX_WMO_TEXTURES_PER_LOAD;
+    int maxWmoModelsPerLoad = MAX_WMO_MODELS_PER_LOAD;
+    int maxWmoGroupsPerLoad = MAX_WMO_GROUPS_PER_LOAD;
+    int maxWmoPlacementsPerLoad = MAX_WMO_PLACEMENTS_PER_LOAD;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
+  // Runtime command (protocol 16): a world load (WORLD MODELS IN THE WORLD above). False (nothing sent) without a
+  // protocol-16 player, a load serial or command.world; the caller raises its terrain load serial only when it returns true.
+  bool sendLoadWorld(const TerrainTileCommand & command);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
   bool sendClearTerrain(const QString & reason);
@@ -836,6 +926,19 @@ public:
     int globalWmoRecords = 0;
     quint32 globalWmoFileDataID = 0;
     QString globalWmoPath;
+    // Protocol 16: that first record as stored (file frame: position, angles in degrees, extents), for inspectWorldModel.
+    struct GlobalRecord
+    {
+      bool present = false;
+      double position[3] = { 0.0, 0.0, 0.0 };
+      double rotation[3] = { 0.0, 0.0, 0.0 };
+      double extentsMin[3] = { 0.0, 0.0, 0.0 };
+      double extentsMax[3] = { 0.0, 0.0, 0.0 };
+      int flags = 0;
+      int scale = 0;
+      quint32 uniqueId = 0;
+    };
+    GlobalRecord globalRecord;
   };
   std::function<void(const MapTilesInspection &)> onMapTilesInspected;
   // setTerrainView: the view terrain is drawn in from now on -- "auto" (textured when the tile's material has drawable
@@ -873,6 +976,61 @@ public:
     int load = 0;                  // the tile on screen
   };
   std::function<void(const WorldCameraApplied &)> onWorldCameraApplied;
+
+  // WORLD MODELS IN THE WORLD (protocol 16). inspectWorldModel: a WMO-only map's world model -- its root's bytes as the map
+  // asset worker read and checked them against their content key (md5), and the WDT record that places it -- for the
+  // player's parser; answered by worldModelInspected with the same inspection. Sent once per map the user picks; refused
+  // (false, nothing sent) as sendInspectMapTiles is, and over MAX_WMO_FILE_BYTES.
+  bool sendInspectWorldModel(int inspection, int mapId, int wmoFileDataID, int assetEpoch, const QString & md5,
+                             const QByteArray & bytes, const MapTilesInspection::GlobalRecord & record);
+  struct WorldModelInspection
+  {
+    int inspection = 0;
+    QString status;                // "inspected" / "failed"
+    QString reason;
+    int mapId = -1;
+    int wmoFileDataID = 0;
+    int assetEpoch = 0;
+    long long wmoBytes = -1;
+    QString md5;
+    int groups = -1;
+    int interiorGroups = -1;
+    double parseMs = -1.0;
+    // World frame (yards; x north, y west, z up): the placed MOHD box, the record's extents, and every group's placed box
+    // (min x, y, z, max x, y, z), with its MOGI flags. valid: the boxes decoded to their sizes (else problem says why).
+    double rootBox[6] = { 0, 0, 0, 0, 0, 0 };
+    double extents[6] = { 0, 0, 0, 0, 0, 0 };
+    std::vector<float> groupBoxes;
+    std::vector<quint32> groupFlags;
+    bool valid = false;
+    QString problem;
+  };
+  std::function<void(const WorldModelInspection &)> onWorldModelInspected;
+  // worldShown: a world load's scene first on screen, its camera placed (the world models may still be loading).
+  struct WorldShown
+  {
+    int load = 0;
+    int mapId = -1;
+    QString kind;                  // "tile" / "globalWmo"
+    int tileX = -1, tileY = -1;
+    int placements = -1, models = -1;
+    double shownMs = -1.0;
+    bool hasOriginWorld = false;
+    double originWorld[3] = { 0.0, 0.0, 0.0 };
+  };
+  std::function<void(const WorldShown &)> onWorldShown;
+  // worldProgress: a world load's world models, counted (at most every quarter second while it is in flight).
+  struct WorldProgress
+  {
+    int load = 0;
+    QString phase;
+    int placements = -1, models = -1, modelsRequested = -1, modelsParsed = -1, modelsBuilt = -1, modelsFailed = -1;
+    int modelsUnsupported = -1, modelsNotRequested = -1, placed = -1, placementsFailed = -1;
+    int filesAsked = -1, filesAnswered = -1;
+    long long bytesReceived = -1;
+    double elapsedMs = -1.0;
+  };
+  std::function<void(const WorldProgress &)> onWorldProgress;
 
   // THE VIEWER'S OWN READS (the Maps viewer's WDT reads, docs/world-viewer/05-maps-viewer-ui.md): a job the viewer gives
   // the map asset worker itself, decided and leased by the viewer. Its result comes back through this server's polls
@@ -1187,7 +1345,44 @@ public:
     QJsonObject message;           // the message as received
     // Protocol 14: the view the tile was drawn in (the player's view names), empty when not sent.
     QString view;
+    // Protocol 16 (WORLD MODELS IN THE WORLD above): the world's outcome, when the report carries "world".
+    bool hasWorld = false;
+    QString worldKind;             // "tile" / "globalWmo"
+    QString worldState;            // "complete" / "partial" / "none" / "failed" / "ended"
+    QString worldReason;
+    int worldRecords = -1, worldPlacements = -1, worldPlaced = -1, worldFailed = -1, worldUnsupported = -1;
+    int worldNotRequested = -1, worldEnded = -1;
+    int worldModels = -1, worldModelsBuilt = -1, worldModelsFailed = -1, worldModelsNotRequested = -1;
+    int worldGroupFiles = -1, worldGroupFilesMissing = -1, worldTextures = -1, worldTexturesDecoded = -1;
+    int worldTexturesMissing = -1;
+    long long worldFileBytes = -1, worldTextureBytes = -1, worldGpuGeometryBytes = -1, worldGpuTextureBytes = -1;
+    bool worldHasOrigin = false;
+    double worldOrigin[3] = { 0.0, 0.0, 0.0 };
+    bool worldStart = false;       // a start point was found in the global world model's geometry
+    double worldStartPoint[3] = { 0.0, 0.0, 0.0 };
+    QString worldStartReason;
+    double worldShownMs = -1.0, worldFetchMs = -1.0, worldParseMs = -1.0, worldDecodeMs = -1.0, worldBuildMs = -1.0;
+    double worldBuildMaxMs = -1.0, worldPlaceMs = -1.0;
+    struct Placement
+    {
+      quint32 uniqueId = 0;
+      int fileDataID = -1;
+      int records = -1;
+      QString state;               // "placed" / "failed" / "unsupported" / "notRequested" / "ended"
+      QString reason;
+      double scale = 1.0;
+      int groups = -1, groupsDrawn = -1;
+      double position[3] = { 0.0, 0.0, 0.0 };
+      double rotation[3] = { 0.0, 0.0, 0.0 };
+      double extents[6] = { 0, 0, 0, 0, 0, 0 };
+      bool hasRendered = false;    // the instance's drawn box, world frame
+      double rendered[6] = { 0, 0, 0, 0, 0, 0 };
+    };
+    std::vector<Placement> worldList;   // at most TERRAIN_REPORT_PLACEMENTS_MAX kept
+    int worldListSent = -1;
     QString describe() const;
+    // The world's outcome in one line (empty without "world").
+    QString describeWorld() const;
   };
   // What a report is read into at most; the rest is counted, not kept. The retired ids and the chunk-state counters:
   // TERRAIN_REPORT_LIST_MAX (a protocol-13 player retires at most its outstanding limit of ids, and sends about a dozen
@@ -1199,6 +1394,8 @@ public:
   // that count.
   static const int TERRAIN_REPORT_LIST_MAX = MAX_TERRAIN_TEXTURES_PER_LOAD;
   static const int TERRAIN_REPORT_TEXTURES_MAX = 256 * 8 * 2;
+  // The placements a report is read into at most (the player lists at most MAX_WMO_PLACEMENTS_PER_LOAD).
+  static const int TERRAIN_REPORT_PLACEMENTS_MAX = MAX_WMO_PLACEMENTS_PER_LOAD;
   // Raised on the GUI thread for every terrainTileLoaded.
   std::function<void(const TerrainTileReport &)> onTerrainTileLoaded;
 
@@ -1257,6 +1454,12 @@ public:
     int terrainBuilt = 0;         // ... of which "built"
     int terrainFailed = 0;        // ... of which "failed"
     QString lastTerrain;          // "load <n> <status> map <m> tile <x>_<y> <reason>" of the last report
+    int worldLoads = 0;           // loadWorld sent (protocol 16)
+    int worldShown = 0;           // worldShown received
+    int worldProgress = 0;        // worldProgress received
+    int worldReports = 0;         // terrainTileLoaded received with "world"
+    int worldInspections = 0;     // inspectWorldModel sent
+    int worldInspected = 0;       // worldModelInspected received, any status
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
@@ -1313,6 +1516,11 @@ private:
   void handleMapTilesInspected(const QJsonObject & msg);
   void handleTerrainViewApplied(const QJsonObject & msg);
   void handleWorldCameraApplied(const QJsonObject & msg);
+  void handleWorldShown(const QJsonObject & msg);
+  void handleWorldProgress(const QJsonObject & msg);
+  void handleWorldModelInspected(const QJsonObject & msg);
+  // loadTerrainTile's fields (shared by loadWorld); false when the camera was not put (no protocol-15 player, no mode).
+  bool putTerrainCommand(QJsonObject & msg, const TerrainTileCommand & command, bool & textures) const;
   static void putCamera(QJsonObject & msg, const WorldCamera & camera);
   static QString describeCamera(const WorldCamera & camera);
   void queueLine(const QByteArray & line);

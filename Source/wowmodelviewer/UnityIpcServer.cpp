@@ -15,6 +15,7 @@
 #include "UnityIpcServer.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 
 #include <QCryptographicHash>
@@ -681,7 +682,16 @@ QString UnityIpcServer::RuntimeState::describe() const
            .arg(terrainTimeoutMs).arg(terrainRetiredTotal).arg(mapAnswersLate).arg(mapAnswersUnowned) +
          " terrainLastRetiredRequest=" + (hasTerrainLastRetiredRequest ? "\"" + terrainLastRetiredRequest + "\"" : QString("-")) +
          QString(" terrainTextures=%1 terrainTextureBytes=%2 terrainAlphaArrays=%3")
-           .arg(terrainTextures).arg(terrainTextureBytes).arg(terrainAlphaArrays);
+           .arg(terrainTextures).arg(terrainTextureBytes).arg(terrainAlphaArrays) +
+         QString(" worldInstances=%1 worldModels=%2 worldMeshes=%3 worldMaterials=%4 worldTextures=%5"
+                 " worldGpuGeometryBytes=%6 worldGpuTextureBytes=%7")
+           .arg(worldInstances).arg(worldModels).arg(worldMeshes).arg(worldMaterials).arg(worldTextures)
+           .arg(worldGpuGeometryBytes).arg(worldGpuTextureBytes) +
+         QString(" worldGroups=%1 worldGroupsVisible=%2 worldGroupsCulled=%3 worldInstancesCulled=%4 worldLoad=%5")
+           .arg(worldGroups).arg(worldGroupsVisible).arg(worldGroupsCulled).arg(worldInstancesCulled).arg(worldLoad) +
+         " worldKind=" + (worldKind.isEmpty() ? QString("-") : worldKind) +
+         QString(" worldFrames=%1 worldFrameMsMedian=%2 worldFrameMsP95=%3 worldFrameMsMax=%4").arg(worldFrames)
+           .arg(worldFrameMsMedian, 0, 'f', 2).arg(worldFrameMsP95, 0, 'f', 2).arg(worldFrameMsMax, 0, 'f', 2);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -765,6 +775,32 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   const QJsonValue textureBytes = msg.value(QLatin1String("terrainTextureBytes"));
   s.terrainTextureBytes = textureBytes.isDouble() ? (long long)textureBytes.toDouble() : -1LL;
   s.terrainAlphaArrays = count("terrainAlphaArrays");
+  // Protocol 16 (WORLD MODELS IN THE WORLD).
+  const auto count64 = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? (long long)v.toDouble() : -1LL;
+  };
+  s.worldInstances = count("worldInstances");
+  s.worldModels = count("worldModels");
+  s.worldMeshes = count("worldMeshes");
+  s.worldMaterials = count("worldMaterials");
+  s.worldTextures = count("worldTextures");
+  s.worldGpuGeometryBytes = count64("worldGpuGeometryBytes");
+  s.worldGpuTextureBytes = count64("worldGpuTextureBytes");
+  s.worldGroups = count("worldGroups");
+  s.worldGroupsVisible = count("worldGroupsVisible");
+  s.worldGroupsCulled = count("worldGroupsCulled");
+  s.worldInstancesCulled = count("worldInstancesCulled");
+  s.worldLoad = count("worldLoad");
+  s.worldKind = msg.value(QLatin1String("worldKind")).toString();
+  s.worldFrames = count("worldFrames");
+  const auto ms = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? v.toDouble() : -1.0;
+  };
+  s.worldFrameMsMedian = ms("worldFrameMsMedian");
+  s.worldFrameMsP95 = ms("worldFrameMsP95");
+  s.worldFrameMsMax = ms("worldFrameMsMax");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -1207,8 +1243,9 @@ void UnityIpcServer::handleLine(const std::string & line)
                      " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
                      " stays the player's own default, a character's model generation (below v8) is not switched,"
                      " every load (below v9) fetches its files again, files travel as base64 text (below v10), an NPC on its"
-                     " own model is shown without its weapons (below v11), no terrain tile is drawn (below v12), and a"
-                     " terrain tile is drawn without its textures (below v13)";
+                     " own model is shown without its weapons (below v11), no terrain tile is drawn (below v12), a"
+                     " terrain tile is drawn without its textures (below v13), and no world model is placed in the world"
+                     " (below v16)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1265,6 +1302,18 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "worldCameraApplied")
   {
     handleWorldCameraApplied(msg);
+  }
+  else if (type == "worldShown")
+  {
+    handleWorldShown(msg);
+  }
+  else if (type == "worldProgress")
+  {
+    handleWorldProgress(msg);
+  }
+  else if (type == "worldModelInspected")
+  {
+    handleWorldModelInspected(msg);
   }
   else
   {
@@ -1395,12 +1444,8 @@ void UnityIpcServer::handleGetAsset(const QJsonObject & msg, bool byFileDataID)
 
 // ---------------------------------------------------------------- terrain (protocol 12)
 
-bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
+bool UnityIpcServer::putTerrainCommand(QJsonObject & msg, const TerrainTileCommand & c, bool & textures) const
 {
-  if (!playerDrawsTerrain() || c.load <= 0)
-    return false;
-  QJsonObject msg;
-  msg["type"] = "loadTerrainTile";
   msg["load"] = c.load;
   msg["assetEpoch"] = c.assetEpoch;
   msg["mapId"] = c.mapId;
@@ -1416,7 +1461,7 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
   msg["maxAssetBytes"] = c.maxAssetBytes;
   // TERRAIN TEXTURES (protocol 13): only to a player that takes them, and only when the load offers them. A protocol-13
   // player that finds no maxTextureBytes asks for no tex0 or texture (a protocol-12 host).
-  const bool textures = playerDrawsTerrainTextures() && c.maxTextureBytes > 0;
+  textures = playerDrawsTerrainTextures() && c.maxTextureBytes > 0;
   if (textures)
   {
     msg["maxTextureBytes"] = c.maxTextureBytes;
@@ -1427,6 +1472,17 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
   const bool camera = playerFliesWorld() && !c.camera.mode.isEmpty();
   if (camera)
     putCamera(msg, c.camera);
+  return camera;
+}
+
+bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
+{
+  if (!playerDrawsTerrain() || c.load <= 0)
+    return false;
+  QJsonObject msg;
+  msg["type"] = "loadTerrainTile";
+  bool textures = false;
+  const bool camera = putTerrainCommand(msg, c, textures);
   m_stats.terrainLoads++;
   LOG_INFO << "[unityipc] -> loadTerrainTile load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId
            << c.mapDirectory << "tile" << QString("%1_%2").arg(c.tileX).arg(c.tileY) << "wdtFileDataID=" << c.wdtFileDataID
@@ -1436,6 +1492,43 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
                             .arg(c.maxTextureBytes).arg(c.maxTextureBytesPerLoad).arg(c.maxTexturesPerLoad)
                         : playerDrawsTerrainTextures() ? QString("no textures offered")
                                                        : QString("no textures (a protocol %1 player)").arg(m_playerProtocol))
+           << (camera ? "camera: " + describeCamera(c.camera) : QString());
+  queueJson(msg);
+  return true;
+}
+
+bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
+{
+  if (!playerPlacesWorldModels() || c.load <= 0 || !c.world)
+    return false;
+  QJsonObject msg;
+  msg["type"] = "loadWorld";
+  bool textures = false;
+  const bool camera = putTerrainCommand(msg, c, textures);
+  msg["worldModels"] = true;
+  msg["globalWmo"] = c.globalWmo;
+  msg["maxWmoFileBytes"] = c.maxWmoFileBytes;
+  msg["maxWmoBytesPerLoad"] = c.maxWmoBytesPerLoad;
+  msg["maxWmoTextureBytes"] = c.maxWmoTextureBytes;
+  msg["maxWmoTextureBytesPerLoad"] = c.maxWmoTextureBytesPerLoad;
+  msg["maxWmoTexturesPerLoad"] = c.maxWmoTexturesPerLoad;
+  msg["maxWmoModelsPerLoad"] = c.maxWmoModelsPerLoad;
+  msg["maxWmoGroupsPerLoad"] = c.maxWmoGroupsPerLoad;
+  msg["maxWmoPlacementsPerLoad"] = c.maxWmoPlacementsPerLoad;
+  m_stats.terrainLoads++;
+  m_stats.worldLoads++;
+  LOG_INFO << "[unityipc] -> loadWorld load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId << c.mapDirectory
+           << (c.globalWmo ? QString("its global world model (no tile)") : "tile " + QString("%1_%2").arg(c.tileX).arg(c.tileY))
+           << "wdtFileDataID=" << c.wdtFileDataID << "resolved by" << c.wdtResolvedBy
+           << (c.wdtResolvedBy == "path" ? c.wdtPath : QString()) << "client" << c.product << c.build
+           << "maxAssetBytes=" << c.maxAssetBytes
+           << (textures ? QString("maxTextureBytes=%1 maxTextureBytesPerLoad=%2 maxTexturesPerLoad=%3")
+                            .arg(c.maxTextureBytes).arg(c.maxTextureBytesPerLoad).arg(c.maxTexturesPerLoad)
+                        : QString("no textures offered"))
+           << QString("world models: maxWmoFileBytes=%1 maxWmoBytesPerLoad=%2 maxWmoTextureBytes=%3 maxWmoTextureBytesPerLoad=%4"
+                      " maxWmoTexturesPerLoad=%5 maxWmoModelsPerLoad=%6 maxWmoGroupsPerLoad=%7 maxWmoPlacementsPerLoad=%8")
+                .arg(c.maxWmoFileBytes).arg(c.maxWmoBytesPerLoad).arg(c.maxWmoTextureBytes).arg(c.maxWmoTextureBytesPerLoad)
+                .arg(c.maxWmoTexturesPerLoad).arg(c.maxWmoModelsPerLoad).arg(c.maxWmoGroupsPerLoad).arg(c.maxWmoPlacementsPerLoad)
            << (camera ? "camera: " + describeCamera(c.camera) : QString());
   queueJson(msg);
   return true;
@@ -1452,10 +1545,15 @@ void UnityIpcServer::putCamera(QJsonObject & msg, const WorldCamera & c)
   msg["cameraYaw"] = c.yaw;
   msg["cameraPitch"] = c.pitch;
   msg["cameraEyeHeight"] = c.eyeHeight;
+  // Protocol 16: only when asked (an older player reads none of it).
+  if (c.start)
+    msg["cameraStart"] = true;
 }
 
 QString UnityIpcServer::describeCamera(const WorldCamera & c)
 {
+  if (c.mode == "fly" && c.start)
+    return QString("request %1 fly at the world model's start point").arg(c.request);
   if (c.mode != "fly")
     return QString("request %1 %2").arg(c.request).arg(c.mode);
   return QString("request %1 fly at (%2, %3, %4) yaw %5 pitch %6 eye %7").arg(c.request).arg(c.x, 0, 'f', 3).arg(c.y, 0, 'f', 3)
@@ -1560,6 +1658,24 @@ void UnityIpcServer::handleMapTilesInspected(const QJsonObject & msg)
   r.globalWmoRecords = msg.value("globalWmoRecords").toInt(0);
   r.globalWmoFileDataID = (quint32)msg.value("globalWmoFileDataID").toDouble(0);
   r.globalWmoPath = msg.value("globalWmoPath").toString();
+  // Protocol 16: the WDT's first global record, as stored (absent before it, or without one).
+  if (msg.value("globalRecord").toBool(false))
+  {
+    const auto triple = [&msg](const char * key, double * out) {
+      const QJsonArray a = msg.value(QLatin1String(key)).toArray();
+      if (a.size() != 3)
+        return false;
+      for (int i = 0; i < 3; i++)
+        out[i] = a.at(i).toDouble();
+      return true;
+    };
+    MapTilesInspection::GlobalRecord & g = r.globalRecord;
+    g.present = triple("globalPosition", g.position) && triple("globalRotation", g.rotation) &&
+                triple("globalExtentsMin", g.extentsMin) && triple("globalExtentsMax", g.extentsMax);
+    g.flags = msg.value("globalFlags").toInt(0);
+    g.scale = msg.value("globalScale").toInt(0);
+    g.uniqueId = (quint32)msg.value("globalUniqueId").toDouble(0);
+  }
   const int tiles = 64 * 64;
   if (r.status == "inspected")
   {
@@ -1607,12 +1723,187 @@ void UnityIpcServer::handleMapTilesInspected(const QJsonObject & msg)
            << "ms" << (r.minimapIds.empty() ? QString() : QString("minimap ids %1").arg(r.minimapIds.size()))
            << (r.globalWmoRecords > 0 ? QString("global WMO %1 (%2 record(s))")
                                           .arg(r.globalWmoFileDataID ? QString::number(r.globalWmoFileDataID) : r.globalWmoPath)
-                                          .arg(r.globalWmoRecords)
+                                          .arg(r.globalWmoRecords) +
+                                          (r.globalRecord.present
+                                             ? QString(" at (%1, %2, %3) rotation (%4, %5, %6) scale %7 flags 0x%8")
+                                                 .arg(r.globalRecord.position[0], 0, 'f', 3).arg(r.globalRecord.position[1], 0, 'f', 3)
+                                                 .arg(r.globalRecord.position[2], 0, 'f', 3).arg(r.globalRecord.rotation[0], 0, 'f', 3)
+                                                 .arg(r.globalRecord.rotation[1], 0, 'f', 3).arg(r.globalRecord.rotation[2], 0, 'f', 3)
+                                                 .arg(r.globalRecord.scale).arg(r.globalRecord.flags, 0, 16)
+                                             : QString(" (no record sent)"))
                                       : QString())
            << (r.reason.isEmpty() ? QString() : "reason: " + r.reason)
            << (r.tableProblem.isEmpty() ? QString() : "TABLE REFUSED: " + r.tableProblem);
   if (onMapTilesInspected)
     onMapTilesInspected(r);
+}
+
+// ---------------------------------------------------------------- world models in the world (protocol 16)
+
+bool UnityIpcServer::sendInspectWorldModel(int inspection, int mapId, int wmoFileDataID, int assetEpoch, const QString & md5,
+                                           const QByteArray & bytes, const MapTilesInspection::GlobalRecord & g)
+{
+  if (!playerPlacesWorldModels() || inspection <= 0 || wmoFileDataID <= 0 || bytes.isEmpty() || bytes.size() > MAX_WMO_FILE_BYTES ||
+      !g.present)
+    return false;
+  if (unsentBytes() > MAP_ASSET_SEND_HIGH_WATER)
+  {
+    LOG_INFO << "[unityipc] inspectWorldModel" << inspection << "not sent:" << unsentBytes()
+             << "bytes still wait to be sent (the player is not reading)";
+    return false;
+  }
+  const auto triple = [](const double * v) {
+    QJsonArray a;
+    for (int i = 0; i < 3; i++)
+      a.append(v[i]);
+    return a;
+  };
+  QJsonObject msg;
+  msg["type"] = "inspectWorldModel";
+  msg["inspection"] = inspection;
+  msg["mapId"] = mapId;
+  msg["wmoFileDataID"] = wmoFileDataID;
+  msg["assetEpoch"] = assetEpoch;
+  msg["md5"] = md5;
+  msg["wmoPosition"] = triple(g.position);
+  msg["wmoRotation"] = triple(g.rotation);
+  msg["wmoExtentsMin"] = triple(g.extentsMin);
+  msg["wmoExtentsMax"] = triple(g.extentsMax);
+  msg["wmoFlags"] = g.flags;
+  msg["wmoScale"] = g.scale;
+  msg["wmoUniqueId"] = (double)g.uniqueId;
+  msg["encoding"] = "binary";
+  msg["payloadBytes"] = bytes.size();
+  m_stats.worldInspections++;
+  LOG_INFO << "[unityipc] -> inspectWorldModel" << inspection << "map" << mapId << "WMO" << wmoFileDataID << "(" << bytes.size()
+           << "bytes) epoch" << assetEpoch;
+  queueFrame(QJsonDocument(msg).toJson(QJsonDocument::Compact), bytes);
+  return true;
+}
+
+void UnityIpcServer::handleWorldModelInspected(const QJsonObject & msg)
+{
+  WorldModelInspection r;
+  r.inspection = msg.value("inspection").toInt(0);
+  r.status = msg.value("status").toString();
+  r.reason = msg.value("reason").toString();
+  r.mapId = msg.value("mapId").toInt(-1);
+  r.wmoFileDataID = msg.value("wmoFileDataID").toInt(0);
+  r.assetEpoch = msg.value("assetEpoch").toInt(0);
+  r.wmoBytes = (long long)msg.value("wmoBytes").toDouble(-1);
+  r.md5 = msg.value("md5").toString();
+  r.groups = msg.value("groups").toInt(-1);
+  r.interiorGroups = msg.value("interiorGroups").toInt(-1);
+  r.parseMs = msg.value("parseMs").toDouble(-1.0);
+  m_stats.worldInspected++;
+  const auto six = [&msg](const char * key, double * out) {
+    const QJsonArray a = msg.value(QLatin1String(key)).toArray();
+    if (a.size() != 6)
+      return false;
+    for (int i = 0; i < 6; i++)
+      out[i] = a.at(i).toDouble();
+    return true;
+  };
+  if (r.status == "inspected")
+  {
+    // At most 1,024 groups (the player refuses a root with more): 6 floats and one flag word each.
+    const QByteArray boxes = QByteArray::fromBase64(msg.value("groupBoxes").toString().toLatin1());
+    const QByteArray flags = QByteArray::fromBase64(msg.value("groupFlags").toString().toLatin1());
+    if (!six("rootBox", r.rootBox) || !six("extents", r.extents))
+      r.problem = "the root box or the extents did not decode to 6 numbers";
+    else if (r.groups < 0 || r.groups > 1024)
+      r.problem = QString("the message names %1 groups (0 to 1,024)").arg(r.groups);
+    else if (boxes.size() != r.groups * 6 * 4 || flags.size() != r.groups * 4)
+      r.problem = QString("the group boxes and flags decoded to %1 and %2 bytes, not %3 and %4 for %5 groups")
+                    .arg(boxes.size()).arg(flags.size()).arg(r.groups * 24).arg(r.groups * 4).arg(r.groups);
+    else
+    {
+      r.groupBoxes.resize(r.groups * 6);
+      std::memcpy(r.groupBoxes.data(), boxes.constData(), boxes.size());
+      r.groupFlags.resize(r.groups);
+      const unsigned char * p = reinterpret_cast<const unsigned char *>(flags.constData());
+      for (int i = 0; i < r.groups; i++)
+        r.groupFlags[i] = (quint32)p[4 * i] | ((quint32)p[4 * i + 1] << 8) | ((quint32)p[4 * i + 2] << 16) | ((quint32)p[4 * i + 3] << 24);
+      r.valid = true;
+      for (float v : r.groupBoxes)
+        if (!std::isfinite(v))
+        {
+          r.valid = false;
+          r.problem = "a group box is not finite";
+          break;
+        }
+    }
+  }
+  LOG_INFO << "[unityipc] <- worldModelInspected" << r.inspection << r.status << "map" << r.mapId << "WMO" << r.wmoFileDataID
+           << r.wmoBytes << "bytes;" << r.groups << "group(s)," << r.interiorGroups << "interior; parse" << r.parseMs << "ms"
+           << QString("root box (%1, %2, %3)..(%4, %5, %6)").arg(r.rootBox[0], 0, 'f', 2).arg(r.rootBox[1], 0, 'f', 2)
+                .arg(r.rootBox[2], 0, 'f', 2).arg(r.rootBox[3], 0, 'f', 2).arg(r.rootBox[4], 0, 'f', 2).arg(r.rootBox[5], 0, 'f', 2)
+           << (r.reason.isEmpty() ? QString() : "reason: " + r.reason)
+           << (r.problem.isEmpty() ? QString() : "REFUSED: " + r.problem);
+  if (onWorldModelInspected)
+    onWorldModelInspected(r);
+}
+
+void UnityIpcServer::handleWorldShown(const QJsonObject & msg)
+{
+  WorldShown r;
+  r.load = msg.value("load").toInt(0);
+  r.mapId = msg.value("mapId").toInt(-1);
+  r.kind = msg.value("kind").toString();
+  r.tileX = msg.value("tileX").toInt(-1);
+  r.tileY = msg.value("tileY").toInt(-1);
+  r.placements = msg.value("placements").toInt(-1);
+  r.models = msg.value("models").toInt(-1);
+  r.shownMs = msg.value("shownMs").toDouble(-1.0);
+  const QJsonArray o = msg.value("originWorld").toArray();
+  r.hasOriginWorld = o.size() == 3;
+  for (int i = 0; i < 3 && r.hasOriginWorld; i++)
+    r.originWorld[i] = o.at(i).toDouble();
+  m_stats.worldShown++;
+  LOG_INFO << "[unityipc] <- worldShown load" << r.load << "map" << r.mapId << r.kind
+           << (r.kind == "tile" ? QString("tile %1_%2").arg(r.tileX).arg(r.tileY) : QString()) << ":" << r.placements
+           << "placement(s) of" << r.models << "world model(s) planned; shown after" << r.shownMs << "ms"
+           << (r.hasOriginWorld ? QString("origin (%1, %2, %3)").arg(r.originWorld[0], 0, 'f', 3).arg(r.originWorld[1], 0, 'f', 3)
+                                    .arg(r.originWorld[2], 0, 'f', 3)
+                                : QString());
+  if (onWorldShown)
+    onWorldShown(r);
+}
+
+void UnityIpcServer::handleWorldProgress(const QJsonObject & msg)
+{
+  const auto count = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? (int)v.toDouble() : -1;
+  };
+  WorldProgress r;
+  r.load = msg.value("load").toInt(0);
+  r.phase = msg.value("phase").toString();
+  r.placements = count("placements");
+  r.models = count("models");
+  r.modelsRequested = count("modelsRequested");
+  r.modelsParsed = count("modelsParsed");
+  r.modelsBuilt = count("modelsBuilt");
+  r.modelsFailed = count("modelsFailed");
+  r.modelsUnsupported = count("modelsUnsupported");
+  r.modelsNotRequested = count("modelsNotRequested");
+  r.placed = count("placed");
+  r.placementsFailed = count("placementsFailed");
+  r.filesAsked = count("filesAsked");
+  r.filesAnswered = count("filesAnswered");
+  const QJsonValue bytes = msg.value("bytesReceived");
+  r.bytesReceived = bytes.isDouble() ? (long long)bytes.toDouble() : -1LL;
+  r.elapsedMs = msg.value("elapsedMs").toDouble(-1.0);
+  m_stats.worldProgress++;
+  LOG_INFO << "[unityipc] <- worldProgress load" << r.load << r.phase << QString("models %1 requested %2 parsed %3 built %4 failed %5"
+                                                                             " unsupported %6 not requested %7; placed %8 of %9 (%10"
+                                                                             " failed); files %11 of %12, %13 bytes; %14 ms")
+                                                    .arg(r.models).arg(r.modelsRequested).arg(r.modelsParsed).arg(r.modelsBuilt)
+                                                    .arg(r.modelsFailed).arg(r.modelsUnsupported).arg(r.modelsNotRequested)
+                                                    .arg(r.placed).arg(r.placements).arg(r.placementsFailed).arg(r.filesAnswered)
+                                                    .arg(r.filesAsked).arg(r.bytesReceived).arg(r.elapsedMs, 0, 'f', 1);
+  if (onWorldProgress)
+    onWorldProgress(r);
 }
 
 void UnityIpcServer::handleTerrainViewApplied(const QJsonObject & msg)
@@ -1919,6 +2210,9 @@ void UnityIpcServer::detachForShutdown()
   onMapTilesInspected = nullptr;
   onTerrainViewApplied = nullptr;
   onWorldCameraApplied = nullptr;
+  onWorldModelInspected = nullptr;
+  onWorldShown = nullptr;
+  onWorldProgress = nullptr;
   LOG_INFO << "[unityipc] detached for the viewer's shutdown:" << m_mapReadsInFlight.size()
            << "map read(s) in flight left unanswered; no poll serves from now on"
            << (m_wakePosted.load() ? "(a wake already queued will find nothing to do)" : "");
@@ -2360,6 +2654,35 @@ QString UnityIpcServer::TerrainTileReport::describe() const
                            }() + "}");
 }
 
+QString UnityIpcServer::TerrainTileReport::describeWorld() const
+{
+  if (!hasWorld)
+    return QString();
+  const auto ms = [](double v) { return v < 0.0 ? QString("-") : QString::number(v, 'f', 1); };
+  // The player's free text is appended, never passed through arg().
+  return "world kind=" + worldKind + " state=" + worldState +
+         QString(" records=%1 placements=%2 placed=%3 failed=%4 unsupported=%5 notRequested=%6 ended=%7")
+           .arg(worldRecords).arg(worldPlacements).arg(worldPlaced).arg(worldFailed).arg(worldUnsupported)
+           .arg(worldNotRequested).arg(worldEnded) +
+         QString(" models=%1 modelsBuilt=%2 modelsFailed=%3 modelsNotRequested=%4 groupFiles=%5 groupFilesMissing=%6")
+           .arg(worldModels).arg(worldModelsBuilt).arg(worldModelsFailed).arg(worldModelsNotRequested).arg(worldGroupFiles)
+           .arg(worldGroupFilesMissing) +
+         QString(" textures=%1 texturesDecoded=%2 texturesMissing=%3 fileBytes=%4 textureBytes=%5 gpuGeometryBytes=%6"
+                 " gpuTextureBytes=%7")
+           .arg(worldTextures).arg(worldTexturesDecoded).arg(worldTexturesMissing).arg(worldFileBytes).arg(worldTextureBytes)
+           .arg(worldGpuGeometryBytes).arg(worldGpuTextureBytes) +
+         (worldHasOrigin ? QString(" origin=[%1,%2,%3]").arg(worldOrigin[0], 0, 'f', 3).arg(worldOrigin[1], 0, 'f', 3)
+                                .arg(worldOrigin[2], 0, 'f', 3)
+                         : QString()) +
+         (worldStart ? QString(" start=[%1,%2,%3]").arg(worldStartPoint[0], 0, 'f', 3).arg(worldStartPoint[1], 0, 'f', 3)
+                             .arg(worldStartPoint[2], 0, 'f', 3) + " startReason=\"" + worldStartReason + "\""
+                     : QString(" start=-")) +
+         QString(" shownMs=%1 fetchMs=%2 parseMs=%3 decodeMs=%4 buildMs=%5 buildMaxMs=%6 placeMs=%7")
+           .arg(ms(worldShownMs)).arg(ms(worldFetchMs)).arg(ms(worldParseMs)).arg(ms(worldDecodeMs)).arg(ms(worldBuildMs))
+           .arg(ms(worldBuildMaxMs)).arg(ms(worldPlaceMs)) +
+         " reason=\"" + worldReason + "\"";
+}
+
 int UnityIpcServer::TerrainTileReport::chunkState(const QString & name) const
 {
   for (const auto & c : chunkStates)
@@ -2545,6 +2868,93 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
     r.materialBuildMs = mtiming("materialBuildMs");
   }
 
+  // Protocol 16 (WORLD MODELS IN THE WORLD): the world's outcome; its placements read up to TERRAIN_REPORT_PLACEMENTS_MAX.
+  const QJsonValue worldValue = msg.value("world");
+  if (worldValue.isObject())
+  {
+    const QJsonObject w = worldValue.toObject();
+    const auto wcount = [&w](const char * key) {
+      const QJsonValue v = w.value(QLatin1String(key));
+      return v.isDouble() ? (int)v.toDouble() : -1;
+    };
+    const auto wcount64 = [&w](const char * key) {
+      const QJsonValue v = w.value(QLatin1String(key));
+      return v.isDouble() ? (long long)v.toDouble() : -1LL;
+    };
+    const auto numbers = [](const QJsonValue & value, double * out, int n) {
+      const QJsonArray a = value.toArray();
+      if (a.size() != n)
+        return false;
+      for (int i = 0; i < n; i++)
+        out[i] = a.at(i).toDouble();
+      return true;
+    };
+    r.hasWorld = true;
+    r.worldKind = w.value("kind").toString();
+    r.worldState = w.value("state").toString();
+    r.worldReason = w.value("reason").toString();
+    r.worldRecords = wcount("records");
+    r.worldPlacements = wcount("placements");
+    r.worldPlaced = wcount("placed");
+    r.worldFailed = wcount("failed");
+    r.worldUnsupported = wcount("unsupported");
+    r.worldNotRequested = wcount("notRequested");
+    r.worldEnded = wcount("ended");
+    r.worldModels = wcount("models");
+    r.worldModelsBuilt = wcount("modelsBuilt");
+    r.worldModelsFailed = wcount("modelsFailed");
+    r.worldModelsNotRequested = wcount("modelsNotRequested");
+    r.worldGroupFiles = wcount("groupFiles");
+    r.worldGroupFilesMissing = wcount("groupFilesMissing");
+    r.worldTextures = wcount("textures");
+    r.worldTexturesDecoded = wcount("texturesDecoded");
+    r.worldTexturesMissing = wcount("texturesMissing");
+    r.worldFileBytes = wcount64("fileBytes");
+    r.worldTextureBytes = wcount64("textureBytes");
+    r.worldGpuGeometryBytes = wcount64("gpuGeometryBytes");
+    r.worldGpuTextureBytes = wcount64("gpuTextureBytes");
+    r.worldHasOrigin = numbers(w.value("originWorld"), r.worldOrigin, 3);
+    r.worldStart = w.value("start").toBool(false) && numbers(w.value("startPoint"), r.worldStartPoint, 3);
+    r.worldStartReason = w.value("startReason").toString();
+    const QJsonObject wt = w.value("timings").toObject();
+    const auto wtiming = [&wt](const char * key) {
+      const QJsonValue v = wt.value(QLatin1String(key));
+      return v.isDouble() ? v.toDouble() : -1.0;
+    };
+    r.worldShownMs = wtiming("shownMs");
+    r.worldFetchMs = wtiming("fetchMs");
+    r.worldParseMs = wtiming("parseMs");
+    r.worldDecodeMs = wtiming("decodeMs");
+    r.worldBuildMs = wtiming("buildMs");
+    r.worldBuildMaxMs = wtiming("buildMaxMs");
+    r.worldPlaceMs = wtiming("placeMs");
+    const QJsonValue listValue = w.value("list");
+    if (listValue.isArray())
+    {
+      const QJsonArray list = listValue.toArray();
+      r.worldListSent = list.size();
+      for (int i = 0; i < list.size() && i < TERRAIN_REPORT_PLACEMENTS_MAX; i++)
+      {
+        const QJsonObject e = list.at(i).toObject();
+        TerrainTileReport::Placement pl;
+        pl.uniqueId = (quint32)e.value("uniqueId").toDouble(0);
+        pl.fileDataID = e.value("fileDataID").isDouble() ? (int)e.value("fileDataID").toDouble() : -1;
+        pl.records = e.value("records").isDouble() ? (int)e.value("records").toDouble() : -1;
+        pl.state = e.value("state").toString();
+        pl.reason = e.value("reason").toString();
+        pl.scale = e.value("scale").toDouble(1.0);
+        pl.groups = e.value("groups").isDouble() ? (int)e.value("groups").toDouble() : -1;
+        pl.groupsDrawn = e.value("groupsDrawn").isDouble() ? (int)e.value("groupsDrawn").toDouble() : -1;
+        numbers(e.value("position"), pl.position, 3);
+        numbers(e.value("rotation"), pl.rotation, 3);
+        numbers(e.value("extents"), pl.extents, 6);
+        pl.hasRendered = numbers(e.value("rendered"), pl.rendered, 6);
+        r.worldList.push_back(pl);
+      }
+    }
+    m_stats.worldReports++;
+  }
+
   m_stats.terrainReports++;
   if (r.status == "built")
     m_stats.terrainBuilt++;
@@ -2588,6 +2998,25 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
   if (r.texturesSent > (int)r.textures.size())
     LOG_WARNING << "[unityipc]    load" << r.load << ":" << r.texturesSent << "texture entries sent," << (int)r.textures.size()
                 << "read (at most" << TERRAIN_REPORT_TEXTURES_MAX << ")";
+  // The world on a line of its own, then each placement (the player's texts appended, never passed through arg()).
+  if (r.hasWorld)
+  {
+    LOG_INFO << "[unityipc]    load" << r.load << r.describeWorld();
+    for (const TerrainTileReport::Placement & pl : r.worldList)
+      LOG_INFO << "[unityipc]    load" << r.load << "placement" << pl.uniqueId << "WMO" << pl.fileDataID << pl.state
+               << QString("records=%1 groups=%2 drawn=%3 scale=%4 at (%5, %6, %7) rotation (%8, %9, %10)")
+                    .arg(pl.records).arg(pl.groups).arg(pl.groupsDrawn).arg(pl.scale, 0, 'f', 4).arg(pl.position[0], 0, 'f', 3)
+                    .arg(pl.position[1], 0, 'f', 3).arg(pl.position[2], 0, 'f', 3).arg(pl.rotation[0], 0, 'f', 3)
+                    .arg(pl.rotation[1], 0, 'f', 3).arg(pl.rotation[2], 0, 'f', 3) +
+                  (pl.hasRendered ? QString(" rendered (%1, %2, %3)..(%4, %5, %6)").arg(pl.rendered[0], 0, 'f', 2)
+                                      .arg(pl.rendered[1], 0, 'f', 2).arg(pl.rendered[2], 0, 'f', 2).arg(pl.rendered[3], 0, 'f', 2)
+                                      .arg(pl.rendered[4], 0, 'f', 2).arg(pl.rendered[5], 0, 'f', 2)
+                                  : QString()) +
+                  (pl.reason.isEmpty() ? QString() : " reason=\"" + pl.reason + "\"");
+    if (r.worldListSent > (int)r.worldList.size())
+      LOG_WARNING << "[unityipc]    load" << r.load << ":" << r.worldListSent << "placements sent," << (int)r.worldList.size()
+                  << "read (at most" << TERRAIN_REPORT_PLACEMENTS_MAX << ")";
+  }
   if (onTerrainTileLoaded)
     onTerrainTileLoaded(r);
 }

@@ -26,6 +26,16 @@
  *                    on screen: the camera alone is moved (setWorldCamera). Back to map gives the viewport to the overhead
  *                    map again; the world stays loaded behind it.
  *   a camera         the free camera at the target, or the tile's overview (setWorldCamera), nothing reloaded.
+ *   world models     (protocol 16, docs/world-viewer/06-world-models-in-world.md) Enter world loads the tile with the world
+ *                    models its obj0 ADT places (ModelViewer::RequestWorld): the world takes the viewport when the player
+ *                    first shows it (worldShown), while its world models may still be loading (worldProgress); the load's
+ *                    report says how many were placed, failed or unsupported. A WMO-ONLY MAP (its WDT names one global
+ *                    world model and no tile) is no longer refused: its world model's root is read by the worker and
+ *                    handed to the player (inspectWorldModel), whose parser answers with the placed root box and every
+ *                    group's box (worldModelInspected) -- the FOOTPRINT the overhead map draws instead of the tile grid. A
+ *                    click inside it sets the target; Enter world loads the world model (no tile) with the free camera at
+ *                    the target, standing on the highest floor under it, or -- no target -- at the world model's own start
+ *                    point (the player's, from its geometry).
  *   a display mode   setTerrainView (protocol 14): the tile on screen built again in it by the player, nothing read.
  *
  * ISOLATION. Every read and answer carries the client epoch and storage generation it was made under, and a serial of
@@ -119,6 +129,8 @@ public:
     double loadMs = -1.0;          // from the click to the player's "built" report handled
     double playerTotalMs = -1.0;   // player: the load's own total
     double viewMs = -1.0;          // from setTerrainView sent to terrainViewApplied handled
+    double worldShownMs = -1.0;    // from the click to worldShown handled (a world load: the world takes the viewport)
+    double footprintMs = -1.0;     // from the grid known to the footprint known (a WMO-only map)
     double rebuildMs = -1.0;       // player: the rebuild in the view
     double uiUpdateMs = -1.0;      // GUI: the last update of what is shown (the grid panel, the viewport's notice, labels)
     double uiUpdateMaxMs = -1.0;   // ... the longest since the viewer was made
@@ -157,6 +169,8 @@ public:
   // overhead map, at fractions of cell (tx, ty). SelectTile: the cell's middle (the keyboard's pick).
   bool SetTarget(double x, double y, bool hasZ, double z);
   void SetTargetAt(int tx, int ty, double fx, double fy);
+  // No target (the fields emptied): a WMO-only map is entered at its start point again; a tile map has no tile picked.
+  void ClearTarget();
   void SelectTile(int x, int y);
   bool hasTarget() const { return m_hasTarget; }
   double targetX() const { return m_targetX; }
@@ -195,6 +209,10 @@ public:
   void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
   void OnTerrainViewApplied(const UnityIpcServer::TerrainViewApplied & applied);
   void OnWorldCameraApplied(const UnityIpcServer::WorldCameraApplied & applied);
+  // Protocol 16: a world load's scene on screen, its progress, and a WMO-only map's footprint.
+  void OnWorldShown(const UnityIpcServer::WorldShown & shown);
+  void OnWorldProgress(const UnityIpcServer::WorldProgress & progress);
+  void OnWorldModelInspected(const UnityIpcServer::WorldModelInspection & inspection);
 
   // THE OVERHEAD MAP'S PICTURES (see the header): ThumbSide x ThumbSide RGBA thumbnails, MinimapBatch read at a time.
   static const int ThumbSide = 32;
@@ -219,6 +237,36 @@ public:
   std::function<void()> onImagesChanged;
   // A world-model-only map's global WMO, from its table: records (0: none), and the first one's file.
   int globalWmoRecords() const { return m_globalWmoRecords; }
+  quint32 globalWmoFileDataID() const { return m_globalWmoFileDataID; }
+
+  // A WMO-ONLY MAP (protocol 16): the map is one world model and no tile (the WDT's kind GlobalWmo), and its footprint.
+  enum class FootprintPhase
+  {
+    None,           // not a WMO-only map, or not known yet
+    WaitingPlayer,  // the player is not ready (or too old) to read the world model
+    Reading,        // the world model's root is being read by the map asset worker
+    Inspecting,     // the player is reading it
+    Ready,          // the footprint is known
+    Failed,         // the root could not be read or inspected (detail says why)
+    Unsupported,    // the WDT names its world model by a path only (an old-form WDT): not entered (detail says why)
+  };
+  bool worldModelMap() const { return m_mapPhase == MapPhase::Ready && m_globalOnly; }
+  FootprintPhase footprintPhase() const { return m_footprintPhase; }
+  QString footprintDetail() const { return m_footprintDetail; }
+  bool hasFootprint() const { return worldModelMap() && m_footprintPhase == FootprintPhase::Ready; }
+  // The footprint, world frame (yards; x north, y west, z up): the placed root box (min x, y, z, max x, y, z), and each
+  // group's placed box (6 floats a group) with its MOGI flags (0x2000: interior).
+  const double * footprintRootBox() const { return m_footprintRoot; }
+  int footprintGroups() const { return (int)m_footprintFlags.size(); }
+  int footprintInteriorGroups() const { return m_footprintInterior; }
+  const std::vector<float> & footprintGroupBoxes() const { return m_footprintBoxes; }
+  const std::vector<quint32> & footprintGroupFlags() const { return m_footprintFlags; }
+  // The world model on screen (a WMO-only map's world load shown).
+  bool worldModelShown() const { return m_shownGlobal; }
+  // The world's state in words: its world models while they load, and their outcome (empty: no world load).
+  QString worldDetail() const { return m_worldDetail; }
+  // The last progress of the current world load (load 0: none).
+  const UnityIpcServer::WorldProgress & worldProgress() const { return m_progress; }
 
   // WHAT THE GRID AND THE NOTICE SHOW.
   int mapId() const { return m_mapId; }
@@ -278,6 +326,13 @@ private:
   bool targetOnShownTile() const;
   void applyCamera(const UnityIpcServer::WorldCameraApplied & applied);
   void leaveWorld();
+  void beginWorldModelRead();
+  void onWorldModelRead(MapAssetWorker::Result & result);
+  void sendWorldModelInspection();
+  UnityIpcServer::WorldCamera startCamera();
+  // A world is on screen: a tile, or a WMO-only map's world model.
+  bool worldOnScreen() const { return m_shownX >= 0 || m_shownGlobal; }
+  QString progressLine(const UnityIpcServer::WorldProgress & p) const;
 
   ModelViewer * m_viewer;
   bool m_active = false;
@@ -349,6 +404,25 @@ private:
   int m_globalWmoRecords = 0;
   quint32 m_globalWmoFileDataID = 0;
   QString m_globalWmoPath;
+
+  // A WMO-only map (protocol 16): its record, its root read and the footprint the player made of it.
+  bool m_globalOnly = false;
+  UnityIpcServer::MapTilesInspection::GlobalRecord m_globalRecord;
+  FootprintPhase m_footprintPhase = FootprintPhase::None;
+  QString m_footprintDetail;
+  quint64 m_wmoReadTicket = 0;
+  QByteArray m_wmoBytes;         // the root read, until the player has inspected it (then dropped)
+  QString m_wmoMd5;
+  QElapsedTimer m_footprintClock;
+  double m_footprintRoot[6] = { 0, 0, 0, 0, 0, 0 };
+  std::vector<float> m_footprintBoxes;
+  std::vector<quint32> m_footprintFlags;
+  int m_footprintInterior = 0;
+  // The world load: shown (worldShown came), the world model on screen, its progress and outcome.
+  bool m_loadShown = false;
+  bool m_shownGlobal = false;
+  UnityIpcServer::WorldProgress m_progress;
+  QString m_worldDetail;
 };
 
 #endif // MAPSVIEWER_H

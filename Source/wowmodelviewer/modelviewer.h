@@ -654,8 +654,10 @@ public:
     int maxTexturesPerLoad = 0;
     // What the load has had (accounted when a request goes on to the read, noteMapAssetRead, and after it,
     // noteMapAssetResult).
-    int reads = 0;                      // requests that went on to the storage read, every role: at most
-                                        // 3 + maxTexturesPerLoad
+    int reads = 0;                      // requests that went on to the storage read, every role: the terrain roles' at
+                                        // most 3 + maxTexturesPerLoad, the world roles' (worldReads) apart
+    int worldReads = 0;                 // ... of them the world roles' (obj0Adt, wmoRoot, wmoGroup, wmoTexture): at most
+                                        // 1 + maxWmoModelsPerLoad + maxWmoGroupsPerLoad + maxWmoTexturesPerLoad
     bool tex0Asked = false;             // a tex0 ADT went on to the read: the only one this load may have
     int tex0FileDataID = 0;             // ... its FileDataID
     bool tex0Served = false;            // ... and it was answered "available" (its kind checked)
@@ -665,6 +667,30 @@ public:
                                         // still read, counted against maxTextureBytesPerLoad until their results come
     bool ended = false;                 // the player reported the load (terrainTileLoaded): nothing more is read for it
     QString endedStatus;                // ... the status it reported
+    // WORLD MODELS (protocol 16, docs/world-viewer/06-world-models-in-world.md): a world load (loadWorld) -- the tile and
+    // the world models its obj0 ADT places, or (globalWmo) a WMO-only map's one world model and no tile. The budgets it was
+    // sent with (0: none -- a loadTerrainTile, which is served no world-model file), and what it has had.
+    bool world = false;
+    bool globalWmo = false;
+    int globalWmoFileDataID = 0;        // the WDT's world model: the one root a WMO-only map's load may fetch (0: not known)
+    qint64 maxWmoFileBytes = 0;
+    qint64 maxWmoBytesPerLoad = 0;
+    qint64 maxWmoTextureBytes = 0;
+    qint64 maxWmoTextureBytesPerLoad = 0;
+    int maxWmoTexturesPerLoad = 0;
+    int maxWmoModelsPerLoad = 0;
+    int maxWmoGroupsPerLoad = 0;
+    bool obj0Asked = false;             // the tile's obj0 ADT went on to the read: the only one this load may have
+    int obj0FileDataID = 0;
+    bool obj0Served = false;            // ... answered "available" (its kind checked)
+    std::vector<int> wmoRootIds;        // the world-model roots that went on to the read, each once
+    int wmoRootsServed = 0;             // ... answered "available" (their kind checked)
+    std::vector<int> wmoGroupIds;       // the group files that went on to the read, each once
+    std::vector<int> wmoTextureIds;     // the world-model textures that went on to the read, each once
+    qint64 wmoBytesRead = 0;            // root and group bytes read, kind failures included: at most maxWmoBytesPerLoad
+    qint64 wmoBytesReserved = 0;        // the limits of the root and group reads in flight
+    qint64 wmoTextureBytesRead = 0;     // world-model texture bytes read: at most maxWmoTextureBytesPerLoad
+    qint64 wmoTextureBytesReserved = 0; // the limits of those reads in flight
   };
   // What getMapAsset decided before anything is read: state "" goes on to the read (at most maxBytes), "refused" or
   // "stale" is the answer.
@@ -684,14 +710,23 @@ public:
   // before, or past maxTexturesPerLoad ids; and for every role a read past 3 + maxTexturesPerLoad for the load, and for a
   // texture once maxTextureBytesPerLoad bytes were read -- all refused. The read's limit: maxAssetBytes, for a texture the
   // smaller of maxTextureBytes and what is left of maxTextureBytesPerLoad.
+  // WORLD MODELS (protocol 16): "obj0Adt", "wmoRoot", "wmoGroup" and "wmoTexture" are served to a world load only (a
+  // loadTerrainTile's is refused), and a WMO-only map's load has no tile (its "rootAdt", "tex0Adt", "texture" and
+  // "obj0Adt" are refused). The obj0 ADT once, after the WDT; a root after the obj0 was served (a WMO-only map's: after
+  // the WDT, and only the WDT's world model when it is known), each once, at most maxWmoModelsPerLoad; a group file or a
+  // texture after a root was served, each once, at most maxWmoGroupsPerLoad and maxWmoTexturesPerLoad; root and group
+  // bytes within maxWmoBytesPerLoad, texture bytes within maxWmoTextureBytesPerLoad (the reads in flight reserved). The
+  // reads a world load may make grow by 1 + those three counts. The read's limit: maxAssetBytes for the obj0, the smaller
+  // of maxWmoFileBytes (maxWmoTextureBytes) and what is left of the load's bytes for the others.
   static MapAssetDecision decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current, int epochNow,
                                                 bool catalogueBelongs, bool clientLoading);
   // The accounting of a request the decision let through, before its read (the read counted, the tex0 or texture id
   // taken), and after it (bytesRead: what the read read, kind failures included; available: the answer, its kind checked).
   static void noteMapAssetRead(TerrainRequest & current, const QJsonObject & request);
   static void noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available);
-  // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; nothing for the other
-  // roles): "" when it is that kind, else what was found, the answer's detail.
+  // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; WORLD MODELS: "obj0Adt"
+  // MVER then MDDF, "wmoRoot" MVER then MOHD, "wmoGroup" MVER then MOGP, "wmoTexture" BLP2; nothing for the other roles):
+  // "" when it is that kind, else what was found, the answer's detail.
   static QString mapAssetKindProblem(const QString & role, const QByteArray & bytes);
   // Show one terrain tile: refused, 0 with why, unless a client is loaded (and none is loading), the player draws terrain,
   // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
@@ -703,11 +738,18 @@ public:
   // camera (protocol 15, the Maps viewer's Enter world): where the player puts its free camera when the tile is shown.
   int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected = false,
                          const UnityIpcServer::WorldCamera * camera = nullptr);
+  // THE WORLD (protocol 16): a world load, sent as loadWorld with the world-model budgets -- the tile and the world models
+  // its obj0 ADT places, or (globalWmo) a WMO-only map's one world model and no tile (tileX and tileY ignored;
+  // globalWmoFileDataID the WDT's world model, the one root the load may fetch, 0 when not known). Refused as
+  // RequestTerrainTile is, and without a protocol-16 player. The rest as RequestTerrainTile.
+  int RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
+                   bool wdtInspected = false, const UnityIpcServer::WorldCamera * camera = nullptr);
   // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with
   // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect), unless
   // wdtInspected and the catalogue's inspection of it is Available.
+  // noTile (a WMO-only map's world load): no tile is named (tileX and tileY -1, not checked).
   bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why,
-                          bool wdtInspected = false);
+                          bool wdtInspected = false, bool noTile = false);
   // Take the terrain away (clearTerrain): false when there is no player that draws terrain.
   bool ClearTerrain(const QString & reason);
   // THE MAP ASSET WORKER (docs/world-viewer/04b-asset-serving.md), the viewer's side, all on the GUI thread.
@@ -755,6 +797,11 @@ public:
   int m_mapAssetLeaseEpoch = 0;
   quint64 m_mapAssetLeaseGeneration = 0;
   void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
+  // worldShown (protocol 16): the current world load's scene is on screen (its world models may still be loading).
+  void OnWorldShown(const UnityIpcServer::WorldShown & shown);
+  // RequestTerrainTile and RequestWorld: one load sent (world: as loadWorld).
+  int RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
+                  bool wdtInspected, const UnityIpcServer::WorldCamera * camera);
   // The headless terrain test's "staleload" step: a newer load the player never gets (the serial raised, the request
   // moved to it, nothing sent).
   void TerrainTestRaiseLoadWithoutSending();

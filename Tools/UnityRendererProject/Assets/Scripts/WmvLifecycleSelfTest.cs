@@ -4184,6 +4184,7 @@ public static partial class WmvLifecycleSelfTest
         TerrainMapRoutingTests(log);
         TerrainMaterialTests(log);
         TerrainMapsViewerTests(log);
+        TerrainWorldModelTests(log);
         int meshesAfter = Resources.FindObjectsOfTypeAll<Mesh>().Length;
         int materialsAfter = Resources.FindObjectsOfTypeAll<Material>().Length;
         int texturesAfter = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
@@ -5491,8 +5492,8 @@ public static partial class WmvLifecycleSelfTest
             ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
-            Check(WmvIpcClient.ProtocolVersion == 15, "terrain ipc: the player speaks protocol 15 (13 added terrain textures, 14 the Maps viewer, " +
-                  "15 its overhead map and free camera)", log);
+            Check(WmvIpcClient.ProtocolVersion == 16, "terrain ipc: the player speaks protocol 16 (13 added terrain textures, 14 the Maps viewer, " +
+                  "15 its overhead map and free camera, 16 world models in the world)", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +
@@ -5577,7 +5578,7 @@ public static partial class WmvLifecycleSelfTest
                                      "\"terrainPendingRequests\":1,\"terrainRetiredRequests\":3,\"terrainRetiredTotal\":37," +
                                      "\"terrainLastRetiredRequest\":\"map41\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted +
                                      ",\"mapAnswersDropped\":4,\"mapAnswersLate\":3,\"mapAnswersUnowned\":1,\"terrainTimeoutMs\":3000," +
-                                     "\"terrainTextures\":0,\"terrainTextureBytes\":0,\"terrainAlphaArrays\":0}") &&
+                                     "\"terrainTextures\":0,\"terrainTextureBytes\":0,\"terrainAlphaArrays\":0,") &&
                   ipc.MapAnswersRouted == 2 && noneLine.Contains(",\"terrainLastRetiredRequest\":\"\",") &&
                   JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainLastRetiredRequest == "map41" &&
                   JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainRetiredTotal == 37,

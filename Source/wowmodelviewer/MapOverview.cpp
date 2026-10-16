@@ -65,12 +65,22 @@ void MapOverview::Refresh2()
   const int id = m_maps->mapId();
   const QString name = id < 0 ? QString() : (m_maps->mapName().isEmpty() ? m_maps->mapDirectory() : m_maps->mapName());
   m_title->SetLabel(id < 0 ? wxString(_("Maps")) : wxString::Format(wxT("%s  [%d]"), qs(name), id));
-  m_hint->Show(m_maps->hasGrid() && m_maps->tilesAvailable() > 0);
-  m_wholeBox->Enable(m_maps->hasGrid());
+  // A WMO-only map: its footprint, not the grid.
+  const wxString hint = m_maps->worldModelMap() ? _("Click the world model to set where to enter it; double-click to enter it "
+                                                    "there. Enter world without a target starts inside it.")
+                                                : _("Click the map to set where to enter the world; double-click to enter it "
+                                                    "there. The wheel zooms, a drag moves.");
+  if (m_hint->GetLabel() != hint)
+    m_hint->SetLabel(hint);
+  m_hint->Show((m_maps->hasGrid() && m_maps->tilesAvailable() > 0) || m_maps->hasFootprint());
+  m_wholeBox->Enable(m_maps->hasGrid() && !m_maps->worldModelMap());
   QString why;
   const bool canEnter = m_maps->canEnter(why);
   m_enter->Enable(canEnter);
-  m_enter->SetToolTip(canEnter ? _("Load the world at the target and put the free camera there") : qs(why));
+  m_enter->SetToolTip(canEnter ? (m_maps->worldModelMap() && !m_maps->hasTarget()
+                                    ? _("Load the world model and put the free camera at its start point")
+                                    : _("Load the world at the target and put the free camera there"))
+                               : qs(why));
   m_enter->Show(m_maps->hasGrid());
   QString target = m_maps->hasTarget() ? "Target: " + m_maps->targetLine() : QString();
   if (m_maps->entering())
@@ -87,7 +97,10 @@ void MapOverview::HoverChanged()
 {
   const int x = m_grid->hoverX(), y = m_grid->hoverY();
   QString text;
-  if (x >= 0 && m_maps->hasGrid())
+  double wx = 0.0, wy = 0.0;
+  if (m_maps->worldModelMap())
+    text = m_grid->footprintHover(wx, wy) ? QString("X %1  Y %2").arg(wx, 0, 'f', 1).arg(wy, 0, 'f', 1) : m_maps->statusLine();
+  else if (x >= 0 && m_maps->hasGrid())
   {
     text = QString("Tile %1, %2 (%3_%4): %5").arg(x).arg(y).arg(x).arg(y).arg(MapsViewer::stateName(m_maps->tileState(x, y)));
     const QString picture = m_maps->minimapState(x, y);

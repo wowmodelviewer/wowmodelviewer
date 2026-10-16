@@ -218,12 +218,29 @@ public class WmvRuntimeMapObject
     public static int Live { get { return live; } }
     static int live;
     bool disposed;
+    bool countedLive = true;
 
     public WmvRuntimeMapObject() { live++; }
 
+    /// <summary>A world model built as a prototype of the world scene (stage 06, WmvWorldModels) is not the Buildings
+    /// slot's: it leaves Live -- runtimeState's liveMapObjects, which the Buildings tests hold at 1 or 0 -- at once, and the
+    /// world scene counts it in its own tallies. Its Dispose then leaves Live alone.</summary>
+    public void LeaveLiveCount()
+    {
+        if (!disposed && countedLive)
+        {
+            countedLive = false;
+            live--;
+        }
+    }
+
     public void Dispose()
     {
-        if (!disposed) { disposed = true; live--; }
+        if (!disposed)
+        {
+            disposed = true;
+            if (countedLive) live--;
+        }
         if (Root != null) UnityEngine.Object.Destroy(Root);
         foreach (var m in Meshes) if (m != null) UnityEngine.Object.Destroy(m);
         foreach (var m in Materials) if (m != null) UnityEngine.Object.Destroy(m);

@@ -3054,7 +3054,7 @@ public static partial class WmvLifecycleSelfTest
             sent.Clear();
             ipc.ReportRuntimeState(11, new WmvIpcClient.RuntimeReport { MountKey = "", TerrainLastRetiredRequest = "", TerrainTextures = 10,
                                                                          TerrainTextureBytes = 655360, TerrainAlphaArrays = 1 });
-            Check(sent.Count == 1 && sent[0].EndsWith(",\"terrainTextures\":10,\"terrainTextureBytes\":655360,\"terrainAlphaArrays\":1}"),
+            Check(sent.Count == 1 && sent[0].Contains(",\"terrainTextures\":10,\"terrainTextureBytes\":655360,\"terrainAlphaArrays\":1,"),
                   "terrain ipc 13: runtimeState carries terrainTextures, terrainTextureBytes and terrainAlphaArrays", log);
         }
         finally
