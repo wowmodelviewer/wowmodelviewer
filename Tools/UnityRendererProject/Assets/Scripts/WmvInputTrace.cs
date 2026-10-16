@@ -99,6 +99,7 @@ public class WmvInputTrace : MonoBehaviour
             callWndProc = OnCallWndProc;
             getMessageHook = SetWindowsHookEx(WH_GETMESSAGE, getMessageProc, IntPtr.Zero, playerThread);
             callWndHook = SetWindowsHookEx(WH_CALLWNDPROC, callWndProc, IntPtr.Zero, playerThread);
+            Application.quitting += RemoveHooks;
         }
         Log(string.Format("on: player window {0} ({1}), parent {2}, its thread {3}, the main thread {4}; hooks {5} {6}",
                           Hex(playerWindow), ClassOf(playerWindow), Hex(playerWindow != IntPtr.Zero ? GetParent(playerWindow) : IntPtr.Zero),
@@ -108,10 +109,16 @@ public class WmvInputTrace : MonoBehaviour
 
     void OnDestroy()
     {
+        RemoveHooks();
+        if (instance == this) instance = null;
+    }
+
+    /// <summary>The hooks removed -- when the trace goes and as the player quits (a hook left in place hangs the exit).</summary>
+    void RemoveHooks()
+    {
         if (getMessageHook != IntPtr.Zero) UnhookWindowsHookEx(getMessageHook);
         if (callWndHook != IntPtr.Zero) UnhookWindowsHookEx(callWndHook);
         getMessageHook = callWndHook = IntPtr.Zero;
-        if (instance == this) instance = null;
     }
 
     /// <summary>The player's own window (WmvKeyboardFocus finds it: the child of the -parentHWND window of this process).</summary>

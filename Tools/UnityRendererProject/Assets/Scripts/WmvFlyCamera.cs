@@ -154,7 +154,9 @@ public class WmvFlyCamera : MonoBehaviour
 
     void OnDisable()
     {
-        // The world view left (or the overview chosen): no key carries over to the next flight.
+        // The world view left (or the overview chosen): no key carries over to the next flight, and presses are no longer
+        // watched (the hook is removed: left in place it hung the player's exit).
+        WmvKeyboardFocus.StopWatching();
         gate = new KeyGate();
         heldKeys = countedKeys = 0;
         hasKeyboard = false;

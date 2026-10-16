@@ -39,11 +39,15 @@ public static class WmvKeyboardFocus
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr parent, EnumWindowsProc proc, IntPtr lParam);
     [DllImport("user32.dll")] static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+    [DllImport("user32.dll")] static extern bool UnhookWindowsHookEx(IntPtr hhk);
     [DllImport("user32.dll")] static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
     [DllImport("kernel32.dll")] static extern uint GetCurrentProcessId();
 
     const int WH_GETMESSAGE = 3;
+    const uint WM_ACTIVATE = 0x0006, WA_ACTIVE = 1;
     const uint WM_LBUTTONDOWN = 0x0201, WM_RBUTTONDOWN = 0x0204, WM_MBUTTONDOWN = 0x0207;
+    static bool quitHooked;
 
     static IntPtr playerWindow, pressHook;
     static HookProc pressProc;          // kept alive: the hook calls it
@@ -88,10 +92,16 @@ public static class WmvKeyboardFocus
         return found;
     }
 
-    /// <summary>From now on, note every mouse press taken from the queue for the player's window (once; the hook only
-    /// notes, the message goes on unchanged).</summary>
+    /// <summary>From now on, note every mouse press taken from the queue for the player's window (the hook only notes, the
+    /// message goes on unchanged), until StopWatching -- which the free camera calls when it stops, and the player calls
+    /// as it quits: a hook left in place made every exit hang until the host terminated the player (3 s).</summary>
     public static void WatchPresses()
     {
+        if (!quitHooked)
+        {
+            quitHooked = true;
+            Application.quitting += StopWatching;
+        }
         if (pressHook != IntPtr.Zero)
             return;
         IntPtr w = PlayerWindow;
@@ -117,6 +127,15 @@ public static class WmvKeyboardFocus
         return CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
     }
 
+    /// <summary>No more noting of presses (the hook removed).</summary>
+    public static void StopWatching()
+    {
+        if (pressHook != IntPtr.Zero)
+            UnhookWindowsHookEx(pressHook);
+        pressHook = IntPtr.Zero;
+        pressSeen = false;
+    }
+
     /// <summary>Was a mouse button pressed in the player's window since the last call?</summary>
     public static bool TakePressSeen()
     {
@@ -136,19 +155,27 @@ public static class WmvKeyboardFocus
     /// host's windows makes that possible). True when it has it afterwards.</summary>
     public static bool TakeKeyboard(string why)
     {
-        if (HasKeyboard())
-            return true;
         IntPtr w = PlayerWindow;
         if (w == IntPtr.Zero)
             return false;
-        SetFocus(w);
+        bool had = HasKeyboard();
+        if (!had)
+            SetFocus(w);
         bool has = HasKeyboard();
-        Debug.Log("WMV: [input] the player's window " + (has ? "took the keyboard" : "could not take the keyboard") + " (" + why + ")");
+        // The player's window activated, as the documented embedding (-parentHWND) asks of the host: a child window is never
+        // sent WM_ACTIVATE by Windows, and the player keeps its own idea of being the active window. Sent on every press
+        // that gives it the keyboard, never WA_INACTIVE (the mouse must keep working in the other viewers).
+        if (has)
+            SendMessage(w, WM_ACTIVATE, new IntPtr(WA_ACTIVE), IntPtr.Zero);
+        if (!had)
+            Debug.Log("WMV: [input] the player's window " + (has ? "took the keyboard and was activated" : "could not take the keyboard") +
+                      " (" + why + ")");
         return has;
     }
 #else
     public static IntPtr PlayerWindow { get { return IntPtr.Zero; } }
     public static void WatchPresses() { }
+    public static void StopWatching() { }
     public static bool TakePressSeen() { return false; }
     public static bool HasKeyboard() { return Application.isFocused; }
     public static bool TakeKeyboard(string why) { return Application.isFocused; }
