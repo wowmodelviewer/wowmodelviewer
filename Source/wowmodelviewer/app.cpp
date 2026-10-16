@@ -10202,6 +10202,26 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       };
       if (fc->fileTree->GetRootItem().IsOk())
         find(fc->fileTree->GetRootItem());
+      // A map in a group not opened yet has no row (its rows are made when it is opened: FileControl::FillMapGroup): the
+      // closed groups are opened in turn, as a user opens one, until the map's row is there; the others are closed again.
+      QString opened;
+      if (!row.IsOk() && fc->fileTree->GetRootItem().IsOk())
+      {
+        const wxTreeItemId root = fc->fileTree->GetRootItem();
+        wxTreeItemIdValue cookie;
+        for (wxTreeItemId g = fc->fileTree->GetFirstChild(root, cookie); g.IsOk() && !row.IsOk();
+             g = fc->fileTree->GetNextChild(root, cookie))
+        {
+          if (!fc->fileTree->ItemHasChildren(g) || fc->fileTree->IsExpanded(g))
+            continue;
+          fc->fileTree->Expand(g);
+          find(g);
+          if (row.IsOk())
+            opened = QString(", its group opened (%1 rows)").arg((int)fc->fileTree->GetChildrenCount(g, false));
+          else
+            fc->fileTree->Collapse(g);
+        }
+      }
       if (!row.IsOk())
       {
         tally.check(label + ": the map's row is listed", false, QString("no row for MapID %1").arg(id));
@@ -10213,8 +10233,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       fc->fileTree->GetBoundingRect(row, r, true);
       postClick((HWND)fc->fileTree->GetHWND(), wxPoint(r.x + std::min(r.width / 2, 40), r.y + r.height / 2));
       const bool picked = pumpUntil([&]() { return maps->mapId() == id; }, 5000);
-      tally.check(label + ": a click on its row picks the map", picked, QString("picked %1, row at %2,%3").arg(maps->mapId())
-                                                                         .arg(r.x).arg(r.y));
+      tally.check(label + ": a click on its row picks the map", picked, QString("picked %1, row at %2,%3%4").arg(maps->mapId())
+                                                                         .arg(r.x).arg(r.y).arg(opened));
     }
     else if (kind == "waitgrid")
     {
