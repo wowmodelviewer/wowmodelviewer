@@ -48,6 +48,7 @@
 #include "UiIcons.h"
 
 #include <map>
+#include <string>
 #include <tuple>
 
 namespace
@@ -113,8 +114,10 @@ namespace UiIcons
     auto found = cache.find(key);
     if (found != cache.end())
       return found->second;
-    const wxScopedCharBuffer svg = svgFor(Sources[index], colour, sizeDip).utf8_str();
-    wxBitmapBundle b = wxBitmapBundle::FromSVG(svg.data(), wxSize(sizeDip, sizeDip));
+    // The text as a string of its own: utf8_str() lends a buffer the wxString owns, so on the temporary that
+    // svgFor returns it would point to freed memory -- the heap's own links over "<svg xmlns", and no icon.
+    const std::string svg = svgFor(Sources[index], colour, sizeDip).utf8_string();
+    wxBitmapBundle b = wxBitmapBundle::FromSVG(svg.c_str(), wxSize(sizeDip, sizeDip));
     cache[key] = b;
     return b;
   }

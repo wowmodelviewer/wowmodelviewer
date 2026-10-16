@@ -16,6 +16,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **A tabard's lower flaps stuck out over a robe's skirt (#48).** With a robe, or legs with a skirt (a kilt), the
   tabard's flaps were still drawn, and their edges poked out over the skirt at the hips. As in the game, a skirt
   now hides the flaps, and the tabard shows on the chest only. A robe whose display has no skirt keeps them.
+- **A button of the viewer selector sometimes showed no icon.** Now and then one button in the command bar (Models
+  on some screens, Maps on others) lost its icon for the whole session, while its label stayed. The icon's drawing
+  was read from memory the viewer had already released, so whether it survived was down to chance. Every button
+  now shows its icon (the known issue listed for 1.1).
 
 ## [1.1] — 2026-10-14
 
