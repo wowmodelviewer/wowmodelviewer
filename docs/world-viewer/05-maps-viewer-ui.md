@@ -333,8 +333,10 @@ tile's edge (the dark background) -- those are the later milestones of `roadmap.
   made-up name. A name is Map.db2's `MapName_lang`, in the storage's locale. A map whose name is empty is listed by its
   directory.
 - **Listing.** `FileControl::InitMaps` runs on the GUI thread over the catalogue's in-memory rows, with no file read. It
-  lists 1,187 Retail maps in 15 to 16 ms (final suite). It runs when Maps is entered, on a search, and after a client
-  load completes, in the load's deferred step: inside `LoadWoW` the client does not count as active yet.
+  groups the 1,187 Retail maps and makes the rows of the groups open at the listing (the 744 tile-grid maps while
+  browsing) in 6 to 9 ms; a closed group's rows are made when it is first opened (section 13.1; 15 to 16 ms for every
+  row before). It runs when Maps is entered, on a search, and after a client load completes, in the load's deferred
+  step: inside `LoadWoW` the client does not count as active yet.
 - **States respected.** The groups come from the catalogue's own fields (`WdtReference::Kind`, `statedWdtForm()`) and the
   storage root's listing, never from a guess. A row is not a promise that terrain exists: whether the WDT can be read
   is found when the map is picked (section 5). What its tiles are comes from the WDT itself, through the player's parser.
@@ -649,13 +651,15 @@ after, no request sent, no framing, and a failed rebuild leaving the old tile wh
 ## 13. GUI responsiveness
 
 All times are GUI-thread milliseconds on this computer (Ryzen 9 9950X3D), PROVEN_RUNTIME, final suite unless named.
+The rows that name section 13.1 were measured again with the follow-up of 2026-10-16 (its own runs and the whole suite
+re-run on its build).
 "GUI round" is one poll plus one pass of the wx queue in the harness's pump (`g_pumpBusy`), so it also contains
 handling the harness did not cause.
 
 | Operation | Measured |
 |---|---|
-| Browse lists the maps (1,187 Retail) | 15 to 16 ms (`InitMaps`, inside one frozen pass) |
-| Entering Maps (the whole switch) | 92 to 184 ms (the most is a run's first entry); of it 43-88 ms is the tree control's thaw after the list is made (profiled in an earlier build of this branch; entering Models costs 49 to 77 ms, Buildings 35 to 46 ms after its first entry; the first entries of Textures and Buildings cost 596 and 342 to 451 ms building their own catalogues) |
+| Browse lists the maps (1,187 Retail; section 13.1) | 6 to 9 ms, median 7.0 (`InitMaps`, inside one frozen pass: every map grouped, the rows of the open groups made, 744 while browsing); 11.1 ms in the same runs before the follow-up, 15 to 16 ms in this stage's final suite. A closed group's rows when it is first opened: 228 in 2.1 ms, 110 in 1.0 ms |
+| Entering Maps (the whole switch; section 13.1) | Median 57.6 ms (53 to 65) entering again with no map picked, 83.4 ms (75 to 102) a run's first entry, about 72 ms with a map picked; before the follow-up 95.1 (87 to 114), 115.8 and about 115 ms in the same interleaved runs, and 92 to 184 ms over this stage's final suite. Of an entry, the tree's thaw is 11 to 15 ms (45 to 57 before). Entering Models costs 50.5 ms in the same runs (50.8 before), Buildings 35 to 46 ms after its first entry; the first entries of Textures and Buildings cost 596 and 342 to 451 ms building their own catalogues |
 | A map picked (`SelectMap`) | 0.15 ms; the GUI update that follows (panel, overhead map, labels) at most 58 ms (median 6.9 ms over 454 updates) |
 | The WDT read (worker, not GUI) | median 0.51, p95 0.79, at most 9.62 ms (972) over every Retail WDT the census read |
 | The tile table (player round trip; the player handles messages once a frame, at the display's refresh rate since PR #114) | median 25.2, p95 33.5, at most 45.8 ms (972) (Retail census) |
@@ -669,7 +673,7 @@ handling the harness did not cause.
 | The tile put on screen (the player's own phases of a load: parse, mesh build, upload, first frame drawn) | parse 1.2 ms, mesh build 8.1 ms, upload 7.7 ms (at most 18.5), first frame 24.7 ms (at most 36.9): medians over 44 loads |
 | The camera moved (`look`: setWorldCamera to worldCameraApplied) | median 16.0, p95 31.0, at most 32.0 ms (18) |
 | A display mode applied (click to the player's answer; its rebuild) | median 29.4, p95 32.1, at most 32.1 ms (8) |
-| The longest single GUI round during the whole Retail run | 452 ms (the mode switches; outside them 79 ms: clearing the search, where Browse re-lists 1,187 maps, 71 ms of it the list) |
+| The longest single GUI round during the whole Retail run | 452 ms (the mode switches; outside them 79 ms: clearing the search, where Browse re-lists 1,187 maps, 71 ms of it the list). With the follow-up (section 13.1): 505 ms (the first switch to Buildings, which builds its catalogue); outside the mode switches 65 ms (a tile load); clearing the search 43 ms |
 | The catalogue scan of 1,187 maps (one pick after another, pictures cancelled by each next pick) | 67.8 s, the longest GUI round 69.1 ms |
 
 Nothing of the Maps viewer reads CASC on the GUI thread: the WDT and the minimap pictures are read by the worker (the
@@ -684,10 +688,74 @@ batch is now given from a 10 ms timer (a window message, so the chain ends at ea
 the viewer's results a poll (`MAP_VIEWER_RESULTS_PER_POLL`), and the overhead map repaints at most every 100 ms while
 pictures come. Each paint takes 14-18 ms at a whole-map fit. Over the same Retail map the longest round fell to 21 ms in that profiling run (the final suite's rounds are in the table above; a Retail round while pictures come also holds the paint of the whole map, 14-18 ms).
 
-**Not acceptable, and documented: entering Maps** costs 92-184 ms in one GUI round, about twice a switch to Models.
-The cost is the native tree control re-laying out 1,187 freshly inserted rows when the frozen window is thawed. A lazy
-list (rows of a group added on expand) would remove most of it. That is a follow-up (`roadmap.md`, milestone 08 names
-it), not done here.
+**Entering Maps was not acceptable as this stage left it**: 92-184 ms in one GUI round, about twice a switch to
+Models. Section 13.1 is the follow-up that cut it.
+
+### 13.1 Entering Maps: the lazy list (follow-up, 2026-10-16)
+
+Branch `world/05b-lazy-map-list`, on develop `438111b5` (this stage, merged). PROVEN_RUNTIME on hidden desktops, the
+harness's window messages only. "Before" is a build without the follow-up, "after" the same build with it, run in turns
+so that the computer's load (other work ran on it) fell on both alike. The profile and the tables below were taken on
+`6b280039`, before this stage's keyboard work (section 22); the follow-up rebased onto `438111b5` was measured again
+(the end of this section).
+
+**The cause, profiled** (timers around the switch, each window's thaw timed on its own; a temporary probe build):
+
+- Entering Maps cost 88 to 110 ms of switch, of it 45 to 57 ms the thaw of Browse; the list itself 10 to 12 ms.
+- The native tree control measures every row it holds, rows in closed groups and rows it measured before included,
+  each time scrolling is turned back on, and each time the redraw is turned on while scrolling is on: about 20 us a
+  row. A freeze and thaw of the 1,191 rows already on screen cost 44 to 58 ms again. With the tile-grid group closed
+  but its rows made, the thaw still cost 46 to 51 ms; with the rows of the closed groups not made (744 rows), 21 to 28 ms.
+- wxTreeCtrl freezes with the redraw off and scrolling off (TVS_NOSCROLL), and thaws scrolling first, then the redraw:
+  two passes (each 20 to 30 ms for 1,191 rows, once 45 and 52). The redraw turned on while scrolling is still off took
+  0.01 ms; scrolling on after it was the one pass.
+- Without horizontal scrolling the thaw took under 10 ms, but 914 of the 1,187 labels are wider than the tree in the
+  test layout with their indent (median 306 px, at most 719, against a 230 px client area), so horizontal scrolling stays. The pass is the
+  control's own measuring: one notification reaches wx during it.
+
+**The change:**
+
+1. A group's rows are made when it is opened (`FileControl::FillMapGroup`). The listing groups every map, as before,
+   and makes the rows of the groups open at the listing (the tile-grid maps while browsing, every group of a search)
+   and of the group of the map picked, whose row is picked again and shown. The other groups show their chevron and
+   get their rows on their first opening. The groups, their counts, the search (name, directory, MapID with the exact
+   map pinned first, Enter opens it), the selection, each mode's search and the re-list after a client switch are as
+   before. The harness's `pick:` opens the closed groups in turn, as a user opens one, until the map's row is there.
+2. Browse's tree thaws in one pass (`BrowseTree`, `filecontrol.cpp`): the redraw first, then scrolling; an
+   EnsureVisible asked while frozen is put off until the thaw, as wxTreeCtrl's own thaw does. It is the one tree of
+   Browse, so every viewer's thaw is a pass shorter.
+
+**Measured** (the `modes` sequence of the final suite, 4 runs of each build in turns, no map picked; then 2 runs each
+with Eastern Kingdoms picked; the longest GUI round of each mode step):
+
+| | Before | After |
+|---|---|---|
+| Maps, entered again (no map picked), 8 entries | median 95.1 ms (87 to 114) | median 57.6 ms (53 to 65) |
+| Maps, a run's first entry, 4 entries | median 115.8 ms (114 to 164) | median 83.4 ms (75 to 102) |
+| Maps, entered again with Eastern Kingdoms picked, 8 entries | 101 to 125 ms (median about 115) | 63 to 78 ms (median about 72) |
+| Models in the same runs, 16 entries | median 50.8 ms | median 50.5 ms |
+| `InitMaps` in a Maps entry | median 11.1 ms | median 7.0 ms |
+| The tree's thaw in a Maps entry (probe builds) | 45 to 57 ms | 11 to 15 ms |
+| Clearing the search (Retail suite, the step's longest round) | 79 ms | 43 ms |
+
+Over every run of the day, quiet or not (19 before, 12 after), the medians were 97.9 against 64.4 ms entering again
+and 120.5 against 93.4 ms for a first entry. Entering Maps again now costs a few milliseconds more than entering
+Models (it was twice). What is left: the open tile-grid group is one pass of the native control over 744 rows (11 to
+15 ms); a run's first entry also makes the Maps panel (21 to 31 ms more of the switch); an entry with a map picked also
+repaints the overhead map.
+
+**Checked:** every run of the final suite (section 15.1) on the follow-up's build, PASS with the same counts: Retail
+129, Era 28, MoP 25 and 16, Beta 20, `backlog` 26, `retailscan` 4, `switch` 52, `holdclose` 9 (and the shutdown check
+9), `modes` 13, `repeat` 93. Browse photographed in every viewer (a Models, a Buildings and a Textures search and their
+clearing, a Maps search by name and by MapID, a closed group opened, Models and Maps again), twice with each build:
+the trees are the same pixel for pixel. The differences between pictures, among runs of either build too, are the
+Maps tool's icon (section 18), the search box's caret, a viewport notice drawn while it was still laying out, and how
+many minimap pictures had come.
+
+**Re-checked after the rebase onto `438111b5`** (with the keyboard work of section 22; the player built from it): 4 runs
+of each build in turns, entering Maps again median 94.1 ms (92 to 99) before, 56.1 ms (53 to 65) after; a run's first
+entry 117.7 against 82.7 ms; Models 52.2 against 49.6 ms; `InitMaps` 11.3 against 6.8 ms. The suite again PASS with the
+same counts, and Browse photographed in every viewer the same on both builds.
 
 ## 14. Memory
 
@@ -731,6 +799,7 @@ it), not done here.
 | Back to map after the pictures came behind the world; the free camera with the target on another tile (stays on the tile on screen); Back to map while a tile loads (the world stays behind the overhead map) | `backlog` | **PASS** (26 passed, 0 failed) |
 | Repeated entering and memory | `repeat` | **PASS** (93 passed, 0 failed) |
 | Viewer-mode switching | `modes` | **PASS** (13 passed, 0 failed) |
+| Entering Maps after the follow-up (13.1): the `modes` sequence in turns with the build before, the suite re-run, Browse photographed in every viewer | `modes`, the suite, a Browse sequence | **PASS**: every suite run with the same counts; entering Maps again median 57.6 ms (95.1 before); the Browse trees identical |
 | Stage 03/04/04B worker battery (W) | `-terraintile`, 6 runs | **PASS**, 6 of 6 |
 | Stage 03/04 harness battery (H: late answers, switches, lifecycle, protocol-12 player) | 12 runs | 11 of 12 **PASS**. `H_B_missingtex0` fails for an environment reason: the tex0 it expects to be missing (5862455) is installed now, so "unavailable" cannot be reproduced (SKIP, as in 04B) |
 | Geometry dumps vs the 04B host, same data | 6 tiles, 3 clients | **PASS**, 6 of 6 dumps byte-identical (Beta 32_48 against the reference host re-run on today's Beta data: the install updated from 70374 to 70425 between the parts) |
@@ -866,7 +935,9 @@ camera, with missing fields handled and a wrong-sized minimap table refused.
   (W, A, S, D, Shift, Q, E, Space, Alt) and the stale-key case by hand.
 - **While the 3D view has the keyboard, the app's own keys** (F5-F10, Ctrl shortcuts, F11, Esc in fullscreen) go to the
   player: a click in any of the app's panels gives them back (22.7).
-- **Entering Maps** takes 92-184 ms of GUI time (section 13). A lazy list is a follow-up.
+- **Entering Maps** costs a median 58 ms of GUI time entering again, 83 ms a run's first entry (section 13.1; 92-184 ms
+  before the follow-up), a few milliseconds more than Models. Left: one pass of the native tree over the 744 tile-grid
+  rows, the Maps panel made on the first entry, and the overhead map's repaint when a map is picked.
 - **No real "not downloaded", "not in client files" or "no root ADT" tile** exists on this computer (section 5.4).
 - **The player keeps the last model or world model across a client switch** (hidden; inherited, not Maps-specific).
 - **Outgoing IPC buffering** (04b 18.2) is still bounded only for the shipped player's requests. The new messages are
@@ -902,8 +973,8 @@ camera, with missing fields handled and a wrong-sized minimap table refused.
     where that puts the model in the world is 06's to establish).
   - The 04B worker reads one file at a time (FIFO); the pictures already show the need to keep the viewer's reads from
     starving the player's (batches, none while a tile loads).
-- **What to fix first.** The transport-wide send cap (04b 18.2), the Maps entry cost (lazy list), the player's retained
-  model across a client switch, and the keyboard question of section 9 (a manual check).
+- **What to fix first.** The transport-wide send cap (04b 18.2), the player's retained model across a client switch,
+  and the keyboard question of section 9 (a manual check). (The Maps entry cost was cut by the follow-up, 13.1.)
 
 ## 20. Grades
 
@@ -957,7 +1028,7 @@ keys, the panel's fields, buttons and choices, on the viewer's own event paths.
 | Client switching (all four clients, held read included) | PASS | section 12 |
 | GUI responsiveness: no CASC read or decode on the GUI thread | PASS | section 13 |
 | GUI responsiveness: the pictures | PASS | section 13 (a stall found and fixed) |
-| GUI responsiveness: entering Maps | FAIL (documented) | 92-184 ms in one GUI round; a lazy list is the follow-up |
+| GUI responsiveness: entering Maps | PASS (follow-up, 13.1) | was FAIL at 92-184 ms in one GUI round; now a median 57.6 ms entering again (Models 50.5 ms in the same runs), 83.4 ms a run's first entry |
 | IPC buffering: no new periodic source | PASS | section 18 |
 | IPC buffering: the transport-wide cap (04b 18.2) | not in scope | inherited, recorded |
 | Geometry and material outputs unchanged | PASS | section 16 |

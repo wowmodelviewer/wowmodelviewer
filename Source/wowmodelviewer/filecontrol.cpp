@@ -91,6 +91,71 @@ void beautifyFileName(QString & file)
   }
 }
 
+namespace
+{
+  // THE BROWSE TREE: the native tree control, thawed in one pass over its rows rather than two.
+  // wxTreeCtrl's freeze turns the redraw off and scrolling off (TVS_NOSCROLL: rows added meanwhile do not update the
+  // scroll bars one by one); its thaw turns scrolling back on, then the redraw. The native control measures every row it
+  // holds -- in closed folders too, and rows it measured before -- each time scrolling is turned on, and each time the
+  // redraw is turned on while scrolling is on: about 20 us a row on the test computer, so wx's thaw of the 1,187 Retail
+  // maps took 44 to 58 ms, two passes of 20 to 30 ms. The redraw turned on first, while scrolling is still off, took
+  // 0.01 ms; scrolling on is then the one pass (docs/world-viewer/05-maps-viewer-ui.md, section 13).
+  class BrowseTree : public wxTreeCtrl
+  {
+  public:
+    using wxTreeCtrl::wxTreeCtrl;
+
+    // wxTreeCtrl puts off an EnsureVisible asked while frozen until its own thaw, which this thaw replaces: put off here.
+    void EnsureVisible(const wxTreeItemId & item) override
+    {
+      if (IsFrozen())
+        m_ensureVisible.push_back(item);
+      else
+        wxTreeCtrl::EnsureVisible(item);
+    }
+    // A row put off for EnsureVisible may go before the thaw: none is kept past a deletion.
+    void Delete(const wxTreeItemId & item) override
+    {
+      m_ensureVisible.clear();
+      wxTreeCtrl::Delete(item);
+    }
+    void DeleteChildren(const wxTreeItemId & item) override
+    {
+      m_ensureVisible.clear();
+      wxTreeCtrl::DeleteChildren(item);
+    }
+    void DeleteAllItems() override
+    {
+      m_ensureVisible.clear();
+      wxTreeCtrl::DeleteAllItems();
+    }
+
+  protected:
+    void DoThaw() override
+    {
+      // wxWindow's thaw: the redraw on and the window refreshed (nothing for a hidden window, which its freeze left
+      // alone) -- scrolling still off.
+      wxTreeCtrlBase::DoThaw();
+      // Scrolling back on: the one pass.
+      const HWND tree = (HWND)GetHWND();
+      const LONG_PTR style = ::GetWindowLongPtr(tree, GWL_STYLE);
+      if (style & TVS_NOSCROLL)
+        ::SetWindowLongPtr(tree, GWL_STYLE, style & ~(LONG_PTR)TVS_NOSCROLL);
+      if (!IsFrozen() && !m_ensureVisible.empty())
+      {
+        std::vector<wxTreeItemId> items;
+        items.swap(m_ensureVisible);
+        for (const wxTreeItemId & item : items)
+          if (item.IsOk())
+            wxTreeCtrl::EnsureVisible(item);
+      }
+    }
+
+  private:
+    std::vector<wxTreeItemId> m_ensureVisible;
+  };
+}
+
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
 {
   modelviewer = NULL;
@@ -118,7 +183,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 
     // The tree in the Explorer style (chevrons, hover, the soft selection), on the pane's own colour with
     // no border of its own (the pane has one), rows a little taller than the native minimum.
-    fileTree = new wxTreeCtrl(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize,
+    fileTree = new BrowseTree(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize,
                               wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_FULL_ROW_HIGHLIGHT |
                               wxTR_NO_LINES | wxTR_TWIST_BUTTONS | wxBORDER_NONE);
     fileTree->EnableSystemTheme();
@@ -714,6 +779,21 @@ void FileControl::OnTreeItemExpanding(wxTreeEvent &event)
     m_textures->expanding(item);
     return;
   }
+  if (m_mode == ViewerMode::Maps)
+  {
+    // A Maps group opened the first time: its rows. (Its first row says whether they are made: counting them walks them.)
+    wxTreeItemIdValue cookie;
+    if (fileTree->GetFirstChild(item, cookie).IsOk())
+      return;
+    QElapsedTimer timer;
+    timer.start();
+    FillMapGroup(item, -1);
+    FileTreeData * data = dynamic_cast<FileTreeData *>(fileTree->GetItemData(item));
+    if (data && data->mapGroup >= 0 && data->mapGroup < (int)m_mapGroups.size())
+      LOG_INFO << "[maps] Browse made the" << (int)m_mapGroups[data->mapGroup].size() << "row(s) of a group opened in"
+               << timer.nsecsElapsed() / 1e6 << "ms";
+    return;
+  }
   FileTreeData * data = (FileTreeData *)fileTree->GetItemData(item);
   if (data && data->node)
     data->node->appendChildren(fileTree);
@@ -1205,6 +1285,12 @@ void FileControl::FollowViewerMode(ViewerMode mode)
     m_textures->rememberOpenFolders();
   else if (m_mode != ViewerMode::Maps)   // the map list is listed again on the way back (a fraction of a millisecond)
     keepTree(treeState());
+  else
+  {
+    // The maps' groups go with their rows (the next mode's listing, below, takes the rows), and so does the catalogue.
+    m_mapGroups.clear();
+    m_mapsCatalog.reset();
+  }
   // Each mode's search is what its tree shows, not text typed and not run: that one could be a
   // 1-character search over every model, which takes seconds.
   m_search[slot(m_mode)] = m_applied[slot(m_mode)];
@@ -1263,6 +1349,16 @@ namespace
     }
     return GroupUnknown;
   }
+
+  // A map's row: "name  [MapID]", and its directory when the name is not the directory; a map with no name by its directory.
+  wxString mapLabel(const wow::MapEntry & e)
+  {
+    const QString name = e.name.isEmpty() ? e.directory : e.name;
+    QString t = name + QString("  [%1]").arg(e.id);
+    if (!e.name.isEmpty() && e.directory.compare(e.name, Qt::CaseInsensitive) != 0)
+      t += "  " + e.directory;
+    return wxString(t.toStdWString());
+  }
 }
 
 void FileControl::InitMaps(const QString & content)
@@ -1274,6 +1370,8 @@ void FileControl::InitMaps(const QString & content)
   fileTree->Freeze();
   clearRows();
   m_mapsListed = 0;
+  m_mapGroups.clear();
+  m_mapsCatalog.reset();
   if (!catalog || !UnityAssetAccess::hasActiveClient())
   {
     fileTree->Thaw();
@@ -1308,26 +1406,24 @@ void FileControl::InitMaps(const QString & content)
       return !pathsNamed || folder.storageRootEntryByPath(e.wdt.path).listed;
     return false;
   };
-  std::vector<const wow::MapEntry *> groups[GroupCount];
+  m_mapsCatalog = catalog;
+  m_mapGroups.assign(GroupCount, std::vector<const wow::MapEntry *>());
+  std::vector<std::vector<const wow::MapEntry *>> & groups = m_mapGroups;
   const wow::MapEntry * pinned = nullptr;
   for (const wow::MapEntry & e : catalog->maps())
   {
     if (wantedId >= 0 && e.id == wantedId)
       pinned = &e;
     bool all = true;
-    const QString name = e.name.toLower(), dir = e.directory.toLower();
-    for (const QString & w : words)
-      all = all && (name.contains(w) || dir.contains(w) || (numeric && QString::number(e.id) == w));
+    if (!words.isEmpty())
+    {
+      const QString name = e.name.toLower(), dir = e.directory.toLower();
+      for (const QString & w : words)
+        all = all && (name.contains(w) || dir.contains(w) || (numeric && QString::number(e.id) == w));
+    }
     if (all)
       groups[groupOf(e, listed(e))].push_back(&e);
   }
-  const auto label = [](const wow::MapEntry & e) {
-    const QString name = e.name.isEmpty() ? e.directory : e.name;
-    QString t = name + QString("  [%1]").arg(e.id);
-    if (!e.name.isEmpty() && e.directory.compare(e.name, Qt::CaseInsensitive) != 0)
-      t += "  " + e.directory;
-    return wxString(t.toStdWString());
-  };
   const wxTreeItemId root = fileTree->AddRoot(wxT("Maps"));
   wxTreeItemId select;
   MapsViewer * maps = g_modelViewer->maps();
@@ -1336,28 +1432,35 @@ void FileControl::InitMaps(const QString & content)
   {
     FileTreeData * d = new FileTreeData(nullptr);
     d->mapId = pinned->id;
-    const wxTreeItemId row = fileTree->AppendItem(root, label(*pinned), -1, -1, d);
+    const wxTreeItemId row = fileTree->AppendItem(root, mapLabel(*pinned), -1, -1, d);
     if (pinned->id == picked)
       select = row;
   }
+  // A GROUP'S ROWS ARE MADE WHEN IT IS OPENED. The native tree measures every row it holds at each thaw, in closed groups
+  // too (about 20 us a row: BrowseTree), so the rows of a closed group would cost every entry into Maps unseen. Made now:
+  // the groups open at the listing (the tile-grid maps while browsing, every group of a search) and the group of the map
+  // picked, whose row is picked again and shown; another group's rows when it is opened (OnTreeItemExpanding).
   for (int g = 0; g < GroupCount; g++)
   {
     if (groups[g].empty())
       continue;
+    FileTreeData * gd = new FileTreeData(nullptr);
+    gd->mapGroup = g;
     const wxTreeItemId group = fileTree->AppendItem(root, wxString::Format(wxT("%s  (%d)"), groupNames[g], (int)groups[g].size()),
-                                                    -1, -1, new FileTreeData(nullptr));
-    for (const wow::MapEntry * e : groups[g])
+                                                    -1, -1, gd);
+    m_mapsListed += (int)groups[g].size();
+    const bool open = g == GroupTerrain || !content.isEmpty();
+    const bool holdsPicked = picked >= 0 && std::any_of(groups[g].begin(), groups[g].end(),
+                                                         [picked](const wow::MapEntry * e) { return e->id == picked; });
+    if (open || holdsPicked)
     {
-      FileTreeData * d = new FileTreeData(nullptr);
-      d->mapId = e->id;
-      const wxTreeItemId row = fileTree->AppendItem(group, label(*e), -1, -1, d);
-      if (g != GroupTerrain)
-        fileTree->SetItemTextColour(row, UiStyle::palette().textSecondary);
-      if (e->id == picked && !select.IsOk())
+      const wxTreeItemId row = FillMapGroup(group, picked);
+      if (!select.IsOk())
         select = row;
-      m_mapsListed++;
     }
-    if (g == GroupTerrain || !content.isEmpty())
+    else
+      fileTree->SetItemHasChildren(group, true);
+    if (open)
       fileTree->Expand(group);
   }
   if (select.IsOk())
@@ -1380,6 +1483,28 @@ void FileControl::InitMaps(const QString & content)
                                                  : wxString::Format(_("%d map(s) match."), m_mapsListed));
   LOG_INFO << "[maps] Browse listed" << m_mapsListed << "map(s) of" << (int)catalog->maps().size() << "for the search \"" << content
            << "\" in" << m_mapsListMs << "ms";
+}
+
+wxTreeItemId FileControl::FillMapGroup(wxTreeItemId group, int picked)
+{
+  wxTreeItemId pickedRow;
+  FileTreeData * gd = group.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(group)) : nullptr;
+  wxTreeItemIdValue cookie;
+  if (!gd || gd->mapGroup < 0 || gd->mapGroup >= (int)m_mapGroups.size() || fileTree->GetFirstChild(group, cookie).IsOk())
+    return pickedRow;
+  // Every group's rows but the tile-grid maps' in the secondary colour (section 4: unavailable or unsupported maps).
+  const bool secondary = gd->mapGroup != GroupTerrain;
+  for (const wow::MapEntry * e : m_mapGroups[gd->mapGroup])
+  {
+    FileTreeData * d = new FileTreeData(nullptr);
+    d->mapId = e->id;
+    const wxTreeItemId row = fileTree->AppendItem(group, mapLabel(*e), -1, -1, d);
+    if (secondary)
+      fileTree->SetItemTextColour(row, UiStyle::palette().textSecondary);
+    if (e->id == picked && !pickedRow.IsOk())
+      pickedRow = row;
+  }
+  return pickedRow;
 }
 
 void FileControl::SelectMapRow(wxTreeItemId item)

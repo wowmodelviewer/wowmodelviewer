@@ -10,9 +10,12 @@ class ModelViewer;
 #include <wx/treectrl.h> // wxTreeItemId
 #include <wx/timer.h>    // wxTimer for debounced as-you-type search
 
+#include <memory>
 #include <set>
 #include <utility>
 #include <vector>
+
+namespace wow { struct MapEntry; class WorldMapCatalog; }
 
 class wxSearchCtrl;
 class wxStaticText;
@@ -32,6 +35,9 @@ public:
   int lookupFileDataId = 0;
   // A Maps row (no file, no node): the map's MapID; -1 on every other row (a Maps group row too).
   int mapId = -1;
+  // A Maps group row: its group, whose rows are made when it is first opened (FileControl::FillMapGroup); -1 on every
+  // other row.
+  int mapGroup = -1;
   FileTreeData(GameFile * f, TreeStackItem * n = 0): file(f), node(n) {}
 };
 
@@ -245,6 +251,8 @@ private:
   // know), each "name [MapID]"; a search matches every word in the name or the directory, and a number is a MapID,
   // its map pinned first.
   void InitMaps(const QString & content);
+  // A Maps group's rows, made now unless they are made already; the row of the map picked when it is one of them.
+  wxTreeItemId FillMapGroup(wxTreeItemId group, int picked);
   void SelectMapRow(wxTreeItemId item);
   void SelectTextureRow(wxTreeItemId item);
   void ShowTextureMenu(wxTreeItemId item);
@@ -288,6 +296,10 @@ private:
   MapTilePanel * m_mapPanel = nullptr;
   double m_mapsListMs = -1.0;
   int m_mapsListed = 0;
+  // The maps listed: each group's, in Browse's order, and the catalogue they belong to (kept with them while Maps shows
+  // them). A group's rows are made when it is opened: the groups open at the listing at once, the others on demand.
+  std::shared_ptr<wow::WorldMapCatalog> m_mapsCatalog;
+  std::vector<std::vector<const wow::MapEntry *>> m_mapGroups;
 };
 
 #endif
