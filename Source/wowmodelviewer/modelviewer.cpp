@@ -6333,6 +6333,16 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
   // panels paint -- or, behind a notice, it went at the end of the freeze. Going to Textures it is taken off screen
   // after the repaint, so the texture view -- raised above it, but no cover while it is on screen -- is already
   // painted when it goes.
+  // THE MAPS VIEWER'S WORLD VIEW left for Models or Buildings: the keyboard its free camera took (a press in the
+  // viewport, WmvKeyboardFocus.cs) comes back to Browse's search box, as those viewers have it -- their player does not
+  // fly, and the app's own keys must work again. (Going to Textures, the texture view covers the player and the
+  // keyboard leaves it then.) The move waits on the player's thread for one of its frames.
+  if (previous == ViewerMode::Maps && !textures && unityRendererHost && unityRendererHost->playerHasKeyboard())
+  {
+    wxWindow * to = fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen() ? (wxWindow *)fileControl->txtContent
+                                                                                                         : (wxWindow *)this;
+    unityRendererHost->takeKeyboardFromPlayer(to);
+  }
   // A window that had the keyboard and was put away while frozen keeps it (a hidden window's hide moves
   // the focus away only when Windows sees it hidden, and frozen it already reads so): the keyboard to
   // Browse's search box, or the frame. Not the player's window (seen here as its frame): it keeps the keyboard,

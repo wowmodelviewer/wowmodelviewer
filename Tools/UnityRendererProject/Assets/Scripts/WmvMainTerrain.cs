@@ -93,6 +93,11 @@ public partial class WmvMain
         if (fly == null)
             fly = cam.gameObject.AddComponent<WmvFlyCamera>();
         fly.enabled = false;
+        if (WmvInputTrace.Requested())
+        {
+            gameObject.AddComponent<WmvInputTrace>();
+            WmvInputTrace.CameraLine = TraceCameraLine;
+        }
         terrainViewMode = new WmvTerrainViewMode(orbit, cam) { Fly = fly };
         terrain = new WmvTerrainSession(new MainTerrainView(this), ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded,
                                         s => Debug.Log("WMV: " + s),
@@ -196,6 +201,39 @@ public partial class WmvMain
                                 r.Status == "applied" && r.Mode == "fly" ? string.Format(System.Globalization.CultureInfo.InvariantCulture,
                                     "; at ({0:0.###}, {1:0.###}, {2:0.###}), Unity {3}", r.X, r.Y, r.Z, fly.transform.position) : ""));
         return r;
+    }
+
+    /// <summary>The free camera for the input trace (WmvInputTrace): "" while it is off; else its state (the keys, the input
+    /// it read), "|", and where it is -- in the game's world frame when a tile is on screen.</summary>
+    string TraceCameraLine()
+    {
+        if (fly == null || !fly.enabled)
+            return "";
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        WmvFlyCamera.FlyInput k = fly.LastKeys;
+        string state = string.Format(ci, "free camera; the keyboard {0}; keys held {1}, counted {2}; input forward {3} right {4} up {5} speed x{6}",
+                                     fly.HasKeyboard ? "is the player's" : "is not the player's", WmvFlyCamera.KeyNames(fly.HeldKeys),
+                                     WmvFlyCamera.KeyNames(fly.CountedKeys), k.Forward, k.Right, k.Up, k.SpeedFactor);
+        double x, y, z;
+        string where = FlyWorldPosition(out x, out y, out z) ? string.Format(ci, "world ({0:0.00}, {1:0.00}, {2:0.00})", x, y, z)
+                                                             : "Unity " + fly.transform.position.ToString("F2");
+        return state + "|" + where + string.Format(ci, " yaw {0:0.0} pitch {1:0.0}", fly.Current.Yaw, fly.Current.Pitch);
+    }
+
+    /// <summary>The free camera's position in the game's world frame: the inverse of WorldToUnity on the shown tile's mesh
+    /// origin, relative to its root ((ux, uy, uz) = (-(y - o.Y), z - o.Z, x - o.X)).</summary>
+    bool FlyWorldPosition(out double x, out double y, out double z)
+    {
+        x = y = z = 0.0;
+        WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
+        TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
+        if (tile == null || tile.Root == null || mesh == null)
+            return false;
+        Vector3 u = fly.transform.position - tile.Root.transform.position;
+        x = u.z + mesh.Origin.X;
+        y = mesh.Origin.Y - u.x;
+        z = u.y + mesh.Origin.Z;
+        return true;
     }
 
     /// <summary>Is world point (x, y) on tile (tileX, tileY)? Its north-west corner and the tile size (TerrainLayout.cs).</summary>

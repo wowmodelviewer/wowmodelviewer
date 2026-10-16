@@ -10406,6 +10406,75 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                   QString("overview %1, content shown %2, the world's tile %3_%4").arg(maps->showsOverview() ? 1 : 0)
                     .arg(frame->unityRendererHost->isShowingContent() ? 1 : 0).arg(maps->shownTileX()).arg(maps->shownTileY()));
     }
+    else if (kind == "focusinfo")
+    {
+      // focusinfo[:player|host]: where the keyboard is, in the input trace's words -- the focus window of the input queue
+      // this thread shares with the player's window, the active and foreground windows -- checked when asked.
+      UnityRendererHost * h = frame->unityRendererHost;
+      const QString focus = h->describeWindow(::GetFocus());
+      rec["focus"] = focus;
+      rec["active"] = h->describeWindow(::GetActiveWindow());
+      rec["foreground"] = h->describeWindow(::GetForegroundWindow());
+      rec["playerHasKeyboard"] = h->playerHasKeyboard();
+      LOG_INFO << "[input] harness: the keyboard is in" << focus << "; active" << rec["active"].toString() << "; foreground"
+               << rec["foreground"].toString();
+      if (arg == "player" || arg == "host")
+        tally.check(label + (arg == "player" ? ": the keyboard is in the player's window" : ": the keyboard is in the host's windows"),
+                    h->playerHasKeyboard() == (arg == "player"), focus);
+    }
+    else if (kind == "keypost" || kind == "keyplayer")
+    {
+      // keypost:<key>:<down|up>: the key's message as the system posts it, to the window that has the keyboard (keypost),
+      // or to the player's window whatever has it (keyplayer). Posted, so the system's own key state does not change: a
+      // stand-in for the keyboard's messages, not the keyboard (docs/world-viewer/05-maps-viewer-ui.md section 22).
+      const QString key = arg.section(':', 0, 0).toLower();
+      const bool down = arg.section(':', 1, 1).toLower() != "up";
+      const UINT vk = key == "space" ? VK_SPACE : key == "shift" ? VK_SHIFT : key.size() == 1 ? (UINT)key.toUpper()[0].unicode() : 0;
+      const HWND target = kind == "keyplayer" ? frame->unityRendererHost->playerWindow() : ::GetFocus();
+      const UINT scan = ::MapVirtualKeyW(vk == VK_SHIFT ? VK_LSHIFT : vk, MAPVK_VK_TO_VSC);
+      const LPARAM lp = (LPARAM)(1u | (scan << 16) | (down ? 0u : (3u << 30)));
+      const bool posted = vk != 0 && target && ::PostMessageW(target, down ? WM_KEYDOWN : WM_KEYUP, vk, lp);
+      rec["target"] = frame->unityRendererHost->describeWindow(target);
+      LOG_INFO << "[input] harness posted" << (down ? "WM_KEYDOWN" : "WM_KEYUP") << key << "to" << rec["target"].toString();
+      tally.check(label + ": posted", posted, rec["target"].toString());
+      pump(50);
+    }
+    else if (kind == "clickplayer")
+    {
+      // A left press and release posted to the player's window at its middle: what its own window procedure does with
+      // them. (The system's own handling of a real click -- the activation, the parent's notification -- is not part of it.)
+      const HWND p = frame->unityRendererHost->playerWindow();
+      RECT r = { 0, 0, 0, 0 };
+      if (p)
+        ::GetClientRect(p, &r);
+      const LPARAM at = MAKELPARAM((r.right - r.left) / 2, (r.bottom - r.top) / 2);
+      const bool posted = p && ::PostMessageW(p, WM_LBUTTONDOWN, MK_LBUTTON, at) && ::PostMessageW(p, WM_LBUTTONUP, 0, at);
+      LOG_INFO << "[input] harness posted a left press and release to" << frame->unityRendererHost->describeWindow(p);
+      pump(300);
+      tally.check(label + ": posted", posted, frame->unityRendererHost->describeWindow(p));
+    }
+    else if (kind == "focushost")
+    {
+      // focushost:search|target: the keyboard to Browse's search box or the target's X field, as a click there gives it;
+      // the player's window must not keep it (nothing typed there may move the camera).
+      wxWindow * w = arg == "target" ? (wxWindow *)fc->mapPanel()->targetField(0) : (wxWindow *)fc->txtContent;
+      if (w)
+        w->SetFocus();
+      pump(200);
+      tally.check(label + ": the field has the keyboard, the player's window not", w && !frame->unityRendererHost->playerHasKeyboard(),
+                  frame->unityRendererHost->describeWindow(::GetFocus()));
+    }
+    else if (kind == "focusplayer")
+    {
+      // The keyboard given to the player's window directly: ::SetFocus from this thread, whose input queue the player's
+      // window shares (what the viewport panel does when it is given the keyboard).
+      const HWND p = frame->unityRendererHost->playerWindow();
+      if (p)
+        ::SetFocus(p);
+      pump(200);
+      tally.check(label + ": the player's window has the keyboard", frame->unityRendererHost->playerHasKeyboard(),
+                  frame->unityRendererHost->describeWindow(::GetFocus()));
+    }
     else if (kind == "camera")
     {
       // camera:fly|overview: the panel's Camera choice, as the control reports a pick; then the player's answer.
@@ -11171,6 +11240,11 @@ bool WowModelViewApp::OnInit()
       break;
     }
   }
+  // -inputtrace: the keyboard path traced in this process and the player's (UnityRendererHost::inputTrace), known before
+  // the frame starts the player.
+  for (int ai = 1; ai < argc; ai++)
+    if (QString::fromWCharArray(argv[ai]) == "-inputtrace")
+      UnityRendererHost::inputTrace = true;
 
   // THE THEME, before the first window (the splash): wxWidgets' dark mode is decided once, for the
   // whole run, and only before any window exists. So the appearance is read from Config.ini here

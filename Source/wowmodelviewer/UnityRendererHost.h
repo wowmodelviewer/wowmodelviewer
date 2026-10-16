@@ -32,6 +32,8 @@
 #endif
 #include <wx/timer.h>
 
+#include <QString>
+
 #ifdef _WINDOWS
 #include <windows.h>
 #include <wx/msw/winundef.h>
@@ -161,6 +163,11 @@ public:
   // The keyboard is in the player's window. Asked without asking that window anything: wxWindow::FindFocus sends it
   // WM_GETDLGCODE to find a wx window for it, which waits on the player's thread (once per frame it draws).
   bool playerHasKeyboard();
+  // The keyboard taken from the player's window to `to` (one of this process's windows), when the player has it: the Maps
+  // viewer's free camera takes it on a press in the viewport (WmvKeyboardFocus.cs), and a viewer left for one that does
+  // not fly gives it back. The move waits on the player's thread (it is sent the focus change) -- not for one Windows
+  // considers hung: that player keeps it until a click elsewhere. True when the keyboard moved.
+  bool takeKeyboardFromPlayer(wxWindow * to);
   // A viewer switch ending on a notice (held): the player's frame off screen now, at the end of the freeze -- the
   // old workspace stays whole until then, and the switch's repaint paints the notice where it was. Its release finds
   // it done. True when it was on screen until now: paintPlainNow once the freeze is over.
@@ -170,6 +177,18 @@ public:
   // the player's window, which show from the moment it goes until this panel paints. The notice follows with the
   // next paint. Not while the content window covers it (it is what shows there).
   void paintPlainNow();
+
+  // THE KEYBOARD TRACE (-inputtrace on the app's command line, docs/world-viewer/05-maps-viewer-ui.md section 22): the
+  // player is started with -wmvInputTrace (WmvInputTrace.cs), and this process logs, as "[input]" lines, the keyboard
+  // messages its own thread takes and the focus and activation messages its windows are sent, so a key can be followed
+  // from the window that had the keyboard to the player's input. Set before the first launch.
+  static bool inputTrace;
+#ifdef _WINDOWS
+  // The player's window, null while there is none (the trace and the harness).
+  HWND playerWindow() { return findEmbeddedWindow(); }
+  // A window in the trace's words: "player <hwnd>", a wx window's name and class, another process's, or "none".
+  QString describeWindow(HWND hwnd);
+#endif
 
 private:
   void OnSize(wxSizeEvent & event);
@@ -252,6 +271,12 @@ private:
   // The player's top-level-turned-child window inside this panel (found lazily: the
   // player creates it asynchronously after process start).
   HWND findEmbeddedWindow();
+  // The keyboard trace's hooks on this thread (inputTrace), set up with the panel and removed with it.
+  void startInputTrace();
+  void stopInputTrace();
+  // The keyboard handed on by this panel or its frame (OnSetFocus): to the content window, the player, or kept; logged
+  // when tracing.
+  void handKeyboardOn(const char * from);
 
   HANDLE m_process = nullptr; // owned; nullptr when no player has been launched
   DWORD  m_processId = 0;

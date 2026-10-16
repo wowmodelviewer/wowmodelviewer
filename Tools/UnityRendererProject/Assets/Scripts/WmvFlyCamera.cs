@@ -8,19 +8,25 @@
 // CONTROLS -- the mouse alone is enough:
 //   left or right drag      look around (yaw, pitch; pitch held within +-89 degrees)
 //   wheel                   fly forwards / backwards along the view: a quarter second at the current speed per notch
-//   W A S D, arrow keys     forwards, left, backwards, right    } once a press in the viewport has given it the keys
-//   E or Space, Q or C      up, down (the world's vertical)     }
+//   W A S D, arrow keys     forwards, left, backwards, right    } while the player's window has the keyboard, which a
+//   E or Space, Q or C      up, down (the world's vertical)     } press in the viewport gives it
 //   Shift, Alt              four times faster, a quarter as fast
 //
 // INPUT, as WmvOrbitCamera's header measured it for a player embedded in the host's window: position and buttons from the
 // legacy Input Manager, the wheel from the Input System. Buttons and the wheel are device state, seen even over the
-// host's other panels, so a drag counts only when its press started over the viewport, and the wheel only over it. The
-// keys are read from both backends; whether they reach a player embedded in another process's window is measured in
-// 05-maps-viewer-ui.md, not assumed. They count only after a press inside the viewport and until a press outside it -- the
-// player has no other sign of having the keyboard -- so typing in Browse's search box never moves the camera.
+// host's other panels, so a drag counts only when its press started over the viewport, and the wheel only over it.
 //
-// STEP. Everything that moves the camera is a pure function (Step) of the state, one frame's input and the frame time,
-// so the self-test drives it without input devices.
+// THE KEYS (measured, 05-maps-viewer-ui.md section 22; WmvKeyboardFocus): both backends read them from Raw Input, which
+// Windows gives only to the thread with the keyboard focus -- and embedded, the focus stays in the host's windows unless
+// the player's window takes it. So a mouse press in the player's window takes the keyboard (WmvKeyboardFocus: a press
+// message for that window, not a press the backends report while the pointer is over the viewport's rectangle, where a
+// host dialog or menu may lie), and keys count only while the player's window has it: typing in Browse's search box or
+// the target fields (the host's windows have the keyboard then) never moves the camera. A key already held when the
+// keyboard comes counts only once it has been seen released (GateKeys): its release may have gone to another window, so
+// the backends may still report it held, and a key released must never keep the camera moving.
+//
+// STEP. Everything that moves the camera is a pure function (Step, GateKeys, ApplyKeys) of the state, one frame's input
+// and the frame time, so the self-test drives it without input devices.
 
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -74,21 +80,84 @@ public class WmvFlyCamera : MonoBehaviour
         return s;
     }
 
+    /// <summary>The movement keys as bits (ReadKeys, GateKeys, ApplyKeys).</summary>
+    public const uint KeyForward = 1, KeyBack = 2, KeyLeft = 4, KeyRight = 8, KeyUp = 16, KeyDown = 32, KeyFast = 64, KeySlow = 128;
+
+    /// <summary>What GateKeys remembers between frames: did the player's window have the keyboard, and which keys held when
+    /// it got it have not been seen released since.</summary>
+    public struct KeyGate
+    {
+        public bool HadKeyboard;
+        public uint Waiting;
+    }
+
+    /// <summary>The keys that count this frame: none without the keyboard; with it, the keys held, but not one that was
+    /// already held when the keyboard came until it has been seen released.</summary>
+    public static uint GateKeys(ref KeyGate g, bool hasKeyboard, uint held)
+    {
+        if (!hasKeyboard)
+        {
+            g.HadKeyboard = false;
+            g.Waiting = 0;
+            return 0;
+        }
+        if (!g.HadKeyboard)
+        {
+            g.HadKeyboard = true;
+            g.Waiting = held;
+        }
+        g.Waiting &= held;
+        return held & ~g.Waiting;
+    }
+
+    /// <summary>The movement a set of keys asks for (opposite keys together cancel).</summary>
+    public static void ApplyKeys(ref FlyInput i, uint keys)
+    {
+        i.Forward = ((keys & KeyForward) != 0 ? 1f : 0f) - ((keys & KeyBack) != 0 ? 1f : 0f);
+        i.Right = ((keys & KeyRight) != 0 ? 1f : 0f) - ((keys & KeyLeft) != 0 ? 1f : 0f);
+        i.Up = ((keys & KeyUp) != 0 ? 1f : 0f) - ((keys & KeyDown) != 0 ? 1f : 0f);
+        i.SpeedFactor = (keys & KeyFast) != 0 ? FastFactor : (keys & KeySlow) != 0 ? SlowFactor : 1f;
+    }
+
     State state;
     Vector3 lastMouse;
-    bool haveLastMouse, leftWasHeld, rightWasHeld, dragFromViewport, keysGiven;
+    bool haveLastMouse, leftWasHeld, rightWasHeld, dragFromViewport, hasKeyboard;
+    KeyGate gate;
+    uint heldKeys, countedKeys;
+    FlyInput lastKeys;
 
     public State Current { get { return state; } }
+    /// <summary>For the input trace (WmvInputTrace): did the player's window have the keyboard, the keys the backends report
+    /// held and the keys that counted, last frame, and the input they made.</summary>
+    public bool HasKeyboard { get { return hasKeyboard; } }
+    public uint HeldKeys { get { return heldKeys; } }
+    public uint CountedKeys { get { return countedKeys; } }
+    public FlyInput LastKeys { get { return lastKeys; } }
 
-    /// <summary>Put the camera at a Unity position, facing yaw and pitch (degrees); the speed starts over, the keys wait for
-    /// a press in the viewport.</summary>
+    /// <summary>Put the camera at a Unity position, facing yaw and pitch (degrees); the speed starts over, and a key held now
+    /// counts only once released.</summary>
     public void Place(Vector3 position, float yaw, float pitch)
     {
         state = new State { Position = position, Yaw = Mathf.Repeat(yaw, 360f), Pitch = Mathf.Clamp(pitch, -MaxPitch, MaxPitch), Speed = DefaultSpeed };
         haveLastMouse = false;
         dragFromViewport = false;
-        keysGiven = false;
+        gate = new KeyGate();
         ApplyToTransform();
+    }
+
+    void OnEnable()
+    {
+        // Presses in the player's window from now on; one made before the flight began does not count.
+        WmvKeyboardFocus.WatchPresses();
+        WmvKeyboardFocus.TakePressSeen();
+    }
+
+    void OnDisable()
+    {
+        // The world view left (or the overview chosen): no key carries over to the next flight.
+        gate = new KeyGate();
+        heldKeys = countedKeys = 0;
+        hasKeyboard = false;
     }
 
     void ApplyToTransform()
@@ -113,10 +182,11 @@ public class WmvFlyCamera : MonoBehaviour
         var i = new FlyInput { SpeedFactor = 1f };
         bool pressed = (leftHeld && !leftWasHeld) || (rightHeld && !rightWasHeld);
         if (pressed)
-        {
             dragFromViewport = over;
-            keysGiven = over;
-        }
+        // A press that reached the player's own window (not one the backends report while a host dialog or menu lies over
+        // the viewport): the keyboard to the 3D view.
+        if (WmvKeyboardFocus.TakePressSeen())
+            WmvKeyboardFocus.TakeKeyboard("a press in the 3D view, the free camera on");
         if (!leftHeld && !rightHeld)
             dragFromViewport = false;
         leftWasHeld = leftHeld;
@@ -131,8 +201,11 @@ public class WmvFlyCamera : MonoBehaviour
         haveLastMouse = true;
         if (over && Mathf.Abs(wheel) > 0.0001f)
             i.WheelNotches = wheel;
-        if (keysGiven)
-            ReadKeys(ref i);
+        hasKeyboard = WmvKeyboardFocus.HasKeyboard();
+        heldKeys = hasKeyboard ? ReadKeys() : 0u;
+        countedKeys = GateKeys(ref gate, hasKeyboard, heldKeys);
+        ApplyKeys(ref i, countedKeys);
+        lastKeys = i;
         if (i.LookX == 0f && i.LookY == 0f && i.Forward == 0f && i.Right == 0f && i.Up == 0f && i.WheelNotches == 0f)
             return;
         state = Step(state, i, Time.unscaledDeltaTime);
@@ -172,8 +245,8 @@ public class WmvFlyCamera : MonoBehaviour
 #endif
     }
 
-    /// <summary>The movement keys, from whichever backend sees them.</summary>
-    static void ReadKeys(ref FlyInput i)
+    /// <summary>The movement keys held, from whichever backend sees them, as Key bits.</summary>
+    static uint ReadKeys()
     {
         bool w = false, a = false, s = false, d = false, up = false, down = false, fast = false, slow = false;
 #if ENABLE_LEGACY_INPUT_MANAGER
@@ -200,9 +273,22 @@ public class WmvFlyCamera : MonoBehaviour
             slow |= k.altKey.isPressed;
         }
 #endif
-        i.Forward = (w ? 1f : 0f) - (s ? 1f : 0f);
-        i.Right = (d ? 1f : 0f) - (a ? 1f : 0f);
-        i.Up = (up ? 1f : 0f) - (down ? 1f : 0f);
-        i.SpeedFactor = fast ? FastFactor : slow ? SlowFactor : 1f;
+        return (w ? KeyForward : 0u) | (s ? KeyBack : 0u) | (a ? KeyLeft : 0u) | (d ? KeyRight : 0u) | (up ? KeyUp : 0u) |
+               (down ? KeyDown : 0u) | (fast ? KeyFast : 0u) | (slow ? KeySlow : 0u);
+    }
+
+    /// <summary>Key bits in words, for the trace: "forward left fast", or "none".</summary>
+    public static string KeyNames(uint keys)
+    {
+        var parts = new System.Collections.Generic.List<string>();
+        if ((keys & KeyForward) != 0) parts.Add("forward");
+        if ((keys & KeyBack) != 0) parts.Add("back");
+        if ((keys & KeyLeft) != 0) parts.Add("left");
+        if ((keys & KeyRight) != 0) parts.Add("right");
+        if ((keys & KeyUp) != 0) parts.Add("up");
+        if ((keys & KeyDown) != 0) parts.Add("down");
+        if ((keys & KeyFast) != 0) parts.Add("fast");
+        if ((keys & KeySlow) != 0) parts.Add("slow");
+        return parts.Count == 0 ? "none" : string.Join(" ", parts.ToArray());
     }
 }

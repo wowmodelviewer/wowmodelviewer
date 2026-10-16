@@ -18,7 +18,13 @@
 
 #include "logger/Logger.h"
 
+#ifdef _WINDOWS
+#include <wx/msw/private.h>
+#endif
+
 IMPLEMENT_CLASS(UnityRendererHost, wxPanel)
+
+bool UnityRendererHost::inputTrace = false;
 
 BEGIN_EVENT_TABLE(UnityRendererHost, wxPanel)
   EVT_SIZE(UnityRendererHost::OnSize)
@@ -344,13 +350,11 @@ UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
   // viewer's shortcuts). Never reached by Tab.
   m_playerFrame->DisableFocusFromKeyboard();
   m_playerFrame->Bind(wxEVT_SET_FOCUS, [this](wxFocusEvent & event) {
-    if (m_contentShown && m_content)
-      m_content->SetFocus();
-    else if (!m_notice && m_playerOnScreen && m_playerHold == 0)
-      if (HWND wnd = findEmbeddedWindow())
-        ::SetFocus(wnd);
+    handKeyboardOn("the player's frame");
     event.Skip();
   });
+  if (inputTrace)
+    startInputTrace();
 #endif
   m_ipc = new UnityIpcServer();
   m_noticeTimer.SetOwner(this);
@@ -358,6 +362,9 @@ UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 
 UnityRendererHost::~UnityRendererHost()
 {
+#ifdef _WINDOWS
+  stopInputTrace();
+#endif
   shutdown();
   delete m_ipc;
   m_ipc = nullptr;
@@ -396,6 +403,98 @@ namespace
     }
     return TRUE;
   }
+
+  // THE KEYBOARD TRACE's two hooks on this (the GUI) thread (inputTrace): the keyboard messages it takes from its queue,
+  // and the focus, activation and parent-notify messages its windows are sent. They only log; nothing is changed.
+  UnityRendererHost * g_traceHost = nullptr;
+  HHOOK g_traceGetMessage = nullptr, g_traceCallWnd = nullptr;
+
+  QString traceKeyName(WPARAM vk)
+  {
+    if (vk >= 'A' && vk <= 'Z')
+      return QString(QChar((char)vk));
+    switch (vk)
+    {
+      case VK_SHIFT: return "Shift";
+      case VK_CONTROL: return "Ctrl";
+      case VK_MENU: return "Alt";
+      case VK_SPACE: return "Space";
+      case VK_LEFT: return "Left";
+      case VK_UP: return "Up";
+      case VK_RIGHT: return "Right";
+      case VK_DOWN: return "Down";
+      case VK_RETURN: return "Enter";
+      case VK_TAB: return "Tab";
+      case VK_ESCAPE: return "Escape";
+    }
+    return QString("vk %1").arg((int)vk);
+  }
+
+  LRESULT CALLBACK traceGetMessage(int code, WPARAM wParam, LPARAM lParam)
+  {
+    if (code >= 0 && wParam == PM_REMOVE && g_traceHost)
+    {
+      const MSG * m = reinterpret_cast<const MSG *>(lParam);
+      const char * name = m->message == WM_KEYDOWN ? "WM_KEYDOWN" : m->message == WM_KEYUP ? "WM_KEYUP"
+                        : m->message == WM_SYSKEYDOWN ? "WM_SYSKEYDOWN" : m->message == WM_SYSKEYUP ? "WM_SYSKEYUP" : nullptr;
+      if (name)
+        LOG_INFO << "[input] host took" << name << traceKeyName(m->wParam) << ((m->lParam & (1 << 30)) && m->message == WM_KEYDOWN ? "(repeat)" : "")
+                 << "for" << g_traceHost->describeWindow(m->hwnd);
+      else if (m->message == WM_INPUT)
+      {
+        // Raw keyboard input this thread was given: input registered without a target window follows the keyboard focus,
+        // so a key meant for the player arrives here while one of this process's windows has the keyboard.
+        RAWINPUTHEADER h;
+        UINT size = sizeof(h);
+        if (::GetRawInputData((HRAWINPUT)m->lParam, RID_HEADER, &h, &size, sizeof(RAWINPUTHEADER)) != (UINT)-1 && h.dwType == RIM_TYPEKEYBOARD)
+          LOG_INFO << "[input] host took WM_INPUT (raw keyboard) for" << g_traceHost->describeWindow(m->hwnd);
+      }
+    }
+    return ::CallNextHookEx(nullptr, code, wParam, lParam);
+  }
+
+  LRESULT CALLBACK traceCallWnd(int code, WPARAM wParam, LPARAM lParam)
+  {
+    if (code >= 0 && g_traceHost)
+    {
+      const CWPSTRUCT * c = reinterpret_cast<const CWPSTRUCT *>(lParam);
+      if (c->message == WM_SETFOCUS)
+        LOG_INFO << "[input] host sent WM_SETFOCUS to" << g_traceHost->describeWindow(c->hwnd) << "(from"
+                 << g_traceHost->describeWindow((HWND)c->wParam) << ")";
+      else if (c->message == WM_KILLFOCUS)
+        LOG_INFO << "[input] host sent WM_KILLFOCUS to" << g_traceHost->describeWindow(c->hwnd) << "(to"
+                 << g_traceHost->describeWindow((HWND)c->wParam) << ")";
+      else if (c->message == WM_ACTIVATE)
+        LOG_INFO << "[input] host sent WM_ACTIVATE" << (LOWORD(c->wParam) == WA_INACTIVE ? "inactive" : "active") << "to"
+                 << g_traceHost->describeWindow(c->hwnd);
+      else if (c->message == WM_ACTIVATEAPP)
+        LOG_INFO << "[input] host sent WM_ACTIVATEAPP" << (c->wParam ? "active" : "inactive") << "to" << g_traceHost->describeWindow(c->hwnd);
+      else if (c->message == WM_PARENTNOTIFY && LOWORD(c->wParam) != WM_CREATE && LOWORD(c->wParam) != WM_DESTROY)
+        LOG_INFO << "[input] host sent WM_PARENTNOTIFY" << QString("0x%1").arg((int)LOWORD(c->wParam), 0, 16) << "to"
+                 << g_traceHost->describeWindow(c->hwnd);
+    }
+    return ::CallNextHookEx(nullptr, code, wParam, lParam);
+  }
+}
+
+QString UnityRendererHost::describeWindow(HWND hwnd)
+{
+  if (!hwnd)
+    return "none";
+  wchar_t cls[128] = { 0 };
+  ::GetClassNameW(hwnd, cls, 127);
+  const QString handle = QString("0x%1").arg((qulonglong)(uintptr_t)hwnd, 0, 16);
+  // The player's window as last found (not looked for again here: this is called from the hooks).
+  const HWND player = m_embeddedWnd && ::IsWindow(m_embeddedWnd) ? m_embeddedWnd : nullptr;
+  if (player && (hwnd == player || ::IsChild(player, hwnd)))
+    return QString(hwnd == player ? "player %1" : "player child %1").arg(handle);
+  DWORD pid = 0;
+  ::GetWindowThreadProcessId(hwnd, &pid);
+  if (pid != ::GetCurrentProcessId())
+    return QString("another process's %1 %2").arg(QString::fromWCharArray(cls)).arg(handle);
+  if (wxWindow * w = wxFindWinFromHandle((WXHWND)hwnd))
+    return QString("%1 (%2 %3)").arg(QString::fromStdWString(w->GetName().ToStdWstring())).arg(QString::fromWCharArray(cls)).arg(handle);
+  return QString("%1 %2").arg(QString::fromWCharArray(cls)).arg(handle);
 }
 
 bool UnityRendererHost::launch(bool selfTest)
@@ -447,6 +546,9 @@ bool UnityRendererHost::launch(bool selfTest)
   // Diagnostic runs only: ask the player to also probe the protocol's error paths.
   if (selfTest)
     cmdLine += wxT(" -wmvSelfTest");
+  // The keyboard trace in the player too (inputTrace).
+  if (inputTrace)
+    cmdLine += wxT(" -wmvInputTrace");
 
   STARTUPINFOW si;
   ZeroMemory(&si, sizeof(si));
@@ -644,6 +746,22 @@ bool UnityRendererHost::playerHasKeyboard()
   return wnd && focus && (focus == wnd || ::IsChild(wnd, focus));
 }
 
+bool UnityRendererHost::takeKeyboardFromPlayer(wxWindow * to)
+{
+  if (!to || !playerHasKeyboard())
+    return false;
+  if (::IsHungAppWindow(findEmbeddedWindow()))
+  {
+    LOG_INFO << "[input] the player's window keeps the keyboard: Windows considers it hung (a click elsewhere takes it)";
+    return false;
+  }
+  to->SetFocus();
+  if (inputTrace)
+    LOG_INFO << "[input] host took the keyboard from the player for" << describeWindow((HWND)to->GetHWND()) << "; it is now in"
+             << describeWindow(::GetFocus());
+  return true;
+}
+
 void UnityRendererHost::releaseKeyboardFromPlayer()
 {
   // On the next turn of the event loop -- which comes before the paint that is pending (wx runs these first) -- so
@@ -716,15 +834,53 @@ void UnityRendererHost::applyEmbeddedVisibility()
 
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event)
 {
+  handKeyboardOn("the viewport panel");
+  event.Skip();
+}
+
+void UnityRendererHost::handKeyboardOn(const char * from)
+{
   // Hand keyboard focus straight to the embedded player so its input works when the
   // pane is clicked/activated (not while it is off screen behind a notice or the content window -- the
   // content window takes it then -- nor while a switch holds it: the move waits on the player's thread).
   if (m_contentShown && m_content)
+  {
     m_content->SetFocus();
-  else if (!m_notice && m_playerOnScreen && m_playerHold == 0)
-    if (HWND wnd = findEmbeddedWindow())
-      ::SetFocus(wnd);
-  event.Skip();
+    if (inputTrace)
+      LOG_INFO << "[input] host:" << from << "got the keyboard: handed to the content window";
+    return;
+  }
+  const HWND wnd = !m_notice && m_playerOnScreen && m_playerHold == 0 ? findEmbeddedWindow() : nullptr;
+  if (wnd)
+    ::SetFocus(wnd);
+  if (inputTrace)
+    LOG_INFO << "[input] host:" << from << "got the keyboard:"
+             << (wnd ? "handed to the player" : m_notice ? "kept (a notice is up)" : !m_playerOnScreen ? "kept (the player is off screen)"
+                 : m_playerHold > 0 ? "kept (a viewer switch holds the player)" : "kept (no player window)")
+             << "; the keyboard is now in" << describeWindow(::GetFocus());
+}
+
+void UnityRendererHost::startInputTrace()
+{
+  g_traceHost = this;
+  g_traceGetMessage = ::SetWindowsHookExW(WH_GETMESSAGE, traceGetMessage, nullptr, ::GetCurrentThreadId());
+  g_traceCallWnd = ::SetWindowsHookExW(WH_CALLWNDPROC, traceCallWnd, nullptr, ::GetCurrentThreadId());
+  UINT registered = 0;
+  ::GetRegisteredRawInputDevices(nullptr, &registered, sizeof(RAWINPUTDEVICE));
+  LOG_INFO << "[input] host trace on (-inputtrace): hooks" << (g_traceGetMessage ? "getmessage" : "(no getmessage)")
+           << (g_traceCallWnd ? "callwndproc" : "(no callwndproc)") << "on thread" << (int)::GetCurrentThreadId()
+           << "; this process registers raw input for" << (int)registered << "device kind(s); the player is started with -wmvInputTrace";
+}
+
+void UnityRendererHost::stopInputTrace()
+{
+  if (g_traceGetMessage)
+    ::UnhookWindowsHookEx(g_traceGetMessage);
+  if (g_traceCallWnd)
+    ::UnhookWindowsHookEx(g_traceCallWnd);
+  g_traceGetMessage = g_traceCallWnd = nullptr;
+  if (g_traceHost == this)
+    g_traceHost = nullptr;
 }
 
 #else // !_WINDOWS
@@ -744,6 +900,7 @@ void UnityRendererHost::releaseKeyboardFromPlayer() {}
 void UnityRendererHost::takeKeyboardFromParkedPlayer() {}
 void UnityRendererHost::sizePlayerForLoad() {}
 bool UnityRendererHost::playerHasKeyboard() { return false; }
+bool UnityRendererHost::takeKeyboardFromPlayer(wxWindow *) { return false; }
 void UnityRendererHost::paintPlainNow() {}
 void UnityRendererHost::applyEmbeddedVisibility() {}
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event) { event.Skip(); }

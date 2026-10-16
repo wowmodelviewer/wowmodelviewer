@@ -13,7 +13,10 @@
 //   - protocol 15: the minimap ids (MAID word 7) at y * 64 + x and a world-model-only WDT's global WMO in the tile table;
 //     the camera fields of loadTerrainTile and setWorldCamera; the worldCameraApplied line; the ground under a point
 //     (TerrainHeight) against ramps known everywhere, holes and points off the tile; the world-to-Unity conversion the
-//     camera uses, against the mesh's own vertices; the free camera's step (WmvFlyCamera.Step) from synthetic input.
+//     camera uses, against the mesh's own vertices; the free camera's step (WmvFlyCamera.Step) from synthetic input, and
+//     its keys (GateKeys, ApplyKeys): counted only with the keyboard, never a key held from before it came, opposite keys
+//     cancelling, the same distance at any frame rate. (Whether the keys reach the player is not a self-test's to say:
+//     section 22.)
 
 using System;
 using System.Collections.Generic;
@@ -33,6 +36,7 @@ public static partial class WmvLifecycleSelfTest
             WorldCameraIpcTests(log);
             TerrainHeightTests(log);
             FlyCameraStepTests(log);
+            FlyCameraKeyTests(log);
         }
         catch (Exception e)
         {
@@ -207,6 +211,49 @@ public static partial class WmvLifecycleSelfTest
               Close(up.Position, new Vector3(0f, 15f, 25.98076f)),
               "maps viewer: two wheel notches fly half a second forwards, Shift four times as fast, and forwards follows the pitch (" + wheel.Position +
               ", " + fast.Position + ", " + up.Position + ")", log);
+    }
+
+    // ---- the free camera's keys (section 22): only with the keyboard, never a key held from before it came
+    static void FlyCameraKeyTests(Action<string> log)
+    {
+        const uint W = WmvFlyCamera.KeyForward, D = WmvFlyCamera.KeyRight, Shift = WmvFlyCamera.KeyFast;
+        var g = new WmvFlyCamera.KeyGate();
+        uint without = WmvFlyCamera.GateKeys(ref g, false, W);
+        uint atTake = WmvFlyCamera.GateKeys(ref g, true, W);            // W already held when the keyboard comes
+        uint stillHeld = WmvFlyCamera.GateKeys(ref g, true, W);
+        uint released = WmvFlyCamera.GateKeys(ref g, true, 0);
+        uint pressed = WmvFlyCamera.GateKeys(ref g, true, W);
+        Check(without == 0 && atTake == 0 && stillHeld == 0 && released == 0 && pressed == W,
+              "maps viewer: keys count only while the player's window has the keyboard, and a key held when it came only after it was released (" +
+              without + " " + atTake + " " + stillHeld + " " + released + " " + pressed + ")", log);
+        uint lost = WmvFlyCamera.GateKeys(ref g, false, W);             // the keyboard goes while W is held
+        uint stale = WmvFlyCamera.GateKeys(ref g, true, W);             // back, the backends still reporting W held
+        uint staleAgain = WmvFlyCamera.GateKeys(ref g, true, W | D);    // D pressed meanwhile counts, the stale W does not
+        uint freed = WmvFlyCamera.GateKeys(ref g, true, D);
+        uint both = WmvFlyCamera.GateKeys(ref g, true, W | D);
+        Check(lost == 0 && stale == 0 && staleAgain == D && freed == D && both == (W | D),
+              "maps viewer: a key whose release went elsewhere never moves the camera; a key pressed since counts at once (" + lost + " " + stale + " " +
+              staleAgain + " " + freed + " " + both + ")", log);
+        var i = new WmvFlyCamera.FlyInput();
+        WmvFlyCamera.ApplyKeys(ref i, W | D | Shift);
+        var j = new WmvFlyCamera.FlyInput();
+        WmvFlyCamera.ApplyKeys(ref j, WmvFlyCamera.KeyBack | WmvFlyCamera.KeyLeft | WmvFlyCamera.KeyDown);
+        var k = new WmvFlyCamera.FlyInput();
+        WmvFlyCamera.ApplyKeys(ref k, W | WmvFlyCamera.KeyBack | WmvFlyCamera.KeyUp | WmvFlyCamera.KeyDown);
+        var none = new WmvFlyCamera.FlyInput();
+        WmvFlyCamera.ApplyKeys(ref none, 0);
+        Check(i.Forward == 1f && i.Right == 1f && i.Up == 0f && i.SpeedFactor == WmvFlyCamera.FastFactor &&
+              j.Forward == -1f && j.Right == -1f && j.Up == -1f && j.SpeedFactor == 1f &&
+              k.Forward == 0f && k.Up == 0f && none.Forward == 0f && none.Right == 0f && none.Up == 0f && none.SpeedFactor == 1f,
+              "maps viewer: W+D+Shift fly forwards and right four times as fast, S+A+Q back, left and down, opposite keys cancel, no key stops", log);
+        // Frame-rate independent: the same second of W at 30 or 240 frames a second ends at the same place.
+        var s = new WmvFlyCamera.State { Speed = WmvFlyCamera.DefaultSpeed };
+        WmvFlyCamera.State at30 = s, at240 = s;
+        var fw = new WmvFlyCamera.FlyInput { Forward = 1f, SpeedFactor = 1f };
+        for (int n = 0; n < 30; n++) at30 = WmvFlyCamera.Step(at30, fw, 1f / 30f);
+        for (int n = 0; n < 240; n++) at240 = WmvFlyCamera.Step(at240, fw, 1f / 240f);
+        Check(Close(at30.Position, at240.Position) && Close(at30.Position, new Vector3(0f, 0f, WmvFlyCamera.DefaultSpeed)),
+              "maps viewer: a second of W moves the free camera its speed in yards at 30 and at 240 frames a second (" + at30.Position + ", " + at240.Position + ")", log);
     }
 
     static bool Close(Vector3 a, Vector3 b)
