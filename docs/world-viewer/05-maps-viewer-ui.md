@@ -862,8 +862,9 @@ camera, with missing fields handled and a wrong-sized minimap table refused.
   milestone 06.
 - **A player that never answers a camera request** (an exception while it places the camera) leaves the host entering:
   there is no timeout. Enter world again, another map or another client recovers (section 17.2, L5).
-- **Keyboard flight: fixed after two of the owner's tests failed** (section 22). Q, E, Space, Alt and a key released in
-  another window are verified through the real window but not yet pressed by hand (22.6).
+- **Keyboard flight: fixed after two of the owner's tests failed** (section 22); the owner has since flown with W, A, D,
+  Shift, Q, E and Space. Alt and a key released in another window are verified through the real window but not yet
+  pressed by hand (22.6).
 - **While the 3D view has the keyboard, the app's own keys** (F5-F10, Ctrl shortcuts, F11, Esc in fullscreen) go to the
   player: a click in any of the app's panels gives them back (22.7).
 - **Entering Maps** takes 92-184 ms of GUI time (section 13). A lazy list is a follow-up.
@@ -923,7 +924,7 @@ keys, the panel's fields, buttons and choices, on the viewer's own event paths.
 | 6 | identify an available tile | PASS | the minimap pictures, the state colours and hatching, the hover line (screenshots 2, 4) |
 | 7 | click that tile | PASS | a click sets the target (screenshot 5); Enter world, a double-click, Enter on the keyboard, typed coordinates |
 | 8 | see its real terrain and supported textures | PASS | the views from inside the world on all four clients (screenshots 7a-7d, 11a, 11b, 12b-12j); Era Azeroth's 4-bit alpha stated unsupported, not shown textured (12b) |
-| 9 | navigate the camera | PASS (placement, look, the overview, the wheel, the keys) | the free camera placed at the target and turned (`look`), the overview and back; the keys: failed in the owner's first two tests, fixed; PASS with the owner's keyboard (W, A, D, Shift) and end to end through the real window for every key (section 22.5) |
+| 9 | navigate the camera | PASS (placement, look, the overview, the wheel, the keys) | the free camera placed at the target and turned (`look`), the overview and back; the keys: failed in the owner's first two tests, fixed; PASS with the owner's keyboard (W, A, D, Shift, Q, E, Space) and end to end through the real window for every key (section 22.5) |
 | 10 | change the terrain display mode | PASS | eight modes from inside the world, no reload, the camera kept (screenshots 8a-8g) |
 | 11 | select another tile | PASS | Back to map and another target (11a, 11b); rapid entries superseded; the keyboard |
 | 12 | leave Maps without breaking Models or Buildings | PASS | screenshots 13, 14; `expect:terrain:0` after every exit |
@@ -949,7 +950,7 @@ keys, the panel's fields, buttons and choices, on the viewer's own event paths.
 | The target: clicked, typed, shown in tile and world coordinates | PASS | section 5.6 |
 | Enter world through protocol 13 and the 04B worker, no new parser | PASS | section 6 |
 | The free camera: placed on the ground at the target, turned, the overview | PASS | sections 9, 21.4 |
-| Keyboard flight (W A S D, Q / E, Space, Shift) | PASS | failed in the owner's first two tests (the keyboard stayed in the host, then the player was not activated); fixed (section 22); the owner's keyboard: W, A, D, Shift; through the real window: every key, its direction, distance and stop, no stale key; Q, E, Space and a key released elsewhere still to be pressed by hand (22.6) |
+| Keyboard flight (W A S D, Q / E, Space, Shift) | PASS | failed in the owner's first two tests (the keyboard stayed in the host, then the player was not activated); fixed (section 22); the owner's keyboard: W, A, D, Shift, Q, E, Space; through the real window: every key, its direction, distance and stop, no stale key; Alt and a key released elsewhere still to be pressed by hand (22.6) |
 | Live mouse flight (drag, wheel) | PASS | the owner's tests: the wheel, and drag-look in the traced run (yaw 0 to 291 degrees while dragging, section 22.5) |
 | Every loading state shown | PASS | section 7 (the "renderer too old" state: PROVEN_SOURCE, an old player was not run through the GUI) |
 | Display modes from the existing shaders, without reload | PASS | section 10 |
@@ -1068,7 +1069,8 @@ The owner tested the World Viewer in the real application three times:
    camera's self-tests passed because they drive its step with synthetic input.
 2. **After `351328b1`** (the keyboard focus given to the player on a click): still nothing -- although the player's own
    log shows that the click gave its window the keyboard (`the player's window took the keyboard`).
-3. **After `f6d118c0`** (the player's window also activated), with the trace on: **the camera moves.**
+3. **After `f6d118c0`** (the player's window also activated), with the trace on: **the camera moves** (W, A, D, Shift);
+   after `bd46619b` the owner confirmed **Q, E and Space** as well.
 
 This section follows the keys from the window that has them to the camera, records where they stopped -- including a
 conclusion of the first fix that the owner's traced run showed to be wrong (22.3.4) -- and the fix.
@@ -1195,9 +1197,9 @@ Binaries: host `wowmodelviewer.exe` SHA-256 `7B8E368052C1560F...` (the run's), p
 
 ### 22.6 Still open
 
-- **Real keys not yet pressed by hand:** Q, E, Space, Alt, and a key released in Browse (the stale key of 22.3.5). They
-  take the same message path as the keys the owner pressed, and the run above moves the camera with each of them; a short
-  check by hand would close it.
+- **Real keys not yet pressed by hand:** Alt, and a key released in Browse (the stale key of 22.3.5). They take the same
+  message path as the keys the owner pressed (W, A, D, Shift, Q, E, Space), and the run above moves
+  the camera with each of them; a short check by hand would close it.
 - **Switching away from the app and back:** the frame restores the keyboard to the last of its windows that had it; when
   that was the 3D view, wx records the player's frame as that window and its handler gives the player the keyboard again.
   INFERRED from wx's focus handling, not measured; a click in the view always does it.
