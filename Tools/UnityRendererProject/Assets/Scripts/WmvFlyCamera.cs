@@ -16,14 +16,17 @@
 // legacy Input Manager, the wheel from the Input System. Buttons and the wheel are device state, seen even over the
 // host's other panels, so a drag counts only when its press started over the viewport, and the wheel only over it.
 //
-// THE KEYS (measured, 05-maps-viewer-ui.md section 22; WmvKeyboardFocus): both backends read them from Raw Input, which
-// Windows gives only to the thread with the keyboard focus -- and embedded, the focus stays in the host's windows unless
-// the player's window takes it. So a mouse press in the player's window takes the keyboard (WmvKeyboardFocus: a press
+// THE KEYS (measured, 05-maps-viewer-ui.md section 22; WmvKeyboardFocus): they arrive as keyboard messages to the window
+// with the keyboard focus, which the legacy Input Manager reads once the player's window has been activated (the Input
+// System gets no keyboard while embedded) -- and embedded, the focus stays in the host's windows unless the player's
+// window takes it. So a mouse press in the player's window takes the keyboard and activates it (WmvKeyboardFocus: a press
 // message for that window, not a press the backends report while the pointer is over the viewport's rectangle, where a
 // host dialog or menu may lie), and keys count only while the player's window has it: typing in Browse's search box or
-// the target fields (the host's windows have the keyboard then) never moves the camera. A key already held when the
-// keyboard comes counts only once it has been seen released (GateKeys): its release may have gone to another window, so
-// the backends may still report it held, and a key released must never keep the camera moving.
+// the target fields (the host's windows have the keyboard then) never moves the camera. When the keyboard leaves the
+// player's window (or the flight ends), every movement key the Input Manager still holds is released (ReleaseHeldKeys):
+// the real releases go to another window, and the Input Manager would keep those keys held. And as a last guard, a key
+// already held when the keyboard comes counts only once it has been seen released (GateKeys): a key released must never
+// keep the camera moving.
 //
 // STEP. Everything that moves the camera is a pure function (Step, GateKeys, ApplyKeys) of the state, one frame's input
 // and the frame time, so the self-test drives it without input devices.
@@ -152,10 +155,55 @@ public class WmvFlyCamera : MonoBehaviour
         WmvKeyboardFocus.TakePressSeen();
     }
 
+    // The movement keys the legacy Input Manager may hold, as the keyboard sends them: virtual key, scan code, extended,
+    // and whether it is a system key (Alt).
+    struct KeySend
+    {
+        public KeyCode Code;
+        public uint Vk, Scan;
+        public bool Extended, Sys;
+        public KeySend(KeyCode code, uint vk, uint scan, bool extended = false, bool sys = false)
+        {
+            Code = code; Vk = vk; Scan = scan; Extended = extended; Sys = sys;
+        }
+    }
+
+    static readonly KeySend[] Releasable =
+    {
+        new KeySend(KeyCode.W, 0x57, 0x11), new KeySend(KeyCode.S, 0x53, 0x1F), new KeySend(KeyCode.A, 0x41, 0x1E),
+        new KeySend(KeyCode.D, 0x44, 0x20), new KeySend(KeyCode.E, 0x45, 0x12), new KeySend(KeyCode.Q, 0x51, 0x10),
+        new KeySend(KeyCode.C, 0x43, 0x2E), new KeySend(KeyCode.Space, 0x20, 0x39), new KeySend(KeyCode.UpArrow, 0x26, 0x48, true),
+        new KeySend(KeyCode.DownArrow, 0x28, 0x50, true), new KeySend(KeyCode.LeftArrow, 0x25, 0x4B, true),
+        new KeySend(KeyCode.RightArrow, 0x27, 0x4D, true), new KeySend(KeyCode.LeftShift, 0x10, 0x2A),
+        new KeySend(KeyCode.RightShift, 0x10, 0x36), new KeySend(KeyCode.LeftAlt, 0x12, 0x38, false, true),
+        new KeySend(KeyCode.RightAlt, 0x12, 0x38, true, true),
+    };
+
+    /// <summary>Every movement key the legacy Input Manager still holds, released (WmvKeyboardFocus.SendKeyUp): when the
+    /// keyboard leaves the player's window its real releases go to another window, and the Input Manager -- measured --
+    /// keeps such a key held until it is pressed and released again, which would swallow the next press (the gate keeps the
+    /// held key from moving the camera, and so the next press too).</summary>
+    static void ReleaseHeldKeys(string why)
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        var released = new System.Collections.Generic.List<string>();
+        foreach (KeySend k in Releasable)
+            if (UnityEngine.Input.GetKey(k.Code))
+            {
+                WmvKeyboardFocus.SendKeyUp(k.Vk, k.Scan, k.Extended, k.Sys);
+                released.Add(k.Code.ToString());
+            }
+        if (released.Count > 0)
+            Debug.Log("WMV: [input] released " + string.Join(" ", released.ToArray()) + " (" + why + ")");
+#endif
+    }
+
     void OnDisable()
     {
-        // The world view left (or the overview chosen): no key carries over to the next flight, and presses are no longer
-        // watched (the hook is removed: left in place it hung the player's exit).
+        // The world view left (or the overview chosen): the keys still held released, no key carries over to the next
+        // flight, and presses are no longer watched (the hook is removed: left in place it hung the player's exit).
+        if (hasKeyboard)
+            ReleaseHeldKeys("the flight ended");
         WmvKeyboardFocus.StopWatching();
         gate = new KeyGate();
         heldKeys = countedKeys = 0;
@@ -203,7 +251,10 @@ public class WmvFlyCamera : MonoBehaviour
         haveLastMouse = true;
         if (over && Mathf.Abs(wheel) > 0.0001f)
             i.WheelNotches = wheel;
-        hasKeyboard = WmvKeyboardFocus.HasKeyboard();
+        bool keyboardNow = WmvKeyboardFocus.HasKeyboard();
+        if (hasKeyboard && !keyboardNow)
+            ReleaseHeldKeys("the keyboard left the player's window");
+        hasKeyboard = keyboardNow;
         heldKeys = hasKeyboard ? ReadKeys() : 0u;
         countedKeys = GateKeys(ref gate, hasKeyboard, heldKeys);
         ApplyKeys(ref i, countedKeys);

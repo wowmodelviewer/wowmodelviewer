@@ -10429,7 +10429,10 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       // stand-in for the keyboard's messages, not the keyboard (docs/world-viewer/05-maps-viewer-ui.md section 22).
       const QString key = arg.section(':', 0, 0).toLower();
       const bool down = arg.section(':', 1, 1).toLower() != "up";
-      const UINT vk = key == "space" ? VK_SPACE : key == "shift" ? VK_SHIFT : key.size() == 1 ? (UINT)key.toUpper()[0].unicode() : 0;
+      // ("lshift": the left Shift's own code. A posted generic Shift leaves the system's keyboard state as it is, which the
+      // player's input reads to tell the side; a real Shift updates it.)
+      const UINT vk = key == "space" ? VK_SPACE : key == "shift" ? VK_SHIFT : key == "lshift" ? VK_LSHIFT
+                    : key.size() == 1 ? (UINT)key.toUpper()[0].unicode() : 0;
       const HWND target = kind == "keyplayer" ? frame->unityRendererHost->playerWindow() : ::GetFocus();
       const UINT scan = ::MapVirtualKeyW(vk == VK_SHIFT ? VK_LSHIFT : vk, MAPVK_VK_TO_VSC);
       const LPARAM lp = (LPARAM)(1u | (scan << 16) | (down ? 0u : (3u << 30)));

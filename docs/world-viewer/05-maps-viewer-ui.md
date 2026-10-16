@@ -13,7 +13,7 @@ give them, each with the map's own **minimap picture** -- read and decoded on th
 the map, or typed coordinates, set a **target** in the game's world frame; **Enter world** loads the target's tile
 through the unchanged Stage 03/04/04B pipeline and puts a **free camera** on the ground at the target, in the existing
 Unity viewport. The camera flies with the mouse and, once a click in the view has given the player the keyboard, with
-the keys (section 22: the keys did not work in the owner's first test, and why), or shows the tile from above. The display modes are the player's existing views, switched without a reload. Back to map returns to the
+the keys (section 22: why they did not work in the owner's first two tests, and the fix), or shows the tile from above. The display modes are the player's existing views, switched without a reload. Back to map returns to the
 overhead map with the world kept behind it; leaving Maps clears the world. The WDT is parsed by the player's verified
 parser, so the host parses no WDT.
 
@@ -39,7 +39,7 @@ screen.
 |---|---|
 | Host, this branch (final suite) | `wowmodelviewer.exe` SHA-256 `8004070BBC27C4DA...`, `wow.dll` `432B4CE9...`, `core.dll` `991957BE...` |
 | Player, this branch (part 2's final suite) | `Assembly-CSharp.dll` MD5 `C64B99FA4C2E4538FC757F6AD8CCFCB6` (protocol 15), lifecycle self-test **870 passed, 0 failed** |
-| Host and player with the keyboard fix (section 22) | `wowmodelviewer.exe` SHA-256 `E96E8D590D2A5906...`, `Assembly-CSharp.dll` MD5 `887216F9975D5F19B9C342914C070D74`, lifecycle self-test **874 passed, 0 failed** |
+| Host and player with the keyboard fix (section 22) | `wowmodelviewer.exe` SHA-256 `7B8E368052C1560F...`, `Assembly-CSharp.dll` MD5 `E18427DFCF813A0A13292AC9A891132D`, lifecycle self-test **874 passed, 0 failed** |
 | Reference host | `81f79982` plus the shutdown test's instrumentation (no fix), `wowmodelviewer.exe` SHA-256 `043C0AA4...` |
 | Reference player | develop's player, `Assembly-CSharp.dll` MD5 `3C7E3E0F7809056B372731D8CA699DEA` (the user's deployed player before this stage) |
 
@@ -550,16 +550,18 @@ fallback is the existing Stage 03/04 neutral shading.
   - clip planes 0.25 to 3,000 yards.
 - **Input in the embedded player.** As the orbit camera's own measurement found (its file header), the legacy input
   backend gives the mouse position and buttons and the Input System gives the wheel; the free camera reads them the
-  same way, and a drag counts only when its press started over the viewport. **The keys** are read from both backends,
-  which take them from Raw Input -- delivered by Windows only to the thread with the keyboard focus. In the owner's first
-  test they did not work: the keyboard stayed in the host's windows. A press in the view now gives the player's window
-  the keyboard, keys count only while it has it, and a key held from before never counts until released (section 22).
+  same way, and a drag counts only when its press started over the viewport. **The keys** come as keyboard messages to
+  the window with the keyboard focus, which the legacy Input Manager reads once the player's window has been activated
+  (the Input System gets no keyboard while embedded). In the owner's first two tests they did not work: the keyboard
+  stayed in the host's windows, then the player was not activated. A press in the view now gives the player's window the
+  keyboard and activates it, keys count only while it has it, and keys still held when it leaves are released
+  (section 22).
 - **What was verified**: the step from input to movement (self-test: north at yaw 0, east at yaw 90, strafe, climb,
   look and its pitch limit, the wheel, the speed factors); the placement (`look` and Enter world in the GUI suite, the
   camera's world position answered by the player and checked); the conversion of a world point to Unity space against
-  the mesh's own vertices; the views from inside the world (section 3); the keyboard focus moving to the player on a
-  press in the view and back on leaving it (section 22). Physical keys moving the camera are the owner's manual check
-  (section 22.6).
+  the mesh's own vertices; the views from inside the world (section 3); the keys: with the owner's keyboard, and end to
+  end through the real window, each key moving the camera the right way and distance and stopping on release
+  (section 22.5).
 - **No line of the M2 or WMO camera paths changed**: the M2 and WMO pictures are identical (section 16).
 
 ## 10. Display modes
@@ -860,9 +862,8 @@ camera, with missing fields handled and a wrong-sized minimap table refused.
   milestone 06.
 - **A player that never answers a camera request** (an exception while it places the camera) leaves the host entering:
   there is no timeout. Enter world again, another map or another client recovers (section 17.2, L5).
-- **Keyboard flight: fixed, and checked by hand only.** The keys failed in the owner's test; the cause and the fix are
-  in section 22. Physical keys cannot reach a desktop of the harness's own, so the last link -- a real key moving the
-  camera -- is the owner's manual check (22.6), not graded PASS here.
+- **Keyboard flight: fixed after two of the owner's tests failed** (section 22). Q, E, Space, Alt and a key released in
+  another window are verified through the real window but not yet pressed by hand (22.6).
 - **While the 3D view has the keyboard, the app's own keys** (F5-F10, Ctrl shortcuts, F11, Esc in fullscreen) go to the
   player: a click in any of the app's panels gives them back (22.7).
 - **Entering Maps** takes 92-184 ms of GUI time (section 13). A lazy list is a follow-up.
@@ -922,7 +923,7 @@ keys, the panel's fields, buttons and choices, on the viewer's own event paths.
 | 6 | identify an available tile | PASS | the minimap pictures, the state colours and hatching, the hover line (screenshots 2, 4) |
 | 7 | click that tile | PASS | a click sets the target (screenshot 5); Enter world, a double-click, Enter on the keyboard, typed coordinates |
 | 8 | see its real terrain and supported textures | PASS | the views from inside the world on all four clients (screenshots 7a-7d, 11a, 11b, 12b-12j); Era Azeroth's 4-bit alpha stated unsupported, not shown textured (12b) |
-| 9 | navigate the camera | PASS (placement, look, the overview, the wheel); keyboard: FAILED in the owner's test, fixed (section 22), **MANUAL VERIFICATION REQUIRED** | the free camera placed at the target and turned (`look`), the overview and back; the keyboard focus to the player on a press in the view and back on leaving (`keys`); physical keys: section 22.6 |
+| 9 | navigate the camera | PASS (placement, look, the overview, the wheel, the keys) | the free camera placed at the target and turned (`look`), the overview and back; the keys: failed in the owner's first two tests, fixed; PASS with the owner's keyboard (W, A, D, Shift) and end to end through the real window for every key (section 22.5) |
 | 10 | change the terrain display mode | PASS | eight modes from inside the world, no reload, the camera kept (screenshots 8a-8g) |
 | 11 | select another tile | PASS | Back to map and another target (11a, 11b); rapid entries superseded; the keyboard |
 | 12 | leave Maps without breaking Models or Buildings | PASS | screenshots 13, 14; `expect:terrain:0` after every exit |
@@ -948,8 +949,8 @@ keys, the panel's fields, buttons and choices, on the viewer's own event paths.
 | The target: clicked, typed, shown in tile and world coordinates | PASS | section 5.6 |
 | Enter world through protocol 13 and the 04B worker, no new parser | PASS | section 6 |
 | The free camera: placed on the ground at the target, turned, the overview | PASS | sections 9, 21.4 |
-| Keyboard flight (W A S D, Q / E, Space, Shift) | **MANUAL VERIFICATION REQUIRED** | failed in the owner's test; cause (raw keyboard input follows the focus, which stayed in the host) and fix in section 22; focus routing PASS (`keys`); physical keys: 22.6 |
-| Live mouse flight (drag, wheel) | PASS (the owner's test: the wheel); drag SKIP here | section 9 |
+| Keyboard flight (W A S D, Q / E, Space, Shift) | PASS | failed in the owner's first two tests (the keyboard stayed in the host, then the player was not activated); fixed (section 22); the owner's keyboard: W, A, D, Shift; through the real window: every key, its direction, distance and stop, no stale key; Q, E, Space and a key released elsewhere still to be pressed by hand (22.6) |
+| Live mouse flight (drag, wheel) | PASS | the owner's tests: the wheel, and drag-look in the traced run (yaw 0 to 291 degrees while dragging, section 22.5) |
 | Every loading state shown | PASS | section 7 (the "renderer too old" state: PROVEN_SOURCE, an old player was not run through the GUI) |
 | Display modes from the existing shaders, without reload | PASS | section 10 |
 | Scene switching and disposal | PASS | sections 11, 14 |
@@ -1058,13 +1059,19 @@ self-test checks it against ramps whose height is known everywhere.
 
 ## 22. Keyboard input in the embedded viewport (2026-10-16)
 
-### 22.1 The report
+### 22.1 The reports
 
-The owner tested the World Viewer in the real application after `6b280039`: loading a world works and the wheel flies
-the camera, but **W A S D, Q / E and Shift do nothing**. Section 9 had recorded that keyboard delivery to the embedded
-player could not be measured here; the free camera's self-tests passed because they drive its step with synthetic
-input, which says nothing about whether keys reach the player. This section follows the keys from the window that has
-them to the camera, names where they stopped, and records the fix and what is still to be checked by hand.
+The owner tested the World Viewer in the real application three times:
+
+1. **After `6b280039`:** loading a world works and the wheel flies the camera, but **W A S D, Q / E and Shift do
+   nothing.** Section 9 had recorded that keyboard delivery to the embedded player could not be measured here; the free
+   camera's self-tests passed because they drive its step with synthetic input.
+2. **After `351328b1`** (the keyboard focus given to the player on a click): still nothing -- although the player's own
+   log shows that the click gave its window the keyboard (`the player's window took the keyboard`).
+3. **After `f6d118c0`** (the player's window also activated), with the trace on: **the camera moves.**
+
+This section follows the keys from the window that has them to the camera, records where they stopped -- including a
+conclusion of the first fix that the owner's traced run showed to be wrong (22.3.4) -- and the fix.
 
 ### 22.2 The trace
 
@@ -1076,15 +1083,15 @@ them to the camera, names where they stopped, and records the fix and what is st
   keyboard. The player is started with `-wmvInputTrace`.
 - **The player** (`WmvInputTrace.cs`, "WMV: [input]" lines in `unityRenderer.log`): which window has the keyboard
   (`GetFocus`, which answers for the host's windows too: the player's window shares their input queue), the keyboard,
-  focus and `WM_INPUT` messages its window's thread takes or is sent, the raw input devices the process registered and
-  where Windows delivers them, the keys the legacy Input Manager and the Input System report held, and the free camera:
-  whether its window has the keyboard, the keys held and counted, and its position in the game's world frame (ten lines a
-  second at most while it moves, one when it stops).
+  focus, activation and `WM_INPUT` messages its window's thread takes or is sent, the raw input devices the process
+  registered, the keys the legacy Input Manager and the Input System report held, and the free camera: whether its window
+  has the keyboard, the keys held and counted, and its position in the game's world frame (ten lines a second at most
+  while it moves, one when it stops).
 
 The harness has steps for the experiments (`focusinfo`, `keypost` / `keyplayer` -- a key's messages posted to the window
 with the keyboard or to the player's window --, `clickplayer`, `focusplayer`, `focushost`).
 
-### 22.3 Where the keys stopped (before the fix, run `kbdiag1` / `kbdiag2`, PROVEN_RUNTIME)
+### 22.3 Where the keys stopped (PROVEN_RUNTIME: runs `kbdiag1`, `kbdiag2`, `kb5_motion`, and the owner's traced run)
 
 1. **After Enter world the keyboard is in the host.** The overhead map is put away before the player's frame is back on
    screen, so the viewport panel, given the keyboard, keeps it:
@@ -1093,89 +1100,111 @@ with the keyboard or to the player's window --, `clickplayer`, `focusplayer`, `f
 2. **A press in the player's window does not move it.** After a left press reached the player's window
    (`taken WM_LBUTTONDOWN for player`) the keyboard was still in the host's panel: the player's window procedure does not
    take the focus on a press, and Windows moves the focus by itself only when it activates a top-level window.
-3. **The player does not read keys from keyboard messages.** W's `WM_KEYDOWN` and `WM_KEYUP` reached the player's window
-   -- posted to it while the host had the keyboard, and again with the player's window holding the keyboard
-   (`focus player`, `Application.isFocused True`) -- and neither `Input.GetKey(W)` nor `Keyboard.current.wKey` changed.
-   The player's registrations say why: `raw input registered by this process: mouse -> player; keyboard -> player`, no
-   INPUTSINK. Both input backends read the keyboard from **Raw Input**, and Windows gives raw keyboard input only to the
-   thread that has the keyboard focus. With the focus in the host's windows, the keys went to the host's thread (which
-   registers no raw input: they were dropped there) and never to the player.
-4. **Why the wheel worked.** Raw mouse input follows the pointer, so it reached the player whenever the pointer was over
-   the viewport, keyboard or not (the orbit camera's header had measured the wheel on this path).
-5. **The host does not swallow the keys.** Its accelerators are F5-F10, Ctrl+X/E/H/F/Z and Ctrl+Shift+R; its key hook
+3. **With the keyboard in its window, the player still ignored the keys until its window was activated.** The owner's
+   second test (the log line above, and no movement) and the headless runs agree: W's `WM_KEYDOWN` reached the player's
+   window with the keyboard there (`focus player`, `Application.isFocused True`) and `Input.GetKey(W)` stayed false; once
+   the player's window had been sent `WM_ACTIVATE` (WA_ACTIVE), the same messages counted (`legacy W`). The documented
+   `-parentHWND` embedding has the host activate the player's window: Windows never activates a child window, and the
+   player keeps its own idea of being the active window.
+4. **The keys come as keyboard messages; the Input System gets none of them.** In the owner's run the player's window
+   took 205 `WM_KEYDOWN` and 25 `WM_KEYUP` messages for W, A, D and Shift, and **0 raw keyboard inputs** (`WM_INPUT`) --
+   with the keyboard and activated; the host's thread took no keyboard message at all. The legacy Input Manager reported
+   every key (`legacy W`, `legacy W A Shift` ...); `Keyboard.current` reported none. The player does register Raw Input
+   for its window (`keyboard -> player; mouse -> player`, no INPUTSINK), but raw keyboard input never reaches it while it
+   is embedded; raw mouse input does -- the wheel.
+   **Correction:** the first version of this section (`351328b1`) concluded that both input backends read the keyboard
+   from Raw Input, routed by the focus. That was inferred from posted key messages not counting -- which was point 3, the
+   missing activation -- and the owner's traced run disproved it.
+5. **A key released in another window stayed held.** With W held, a click in Browse took the keyboard and W's release
+   went there; the Input Manager kept W held (`legacy W` until the next release of W), so the gate of the first fix kept
+   it from moving the camera -- and swallowed the next real press of W with it (run `kb5_motion`: the first W after the
+   click moved the camera 0 yd).
+6. **The host does not swallow the keys.** Its accelerators are F5-F10, Ctrl+X/E/H/F/Z and Ctrl+Shift+R; its key hook
    acts on Escape (fullscreen) and Ctrl+S (Textures) only. No hook or hot key of the app takes W A S D, Q, E or Shift.
 
-So the break was the keyboard focus: the keys never went to the thread that Windows gives raw keyboard input to. Neither
-the free camera's key reading nor its movement was at fault.
+So the keys stopped at two links in turn -- the keyboard focus (in the host), then the player's activation -- and a
+released key could stay held. Neither the free camera's key reading nor its movement was at fault, and no forwarding is
+needed: with the focus and the activation, the keyboard's own messages reach the player.
 
-### 22.4 The fix (native focus; no forwarding)
+### 22.4 The fix (native focus and activation; no forwarding)
 
-The focus can be given to the player's window reliably -- it shares the host's input queue, and `SetFocus` from its own
-thread works -- so the keyboard is not forwarded over the IPC (section 22.3 shows forwarding is not needed).
-
-- **A press in the 3D view gives the player the keyboard** (`WmvKeyboardFocus.TakeKeyboard`). The signal is a mouse
-  press message taken from the queue for the player's own window -- a thread hook on that window's thread notes it --
-  not a press the input backends report while the pointer is over the viewport's rectangle, where a host dialog or menu
-  may lie (a click in such a dialog must leave it the keyboard). Only while the free camera flies: in Models and
-  Buildings, and in the tile overview, a click in the viewport moves no keyboard, as before.
+- **A press in the 3D view gives the player the keyboard and activates it** (`WmvKeyboardFocus.TakeKeyboard`: `SetFocus`
+  on the player's window from its own thread -- it shares the host's input queue -- and `WM_ACTIVATE` WA_ACTIVE; never
+  WA_INACTIVE, so the mouse keeps working in the other viewers). The signal is a mouse press message taken from the queue
+  for the player's own window -- a thread hook on that window's thread notes it -- not a press the input backends report
+  while the pointer is over the viewport's rectangle, where a host dialog or menu may lie. Only while the free camera
+  flies: in Models and Buildings, and in the tile overview, a click in the viewport moves no keyboard, as before.
 - **Keys count only while the player's window has the keyboard** (`WmvKeyboardFocus.HasKeyboard`, each frame). Typing in
   Browse, the map search or the target fields (the host's windows have the keyboard then) cannot move the camera.
-- **No key can stay held.** A key already down when the keyboard comes counts only after it has been seen released
-  (`WmvFlyCamera.GateKeys`): a key released while another window had the keyboard sends its release there, so a backend
-  may still report it held. Losing the keyboard, leaving the world view and every new placement drop all keys.
+- **No key can stay held.** When the keyboard leaves the player's window, or the flight ends, every movement key the
+  Input Manager still holds is released (`WmvFlyCamera.ReleaseHeldKeys`: the key's release sent to the player's window,
+  as the keyboard sends it). As a last guard a key already down when the keyboard comes counts only after it has been
+  seen released (`GateKeys`); every placement drops all keys.
 - **Leaving the world view gives the keyboard back.** Back to map and Textures cover the player, which gives it up as
-  before (`takeKeyboardFromParkedPlayer`); Models and Buildings do not cover it, so leaving Maps for them now moves the
-  keyboard to Browse's search box (`UnityRendererHost::takeKeyboardFromPlayer`), unless Windows considers the player hung
-  (the move waits on its thread).
+  before; leaving Maps for Models or Buildings moves it to Browse's search box (`UnityRendererHost::takeKeyboardFromPlayer`),
+  unless Windows considers the player hung (the move waits on its thread).
+- **The press hook is removed** when the free camera stops and as the player quits. `351328b1` left it in place for the
+  life of the process, and every close of the viewer then hung until the host terminated the player after 3 s (all
+  twelve runs of that suite; the shutdown check counts a terminated player as gone, so it passed). Since `f6d118c0` the
+  player exits in 735-813 ms again.
 - The free camera's movement is unchanged: `Step` moves by speed x frame time (frame-rate independent), Shift x4,
   Alt x1/4, E/Space up, Q/C down, opposite keys cancelling.
 
-### 22.5 What was verified here
+### 22.5 What was verified
+
+**With the owner's keyboard** (the third test, trace on; PROVEN_RUNTIME from the logs in the owner's `userSettings`):
+the click gave the player the keyboard and activated it; every key went to the player's window as a keyboard message
+(205 key-downs, 25 key-ups, none to the host, no raw input); the Input Manager reported W, A, D and Shift, alone and
+together; the camera moved about 29.7 yd a second with W (3325.50 to 3328.47 in 0.1 s), four times that with Shift held
+(`speed x4`), and stood still the moment W was released.
+
+**Through the real window, end to end** (the suite run `keys`, `-inputtrace`): the owner's run shows that real keys reach
+the player as the very messages the harness posts -- key messages to the window with the keyboard -- so posted keys now
+take the keyboard's own path. The run posts each key's messages and `kb_motion05.py` checks, from the player's camera
+lines, how far and which way each segment moved the camera (world frame; the camera faces north, pitch -8):
+
+| Segment | Moved (x north, y west, z up), yd | Expected | Result |
+|---|---|---|---|
+| W while the host has the keyboard | +0.0, +0.0, +0.0 | no movement | PASS |
+| W ~1 s | +31.7, +0.0, -4.4 | north ~30 yd (pitch -8: a little down), then stops | PASS |
+| S ~0.55 s | -17.3, +0.0, +2.4 | south ~16 yd | PASS |
+| A ~0.55 s | +0.0, +17.5, +0.0 | west (left) ~16 yd | PASS |
+| D ~0.55 s | +0.0, -17.5, +0.0 | east (right) ~16 yd | PASS |
+| E ~0.55 s | +0.0, +0.0, +16.5 | up ~16 yd | PASS |
+| Q ~0.55 s | +0.0, +0.0, -17.5 | down ~16 yd | PASS |
+| Space ~0.55 s | +0.0, +0.0, +17.5 | up ~16 yd | PASS |
+| Shift+W ~0.55 s | +69.3, +0.0, -9.7 | north ~65 yd (four times as fast) | PASS |
+| W+D, D released first | +35.6, -17.0, -5.0 | north ~36 yd and east ~16 yd | PASS |
+| W held, then a click in Browse (W released there) | +11.4, +0.0, -1.6 | north ~10 yd until Browse took the keyboard, then stops | PASS |
+| a click back in the view, nothing pressed | +0.0, +0.0, +0.0 | no movement: no stale W | PASS |
+| W, the first press after that | +17.3, +0.0, -2.4 | north ~16 yd (not swallowed) | PASS |
+| W typed into the search box | +0.0, +0.0, +0.0 | no movement | PASS |
+
+The posted Shift uses the left Shift's own key code: a posted generic Shift leaves the system's keyboard state as it is,
+and the player's input reads that state to tell the side (a real Shift updates it -- the owner's run counted it).
 
 | Check | Run | Result |
 |---|---|---|
-| After Enter world the keyboard is the host's; a press in the viewport gives it to the player's window; Browse's search box and the target field take it back (the camera then reports "the keyboard is not the player's"); a press gives it again; Back to map, Models, Buildings and Textures each leave it with the host, and in Models a press in the viewport moves no keyboard | `keys` (suite), `-inputtrace` | **PASS** (46 passed, 0 failed); the before runs kbdiag1 / kbdiag2 are 22.3 |
-| The key gate and the movement keys: none without the keyboard, a key held when it came only after release, a released key never stuck, a key pressed since counted at once, W+D+Shift, S+A+Q, opposite keys cancelling, one second of W the same distance at 30 and 240 frames a second | player self-test | **874 passed, 0 failed** |
-| The whole GUI suite, Classic runs, switching, closing, memory, modes | `ui_kb` | **PASS** (retail 129, Era 28, MoP 25 and 16, Beta 20, backlog 26, scan 4, switch 52, holdclose 9 with the shutdown check 9/0, modes 13, repeat 93; 0 failed) |
-| Regression battery (geometry, composites, M2/WMO pictures, W, H, shutdown, map catalogue) | `battery_kb` | **PASS**: geometry 6 of 6 and composites 98 of 98 byte-identical to the reference, M2 and WMO pictures identical, W 6 of 6, H 11 of 12 (H_B_missingtex0, the environment reason of 15.1), the shutdown check 9/0 on the four clients, map catalogue 4 of 4 |
+| The movement above | `keys` + `kb_motion05.py` | **PASS**, 14 of 14 segments |
+| The keyboard's place: the host's after Enter world; the player's after a press in the view; Browse's search box and the target field take it back; Back to map, Models, Buildings and Textures leave it with the host; in Models a press in the viewport moves no keyboard | `keys` (suite) | **PASS** (77 passed, 0 failed) |
+| The key gate and the movement keys: none without the keyboard, a key held when it came only after release, simultaneous keys, opposite keys cancelling, one second of W the same distance at 30 and 240 frames a second | player self-test | **874 passed, 0 failed** |
+| The whole GUI suite, Classic runs, switching, closing, memory, modes | `ui_kb6` | **PASS** (retail 129, Era 28, MoP 25 and 16, Beta 20, backlog 26, keys 77, scan 4, switch 52, holdclose 9 with the shutdown check 9/0, modes 13, repeat 93; 0 failed; every player exited in 734-781 ms) |
+| Regression battery (geometry, composites, M2/WMO pictures, W, H, shutdown, map catalogue) | `battery_kb6` | **PASS**: geometry 6 of 6 and composites 98 of 98 byte-identical to the reference, M2 and WMO pictures identical, W 6 of 6, H 11 of 12 (H_B_missingtex0, the environment reason of 15.1), the shutdown check 9/0 on the four clients, map catalogue 4 of 4 |
 
-Binaries: host `wowmodelviewer.exe` SHA-256 `E96E8D590D2A5906...`, player `Assembly-CSharp.dll` MD5 `887216F9975D5F19B9C342914C070D74`.
+Binaries: host `wowmodelviewer.exe` SHA-256 `7B8E368052C1560F...` (the run's), player `Assembly-CSharp.dll` MD5 `E18427DFCF813A0A13292AC9A891132D`.
 
-**Not verified here, and not graded PASS: physical keys moving the camera.** Raw keyboard input exists only on the
-desktop that has the real keyboard. The runs here are on a desktop of their own, where no raw input arrives; posted key
-messages reach the player's window but are not what its input reads (22.3.3); and `SendInput` would go to the owner's
-desktop and game. What is proven here is every link up to that one: the keyboard focus lands in the player's window on a
-press in the viewport, and leaves it as it should, and the player's input reads raw keyboard input sent to that window.
-**The owner's manual check below is what closes it.**
+### 22.6 Still open
 
-### 22.6 Manual verification (for the owner)
-
-Start the viewer with the trace, e.g. from a command prompt in the viewer's folder:
-
-    wowmodelviewer.exe -inputtrace
-
-1. Maps, Eastern Kingdoms, click a point, Enter world.
-2. Click once inside the 3D view (the player's window takes the keyboard). Press and hold W for about a second, release;
-   then A, S, D; Q and E; Space; Shift+W; W and D together, releasing one, then the other.
-3. Expected: each key moves the camera while held and it stops at once on release; Shift+W is four times as fast.
-4. Click Browse's search box and type "wasd": the camera must not move. Click the view again: the keys work again.
-5. Hold W, click Browse while still holding it, release W, click the view again: the camera must not move until W is
-   pressed again.
-6. Back to map; Models; Buildings: the app's own keys (F11, Esc in fullscreen, typing in Browse) work as before.
-
-What the logs show for each key pressed in the view (expected): in `unityRenderer.log`
-`taken WM_INPUT (raw keyboard) for player ...`, `legacy W; Input System W`, `camera free camera; the keyboard is the
-player's; keys held forward, counted forward; input forward 1 ...` with the world position changing, then `camera still`
-after the release; in `log.txt` no `host took WM_KEYDOWN` while the view has the keyboard. If a key does nothing, the same
-lines say which link failed: where the keyboard was (`focus ...`), where the raw input went (`host took WM_INPUT` means the
-host had it), and what the backends saw.
+- **Real keys not yet pressed by hand:** Q, E, Space, Alt, and a key released in Browse (the stale key of 22.3.5). They
+  take the same message path as the keys the owner pressed, and the run above moves the camera with each of them; a short
+  check by hand would close it.
+- **Switching away from the app and back:** the frame restores the keyboard to the last of its windows that had it; when
+  that was the 3D view, wx records the player's frame as that window and its handler gives the player the keyboard again.
+  INFERRED from wx's focus handling, not measured; a click in the view always does it.
 
 ### 22.7 Consequences
 
 - While the 3D view has the keyboard, the app's own keys (F5-F10, Ctrl shortcuts, F11, Esc leaving fullscreen) go to the
   player and do nothing: a click anywhere in the app's panels gives them back (fullscreen keeps the panels).
-- Switching away from the app and back: the frame restores the keyboard to the last of its windows that had it; when that
-  was the 3D view, wx records the player's frame as that window and its handler gives the player the keyboard again.
-  INFERRED from wx's focus handling, not measured here; a click in the view always does it.
 - Observed with the trace, not changed here (inherited): when the player's window is destroyed at shutdown, the keyboard
   passes between the player's frame and the dying window a few times before the frame keeps it.

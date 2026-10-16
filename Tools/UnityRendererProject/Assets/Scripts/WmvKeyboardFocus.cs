@@ -1,20 +1,22 @@
 // WmvKeyboardFocus.cs
 //
 // THE KEYBOARD FOR THE FREE CAMERA (docs/world-viewer/05-maps-viewer-ui.md section 22). What was measured with the
-// keyboard trace (WmvInputTrace, -wmvInputTrace):
-//   - both input backends of this player read the keyboard from Raw Input that the player registers for its own window,
-//     without INPUTSINK (GetRegisteredRawInputDevices: "keyboard -> player, mouse -> player"); a WM_KEYDOWN reaching the
-//     player's window changes neither Input.GetKey nor Keyboard.current;
-//   - Windows gives raw keyboard input to the thread that has the keyboard focus. Embedded, the player's window shares
-//     one input queue with the host's windows, and the keyboard stays where the host put it: in the host's viewport
-//     panel after Enter world. A press in the player's window does not move it (its window procedure does not take the
-//     focus on a press, and Windows moves it only on activation);
-//   - raw mouse input does not need the focus, which is why the wheel always worked over the viewport.
+// keyboard trace (WmvInputTrace, -wmvInputTrace), headless and in the owner's run with a real keyboard:
+//   - keys reach the player as keyboard messages (WM_KEYDOWN / WM_KEYUP) sent to the window that has the keyboard focus.
+//     Embedded, the player's window shares one input queue with the host's windows, and the keyboard stays where the host
+//     put it -- in the host's viewport panel after Enter world. A press in the player's window does not move it (its
+//     window procedure does not take the focus on a press, and Windows moves it only on activation);
+//   - the legacy Input Manager (Input.GetKey) reads those messages only once the player's window has been activated
+//     (WM_ACTIVATE, WA_ACTIVE), which the documented -parentHWND embedding asks of the host: Windows never activates a
+//     child window. Before that it ignored keys even with the focus;
+//   - the Input System (Keyboard.current) gets nothing: raw keyboard input never reached the player (the owner's run: 0
+//     WM_INPUT keyboard messages), with the focus and activated. Raw mouse input does arrive -- the wheel.
 // So the free camera takes the keyboard itself when a mouse button is pressed IN the player's window -- a press message
 // taken from the queue for that window (WatchPresses: a thread hook on the window's thread that only notes it), not a
 // press the input backends report while the pointer is merely over the viewport's rectangle, where a host dialog or menu
-// may lie -- and reads keys only while the player's window has the keyboard (HasKeyboard). The host takes it back when the
-// world view is left for another viewer; a click in any of the host's windows takes it, as any click there does.
+// may lie --, activates the window, and reads keys only while the player's window has the keyboard (HasKeyboard). The
+// host takes it back when the world view is left for another viewer; a click in any of the host's windows takes it, as
+// any click there does.
 //
 // Win32 only. Elsewhere (the editor) the keyboard is the application's, and the calls say so.
 
@@ -45,7 +47,7 @@ public static class WmvKeyboardFocus
     [DllImport("kernel32.dll")] static extern uint GetCurrentProcessId();
 
     const int WH_GETMESSAGE = 3;
-    const uint WM_ACTIVATE = 0x0006, WA_ACTIVE = 1;
+    const uint WM_ACTIVATE = 0x0006, WA_ACTIVE = 1, WM_KEYUP = 0x0101, WM_SYSKEYUP = 0x0105;
     const uint WM_LBUTTONDOWN = 0x0201, WM_RBUTTONDOWN = 0x0204, WM_MBUTTONDOWN = 0x0207;
     static bool quitHooked;
 
@@ -127,6 +129,18 @@ public static class WmvKeyboardFocus
         return CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
     }
 
+    /// <summary>A key's release sent to the player's window (WM_KEYUP, or WM_SYSKEYUP for Alt), as the keyboard would send
+    /// it: for a key the legacy Input Manager still holds when the keyboard leaves the player -- its real release then goes
+    /// to another window, and the Input Manager would keep it held until that key is pressed and released again.</summary>
+    public static void SendKeyUp(uint vk, uint scan, bool extended, bool sys)
+    {
+        IntPtr w = PlayerWindow;
+        if (w == IntPtr.Zero)
+            return;
+        long lp = 1L | ((long)scan << 16) | (extended ? 1L << 24 : 0L) | (3L << 30);
+        SendMessage(w, sys ? WM_SYSKEYUP : WM_KEYUP, new IntPtr(vk), new IntPtr(lp));
+    }
+
     /// <summary>No more noting of presses (the hook removed).</summary>
     public static void StopWatching()
     {
@@ -176,6 +190,7 @@ public static class WmvKeyboardFocus
     public static IntPtr PlayerWindow { get { return IntPtr.Zero; } }
     public static void WatchPresses() { }
     public static void StopWatching() { }
+    public static void SendKeyUp(uint vk, uint scan, bool extended, bool sys) { }
     public static bool TakePressSeen() { return false; }
     public static bool HasKeyboard() { return Application.isFocused; }
     public static bool TakeKeyboard(string why) { return Application.isFocused; }
