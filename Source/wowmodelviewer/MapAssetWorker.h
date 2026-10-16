@@ -21,7 +21,12 @@
  * and checks them there again before anything is sent.
  *
  * Order. Jobs and lease changes are carried out one at a time, in the order they were given; results come back in
- * that order. Bounds are the caller's (UnityIpcServer: at most MAP_ASSET_READS_IN_FLIGHT jobs not yet taken back).
+ * that order. Bounds are the caller's (UnityIpcServer: at most MAP_ASSET_READS_IN_FLIGHT of the player's reads not yet
+ * taken back, and the viewer's own reads -- the Maps viewer's WDT and at most MapsViewer::MinimapBatch minimaps).
+ *
+ * Thumbnails (protocol 15, the Maps viewer's overhead map). A job may ask for its file -- a BLP2 minimap -- to be reduced to
+ * a small RGBA picture on this thread (MapThumbnail, plain code on the bytes read): the result then carries the picture
+ * instead of the file, so neither the decode nor the file's bytes reach the GUI thread.
  *
  * Life. The thread starts with the first job or lease. stop() cancels what waits, lets the read in progress finish (a
  * read is whole: CascLib is never asked for part of a file, section B), releases the lease and joins; every job still
@@ -68,6 +73,7 @@ public:
     int epoch = 0;                // the client epoch and storage generation the read was decided under: read only
     quint64 generation = 0;       // when the lease is that storage's
     QString role;                 // for the test hooks and the record
+    int thumbnailSide = 0;        // > 0: the file is a BLP2 image, handed back as a side x side RGBA thumbnail (Result::thumbnail)
     std::shared_ptr<std::atomic<bool>> cancelled;   // set by the GUI thread; a cancelled job waiting is not read
     // TEST HOOKS (the -terraintile harness only)
     bool testHold = false;        // hold with the file open until testReleaseHold() (or stop(), or 60 s)
@@ -92,7 +98,10 @@ public:
     Outcome outcome = Outcome::Stopped;
     QString detail;               // why it was not read (every outcome but Read)
     wow::WdtInspection inspection;
-    QByteArray bytes;             // the file, when the inspection found it Available
+    QByteArray bytes;             // the file, when the inspection found it Available -- or its thumbnail (thumbnail true)
+    bool thumbnail = false;       // bytes is the job's side x side RGBA thumbnail, not the file
+    QString thumbnailProblem;     // why the file read gave no thumbnail (bytes then empty)
+    double thumbnailMs = -1.0;    // the decode and the reduction, on the worker
     qint64 maxBytes = 0;          // the job's limit, handed back for the caller's accounting
     QString role;
     double waitMs = -1.0;         // from submit() to the job's start on the worker

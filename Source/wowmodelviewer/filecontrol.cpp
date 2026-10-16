@@ -1212,12 +1212,12 @@ void FileControl::FollowViewerMode(ViewerMode mode)
   m_mode = mode;
   m_keysRepeating = false;
   m_buildingPickPending = false;
-  // THE MAPS VIEWER's tile grid, under the list in Maps only.
+  // THE MAPS VIEWER's facts and controls, under the list in Maps only (the overhead map is in the viewport's place).
   if (mode == ViewerMode::Maps && !m_mapPanel && g_modelViewer && g_modelViewer->maps())
   {
-    // The grid takes two thirds of the height under the search box, the list of maps the rest.
+    // As tall as its controls; the list of maps takes the rest.
     m_mapPanel = new MapTilePanel(this, g_modelViewer->maps());
-    GetSizer()->Insert(2, m_mapPanel, 2, wxEXPAND);
+    GetSizer()->Insert(2, m_mapPanel, 0, wxEXPAND);
   }
   if (m_mapPanel)
   {

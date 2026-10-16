@@ -135,9 +135,12 @@ public:
   // for a texture picked in Browse -- covering the panel, the player and any notice. As with a notice,
   // the player is only taken off screen meanwhile (its frame) and nothing is sent to it. The window is a child of
   // this panel, sized with it; showContent(false) gives the viewport back.
+  // Another window given while one is shown takes its place at once (the texture view and the Maps viewer's overhead map
+  // share the place).
   void setContent(wxWindow * content);
   void showContent(bool show);
   bool isShowingContent() const { return m_contentShown; }
+  wxWindow * content() const { return m_content; }
 
   // THE HOLD (a viewer-mode switch). While held, the player is neither taken off screen, put back nor
   // resized; releasing the last hold applies what is due -- its size, then put back; or taken off screen

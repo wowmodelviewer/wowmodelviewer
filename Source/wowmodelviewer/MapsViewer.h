@@ -2,9 +2,10 @@
  * MapsViewer.h
  *
  * THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the fourth viewer mode's state, between the user's choices
- * (a map in Browse, a tile in the tile grid, a display mode) and the verified world pipeline of stages 02-04B. It owns
- * no widget: Browse lists the catalogue's maps (FileControl), the tile grid draws this state (MapTilePanel), and the
- * viewport shows the tile (the Unity player) or the notice this state names.
+ * (a map in Browse, a target on the overhead map, Enter world, a camera, a display mode) and the verified world pipeline of
+ * stages 02-04B. It owns no widget: Browse lists the catalogue's maps (FileControl), the overhead map in the viewport's
+ * place draws this state (MapOverview), the panel under Browse shows its facts and controls (MapTilePanel), and once a
+ * world is entered the viewport shows it (the Unity player).
  *
  *   a map picked     its WDT read whole by the MAP ASSET WORKER (off the GUI thread; the read, its frame checks and its
  *                    content key are the catalogue's own, WorldMapCatalog::inspectInStorage), then handed to the player
@@ -12,9 +13,19 @@
  *                    the host never parses a WDT. Each tile's root ADT (MAID word 0) is then looked up in the client's
  *                    storage root: listed, on this computer (never read). A tile is available only when its MAIN flag is
  *                    set, MAID names a root ADT, and the storage lists that file and has it locally.
- *   a tile clicked   an available one is requested (ModelViewer::RequestTerrainTile: Stage 03/04 terrain, protocol 13
+ *   the pictures     the tiles' minimap images (MAID word 7, in the table since protocol 15) read and reduced to thumbnails
+ *                    on the worker (MapThumbnail), a batch at a time, none while a tile loads, nearest the map's middle
+ *                    first; cancelled with the map.
+ *   a target         a point of the game's world frame (x north, y west): clicked inside a cell of the overhead map, or
+ *                    typed (X, Y, and Z or "on the ground"). A target off the 64 x 64 tiles is refused; one on a tile that
+ *                    cannot be loaded is kept, with why the world cannot be entered there.
+ *   Enter world      the target's tile requested (ModelViewer::RequestTerrainTile: Stage 03/04 terrain, protocol 13
  *                    serving, the Stage 04B worker), with the WDT inspection the worker made, so the GUI thread reads
- *                    nothing; any other says why it cannot be loaded.
+ *                    nothing, and with the camera (protocol 15): the player puts its free camera at the target when the tile
+ *                    is shown, and answers worldCameraApplied; the world then has the viewport. The target's tile already
+ *                    on screen: the camera alone is moved (setWorldCamera). Back to map gives the viewport to the overhead
+ *                    map again; the world stays loaded behind it.
+ *   a camera         the free camera at the target, or the tile's overview (setWorldCamera), nothing reloaded.
  *   a display mode   setTerrainView (protocol 14): the tile on screen built again in it by the player, nothing read.
  *
  * ISOLATION. Every read and answer carries the client epoch and storage generation it was made under, and a serial of
@@ -28,12 +39,16 @@
 #ifndef MAPSVIEWER_H
 #define MAPSVIEWER_H
 
+#include <deque>
 #include <functional>
+#include <map>
 #include <memory>
 #include <vector>
 
 #include <QElapsedTimer>
 #include <QString>
+
+#include <wx/timer.h>
 
 #include "MapAssetWorker.h"
 #include "UnityIpcServer.h"
@@ -118,6 +133,15 @@ public:
 
   explicit MapsViewer(ModelViewer * viewer);
 
+  // THE WORLD FRAME (docs/world-viewer/00-audit.md 6.1): yards, x north, y west; tile (tx, ty) -- tx the column, east;
+  // ty the row, south -- spans x from (32 - ty)T down to (32 - ty - 1)T and y from (32 - tx)T down to (32 - tx - 1)T,
+  // T = 1600/3. The tile under a point, and the point at fractions of a tile (fx east, fy south of its north-west corner).
+  static constexpr double TileSize = 1600.0 / 3.0;
+  static bool tileOf(double x, double y, int & tx, int & ty);
+  static void pointIn(int tx, int ty, double fx, double fy, double & x, double & y);
+  // The free camera's eye above the ground when no height is given (yards).
+  static constexpr double EyeHeight = 2.0;
+
   // THE VIEWER MODE: entered (the grid comes back as it was left, for the same client), left (the terrain cleared).
   void Entered();
   void Left();
@@ -129,8 +153,37 @@ public:
 
   // THE USER'S CHOICES.
   void SelectMap(int mapId);
-  // A tile clicked in the grid: an available one is loaded; any other is picked, with why it cannot be.
+  // THE TARGET. SetTarget: a typed point (false, and said, when it is off the map's tiles). SetTargetAt: a click on the
+  // overhead map, at fractions of cell (tx, ty). SelectTile: the cell's middle (the keyboard's pick).
+  bool SetTarget(double x, double y, bool hasZ, double z);
+  void SetTargetAt(int tx, int ty, double fx, double fy);
   void SelectTile(int x, int y);
+  bool hasTarget() const { return m_hasTarget; }
+  double targetX() const { return m_targetX; }
+  double targetY() const { return m_targetY; }
+  double targetZ() const { return m_targetZ; }
+  bool targetHasZ() const { return m_targetHasZ; }
+  QString targetLine() const;
+  // ENTER WORLD and BACK TO MAP (see the header). canEnter: false, and why, when the world cannot be entered at the target.
+  bool canEnter(QString & why) const;
+  void EnterWorld();
+  void BackToMap();
+  // The viewport shows the overhead map (not the world): in this viewer, until a world is entered, and after Back to map.
+  bool showsOverview() const { return m_active && !m_worldShown; }
+  bool worldShown() const { return m_worldShown; }
+  bool entering() const { return m_entering; }
+  // THE CAMERA in the world: the free camera at the target, or the tile's overview. Look: the free camera put at the target
+  // again, facing yaw (degrees clockwise from north) and pitch (degrees, up positive).
+  enum class CameraMode { Fly, Overview };
+  void SetCameraMode(CameraMode mode);
+  CameraMode cameraMode() const { return m_cameraMode; }
+  void Look(double yaw, double pitch);
+  QString cameraDetail() const { return m_cameraDetail; }
+  // The camera's last placement the player answered "applied" (game frame), and whether one is.
+  bool cameraPlaced() const { return m_cameraPlaced; }
+  double cameraX() const { return m_cameraX; }
+  double cameraY() const { return m_cameraY; }
+  double cameraZ() const { return m_cameraZ; }
   void ClearTerrain();
   void SetDisplayMode(int index);
   int displayMode() const { return m_displayMode; }
@@ -141,6 +194,31 @@ public:
   void OnTilesInspected(const UnityIpcServer::MapTilesInspection & inspection);
   void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
   void OnTerrainViewApplied(const UnityIpcServer::TerrainViewApplied & applied);
+  void OnWorldCameraApplied(const UnityIpcServer::WorldCameraApplied & applied);
+
+  // THE OVERHEAD MAP'S PICTURES (see the header): ThumbSide x ThumbSide RGBA thumbnails, MinimapBatch read at a time.
+  static const int ThumbSide = 32;
+  static const int MinimapBatch = 8;
+  // The next batch is given from a timer this long after a picture came, never from the picture's own handler: a result
+  // posts the server a wake, and wx runs the events that become pending while it runs them, so reads given from the handler
+  // would chain wake after wake and keep the window from painting or taking input until the last picture.
+  static const int MinimapPumpMs = 10;
+  // A tile's thumbnail (empty: none, or not yet), and its picture's state in words (the hover line).
+  const QByteArray & thumbnail(int x, int y) const;
+  QString minimapState(int x, int y) const;
+  // A tile's minimap FileDataID (MAID word 7), 0 for none.
+  quint32 minimapId(int x, int y) const;
+  int minimapsWanted() const { return m_minimapsWanted; }
+  int minimapsLoaded() const { return m_minimapsLoaded; }
+  int minimapsMissing() const { return m_minimapsMissing; }
+  bool minimapsLoading() const { return !m_minimapQueue.empty() || !m_minimapTickets.empty(); }
+  double minimapsMs() const { return m_minimapsMs; }
+  // Grows with every picture that comes (the overview's mosaic follows it), and with every map.
+  int imagesSerial() const { return m_imagesSerial; }
+  // A picture came: the overhead map repaints (nothing else of the viewer is updated for it).
+  std::function<void()> onImagesChanged;
+  // A world-model-only map's global WMO, from its table: records (0: none), and the first one's file.
+  int globalWmoRecords() const { return m_globalWmoRecords; }
 
   // WHAT THE GRID AND THE NOTICE SHOW.
   int mapId() const { return m_mapId; }
@@ -190,6 +268,16 @@ private:
   void buildGrid(const UnityIpcServer::MapTilesInspection & inspection);
   bool clientCurrent(int epoch, quint64 generation) const;
   UnityIpcServer * ipc() const;
+  void startMinimaps(const UnityIpcServer::MapTilesInspection & inspection);
+  void pumpMinimaps();
+  void stopMinimaps();
+  void onMinimapRead(int index, MapAssetWorker::Result & result);
+  void readDeferredWdt();
+  UnityIpcServer::WorldCamera flyCameraAtTarget();
+  UnityIpcServer::WorldCamera flyCameraOnShownTile();
+  bool targetOnShownTile() const;
+  void applyCamera(const UnityIpcServer::WorldCameraApplied & applied);
+  void leaveWorld();
 
   ModelViewer * m_viewer;
   bool m_active = false;
@@ -227,6 +315,40 @@ private:
   QString m_shownView;
   QString m_viewDetail;
   Timings m_timings;
+
+  // The target.
+  bool m_hasTarget = false;
+  double m_targetX = 0.0, m_targetY = 0.0, m_targetZ = 0.0;
+  bool m_targetHasZ = false;
+
+  // The world and its camera.
+  bool m_worldShown = false;     // the world has the viewport (a camera was placed after Enter world)
+  bool m_entering = false;       // Enter world asked, its camera not answered yet
+  CameraMode m_cameraMode = CameraMode::Fly;
+  int m_cameraSerial = 0;        // the last request given
+  int m_cameraRequest = 0;       // the request whose answer counts
+  QString m_cameraDetail;
+  bool m_cameraPlaced = false;
+  bool m_cameraHeld = false;     // the answer to the camera a load carried came before the load's report: held for it
+  UnityIpcServer::WorldCameraApplied m_heldCamera;
+  double m_cameraX = 0.0, m_cameraY = 0.0, m_cameraZ = 0.0;
+  double m_lookYaw = 0.0, m_lookPitch = -8.0;
+
+  // The pictures.
+  std::vector<quint32> m_minimapIds;           // MAID word 7 per tile (empty without MAID)
+  std::vector<QByteArray> m_thumbs;            // Tiles * Tiles, empty until a picture came
+  std::vector<unsigned char> m_thumbState;     // MinimapState per tile (MapsViewer.cpp)
+  std::vector<QString> m_thumbReason;          // why a tile has no picture
+  std::deque<int> m_minimapQueue;              // tile indices still to read, nearest the middle first
+  std::map<quint64, int> m_minimapTickets;     // the worker's tickets of the reads out, and their tiles
+  wxTimer m_minimapTimer;                      // gives the next batch (MinimapPumpMs)
+  int m_minimapsWanted = 0, m_minimapsLoaded = 0, m_minimapsMissing = 0;
+  int m_imagesSerial = 0;
+  QElapsedTimer m_minimapClock;
+  double m_minimapsMs = -1.0;
+  int m_globalWmoRecords = 0;
+  quint32 m_globalWmoFileDataID = 0;
+  QString m_globalWmoPath;
 };
 
 #endif // MAPSVIEWER_H

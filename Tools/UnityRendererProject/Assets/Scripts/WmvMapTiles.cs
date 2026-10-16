@@ -9,6 +9,10 @@
 //     bit 0  the MAIN flag (WdtMainEntry.HasTile: MAID names this tile's files)
 //     bit 1  MAID word 0 names a root ADT (WdtTileFileRole.RootAdt; the root a terrain load asks for, WmvTerrainSession)
 //   rootIds, tex0Ids: MAID words 0 and 3 of every tile (0: none); absent without MAID
+//   minimapIds (protocol 15): MAID word 7 of every tile, the tile's minimap image (00-audit.md 4.2, 4.6); absent without MAID
+//   the global WMO (protocol 15): how many MODF records the WDT has, and the first one's file (a FileDataID, or the old form's
+//     MWMO path when that is unambiguous) -- what a world-model-only map is. Where it stands in the world is milestone 06's
+//     to establish (roadmap.md), so no position or box is reported
 //
 // What the table does not say: whether the client has a tile's files. That is the host's to answer from its storage
 // root (listed, on this computer), never assumed from the flag (01-parsers.md 2: a Beta root is listed but not local).
@@ -74,6 +78,7 @@ public static class WmvMapTiles
         {
             r.RootIds = new uint[Tiles * Tiles];
             r.Tex0Ids = new uint[Tiles * Tiles];
+            r.MinimapIds = new uint[Tiles * Tiles];
         }
         for (int i = 0; i < Tiles * Tiles; i++)
         {
@@ -87,6 +92,7 @@ public static class WmvMapTiles
             {
                 r.RootIds[i] = wdt.Maid[i * WdtFile.MaidWordsPerTile + (int)WdtTileFileRole.RootAdt];
                 r.Tex0Ids[i] = wdt.Maid[i * WdtFile.MaidWordsPerTile + (int)WdtTileFileRole.Tex0Adt];
+                r.MinimapIds[i] = wdt.Maid[i * WdtFile.MaidWordsPerTile + (int)WdtTileFileRole.Minimap];
                 if (r.RootIds[i] != 0)
                 {
                     f |= FlagRoot;
@@ -94,6 +100,18 @@ public static class WmvMapTiles
                 }
             }
             r.TileFlags[i] = f;
+        }
+        r.GlobalWmoRecords = wdt.GlobalWmos != null ? wdt.GlobalWmos.Length : 0;
+        if (r.GlobalWmoRecords > 0)
+        {
+            WorldFileReference reference;
+            if (wdt.TryGetGlobalWmoReference(0, out reference))
+            {
+                if (!reference.IsPath)
+                    r.GlobalWmoFileDataID = reference.FileDataId;
+                else
+                    r.GlobalWmoPath = reference.Path ?? "";
+            }
         }
         r.Status = "inspected";
         r.ParseMs = sw.Elapsed.TotalMilliseconds;

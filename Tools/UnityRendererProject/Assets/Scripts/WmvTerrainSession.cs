@@ -244,6 +244,8 @@ public sealed class WmvTerrainSession
     /// <summary>The load of the tile on screen, 0 for none.</summary>
     public int ShownLoad { get { return shown != null ? shownLoad : 0; } }
     public WmvRuntimeTerrainTile ShownTile { get { return shown; } }
+    /// <summary>The mesh data of the tile on screen (the world view's ground: TerrainHeight), null when none is kept.</summary>
+    public TerrainTileMesh ShownMesh { get { return shown != null ? shownMesh : null; } }
     /// <summary>A terrain load is in flight (not yet reported).</summary>
     public bool Loading { get { return current != null; } }
     /// <summary>The load in flight, 0 for none.</summary>

@@ -194,11 +194,17 @@ void UnityRendererHost::watchEmbeddedVisibility(bool wasCovered)
 
 void UnityRendererHost::setContent(wxWindow * content)
 {
+  if (m_content == content)
+    return;
+  if (m_content && m_contentShown)
+    m_content->Hide();
   m_content = content;
   if (m_content)
   {
-    m_content->Show(m_contentShown);
     m_content->SetSize(GetClientRect());
+    m_content->Show(m_contentShown);
+    if (m_contentShown)
+      m_content->Raise();
   }
 }
 

@@ -57,6 +57,7 @@ class UiMenuBarTitles;
 
 class ClientLoadProgress;
 class MapsViewer;
+class MapOverview;
 
 class ModelViewer: public wxFrame
 {    
@@ -151,6 +152,8 @@ public:
   // A texture picked in Browse (Textures mode), shown in the viewport's place: the Unity host's
   // content window (UnityRendererHost::showContent). Created with the viewport.
   TextureView * textureView = nullptr;
+  // The Maps viewer's overhead map, in the viewport's place until a world is entered (MapOverview.h).
+  MapOverview * mapOverview = nullptr;
 
   // Initialising related functions
   void InitMenu();
@@ -697,7 +700,9 @@ public:
   // for it end here. wdtInspected (the Maps viewer, docs/world-viewer/05-maps-viewer-ui.md): the map's WDT inspection
   // the catalogue holds was made by the map asset worker for this client (WorldMapCatalog::noteInspection), and is used
   // as it is when it says Available -- the GUI thread reads nothing; otherwise the WDT is inspected here as before.
-  int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected = false);
+  // camera (protocol 15, the Maps viewer's Enter world): where the player puts its free camera when the tile is shown.
+  int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected = false,
+                         const UnityIpcServer::WorldCamera * camera = nullptr);
   // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with
   // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect), unless
   // wdtInspected and the catalogue's inspection of it is Available.

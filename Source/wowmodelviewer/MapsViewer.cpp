@@ -4,6 +4,9 @@
 
 #include "MapsViewer.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "Game.h"
 #include "UnityAssetAccess.h"
 #include "UnityRendererHost.h"
@@ -17,6 +20,38 @@ namespace
 {
   QString tileName(int x, int y) { return QString("%1_%2").arg(x).arg(y); }
   double msOf(const QElapsedTimer & t) { return t.isValid() ? t.nsecsElapsed() / 1e6 : -1.0; }
+
+  // A tile's picture.
+  enum MinimapState : unsigned char
+  {
+    MinimapNone = 0,    // the WDT names no minimap for it (or it is not part of the map)
+    MinimapQueued,      // to be read
+    MinimapReading,     // with the worker
+    MinimapLoaded,      // its thumbnail came
+    MinimapMissing,     // it has none: not in the client's files, not downloaded, unreadable (the reason is kept)
+  };
+
+  // The largest minimap file read: a mebibyte, room for a 1024 x 1024 DXT1 image with its levels (the audit's minimaps are
+  // 512 x 512 and 256 x 256 DXT1 without levels, 00-audit.md 4.6). A larger file is not read: its tile shows no picture,
+  // and the hover line says why.
+  const qint64 MaxMinimapBytes = 1 << 20;
+  const QByteArray NoThumbnail;
+}
+
+bool MapsViewer::tileOf(double x, double y, int & tx, int & ty)
+{
+  tx = ty = -1;
+  if (!std::isfinite(x) || !std::isfinite(y) || std::fabs(x) > 1e6 || std::fabs(y) > 1e6)
+    return false;
+  tx = (int)std::floor(32.0 - y / TileSize);
+  ty = (int)std::floor(32.0 - x / TileSize);
+  return tx >= 0 && tx < Tiles && ty >= 0 && ty < Tiles;
+}
+
+void MapsViewer::pointIn(int tx, int ty, double fx, double fy, double & x, double & y)
+{
+  x = (32.0 - ty - fy) * TileSize;
+  y = (32.0 - tx - fx) * TileSize;
 }
 
 const std::vector<MapsViewer::DisplayMode> & MapsViewer::displayModes()
@@ -39,6 +74,7 @@ const std::vector<MapsViewer::DisplayMode> & MapsViewer::displayModes()
 MapsViewer::MapsViewer(ModelViewer * viewer) : m_viewer(viewer)
 {
   m_state.assign(Tiles * Tiles, (unsigned char)TileState::NotInWdt);
+  m_minimapTimer.Bind(wxEVT_TIMER, [this](wxTimerEvent &) { pumpMinimaps(); });
 }
 
 UnityIpcServer * MapsViewer::ipc() const
@@ -75,6 +111,7 @@ void MapsViewer::Entered()
     m_viewSent = view;
   }
   LOG_INFO << "[maps] entered" << (m_mapId >= 0 ? QString("with map %1 picked").arg(m_mapId) : QString("with no map picked"));
+  pumpMinimaps();
   changed();
 }
 
@@ -89,12 +126,13 @@ void MapsViewer::Left()
   if (had)
   {
     m_tilePhase = TilePhase::Cleared;
-    m_tileDetail = "The terrain was taken away when the Maps viewer was left. Click a tile to load it again.";
+    m_tileDetail = "The world was taken away when the Maps viewer was left. Enter world to load it again.";
   }
   m_load = 0;
   m_shownX = m_shownY = m_shownMap = -1;
   m_shownView.clear();
-  LOG_INFO << "[maps] left; the terrain cleared";
+  leaveWorld();
+  LOG_INFO << "[maps] left; the terrain cleared" << (minimapsLoading() ? "; the minimap pictures wait for the viewer's return" : "");
   changed();
 }
 
@@ -108,6 +146,7 @@ void MapsViewer::ClientReplaced()
   resetTile();
   m_shownX = m_shownY = m_shownMap = -1;
   m_shownView.clear();
+  leaveWorld();
   m_mapDetail = "A client is being loaded.";
   LOG_INFO << "[maps] the client is being replaced: the map, its tiles and the terrain forgotten";
   changed();
@@ -120,15 +159,18 @@ void MapsViewer::ClientLoaded()
   resetTile();
   m_shownX = m_shownY = m_shownMap = -1;
   m_shownView.clear();
+  leaveWorld();
   changed();
 }
 
 void MapsViewer::resetMap()
 {
+  stopMinimaps();
   if (m_readTicket != 0)
     if (UnityIpcServer * s = ipc())
       s->cancelViewerReads();
   m_readTicket = 0;
+  m_readDeferred = false;   // (a later pick defers again if it must; a pick without a WDT read must not inherit it)
   m_mapId = -1;
   m_mapName.clear();
   m_mapDirectory.clear();
@@ -144,6 +186,18 @@ void MapsViewer::resetMap()
   m_tex0s.clear();
   m_tilesInWdt = 0;
   m_tilesAvailable = 0;
+  m_minimapIds.clear();
+  m_thumbs.clear();
+  m_thumbState.clear();
+  m_thumbReason.clear();
+  m_minimapsWanted = m_minimapsLoaded = m_minimapsMissing = 0;
+  m_minimapsMs = -1.0;
+  m_imagesSerial++;
+  m_globalWmoRecords = 0;
+  m_globalWmoFileDataID = 0;
+  m_globalWmoPath.clear();
+  m_hasTarget = false;
+  m_targetHasZ = false;
 }
 
 void MapsViewer::resetTile()
@@ -171,6 +225,8 @@ void MapsViewer::SelectMap(int mapId)
     m_shownX = m_shownY = m_shownMap = -1;
     m_shownView.clear();
   }
+  if (mapId != m_mapId)
+    leaveWorld();
   resetMap();
   resetTile();
   m_pickClock.start();
@@ -277,18 +333,34 @@ void MapsViewer::beginRead()
   m_mapDetail = "Reading the map's WDT.";
 }
 
+void MapsViewer::readDeferredWdt()
+{
+  // The pick that waited for this viewer's earlier reads to come back is read now.
+  UnityIpcServer * s = ipc();
+  if (m_readDeferred && m_mapId >= 0 && s && s->viewerReadsInFlight() == 0)
+  {
+    beginRead();
+    changed();
+  }
+}
+
 void MapsViewer::OnWdtRead(MapAssetWorker::Result & result)
 {
+  // A minimap picture of the map's (the viewer's other reads).
+  const auto mt = m_minimapTickets.find(result.ticket);
+  if (result.ticket != 0 && mt != m_minimapTickets.end())
+  {
+    const int index = mt->second;
+    m_minimapTickets.erase(mt);
+    onMinimapRead(index, result);
+    readDeferredWdt();
+    return;
+  }
   if (result.ticket == 0 || result.ticket != m_readTicket)
   {
-    LOG_INFO << "[maps] a WDT read (ticket" << (qulonglong)result.ticket << ") of an earlier pick came back: dropped";
-    // The pick that waited for it is read now.
-    UnityIpcServer * s = ipc();
-    if (m_readDeferred && m_mapId >= 0 && s && s->viewerReadsInFlight() == 0)
-    {
-      beginRead();
-      changed();
-    }
+    LOG_INFO << "[maps] a" << (result.role == "minimap" ? "minimap" : "WDT") << "read (ticket" << (qulonglong)result.ticket
+             << ") of an earlier pick came back: dropped";
+    readDeferredWdt();
     return;
   }
   QElapsedTimer clock;
@@ -371,14 +443,16 @@ void MapsViewer::OnPlayerReady()
   if (m_tilePhase == TilePhase::Loading || m_tilePhase == TilePhase::Loaded)
   {
     m_tilePhase = TilePhase::Cleared;
-    m_tileDetail = "The Unity viewport was restarted. Click a tile to load it again.";
+    m_tileDetail = "The Unity viewport was restarted. Enter world to load the world again.";
   }
   m_load = 0;
   m_shownX = m_shownY = m_shownMap = -1;
+  leaveWorld();
   if ((m_mapPhase == MapPhase::WaitingPlayer || m_mapPhase == MapPhase::Inspecting) && !m_wdtBytes.isEmpty())
     sendInspection();
   else if (m_mapPhase == MapPhase::WaitingPlayer && m_mapId >= 0 && m_readTicket == 0)
     beginRead();   // the WDT waited for a server to take its read back
+  pumpMinimaps();  // a load in flight held the pictures back, and the restart ended it without a report
   changed();
 }
 
@@ -439,8 +513,15 @@ void MapsViewer::buildGrid(const UnityIpcServer::MapTilesInspection & r)
   m_timings.gridMs = msOf(clock);
   m_timings.pickToGridMs = msOf(m_pickClock);
   m_mapPhase = MapPhase::Ready;
+  m_globalWmoRecords = r.globalWmoRecords;
+  m_globalWmoFileDataID = r.globalWmoFileDataID;
+  m_globalWmoPath = r.globalWmoPath;
   if (r.kind == "GlobalWmo")
-    m_mapDetail = "This map has no terrain tiles: it is one world model (open it in Buildings).";
+    m_mapDetail = QString("This map has no terrain tiles: it is one world model (%1). Entering a world model in the world view "
+                          "is a later stage (world models in the world, docs/world-viewer/roadmap.md); it can be viewed in "
+                          "Buildings.").arg(m_globalWmoFileDataID ? QString("WMO FileDataID %1").arg(m_globalWmoFileDataID)
+                                                                 : !m_globalWmoPath.isEmpty() ? m_globalWmoPath
+                                                                                              : QString("its file is not named"));
   else if (r.kind == "Empty" || m_tilesInWdt == 0)
     m_mapDetail = "This map's WDT names no terrain tile.";
   else if (m_tilesAvailable == 0)
@@ -453,6 +534,163 @@ void MapsViewer::buildGrid(const UnityIpcServer::MapTilesInspection & r)
            << "not on this computer; kind" << r.kind << "; the table took" << m_timings.gridMs << "ms on this thread, "
            << m_timings.pickToGridMs << "ms from the pick (player parse" << r.parseMs << "ms, round trip"
            << m_timings.inspectRoundTripMs << "ms)";
+  startMinimaps(r);
+}
+
+// ---------------------------------------------------------------- the overhead map's pictures
+
+void MapsViewer::startMinimaps(const UnityIpcServer::MapTilesInspection & r)
+{
+  m_minimapIds = r.minimapIds;
+  m_thumbs.assign(Tiles * Tiles, QByteArray());
+  m_thumbState.assign(Tiles * Tiles, MinimapNone);
+  m_thumbReason.assign(Tiles * Tiles, QString());
+  m_minimapQueue.clear();
+  m_minimapsWanted = m_minimapsLoaded = m_minimapsMissing = 0;
+  m_minimapsMs = -1.0;
+  m_imagesSerial++;
+  if (m_minimapIds.size() != (size_t)(Tiles * Tiles))
+  {
+    LOG_INFO << "[maps] map" << m_mapId << ": no minimap pictures (the table names none:"
+             << (r.hasMaid ? "a player before protocol 15" : "the WDT has no MAID") << ")";
+    return;
+  }
+  // Each tile's minimap, asked of the storage root first (listed, on this computer: nothing read), as the root ADTs are.
+  wow::WoWFolder & folder = static_cast<wow::WoWFolder &>(GAMEDIRECTORY);
+  int minX, minY, maxX, maxY;
+  const bool box = tileExtent(minX, minY, maxX, maxY);
+  const double cx = box ? (minX + maxX) / 2.0 : 32.0, cy = box ? (minY + maxY) / 2.0 : 32.0;
+  std::vector<std::pair<double, int>> order;
+  for (int i = 0; i < Tiles * Tiles; i++)
+  {
+    if ((TileState)m_state[i] == TileState::NotInWdt || m_minimapIds[i] == 0)
+      continue;
+    m_minimapsWanted++;
+    const CASCFolder::RootEntry e = folder.storageRootEntry((int)m_minimapIds[i]);
+    if (!e.listed || !e.local)
+    {
+      m_thumbState[i] = MinimapMissing;
+      m_thumbReason[i] = QString("its minimap (FileDataID %1) is %2").arg(m_minimapIds[i])
+                           .arg(!e.listed ? "not in this client's files" : "not downloaded on this computer");
+      m_minimapsMissing++;
+      continue;
+    }
+    m_thumbState[i] = MinimapQueued;
+    const double dx = (i % Tiles) - cx, dy = (i / Tiles) - cy;
+    order.push_back(std::make_pair(dx * dx + dy * dy, i));
+  }
+  std::sort(order.begin(), order.end());
+  for (const auto & o : order)
+    m_minimapQueue.push_back(o.second);
+  m_minimapClock.start();
+  LOG_INFO << "[maps] map" << m_mapId << ":" << m_minimapsWanted << "minimap picture(s) named," << m_minimapQueue.size()
+           << "to read," << m_minimapsMissing << "not in the client's files or not downloaded";
+  pumpMinimaps();
+}
+
+void MapsViewer::pumpMinimaps()
+{
+  if (!m_active || m_mapPhase != MapPhase::Ready || m_minimapQueue.empty() || m_tilePhase == TilePhase::Loading)
+    return;   // (a tile being loaded reads first: the batch goes on when its load ends)
+  UnityIpcServer * s = ipc();
+  if (!s || !s->isListening() || !clientCurrent(m_epoch, m_generation) || !m_viewer->EnsureMapAssetLease(m_epoch, m_generation))
+    return;
+  while (!m_minimapQueue.empty() && (int)m_minimapTickets.size() < MinimapBatch)
+  {
+    const int i = m_minimapQueue.front();
+    m_minimapQueue.pop_front();
+    MapAssetWorker::Job job;
+    job.fileDataID = (int)m_minimapIds[i];
+    job.maxBytes = MaxMinimapBytes;
+    job.epoch = m_epoch;
+    job.generation = m_generation;
+    job.role = "minimap";
+    job.thumbnailSide = ThumbSide;
+    if (!s->submitViewerRead(job))
+    {
+      m_minimapQueue.push_front(i);
+      return;
+    }
+    m_thumbState[i] = MinimapReading;
+    m_minimapTickets[job.ticket] = i;
+  }
+}
+
+void MapsViewer::stopMinimaps()
+{
+  m_minimapTimer.Stop();
+  if (!m_minimapTickets.empty())
+  {
+    // Their answers come back as reads of an earlier pick, and are dropped there.
+    if (UnityIpcServer * s = ipc())
+      s->cancelViewerReads();
+    m_minimapTickets.clear();
+  }
+  m_minimapQueue.clear();
+}
+
+void MapsViewer::onMinimapRead(int i, MapAssetWorker::Result & r)
+{
+  if (i < 0 || i >= (int)m_thumbState.size() || !clientCurrent(m_epoch, m_generation))
+    return;
+  if (r.outcome == MapAssetWorker::Result::Outcome::Read && r.thumbnail && r.bytes.size() == ThumbSide * ThumbSide * 4)
+  {
+    m_thumbs[i] = r.bytes;
+    m_thumbState[i] = MinimapLoaded;
+    m_minimapsLoaded++;
+    m_imagesSerial++;
+  }
+  else
+  {
+    m_thumbState[i] = MinimapMissing;
+    m_minimapsMissing++;
+    if (r.outcome != MapAssetWorker::Result::Outcome::Read)
+      m_thumbReason[i] = "its minimap was not read (" + MapAssetWorker::outcomeName(r.outcome) + "): " + r.detail;
+    else if (r.inspection.state != wow::WdtAvailability::Available)
+      m_thumbReason[i] = "its minimap is " + wow::WorldMapCatalog::availabilityName(r.inspection.state) + ": " + r.inspection.detail;
+    else
+      m_thumbReason[i] = "its minimap could not be decoded: " + r.thumbnailProblem;
+    LOG_INFO << "[maps] tile" << tileName(i % Tiles, i / Tiles) << "of map" << m_mapId << ": no picture --" << m_thumbReason[i];
+  }
+  if (!m_minimapQueue.empty() && !m_minimapTimer.IsRunning())
+    m_minimapTimer.StartOnce(MinimapPumpMs);
+  if (onImagesChanged)
+    onImagesChanged();
+  if (!minimapsLoading())
+  {
+    m_minimapsMs = msOf(m_minimapClock);
+    LOG_INFO << "[maps] map" << m_mapId << ": minimap pictures --" << m_minimapsLoaded << "of" << m_minimapsWanted << "shown,"
+             << m_minimapsMissing << "without one; the last came" << m_minimapsMs << "ms after the grid";
+    changed();
+  }
+}
+
+quint32 MapsViewer::minimapId(int x, int y) const
+{
+  return x >= 0 && x < Tiles && y >= 0 && y < Tiles && m_minimapIds.size() == (size_t)(Tiles * Tiles) ? m_minimapIds[y * Tiles + x] : 0;
+}
+
+const QByteArray & MapsViewer::thumbnail(int x, int y) const
+{
+  if (x < 0 || x >= Tiles || y < 0 || y >= Tiles || m_thumbs.empty())
+    return NoThumbnail;
+  return m_thumbs[y * Tiles + x];
+}
+
+QString MapsViewer::minimapState(int x, int y) const
+{
+  if (x < 0 || x >= Tiles || y < 0 || y >= Tiles || m_thumbState.empty())
+    return QString();
+  const int i = y * Tiles + x;
+  switch ((MinimapState)m_thumbState[i])
+  {
+    case MinimapNone: return m_minimapIds.empty() ? QString() : QString("no minimap named");
+    case MinimapQueued:
+    case MinimapReading: return "its minimap is being read";
+    case MinimapLoaded: return QString("minimap %1").arg(m_minimapIds[i]);
+    case MinimapMissing: return m_thumbReason[i];
+  }
+  return QString();
 }
 
 // ---------------------------------------------------------------- a tile
@@ -540,44 +778,288 @@ QString MapsViewer::tileReason(int x, int y) const
   return t;
 }
 
+// ---------------------------------------------------------------- the target, Enter world, the camera
+
 void MapsViewer::SelectTile(int x, int y)
 {
-  if (!hasGrid() || x < 0 || x >= Tiles || y < 0 || y >= Tiles)
+  SetTargetAt(x, y, 0.5, 0.5);
+}
+
+void MapsViewer::SetTargetAt(int tx, int ty, double fx, double fy)
+{
+  if (!hasGrid() || tx < 0 || tx >= Tiles || ty < 0 || ty >= Tiles)
     return;
-  if (m_tilePhase == TilePhase::Loaded && m_shownX == x && m_shownY == y && m_shownMap == m_mapId)
-    return;   // on screen already
-  if (m_tilePhase == TilePhase::Loading && m_tileX == x && m_tileY == y)
-    return;   // being loaded already (a key held down, a double click): not asked for again
-  m_tileX = x;
-  m_tileY = y;
-  if (tileState(x, y) != TileState::Available)
+  double x, y;
+  pointIn(tx, ty, std::min(std::max(fx, 0.0), 1.0 - 1e-9), std::min(std::max(fy, 0.0), 1.0 - 1e-9), x, y);
+  SetTarget(x, y, false, 0.0);
+}
+
+bool MapsViewer::SetTarget(double x, double y, bool hasZ, double z)
+{
+  int tx, ty;
+  if (!hasGrid() || !std::isfinite(x) || !std::isfinite(y) || (hasZ && !std::isfinite(z)) || !tileOf(x, y, tx, ty))
   {
-    // Picked, not loaded: what is on screen stays, and a load in flight goes on (its report is still taken: m_load).
-    m_tilePhase = TilePhase::Unavailable;
-    m_tileDetail = tileReason(x, y);
-    LOG_INFO << "[maps] tile" << tileName(x, y) << "of map" << m_mapId << "picked, not loaded:" << m_tileDetail;
+    m_tileDetail = hasGrid() ? QString("X %1, Y %2 is not on this map's 64 x 64 tiles (each coordinate within +-%3).")
+                                 .arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(32.0 * TileSize, 0, 'f', 2)
+                             : QString("Pick a map first.");
+    changed();
+    return false;
+  }
+  m_hasTarget = true;
+  m_targetX = x;
+  m_targetY = y;
+  m_targetHasZ = hasZ;
+  m_targetZ = hasZ ? z : 0.0;
+  // The target's tile is the tile picked: the grid's ring, and what Enter world loads. A load in flight goes on, and what
+  // is on screen stays, until Enter world.
+  m_tileX = tx;
+  m_tileY = ty;
+  if (m_tilePhase != TilePhase::Loading && m_tilePhase != TilePhase::Loaded)
+  {
+    m_tilePhase = tileState(tx, ty) == TileState::Available ? TilePhase::None : TilePhase::Unavailable;
+    m_tileDetail = m_tilePhase == TilePhase::Unavailable ? tileReason(tx, ty) : QString();
+  }
+  else if (tileState(tx, ty) != TileState::Available)
+    m_tileDetail = tileReason(tx, ty);
+  LOG_INFO << "[maps] target" << targetLine();
+  changed();
+  return true;
+}
+
+QString MapsViewer::targetLine() const
+{
+  if (!m_hasTarget)
+    return QString();
+  int tx, ty;
+  tileOf(m_targetX, m_targetY, tx, ty);
+  return QString("Tile %1, %2  X %3  Y %4  Z %5").arg(tx).arg(ty).arg(m_targetX, 0, 'f', 1).arg(m_targetY, 0, 'f', 1)
+    .arg(m_targetHasZ ? QString::number(m_targetZ, 'f', 1) : QString("on the ground"));
+}
+
+bool MapsViewer::canEnter(QString & why) const
+{
+  why.clear();
+  UnityIpcServer * s = ipc();
+  int tx, ty;
+  if (!hasGrid())
+    why = m_mapId < 0 ? QString("Pick a map first.") : m_mapDetail.isEmpty() ? QString("The map's tiles are not known yet.") : m_mapDetail;
+  else if (m_globalWmoRecords > 0 && m_tilesInWdt == 0)
+    why = m_mapDetail;
+  else if (!m_hasTarget)
+    why = "Click the overhead map, or type X and Y, to set where to enter the world.";
+  else if (!tileOf(m_targetX, m_targetY, tx, ty) || tileState(tx, ty) != TileState::Available)
+    why = tileReason(m_tileX, m_tileY);
+  else if (!s || !s->isUnityReady())
+    why = "The Unity viewport is not ready.";
+  else if (m_viewer->m_clientLoading || UnityAssetAccess::isClientLoading())
+    why = "A client is being loaded.";
+  return why.isEmpty();
+}
+
+bool MapsViewer::targetOnShownTile() const
+{
+  int tx, ty;
+  return m_hasTarget && m_shownX >= 0 && m_shownMap == m_mapId && tileOf(m_targetX, m_targetY, tx, ty) && tx == m_shownX && ty == m_shownY;
+}
+
+UnityIpcServer::WorldCamera MapsViewer::flyCameraOnShownTile()
+{
+  // At the target when it is on the tile on screen; else at that tile's middle, on the ground (a target typed for another
+  // tile waits for Enter world, and the free camera never leaves the tile it stands on).
+  if (targetOnShownTile())
+    return flyCameraAtTarget();
+  UnityIpcServer::WorldCamera c = flyCameraAtTarget();
+  pointIn(m_shownX, m_shownY, 0.5, 0.5, c.x, c.y);
+  c.hasZ = false;
+  c.z = 0.0;
+  return c;
+}
+
+UnityIpcServer::WorldCamera MapsViewer::flyCameraAtTarget()
+{
+  UnityIpcServer::WorldCamera c;
+  c.request = ++m_cameraSerial;
+  c.mode = "fly";
+  c.x = m_targetX;
+  c.y = m_targetY;
+  c.z = m_targetZ;
+  c.hasZ = m_targetHasZ;
+  c.yaw = m_lookYaw;
+  c.pitch = m_lookPitch;
+  c.eyeHeight = EyeHeight;
+  return c;
+}
+
+void MapsViewer::EnterWorld()
+{
+  QString why;
+  if (!canEnter(why))
+  {
+    m_tileDetail = why;
+    LOG_INFO << "[maps] Enter world refused:" << why;
+    changed();
+    return;
+  }
+  UnityIpcServer * s = ipc();
+  const bool flies = s->playerFliesWorld();
+  int tx, ty;
+  tileOf(m_targetX, m_targetY, tx, ty);
+  UnityIpcServer::WorldCamera camera = flies ? flyCameraAtTarget() : UnityIpcServer::WorldCamera();
+  m_cameraMode = CameraMode::Fly;
+  // The target's tile on screen already: only the camera moves.
+  if (m_tilePhase == TilePhase::Loaded && m_shownX == tx && m_shownY == ty && m_shownMap == m_mapId)
+  {
+    if (!flies)
+    {
+      m_worldShown = true;
+      m_cameraMode = CameraMode::Overview;
+      m_cameraDetail = "The Unity renderer in use has no free camera (protocol 15 is needed): the tile is shown from above.";
+      changed();
+      return;
+    }
+    s->sendSetWorldCamera(camera);
+    m_cameraRequest = camera.request;
+    m_entering = true;
+    m_cameraDetail = "Placing the camera at the target.";
     changed();
     return;
   }
   QElapsedTimer clock;
   clock.start();
-  QString why;
-  const int load = m_viewer->RequestTerrainTile(m_mapId, x, y, why, true);
+  const int load = m_viewer->RequestTerrainTile(m_mapId, tx, ty, why, true, flies ? &camera : nullptr);
   m_timings.requestMs = msOf(clock);
   if (load <= 0)
   {
     m_tilePhase = TilePhase::Failed;
-    m_tileDetail = "The load was not sent: " + why;
+    m_tileDetail = "The world could not be entered: " + why;
+    pumpMinimaps();   // (a load before it may have held the pictures back)
     changed();
     return;
   }
+  m_tileX = tx;
+  m_tileY = ty;
   m_load = load;
   m_tilePhase = TilePhase::Loading;
-  m_tileDetail = "Loading " + tileName(x, y) + ".";
+  m_tileDetail = "Entering the world at tile " + tileName(tx, ty) + ": its terrain and textures are being read and built.";
+  m_entering = true;
+  m_cameraRequest = flies ? camera.request : 0;
+  m_cameraDetail = flies ? QString("The free camera goes to the target when the tile is shown.")
+                         : QString("The Unity renderer in use has no free camera (protocol 15 is needed): the tile will be shown "
+                                   "from above.");
   m_loadClock.start();
-  LOG_INFO << "[maps] tile" << tileName(x, y) << "of map" << m_mapId << "requested: load" << load << "(" << m_timings.requestMs
-           << "ms on this thread, no WDT read)";
+  LOG_INFO << "[maps] Enter world at" << targetLine() << ": tile" << tileName(tx, ty) << "requested, load" << load << "("
+           << m_timings.requestMs << "ms on this thread, no WDT read)" << (flies ? "with the free camera" : "without a camera");
   changed();
+}
+
+void MapsViewer::BackToMap()
+{
+  if (!m_worldShown && !m_entering)
+    return;
+  m_worldShown = false;
+  // Asked while the world was being entered: the load goes on (the world will be behind the map), but its camera's
+  // answer no longer takes the viewport.
+  m_entering = false;
+  m_cameraRequest = 0;
+  LOG_INFO << "[maps] back to the map; the world stays loaded behind it";
+  changed();
+}
+
+void MapsViewer::leaveWorld()
+{
+  m_worldShown = false;
+  m_entering = false;
+  m_cameraRequest = 0;
+  m_cameraPlaced = false;
+  m_cameraHeld = false;
+  m_cameraDetail.clear();
+}
+
+void MapsViewer::SetCameraMode(CameraMode mode)
+{
+  UnityIpcServer * s = ipc();
+  if (!m_worldShown || m_shownX < 0 || !s || !s->playerFliesWorld())
+  {
+    m_cameraMode = mode;
+    changed();
+    return;
+  }
+  UnityIpcServer::WorldCamera c;
+  if (mode == CameraMode::Fly)
+    c = flyCameraOnShownTile();
+  else
+  {
+    c.request = ++m_cameraSerial;
+    c.mode = "overview";
+  }
+  if (s->sendSetWorldCamera(c))
+    m_cameraRequest = c.request;
+  m_cameraMode = mode;
+  changed();
+}
+
+void MapsViewer::Look(double yaw, double pitch)
+{
+  m_lookYaw = yaw;
+  m_lookPitch = pitch;
+  UnityIpcServer * s = ipc();
+  if (!m_worldShown || m_shownX < 0 || !s || !s->playerFliesWorld())
+    return;
+  const UnityIpcServer::WorldCamera c = flyCameraOnShownTile();
+  if (s->sendSetWorldCamera(c))
+    m_cameraRequest = c.request;
+  m_cameraMode = CameraMode::Fly;
+}
+
+void MapsViewer::OnWorldCameraApplied(const UnityIpcServer::WorldCameraApplied & a)
+{
+  if (a.request == 0 || a.request != m_cameraRequest)
+  {
+    LOG_INFO << "[maps] the answer to camera request" << a.request << "came after request" << m_cameraRequest << ": not shown";
+    return;
+  }
+  // The camera Enter world sent with the load is placed when the player shows the tile, a moment before the load is
+  // reported built: its answer is held until that report, so the world takes the viewport with its tile known (never
+  // with the "Loading tile" notice over the player's first frame), and not at all when the load ends otherwise.
+  if (a.load != 0 && a.load == m_load && m_tilePhase == TilePhase::Loading)
+  {
+    m_heldCamera = a;
+    m_cameraHeld = true;
+    LOG_INFO << "[maps] camera" << a.request << a.status << "with load" << a.load << "on screen: held for the load's report";
+    return;
+  }
+  applyCamera(a);
+  changed();
+}
+
+void MapsViewer::applyCamera(const UnityIpcServer::WorldCameraApplied & a)
+{
+  m_cameraRequest = 0;
+  m_entering = false;
+  if (a.status == "applied")
+  {
+    m_worldShown = true;
+    m_cameraPlaced = a.mode == "fly";
+    m_cameraX = a.x;
+    m_cameraY = a.y;
+    m_cameraZ = a.z;
+    m_cameraMode = a.mode == "overview" ? CameraMode::Overview : CameraMode::Fly;
+    m_cameraDetail = a.mode == "overview"
+                       ? QString("Tile overview.")
+                       : QString("Free camera at X %1  Y %2  Z %3%4. Drag to look, the wheel to fly forwards and back; W A S D, "
+                                 "Q and E once a click in the viewport has given it the keys.")
+                           .arg(a.x, 0, 'f', 1).arg(a.y, 0, 'f', 1).arg(a.z, 0, 'f', 1)
+                           .arg(a.ground ? QString(" (on the ground, %1, plus %2)").arg(a.groundZ, 0, 'f', 1).arg(EyeHeight, 0, 'f', 1)
+                                         : a.hasGroundZ ? QString() : QString(" (%1)").arg(a.reason));
+  }
+  else
+  {
+    // A tile on screen whose camera could not be placed is still shown, framed from above.
+    if (a.load != 0 && a.load == m_load)
+      m_worldShown = true;
+    m_cameraDetail = "The camera could not be placed: " + a.reason;
+  }
+  LOG_INFO << "[maps] camera" << a.request << a.status << ":" << m_cameraDetail;
 }
 
 void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r)
@@ -640,9 +1122,30 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
     m_tileDetail = "The load of tile " + t + " was cleared: " + r.reason;
   }
   if (r.status != "built")
+  {
     m_load = 0;
+    // Enter world ended without a world: the overhead map stays, with why.
+    m_entering = false;
+    m_cameraRequest = 0;
+  }
+  else if (m_entering && m_cameraRequest == 0)
+  {
+    // A player without the free camera: the tile is shown framed from above.
+    m_entering = false;
+    m_worldShown = true;
+    m_cameraMode = CameraMode::Overview;
+  }
+  if (m_cameraHeld)
+  {
+    // The camera answer held for this report: taken now the tile is built, dropped when the load ended otherwise (or a
+    // later camera request replaced it).
+    m_cameraHeld = false;
+    if (r.status == "built" && m_heldCamera.load == r.load && m_heldCamera.request == m_cameraRequest)
+      applyCamera(m_heldCamera);
+  }
   LOG_INFO << "[maps] load" << r.load << "tile" << t << "of map" << r.mapId << ":" << r.status << "after" << m_timings.loadMs
            << "ms (the player's own total" << r.totalMs << "ms; view" << r.view << ") --" << m_tileDetail;
+  pumpMinimaps();   // the pictures waited for the load
   changed();
 }
 
@@ -652,11 +1155,13 @@ void MapsViewer::ClearTerrain()
     return;
   m_viewer->ClearTerrain("the Maps viewer's Clear terrain");
   m_tilePhase = TilePhase::Cleared;
-  m_tileDetail = "The terrain was cleared. Click a tile to load it again.";
+  m_tileDetail = "The world was cleared. Enter world to load it again.";
   m_load = 0;
   m_shownX = m_shownY = m_shownMap = -1;
   m_shownView.clear();
+  leaveWorld();
   LOG_INFO << "[maps] terrain cleared";
+  pumpMinimaps();
   changed();
 }
 
@@ -719,6 +1224,10 @@ QString MapsViewer::statusLine() const
   if (m_mapPhase != MapPhase::Ready)
     return m_mapDetail;
   QString s = QString("%1 of %2 tiles available.").arg(m_tilesAvailable).arg(m_tilesInWdt);
+  if (m_minimapsWanted > 0)
+    s += minimapsLoading() ? QString(" Minimap pictures: %1 of %2.").arg(m_minimapsLoaded).arg(m_minimapsWanted)
+                           : QString(" Minimap pictures: %1%2.").arg(m_minimapsLoaded)
+                               .arg(m_minimapsMissing > 0 ? QString(" (%1 without one)").arg(m_minimapsMissing) : QString());
   if (!m_mapDetail.isEmpty())
     s += " " + m_mapDetail;
   return s;
@@ -769,10 +1278,10 @@ bool MapsViewer::viewportNotice(QString & title, QString & detail) const
   {
     case TilePhase::None:
     case TilePhase::Cleared:
-      title = m_tilesAvailable > 0 ? QString("No tile selected") : map + " has no tile to show";
+      title = m_tilesAvailable > 0 ? QString("No world entered") : map + " has no tile to show";
       detail = m_tilesAvailable > 0 ? (m_tilePhase == TilePhase::Cleared ? m_tileDetail
-                                                                         : QString("Click an available tile in the tile grid "
-                                                                                   "under the map list in Browse."))
+                                                                         : QString("Click the overhead map to set where to enter "
+                                                                                   "the world, then Enter world."))
                                     : m_mapDetail;
       return true;
     case TilePhase::Unavailable:

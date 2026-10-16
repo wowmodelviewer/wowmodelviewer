@@ -9,7 +9,11 @@
 //   - the tile on screen built again in another view (WmvTerrainSession.RebuildShown): its uploaded textures handed
 //     over, never uploaded twice, nothing asked of the host, no framing; the data of the textures a view did not upload
 //     kept and uploaded by a textured rebuild; a rebuild that throws leaves the old tile as it was; nothing on screen;
-//     every tile, texture and alpha array released by clearTerrain.
+//     every tile, texture and alpha array released by clearTerrain;
+//   - protocol 15: the minimap ids (MAID word 7) at y * 64 + x and a world-model-only WDT's global WMO in the tile table;
+//     the camera fields of loadTerrainTile and setWorldCamera; the worldCameraApplied line; the ground under a point
+//     (TerrainHeight) against ramps known everywhere, holes and points off the tile; the world-to-Unity conversion the
+//     camera uses, against the mesh's own vertices; the free camera's step (WmvFlyCamera.Step) from synthetic input.
 
 using System;
 using System.Collections.Generic;
@@ -25,6 +29,10 @@ public static partial class WmvLifecycleSelfTest
             MapTilesTableTests(log);
             TerrainRuntimeViewTests(log);
             TerrainRebuildTests(log);
+            OverheadMapTableTests(log);
+            WorldCameraIpcTests(log);
+            TerrainHeightTests(log);
+            FlyCameraStepTests(log);
         }
         catch (Exception e)
         {
@@ -34,6 +42,176 @@ public static partial class WmvLifecycleSelfTest
         {
             WmvTerrainDebug.SetRuntimeView("auto");
         }
+    }
+
+    // ---- protocol 15: the overhead map's table
+    static void OverheadMapTableTests(Action<string> log)
+    {
+        // Minimap ids on (30, 48) and (2, 63); (63, 2) is not one, so a transposed table cannot pass.
+        var maid = new byte[4096 * 32];
+        int a = 48 * 64 + 30, b = 63 * 64 + 2, t = 2 * 64 + 63;
+        AdtSynthetic.PutU32(maid, a * 32, 1001);
+        AdtSynthetic.PutU32(maid, a * 32 + 28, 5001);
+        AdtSynthetic.PutU32(maid, b * 32, 1002);
+        AdtSynthetic.PutU32(maid, b * 32 + 28, 5002);
+        byte[] wdt = AdtSynthetic.Cat(AdtSynthetic.Mver(), AdtSynthetic.Mphd(0), AdtSynthetic.MainTable(a, b), AdtSynthetic.Chunk("MAID", maid));
+        WmvIpcClient.MapTilesReport r = WmvMapTiles.Inspect(TilesRequest(wdt));
+        int nonZero = 0;
+        if (r.MinimapIds != null)
+            foreach (uint id in r.MinimapIds)
+                if (id != 0) nonZero++;
+        Check(r.Status == "inspected" && r.MinimapIds != null && r.MinimapIds.Length == 4096 && r.MinimapIds[a] == 5001 && r.MinimapIds[b] == 5002 &&
+              r.MinimapIds[t] == 0 && nonZero == 2 && r.RootIds[a] == 1001 && r.GlobalWmoRecords == 0,
+              "maps viewer: the minimap ids are MAID word 7 at y * 64 + x, never transposed (" + nonZero + " non-zero)", log);
+        string line = WmvIpcClient.MapTilesInspectedLine(r);
+        string key = "\"minimapIds\":\"";
+        int at = line.IndexOf(key, StringComparison.Ordinal);
+        bool decoded = false;
+        if (at >= 0)
+        {
+            int start = at + key.Length, end = line.IndexOf('"', start);
+            byte[] bytes = Convert.FromBase64String(line.Substring(start, end - start));
+            decoded = bytes.Length == 4096 * 4 && BitConverter.ToUInt32(bytes, a * 4) == 5001 && BitConverter.ToUInt32(bytes, b * 4) == 5002;
+        }
+        Check(decoded && line.Contains("\"globalWmoRecords\":0"), "maps viewer: mapTilesInspected carries the minimap ids (little-endian u32, base64)", log);
+
+        // A world-model-only WDT, modern form: no tile, MAID, one MODF naming FileDataID 108631 (flag 0x8).
+        byte[] wmoOnly = AdtSynthetic.Cat(AdtSynthetic.Mver(), AdtSynthetic.Mphd(1), AdtSynthetic.MainTable(), AdtSynthetic.Chunk("MAID", new byte[4096 * 32]),
+                                          AdtSynthetic.Chunk("MODF", AdtSynthetic.ModfRecord(108631, 0xFFFFFFFF, 0x8, 1024)));
+        WmvIpcClient.MapTilesReport w = WmvMapTiles.Inspect(TilesRequest(wmoOnly));
+        string wl = WmvIpcClient.MapTilesInspectedLine(w);
+        Check(w.Status == "inspected" && w.TilesInMain == 0 && w.GlobalWmoRecords == 1 && w.GlobalWmoFileDataID == 108631 && w.GlobalWmoPath == "" &&
+              wl.Contains("\"globalWmoRecords\":1") && wl.Contains("\"globalWmoFileDataID\":108631"),
+              "maps viewer: a world-model-only WDT's global WMO is reported (" + w.Kind + ", " + w.GlobalWmoRecords + " record, file " +
+              w.GlobalWmoFileDataID + ")", log);
+    }
+
+    // ---- protocol 15: the camera on the wire
+    static void WorldCameraIpcTests(Action<string> log)
+    {
+        var go = new GameObject("WorldCameraIpcTest");
+        try
+        {
+            var ipc = go.AddComponent<WmvIpcClient>();
+            ipc.SentForTest = s => { };
+            WmvIpcClient.TerrainTileCommand got = null;
+            WmvIpcClient.WorldCameraRequest asked = null;
+            ipc.OnLoadTerrainTile = c => got = c;
+            ipc.OnSetWorldCamera = q => asked = q;
+            ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":7,\"assetEpoch\":2,\"mapId\":0,\"tileX\":32,\"tileY\":48," +
+                                "\"wdtFileDataID\":775971,\"maxAssetBytes\":4194304,\"cameraRequest\":9,\"cameraMode\":\"fly\"," +
+                                "\"cameraX\":-9449.25,\"cameraY\":64.5,\"cameraZ\":0,\"cameraHasZ\":false,\"cameraYaw\":135,\"cameraPitch\":-10," +
+                                "\"cameraEyeHeight\":2}", null);
+            WmvIpcClient.WorldCameraRequest c0 = got != null ? got.Camera : null;
+            Check(c0 != null && c0.Request == 9 && c0.Mode == "fly" && c0.X == -9449.25 && c0.Y == 64.5 && !c0.HasZ && c0.Yaw == 135f &&
+                  c0.Pitch == -10f && c0.EyeHeight == 2f,
+                  "maps viewer: loadTerrainTile carries the world camera, read whole (" + (c0 != null ? c0.ToString() : "none") + ")", log);
+            got = null;
+            ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":8,\"assetEpoch\":2,\"mapId\":0,\"tileX\":32,\"tileY\":48," +
+                                "\"wdtFileDataID\":775971,\"maxAssetBytes\":4194304}", null);
+            Check(got != null && got.Camera == null, "maps viewer: a loadTerrainTile without a camera carries none (the tile is framed as before)", log);
+            ipc.FeedLineForTest("{\"type\":\"setWorldCamera\",\"cameraRequest\":11,\"cameraMode\":\"fly\",\"cameraX\":100.5," +
+                                "\"cameraY\":-20.25,\"cameraZ\":55.5,\"cameraHasZ\":true,\"cameraYaw\":270,\"cameraPitch\":5}", null);
+            Check(asked != null && asked.Request == 11 && asked.Mode == "fly" && asked.X == 100.5 && asked.Y == -20.25 && asked.HasZ && asked.Z == 55.5 &&
+                  asked.Yaw == 270f && asked.Pitch == 5f, "maps viewer: setWorldCamera is read whole (" + (asked != null ? asked.ToString() : "none") + ")", log);
+            asked = null;
+            ipc.FeedLineForTest("{\"type\":\"setWorldCamera\",\"cameraRequest\":12}", null);
+            Check(asked != null && asked.Request == 12 && asked.Mode == "",
+                  "maps viewer: a setWorldCamera without a mode still reaches the player (to be answered refused)", log);
+            string line = WmvIpcClient.WorldCameraAppliedLine(new WmvIpcClient.WorldCameraReport
+            {
+                Request = 11, Mode = "fly", Status = "applied", Reason = "on the ground", X = 1.5, Y = -2.25, Z = 60.75, Ground = true,
+                GroundZ = 58.75, Yaw = 90f, Pitch = -5f, Load = 7,
+            });
+            string none = WmvIpcClient.WorldCameraAppliedLine(new WmvIpcClient.WorldCameraReport { Request = 12, Reason = "no world is on screen" });
+            Check(line == "{\"type\":\"worldCameraApplied\",\"request\":11,\"mode\":\"fly\",\"status\":\"applied\",\"reason\":\"on the ground\"," +
+                          "\"x\":1.5,\"y\":-2.25,\"z\":60.75,\"ground\":true,\"hasGroundZ\":true,\"groundZ\":58.75,\"yaw\":90,\"pitch\":-5,\"load\":7}" &&
+                  none.Contains("\"status\":\"refused\"") && none.Contains("\"hasGroundZ\":false"),
+                  "maps viewer: the worldCameraApplied line (" + line + ")", log);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
+    // ---- protocol 15: the ground under a point
+    static void TerrainHeightTests(Action<string> log)
+    {
+        const int tx = 32, ty = 48;
+        WorldOrigin o = WorldToUnity.TileOrigin(tx, ty);
+        double sx = 0.05, sy = -0.03;
+        TerrainTileMesh ramp = TerrainFromRoot(AdtSynthetic.RampRoot(tx, ty, sx, sy), tx, ty);
+        var rng = new System.Random(15);
+        double T = TerrainCoordinates.TileSize, C = TerrainCoordinates.ChunkSize;
+        int found = 0;
+        double worst = 0;
+        for (int k = 0; k < 400; k++)
+        {
+            // Inside the tile: x from o.X - T to o.X, y from o.Y - T to o.Y; every 20th point on a chunk border exactly.
+            double south = rng.NextDouble() * T, east = rng.NextDouble() * T;
+            if (k % 20 == 0)
+                south = Math.Floor(south / C) * C;
+            double x = o.X - south, y = o.Y - east;
+            double h = TerrainHeight.At(ramp, x, y);
+            if (double.IsNaN(h))
+                continue;
+            found++;
+            worst = Math.Max(worst, Math.Abs(h - (100.0 + sx * (x - o.X) + sy * (y - o.Y))));
+        }
+        Check(found == 400 && worst < 0.01,
+              string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                            "maps viewer: the ground under 400 points of a ramp is the ramp's height (found {0}, worst {1:G3} yd)", found, worst), log);
+        double off1 = TerrainHeight.At(ramp, o.X + 1.0, o.Y - 10.0), off2 = TerrainHeight.At(ramp, o.X - 10.0, o.Y - T - 1.0);
+        Check(double.IsNaN(off1) && double.IsNaN(off2), "maps viewer: a point off the tile has no ground (NaN)", log);
+        // Chunk 64 is all holes: its cell (3, 4) has no ground; the same cell of chunk 65 has.
+        TerrainTileMesh holed = TerrainFromRoot(AdtSynthetic.RootWith(tx, ty, n => new RootChunkSpec { Holes = n == 64 ? ulong.MaxValue : 0UL }), tx, ty);
+        double U = TerrainCoordinates.UnitSize;
+        int hx = 64 % 16, hy = 64 / 16;
+        double inHole = TerrainHeight.At(holed, o.X - (hy * C + 3.5 * U), o.Y - (hx * C + 4.5 * U));
+        double beside = TerrainHeight.At(holed, o.X - (hy * C + 3.5 * U), o.Y - ((hx + 1) * C + 4.5 * U));
+        Check(double.IsNaN(inHole) && !double.IsNaN(beside), "maps viewer: a hole cell has no ground, the cell beside it has", log);
+        // The conversion the camera uses: a vertex's world point turns into that vertex's Unity position.
+        TerrainChunkMesh ch = ramp.Chunks[17];
+        double vx, vy;
+        TerrainCoordinates.OuterVertex(tx, ty, 17 % 16, 17 / 16, 0, 0, out vx, out vy);
+        double vz = 100.0 + sx * (vx - o.X) + sy * (vy - o.Y);
+        double ux, uy, uz;
+        WorldToUnity.PositionD(vx, vy, vz, ramp.Origin, out ux, out uy, out uz);
+        Check(Math.Abs(ux - ch.Positions[0]) < 1e-3 && Math.Abs(uy - ch.Positions[1]) < 1e-3 && Math.Abs(uz - ch.Positions[2]) < 1e-3,
+              string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                            "maps viewer: a world point converts to the Unity position of its vertex ({0:0.###}, {1:0.###}, {2:0.###} vs {3}, {4}, {5})",
+                            ux, uy, uz, ch.Positions[0], ch.Positions[1], ch.Positions[2]), log);
+    }
+
+    // ---- protocol 15: the free camera's step
+    static void FlyCameraStepTests(Action<string> log)
+    {
+        var s = new WmvFlyCamera.State { Position = Vector3.zero, Yaw = 0f, Pitch = 0f, Speed = 30f };
+        WmvFlyCamera.State n = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { Forward = 1f, SpeedFactor = 1f }, 0.5f);
+        WmvFlyCamera.State e = WmvFlyCamera.Step(new WmvFlyCamera.State { Yaw = 90f, Speed = 30f }, new WmvFlyCamera.FlyInput { Forward = 1f, SpeedFactor = 1f }, 0.5f);
+        WmvFlyCamera.State r = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { Right = 1f, SpeedFactor = 1f }, 0.5f);
+        WmvFlyCamera.State u = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { Up = 1f, SpeedFactor = 1f }, 0.5f);
+        Check(Close(n.Position, new Vector3(0f, 0f, 15f)) && Close(e.Position, new Vector3(15f, 0f, 0f)) && Close(r.Position, new Vector3(15f, 0f, 0f)) &&
+              Close(u.Position, new Vector3(0f, 15f, 0f)),
+              "maps viewer: the free camera flies north at yaw 0, east at yaw 90, strafes east, climbs straight up (" + n.Position + ", " + e.Position +
+              ", " + r.Position + ", " + u.Position + ")", log);
+        WmvFlyCamera.State look = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { LookX = 1800f, LookY = 1000f, SpeedFactor = 1f }, 0.016f);
+        WmvFlyCamera.State down = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { LookY = -1000f, SpeedFactor = 1f }, 0.016f);
+        Check(Mathf.Abs(look.Yaw) < 1e-3f && look.Pitch == WmvFlyCamera.MaxPitch && down.Pitch == -WmvFlyCamera.MaxPitch && Close(look.Position, Vector3.zero),
+              "maps viewer: a drag turns the free camera (360 degrees back to north) and holds its pitch within 89 degrees, without moving it", log);
+        WmvFlyCamera.State wheel = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { WheelNotches = 2f, SpeedFactor = 1f }, 0.016f);
+        WmvFlyCamera.State fast = WmvFlyCamera.Step(s, new WmvFlyCamera.FlyInput { Forward = 1f, SpeedFactor = WmvFlyCamera.FastFactor }, 0.5f);
+        WmvFlyCamera.State up = WmvFlyCamera.Step(new WmvFlyCamera.State { Pitch = 30f, Speed = 30f }, new WmvFlyCamera.FlyInput { Forward = 1f, SpeedFactor = 1f }, 1f);
+        Check(Close(wheel.Position, new Vector3(0f, 0f, 15f)) && Close(fast.Position, new Vector3(0f, 0f, 60f)) &&
+              Close(up.Position, new Vector3(0f, 15f, 25.98076f)),
+              "maps viewer: two wheel notches fly half a second forwards, Shift four times as fast, and forwards follows the pitch (" + wheel.Position +
+              ", " + fast.Position + ", " + up.Position + ")", log);
+    }
+
+    static bool Close(Vector3 a, Vector3 b)
+    {
+        return (a - b).magnitude < 1e-3f;
     }
 
     static WmvIpcClient.MapTilesRequest TilesRequest(byte[] wdt, string md5 = null)

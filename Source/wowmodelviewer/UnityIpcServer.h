@@ -393,7 +393,7 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 14;
+  static const int PROTOCOL_VERSION = 15;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -410,6 +410,10 @@ public:
   // file read ends its poll's serving; the polls whose timing is kept.
   static const int MAP_ASSET_QUEUE_MAX = 16;
   static const int MAP_ASSET_POLL_BUDGET_BYTES = 2 * 1024 * 1024;
+  // The viewer's own results a poll takes back at most (the Maps viewer's minimap pictures: small, many, each handed to
+  // the viewer): the rest waits for the next poll, so a run of them never holds this thread (the wake burst rule then
+  // lets the window paint between runs).
+  static const int MAP_VIEWER_RESULTS_PER_POLL = 8;
   static const int MAP_ASSET_LARGE_FILE_BYTES = 1024 * 1024;
   static const int MAP_ASSET_POLL_TIMINGS_KEPT = 256;
   // The getMapAsset records kept (mapAssetsServed): the most recent 256; the rest are counted, not kept.
@@ -501,6 +505,8 @@ public:
   // verified parser (inspectMapTiles -> mapTilesInspected; the host never parses a WDT) and draws terrain in the view the
   // host chooses, the tile on screen built again in it from what it holds (setTerrainView -> terrainViewApplied).
   bool playerInspectsMapTiles() const { return m_client && m_unityReady && m_playerProtocol >= 14; }
+  // Protocol 15: the Maps viewer's overhead map (the minimap ids in the tile table) and the world view's free camera.
+  bool playerFliesWorld() const { return m_client && m_unityReady && m_playerProtocol >= 15; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -751,6 +757,20 @@ public:
   // Runtime command (TERRAIN above): one terrain tile, and the map's WDT the player fetches first. False (nothing sent)
   // when the player is not connected and ready, or speaks a protocol older than 12. The caller raises its terrain load
   // serial only when this returns true.
+  // THE WORLD VIEW'S CAMERA (protocol 15, docs/world-viewer/05-maps-viewer-ui.md section 21). Positions are the game's
+  // world frame (yards; x north, y west, z up): the player converts them with the scene's floating origin. "fly": the free
+  // camera at (x, y, z), or on the ground under (x, y) plus eyeHeight when hasZ is false, facing yaw (degrees clockwise from
+  // north) and pitch (degrees, up positive); "overview": the tile framed as Stage 03 frames it.
+  struct WorldCamera
+  {
+    int request = 0;               // the host's serial, echoed in worldCameraApplied
+    QString mode;                  // "fly" / "overview"; empty: no camera
+    double x = 0.0, y = 0.0, z = 0.0;
+    bool hasZ = false;
+    double yaw = 0.0, pitch = 0.0;
+    double eyeHeight = 2.0;
+  };
+
   struct TerrainTileCommand
   {
     int load = 0;                  // the host's terrain load serial (> 0)
@@ -770,6 +790,9 @@ public:
     int maxTextureBytes = 0;
     int maxTextureBytesPerLoad = 0;
     int maxTexturesPerLoad = 0;
+    // Protocol 15: where the world view's camera goes when this load's tile is put on screen (sent only when camera.mode
+    // is set and the player flies the world; otherwise the tile is framed as before).
+    WorldCamera camera;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
@@ -806,8 +829,13 @@ public:
     QByteArray tileFlags;
     std::vector<quint32> rootIds;
     std::vector<quint32> tex0Ids;
+    std::vector<quint32> minimapIds;   // protocol 15: MAID word 7 of every tile (the minimap image), empty without MAID
     bool tableValid = false;
     QString tableProblem;
+    // Protocol 15: a world-model-only map's global WMO -- the WDT's MODF records, and the first one's file.
+    int globalWmoRecords = 0;
+    quint32 globalWmoFileDataID = 0;
+    QString globalWmoPath;
   };
   std::function<void(const MapTilesInspection &)> onMapTilesInspected;
   // setTerrainView: the view terrain is drawn in from now on -- "auto" (textured when the tile's material has drawable
@@ -827,6 +855,24 @@ public:
     long long retainedTextureBytes = -1;
   };
   std::function<void(const TerrainViewApplied &)> onTerrainViewApplied;
+  // setWorldCamera (protocol 15): place the world view's camera, or switch between the free camera and the overview, without
+  // a reload; answered by worldCameraApplied with the same request. False (nothing sent) without a protocol-15 player or a
+  // camera mode. Sent once per choice of the user's -- never on a timer.
+  bool sendSetWorldCamera(const WorldCamera & camera);
+  struct WorldCameraApplied
+  {
+    int request = 0;
+    QString mode;
+    QString status;                // "applied" / "refused"
+    QString reason;
+    double x = 0.0, y = 0.0, z = 0.0;   // where the camera is (game frame)
+    bool ground = false;           // z came from the ground under the point
+    bool hasGroundZ = false;
+    double groundZ = 0.0;
+    double yaw = 0.0, pitch = 0.0;
+    int load = 0;                  // the tile on screen
+  };
+  std::function<void(const WorldCameraApplied &)> onWorldCameraApplied;
 
   // THE VIEWER'S OWN READS (the Maps viewer's WDT reads, docs/world-viewer/05-maps-viewer-ui.md): a job the viewer gives
   // the map asset worker itself, decided and leased by the viewer. Its result comes back through this server's polls
@@ -968,6 +1014,7 @@ public:
     int served = 0;                // requests answered in the poll
     long long bytesRead = 0;       // bytes read from the storage for them
     int largeFiles = 0;            // files over MAP_ASSET_LARGE_FILE_BYTES among them (0 or 1)
+    int viewerResults = 0;         // the viewer's own results taken back (at most MAP_VIEWER_RESULTS_PER_POLL)
     double serveMs = -1.0;         // the serving, from the first request taken to the last answer queued
     int waitingAfter = 0;          // requests still waiting when the poll stopped serving
     bool stoppedForBudget = false; // it stopped taking results back: MAP_ASSET_POLL_BUDGET_BYTES read for them, or a
@@ -1265,6 +1312,9 @@ private:
   void handleTerrainTileLoaded(const QJsonObject & msg);
   void handleMapTilesInspected(const QJsonObject & msg);
   void handleTerrainViewApplied(const QJsonObject & msg);
+  void handleWorldCameraApplied(const QJsonObject & msg);
+  static void putCamera(QJsonObject & msg, const WorldCamera & camera);
+  static QString describeCamera(const WorldCamera & camera);
   void queueLine(const QByteArray & line);
   // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
   // joining it into one QByteArray first would copy all of it once more.
@@ -1336,6 +1386,7 @@ private:
   bool m_detached = false;                 // detachForShutdown()
   quint64 m_resultsSeen = 0;               // the worker's results made, as the last serving poll saw them
   qint64 m_wakeBurstEndNs = -1;            // when the last wake poll ended (m_clock)
+  long long m_viewerResultsTaken = 0;      // the viewer's own results taken back, ever (a wake counts them as taken)
   double m_wakeBurstMs = 0.0;              // GUI time of the run of wakes it belongs to
   unsigned long long m_connectionSerial = 0;
   bool m_holdNextMapRead = false;

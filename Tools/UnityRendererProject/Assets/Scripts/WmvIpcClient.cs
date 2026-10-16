@@ -256,7 +256,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 14;
+    public const int ProtocolVersion = 15;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -279,6 +279,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<string> OnClearTerrain;                      // take the terrain away (protocol 12; the host's reason)
     public Action<MapTilesRequest> OnInspectMapTiles;          // what a WDT says of its tiles (protocol 14)
     public Action<string> OnSetTerrainView;                    // the view terrain is drawn in (protocol 14)
+    public Action<WorldCameraRequest> OnSetWorldCamera;        // place the world view's camera, or switch it (protocol 15)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -509,6 +510,9 @@ public class WmvIpcClient : MonoBehaviour
         public int MaxTextureBytes;         // one texture file
         public int MaxTextureBytesPerLoad;  // texture bytes the host reads for one load (the host enforces it)
         public int MaxTexturesPerLoad;      // texture ids one load may ask for
+        // Protocol 15: where the world view's camera goes when this tile is put on screen (the Maps viewer's Enter world);
+        // null: the tile is framed as before (the overview).
+        public WorldCameraRequest Camera;
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
@@ -522,6 +526,78 @@ public class WmvIpcClient : MonoBehaviour
                                                                  MaxTextureBytes, MaxTextureBytesPerLoad, MaxTexturesPerLoad)
                                                  : " (no textures offered)");
         }
+    }
+
+    /// <summary>The world view's camera, as the host asks for it (protocol 15: setWorldCamera, and loadTerrainTile's camera).
+    /// Positions are the game's world frame (yards; x north, y west, z up), never Unity's: the player converts them with
+    /// the scene's floating origin. Mode "fly" puts the free camera at (X, Y, Z) -- on the ground under (X, Y), plus
+    /// EyeHeight, when HasZ is false -- facing Yaw (degrees clockwise from north) and Pitch (degrees, up positive);
+    /// "overview" frames the tile on screen as Stage 03 does.</summary>
+    public class WorldCameraRequest
+    {
+        public int Request;             // the host's serial, echoed in worldCameraApplied (0: no answer is wanted)
+        public string Mode = "";        // "fly" | "overview"
+        public double X, Y, Z;
+        public bool HasZ;
+        public float Yaw, Pitch;
+        public float EyeHeight;
+
+        public override string ToString()
+        {
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            return Mode == "fly"
+                ? string.Format(inv, "request {0} fly at ({1:0.###}, {2:0.###}, {3}) yaw {4:0.#} pitch {5:0.#} eye {6:0.##}", Request, X, Y,
+                                HasZ ? Z.ToString("0.###", inv) : "ground", Yaw, Pitch, EyeHeight)
+                : string.Format(inv, "request {0} {1}", Request, Mode);
+        }
+    }
+
+    /// <summary>worldCameraApplied (protocol 15): what the player did with a WorldCameraRequest.</summary>
+    public class WorldCameraReport
+    {
+        public int Request;
+        public string Mode = "", Status = "refused", Reason = "";   // "applied" | "refused"
+        public double X, Y, Z;                 // where the camera is, in the game's world frame
+        public bool Ground;                    // Z came from the ground under the point
+        public double GroundZ = double.NaN;    // the ground's height there (NaN: none -- a hole, or off the tile)
+        public float Yaw, Pitch;
+        public int Load;                       // the tile on screen, 0 for none
+    }
+
+    public void ReportWorldCameraApplied(WorldCameraReport r) { Send(WorldCameraAppliedLine(r)); }
+
+    /// <summary>The worldCameraApplied line (also for the self-test).</summary>
+    public static string WorldCameraAppliedLine(WorldCameraReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"worldCameraApplied\",\"request\":").Append(r.Request)
+          .Append(",\"mode\":\"").Append(Escape(r.Mode ?? "")).Append('"')
+          .Append(",\"status\":\"").Append(Escape(r.Status ?? "")).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"')
+          .Append(",\"x\":").Append(r.X.ToString("R", inv))
+          .Append(",\"y\":").Append(r.Y.ToString("R", inv))
+          .Append(",\"z\":").Append(r.Z.ToString("R", inv))
+          .Append(",\"ground\":").Append(r.Ground ? "true" : "false")
+          .Append(",\"hasGroundZ\":").Append(double.IsNaN(r.GroundZ) ? "false" : "true")
+          .Append(",\"groundZ\":").Append(double.IsNaN(r.GroundZ) ? "0" : r.GroundZ.ToString("R", inv))
+          .Append(",\"yaw\":").Append(r.Yaw.ToString("R", inv))
+          .Append(",\"pitch\":").Append(r.Pitch.ToString("R", inv))
+          .Append(",\"load\":").Append(r.Load)
+          .Append('}');
+        return sb.ToString();
+    }
+
+    /// <summary>The camera a host line states (setWorldCamera, or loadTerrainTile's), or null when it states none.</summary>
+    static WorldCameraRequest CameraFrom(Msg msg)
+    {
+        if (msg == null || string.IsNullOrEmpty(msg.cameraMode))
+            return null;
+        return new WorldCameraRequest
+        {
+            Request = msg.cameraRequest, Mode = msg.cameraMode, X = msg.cameraX, Y = msg.cameraY, Z = msg.cameraZ,
+            HasZ = msg.cameraHasZ, Yaw = msg.cameraYaw, Pitch = msg.cameraPitch, EyeHeight = msg.cameraEyeHeight,
+        };
     }
 
     // ---- characterScene -------------------------------------------------------------------------
@@ -747,6 +823,13 @@ public class WmvIpcClient : MonoBehaviour
         public string reason;         // clearTerrain
         public int inspection;        // inspectMapTiles (protocol 14)
         public string view;           // setTerrainView (protocol 14)
+        // protocol 15: the world view's camera (setWorldCamera, and loadTerrainTile's optional camera); flat, not a
+        // nested object, for the reason HasMount gives
+        public int cameraRequest;
+        public string cameraMode;
+        public double cameraX, cameraY, cameraZ;
+        public bool cameraHasZ;
+        public float cameraYaw, cameraPitch, cameraEyeHeight;
         public string state;          // assetResponse to getMapAsset: the host's decision
         public string detail;
         public double readMs;
@@ -1249,6 +1332,7 @@ public class WmvIpcClient : MonoBehaviour
                     WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.tileX, TileY = msg.tileY,
                     MaxAssetBytes = msg.maxAssetBytes, MaxTextureBytes = msg.maxTextureBytes,
                     MaxTextureBytesPerLoad = msg.maxTextureBytesPerLoad, MaxTexturesPerLoad = msg.maxTexturesPerLoad,
+                    Camera = CameraFrom(msg),
                 });
                 break;
 
@@ -1267,6 +1351,11 @@ public class WmvIpcClient : MonoBehaviour
 
             case "setTerrainView":
                 OnSetTerrainView?.Invoke(msg.view ?? "");
+                break;
+
+            // The world view's camera (protocol 15). A line without a mode is still answered (refused), never dropped.
+            case "setWorldCamera":
+                OnSetWorldCamera?.Invoke(CameraFrom(msg) ?? new WorldCameraRequest { Request = msg.cameraRequest });
                 break;
 
             case "captureScreenshot":
@@ -1703,6 +1792,11 @@ public class WmvIpcClient : MonoBehaviour
         public int TilesInMain, TilesWithRoot;
         public byte[] TileFlags;                        // 4096: bit 0 the MAIN flag, bit 1 MAID names a root ADT
         public uint[] RootIds, Tex0Ids;                 // 4096 each, or null without MAID
+        public uint[] MinimapIds;                       // protocol 15: MAID word 7 of every tile, or null without MAID
+        // Protocol 15: a world-model-only map's global WMO (the WDT's MODF records; the first one's file).
+        public int GlobalWmoRecords;                    // MODF records in the WDT
+        public uint GlobalWmoFileDataID;                // 0 when the record names a path, or nothing resolvable
+        public string GlobalWmoPath = "";
         public double ParseMs = -1;
     }
 
@@ -1745,6 +1839,11 @@ public class WmvIpcClient : MonoBehaviour
             sb.Append(",\"rootIds\":\"").Append(Convert.ToBase64String(U32Bytes(r.RootIds))).Append('"');
         if (r.Tex0Ids != null)
             sb.Append(",\"tex0Ids\":\"").Append(Convert.ToBase64String(U32Bytes(r.Tex0Ids))).Append('"');
+        if (r.MinimapIds != null)
+            sb.Append(",\"minimapIds\":\"").Append(Convert.ToBase64String(U32Bytes(r.MinimapIds))).Append('"');
+        sb.Append(",\"globalWmoRecords\":").Append(r.GlobalWmoRecords)
+          .Append(",\"globalWmoFileDataID\":").Append(r.GlobalWmoFileDataID)
+          .Append(",\"globalWmoPath\":\"").Append(Escape(r.GlobalWmoPath ?? "")).Append('"');
         sb.Append('}');
         return sb.ToString();
     }

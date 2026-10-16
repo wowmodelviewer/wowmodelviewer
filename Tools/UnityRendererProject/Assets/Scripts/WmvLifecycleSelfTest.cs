@@ -5491,7 +5491,8 @@ public static partial class WmvLifecycleSelfTest
             ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
-            Check(WmvIpcClient.ProtocolVersion == 14, "terrain ipc: the player speaks protocol 14 (13 added terrain textures, 14 the Maps viewer)", log);
+            Check(WmvIpcClient.ProtocolVersion == 15, "terrain ipc: the player speaks protocol 15 (13 added terrain textures, 14 the Maps viewer, " +
+                  "15 its overhead map and free camera)", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +

@@ -6,6 +6,7 @@
 #include "AnimationExportChoiceDialog.h"
 #include "ArmoryImportDialog.h"
 #include "TextureView.h"
+#include "MapOverview.h"
 #include "MapsViewer.h"
 #include "AnimManager.h"
 
@@ -280,6 +281,8 @@ ModelViewer::ModelViewer()
     t.start();
     if (fileControl)
       fileControl->MapsChanged();
+    if (mapOverview && isMapsMode())
+      mapOverview->Refresh2();
     const double panelMs = t.nsecsElapsed() / 1e6;
     if (isMapsMode())
     {
@@ -290,8 +293,13 @@ ModelViewer::ModelViewer()
     const double ms = t.nsecsElapsed() / 1e6;
     m_maps->noteUiUpdate(ms);
     if (ms > 8.0)
-      LOG_INFO << "[maps] a GUI update took" << ms << "ms (the tile grid panel" << panelMs << "ms, the viewport, its notice and the "
-                  "labels" << ms - panelMs << "ms)";
+      LOG_INFO << "[maps] a GUI update took" << ms << "ms (the panel and the overhead map" << panelMs << "ms, the viewport, its "
+                  "notice and the labels" << ms - panelMs << "ms)";
+  };
+  // A minimap picture came: the overhead map repaints, nothing else.
+  m_maps->onImagesChanged = [this]() {
+    if (mapOverview && isMapsMode())
+      mapOverview->ImagesChanged();
   };
   // our main class objects
   animControl = nullptr;
@@ -1894,7 +1902,10 @@ ModelViewer::~ModelViewer()
     unityRendererHost->ipc()->detachForShutdown();
   // The Maps viewer tells nothing any more: the windows it would repaint go below.
   if (m_maps)
+  {
     m_maps->onChanged = nullptr;
+    m_maps->onImagesChanged = nullptr;
+  }
   LOG_INFO << "Shutting down the program...";
 
   if (testShutdownProbe)
@@ -2317,6 +2328,9 @@ void ModelViewer::CreateUnityViewport()
   // A texture picked in Browse is shown in the viewport's place.
   textureView = new TextureView(unityRendererHost, this);
   unityRendererHost->setContent(textureView);
+  // The Maps viewer's overhead map takes the same place until a world is entered (MapOverview).
+  mapOverview = new MapOverview(unityRendererHost, m_maps.get());
+  mapOverview->Hide();
   textureView->onLookupResolved = [this](int fileDataId, const QString & indexName) {
     if (fileControl)
       fileControl->TextureLookupResolved(fileDataId, indexName);
@@ -2410,6 +2424,10 @@ void ModelViewer::CreateUnityViewport()
   unityRendererHost->ipc()->onTerrainViewApplied = [this](const UnityIpcServer::TerrainViewApplied & applied) {
     if (m_maps)
       m_maps->OnTerrainViewApplied(applied);
+  };
+  unityRendererHost->ipc()->onWorldCameraApplied = [this](const UnityIpcServer::WorldCameraApplied & applied) {
+    if (m_maps)
+      m_maps->OnWorldCameraApplied(applied);
   };
 }
 
@@ -2992,7 +3010,8 @@ void ModelViewer::UpdateUnityViewportState()
   // about the player -- missing, stopped, still starting -- is said over it.
   if (isTextureMode() && textureView)
   {
-    const bool changed = !unityRendererHost->isShowingContent();
+    const bool changed = !unityRendererHost->isShowingContent() || unityRendererHost->content() != textureView;
+    unityRendererHost->setContent(textureView);
     unityRendererHost->showContent(true);
     unityRendererHost->clearNotice();
     // The model's panels go once the texture covers the viewport, so the player is never seen
@@ -3007,10 +3026,27 @@ void ModelViewer::UpdateUnityViewportState()
     return;
   }
 
+  // THE MAPS VIEWER'S OVERHEAD MAP: until a world is entered, and after Back to map, it covers the viewport as the texture
+  // view does; the player, and any world it holds, is only taken off screen.
+  if (isMapsMode() && mapOverview && m_maps && m_maps->showsOverview())
+  {
+    const bool changed = !unityRendererHost->isShowingContent() || unityRendererHost->content() != mapOverview;
+    unityRendererHost->setContent(mapOverview);
+    unityRendererHost->showContent(true);
+    unityRendererHost->clearNotice();
+    applyWorkspace(workspacePanes(ViewerMode::Maps));
+    if (changed)
+    {
+      LOG_INFO << "[viewport] showing the overhead map";
+      mapOverview->Refresh2();
+    }
+    return;
+  }
+
   ViewportNotice notice;
   bool changed = unityRendererHost->isShowingContent();
   if (changed)
-    LOG_INFO << "[viewport] the texture view is put away";
+    LOG_INFO << "[viewport] the" << (unityRendererHost->content() == mapOverview ? "overhead map" : "texture view") << "is put away";
   if (unityViewportNotice(notice))
   {
     const bool newNotice = !unityRendererHost->hasNotice() || unityRendererHost->noticeTitle() != notice.title;
@@ -3764,7 +3800,8 @@ bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcSe
   return true;
 }
 
-int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected)
+int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected,
+                                    const UnityIpcServer::WorldCamera * camera)
 {
   why.clear();
   const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
@@ -3793,6 +3830,8 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
     command.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
     command.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
   }
+  if (camera)
+    command.camera = *camera;
   if (!ipc->sendLoadTerrainTile(command))
     return refuse("the load could not be sent to the player");
   // Raised only now that the load is out: the serial counts the loads the player was sent.

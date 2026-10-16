@@ -37,6 +37,9 @@
 #include "UiStyle.h"
 #include "UiControls.h"
 #include "MapsViewer.h"
+#include "MapOverview.h"
+#include "MapThumbnail.h"
+#include "TextureDecode.h"
 #include "MapTilePanel.h"
 #include <wx/checkbox.h>
 #include <wx/choice.h>
@@ -10265,7 +10268,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         tally.check(label + ": a tile to click", false, "no available tile");
         continue;
       }
-      MapTileGrid * grid = fc->mapPanel()->grid();
+      MapTileGrid * grid = frame->mapOverview->grid();
       int gx0, gy0, gx1, gy1;
       grid->Extent(gx0, gy0, gx1, gy1);
       if (x < gx0 || x > gx1 || y < gy0 || y > gy1)
@@ -10283,21 +10286,269 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                   QString("picked %1_%2 (cell %3 px at %4,%5), %6").arg(maps->tileX()).arg(maps->tileY()).arg(grid->cellSize())
                     .arg(r.x).arg(r.y).arg(tilePhaseName(maps->tilePhase())));
     }
-    else if (kind == "clickrapid")
+    else if (kind == "clickrapid" || kind == "enterrapid")
     {
-      // clickrapid:<x1>:<y1>:<x2>:<y2>: two tiles clicked back to back (no pump between): the first load is superseded by
-      // the second, which alone may come to the screen.
-      MapTileGrid * grid = fc->mapPanel()->grid();
+      // clickrapid:<x1>:<y1>:<x2>:<y2>: two tiles clicked back to back (no pump between): the second is the target.
+      // enterrapid: each click followed by a click on the overhead map's Enter world, all queued at once: the first load is
+      // superseded by the second, which alone may come to the screen.
+      MapTileGrid * grid = frame->mapOverview->grid();
       grid->SetWholeGrid(true);
       pump(100);
       const wxRect r1 = grid->TileRect(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toInt());
       const wxRect r2 = grid->TileRect(arg.section(':', 2, 2).toInt(), arg.section(':', 3, 3).toInt());
+      UiButton * enter = frame->mapOverview->enterButton();
+      const wxSize es = enter->GetClientSize();
       postClick((HWND)grid->GetHWND(), wxPoint(r1.x + r1.width / 2, r1.y + r1.height / 2));
+      if (kind == "enterrapid")
+        postClick((HWND)enter->GetHWND(), wxPoint(es.x / 2, es.y / 2));
       postClick((HWND)grid->GetHWND(), wxPoint(r2.x + r2.width / 2, r2.y + r2.height / 2));
+      if (kind == "enterrapid")
+        postClick((HWND)enter->GetHWND(), wxPoint(es.x / 2, es.y / 2));
       const bool second = pumpUntil([&]() { return maps->tileX() == arg.section(':', 2, 2).toInt() &&
-                                                   maps->tileY() == arg.section(':', 3, 3).toInt(); }, 5000);
-      tally.check(label + ": the second click picks its tile", second, QString("picked %1_%2, load %3").arg(maps->tileX())
-                                                                       .arg(maps->tileY()).arg(maps->load()));
+                                                   maps->tileY() == arg.section(':', 3, 3).toInt() &&
+                                                   (kind == "clickrapid" || maps->entering() || maps->worldShown()); }, 5000);
+      tally.check(label + ": the second click picks its tile" + (kind == "enterrapid" ? QString(", and enters the world there") : QString()),
+                  second, QString("picked %1_%2, load %3, %4").arg(maps->tileX()).arg(maps->tileY()).arg(maps->load())
+                            .arg(maps->entering() ? "entering" : maps->worldShown() ? "world shown" : "on the map"));
+    }
+    else if (kind == "clickat" || kind == "dclick")
+    {
+      // clickat:<x>:<y>:<fx>:<fy>: a click inside cell (x, y) at fractions fx (east) and fy (south): the target there.
+      // dclick:<x>:<y>[:<fx>:<fy>]: a double-click there: the target, and Enter world.
+      const int x = arg.section(':', 0, 0).toInt(), y = arg.section(':', 1, 1).toInt();
+      const double fx = arg.section(':', 2, 2).isEmpty() ? 0.5 : arg.section(':', 2, 2).toDouble();
+      const double fy = arg.section(':', 3, 3).isEmpty() ? 0.5 : arg.section(':', 3, 3).toDouble();
+      MapTileGrid * grid = frame->mapOverview->grid();
+      int gx0, gy0, gx1, gy1;
+      grid->Extent(gx0, gy0, gx1, gy1);
+      if (x < gx0 || x > gx1 || y < gy0 || y > gy1)
+      {
+        grid->SetWholeGrid(true);
+        pump(100);
+      }
+      const wxRect r = grid->TileRect(x, y);
+      const wxPoint at(r.x + (int)(fx * r.width), r.y + (int)(fy * r.height));
+      if (kind == "dclick")
+      {
+        HWND h = (HWND)grid->GetHWND();
+        PostMessage(h, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONUP, 0, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONDBLCLK, MK_LBUTTON, MAKELPARAM(at.x, at.y));
+        PostMessage(h, WM_LBUTTONUP, 0, MAKELPARAM(at.x, at.y));
+      }
+      else
+        postClick((HWND)grid->GetHWND(), at);
+      const bool done = pumpUntil([&]() { return maps->tileX() == x && maps->tileY() == y &&
+                                                 (kind == "clickat" || maps->entering() || maps->worldShown()); }, 5000);
+      rec["target"] = maps->targetLine();
+      tally.check(label + QString(": the %1 sets the target in cell %2_%3%4").arg(kind == "dclick" ? "double-click" : "click").arg(x).arg(y)
+                    .arg(kind == "dclick" ? QString(" and enters the world") : QString()),
+                  done, maps->targetLine() + (maps->entering() ? " (entering)" : ""));
+    }
+    else if (kind == "target")
+    {
+      // target:<X>:<Y>[:<Z>]: the coordinates typed into the panel's fields, and Enter pressed in one of them.
+      MapTilePanel * panel = fc->mapPanel();
+      const QStringList v = arg.split(':');
+      for (int a = 0; a < 3; a++)
+      {
+        wxTextCtrl * t = panel->targetField(a);
+        t->SetValue(a < v.size() ? wxString(v[a].toStdWString()) : wxString());
+      }
+      wxCommandEvent enter(wxEVT_TEXT_ENTER, panel->targetField(0)->GetId());
+      enter.SetEventObject(panel->targetField(0));
+      panel->targetField(0)->ProcessWindowEvent(enter);
+      pump(200);
+      rec["target"] = maps->targetLine();
+      tally.check(label + ": the typed coordinates are the target", maps->hasTarget() &&
+                                                                    std::fabs(maps->targetX() - v.value(0).toDouble()) < 0.01 &&
+                                                                    std::fabs(maps->targetY() - v.value(1).toDouble()) < 0.01,
+                  maps->hasTarget() ? maps->targetLine() : maps->tileDetail());
+    }
+    else if (kind == "enter" || kind == "enterov")
+    {
+      // The panel's Enter world (enter), or the overhead map's (enterov), as a click on it reports.
+      UiButton * b = kind == "enter" ? fc->mapPanel()->enterButton() : frame->mapOverview->enterButton();
+      QString why;
+      const bool could = maps->canEnter(why);
+      wxCommandEvent clicked(wxEVT_BUTTON, b->GetId());
+      clicked.SetEventObject(b);
+      b->ProcessWindowEvent(clicked);
+      pump(100);
+      tally.check(label + ": Enter world is taken", could && (maps->entering() || maps->worldShown()),
+                  could ? (maps->entering() ? QString("entering: ") + maps->tileDetail() : maps->cameraDetail()) : "refused: " + why);
+    }
+    else if (kind == "waitworld")
+    {
+      const long ms = arg.isEmpty() ? 90000 : arg.toLong();
+      pumpUntil([&]() { return !maps->entering(); }, ms);
+      pump(500);
+      rec["worldShown"] = maps->worldShown();
+      rec["cameraDetail"] = maps->cameraDetail();
+      rec["cameraX"] = maps->cameraX();
+      rec["cameraY"] = maps->cameraY();
+      rec["cameraZ"] = maps->cameraZ();
+      rec["tileDetail"] = maps->tileDetail();
+      tally.check(label + ": the world is entered and has the viewport", !maps->entering() && maps->worldShown() &&
+                                                                          !frame->unityRendererHost->isShowingContent(),
+                  QString("%1; %2").arg(maps->worldShown() ? "world shown" : "on the map").arg(maps->cameraDetail()));
+    }
+    else if (kind == "back")
+    {
+      UiButton * b = fc->mapPanel()->backButton();
+      wxCommandEvent clicked(wxEVT_BUTTON, b->GetId());
+      clicked.SetEventObject(b);
+      b->ProcessWindowEvent(clicked);
+      pump(300);
+      tally.check(label + ": Back to map shows the overhead map, the world kept behind it",
+                  maps->showsOverview() && frame->unityRendererHost->isShowingContent() &&
+                    frame->unityRendererHost->content() == (wxWindow *)frame->mapOverview,
+                  QString("overview %1, content shown %2, the world's tile %3_%4").arg(maps->showsOverview() ? 1 : 0)
+                    .arg(frame->unityRendererHost->isShowingContent() ? 1 : 0).arg(maps->shownTileX()).arg(maps->shownTileY()));
+    }
+    else if (kind == "camera")
+    {
+      // camera:fly|overview: the panel's Camera choice, as the control reports a pick; then the player's answer.
+      wxChoice * choice = fc->mapPanel()->cameraChoice();
+      const int index = arg == "overview" ? 1 : 0;
+      choice->SetSelection(index);
+      wxCommandEvent picked(wxEVT_CHOICE, choice->GetId());
+      picked.SetEventObject(choice);
+      picked.SetInt(index);
+      choice->ProcessWindowEvent(picked);
+      pump(1500);
+      rec["cameraDetail"] = maps->cameraDetail();
+      tally.check(label + ": the camera is switched", (maps->cameraMode() == MapsViewer::CameraMode::Overview) == (index == 1) &&
+                                                          maps->cameraDetail().startsWith(index == 1 ? "Tile overview" : "Free camera"),
+                  maps->cameraDetail());
+    }
+    else if (kind == "look")
+    {
+      // look:<yaw>:<pitch>: the free camera put at the target again, facing that way (the views from inside the world).
+      maps->Look(arg.section(':', 0, 0).toDouble(), arg.section(':', 1, 1).toDouble());
+      pump(1500);
+      rec["cameraDetail"] = maps->cameraDetail();
+      tally.check(label + ": the free camera faces the way asked, at the target", maps->cameraPlaced() &&
+                                                                                    maps->cameraDetail().startsWith("Free camera"),
+                  maps->cameraDetail());
+    }
+    else if (kind == "decodecheck")
+    {
+      // decodecheck:<n>: the software decoder of the minimap pictures (MapThumbnail, the worker's) against the app's GL
+      // decoder (TextureDecode, the texture viewer's) on up to n of the map's minimaps, spread over its tiles: level 0 of
+      // each, pixel by pixel (RGB; the minimaps carry no alpha).
+      const int n = arg.isEmpty() ? 24 : arg.toInt();
+      std::vector<std::pair<int, int>> tiles;
+      for (int ty = 0; ty < 64; ty++)
+        for (int tx = 0; tx < 64; tx++)
+          if (maps->minimapId(tx, ty) != 0 && maps->tileState(tx, ty) != MapsViewer::TileState::NotInWdt)
+            tiles.push_back(std::make_pair(tx, ty));
+      const bool glReady = frame->canvas && video.render && frame->canvas->init;
+      int compared = 0, refused = 0, sizeMismatch = 0;
+      double worstMean = 0.0;
+      int worstMax = 0;
+      long long over8 = 0, pixels = 0;
+      QStringList formats, problems;
+      const size_t step = tiles.empty() ? 1 : std::max<size_t>(1, tiles.size() / (size_t)std::max(1, n));
+      for (size_t k = 0; k < tiles.size() && compared + refused < n; k += step)
+      {
+        const quint32 id = maps->minimapId(tiles[k].first, tiles[k].second);
+        TextureDecode::Source src = TextureDecode::readId((int)id);
+        if (!src.ok)
+        {
+          refused++;
+          problems << QString("%1: %2").arg(id).arg(src.error);
+          continue;
+        }
+        const QString why = TextureDecode::decoderProblem(glReady, src.info);
+        QByteArray soft;
+        int w = 0, h = 0;
+        QString problem;
+        const bool softOk = MapThumbnail::decodeLevel(src.bytes, 0, soft, w, h, problem);
+        if (!why.isEmpty() || !softOk)
+        {
+          refused++;
+          problems << QString("%1: %2").arg(id).arg(!why.isEmpty() ? "GL: " + why : "software: " + problem);
+          continue;
+        }
+        const TextureDecode::Pixels gl = TextureDecode::decode(src.file, src.info, 0);
+        if (!gl.ok || gl.image.width() != w || gl.image.height() != h)
+        {
+          sizeMismatch++;
+          problems << QString("%1: GL %2 x %3 (%4), software %5 x %6").arg(id).arg(gl.image.width()).arg(gl.image.height())
+                        .arg(gl.error).arg(w).arg(h);
+          continue;
+        }
+        const unsigned char * s = reinterpret_cast<const unsigned char *>(soft.constData());
+        long long sum = 0;
+        int mx = 0;
+        for (int y = 0; y < h; y++)
+        {
+          const QRgb * line = reinterpret_cast<const QRgb *>(gl.image.constScanLine(y));
+          for (int x = 0; x < w; x++)
+          {
+            const unsigned char * p = s + 4 * ((size_t)y * w + x);
+            const int d = std::max(std::abs(p[0] - qRed(line[x])), std::max(std::abs(p[1] - qGreen(line[x])), std::abs(p[2] - qBlue(line[x]))));
+            sum += d;
+            mx = std::max(mx, d);
+            if (d > 8)
+              over8++;
+          }
+        }
+        pixels += (long long)w * h;
+        compared++;
+        worstMax = std::max(worstMax, mx);
+        worstMean = std::max(worstMean, (double)sum / ((double)w * h));
+        const QString f = TextureDecode::decodedFormatName(gl.internalFormat, src.info) + QString(" %1x%2").arg(w).arg(h);
+        if (!formats.contains(f))
+          formats << f;
+      }
+      rec["compared"] = compared;
+      rec["refused"] = refused;
+      rec["worstMaxDiff"] = worstMax;
+      rec["worstMeanDiff"] = worstMean;
+      rec["pixelsOver8"] = (double)over8;
+      rec["pixels"] = (double)pixels;
+      rec["formats"] = formats.join(", ");
+      tally.check(label + ": the worker's software decoder gives the GL decoder's pixels on the map's minimaps",
+                  compared > 0 && sizeMismatch == 0 && worstMax <= 16 && worstMean <= 1.5,
+                  QString("%1 compared (%2), %3 refused, %4 size mismatch(es); the worst pixel differs by %5 of 255, the worst mean "
+                          "%6; %7 of %8 pixels differ by more than 8%9").arg(compared).arg(formats.join(", ")).arg(refused)
+                    .arg(sizeMismatch).arg(worstMax).arg(worstMean, 0, 'f', 3).arg(over8).arg(pixels)
+                    .arg(problems.isEmpty() ? QString() : "; " + problems.mid(0, 3).join("; ")));
+    }
+    else if (kind == "dumpminimap")
+    {
+      // dumpminimap:<x>:<y>:<side>: tile (x, y)'s minimap as the worker reduces it, side x side, to <out>_minimap_<x>_<y>.png
+      // (gate G4: compared with the tile seen from straight above).
+      const int x = arg.section(':', 0, 0).toInt(), y = arg.section(':', 1, 1).toInt();
+      const int side = arg.section(':', 2, 2).isEmpty() ? 256 : arg.section(':', 2, 2).toInt();
+      const quint32 id = maps->minimapId(x, y);
+      TextureDecode::Source src = id ? TextureDecode::readId((int)id) : TextureDecode::Source();
+      QByteArray rgba;
+      QString problem;
+      bool ok = src.ok && MapThumbnail::fromBlp(src.bytes, side, rgba, problem);
+      const QString path = outBase + QString("_minimap_%1_%2.png").arg(x).arg(y);
+      if (ok)
+      {
+        QImage img(reinterpret_cast<const uchar *>(rgba.constData()), side, side, side * 4, QImage::Format_RGBA8888);
+        ok = img.copy().save(path, "PNG");
+      }
+      rec["minimap"] = (double)id;
+      tally.check(label + ": the minimap is written", ok, ok ? path : QString("minimap %1: %2").arg(id).arg(src.ok ? problem : src.error));
+    }
+    else if (kind == "waitminimaps")
+    {
+      const long ms = arg.isEmpty() ? 60000 : arg.toLong();
+      pumpUntil([&]() { return !maps->minimapsLoading(); }, ms);
+      pump(300);
+      rec["minimapsWanted"] = maps->minimapsWanted();
+      rec["minimapsLoaded"] = maps->minimapsLoaded();
+      rec["minimapsMissing"] = maps->minimapsMissing();
+      rec["minimapsMs"] = maps->minimapsMs();
+      tally.check(label + ": the minimap pictures have come (or why not)", !maps->minimapsLoading(),
+                  QString("%1 of %2 shown, %3 without one, the last %4 ms after the grid").arg(maps->minimapsLoaded())
+                    .arg(maps->minimapsWanted()).arg(maps->minimapsMissing()).arg(maps->minimapsMs(), 0, 'f', 1));
     }
     else if (kind == "waittile")
     {
@@ -10347,19 +10598,19 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     }
     else if (kind == "whole")
     {
-      wxCheckBox * box = fc->mapPanel()->wholeGridBox();
+      wxCheckBox * box = frame->mapOverview->wholeGridBox();
       box->SetValue(arg.toInt() != 0);
       wxCommandEvent ticked(wxEVT_CHECKBOX, box->GetId());
       ticked.SetEventObject(box);
       ticked.SetInt(arg.toInt() != 0);
       box->ProcessWindowEvent(ticked);
       pump(300);
-      tally.check(label + ": the whole-grid box", fc->mapPanel()->grid()->wholeGrid() == (arg.toInt() != 0),
-                  fc->mapPanel()->grid()->wholeGrid() ? "whole grid" : "the map's tiles");
+      tally.check(label + ": the whole-grid box", frame->mapOverview->grid()->wholeGrid() == (arg.toInt() != 0),
+                  frame->mapOverview->grid()->wholeGrid() ? "whole grid" : "the map's tiles");
     }
     else if (kind == "key")
     {
-      MapTileGrid * grid = fc->mapPanel()->grid();
+      MapTileGrid * grid = frame->mapOverview->grid();
       grid->SetFocus();
       const int vk = arg == "left" ? VK_LEFT : arg == "right" ? VK_RIGHT : arg == "up" ? VK_UP : arg == "down" ? VK_DOWN
                                                                                                              : VK_RETURN;
@@ -10522,21 +10773,52 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       }
       else if (what == "shownview")
         tally.check(label, maps->shownView() == a1, maps->shownView());
+      else if (what == "world")
+        tally.check(label, a1 == "shown" ? maps->worldShown() && !frame->unityRendererHost->isShowingContent()
+                                         : maps->showsOverview() && frame->unityRendererHost->content() == (wxWindow *)frame->mapOverview,
+                    QString("world shown %1, overhead map %2").arg(maps->worldShown() ? 1 : 0).arg(maps->showsOverview() ? 1 : 0));
+      else if (what == "camera")
+        tally.check(label, a1 == "placed" ? maps->cameraPlaced()
+                                          : (maps->cameraMode() == MapsViewer::CameraMode::Overview) == (a1 == "overview"),
+                    maps->cameraDetail());
+      else if (what == "minimaps")
+        tally.check(label, maps->minimapsLoaded() >= a1.toInt(), QString("%1 of %2 shown").arg(maps->minimapsLoaded()).arg(maps->minimapsWanted()));
+      else if (what == "target")
+      {
+        int tx = -1, ty = -1;
+        MapsViewer::tileOf(maps->targetX(), maps->targetY(), tx, ty);
+        tally.check(label, maps->hasTarget() && tx == a1.toInt() && ty == a2.toInt(), maps->targetLine());
+      }
+      else if (what == "cameratile")
+      {
+        // expect:cameratile:X:Y -- the free camera the player answered stands on tile X_Y.
+        int tx = -1, ty = -1;
+        MapsViewer::tileOf(maps->cameraX(), maps->cameraY(), tx, ty);
+        tally.check(label, maps->cameraPlaced() && tx == a1.toInt() && ty == a2.toInt(),
+                    QString("camera at X %1 Y %2 Z %3, tile %4_%5: %6").arg(maps->cameraX(), 0, 'f', 1).arg(maps->cameraY(), 0, 'f', 1)
+                      .arg(maps->cameraZ(), 0, 'f', 1).arg(tx).arg(ty).arg(maps->cameraDetail()));
+      }
+      else if (what == "enter")
+      {
+        QString why;
+        const bool can = maps->canEnter(why);
+        tally.check(label, can == (a1 == "yes"), can ? QString("can enter") : why);
+      }
       else
         tally.check(label, false, "unknown expectation");
     }
     else if (kind == "zoom")
     {
       // zoom:<cell>:<x>:<y>: the grid zoomed so cells are that big about tile (x, y) (what the wheel does), 0 the fit.
-      fc->mapPanel()->grid()->ZoomTo(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toDouble() + 0.5,
+      frame->mapOverview->grid()->ZoomTo(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toDouble() + 0.5,
                                      arg.section(':', 2, 2).toDouble() + 0.5);
       pump(200);
-      rec["cell"] = fc->mapPanel()->grid()->cellSize();
+      rec["cell"] = frame->mapOverview->grid()->cellSize();
     }
     else if (kind == "wheel" && arg.startsWith("grid"))
     {
       // wheel:grid:<x>:<y>:<clicks>: the wheel turned over that tile of the grid (posted to the grid's window).
-      MapTileGrid * grid = fc->mapPanel()->grid();
+      MapTileGrid * grid = frame->mapOverview->grid();
       const wxRect r = grid->TileRect(arg.section(':', 1, 1).toInt(), arg.section(':', 2, 2).toInt());
       POINT sp = { r.x + r.width / 2, r.y + r.height / 2 };
       ClientToScreen((HWND)grid->GetHWND(), &sp);
@@ -10717,6 +10999,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     rec["timings"] = timingsJson(maps->timings());
     rec["mapPhase"] = mapPhaseName(maps->mapPhase());
     rec["tilePhase"] = tilePhaseName(maps->tilePhase());
+    rec["worldShown"] = maps->worldShown();
+    rec["minimapsLoaded"] = maps->minimapsLoaded();
     rec["privateBytes"] = (double)privateBytesNow();
     steps.append(rec);
     LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax << "ms";
@@ -10763,11 +11047,20 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         }
     if (x0 >= 0)
     {
-      MapTileGrid * grid = fc->mapPanel()->grid();
+      // On the overhead map: the tile clicked, then Enter world.
+      if (!maps->showsOverview())
+      {
+        maps->BackToMap();
+        pump(200);
+      }
+      MapTileGrid * grid = frame->mapOverview->grid();
       grid->SetWholeGrid(true);
       pump(100);
       const wxRect r = grid->TileRect(x0, y0);
       postClick((HWND)grid->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
+      pump(100);
+      UiButton * enter = frame->mapOverview->enterButton();
+      postClick((HWND)enter->GetHWND(), wxPoint(enter->GetClientSize().x / 2, enter->GetClientSize().y / 2));
       wxStopWatch w;
       while (!ipc->testMapReadHeld() && w.Time() < 20000)
         pumpIpc(ipc, 1);
