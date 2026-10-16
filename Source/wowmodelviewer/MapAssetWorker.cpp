@@ -9,6 +9,7 @@
 #include <chrono>
 #include <new>
 
+#include "MapThumbnail.h"
 #include "logger/Logger.h"
 
 namespace
@@ -397,11 +398,39 @@ MapAssetWorker::Result MapAssetWorker::readJob(const Job & job)
     else
     {
       wow::WdtReference ref;
-      ref.kind = wow::WdtReference::Kind::FileDataId;
-      ref.fileDataId = job.fileDataID;
+      if (job.fileDataID <= 0 && !job.path.isEmpty())
+      {
+        ref.kind = wow::WdtReference::Kind::Path;
+        ref.path = job.path;
+      }
+      else
+      {
+        ref.kind = wow::WdtReference::Kind::FileDataId;
+        ref.fileDataId = job.fileDataID;
+      }
       r.inspection = wow::WorldMapCatalog::inspectInStorage(m_lease.storage, ref, &r.bytes, false, job.maxBytes,
                                                             hooked ? &hooks : nullptr);
       r.outcome = Result::Outcome::Read;
+    }
+    // A thumbnail asked for: the file read becomes its picture here, on this thread (MapThumbnail), and the file goes.
+    if (job.thumbnailSide > 0 && r.outcome == Result::Outcome::Read && r.inspection.state == wow::WdtAvailability::Available &&
+        !r.bytes.isEmpty())
+    {
+      QElapsedTimer t;
+      t.start();
+      QByteArray rgba;
+      QString problem;
+      if (MapThumbnail::fromBlp(r.bytes, job.thumbnailSide, rgba, problem))
+      {
+        r.bytes = rgba;
+        r.thumbnail = true;
+      }
+      else
+      {
+        r.bytes.clear();
+        r.thumbnailProblem = problem;
+      }
+      r.thumbnailMs = t.nsecsElapsed() / 1e6;
     }
   }
   catch (const std::bad_alloc &)

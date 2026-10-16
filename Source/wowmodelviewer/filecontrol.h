@@ -17,6 +17,7 @@ class ModelViewer;
 class wxSearchCtrl;
 class wxStaticText;
 class TextureBrowse;
+class MapTilePanel;
 
 #include "metaclasses/Container.h"
 
@@ -29,6 +30,8 @@ public:
   TreeStackItem * node; // owning hierarchy node, for lazily filling in children on expand
   // A Buildings search's "Look up FileDataID N" row (no file, no node): the number to look up when picked.
   int lookupFileDataId = 0;
+  // A Maps row (no file, no node): the map's MapID; -1 on every other row (a Maps group row too).
+  int mapId = -1;
   FileTreeData(GameFile * f, TreeStackItem * n = 0): file(f), node(n) {}
 };
 
@@ -152,6 +155,14 @@ public:
   // FileDataID looked up from its search has been read. (The building and model trees are told too.)
   bool ShowsTextures() const;
   bool ShowsBuildings() const;
+  bool ShowsMaps() const;
+  // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the tile grid under the map list, and MapsViewer's state
+  // changed (its onChanged): the grid follows.
+  MapTilePanel * mapPanel() const { return m_mapPanel; }
+  void MapsChanged();
+  // What the last Maps listing took and listed (the tests and the document).
+  double mapsListMs() const { return m_mapsListMs; }
+  int mapsListed() const { return m_mapsListed; }
   TextureBrowse * textureBrowse() const { return m_textures; }
   void TexturesClientLoadStarting();
   void TexturesClientLoaded();
@@ -230,6 +241,11 @@ private:
   void InitModels(const QString & content);
   void InitBuildings(const QString & content);
   void InitTextures();
+  // THE MAPS: the catalogue's maps by its own states (a terrain grid, one world model, no WDT, a type it does not
+  // know), each "name [MapID]"; a search matches every word in the name or the directory, and a number is a MapID,
+  // its map pinned first.
+  void InitMaps(const QString & content);
+  void SelectMapRow(wxTreeItemId item);
   void SelectTextureRow(wxTreeItemId item);
   void ShowTextureMenu(wxTreeItemId item);
   // A Buildings row picked: its root loaded, or a FileDataID looked up.
@@ -258,8 +274,8 @@ private:
   wxTimer m_texturesLoadWatch;
   // Each mode's search: the text while another mode has the box, and the text its tree was last built with
   // (a short text typed but never run -- the search waits for 3 characters -- is not what it shows).
-  wxString m_search[3];
-  wxString m_applied[3];
+  wxString m_search[4];
+  wxString m_applied[4];
   static int slot(ViewerMode mode) { return (int)mode; }
   TreeState m_modelsTree;
   TreeState m_buildingsTree;
@@ -268,6 +284,10 @@ private:
   // An arrow key repeating in the Buildings tree: the rows it passes are not loaded until it is let go.
   bool m_keysRepeating = false;
   bool m_buildingPickPending = false;
+  // THE MAPS VIEWER's tile grid (made the first time Maps is shown), and its listing's cost.
+  MapTilePanel * m_mapPanel = nullptr;
+  double m_mapsListMs = -1.0;
+  int m_mapsListed = 0;
 };
 
 #endif

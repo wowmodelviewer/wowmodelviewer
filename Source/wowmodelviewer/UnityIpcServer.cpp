@@ -213,8 +213,9 @@ void UnityIpcServer::onPoll(wxTimerEvent & WXUNUSED(event))
 
 void UnityIpcServer::poll()
 {
-  if (!m_listen)
+  if (!m_listen || m_detached)
     return;
+  m_activity.pollsServed++;
   const qint64 startNs = m_clock.nsecsElapsed();
   m_pollMapAnswered = 0;
   m_pollRecordMs = 0.0;
@@ -403,8 +404,8 @@ void UnityIpcServer::queueLine(const QByteArray & line)
 
 void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
 {
-  if (!m_client)
-    return;
+  if (!m_client || m_detached)
+    return;   // (detached: the viewer is shutting down, and nothing is sent any more -- not only from a poll)
   for (const QByteArray & part : parts)
     m_outBuf.append(part.constData(), (size_t)part.size());
   m_outBuf.push_back('\n');
@@ -415,7 +416,7 @@ void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
 
 void UnityIpcServer::queueFrame(const QByteArray & header, const QByteArray & payload, double * appendMs, double * sendMs)
 {
-  if (!m_client)
+  if (!m_client || m_detached)
     return;
   QElapsedTimer step;
   step.start();
@@ -1180,6 +1181,7 @@ bool UnityIpcServer::sendCharacterScene(int m2FileDataID, int revision, const QJ
 
 void UnityIpcServer::handleLine(const std::string & line)
 {
+  m_activity.messagesHandled++;
   QJsonParseError err;
   const QJsonDocument doc = QJsonDocument::fromJson(QByteArray(line.data(), (int)line.size()), &err);
   if (doc.isNull() || !doc.isObject())
@@ -1251,6 +1253,18 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "terrainTileLoaded")
   {
     handleTerrainTileLoaded(msg);
+  }
+  else if (type == "mapTilesInspected")
+  {
+    handleMapTilesInspected(msg);
+  }
+  else if (type == "terrainViewApplied")
+  {
+    handleTerrainViewApplied(msg);
+  }
+  else if (type == "worldCameraApplied")
+  {
+    handleWorldCameraApplied(msg);
   }
   else
   {
@@ -1409,6 +1423,10 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
     msg["maxTextureBytesPerLoad"] = c.maxTextureBytesPerLoad;
     msg["maxTexturesPerLoad"] = c.maxTexturesPerLoad;
   }
+  // THE CAMERA (protocol 15): placed by the player when this load's tile goes on screen.
+  const bool camera = playerFliesWorld() && !c.camera.mode.isEmpty();
+  if (camera)
+    putCamera(msg, c.camera);
   m_stats.terrainLoads++;
   LOG_INFO << "[unityipc] -> loadTerrainTile load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId
            << c.mapDirectory << "tile" << QString("%1_%2").arg(c.tileX).arg(c.tileY) << "wdtFileDataID=" << c.wdtFileDataID
@@ -1417,9 +1435,226 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
            << (textures ? QString("maxTextureBytes=%1 maxTextureBytesPerLoad=%2 maxTexturesPerLoad=%3")
                             .arg(c.maxTextureBytes).arg(c.maxTextureBytesPerLoad).arg(c.maxTexturesPerLoad)
                         : playerDrawsTerrainTextures() ? QString("no textures offered")
-                                                       : QString("no textures (a protocol %1 player)").arg(m_playerProtocol));
+                                                       : QString("no textures (a protocol %1 player)").arg(m_playerProtocol))
+           << (camera ? "camera: " + describeCamera(c.camera) : QString());
   queueJson(msg);
   return true;
+}
+
+void UnityIpcServer::putCamera(QJsonObject & msg, const WorldCamera & c)
+{
+  msg["cameraRequest"] = c.request;
+  msg["cameraMode"] = c.mode;
+  msg["cameraX"] = c.x;
+  msg["cameraY"] = c.y;
+  msg["cameraZ"] = c.z;
+  msg["cameraHasZ"] = c.hasZ;
+  msg["cameraYaw"] = c.yaw;
+  msg["cameraPitch"] = c.pitch;
+  msg["cameraEyeHeight"] = c.eyeHeight;
+}
+
+QString UnityIpcServer::describeCamera(const WorldCamera & c)
+{
+  if (c.mode != "fly")
+    return QString("request %1 %2").arg(c.request).arg(c.mode);
+  return QString("request %1 fly at (%2, %3, %4) yaw %5 pitch %6 eye %7").arg(c.request).arg(c.x, 0, 'f', 3).arg(c.y, 0, 'f', 3)
+    .arg(c.hasZ ? QString::number(c.z, 'f', 3) : QString("ground")).arg(c.yaw, 0, 'f', 1).arg(c.pitch, 0, 'f', 1).arg(c.eyeHeight, 0, 'f', 2);
+}
+
+bool UnityIpcServer::sendSetWorldCamera(const WorldCamera & c)
+{
+  if (!playerFliesWorld() || c.mode.isEmpty())
+    return false;
+  QJsonObject msg;
+  msg["type"] = "setWorldCamera";
+  putCamera(msg, c);
+  LOG_INFO << "[unityipc] -> setWorldCamera" << describeCamera(c);
+  queueJson(msg);
+  return true;
+}
+
+void UnityIpcServer::handleWorldCameraApplied(const QJsonObject & msg)
+{
+  WorldCameraApplied r;
+  r.request = msg.value("request").toInt(0);
+  r.mode = msg.value("mode").toString();
+  r.status = msg.value("status").toString();
+  r.reason = msg.value("reason").toString();
+  r.x = msg.value("x").toDouble(0.0);
+  r.y = msg.value("y").toDouble(0.0);
+  r.z = msg.value("z").toDouble(0.0);
+  r.ground = msg.value("ground").toBool(false);
+  r.hasGroundZ = msg.value("hasGroundZ").toBool(false);
+  r.groundZ = msg.value("groundZ").toDouble(0.0);
+  r.yaw = msg.value("yaw").toDouble(0.0);
+  r.pitch = msg.value("pitch").toDouble(0.0);
+  r.load = msg.value("load").toInt(0);
+  LOG_INFO << "[unityipc] <- worldCameraApplied" << r.request << r.mode << r.status << "load" << r.load
+           << QString("at (%1, %2, %3) yaw %4 pitch %5").arg(r.x, 0, 'f', 3).arg(r.y, 0, 'f', 3).arg(r.z, 0, 'f', 3)
+                .arg(r.yaw, 0, 'f', 1).arg(r.pitch, 0, 'f', 1)
+           << (r.hasGroundZ ? QString("ground %1").arg(r.groundZ, 0, 'f', 3) : QString("no ground"))
+           << (r.reason.isEmpty() ? QString() : "-- " + r.reason);
+  if (onWorldCameraApplied)
+    onWorldCameraApplied(r);
+}
+
+// ---------------------------------------------------------------- the Maps viewer (protocol 14)
+
+bool UnityIpcServer::sendInspectMapTiles(int inspection, int mapId, int wdtFileDataID, int assetEpoch, const QString & md5,
+                                         const QByteArray & bytes)
+{
+  if (!playerInspectsMapTiles() || inspection <= 0 || bytes.isEmpty() || bytes.size() > MAX_MAP_ASSET_BYTES)
+    return false;
+  if (unsentBytes() > MAP_ASSET_SEND_HIGH_WATER)
+  {
+    LOG_INFO << "[unityipc] inspectMapTiles" << inspection << "not sent:" << unsentBytes()
+             << "bytes still wait to be sent (the player is not reading)";
+    return false;
+  }
+  QJsonObject msg;
+  msg["type"] = "inspectMapTiles";
+  msg["inspection"] = inspection;
+  msg["mapId"] = mapId;
+  msg["wdtFileDataID"] = wdtFileDataID;
+  msg["assetEpoch"] = assetEpoch;
+  msg["md5"] = md5;
+  msg["encoding"] = "binary";
+  msg["payloadBytes"] = bytes.size();
+  LOG_INFO << "[unityipc] -> inspectMapTiles" << inspection << "map" << mapId << "WDT" << wdtFileDataID << "(" << bytes.size()
+           << "bytes) epoch" << assetEpoch;
+  queueFrame(QJsonDocument(msg).toJson(QJsonDocument::Compact), bytes);
+  return true;
+}
+
+bool UnityIpcServer::sendSetTerrainView(const QString & view)
+{
+  if (!playerInspectsMapTiles())
+    return false;
+  QJsonObject msg;
+  msg["type"] = "setTerrainView";
+  msg["view"] = view;
+  LOG_INFO << "[unityipc] -> setTerrainView" << view;
+  queueJson(msg);
+  return true;
+}
+
+void UnityIpcServer::handleMapTilesInspected(const QJsonObject & msg)
+{
+  MapTilesInspection r;
+  r.inspection = msg.value("inspection").toInt(0);
+  r.status = msg.value("status").toString();
+  r.reason = msg.value("reason").toString();
+  r.mapId = msg.value("mapId").toInt(-1);
+  r.wdtFileDataID = msg.value("wdtFileDataID").toInt(0);
+  r.assetEpoch = msg.value("assetEpoch").toInt(0);
+  r.wdtBytes = (long long)msg.value("wdtBytes").toDouble(-1);
+  r.md5 = msg.value("md5").toString();
+  r.kind = msg.value("kind").toString();
+  r.mphdFlags = (quint32)msg.value("mphdFlags").toDouble(0);
+  r.hasMain = msg.value("hasMain").toBool(false);
+  r.hasMaid = msg.value("hasMaid").toBool(false);
+  r.tilesInMain = msg.value("tilesInMain").toInt(-1);
+  r.tilesWithRoot = msg.value("tilesWithRoot").toInt(-1);
+  r.parseMs = msg.value("parseMs").toDouble(-1.0);
+  r.globalWmoRecords = msg.value("globalWmoRecords").toInt(0);
+  r.globalWmoFileDataID = (quint32)msg.value("globalWmoFileDataID").toDouble(0);
+  r.globalWmoPath = msg.value("globalWmoPath").toString();
+  const int tiles = 64 * 64;
+  if (r.status == "inspected")
+  {
+    r.tileFlags = QByteArray::fromBase64(msg.value("tileFlags").toString().toLatin1());
+    const auto ids = [&msg, tiles](const char * key, std::vector<quint32> & out) {
+      if (!msg.contains(QLatin1String(key)))
+        return true;   // absent: the WDT has no MAID
+      const QByteArray b = QByteArray::fromBase64(msg.value(QLatin1String(key)).toString().toLatin1());
+      if (b.size() != tiles * 4)
+        return false;
+      out.resize(tiles);
+      const unsigned char * p = reinterpret_cast<const unsigned char *>(b.constData());
+      for (int i = 0; i < tiles; i++)
+        out[i] = (quint32)p[4 * i] | ((quint32)p[4 * i + 1] << 8) | ((quint32)p[4 * i + 2] << 16) | ((quint32)p[4 * i + 3] << 24);
+      return true;
+    };
+    const bool rootsOk = ids("rootIds", r.rootIds);
+    const bool tex0Ok = ids("tex0Ids", r.tex0Ids);
+    const bool minimapsOk = ids("minimapIds", r.minimapIds);
+    if (r.tileFlags.size() != tiles)
+      r.tableProblem = QString("the tile flags decoded to %1 bytes, not %2").arg(r.tileFlags.size()).arg(tiles);
+    else if (!rootsOk || !tex0Ok || !minimapsOk)
+      r.tableProblem = "the MAID ids did not decode to 4,096 each";
+    else if (!r.minimapIds.empty() && r.rootIds.empty())
+      r.tableProblem = "the table has minimap ids but no MAID root ids";
+    else if (r.hasMaid != !r.rootIds.empty())
+      r.tableProblem = "the table's MAID ids and its hasMaid disagree";
+    else
+    {
+      int main = 0, root = 0;
+      for (int i = 0; i < tiles; i++)
+      {
+        main += (r.tileFlags[i] & 1) ? 1 : 0;
+        root += (r.tileFlags[i] & 2) ? 1 : 0;
+      }
+      if (main != r.tilesInMain || root != r.tilesWithRoot)
+        r.tableProblem = QString("the flags count %1 tiles in MAIN and %2 with a root, the message %3 and %4")
+                           .arg(main).arg(root).arg(r.tilesInMain).arg(r.tilesWithRoot);
+      else
+        r.tableValid = true;
+    }
+  }
+  LOG_INFO << "[unityipc] <- mapTilesInspected" << r.inspection << r.status << "map" << r.mapId << "WDT" << r.wdtFileDataID
+           << "kind" << r.kind << "tiles in MAIN" << r.tilesInMain << "with a root" << r.tilesWithRoot << "parse" << r.parseMs
+           << "ms" << (r.minimapIds.empty() ? QString() : QString("minimap ids %1").arg(r.minimapIds.size()))
+           << (r.globalWmoRecords > 0 ? QString("global WMO %1 (%2 record(s))")
+                                          .arg(r.globalWmoFileDataID ? QString::number(r.globalWmoFileDataID) : r.globalWmoPath)
+                                          .arg(r.globalWmoRecords)
+                                      : QString())
+           << (r.reason.isEmpty() ? QString() : "reason: " + r.reason)
+           << (r.tableProblem.isEmpty() ? QString() : "TABLE REFUSED: " + r.tableProblem);
+  if (onMapTilesInspected)
+    onMapTilesInspected(r);
+}
+
+void UnityIpcServer::handleTerrainViewApplied(const QJsonObject & msg)
+{
+  TerrainViewApplied r;
+  r.view = msg.value("view").toString();
+  r.status = msg.value("status").toString();
+  r.reason = msg.value("reason").toString();
+  r.load = msg.value("load").toInt(0);
+  r.rebuildMs = msg.value("rebuildMs").toDouble(-1.0);
+  r.texturedChunks = msg.value("texturedChunks").toInt(-1);
+  r.neutralChunks = msg.value("neutralChunks").toInt(-1);
+  r.textures = msg.value("textures").toInt(-1);
+  r.retainedTextureBytes = (long long)msg.value("retainedTextureBytes").toDouble(-1);
+  LOG_INFO << "[unityipc] <- terrainViewApplied" << r.view << r.status << "load" << r.load << "rebuild" << r.rebuildMs << "ms;"
+           << r.texturedChunks << "chunk(s) textured," << r.neutralChunks << "neutral," << r.textures << "texture(s), kept"
+           << r.retainedTextureBytes << "bytes" << (r.reason.isEmpty() ? QString() : "-- " + r.reason);
+  if (onTerrainViewApplied)
+    onTerrainViewApplied(r);
+}
+
+bool UnityIpcServer::submitViewerRead(MapAssetWorker::Job & job)
+{
+  if (!m_mapAssetWorker || m_mapAssetWorker->stopped())
+    return false;
+  if (!job.cancelled)
+    job.cancelled = std::make_shared<std::atomic<bool>>(false);
+  ViewerRead v;
+  v.cancelled = job.cancelled;
+  v.ticket = m_mapAssetWorker->submit(job);
+  job.ticket = v.ticket;
+  m_viewerReads.push_back(v);
+  return true;
+}
+
+void UnityIpcServer::cancelViewerReads()
+{
+  for (ViewerRead & v : m_viewerReads)
+    if (v.cancelled)
+      v.cancelled->store(true);
+  if (!m_viewerReads.empty() && m_mapAssetWorker)
+    m_mapAssetWorker->wake();
 }
 
 bool UnityIpcServer::sendClearTerrain(const QString & reason)
@@ -1605,6 +1840,7 @@ void UnityIpcServer::dropHeldMapAssets(const char * why)
 
 void UnityIpcServer::cancelMapReads(const QString & reason)
 {
+  cancelViewerReads();
   for (MapReadInFlight & f : m_mapReadsInFlight)
     if (!f.orphaned && f.cancelReason.isEmpty())
     {
@@ -1664,6 +1900,30 @@ void UnityIpcServer::setMapAssetWorker(const std::shared_ptr<MapAssetWorker> & w
   m_mapAssetWorker = worker;
 }
 
+void UnityIpcServer::detachForShutdown()
+{
+  if (m_detached)
+    return;
+  // The notifier first, under the worker's lock: once this returns none is running and none will run. The worker is
+  // kept: the destructor takes back what it made for this server.
+  if (m_mapAssetWorker && m_wakeOnResults)
+    m_mapAssetWorker->setResultNotifier(nullptr);
+  m_wakeOnResults = false;
+  m_detached = true;
+  m_timer.Stop();
+  onDispatchMapAsset = nullptr;
+  onCompleteMapAsset = nullptr;
+  onMapAssetStale = nullptr;
+  onMapAssetWait = nullptr;
+  onViewerMapRead = nullptr;
+  onMapTilesInspected = nullptr;
+  onTerrainViewApplied = nullptr;
+  onWorldCameraApplied = nullptr;
+  LOG_INFO << "[unityipc] detached for the viewer's shutdown:" << m_mapReadsInFlight.size()
+           << "map read(s) in flight left unanswered; no poll serves from now on"
+           << (m_wakePosted.load() ? "(a wake already queued will find nothing to do)" : "");
+}
+
 void UnityIpcServer::wakeOnMapResults()
 {
   if (!m_mapAssetWorker)
@@ -1680,7 +1940,10 @@ void UnityIpcServer::wakeOnMapResults()
 void UnityIpcServer::onMapResultWake(wxThreadEvent & WXUNUSED(event))
 {
   // A result was made: a poll now. The flag is lowered first, so a result made during the poll posts another wake.
+  m_activity.wakesHandled++;
   m_wakePosted.store(false);
+  if (m_detached)
+    return;   // the viewer is shutting down: a wake queued before detachForShutdown finds nothing to do
   m_mapReadStats.wakes++;
   // Wakes can follow one another in one pass of the event queue (a poll's answers bring the next results). A run of
   // them spends at most about MAP_ASSET_WAKE_BURST_MS of this thread; then the window gets its turn, and the results
@@ -1694,9 +1957,9 @@ void UnityIpcServer::onMapResultWake(wxThreadEvent & WXUNUSED(event))
     m_wakeBurstEndNs = startNs;
     return;
   }
-  const long long takenBefore = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered;
+  const long long takenBefore = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered + m_viewerResultsTaken;
   poll();
-  const long long taken = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered - takenBefore;
+  const long long taken = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered + m_viewerResultsTaken - takenBefore;
   m_mapReadStats.takenOnWake += taken;
   m_wakeBurstEndNs = m_clock.nsecsElapsed();
   m_wakeBurstMs += (m_wakeBurstEndNs - startNs) / 1e6;
@@ -1711,7 +1974,7 @@ void UnityIpcServer::onMapResultWake(wxThreadEvent & WXUNUSED(event))
 void UnityIpcServer::waitForMapResult(int ms)
 {
   // A server not listening serves nothing (its polls end at once): a plain wait.
-  if (!m_mapAssetWorker || m_mapReadsInFlight.empty() || !isListening())
+  if (!m_mapAssetWorker || (m_mapReadsInFlight.empty() && m_viewerReads.empty()) || !isListening())
   {
     wxMilliSleep(ms);
     return;
@@ -1732,13 +1995,15 @@ int UnityIpcServer::serveMapAssetQueue()
 {
   if (m_mapAssetWorker)
     m_resultsSeen = m_mapAssetWorker->resultsMade();   // (before taking any: a result made from now on is new)
-  if (m_mapAssetQueue.empty() && m_mapReadsInFlight.empty())
+  if (m_mapAssetQueue.empty() && m_mapReadsInFlight.empty() && m_viewerReads.empty())
     return 0;
   QElapsedTimer timer;
   timer.start();
   MapAssetPoll poll;
   const double recordMsBefore = m_pollRecordMs;
   // While a client is being loaded the reads in flight wait: neither checked nor answered (onMapAssetWait).
+  if (onMapAssetWait)
+    m_activity.mapCallbacks++;
   const bool waiting = onMapAssetWait && onMapAssetWait();
 
   // (1) The viewer's check, again, for every read still in flight: a read not begun is skipped, one under way finishes
@@ -1748,6 +2013,7 @@ int UnityIpcServer::serveMapAssetQueue()
     for (MapReadInFlight & f : m_mapReadsInFlight)
       if (!f.orphaned && f.cancelReason.isEmpty())
       {
+        m_activity.mapCallbacks++;
         const QString why = onMapAssetStale(f.request);
         if (!why.isEmpty())
         {
@@ -1763,15 +2029,33 @@ int UnityIpcServer::serveMapAssetQueue()
 
   // (2) Results, in order, as far as the poll's budget goes.
   MapAssetWorker::Result result;
-  while (m_mapAssetWorker && !m_mapReadsInFlight.empty() && !waiting)
+  while (m_mapAssetWorker && (!m_mapReadsInFlight.empty() || !m_viewerReads.empty()) && !waiting)
   {
-    if (poll.bytesRead >= MAP_ASSET_POLL_BUDGET_BYTES || poll.largeFiles > 0)
+    if (poll.bytesRead >= MAP_ASSET_POLL_BUDGET_BYTES || poll.largeFiles > 0 || poll.viewerResults >= MAP_VIEWER_RESULTS_PER_POLL)
     {
       poll.stoppedForBudget = m_mapAssetWorker->resultReady();
       break;
     }
     if (!m_mapAssetWorker->takeResult(result))
       break;
+    // THE VIEWER'S OWN READS: handed to the viewer, never answered to the player.
+    auto own = std::find_if(m_viewerReads.begin(), m_viewerReads.end(),
+                            [&result](const ViewerRead & v) { return v.ticket == result.ticket; });
+    if (own != m_viewerReads.end())
+    {
+      m_viewerReads.erase(own);
+      poll.viewerResults++;
+      m_viewerResultsTaken++;
+      poll.bytesRead += result.bytes.size();
+      if (result.bytes.size() > MAP_ASSET_LARGE_FILE_BYTES)
+        poll.largeFiles++;
+      if (onViewerMapRead)
+      {
+        m_activity.mapCallbacks++;
+        onViewerMapRead(result);
+      }
+      continue;
+    }
     auto it = std::find_if(m_mapReadsInFlight.begin(), m_mapReadsInFlight.end(),
                            [&result](const MapReadInFlight & f) { return f.ticket == result.ticket; });
     if (it == m_mapReadsInFlight.end())
@@ -1787,7 +2071,10 @@ int UnityIpcServer::serveMapAssetQueue()
     complete.start();
     MapAssetAnswer answer;
     if (onCompleteMapAsset)
+    {
+      m_activity.mapCallbacks++;
       answer = onCompleteMapAsset(read.request, result);
+    }
     else
     {
       answer.state = "stale";
@@ -1822,7 +2109,10 @@ int UnityIpcServer::serveMapAssetQueue()
     dispatchTimer.start();
     MapAssetDispatch d;
     if (onDispatchMapAsset)
+    {
+      m_activity.mapCallbacks++;
       d = onDispatchMapAsset(next.request);
+    }
     else
     {
       d.answer.state = "refused";
@@ -2118,6 +2408,7 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
 
   TerrainTileReport r;
   r.message = msg;
+  r.view = msg.value("view").toString();
   r.load = msg.value("load").toInt(0);
   r.status = msg.value("status").toString();
   r.reason = msg.value("reason").toString();

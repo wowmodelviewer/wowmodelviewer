@@ -124,6 +124,19 @@ public sealed class WmvTerrainTexture
     byte[][] decoded;         // palettized / raw: RGBA32 per stored mip
     int[] mipWidths, mipHeights;
 
+    /// <summary>The bytes the prepared data hold (0 once uploaded or released).</summary>
+    public long PreparedBytes
+    {
+        get
+        {
+            long n = source != null ? source.Length : 0;
+            if (decoded != null)
+                foreach (byte[] m in decoded)
+                    n += m != null ? m.Length : 0;
+            return n;
+        }
+    }
+
     /// <summary>Prepared and still holding the data to upload.</summary>
     public bool Ready { get { return State == StateAvailable && (source != null || decoded != null); } }
     /// <summary>Available: answered, verified and prepared (uploaded or not).</summary>

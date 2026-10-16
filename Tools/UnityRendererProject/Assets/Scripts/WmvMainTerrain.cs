@@ -20,6 +20,17 @@
 //                       character or world-model path
 //   Update           -> the session's Pump (worker results, the timeout -- 30 s, or -wmvTerrainTimeoutMs -- and the
 //                       two-frame report)
+//   inspectMapTiles  -> (protocol 14, the Maps viewer) WmvMapTiles.Inspect: the WDT the host read, its tile table by the
+//                       verified parser, answered mapTilesInspected; nothing of the terrain session is touched
+//   setTerrainView   -> (protocol 14) the view every tile is drawn in from now on, and the tile on screen built again in
+//                       it from what the player holds (WmvTerrainSession.RebuildShown; no framing), answered
+//                       terrainViewApplied
+//   setWorldCamera   -> (protocol 15) the world view's camera: "fly" puts the free camera (WmvFlyCamera) at a position of
+//                       the game's world frame -- on the ground under it (TerrainHeight on the shown tile's own mesh) plus
+//                       an eye height when no z is given -- converted with the tile's floating origin; "overview" frames
+//                       the tile as before. Answered worldCameraApplied. A loadTerrainTile may carry the same camera: it
+//                       is placed when that load's tile goes on screen, after its framing, in the same frame, so the
+//                       overview is never seen first.
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -64,6 +75,9 @@ public partial class WmvMain
     GameObject terrainSceneRoot;          // "_WmvTerrain": every tile root hangs under it, at the identity
     Bounds terrainFrame;                  // the box the terrain view was last framed on
     bool haveTerrainFrame;
+    WmvFlyCamera fly;                     // the world view's free camera (protocol 15), on the main camera, off until asked for
+    WmvIpcClient.WorldCameraRequest owedCamera;   // a loadTerrainTile's camera, placed when that load's tile is shown
+    int owedCameraLoad;
 
     /// <summary>The ApplyViewportOrbitOverride tag of the terrain framing: the only one honoured in the terrain view.</summary>
     const string TerrainOverrideTag = "terrain: ";
@@ -75,7 +89,16 @@ public partial class WmvMain
     void SetUpTerrain(Camera cam)
     {
         cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
-        terrainViewMode = new WmvTerrainViewMode(orbit, cam);
+        fly = cam.gameObject.GetComponent<WmvFlyCamera>();
+        if (fly == null)
+            fly = cam.gameObject.AddComponent<WmvFlyCamera>();
+        fly.enabled = false;
+        if (WmvInputTrace.Requested())
+        {
+            gameObject.AddComponent<WmvInputTrace>();
+            WmvInputTrace.CameraLine = TraceCameraLine;
+        }
+        terrainViewMode = new WmvTerrainViewMode(orbit, cam) { Fly = fly };
         terrain = new WmvTerrainSession(new MainTerrainView(this), ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded,
                                         s => Debug.Log("WMV: " + s),
                                         a => System.Threading.ThreadPool.QueueUserWorkItem(_ => a()), WmvTerrainDebug.TimeoutMs);
@@ -98,6 +121,196 @@ public partial class WmvMain
         ipc.OnLoadTerrainTile = HandleLoadTerrainTile;
         ipc.OnClearTerrain = HandleClearTerrain;
         ipc.OnMapAssetResponse = HandleMapAssetResponse;
+        ipc.OnInspectMapTiles = HandleInspectMapTiles;
+        ipc.OnSetTerrainView = HandleSetTerrainView;
+        ipc.OnSetWorldCamera = HandleSetWorldCamera;
+    }
+
+    /// <summary>setWorldCamera: the camera placed or switched now, answered. The user's latest choice wins: a camera a load
+    /// in flight still carries is not placed when that load's tile comes.</summary>
+    void HandleSetWorldCamera(WmvIpcClient.WorldCameraRequest request)
+    {
+        owedCamera = null;
+        WmvIpcClient.WorldCameraReport r = PlaceWorldCamera(request);
+        ipc.ReportWorldCameraApplied(r);
+    }
+
+    /// <summary>
+    /// The world view's camera as asked: "fly" at a world position (the free camera), or "overview" (the tile framed as
+    /// Stage 03 frames it). Refused, and said, when no tile is on screen or the mode is not one of the two. The position
+    /// is the game's world frame; the tile's mesh origin and root offset turn it into Unity space exactly as its vertices
+    /// were (WorldToUnity), so the same position stands at the same place whatever the scene's origin is.
+    /// </summary>
+    WmvIpcClient.WorldCameraReport PlaceWorldCamera(WmvIpcClient.WorldCameraRequest q)
+    {
+        var r = new WmvIpcClient.WorldCameraReport { Request = q != null ? q.Request : 0, Mode = q != null ? q.Mode ?? "" : "" };
+        WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
+        TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
+        r.Load = tile != null ? tile.Load : 0;
+        if (q == null || (q.Mode != "fly" && q.Mode != "overview"))
+            r.Reason = "\"" + r.Mode + "\" is not a camera mode (fly, overview)";
+        else if (tile == null || tile.Root == null || !TerrainViewActive)
+            r.Reason = "no world is on screen";
+        else if (q.Mode == "overview")
+        {
+            FrameTerrainTile(tile);
+            r.Status = "applied";
+            r.Reason = "the tile framed";
+        }
+        else if (mesh == null)
+            r.Reason = "the tile on screen keeps no mesh data to stand the camera on";
+        else if (!OnTile(q.X, q.Y, tile.TileX, tile.TileY))
+            r.Reason = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                     "({0:0.###}, {1:0.###}) is not on the tile on screen ({2}_{3})", q.X, q.Y, tile.TileX, tile.TileY);
+        else
+        {
+            double eye = q.EyeHeight > 0f ? q.EyeHeight : 2.0;
+            r.GroundZ = TerrainHeight.At(mesh, q.X, q.Y);
+            double z;
+            if (q.HasZ)
+            {
+                z = q.Z;
+                r.Reason = "at the height asked for";
+            }
+            else if (!double.IsNaN(r.GroundZ))
+            {
+                z = r.GroundZ + eye;
+                r.Ground = true;
+                r.Reason = string.Format(System.Globalization.CultureInfo.InvariantCulture, "on the ground ({0:0.##}) plus {1:0.##}", r.GroundZ, eye);
+            }
+            else
+            {
+                // No triangle under the point (a hole, or off the tile): above the tile's highest point instead, and said.
+                double top = mesh.BoundsMax != null ? mesh.BoundsMax[1] + mesh.Origin.Z : mesh.Origin.Z;
+                z = top + eye;
+                r.Reason = "no ground under the point (a hole, or outside the tile's triangles): placed above the tile's highest point";
+            }
+            double ux, uy, uz;
+            WorldToUnity.PositionD(q.X, q.Y, z, mesh.Origin, out ux, out uy, out uz);
+            Vector3 position = tile.Root.transform.position + new Vector3((float)ux, (float)uy, (float)uz);
+            terrainViewMode.ApplyFly(position, q.Yaw, q.Pitch);
+            r.Status = "applied";
+            r.X = q.X;
+            r.Y = q.Y;
+            r.Z = z;
+            r.Yaw = fly.Current.Yaw;
+            r.Pitch = fly.Current.Pitch;
+        }
+        Debug.Log(string.Format(System.Globalization.CultureInfo.InvariantCulture, "WMV: [terrain] world camera {0}: {1}{2}{3}",
+                                q != null ? q.ToString() : "(none)", r.Status, string.IsNullOrEmpty(r.Reason) ? "" : " -- " + r.Reason,
+                                r.Status == "applied" && r.Mode == "fly" ? string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                    "; at ({0:0.###}, {1:0.###}, {2:0.###}), Unity {3}", r.X, r.Y, r.Z, fly.transform.position) : ""));
+        return r;
+    }
+
+    /// <summary>The free camera for the input trace (WmvInputTrace): "" while it is off; else its state (the keys, the input
+    /// it read), "|", and where it is -- in the game's world frame when a tile is on screen.</summary>
+    string TraceCameraLine()
+    {
+        if (fly == null || !fly.enabled)
+            return "";
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        WmvFlyCamera.FlyInput k = fly.LastKeys;
+        string state = string.Format(ci, "free camera; the keyboard {0}; keys held {1}, counted {2}; input forward {3} right {4} up {5} speed x{6}",
+                                     fly.HasKeyboard ? "is the player's" : "is not the player's", WmvFlyCamera.KeyNames(fly.HeldKeys),
+                                     WmvFlyCamera.KeyNames(fly.CountedKeys), k.Forward, k.Right, k.Up, k.SpeedFactor);
+        double x, y, z;
+        string where = FlyWorldPosition(out x, out y, out z) ? string.Format(ci, "world ({0:0.00}, {1:0.00}, {2:0.00})", x, y, z)
+                                                             : "Unity " + fly.transform.position.ToString("F2");
+        return state + "|" + where + string.Format(ci, " yaw {0:0.0} pitch {1:0.0}", fly.Current.Yaw, fly.Current.Pitch);
+    }
+
+    /// <summary>The free camera's position in the game's world frame: the inverse of WorldToUnity on the shown tile's mesh
+    /// origin, relative to its root ((ux, uy, uz) = (-(y - o.Y), z - o.Z, x - o.X)).</summary>
+    bool FlyWorldPosition(out double x, out double y, out double z)
+    {
+        x = y = z = 0.0;
+        WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
+        TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
+        if (tile == null || tile.Root == null || mesh == null)
+            return false;
+        Vector3 u = fly.transform.position - tile.Root.transform.position;
+        x = u.z + mesh.Origin.X;
+        y = mesh.Origin.Y - u.x;
+        z = u.y + mesh.Origin.Z;
+        return true;
+    }
+
+    /// <summary>Is world point (x, y) on tile (tileX, tileY)? Its north-west corner and the tile size (TerrainLayout.cs).</summary>
+    static bool OnTile(double x, double y, int tileX, int tileY)
+    {
+        WorldOrigin o = WorldToUnity.TileOrigin(tileX, tileY);
+        double t = TerrainCoordinates.TileSize;
+        return x <= o.X && x > o.X - t && y <= o.Y && y > o.Y - t;
+    }
+
+    /// <summary>The tile of `tile`'s load went on screen: the camera its loadTerrainTile carried, placed now (after the
+    /// framing, in the same frame) and answered.</summary>
+    void PlaceOwedCamera(WmvRuntimeTerrainTile tile)
+    {
+        if (owedCamera == null || tile == null || tile.Load != owedCameraLoad)
+            return;
+        WmvIpcClient.WorldCameraRequest q = owedCamera;
+        owedCamera = null;
+        HandleSetWorldCamera(q);
+    }
+
+    /// <summary>inspectMapTiles: the tile table of the WDT the host read (WmvMapTiles), answered at once.</summary>
+    void HandleInspectMapTiles(WmvIpcClient.MapTilesRequest request)
+    {
+        WmvIpcClient.MapTilesReport r = WmvMapTiles.Inspect(request);
+        Debug.Log(string.Format("WMV: [terrain] inspectMapTiles {0}: map {1}, WDT {2} ({3} bytes): {4}{5}; {6} tile(s) in MAIN, {7} with a root " +
+                                "ADT; {8:0.###} ms", r.Inspection, r.MapId, r.WdtFileDataID, r.Bytes, r.Status,
+                                string.IsNullOrEmpty(r.Reason) ? "" : " (" + r.Reason + ")", r.TilesInMain, r.TilesWithRoot, r.ParseMs));
+        ipc.ReportMapTilesInspected(r);
+    }
+
+    /// <summary>setTerrainView: the view from now on, and the tile on screen built again in it (no framing: the camera stays
+    /// where the user left it).</summary>
+    void HandleSetTerrainView(string name)
+    {
+        var r = new WmvIpcClient.TerrainViewReport { View = name ?? "" };
+        if (!WmvTerrainDebug.SetRuntimeView(r.View))
+        {
+            r.Status = "refused";
+            r.Reason = "\"" + r.View + "\" is not a view the host can choose (auto, or one of " +
+                       string.Join("|", WmvTerrainDebug.ViewNames) + " but texturedplainweights)";
+        }
+        else if (terrain == null)
+        {
+            r.Status = "noTile";
+            r.Reason = "no terrain session";
+        }
+        else
+        {
+            string reason;
+            double ms;
+            int load;
+            r.Status = terrain.RebuildShown("setTerrainView " + r.View, out reason, out ms, out load);
+            r.Reason = reason;
+            r.RebuildMs = ms;
+            r.Load = load;
+            WmvRuntimeTerrainTile t = terrain.ShownTile;
+            if (r.Status == "applied" && t != null)
+            {
+                int textured = 0, objects = 0;
+                for (int n = 0; n < t.ChunkObjects.Length; n++)
+                {
+                    if (t.ChunkObjects[n] == null) continue;
+                    objects++;
+                    if (t.ChunkTextured[n]) textured++;
+                }
+                r.TexturedChunks = textured;
+                r.NeutralChunks = objects - textured;
+                r.Textures = t.Textures.Count;
+                if (r.Reason.Length == 0)
+                    r.Reason = "drawn " + WmvTerrainDebug.ViewNames[(int)t.View];
+            }
+            r.RetainedTextureBytes = terrain.RetainedTextureBytes;
+        }
+        Debug.Log(string.Format("WMV: [terrain] setTerrainView {0} (in effect: {1}): {2}{3}", r.View, WmvTerrainDebug.RuntimeViewName, r.Status,
+                                string.IsNullOrEmpty(r.Reason) ? "" : " -- " + r.Reason));
+        ipc.ReportTerrainViewApplied(r);
     }
 
     void HandleClearTerrain(string reason)
@@ -122,6 +335,9 @@ public partial class WmvMain
     {
         status.Set(string.Format("Terrain tile requested: map {0} tile {1}_{2} (load {3})", cmd.MapId, cmd.TileX, cmd.TileY, cmd.Load));
         DropModelWorkForTerrain("superseded by terrain load " + cmd.Load);
+        // The latest load's camera only: an earlier load's, never placed, goes with that load.
+        owedCamera = cmd.Camera;
+        owedCameraLoad = cmd.Load;
         terrain.Load(cmd);
     }
 
@@ -267,6 +483,7 @@ public partial class WmvMain
     /// <summary>Frame the committed tile: as a world model, then WMV_VIEWPORT_ORBIT, then -wmvTerrainTopDown.</summary>
     void FrameTerrainTile(WmvRuntimeTerrainTile tile)
     {
+        terrainViewMode.StopFly();
         Bounds frame = TerrainFrameBox(tile);
         terrainFrame = frame;
         haveTerrainFrame = true;
@@ -304,8 +521,8 @@ public partial class WmvMain
     void RefitTerrain(Camera cam, string what)
     {
         lastFramedAspect = cam.aspect;
-        if (!haveTerrainFrame)
-            return;
+        if (!haveTerrainFrame || terrainViewMode.Flying)
+            return;   // (the free camera stays where the user flew it)
         orbit.FrameMapObject(terrainFrame);
         ApplyViewportOrbitOverride(TerrainOverrideTag);
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
@@ -612,6 +829,7 @@ public partial class WmvMain
             tile.Root.SetActive(true);
             main.SetViewMode(true, "tile " + tile.TileX + "_" + tile.TileY + " of map " + tile.MapId + ", load " + tile.Load);
             main.FrameTerrainTile(tile);
+            main.PlaceOwedCamera(tile);
         }
 
         public void LeaveTerrainView(string why, bool forModelLoad) { main.SetViewMode(false, why, forModelLoad); }
@@ -647,7 +865,10 @@ public sealed class WmvTerrainViewMode
 
     readonly WmvOrbitCamera orbit;
     readonly Camera cam;
-    bool active, topDown;
+    bool active, topDown, flying;
+    float savedNear, savedFar;
+    /// <summary>The world view's free camera (protocol 15), on the same camera; null in a self-test that drives no flight.</summary>
+    public WmvFlyCamera Fly;
     WmvOrbitCamera.State saved;
     Framing savedFraming;
     bool savedOrthographic, savedOrbitEnabled;
@@ -661,6 +882,8 @@ public sealed class WmvTerrainViewMode
 
     public bool Active { get { return active; } }
     public bool TopDown { get { return topDown; } }
+    /// <summary>The free camera holds the main camera (ApplyFly) until the overview, a new tile's framing or Leave.</summary>
+    public bool Flying { get { return flying; } }
     /// <summary>The model view's orbit state, kept while the terrain view is on.</summary>
     public WmvOrbitCamera.State Saved { get { return saved; } }
 
@@ -687,6 +910,7 @@ public sealed class WmvTerrainViewMode
         restored = new Framing();
         if (!active)
             return false;
+        StopFly();
         active = false;
         topDown = false;
         cam.orthographic = savedOrthographic;
@@ -717,5 +941,45 @@ public sealed class WmvTerrainViewMode
         cam.nearClipPlane = 0.5f;
         cam.farClipPlane = (maxY - minY) + 2f;
         topDown = true;
+    }
+
+    /// <summary>
+    /// The free camera takes the main camera (protocol 15): the orbit stops taking input (its Update would put its own
+    /// placement back), the projection is perspective, the clip planes are the flight's, and the camera stands at `position`
+    /// (Unity space) facing yaw and pitch (degrees). False (nothing done) outside the terrain view or without a free camera.
+    /// StopFly, the overview's framing and Leave give the camera back.
+    /// </summary>
+    public bool ApplyFly(Vector3 position, float yaw, float pitch)
+    {
+        if (!active || Fly == null)
+            return false;
+        if (!flying)
+        {
+            savedNear = cam.nearClipPlane;
+            savedFar = cam.farClipPlane;
+        }
+        orbit.enabled = false;
+        cam.orthographic = false;
+        topDown = false;
+        cam.nearClipPlane = WmvFlyCamera.NearPlane;
+        cam.farClipPlane = WmvFlyCamera.FarPlane;
+        Fly.Place(position, yaw, pitch);
+        Fly.enabled = true;
+        flying = true;
+        return true;
+    }
+
+    /// <summary>The free camera lets go: the orbit takes input again as it did before the flight, and the clip planes are
+    /// put back (a framing that follows sets its own).</summary>
+    public void StopFly()
+    {
+        if (!flying)
+            return;
+        flying = false;
+        if (Fly != null)
+            Fly.enabled = false;
+        orbit.enabled = savedOrbitEnabled;
+        cam.nearClipPlane = savedNear;
+        cam.farClipPlane = savedFar;
     }
 }

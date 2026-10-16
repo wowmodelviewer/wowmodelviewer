@@ -56,6 +56,9 @@ namespace WMVLog
 class UiMenuBarTitles;
 
 class ClientLoadProgress;
+class MapsViewer;
+class MapOverview;
+
 class ModelViewer: public wxFrame
 {    
     DECLARE_CLASS(ModelViewer)
@@ -149,6 +152,8 @@ public:
   // A texture picked in Browse (Textures mode), shown in the viewport's place: the Unity host's
   // content window (UnityRendererHost::showContent). Created with the viewport.
   TextureView * textureView = nullptr;
+  // The Maps viewer's overhead map, in the viewport's place until a world is entered (MapOverview.h).
+  MapOverview * mapOverview = nullptr;
 
   // Initialising related functions
   void InitMenu();
@@ -316,6 +321,7 @@ public:
   bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
   bool isModelsMode() const { return m_viewerMode == ViewerMode::Models; }
   bool isBuildingsMode() const { return m_viewerMode == ViewerMode::Buildings; }
+  bool isMapsMode() const { return m_viewerMode == ViewerMode::Maps; }
   // What the canvas holds, by kind: a world model (with its flag: a pointer a load left behind does not
   // count), or a model.
   bool canvasHasWorldModel() const;
@@ -357,6 +363,7 @@ public:
   // command bar's model name, the status bar facts and the viewport (model or notice) follow it. The one
   // place every load path reports to.
   void DisplayedContentChanged();
+  void UpdateCommandLabel();
 
   // The command bar along the top: the viewer selector, the screenshot, the current model and the three panel toggles.
   void InitCommandBar();
@@ -690,11 +697,17 @@ public:
   // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
   // can be read now (inspected through the storage, for every client family). Otherwise the load serial sent. The model
   // or world model the player was building is dropped by it (the player's model session stays, hidden), so the waits
-  // for it end here.
-  int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why);
+  // for it end here. wdtInspected (the Maps viewer, docs/world-viewer/05-maps-viewer-ui.md): the map's WDT inspection
+  // the catalogue holds was made by the map asset worker for this client (WorldMapCatalog::noteInspection), and is used
+  // as it is when it says Available -- the GUI thread reads nothing; otherwise the WDT is inspected here as before.
+  // camera (protocol 15, the Maps viewer's Enter world): where the player puts its free camera when the tile is shown.
+  int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected = false,
+                         const UnityIpcServer::WorldCamera * camera = nullptr);
   // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with
-  // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect).
-  bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why);
+  // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect), unless
+  // wdtInspected and the catalogue's inspection of it is Available.
+  bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why,
+                          bool wdtInspected = false);
   // Take the terrain away (clearTerrain): false when there is no player that draws terrain.
   bool ClearTerrain(const QString & reason);
   // THE MAP ASSET WORKER (docs/world-viewer/04b-asset-serving.md), the viewer's side, all on the GUI thread.
@@ -726,6 +739,17 @@ public:
   // not waited for: the -terraintile "readshutdown" step leaves it so for the viewer's shutdown. Its ticket, 0 when no
   // read could be given.
   quint64 TestHoldReadForShutdown(int fileDataID);
+  // TEST HOOK (the -terraintile "readshutdownserved" step, docs/world-viewer/04b-asset-serving.md 18.1): when set, the
+  // destructor calls it at its first statement, immediately before the map asset worker is stopped, and immediately
+  // before and after the player is shut down.
+  enum class ShutdownPoint
+  {
+    Begin,
+    BeforeWorkerStop,
+    BeforePlayerShutdown,
+    AfterPlayerShutdown
+  };
+  static std::function<void(ModelViewer &, ShutdownPoint)> testShutdownProbe;
   // The worker (shared with the IPC server), and the lease it was last granted: client epoch and storage generation.
   std::shared_ptr<MapAssetWorker> m_mapAssetWorker;
   int m_mapAssetLeaseEpoch = 0;
@@ -858,6 +882,7 @@ public:
     bool armory = false;              // a Retail-family client with characters (Armory imports Retail characters)
     bool textures = false;            // BLP files indexed
     bool buildings = false;           // WMO files indexed
+    bool maps = false;                // the map catalogue is ready (Map.db2 read: docs/world-viewer/02-map-catalog.md)
     int modelFiles = 0, textureFiles = 0, buildingFiles = 0, races = 0, npcCount = 0, itemCount = 0;
     int filesNotInstalled = 0;        // in the build but not on this computer (a partly downloaded install)
     int tablesNotInstalled = 0, tablesNotRead = 0; // the schema check (WoWDatabase::schemaCheck)
@@ -872,6 +897,9 @@ public:
   // outlives the client finds it no longer belongs to the loaded one.
   std::shared_ptr<wow::WorldMapCatalog> mapCatalog() const { return m_mapCatalog; }
   std::shared_ptr<wow::WorldMapCatalog> m_mapCatalog;
+  // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the fourth viewer mode's state, made with the viewer.
+  std::unique_ptr<MapsViewer> m_maps;
+  MapsViewer * maps() const { return m_maps.get(); }
   // The loaded client in a line, for the status bar and Advanced details: "Classic Era · Vanilla · 1.15.9".
   QString loadedClientSummary() const;
 

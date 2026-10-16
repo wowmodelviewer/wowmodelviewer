@@ -102,6 +102,30 @@ public static class WmvTerrainDebug
     static bool parsed;
     static WmvTerrainView view = WmvTerrainView.Shaded;
     static bool viewGiven;
+    static WmvTerrainView runtimeView = WmvTerrainView.Shaded;
+    static bool runtimeViewSet;
+
+    /// <summary>The views setTerrainView takes (protocol 14): every view but the plain-weights comparison, which fetches
+    /// textures of its own and is a validation fixture, not a display mode; "auto" gives the choice back to the command
+    /// line and the material (EffectiveView).</summary>
+    public static bool IsRuntimeView(string name)
+    {
+        return name == "auto" || (Array.IndexOf(ViewNames, name) >= 0 && name != "texturedplainweights");
+    }
+
+    /// <summary>setTerrainView: the view every tile is drawn in from now on (false: the name is not one IsRuntimeView
+    /// takes, and nothing changes).</summary>
+    public static bool SetRuntimeView(string name)
+    {
+        if (!IsRuntimeView(name))
+            return false;
+        runtimeViewSet = name != "auto";
+        runtimeView = runtimeViewSet ? (WmvTerrainView)Array.IndexOf(ViewNames, name) : WmvTerrainView.Shaded;
+        return true;
+    }
+
+    /// <summary>The host's view, "auto" when it chose none.</summary>
+    public static string RuntimeViewName { get { return runtimeViewSet ? ViewNames[(int)runtimeView] : "auto"; } }
     static int onlyChunk = -1, focus = -1;
     static bool topDown, validate;
     static string dumpName, compositeName, texelName;
@@ -115,10 +139,13 @@ public static class WmvTerrainDebug
     /// <summary>-wmvTerrainView was given (and valid); without it the view follows the tile's material.</summary>
     public static bool ViewGiven { get { Parse(); return viewGiven; } }
     public static string ViewName { get { return ViewGiven ? ViewNames[(int)View] : "auto"; } }
-    /// <summary>The view a tile is drawn in: the one asked for, or -- none asked for -- textured when the tile's material is
-    /// textured or partial (design section 4) and the stage 03 shaded view otherwise.</summary>
+    /// <summary>The view a tile is drawn in: the host's (setTerrainView, protocol 14) when it chose one; else the one asked
+    /// for on the command line; else -- none asked for -- textured when the tile's material is textured or partial (design
+    /// section 4) and the stage 03 shaded view otherwise.</summary>
     public static WmvTerrainView EffectiveView(WmvTerrainTileContent content)
     {
+        if (runtimeViewSet)
+            return runtimeView;
         if (ViewGiven)
             return View;
         return content != null && content.HasDrawableChunks ? WmvTerrainView.Textured : WmvTerrainView.Shaded;
@@ -435,6 +462,26 @@ public class WmvRuntimeTerrainTile
         liveTextureBytes -= b;
         TextureGpuBytes -= b;
         UnityEngine.Object.DestroyImmediate(t);
+        return true;
+    }
+
+    /// <summary>A layer texture handed to another tile (WmvTerrainSession.RebuildShown: the tile built again in another
+    /// view, which binds it): off this tile's lists and every tally at once, NOT destroyed -- the other tile tracks it
+    /// next. False when the tile does not hold it.</summary>
+    public bool Hand(Texture2D t, out long gpuBytes)
+    {
+        gpuBytes = 0;
+        int i = t != null ? textures.IndexOf(t) : -1;
+        if (i < 0) return false;
+        gpuBytes = textureBytes[i];
+        textures.RemoveAt(i);
+        textureBytes.RemoveAt(i);
+        liveTextures--;
+        liveTextureBytes -= gpuBytes;
+        TextureGpuBytes -= gpuBytes;
+        foreach (KeyValuePair<uint, Texture2D> kv in new List<KeyValuePair<uint, Texture2D>>(Textures))
+            if (kv.Value == t)
+                Textures.Remove(kv.Key);
         return true;
     }
 

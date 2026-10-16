@@ -27,6 +27,10 @@
 #include <commctrl.h>
 #include "UnityAssetAccess.h"
 #include "LoadTimeline.h"
+#include "MapsViewer.h"
+#include "MapTilePanel.h"
+#include "WorldMapCatalog.h"
+#include "WoWFolder.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
@@ -180,6 +184,12 @@ void FileControl::UpdateSearchHint()
                              "from 3 characters; press Enter to search a shorter term, or to open the texture with "
                              "that FileDataID"));
   }
+  else if (m_mode == ViewerMode::Maps)
+  {
+    txtContent->SetDescriptiveText(_("Search maps"));
+    txtContent->SetToolTip(_("Maps by name or directory -- or MapID -- as you type; press Enter to open the map with "
+                             "that MapID"));
+  }
   else if (m_mode == ViewerMode::Buildings)
   {
     txtContent->SetDescriptiveText(_("Search buildings"));
@@ -233,6 +243,12 @@ void FileControl::Init(ModelViewer* mv)
   if (m_mode == ViewerMode::Textures)
   {
     InitTextures();
+    return;
+  }
+  if (m_mode == ViewerMode::Maps)
+  {
+    m_applied[slot(m_mode)] = txtContent->GetValue();
+    InitMaps(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
     return;
   }
 
@@ -953,6 +969,17 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
     SelectTextureRow(item);
     return;
   }
+  if (m_mode == ViewerMode::Maps)
+  {
+    // As in Buildings: the map an arrow key stops on is read when it is let go.
+    if (m_keysRepeating)
+    {
+      m_buildingPickPending = true;
+      return;
+    }
+    SelectMapRow(item);
+    return;
+  }
   if (m_mode == ViewerMode::Buildings)
   {
     // Rows passed with an arrow key held down are not loaded: the one it stops on is, when it is let go.
@@ -1103,6 +1130,25 @@ void FileControl::OnButton(wxCommandEvent &event)
         fileTree->SelectItem(first);
     }
   }
+  // Maps: Enter on a MapID opens that map (its row is pinned first).
+  if (ShowsMaps() && event.GetEventType() == wxEVT_SEARCH)
+  {
+    const QString term = QString::fromWCharArray(txtContent->GetValue().c_str()).trimmed();
+    bool digits = !term.isEmpty();
+    for (const QChar c : term)
+      digits = digits && c.isDigit();
+    wxTreeItemIdValue cookie;
+    const wxTreeItemId first = fileTree->GetRootItem().IsOk() ? fileTree->GetFirstChild(fileTree->GetRootItem(), cookie)
+                                                               : wxTreeItemId();
+    FileTreeData * data = first.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(first)) : nullptr;
+    if (digits && data && data->mapId == term.toInt())
+    {
+      if (fileTree->GetSelection() == first)
+        SelectMapRow(first);
+      else
+        fileTree->SelectItem(first);
+    }
+  }
   // Textures: Enter on a FileDataID opens that file (its texture row, or the row that looks it up).
   if (ShowsTextures() && event.GetEventType() == wxEVT_SEARCH)
   {
@@ -1157,7 +1203,7 @@ void FileControl::FollowViewerMode(ViewerMode mode)
   // model or building tree itself (keepTree).
   if (m_mode == ViewerMode::Textures)
     m_textures->rememberOpenFolders();
-  else
+  else if (m_mode != ViewerMode::Maps)   // the map list is listed again on the way back (a fraction of a millisecond)
     keepTree(treeState());
   // Each mode's search is what its tree shows, not text typed and not run: that one could be a
   // 1-character search over every model, which takes seconds.
@@ -1166,8 +1212,182 @@ void FileControl::FollowViewerMode(ViewerMode mode)
   m_mode = mode;
   m_keysRepeating = false;
   m_buildingPickPending = false;
+  // THE MAPS VIEWER's facts and controls, under the list in Maps only (the overhead map is in the viewport's place).
+  if (mode == ViewerMode::Maps && !m_mapPanel && g_modelViewer && g_modelViewer->maps())
+  {
+    // As tall as its controls; the list of maps takes the rest.
+    m_mapPanel = new MapTilePanel(this, g_modelViewer->maps());
+    GetSizer()->Insert(2, m_mapPanel, 0, wxEXPAND);
+  }
+  if (m_mapPanel)
+  {
+    m_mapPanel->Show(mode == ViewerMode::Maps);
+    Layout();
+    // What changed while another viewer had Browse (a client switch, a load) shows at once.
+    if (mode == ViewerMode::Maps)
+      m_mapPanel->Refresh2();
+  }
   UpdateSearchHint();
   Init();
+}
+
+bool FileControl::ShowsMaps() const
+{
+  return m_mode == ViewerMode::Maps;
+}
+
+void FileControl::MapsChanged()
+{
+  if (m_mapPanel && m_mode == ViewerMode::Maps)
+    m_mapPanel->Refresh2();
+}
+
+namespace
+{
+  // The catalogue's own states, in the order Browse lists them; a WDT the storage root does not list (a lookup, no
+  // read) is a group of its own, whatever Map.db2 says the map is.
+  enum MapGroup { GroupTerrain, GroupWorldModel, GroupUnknown, GroupMissingWdt, GroupNoWdt, GroupCount };
+
+  MapGroup groupOf(const wow::MapEntry & e, bool wdtListed)
+  {
+    if (e.wdt.kind == wow::WdtReference::Kind::Unresolved)
+      return GroupNoWdt;
+    if (!wdtListed)
+      return GroupMissingWdt;
+    switch (e.statedWdtForm())
+    {
+      case wow::StatedWdtForm::TileGrid: return GroupTerrain;
+      case wow::StatedWdtForm::WmoOnly:  return GroupWorldModel;
+      case wow::StatedWdtForm::NoWdt:    return GroupNoWdt;
+      case wow::StatedWdtForm::Unknown:  break;
+    }
+    return GroupUnknown;
+  }
+}
+
+void FileControl::InitMaps(const QString & content)
+{
+  QElapsedTimer timer;
+  timer.start();
+  KeepFocusOffTree keepFocus(fileTree);
+  const std::shared_ptr<wow::WorldMapCatalog> catalog = g_modelViewer ? g_modelViewer->mapCatalog() : nullptr;
+  fileTree->Freeze();
+  clearRows();
+  m_mapsListed = 0;
+  if (!catalog || !UnityAssetAccess::hasActiveClient())
+  {
+    fileTree->Thaw();
+    SetSearchStatus(_("Load a World of Warcraft client to browse its maps."));
+    return;
+  }
+  if (catalog->status() != wow::WorldMapCatalog::Status::Ready)
+  {
+    fileTree->Thaw();
+    SetSearchStatus(wxString(("This client's maps cannot be listed: " + wow::WorldMapCatalog::statusName(catalog->status()) +
+                              (catalog->statusDetail().isEmpty() ? QString() : " -- " + catalog->statusDetail()))
+                               .toStdWString()));
+    return;
+  }
+  const QStringList words = content.split(QLatin1Char(' '), QString::SkipEmptyParts);
+  bool numeric = !content.isEmpty();
+  for (const QChar c : content)
+    numeric = numeric && c.isDigit();
+  const int wantedId = numeric ? content.toInt() : -1;
+  static const wxChar * groupNames[GroupCount] = {
+    wxT("Tile-grid maps (by Map.db2's type)"), wxT("World model maps (one WMO, no terrain tiles)"),
+    wxT("Maps of an unknown type"), wxT("Maps whose WDT is not in this client's files"), wxT("Maps without a WDT file"),
+  };
+  // Whether the storage root lists a map's WDT (by FileDataID; by path where the root names its files). A path the root
+  // cannot answer for (it lists files without names) counts as listed: the pick says what is known.
+  wow::WoWFolder & folder = static_cast<wow::WoWFolder &>(GAMEDIRECTORY);
+  const bool pathsNamed = catalog->client().rootNameless == 0;
+  const auto listed = [&](const wow::MapEntry & e) {
+    if (e.wdt.kind == wow::WdtReference::Kind::FileDataId)
+      return folder.storageRootEntry(e.wdt.fileDataId).listed;
+    if (e.wdt.kind == wow::WdtReference::Kind::Path)
+      return !pathsNamed || folder.storageRootEntryByPath(e.wdt.path).listed;
+    return false;
+  };
+  std::vector<const wow::MapEntry *> groups[GroupCount];
+  const wow::MapEntry * pinned = nullptr;
+  for (const wow::MapEntry & e : catalog->maps())
+  {
+    if (wantedId >= 0 && e.id == wantedId)
+      pinned = &e;
+    bool all = true;
+    const QString name = e.name.toLower(), dir = e.directory.toLower();
+    for (const QString & w : words)
+      all = all && (name.contains(w) || dir.contains(w) || (numeric && QString::number(e.id) == w));
+    if (all)
+      groups[groupOf(e, listed(e))].push_back(&e);
+  }
+  const auto label = [](const wow::MapEntry & e) {
+    const QString name = e.name.isEmpty() ? e.directory : e.name;
+    QString t = name + QString("  [%1]").arg(e.id);
+    if (!e.name.isEmpty() && e.directory.compare(e.name, Qt::CaseInsensitive) != 0)
+      t += "  " + e.directory;
+    return wxString(t.toStdWString());
+  };
+  const wxTreeItemId root = fileTree->AddRoot(wxT("Maps"));
+  wxTreeItemId select;
+  MapsViewer * maps = g_modelViewer->maps();
+  const int picked = maps ? maps->mapId() : -1;
+  if (pinned)
+  {
+    FileTreeData * d = new FileTreeData(nullptr);
+    d->mapId = pinned->id;
+    const wxTreeItemId row = fileTree->AppendItem(root, label(*pinned), -1, -1, d);
+    if (pinned->id == picked)
+      select = row;
+  }
+  for (int g = 0; g < GroupCount; g++)
+  {
+    if (groups[g].empty())
+      continue;
+    const wxTreeItemId group = fileTree->AppendItem(root, wxString::Format(wxT("%s  (%d)"), groupNames[g], (int)groups[g].size()),
+                                                    -1, -1, new FileTreeData(nullptr));
+    for (const wow::MapEntry * e : groups[g])
+    {
+      FileTreeData * d = new FileTreeData(nullptr);
+      d->mapId = e->id;
+      const wxTreeItemId row = fileTree->AppendItem(group, label(*e), -1, -1, d);
+      if (g != GroupTerrain)
+        fileTree->SetItemTextColour(row, UiStyle::palette().textSecondary);
+      if (e->id == picked && !select.IsOk())
+        select = row;
+      m_mapsListed++;
+    }
+    if (g == GroupTerrain || !content.isEmpty())
+      fileTree->Expand(group);
+  }
+  if (select.IsOk())
+  {
+    m_restoringTree = true;
+    fileTree->SelectItem(select);
+    fileTree->EnsureVisible(select);
+    m_restoringTree = false;
+  }
+  fileTree->Thaw();
+  m_mapsListMs = timer.nsecsElapsed() / 1e6;
+  if (content.isEmpty())
+    SetSearchStatus(wxString::Format(_("%d maps: %d tile-grid maps, %d world model maps, %d whose WDT is not in this client's "
+                                       "files, %d without a WDT, %d of an unknown type."),
+                                     m_mapsListed, (int)groups[GroupTerrain].size(), (int)groups[GroupWorldModel].size(),
+                                     (int)groups[GroupMissingWdt].size(), (int)groups[GroupNoWdt].size(),
+                                     (int)groups[GroupUnknown].size()));
+  else
+    SetSearchStatus(m_mapsListed == 0 && !pinned ? wxString(_("No map matches."))
+                                                 : wxString::Format(_("%d map(s) match."), m_mapsListed));
+  LOG_INFO << "[maps] Browse listed" << m_mapsListed << "map(s) of" << (int)catalog->maps().size() << "for the search \"" << content
+           << "\" in" << m_mapsListMs << "ms";
+}
+
+void FileControl::SelectMapRow(wxTreeItemId item)
+{
+  FileTreeData * data = item.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(item)) : nullptr;
+  if (!data || data->mapId < 0 || !g_modelViewer || !g_modelViewer->maps())
+    return;
+  g_modelViewer->maps()->SelectMap(data->mapId);
 }
 
 void FileControl::PickedRowFollowsLoad()
@@ -1189,13 +1409,15 @@ void FileControl::KeysRepeating(bool repeating)
 {
   if (modelviewer && modelviewer->textureView)
     modelviewer->textureView->setKeysRepeating(repeating && m_mode == ViewerMode::Textures);
-  m_keysRepeating = repeating && m_mode == ViewerMode::Buildings;
+  m_keysRepeating = repeating && (m_mode == ViewerMode::Buildings || m_mode == ViewerMode::Maps);
   // Let go: the row the key stopped on is loaded.
   if (!m_keysRepeating && m_buildingPickPending)
   {
     m_buildingPickPending = false;
     if (m_mode == ViewerMode::Buildings)
       SelectBuildingRow(fileTree->GetSelection());
+    else if (m_mode == ViewerMode::Maps)
+      SelectMapRow(fileTree->GetSelection());
   }
 }
 
@@ -1493,6 +1715,8 @@ void FileControl::OnTreeActivated(wxTreeEvent &event)
     SelectTextureRow(event.GetItem());
   else if (m_mode == ViewerMode::Buildings)
     SelectBuildingRow(event.GetItem());
+  else if (m_mode == ViewerMode::Maps)
+    SelectMapRow(event.GetItem());
   event.Skip();
 }
 
