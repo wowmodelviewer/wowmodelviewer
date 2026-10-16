@@ -655,9 +655,12 @@ public:
     // What the load has had (accounted when a request goes on to the read, noteMapAssetRead, and after it,
     // noteMapAssetResult).
     int reads = 0;                      // requests that went on to the storage read, every role: the terrain roles' at
-                                        // most 3 + maxTexturesPerLoad, the world roles' (worldReads) apart
+                                        // most 3 + maxTexturesPerLoad, the world roles' (worldReads) and the doodad
+                                        // roles' (doodadReads) apart
     int worldReads = 0;                 // ... of them the world roles' (obj0Adt, wmoRoot, wmoGroup, wmoTexture): at most
                                         // 1 + maxWmoModelsPerLoad + maxWmoGroupsPerLoad + maxWmoTexturesPerLoad
+    int doodadReads = 0;                // ... of them the doodad roles' (m2Model, m2Skin, m2Texture): at most
+                                        // 2 * maxM2ModelsPerLoad + maxM2TexturesPerLoad
     bool tex0Asked = false;             // a tex0 ADT went on to the read: the only one this load may have
     int tex0FileDataID = 0;             // ... its FileDataID
     bool tex0Served = false;            // ... and it was answered "available" (its kind checked)
@@ -691,6 +694,25 @@ public:
     qint64 wmoBytesReserved = 0;        // the limits of the root and group reads in flight
     qint64 wmoTextureBytesRead = 0;     // world-model texture bytes read: at most maxWmoTextureBytesPerLoad
     qint64 wmoTextureBytesReserved = 0; // the limits of those reads in flight
+    // DOODADS (protocol 17, docs/world-viewer/07-doodads.md): a world load to a player that places doodads -- the M2
+    // models the obj0 ADT's MDDF and the world models' doodad sets name, their skins and their textures. The budgets it
+    // was sent with (0: none -- a load to an older player, or not a world load, which is served no doodad file: the load
+    // "carries doodad budgets" when maxM2ModelsPerLoad > 0), and what it has had.
+    qint64 maxM2FileBytes = 0;
+    qint64 maxM2BytesPerLoad = 0;
+    qint64 maxM2TextureBytes = 0;
+    qint64 maxM2TextureBytesPerLoad = 0;
+    int maxM2ModelsPerLoad = 0;
+    int maxM2TexturesPerLoad = 0;
+    int maxDoodadInstancesPerLoad = 0;  // the player's budget alone, kept for the log: the host never sees a placement
+    std::vector<int> m2ModelIds;        // the doodad models that went on to the read, each once
+    int m2ModelsServed = 0;             // ... answered "available" (their kind checked)
+    std::vector<int> m2SkinIds;         // the doodad skins that went on to the read, each once
+    std::vector<int> m2TextureIds;      // the doodad textures that went on to the read, each once
+    qint64 m2BytesRead = 0;             // model and skin bytes read, kind failures included: at most maxM2BytesPerLoad
+    qint64 m2BytesReserved = 0;         // the limits of the model and skin reads in flight
+    qint64 m2TextureBytesRead = 0;      // doodad texture bytes read: at most maxM2TextureBytesPerLoad
+    qint64 m2TextureBytesReserved = 0;  // the limits of those reads in flight
   };
   // What getMapAsset decided before anything is read: state "" goes on to the read (at most maxBytes), "refused" or
   // "stale" is the answer.
@@ -718,6 +740,14 @@ public:
   // bytes within maxWmoBytesPerLoad, texture bytes within maxWmoTextureBytesPerLoad (the reads in flight reserved). The
   // reads a world load may make grow by 1 + those three counts. The read's limit: maxAssetBytes for the obj0, the smaller
   // of maxWmoFileBytes (maxWmoTextureBytes) and what is left of the load's bytes for the others.
+  // DOODADS (protocol 17): "m2Model", "m2Skin" and "m2Texture" are served to a load that carries doodad budgets only (a
+  // load to an older player, or a loadTerrainTile, is refused every one). A model after the load's obj0 or one of its
+  // world-model roots was served; a skin or a texture after a model was served; each id once, at most maxM2ModelsPerLoad
+  // models, as many skins, and maxM2TexturesPerLoad textures; model and skin bytes within maxM2BytesPerLoad, texture
+  // bytes within maxM2TextureBytesPerLoad (the reads in flight reserved). The doodad roles' reads are a third family,
+  // capped at 2 * maxM2ModelsPerLoad + maxM2TexturesPerLoad apart from the terrain's and the world models' (the terrain
+  // roles counted as reads less both). The read's limit: the smaller of maxM2FileBytes (maxM2TextureBytes) and what is
+  // left of the load's bytes.
   static MapAssetDecision decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current, int epochNow,
                                                 bool catalogueBelongs, bool clientLoading);
   // The accounting of a request the decision let through, before its read (the read counted, the tex0 or texture id
@@ -725,8 +755,9 @@ public:
   static void noteMapAssetRead(TerrainRequest & current, const QJsonObject & request);
   static void noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available);
   // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; WORLD MODELS: "obj0Adt"
-  // MVER then MDDF, "wmoRoot" MVER then MOHD, "wmoGroup" MVER then MOGP, "wmoTexture" BLP2; nothing for the other roles):
-  // "" when it is that kind, else what was found, the answer's detail.
+  // MVER then MDDF, "wmoRoot" MVER then MOHD, "wmoGroup" MVER then MOGP, "wmoTexture" BLP2; DOODADS: "m2Model" MD21 then,
+  // at 8, MD20, "m2Skin" SKIN, "m2Texture" BLP2; nothing for the other roles): "" when it is that kind, else what was
+  // found, the answer's detail.
   static QString mapAssetKindProblem(const QString & role, const QByteArray & bytes);
   // Show one terrain tile: refused, 0 with why, unless a client is loaded (and none is loading), the player draws terrain,
   // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
@@ -741,7 +772,9 @@ public:
   // THE WORLD (protocol 16): a world load, sent as loadWorld with the world-model budgets -- the tile and the world models
   // its obj0 ADT places, or (globalWmo) a WMO-only map's one world model and no tile (tileX and tileY ignored;
   // globalWmoFileDataID the WDT's world model, the one root the load may fetch, 0 when not known). Refused as
-  // RequestTerrainTile is, and without a protocol-16 player. The rest as RequestTerrainTile.
+  // RequestTerrainTile is, and without a protocol-16 player. The rest as RequestTerrainTile. To a player that places
+  // doodads (protocol 17) the load offers them too, with the doodad budgets (UnityIpcServer::MAX_M2_*); an older one's
+  // load carries none, and is served no doodad file.
   int RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
                    bool wdtInspected = false, const UnityIpcServer::WorldCamera * camera = nullptr);
   // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with

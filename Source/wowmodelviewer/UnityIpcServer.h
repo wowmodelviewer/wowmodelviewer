@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v13). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v17). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -324,6 +324,42 @@
  * worldGpuTextureBytes, worldGroups, worldGroupsVisible, worldGroupsCulled, worldInstancesCulled, worldLoad, worldKind.
  * An older player is sent loadTerrainTile (no world models: the Stage 05 behaviour) and no inspectWorldModel.
  *
+ * DOODADS (protocol 17, docs/world-viewer/07-doodads.md). A world load places the doodads too: the M2 models its obj0
+ * ADT's MDDF names and those its world models' doodad sets name. To a player that announced protocol 17, loadWorld adds
+ *                  "doodads":true, "maxM2FileBytes":..., "maxM2BytesPerLoad":..., "maxM2TextureBytes":...,
+ *                  "maxM2TextureBytesPerLoad":..., "maxM2ModelsPerLoad":..., "maxM2TexturesPerLoad":...,
+ *                  "maxDoodadInstancesPerLoad":...
+ * (MAX_M2_* and MAX_DOODAD_INSTANCES_PER_LOAD below), and getMapAsset adds the roles "m2Model" (once the load's obj0 or
+ * one of its world-model roots was served: a WMO-only map's doodads come from its world model's sets alone), "m2Skin"
+ * and "m2Texture" (once a doodad model was served), each id once per load, at most maxM2ModelsPerLoad models, as many
+ * skins and maxM2TexturesPerLoad textures; model and skin bytes within maxM2BytesPerLoad, texture bytes within
+ * maxM2TextureBytesPerLoad (the reads in flight reserved); the doodad roles' reads capped apart from the terrain's and the
+ * world models' (2 x maxM2ModelsPerLoad + maxM2TexturesPerLoad). The KIND check: a doodad model starts "MD21" with "MD20"
+ * at byte 8 (a bare MD20 file is refused: the player asks for a model's skin and textures by the FileDataIDs of its SFID
+ * and TXID chunks, which only the chunked form carries), a skin "SKIN", a texture "BLP2". The host parses
+ * no MDDF and no MODD, so it cannot tell whether a model is one they name: as for groups, it vouches for the order, the
+ * kind, each id once and the budgets. The instance budget is the player's alone (the host never sees a placement).
+ *   player -> WMV  worldProgress adds "doodadPhase" ("none", "waiting", "discovering", "requesting", "building", "placing",
+ *                    "complete", "partial", "failed", "ended", "notOffered"), "doodadInstances", "doodadPlaced",
+ *                    "doodadModels", "doodadModelsBuilt", "doodadModelsFailed", "doodadFilesAsked", "doodadFilesAnswered",
+ *                    "doodadBytes" (each -1 when doodads were not offered)
+ *                  terrainTileLoaded's "world" adds "assembly" ("complete", "partial", "none", "failed", "ended": the whole
+ *                    world, its world models and its doodads; "state" stays the world models' own) and "doodads":{ "state"
+ *                    ("complete", "partial", "none", "failed", "ended", "notOffered"), "reason", "mddfRecords",
+ *                    "mddfPlacements", "wmoDoodadRecords", "wmoPlacementsWithDoodads", "sets":[{ uniqueId, wmo, set,
+ *                    setName, setCount, active, reason }] (at most 64), "instances", "placed", "failed", "unsupported",
+ *                    "notRequested", "ended", "models", "modelsBuilt", "modelsFailed", "modelsUnsupported",
+ *                    "modelsNotRequested", "modelsPartial", "textures", "texturesDecoded", "texturesMissing", "textureUses",
+ *                    "textureUploads", "fileBytes", "textureBytes", "gpuGeometryBytes", "gpuTextureBytes", "timings":{
+ *                    discoverMs, firstVisibleMs, fetchMs, parseMs, decodeMs, buildMs, buildMaxMs, placeMs, placeMaxMs,
+ *                    readyMs }, "list":[{ fileDataID, state, reason, instances, placed }] (at most 128: every model not
+ *                    built first, then the most placed) }
+ * runtimeState adds doodadInstances, doodadPrototypes, doodadMeshes, doodadMaterials, doodadTextures,
+ * doodadGpuGeometryBytes, doodadGpuTextureBytes, doodadVisible, doodadCulled, and the scene's whole tallies
+ * liveGameObjects, liveTexture2D, liveMeshes, liveMaterials. A protocol-16 player is sent the protocol-16 loadWorld (no
+ * doodad field) and every doodad role is refused for its load; a protocol-17 player sent no doodad budgets (a protocol-16
+ * host) loads the world as before and reports its doodads "notOffered".
+ *
  * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
  * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
  * a read). A request is decided and accounted only when it is served, so one whose load ended while it waited is
@@ -431,7 +467,7 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 16;
+  static const int PROTOCOL_VERSION = 17;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -459,6 +495,20 @@ public:
   static const int MAX_WMO_MODELS_PER_LOAD = 64;
   static const int MAX_WMO_GROUPS_PER_LOAD = 1024;
   static const int MAX_WMO_PLACEMENTS_PER_LOAD = 256;
+  // DOODADS (protocol 17): the budgets a world load states to a player that places doodads, and the host enforces (but the
+  // instances: the host never sees a placement), from the census in docs/world-viewer/07-doodads.md section 4 (the four
+  // clients' tiles 30_47 and 31_48, the WMO-only maps 34 and 429): one model or skin file at most 8 MiB (the largest M2
+  // read is 2,423,632 bytes, the largest skin 214,960, both Retail), a load's model and skin bytes at most 128 MiB (the
+  // most is 16.4 MB, Retail 30_47); one texture at most 8 MiB (the largest is 1,399,300, Retail), a load's texture bytes
+  // at most 128 MiB (the most is 58.6 MB, Retail 30_47); 1,024 unique models, and as many skins (the most is 616 models,
+  // Retail 30_47), 2,048 texture ids (the most is 578) and 16,384 instances (the most is 6,538, Classic Beta 30_47).
+  static const int MAX_M2_FILE_BYTES = 8 * 1024 * 1024;
+  static const int MAX_M2_BYTES_PER_LOAD = 128 * 1024 * 1024;
+  static const int MAX_M2_TEXTURE_BYTES = 8 * 1024 * 1024;
+  static const int MAX_M2_TEXTURE_BYTES_PER_LOAD = 128 * 1024 * 1024;
+  static const int MAX_M2_MODELS_PER_LOAD = 1024;
+  static const int MAX_M2_TEXTURES_PER_LOAD = 2048;
+  static const int MAX_DOODAD_INSTANCES_PER_LOAD = 16384;
   // THE MAP ASSET QUEUE: requests waiting at most; the bytes a poll reads before it stops serving; the size over which a
   // file read ends its poll's serving; the polls whose timing is kept.
   static const int MAP_ASSET_QUEUE_MAX = 16;
@@ -563,6 +613,9 @@ public:
   // Protocol 16: world models in the world (WORLD MODELS IN THE WORLD above): loadWorld, worldShown, worldProgress,
   // inspectWorldModel, the world-model getMapAsset roles and the camera's start point.
   bool playerPlacesWorldModels() const { return m_client && m_unityReady && m_playerProtocol >= 16; }
+  // Protocol 17: doodads in the world (DOODADS above): loadWorld's doodad budgets, the doodad getMapAsset roles, and the
+  // doodads in worldProgress, terrainTileLoaded and runtimeState.
+  bool playerPlacesDoodads() const { return m_client && m_unityReady && m_playerProtocol >= 17; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -786,6 +839,21 @@ public:
     QString worldKind;                     // "tile" / "globalWmo" / "" (none)
     int worldFrames = -1;                  // the world view's last frames kept (at most 600 since it was entered)
     double worldFrameMsMedian = -1.0, worldFrameMsP95 = -1.0, worldFrameMsMax = -1.0;   // their frame times
+    // Protocol 17 (DOODADS above): the doodads' own tallies (never the Models viewer's), and the scene's whole ones -- every
+    // GameObject (FindObjectsOfTypeAll), Texture2D, Mesh and Material alive in the player: what a leak check counts back.
+    int doodadInstances = -1;              // doodad instances alive (placed)
+    int doodadPrototypes = -1;             // doodad prototypes alive (one per unique M2 built)
+    int doodadMeshes = -1;                 // their Meshes, Materials and Textures (shared by the instances)
+    int doodadMaterials = -1;
+    int doodadTextures = -1;
+    long long doodadGpuGeometryBytes = -1; // the GPU size of their geometry and textures, as the player estimates it
+    long long doodadGpuTextureBytes = -1;
+    int doodadVisible = -1;                // doodad instances drawn and culled last frame
+    int doodadCulled = -1;
+    int liveGameObjects = -1;
+    int liveTexture2D = -1;
+    int liveMeshes = -1;
+    int liveMaterials = -1;
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -880,10 +948,21 @@ public:
     int maxWmoModelsPerLoad = MAX_WMO_MODELS_PER_LOAD;
     int maxWmoGroupsPerLoad = MAX_WMO_GROUPS_PER_LOAD;
     int maxWmoPlacementsPerLoad = MAX_WMO_PLACEMENTS_PER_LOAD;
+    // Protocol 17 (DOODADS above): the world load offers the doodads -- sent ("doodads":true and these budgets) only when
+    // it is set and the player places doodads; otherwise the load is the protocol-16 loadWorld.
+    bool doodads = false;
+    int maxM2FileBytes = MAX_M2_FILE_BYTES;
+    int maxM2BytesPerLoad = MAX_M2_BYTES_PER_LOAD;
+    int maxM2TextureBytes = MAX_M2_TEXTURE_BYTES;
+    int maxM2TextureBytesPerLoad = MAX_M2_TEXTURE_BYTES_PER_LOAD;
+    int maxM2ModelsPerLoad = MAX_M2_MODELS_PER_LOAD;
+    int maxM2TexturesPerLoad = MAX_M2_TEXTURES_PER_LOAD;
+    int maxDoodadInstancesPerLoad = MAX_DOODAD_INSTANCES_PER_LOAD;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command (protocol 16): a world load (WORLD MODELS IN THE WORLD above). False (nothing sent) without a
   // protocol-16 player, a load serial or command.world; the caller raises its terrain load serial only when it returns true.
+  // The doodad budgets (protocol 17, DOODADS above) go with it only when command.doodads and the player places doodads.
   bool sendLoadWorld(const TerrainTileCommand & command);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
@@ -1029,6 +1108,12 @@ public:
     int filesAsked = -1, filesAnswered = -1;
     long long bytesReceived = -1;
     double elapsedMs = -1.0;
+    // Protocol 17 (DOODADS above): the doodads' phase and counts, apart from the world models' (empty and -1 from an older
+    // player; -1 from a protocol-17 one when the load offered no doodads).
+    QString doodadPhase;
+    int doodadInstances = -1, doodadPlaced = -1, doodadModels = -1, doodadModelsBuilt = -1, doodadModelsFailed = -1;
+    int doodadFilesAsked = -1, doodadFilesAnswered = -1;
+    long long doodadBytes = -1;
   };
   std::function<void(const WorldProgress &)> onWorldProgress;
 
@@ -1380,9 +1465,54 @@ public:
     };
     std::vector<Placement> worldList;   // at most TERRAIN_REPORT_PLACEMENTS_MAX kept
     int worldListSent = -1;
+    // Protocol 17 (DOODADS above): the whole world's assembly ("complete" / "partial" / "none" / "failed" / "ended"; empty
+    // from an older player), and the doodads' outcome, when "world" carries "doodads".
+    QString worldAssembly;
+    bool hasDoodads = false;
+    QString doodadState;           // "complete" / "partial" / "none" / "failed" / "ended" / "notOffered"
+    QString doodadReason;
+    int doodadMddfRecords = -1, doodadMddfPlacements = -1;          // the obj0's MDDF records, and unique by uniqueId
+    int doodadWmoRecords = -1;     // "wmoDoodadRecords": MODD records in the active sets of the placed world models
+    int doodadWmoPlacements = -1;  // "wmoPlacementsWithDoodads"
+    int doodadInstances = -1;      // planned instances (MDDF and the world models' sets), after the instance budget
+    int doodadPlaced = -1, doodadFailed = -1, doodadUnsupported = -1, doodadNotRequested = -1, doodadEnded = -1;
+    int doodadModels = -1, doodadModelsBuilt = -1, doodadModelsFailed = -1, doodadModelsUnsupported = -1;
+    int doodadModelsNotRequested = -1, doodadModelsPartial = -1;
+    int doodadTextures = -1, doodadTexturesDecoded = -1, doodadTexturesMissing = -1, doodadTextureUses = -1;
+    int doodadTextureUploads = -1;
+    long long doodadFileBytes = -1, doodadTextureBytes = -1, doodadGpuGeometryBytes = -1, doodadGpuTextureBytes = -1;
+    double doodadDiscoverMs = -1.0, doodadFirstVisibleMs = -1.0, doodadFetchMs = -1.0, doodadParseMs = -1.0;
+    double doodadDecodeMs = -1.0, doodadBuildMs = -1.0, doodadBuildMaxMs = -1.0, doodadPlaceMs = -1.0;
+    double doodadPlaceMaxMs = -1.0, doodadReadyMs = -1.0;
+    // A world model placement's doodad set, as the player chose it (set 0 and the placement's own: U15, not verified).
+    struct DoodadSet
+    {
+      quint32 uniqueId = 0;        // the world model placement's
+      int wmo = -1;                // its FileDataID
+      int set = -1;                // the set index chosen
+      QString setName;
+      int setCount = -1;           // the MODD records the set names
+      int active = -1;             // ... of them placed in this load (the active sets')
+      QString reason;
+    };
+    std::vector<DoodadSet> doodadSets;   // at most TERRAIN_REPORT_DOODAD_SETS_MAX kept
+    int doodadSetsSent = -1;
+    // One doodad model of the load: its outcome, and how many instances it had and placed.
+    struct DoodadModel
+    {
+      int fileDataID = -1;
+      QString state;               // "built" / "partial" / "failed" / "unsupported" / "notRequested" / "ended"
+      QString reason;
+      int instances = -1;
+      int placed = -1;
+    };
+    std::vector<DoodadModel> doodadList; // at most TERRAIN_REPORT_DOODAD_MODELS_MAX kept
+    int doodadListSent = -1;
     QString describe() const;
-    // The world's outcome in one line (empty without "world").
+    // The world's outcome in one line (empty without "world"), its doodads in brief.
     QString describeWorld() const;
+    // The doodads' outcome in one line, every count and timing (empty without "doodads").
+    QString describeDoodads() const;
   };
   // What a report is read into at most; the rest is counted, not kept. The retired ids and the chunk-state counters:
   // TERRAIN_REPORT_LIST_MAX (a protocol-13 player retires at most its outstanding limit of ids, and sends about a dozen
@@ -1396,6 +1526,12 @@ public:
   static const int TERRAIN_REPORT_TEXTURES_MAX = 256 * 8 * 2;
   // The placements a report is read into at most (the player lists at most MAX_WMO_PLACEMENTS_PER_LOAD).
   static const int TERRAIN_REPORT_PLACEMENTS_MAX = MAX_WMO_PLACEMENTS_PER_LOAD;
+  // The doodads' lists a report is read into at most (protocol 17): the sets and the models the player lists at most (64
+  // and 128, which keep a report's line far below the 1 MiB a player's line may have: about 60 KB, estimated, not
+  // measured), and the model entries logged one per line (the rest counted by state).
+  static const int TERRAIN_REPORT_DOODAD_SETS_MAX = 64;
+  static const int TERRAIN_REPORT_DOODAD_MODELS_MAX = 128;
+  static const int TERRAIN_REPORT_DOODAD_LOG_MAX = 32;
   // Raised on the GUI thread for every terrainTileLoaded.
   std::function<void(const TerrainTileReport &)> onTerrainTileLoaded;
 
@@ -1458,6 +1594,7 @@ public:
     int worldShown = 0;           // worldShown received
     int worldProgress = 0;        // worldProgress received
     int worldReports = 0;         // terrainTileLoaded received with "world"
+    int doodadReports = 0;        // ... of them with "doodads" (protocol 17)
     int worldInspections = 0;     // inspectWorldModel sent
     int worldInspected = 0;       // worldModelInspected received, any status
     QString lastRequest;    // "path" or "fileDataID n"

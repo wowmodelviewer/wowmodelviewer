@@ -80,6 +80,9 @@
 // WMO-only map's global record with no tile. WmvTerrainSessionWorld.cs has that half of the session and its rules; this
 // file keeps the tile's, with the hooks the world needs (the obj0 request, the world's requests beside the tile's K, the
 // scene's world models disposed with its tiles, the report waiting for the world).
+//
+// DOODADS (protocol 17, stage 07): a loadWorld with the doodad budgets places the tile's MDDF doodads and the placed world
+// models' doodad sets once the world models are settled (WmvTerrainSessionDoodads.cs); the report waits for them too.
 
 using System;
 using System.Collections.Generic;
@@ -140,6 +143,9 @@ public sealed partial class WmvTerrainSession
         public bool World;
         public Model Model;
         public int Group = -1;
+        // A world load's doodad request (protocol 17: counted against MaxDoodadOutstanding), and its model.
+        public bool Doodad;
+        public DoodadModel DModel;
     }
 
     sealed class Job
@@ -317,7 +323,11 @@ public sealed partial class WmvTerrainSession
         if (cmd.TexturesOffered)
             j.Support = WmvTerrainFormatSupport.Query();
         if (cmd.World)
-            j.World = new WorldWork { Global = cmd.GlobalWmo, Frame = cmd.GlobalWmo ? PlacementFrame.Global : PlacementFrame.Tile };
+            j.World = new WorldWork
+            {
+                Global = cmd.GlobalWmo, Frame = cmd.GlobalWmo ? PlacementFrame.Global : PlacementFrame.Tile,
+                Doodads = new DoodadsWork { Offered = cmd.DoodadsOffered },
+            };
         current = j;
         string bad = CommandProblem(cmd);
         if (bad == null && cmd.World && worldView == null)
@@ -553,10 +563,17 @@ public sealed partial class WmvTerrainSession
                 case RoleWmoRoot: OnWmoRoot(j, r, q); break;
                 case RoleWmoGroup: OnWmoGroup(j, r, q); break;
                 case RoleWmoTexture: OnWmoTexture(j, r, q); break;
-                default: OnTexture(j, r, q); break;
+                case RoleM2Model: OnM2Model(j, r, q); break;
+                case RoleM2Skin: OnM2Skin(j, r, q); break;
+                case RoleM2Texture: OnM2Texture(j, r, q); break;
+                case RoleTexture: OnTexture(j, r, q); break;
+                // Every request is the session's own, so a role it never asks for is an internal error, never a terrain
+                // texture by default.
+                default: throw new InvalidOperationException("an answer to request " + q.Id + " of role \"" + q.Role + "\", which this session never asks for");
             }
             Advance(j);
             AdvanceWorld(j);
+            AdvanceDoodads(j);
         }
         catch (Exception e)
         {
@@ -615,12 +632,13 @@ public sealed partial class WmvTerrainSession
             return;
         if (j.Phase == Phase.World)
         {
-            // A WMO-only map's world model: reported once its scene has been on screen two frames.
-            if (j.World.Done && frame >= j.World.LastCommitFrame + 2)
+            // A WMO-only map's world model (and its doodads): reported once its scene has been on screen two frames after the
+            // last of them.
+            if (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)
                 FinishWorld(j);
             return;
         }
-        if (frame >= j.AdoptFrame + 2 && (j.World == null || (j.World.Done && frame >= j.World.LastCommitFrame + 2)))
+        if (frame >= j.AdoptFrame + 2 && (j.World == null || (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)))
             FinishBuilt(j);
     }
 
@@ -635,6 +653,9 @@ public sealed partial class WmvTerrainSession
             case RoleWmoRoot: return "world-model root";
             case RoleWmoGroup: return "world-model group";
             case RoleWmoTexture: return "world-model texture";
+            case RoleM2Model: return "doodad model";
+            case RoleM2Skin: return "doodad skin";
+            case RoleM2Texture: return "doodad texture";
             default: return "texture";
         }
     }

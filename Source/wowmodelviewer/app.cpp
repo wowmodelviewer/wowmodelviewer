@@ -6172,6 +6172,94 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
   globalWdt.reads = 1;
   ModelViewer::TerrainRequest globalUnknown = globalWdt;
   globalUnknown.globalWmoFileDataID = 0;
+  // DOODADS (protocol 17): world loads that carry the doodad budgets -- the obj0 not served yet; the obj0 served; a model
+  // served; a model asked for whose kind failed (not served) -- and a WMO-only map's, before and after its world model was
+  // served. The world loads above carry none: a protocol-16 load.
+  const auto doodadBudgets = [](ModelViewer::TerrainRequest & t) {
+    t.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+    t.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+    t.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+    t.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+    t.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+    t.maxM2TexturesPerLoad = UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+    t.maxDoodadInstancesPerLoad = UnityIpcServer::MAX_DOODAD_INSTANCES_PER_LOAD;
+  };
+  ModelViewer::TerrainRequest doodadNoObj0 = world;
+  doodadBudgets(doodadNoObj0);
+  ModelViewer::TerrainRequest doodadObj0 = worldObj0;
+  doodadBudgets(doodadObj0);
+  ModelViewer::TerrainRequest doodadModel = doodadObj0;
+  doodadModel.m2ModelIds = {189077};
+  doodadModel.m2ModelsServed = 1;
+  doodadModel.m2BytesRead = 2423632;
+  doodadModel.doodadReads = 1;
+  doodadModel.reads = 5;
+  ModelViewer::TerrainRequest doodadModelFailed = doodadModel;   // the model asked for, its kind failed: not served
+  doodadModelFailed.m2ModelsServed = 0;
+  ModelViewer::TerrainRequest doodadSkin = doodadModel, doodadTexture = doodadModel;
+  doodadSkin.m2SkinIds = {189078};
+  doodadSkin.m2BytesRead += 214960;
+  doodadSkin.doodadReads = 2;
+  doodadSkin.reads = 6;
+  doodadTexture.m2TextureIds = {189079};
+  doodadTexture.m2TextureBytesRead = 1399300;
+  doodadTexture.doodadReads = 2;
+  doodadTexture.reads = 6;
+  ModelViewer::TerrainRequest doodadModels1024 = doodadModel, doodadSkins1024 = doodadModel, doodadTextures2048 = doodadModel;
+  doodadModels1024.m2ModelIds.clear();
+  for (int i = 0; i < UnityIpcServer::MAX_M2_MODELS_PER_LOAD; i++)
+  {
+    doodadModels1024.m2ModelIds.push_back(8000000 + i);
+    doodadSkins1024.m2SkinIds.push_back(8100000 + i);
+  }
+  for (int i = 0; i < UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD; i++)
+    doodadTextures2048.m2TextureIds.push_back(8200000 + i);
+  doodadModels1024.doodadReads = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+  doodadSkins1024.doodadReads = 1 + UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+  doodadTextures2048.doodadReads = 1 + UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+  doodadModels1024.reads = 4 + doodadModels1024.doodadReads;
+  doodadSkins1024.reads = 4 + doodadSkins1024.doodadReads;
+  doodadTextures2048.reads = 4 + doodadTextures2048.doodadReads;
+  // The byte budgets: models and skins spent; 1000 bytes of them left; 120 MiB read and 8 MiB - 1000 reserved by reads in
+  // flight; 120 MiB read and 8 MiB reserved; one model read of 8 MiB in flight; and the same for textures.
+  ModelViewer::TerrainRequest doodadBytesSpent = doodadModel, doodadBytesNear = doodadModel, doodadReservedNear = doodadModel;
+  ModelViewer::TerrainRequest doodadReservedSpent = doodadModel, doodadReservedOne = doodadModel;
+  doodadBytesSpent.m2BytesRead = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+  doodadBytesNear.m2BytesRead = UnityIpcServer::MAX_M2_BYTES_PER_LOAD - 1000;
+  doodadReservedNear.m2BytesRead = 120 * 1024 * 1024;
+  doodadReservedNear.m2BytesReserved = UnityIpcServer::MAX_M2_FILE_BYTES - 1000;
+  doodadReservedSpent.m2BytesRead = 120 * 1024 * 1024;
+  doodadReservedSpent.m2BytesReserved = UnityIpcServer::MAX_M2_FILE_BYTES;
+  doodadReservedOne.m2BytesReserved = UnityIpcServer::MAX_M2_FILE_BYTES;
+  ModelViewer::TerrainRequest doodadTexturesNear = doodadModel, doodadTexturesReserved = doodadModel;
+  ModelViewer::TerrainRequest doodadTexturesReservedNear = doodadModel;
+  doodadTexturesNear.m2TextureBytesRead = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD - 1000;
+  doodadTexturesReserved.m2TextureBytesRead = 120 * 1024 * 1024;
+  doodadTexturesReserved.m2TextureBytesReserved = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+  doodadTexturesReservedNear.m2TextureBytesRead = 120 * 1024 * 1024;
+  doodadTexturesReservedNear.m2TextureBytesReserved = UnityIpcServer::MAX_M2_TEXTURE_BYTES - 1000;
+  // The read families: every doodad read a load may make made (its world-model and terrain reads few); every world-model
+  // read made, and 3 + 128 terrain reads made (their doodad reads few).
+  ModelViewer::TerrainRequest doodadReads = doodadModel;
+  doodadReads.doodadReads = 2 * UnityIpcServer::MAX_M2_MODELS_PER_LOAD + UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+  doodadReads.reads = 3 + doodadReads.worldReads + doodadReads.doodadReads;
+  ModelViewer::TerrainRequest doodadWorldReads = worldReads, doodadTerrainReads = worldTerrainReads;
+  doodadBudgets(doodadWorldReads);
+  doodadBudgets(doodadTerrainReads);
+  for (ModelViewer::TerrainRequest * t : {&doodadWorldReads, &doodadTerrainReads})
+  {
+    t->m2ModelIds = {189077};
+    t->m2ModelsServed = 1;
+    t->doodadReads = 1;
+    t->reads += 1;
+  }
+  ModelViewer::TerrainRequest globalDoodadWdt = globalWdt;   // a WMO-only map's load: its world model not served yet
+  doodadBudgets(globalDoodadWdt);
+  ModelViewer::TerrainRequest globalDoodadRoot = globalDoodadWdt;   // ... and served
+  globalDoodadRoot.wmoRootIds = {108631};
+  globalDoodadRoot.wmoRootsServed = 1;
+  globalDoodadRoot.worldReads = 1;
+  globalDoodadRoot.reads = 2;
   const int epochNow = 7;
   // load -1000 leaves "load" out of the request.
   const auto request = [](int load, int epoch, const QString & role, int fileDataID) {
@@ -6200,11 +6288,15 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
   const qint64 wmoLimit = UnityIpcServer::MAX_WMO_FILE_BYTES, wmoTextureLimit = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
   const QString worldReadsAllowed = QString::number(1 + UnityIpcServer::MAX_WMO_MODELS_PER_LOAD + UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD +
                                                     UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD);
+  const qint64 m2Limit = UnityIpcServer::MAX_M2_FILE_BYTES, m2TextureLimit = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+  const QString doodadReadsAllowed = QString::number(2 * UnityIpcServer::MAX_M2_MODELS_PER_LOAD +
+                                                     UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD);
   const Case cases[] = {
     {"the current load's WDT goes on to the read, at most the map-file limit", request(5, 7, "wdt", 775971), &current, true,
      false, "", "", mapLimit},
     {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused",
-     "unknown role \"x\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup or wmoTexture)"},
+     "unknown role \"x\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup, wmoTexture, m2Model, m2Skin or "
+     "m2Texture)"},
     {"another WDT is refused", request(5, 7, "wdt", 775972), &current, true, false, "refused",
      "WDT is FileDataID 775971, not 775972"},
     {"FileDataID 0 is refused", request(5, 7, "wdt", 0), &current, true, false, "refused", "FileDataID 0 names no file"},
@@ -6345,6 +6437,87 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
      "refused", "load 5 is a WMO-only map's: its world model is FileDataID 108631, not 108632"},
     {"a WMO-only map's load whose world model is not known: one root goes on to the read", request(5, 7, "wmoRoot", 108632),
      &globalUnknown, true, false, "", "", wmoLimit},
+    // DOODADS (protocol 17): a load without the doodad budgets (a protocol-16 world load, or a loadTerrainTile).
+    {"a doodad model for a world load sent without doodads (protocol 16) is refused", request(5, 7, "m2Model", 189077),
+     &worldRoot, true, false, "refused", "load 5 was sent without doodads: no m2Model is served for it"},
+    {"a doodad skin for a world load sent without doodads is refused", request(5, 7, "m2Skin", 189078), &worldRoot, true,
+     false, "refused", "load 5 was sent without doodads: no m2Skin is served for it"},
+    {"a doodad texture for a world load sent without doodads is refused", request(5, 7, "m2Texture", 189079), &worldRoot,
+     true, false, "refused", "load 5 was sent without doodads: no m2Texture is served for it"},
+    {"a doodad model for a load that is not a world load is refused", request(5, 7, "m2Model", 189077), &texTex0, true, false,
+     "refused", "load 5 was sent without doodads: no m2Model is served for it"},
+    // ... the order.
+    {"a doodad model before the obj0 or any world-model root was served is refused", request(5, 7, "m2Model", 189077),
+     &doodadNoObj0, true, false, "refused", "load 5's obj0 ADT or world-model root has not been served, so no doodad model is"},
+    {"a doodad model after the obj0 goes on to the read, at most the M2 file limit", request(5, 7, "m2Model", 189077),
+     &doodadObj0, true, false, "", "", m2Limit},
+    {"a WMO-only map's load: a doodad model before its world model was served is refused", request(5, 7, "m2Model", 189077),
+     &globalDoodadWdt, true, false, "refused", "obj0 ADT or world-model root has not been served"},
+    {"a WMO-only map's load: a doodad model after its world model was served goes on to the read",
+     request(5, 7, "m2Model", 189077), &globalDoodadRoot, true, false, "", "", m2Limit},
+    {"a doodad skin before any doodad model was served is refused", request(5, 7, "m2Skin", 189078), &doodadObj0, true, false,
+     "refused", "load 5 has been served no doodad model, so no doodad skin is"},
+    {"a doodad texture before any doodad model was served is refused", request(5, 7, "m2Texture", 189079), &doodadObj0, true,
+     false, "refused", "load 5 has been served no doodad model, so no doodad texture is"},
+    {"a doodad skin after a model that failed its kind is refused", request(5, 7, "m2Skin", 189078), &doodadModelFailed, true,
+     false, "refused", "has been served no doodad model"},
+    {"a doodad skin after a model goes on to the read, at most the M2 file limit", request(5, 7, "m2Skin", 189078),
+     &doodadModel, true, false, "", "", m2Limit},
+    {"a doodad texture after a model goes on to the read, at most its limit", request(5, 7, "m2Texture", 189079),
+     &doodadModel, true, false, "", "", m2TextureLimit},
+    // ... each id once, and the count caps.
+    {"a doodad model asked for before is refused", request(5, 7, "m2Model", 189077), &doodadModel, true, false, "refused",
+     "load 5 has asked for doodad model 189077 before: each once per load"},
+    {"a doodad model that failed its kind is not asked again", request(5, 7, "m2Model", 189077), &doodadModelFailed, true,
+     false, "refused", "has asked for doodad model 189077 before"},
+    {"a doodad skin asked for before is refused", request(5, 7, "m2Skin", 189078), &doodadSkin, true, false, "refused",
+     "load 5 has asked for doodad skin 189078 before: each once per load"},
+    {"a doodad texture asked for before is refused", request(5, 7, "m2Texture", 189079), &doodadTexture, true, false,
+     "refused", "load 5 has asked for doodad texture 189079 before: each once per load"},
+    {"the 1,025th doodad model is refused", request(5, 7, "m2Model", 187138), &doodadModels1024, true, false, "refused",
+     "load 5 has asked for 1024 doodad models: at most 1024 per load, not 187138"},
+    {"the 1,025th doodad skin is refused", request(5, 7, "m2Skin", 189078), &doodadSkins1024, true, false, "refused",
+     "load 5 has asked for 1024 doodad skins: at most 1024 per load, not 189078"},
+    {"the 2,049th doodad texture is refused", request(5, 7, "m2Texture", 189079), &doodadTextures2048, true, false,
+     "refused", "load 5 has asked for 2048 doodad textures: at most 2048 per load, not 189079"},
+    // ... the byte budgets, the reads in flight reserved.
+    {"doodad model and skin bytes spent: a skin is refused", request(5, 7, "m2Skin", 189078), &doodadBytesSpent, true, false,
+     "refused", "load 5 has read 134217728 bytes of doodad models and skins: at most 134217728 per load"},
+    {"a doodad model near the byte cap is read with what is left of it", request(5, 7, "m2Model", 189080), &doodadBytesNear,
+     true, false, "", "", 1000},
+    {"with one doodad model read of 8 MiB in flight the next still gets a full limit", request(5, 7, "m2Model", 189080),
+     &doodadReservedOne, true, false, "", "", m2Limit},
+    {"the doodad model and skin reads in flight count with what they may read: 120 MiB read and 8 MiB - 1000 reserved "
+     "leave 1000", request(5, 7, "m2Skin", 189078), &doodadReservedNear, true, false, "", "", 1000},
+    {"doodad model and skin bytes read and reserved by reads in flight spend the budget: refused, both named",
+     request(5, 7, "m2Model", 189080), &doodadReservedSpent, true, false, "refused",
+     "load 5 has read 125829120 bytes of doodad models and skins and reserved 8388608 for reads in flight: at most "
+     "134217728 per load"},
+    {"a doodad texture near its byte cap is read with what is left of it", request(5, 7, "m2Texture", 189079),
+     &doodadTexturesNear, true, false, "", "", 1000},
+    {"doodad texture reads in flight: 120 MiB read and 8 MiB - 1000 reserved leave 1000", request(5, 7, "m2Texture", 189079),
+     &doodadTexturesReservedNear, true, false, "", "", 1000},
+    {"doodad texture bytes read and reserved by reads in flight spend the budget: refused, both named",
+     request(5, 7, "m2Texture", 189079), &doodadTexturesReserved, true, false, "refused",
+     "load 5 has read 125829120 bytes of doodad textures and reserved 8388608 for reads in flight: at most 134217728 per load"},
+    {"the doodad textures' budget is not the models': models and skins spent, a texture goes on to the read",
+     request(5, 7, "m2Texture", 189079), &doodadBytesSpent, true, false, "", "", m2TextureLimit},
+    // ... the doodad read family, apart from the terrain's and the world models'.
+    {"a load's doodad reads stop at 1024 + 1024 + 2048", request(5, 7, "m2Texture", 189079), &doodadReads, true, false,
+     "refused", "load 5 has read " + doodadReadsAllowed + " doodad files: at most " + doodadReadsAllowed +
+     " per load (1024 models + 1024 skins + 2048 textures)"},
+    {"... and its world-model reads go on apart", request(5, 7, "wmoRoot", 108631), &doodadReads, true, false, "", "",
+     wmoLimit},
+    {"... and its terrain reads go on apart: a WDT goes on to the read", request(5, 7, "wdt", 775971), &doodadReads, true,
+     false, "", "", mapLimit},
+    {"a load's world-model reads at their cap leave its doodad reads alone", request(5, 7, "m2Skin", 189078),
+     &doodadWorldReads, true, false, "", "", m2Limit},
+    {"... and its world-model reads stay capped", request(5, 7, "wmoGroup", 108633), &doodadWorldReads, true, false,
+     "refused", "world-model files: at most " + worldReadsAllowed + " per load"},
+    {"a load's terrain reads at their cap leave its doodad reads alone", request(5, 7, "m2Texture", 189079),
+     &doodadTerrainReads, true, false, "", "", m2TextureLimit},
+    {"... and its terrain reads stay capped: a WDT is refused", request(5, 7, "wdt", 775971), &doodadTerrainReads, true,
+     false, "refused", "load 5 has read 131 files: at most 131 per load (3 + 128 textures)"},
   };
   for (const Case & c : cases)
   {
@@ -6522,6 +6695,127 @@ static void checkMapAssetAccounting(TerrainTestLog & tally)
                           "%7 reads").arg(t.wmoRootsServed).arg(t.wmoRootIds.size()).arg(t.wmoGroupIds.size())
                     .arg(t.wmoTextureIds.size()).arg(t.wmoBytesRead).arg(t.wmoTextureBytesRead).arg(t.reads));
   }
+  // DOODADS (protocol 17): a world load as a protocol-16 load is sent (no doodad budgets), and as a protocol-17 one.
+  const auto worldLoad = [&base](bool doodads) {
+    ModelViewer::TerrainRequest t = base;
+    t.world = true;
+    t.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+    t.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+    t.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+    t.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+    t.maxWmoTexturesPerLoad = UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+    t.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+    t.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+    if (doodads)
+    {
+      t.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+      t.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+      t.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+      t.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+      t.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+      t.maxM2TexturesPerLoad = UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+      t.maxDoodadInstancesPerLoad = UnityIpcServer::MAX_DOODAD_INSTANCES_PER_LOAD;
+    }
+    return t;
+  };
+  {
+    // In the order the player asks -- a model before the obj0 is refused; WDT, root, tex0, obj0; then a model whose kind
+    // fails (not served: no skin or texture after it, and not asked again), another model served, its skin and a texture
+    // (asked twice). The bytes are counted by budget, models and skins apart from textures, and the doodad reads apart
+    // from the world models' and the terrain's.
+    ModelViewer::TerrainRequest t = worldLoad(true);
+    const QString modelBeforeObj0 = serve(t, "m2Model", 189077, 2423632, true);
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "rootAdt", 778037, 329922, true);
+    serve(t, "tex0Adt", 778040, 1286682, true);
+    const QString obj0 = serve(t, "obj0Adt", 777623, 111876, true);
+    const QString badModel = serve(t, "m2Model", 189078, 214960, false);   // a skin read as a model: its kind fails
+    const QString skinAfterBad = serve(t, "m2Skin", 189079, 214960, true);
+    const QString badModelAgain = serve(t, "m2Model", 189078, 214960, true);
+    const QString model = serve(t, "m2Model", 189077, 2423632, true);
+    const QString skin = serve(t, "m2Skin", 189079, 214960, true);
+    const QString texture = serve(t, "m2Texture", 189080, 1399300, true);
+    const QString textureAgain = serve(t, "m2Texture", 189080, 1399300, true);
+    tally.check("accounting: a world load's doodad files in order; a model that failed its kind serves no skin and is not "
+                "asked again; the bytes counted by budget, the doodad reads apart",
+                modelBeforeObj0 == "refused" && obj0.isEmpty() && t.obj0Served && badModel.isEmpty() &&
+                  skinAfterBad == "refused" && badModelAgain == "refused" && model.isEmpty() && skin.isEmpty() &&
+                  texture.isEmpty() && textureAgain == "refused" && t.m2ModelsServed == 1 && t.m2ModelIds.size() == 2 &&
+                  t.m2SkinIds.size() == 1 && t.m2TextureIds.size() == 1 && t.m2BytesRead == 214960 + 2423632 + 214960 &&
+                  t.m2TextureBytesRead == 1399300 && t.doodadReads == 4 && t.worldReads == 1 && t.reads == 8,
+                QString("model before the obj0 \"%1\", obj0 \"%2\", a model that fails \"%3\", a skin after it \"%4\", that model "
+                        "again \"%5\", another model \"%6\", its skin \"%7\", a texture \"%8\", again \"%9\"; ")
+                  .arg(modelBeforeObj0).arg(obj0).arg(badModel).arg(skinAfterBad).arg(badModelAgain).arg(model).arg(skin)
+                  .arg(texture).arg(textureAgain) +
+                  QString("%1 model(s) served of %2 asked, %3 skin(s), %4 texture(s); %5 model and skin bytes, %6 texture "
+                          "bytes; %7 doodad reads, %8 world, %9 in all")
+                    .arg(t.m2ModelsServed).arg(t.m2ModelIds.size()).arg(t.m2SkinIds.size()).arg(t.m2TextureIds.size())
+                    .arg(t.m2BytesRead).arg(t.m2TextureBytesRead).arg(t.doodadReads).arg(t.worldReads).arg(t.reads));
+  }
+  {
+    // A WMO-only map's load: its doodads come from its world model's sets, so a model goes on once that root was served.
+    ModelViewer::TerrainRequest t = worldLoad(true);
+    t.globalWmo = true;
+    t.globalWmoFileDataID = 108631;
+    serve(t, "wdt", 775971, 294988, true);
+    const QString modelBeforeRoot = serve(t, "m2Model", 189077, 2423632, true);
+    const QString root = serve(t, "wmoRoot", 108631, 35288, true);
+    const QString model = serve(t, "m2Model", 189077, 2423632, true);
+    const QString skin = serve(t, "m2Skin", 189079, 214960, true);
+    tally.check("accounting: a WMO-only map's doodad model goes on once its world model was served, its skin after it",
+                modelBeforeRoot == "refused" && root.isEmpty() && model.isEmpty() && skin.isEmpty() && t.m2ModelsServed == 1 &&
+                  t.doodadReads == 2 && t.worldReads == 1 && t.reads == 4,
+                QString("model before the root \"%1\", the root \"%2\", the model \"%3\", its skin \"%4\"; %5 doodad reads, %6 "
+                        "world, %7 in all").arg(modelBeforeRoot).arg(root).arg(model).arg(skin).arg(t.doodadReads)
+                  .arg(t.worldReads).arg(t.reads));
+  }
+  {
+    // A protocol-16 world load (sent without doodad budgets): its world models are served as before, every doodad role is
+    // refused, and nothing of it is counted.
+    ModelViewer::TerrainRequest t = worldLoad(false);
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "obj0Adt", 777623, 111876, true);
+    const QString root = serve(t, "wmoRoot", 108631, 35288, true);
+    const QString model = serve(t, "m2Model", 189077, 2423632, true);
+    const QString skin = serve(t, "m2Skin", 189079, 214960, true);
+    const QString texture = serve(t, "m2Texture", 189080, 1399300, true);
+    tally.check("accounting: a world load sent without doodads (protocol 16) is refused every doodad role, nothing counted",
+                root.isEmpty() && model == "refused" && skin == "refused" && texture == "refused" && t.doodadReads == 0 &&
+                  t.m2ModelIds.empty() && t.m2SkinIds.empty() && t.m2TextureIds.empty() && t.m2BytesRead == 0 &&
+                  t.m2TextureBytesRead == 0 && t.reads == 3,
+                QString("root \"%1\", model \"%2\", skin \"%3\", texture \"%4\"; %5 doodad reads, %6 in all").arg(root).arg(model)
+                  .arg(skin).arg(texture).arg(t.doodadReads).arg(t.reads));
+  }
+  {
+    // Models of 2,423,632 bytes (the largest real one) until 128 MiB of models and skins are read: each read limited to
+    // what is left; the one that would overrun it is not read (TooLarge, nothing counted); a skin still fits what is left;
+    // then once the bytes are spent no model or skin is read -- and textures, on their own budget, still are.
+    ModelViewer::TerrainRequest t = worldLoad(true);
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "obj0Adt", 777623, 111876, true);
+    const qint64 large = 2423632;
+    int read = 0, id = 8000000;
+    ModelViewer::MapAssetDecision d;
+    while (serve(t, "m2Model", id++, large, true, &d).isEmpty() && d.maxBytes >= large)
+      read++;
+    const qint64 left = UnityIpcServer::MAX_M2_BYTES_PER_LOAD - t.m2BytesRead;
+    const bool overrun = d.state.isEmpty() && d.maxBytes == left && left < large;
+    const QString fits = serve(t, "m2Skin", id++, left, true, &d);
+    const qint64 fitsLimit = d.maxBytes;
+    const QString spentModel = serve(t, "m2Model", id++, 1, true);
+    const QString spentSkin = serve(t, "m2Skin", id++, 1, true);
+    const QString texture = serve(t, "m2Texture", id++, 1399300, true, &d);
+    tally.check("accounting: doodad model and skin bytes up to 128 MiB, each read limited to what is left, then refused; "
+                "textures apart",
+                read == (int)(UnityIpcServer::MAX_M2_BYTES_PER_LOAD / large) && overrun && fits.isEmpty() && fitsLimit == left &&
+                  spentModel == "refused" && spentSkin == "refused" && texture.isEmpty() &&
+                  d.maxBytes == UnityIpcServer::MAX_M2_TEXTURE_BYTES && t.m2BytesRead == UnityIpcServer::MAX_M2_BYTES_PER_LOAD,
+                QString("%1 read whole (%2 expected); then a read limited to %3 bytes; a skin of %4 bytes \"%5\" (limit %6); "
+                        "the next model \"%7\", skin \"%8\"; a texture \"%9\"")
+                  .arg(read).arg(UnityIpcServer::MAX_M2_BYTES_PER_LOAD / large).arg(left).arg(left).arg(fits).arg(fitsLimit)
+                  .arg(spentModel).arg(spentSkin).arg(texture) +
+                  QString(" (limit %1); %2 model and skin bytes read").arg(d.maxBytes).arg(t.m2BytesRead));
+  }
 }
 
 // The kind check after a read (ModelViewer::mapAssetKindProblem) on made-up bytes: a tex0 head (MVER, MAMP), a root head
@@ -6536,6 +6830,13 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
   const QByteArray obj0("REVM\x04\x00\x00\x00\x12\x00\x00\x00" "FDDM\x00\x00\x00\x00", 20);
   const QByteArray wmoRoot("REVM\x04\x00\x00\x00\x11\x00\x00\x00" "DHOM\x40\x00\x00\x00", 20);
   const QByteArray wmoGroup("REVM\x04\x00\x00\x00\x11\x00\x00\x00" "PGOM\x80\x00\x00\x00", 20);
+  // DOODADS (protocol 17): an M2's chunk table opening with MD21 and its MD20 header at byte 8; a bare MD20; an MD21 chunk
+  // without MD20 after its size, and one too short for it; a skin head.
+  const QByteArray m2("MD21\x40\x00\x00\x00" "MD20\x10\x01\x00\x00", 16);
+  const QByteArray bareMd20("MD20\x10\x01\x00\x00", 8);
+  const QByteArray md21NoMd20("MD21\x40\x00\x00\x00" "SFID", 12);
+  const QByteArray md21Short("MD21\x40\x00\x00\x00", 8);
+  const QByteArray skin("SKIN\x10\x00\x00\x00", 8);
   struct Case
   {
     const char * name;
@@ -6570,6 +6871,20 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
     {"an MVER whose size runs past the file is not a world-model group", "wmoGroup", longMver, "leaves no second chunk in 16 bytes"},
     {"a BLP2 head passes as a world-model texture", "wmoTexture", blp, ""},
     {"a WMO root is not a BLP2 world-model texture", "wmoTexture", wmoRoot, "not a BLP2 texture: it starts with REVM"},
+    {"an MD21 chunk with its MD20 header passes as a doodad model", "m2Model", m2, ""},
+    {"a bare MD20 is not a doodad model", "m2Model", bareMd20,
+     "not an M2 model: it starts with MD20 (hex 4d 44 32 30), a bare MD20 model, not the MD21 chunk"},
+    {"an MD21 chunk without MD20 at byte 8 is not a doodad model", "m2Model", md21NoMd20,
+     "not an M2 model: its MD21 chunk starts with SFID (hex 53 46 49 44), not MD20"},
+    {"an MD21 chunk too short for its MD20 header is not a doodad model", "m2Model", md21Short,
+     "not an M2 model: its MD21 chunk leaves no MD20 header in 8 bytes"},
+    {"a skin is not a doodad model", "m2Model", skin, "not an M2 model: it starts with SKIN (hex 53 4b 49 4e), not MD21"},
+    {"three bytes are not a doodad model", "m2Model", QByteArray("MD2"), "not an M2 model: it starts with 3 bytes only"},
+    {"a SKIN head passes as a doodad skin", "m2Skin", skin, ""},
+    {"an M2 is not a doodad skin", "m2Skin", m2, "not an M2 skin: it starts with MD21 (hex 4d 44 32 31), not SKIN"},
+    {"two bytes are not a doodad skin", "m2Skin", QByteArray("SK"), "not an M2 skin: it starts with 2 bytes only, not SKIN"},
+    {"a BLP2 head passes as a doodad texture", "m2Texture", blp, ""},
+    {"an M2 is not a BLP2 doodad texture", "m2Texture", m2, "not a BLP2 texture: it starts with MD21 (hex 4d 44 32 31)"},
   };
   for (const Case & c : cases)
   {
@@ -7469,6 +7784,107 @@ static void checkTerrainReportLists(TerrainTestLog & tally)
                   .arg(got.retiredRequestIds.isEmpty() ? QString("-") : got.retiredRequestIds.back())
                   .arg(got.chunkStates.size()).arg(got.chunkStates.empty() ? QString("-") : got.chunkStates.front().first)
                   .arg(got.texturesSent));
+  }
+  {
+    // DOODADS (protocol 17): a world's "assembly" and "doodads" read by their wire names -- the counts, a byte count past
+    // 2^31, the timings, the sets and the models; 70 sets and 130 models sent, the first 64 and 128 kept, the rest
+    // counted. A world without "doodads" (a protocol-16 player's) has none, and no assembly.
+    QJsonObject doodads;
+    doodads["state"] = "partial";
+    doodads["reason"] = "2 models failed";
+    const char * counts[] = {"mddfRecords", "mddfPlacements", "wmoDoodadRecords", "wmoPlacementsWithDoodads", "instances",
+                             "placed", "failed", "unsupported", "notRequested", "ended", "models", "modelsBuilt",
+                             "modelsFailed", "modelsUnsupported", "modelsNotRequested", "modelsPartial", "textures",
+                             "texturesDecoded", "texturesMissing", "textureUses", "textureUploads", "fileBytes",
+                             "textureBytes", "gpuGeometryBytes"};
+    for (int i = 0; i < (int)(sizeof(counts) / sizeof(counts[0])); i++)
+      doodads[QString::fromLatin1(counts[i])] = 100 + i;   // each count its own number: a key read into the wrong field shows
+    doodads["gpuTextureBytes"] = 3000000000.0;
+    QJsonObject timings;
+    const char * steps[] = {"discoverMs", "firstVisibleMs", "fetchMs", "parseMs", "decodeMs", "buildMs", "buildMaxMs",
+                            "placeMs", "placeMaxMs", "readyMs"};
+    for (int i = 0; i < (int)(sizeof(steps) / sizeof(steps[0])); i++)
+      timings[QString::fromLatin1(steps[i])] = 0.5 + i;
+    doodads["timings"] = timings;
+    QJsonArray sets, models;
+    for (int i = 0; i < 70; i++)
+    {
+      QJsonObject s;
+      s["uniqueId"] = 3000000000.0 + i;
+      s["wmo"] = 108631;
+      s["set"] = 1;
+      s["setName"] = "Set_Tavern";
+      s["setCount"] = 40;
+      s["active"] = 40;
+      s["reason"] = "set 0 and the placement's set 1";
+      sets.append(s);
+    }
+    for (int i = 0; i < 130; i++)
+    {
+      QJsonObject m;
+      m["fileDataID"] = 189000 + i;
+      m["state"] = i < 2 ? "failed" : "built";
+      m["reason"] = i < 2 ? "no skin" : "";
+      m["instances"] = 10;
+      m["placed"] = i < 2 ? 0 : 10;
+      models.append(m);
+    }
+    doodads["sets"] = sets;
+    doodads["list"] = models;
+    QJsonObject world;
+    world["kind"] = "tile";
+    world["state"] = "complete";
+    world["assembly"] = "partial";
+    world["doodads"] = doodads;
+    QJsonObject m;
+    m["type"] = "terrainTileLoaded";
+    m["load"] = 2;
+    m["status"] = "built";
+    m["world"] = world;
+    got = UnityIpcServer::TerrainTileReport();
+    int before = handed;
+    server.testReceiveTerrainTileLoaded(m);
+    const bool fed = handed == before + 1;
+    const UnityIpcServer::TerrainTileReport r = got;
+    const bool fields = r.hasWorld && r.worldState == "complete" && r.worldAssembly == "partial" && r.hasDoodads &&
+                        r.doodadState == "partial" && r.doodadReason == "2 models failed" && r.doodadMddfRecords == 100 &&
+                        r.doodadMddfPlacements == 101 && r.doodadWmoRecords == 102 && r.doodadWmoPlacements == 103 &&
+                        r.doodadInstances == 104 && r.doodadPlaced == 105 && r.doodadFailed == 106 &&
+                        r.doodadUnsupported == 107 && r.doodadNotRequested == 108 && r.doodadEnded == 109 &&
+                        r.doodadModels == 110 && r.doodadModelsBuilt == 111 && r.doodadModelsFailed == 112 &&
+                        r.doodadModelsUnsupported == 113 && r.doodadModelsNotRequested == 114 && r.doodadModelsPartial == 115 &&
+                        r.doodadTextures == 116 && r.doodadTexturesDecoded == 117 && r.doodadTexturesMissing == 118 &&
+                        r.doodadTextureUses == 119 && r.doodadTextureUploads == 120 && r.doodadFileBytes == 121 &&
+                        r.doodadTextureBytes == 122 && r.doodadGpuGeometryBytes == 123 &&
+                        r.doodadGpuTextureBytes == 3000000000LL && r.doodadDiscoverMs == 0.5 && r.doodadFirstVisibleMs == 1.5 &&
+                        r.doodadFetchMs == 2.5 && r.doodadParseMs == 3.5 && r.doodadDecodeMs == 4.5 && r.doodadBuildMs == 5.5 &&
+                        r.doodadBuildMaxMs == 6.5 && r.doodadPlaceMs == 7.5 && r.doodadPlaceMaxMs == 8.5 &&
+                        r.doodadReadyMs == 9.5;
+    const bool lists = r.doodadSetsSent == 70 && (int)r.doodadSets.size() == UnityIpcServer::TERRAIN_REPORT_DOODAD_SETS_MAX &&
+                       r.doodadSets.back().uniqueId == 3000000063u && r.doodadSets.back().wmo == 108631 &&
+                       r.doodadSets.back().set == 1 && r.doodadSets.back().setName == "Set_Tavern" &&
+                       r.doodadSets.back().setCount == 40 && r.doodadSets.back().active == 40 &&
+                       r.doodadSets.back().reason == "set 0 and the placement's set 1" && r.doodadListSent == 130 &&
+                       (int)r.doodadList.size() == UnityIpcServer::TERRAIN_REPORT_DOODAD_MODELS_MAX &&
+                       r.doodadList.front().fileDataID == 189000 && r.doodadList.front().state == "failed" &&
+                       r.doodadList.front().reason == "no skin" && r.doodadList.front().instances == 10 &&
+                       r.doodadList.front().placed == 0 && r.doodadList.back().fileDataID == 189127;
+    world.remove("doodads");
+    world.remove("assembly");
+    m["world"] = world;
+    got = UnityIpcServer::TerrainTileReport();
+    before = handed;
+    server.testReceiveTerrainTileLoaded(m);
+    const bool older = handed == before + 1 && got.hasWorld && !got.hasDoodads && got.worldAssembly.isEmpty() &&
+                       got.doodadSets.empty() && got.doodadList.empty() && got.doodadInstances == -1;
+    tally.check("report lists: a world's doodads are read by their wire names; 70 sets and 130 models sent, the first 64 "
+                "and 128 kept; a world without doodads has none",
+                fed && fields && lists && older,
+                QString("handed %1, fields %2, lists %3 (%4 of %5 sets, %6 of %7 models), a world without doodads %8; ")
+                  .arg(fed ? "yes" : "no").arg(fields ? "read" : "WRONG").arg(lists ? "kept" : "WRONG")
+                  .arg(r.doodadSets.size()).arg(r.doodadSetsSent).arg(r.doodadList.size()).arg(r.doodadListSent)
+                  .arg(older ? "as before" : "WRONG") +
+                  r.describeDoodads());
   }
 }
 
@@ -10032,15 +10448,19 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //   holdclose[:<role>]                       the last step: the read held, the player left running, the window closed
 //                                            with the read in flight (THE SHUTDOWN CHECK of the terrain test); role
 //                                            rootAdt by default, or a world-model role (obj0Adt, wmoRoot, wmoGroup,
-//                                            wmoTexture: the world taken away and entered again at the target first)
+//                                            wmoTexture) or a doodad role (protocol 17: m2Model, m2Skin, m2Texture) -- the
+//                                            world taken away and entered again at the target first
 //   closeworld[:<phase>]                     the last step (protocol 16): the world taken away and entered again at the
 //                                            target, the window closed as soon as the player reports its world models in
 //                                            that phase (worldProgress; "building" by default) -- a close during their
-//                                            construction
+//                                            construction; doodad<Phase> (protocol 17: doodadBuilding, doodadRequesting,
+//                                            ...) waits for the doodads' phase instead (worldProgress doodadPhase
+//                                            "building", "requesting", ...)
 //   waitfootprint[:<ms>]                     (protocol 16) until a WMO-only map's footprint is known (or why not)
 //   clickfp:<fx>:<fy> | dclickfp:<fx>:<fy>   a click (a double-click: and Enter world) on the footprint, at fractions of
 //                                            the world model's box (fx east of its west edge, fy south of its north edge)
 //   worldreport                              (protocol 16) the last load's report: its world, counted, and that there is one
+//                                            (protocol 17: with its assembly and its doodads, their sets and models)
 //   waitshown[:<ms>]                         (protocol 16) until the current world load is on screen (worldShown), its
 //                                            world models perhaps still loading
 //   expect:footprint:<phase> | worldstate:<state> | worldkind:<kind> | placed:<n> | worldinstances:<n> | camerainworld |
@@ -10049,6 +10469,11 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //                                            (protocol 16) the footprint's phase; the last report's world state and kind,
 //                                            at least n placements placed; the player's world-model instances; the free
 //                                            camera inside the world model's box
+//   expect:doodadstate:<state> | doodadsplaced:<min> | doodadinstances:<n> | assembly:<state>
+//                                            (protocol 17) the last report's doodad state ("complete", "partial", "none",
+//                                            "failed", "ended", "notOffered"), at least min doodads placed; the player's
+//                                            doodad instances (runtimeState doodadInstances == n); the last report's whole
+//                                            world assembly ("complete", "partial", "none", "failed", "ended")
 //   expect:<what>[:<args>]                   map:<phase> | grid:<x>:<y>:<state> | tile:<phase> | mode:<mode> |
 //                                            notice:<words> | terrain:<0|1> | listed:<n> | shownview:<view>
 //   wait:<ms> | shot:<name> | state          pump; a picture of the window (PrintWindow, <out>_<name>.png); the
@@ -10330,6 +10755,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   int shownSeen = 0, progressSeen = 0;
   QString lastPhase, wantPhase;
   bool wantPhaseSeen = false;   // closeworld: the phase it waits for came (several progress lines can come in one pump)
+  // Protocol 17: the doodads' last phase, and the one closeworld:doodad<Phase> waits for (empty: the world models' phase).
+  QString lastDoodadPhase, wantDoodadPhase;
   std::function<void(const UnityIpcServer::TerrainTileReport &)> previousReport = ipc->onTerrainTileLoaded;
   ipc->onTerrainTileLoaded = [&](const UnityIpcServer::TerrainTileReport & r) {
     lastReport = r;
@@ -10347,7 +10774,11 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   std::function<void(const UnityIpcServer::WorldProgress &)> previousProgress = ipc->onWorldProgress;
   ipc->onWorldProgress = [&](const UnityIpcServer::WorldProgress & w) {
     lastPhase = w.phase;
-    if (!wantPhase.isEmpty() && w.phase == wantPhase && w.load == maps->load())
+    lastDoodadPhase = w.doodadPhase;
+    // closeworld: the world models' phase, or with doodad<Phase> the doodads' (their name as sent, or with the prefix).
+    const bool phaseNow = wantDoodadPhase.isEmpty() ? w.phase == wantPhase
+                                                    : w.doodadPhase == wantDoodadPhase || w.doodadPhase == wantPhase;
+    if (!wantPhase.isEmpty() && phaseNow && w.load == maps->load())
       wantPhaseSeen = true;
     progressSeen++;
     if (previousProgress)
@@ -10391,6 +10822,20 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       o["materialObjects"] = lastState.materialObjects;
       o["modelFileDataID"] = lastState.modelFileDataID;
       o["mapObjectFileDataID"] = lastState.mapObjectFileDataID;
+      // Protocol 17: the doodads' tallies and the scene's whole ones (-1 from an older player).
+      o["doodadInstances"] = lastState.doodadInstances;
+      o["doodadPrototypes"] = lastState.doodadPrototypes;
+      o["doodadMeshes"] = lastState.doodadMeshes;
+      o["doodadMaterials"] = lastState.doodadMaterials;
+      o["doodadTextures"] = lastState.doodadTextures;
+      o["doodadGpuGeometryBytes"] = (double)lastState.doodadGpuGeometryBytes;
+      o["doodadGpuTextureBytes"] = (double)lastState.doodadGpuTextureBytes;
+      o["doodadVisible"] = lastState.doodadVisible;
+      o["doodadCulled"] = lastState.doodadCulled;
+      o["liveGameObjects"] = lastState.liveGameObjects;
+      o["liveTexture2D"] = lastState.liveTexture2D;
+      o["liveMeshes"] = lastState.liveMeshes;
+      o["liveMaterials"] = lastState.liveMaterials;
     }
     samples.append(o);
     LOG_INFO << "[maps-test] sample" << label << QJsonDocument(o).toJson(QJsonDocument::Compact);
@@ -11176,7 +11621,81 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         rec["start"] = lastReport.worldStart;
         if (lastReport.worldStart)
           rec["startPoint"] = QJsonArray({ lastReport.worldStartPoint[0], lastReport.worldStartPoint[1], lastReport.worldStartPoint[2] });
+        // Protocol 17: the whole world's assembly, and the doodads with their sets and models (as the host kept them).
+        rec["assembly"] = lastReport.worldAssembly;
+        rec["hasDoodads"] = lastReport.hasDoodads;
+        if (lastReport.hasDoodads)
+        {
+          const UnityIpcServer::TerrainTileReport & r = lastReport;
+          QJsonObject d;
+          d["state"] = r.doodadState;
+          d["reason"] = r.doodadReason;
+          d["mddfRecords"] = r.doodadMddfRecords;
+          d["mddfPlacements"] = r.doodadMddfPlacements;
+          d["wmoDoodadRecords"] = r.doodadWmoRecords;
+          d["wmoPlacementsWithDoodads"] = r.doodadWmoPlacements;
+          d["instances"] = r.doodadInstances;
+          d["placed"] = r.doodadPlaced;
+          d["failed"] = r.doodadFailed;
+          d["unsupported"] = r.doodadUnsupported;
+          d["notRequested"] = r.doodadNotRequested;
+          d["ended"] = r.doodadEnded;
+          d["models"] = r.doodadModels;
+          d["modelsBuilt"] = r.doodadModelsBuilt;
+          d["modelsFailed"] = r.doodadModelsFailed;
+          d["modelsUnsupported"] = r.doodadModelsUnsupported;
+          d["modelsNotRequested"] = r.doodadModelsNotRequested;
+          d["modelsPartial"] = r.doodadModelsPartial;
+          d["textures"] = r.doodadTextures;
+          d["texturesDecoded"] = r.doodadTexturesDecoded;
+          d["texturesMissing"] = r.doodadTexturesMissing;
+          d["textureUses"] = r.doodadTextureUses;
+          d["textureUploads"] = r.doodadTextureUploads;
+          d["fileBytes"] = (double)r.doodadFileBytes;
+          d["textureBytes"] = (double)r.doodadTextureBytes;
+          d["gpuGeometryBytes"] = (double)r.doodadGpuGeometryBytes;
+          d["gpuTextureBytes"] = (double)r.doodadGpuTextureBytes;
+          d["discoverMs"] = r.doodadDiscoverMs;
+          d["firstVisibleMs"] = r.doodadFirstVisibleMs;
+          d["fetchMs"] = r.doodadFetchMs;
+          d["parseMs"] = r.doodadParseMs;
+          d["decodeMs"] = r.doodadDecodeMs;
+          d["buildMs"] = r.doodadBuildMs;
+          d["buildMaxMs"] = r.doodadBuildMaxMs;
+          d["placeMs"] = r.doodadPlaceMs;
+          d["placeMaxMs"] = r.doodadPlaceMaxMs;
+          d["readyMs"] = r.doodadReadyMs;
+          d["setsSent"] = r.doodadSetsSent;
+          d["listSent"] = r.doodadListSent;
+          QJsonArray sets, models;
+          for (const UnityIpcServer::TerrainTileReport::DoodadSet & s : r.doodadSets)
+          {
+            QJsonObject o;
+            o["uniqueId"] = (double)s.uniqueId;
+            o["wmo"] = s.wmo;
+            o["set"] = s.set;
+            o["setName"] = s.setName;
+            o["setCount"] = s.setCount;
+            o["active"] = s.active;
+            o["reason"] = s.reason;
+            sets.append(o);
+          }
+          for (const UnityIpcServer::TerrainTileReport::DoodadModel & m : r.doodadList)
+          {
+            QJsonObject o;
+            o["fileDataID"] = m.fileDataID;
+            o["state"] = m.state;
+            o["reason"] = m.reason;
+            o["instances"] = m.instances;
+            o["placed"] = m.placed;
+            models.append(o);
+          }
+          d["sets"] = sets;
+          d["list"] = models;
+          rec["doodads"] = d;
+        }
       }
+      rec["doodadPhase"] = lastDoodadPhase;
       tally.check(label + ": the load was reported, with its world", haveReport && lastReport.hasWorld,
                   haveReport ? "load " + QString::number(lastReport.load) + " " + lastReport.status + "; " + lastReport.describeWorld()
                              : QString("no report"));
@@ -11191,10 +11710,14 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
         continue;
       }
       const QString phase = arg.isEmpty() ? QString("building") : arg;
+      // doodad<Phase> (protocol 17): the doodads' phase, its name lowered ("doodadBuilding": "building").
+      const bool doodadPhase = phase.startsWith("doodad") && phase.size() > 6;
       maps->ClearTerrain();
       pump(500);
       lastPhase.clear();
+      lastDoodadPhase.clear();
       wantPhase = phase;
+      wantDoodadPhase = doodadPhase ? phase.mid(6, 1).toLower() + phase.mid(7) : QString();
       wantPhaseSeen = false;
       UiButton * enter = frame->mapOverview->enterButton();
       if (!maps->showsOverview())
@@ -11204,12 +11727,16 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       enter->ProcessWindowEvent(clicked);
       const bool reached = pumpUntil([&]() { return wantPhaseSeen || maps->tilePhase() != MapsViewer::TilePhase::Loading; }, 60000);
       rec["phase"] = lastPhase;
+      rec["doodadPhase"] = lastDoodadPhase;
       rec["tilePhase"] = tilePhaseName(maps->tilePhase());
       const bool inFlight = reached && wantPhaseSeen && maps->tilePhase() == MapsViewer::TilePhase::Loading;
-      tally.check(label + ": the window is closed while the world models are " + phase, inFlight,
-                  QString("\"%1\" seen %2, the last phase \"%3\", the load %4").arg(phase).arg(wantPhaseSeen ? "yes" : "no").arg(lastPhase)
-                    .arg(tilePhaseName(maps->tilePhase())));
-      LOG_INFO << "[maps-test] closeworld: the window is closed now, the world load" << maps->load() << "in phase" << lastPhase;
+      tally.check(label + (doodadPhase ? ": the window is closed while the doodads are " + wantDoodadPhase
+                                       : ": the window is closed while the world models are " + phase),
+                  inFlight,
+                  QString("\"%1\" seen %2, the last phase \"%3\" (doodads \"%4\"), the load %5").arg(phase)
+                    .arg(wantPhaseSeen ? "yes" : "no").arg(lastPhase).arg(lastDoodadPhase).arg(tilePhaseName(maps->tilePhase())));
+      LOG_INFO << "[maps-test] closeworld: the window is closed now, the world load" << maps->load() << "in phase" << lastPhase
+               << "(doodads" << (lastDoodadPhase.isEmpty() ? QString("-") : lastDoodadPhase) << ")";
       closeWorld = true;
     }
     else if (kind == "holdroot" || kind == "holdwdt")
@@ -11343,6 +11870,32 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                       .arg(o.value("worldInstances").toInt(-1)).arg(o.value("worldModels").toInt(-1)).arg(o.value("worldMeshes").toInt(-1))
                       .arg(o.value("worldMaterials").toInt(-1)).arg(o.value("worldTextures").toInt(-1)));
       }
+      // DOODADS (protocol 17).
+      else if (what == "doodadstate")
+        tally.check(label, haveReport && lastReport.hasDoodads && lastReport.doodadState == a1,
+                    !haveReport ? QString("no report")
+                    : lastReport.hasDoodads ? lastReport.describeDoodads()
+                                            : "no doodads in the report: " + lastReport.describeWorld());
+      else if (what == "doodadsplaced")
+        tally.check(label, haveReport && lastReport.hasDoodads && lastReport.doodadPlaced >= a1.toInt(),
+                    haveReport ? QString("%1 of %2 doodad(s) placed (%3 of %4 models built), state %5")
+                                   .arg(lastReport.doodadPlaced).arg(lastReport.doodadInstances).arg(lastReport.doodadModelsBuilt)
+                                   .arg(lastReport.doodadModels)
+                                   .arg(lastReport.hasDoodads ? lastReport.doodadState : QString("- (no doodads reported)"))
+                               : QString("no report"));
+      else if (what == "doodadinstances")
+      {
+        const QJsonObject o = sample(label);
+        tally.check(label, o.value("doodadInstances").toInt(-1) == a1.toInt(),
+                    QString("doodad instances %1, prototypes %2, meshes %3, materials %4, textures %5; visible %6, culled %7")
+                      .arg(o.value("doodadInstances").toInt(-1)).arg(o.value("doodadPrototypes").toInt(-1))
+                      .arg(o.value("doodadMeshes").toInt(-1)).arg(o.value("doodadMaterials").toInt(-1))
+                      .arg(o.value("doodadTextures").toInt(-1)).arg(o.value("doodadVisible").toInt(-1))
+                      .arg(o.value("doodadCulled").toInt(-1)));
+      }
+      else if (what == "assembly")
+        tally.check(label, haveReport && lastReport.worldAssembly == a1,
+                    haveReport ? "assembly \"" + lastReport.worldAssembly + "\"; " + lastReport.describeWorld() : QString("no report"));
       else if (what == "camerainworld")
       {
         const double * b = maps->footprintRootBox();
@@ -11552,6 +12105,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       o["view"] = maps->shownView();
       o["worldModel"] = maps->worldModelShown();
       o["worldDetail"] = maps->worldDetail();
+      o["doodadDetail"] = maps->doodadDetail();
       shots.append(o);
       tally.check(label + ": the picture is written", ok, QString("%1 (%2 x %3, viewport mean %4)").arg(path).arg(size.width())
                                                             .arg(size.height()).arg(mean, 0, 'f', 1));
@@ -11605,10 +12159,12 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   {
     // A tile requested with its root ADT read held in the worker, then the window closed (the frame's destructor) with
     // the read in flight and the player running: THE SHUTDOWN CHECK watches the destructor. A world-model role (protocol
-    // 16): the world taken away and entered again at the target, the first read of that role held.
+    // 16) or a doodad role (protocol 17): the world taken away and entered again at the target, the first read of that
+    // role held.
     ipc->testHoldNextMapRead(holdRole);
     int x0 = -1, y0 = -1;
-    const bool worldRole = holdRole == "obj0Adt" || holdRole.startsWith("wmo");
+    const bool worldRole = holdRole == "obj0Adt" || holdRole.startsWith("wmo") || holdRole == "m2Model" ||
+                           holdRole == "m2Skin" || holdRole == "m2Texture";
     for (int ty = 0; ty < 64 && x0 < 0 && !worldRole; ty++)
       for (int tx = 0; tx < 64 && x0 < 0; tx++)
         if (maps->tileState(tx, ty) == MapsViewer::TileState::Available && !(tx == maps->shownTileX() && ty == maps->shownTileY()))

@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 16 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 17 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
@@ -22,7 +22,10 @@
 // loadTerrainTile, and setWorldCamera / worldCameraApplied; 16 added world models in the world -- loadWorld (a tile and
 // its MODF world models, or a WMO-only map's global world model), getMapAsset's roles "obj0Adt", "wmoRoot", "wmoGroup"
 // and "wmoTexture", worldShown, worldProgress, terrainTileLoaded's world fields, the global record in mapTilesInspected,
-// inspectWorldModel / worldModelInspected, and runtimeState's world fields -- see WmvTerrainSession and WmvWorldModels).
+// inspectWorldModel / worldModelInspected, and runtimeState's world fields -- see WmvTerrainSession and WmvWorldModels;
+// 17 added doodads -- loadWorld's doodad budgets, getMapAsset's roles "m2Model", "m2Skin" and "m2Texture",
+// worldProgress's doodad fields, terrainTileLoaded's world assembly and doodads, and runtimeState's doodad fields -- see
+// WmvTerrainSessionDoodads and WmvWorldDoodads).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -100,11 +103,19 @@
 //     a world load's files: the tile's obj0 ADT (MAID word 1, its MODF), each world model's root, its LOD0 group files
 //     and the textures its drawn materials sample; at most WmvTerrainSession.MaxWorldOutstanding of them out at once,
 //     beside the tile's own MaxOutstanding
+//   getMapAsset           { ..., role:"m2Model"|"m2Skin"|"m2Texture", fileDataID }              (protocol 17)
+//     a world load's doodad files: each unique M2 its doodads name, the M2's first skin profile (SFID[0]) and the
+//     textures its batches bind; at most WmvTerrainSession.MaxDoodadOutstanding of them out at once, asked only once the
+//     world models are settled and only when loadWorld states the doodad budgets
 //   worldShown            { load, mapId, kind:"tile"|"globalWmo", tileX, tileY, placements, models, shownMs,
 //                           originWorld:[X,Y,Z] }                                                 (protocol 16)
 //   worldProgress         { load, phase, placements, models, modelsRequested, modelsParsed, modelsBuilt, modelsFailed,
 //                           modelsUnsupported, modelsNotRequested, placed, placementsFailed, filesAsked, filesAnswered,
 //                           bytesReceived, elapsedMs }                                           (protocol 16)
+//   worldProgress (protocol 17 adds) { doodadPhase:"none"|"waiting"|"requesting"|"building"|"placing"|"complete"|
+//                           "partial"|"failed"|"ended"|"notOffered", doodadInstances, doodadPlaced, doodadModels,
+//                           doodadModelsBuilt, doodadModelsFailed, doodadFilesAsked, doodadFilesAnswered, doodadBytes }
+//     -1 where doodads were not offered
 //   worldModelInspected   { inspection, status, reason, mapId, wmoFileDataID, assetEpoch, wmoBytes, md5, groups,
 //                           interiorGroups, parseMs, rootBox:[6], extents:[6], groupBoxes (base64 floats),
 //                           groupFlags (base64 u32) }                                            (protocol 16)
@@ -213,6 +224,10 @@
 //     the view every terrain tile is drawn in from now on (WmvTerrainDebug.SetRuntimeView: one of its names but
 //     texturedplainweights, or "auto"); the tile on screen is built again in it from what the player holds, nothing
 //     asked of the host (WmvTerrainSession.RebuildShown), the camera left where it is; answered by terrainViewApplied
+//   loadWorld (protocol 17 adds) { doodads:true, maxM2FileBytes, maxM2BytesPerLoad, maxM2TextureBytes,
+//               maxM2TextureBytesPerLoad, maxM2ModelsPerLoad, maxM2TexturesPerLoad, maxDoodadInstancesPerLoad }
+//     the doodad budgets (docs/world-viewer/07-doodads.md): sent only to a player that announced 17. Without them the
+//     world loads as in protocol 16 and its report's doodads say "notOffered"
 //   loadWorld { what loadTerrainTile carries, worldModels:true, globalWmo, maxWmoFileBytes, maxWmoBytesPerLoad,
 //               maxWmoTextureBytes, maxWmoTextureBytesPerLoad, maxWmoTexturesPerLoad, maxWmoModelsPerLoad,
 //               maxWmoGroupsPerLoad, maxWmoPlacementsPerLoad }                     (protocol 16, world models)
@@ -286,7 +301,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 16;
+    public const int ProtocolVersion = 17;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -556,12 +571,25 @@ public class WmvIpcClient : MonoBehaviour
         public int MaxWmoModelsPerLoad;      // unique world models (roots) one load may ask for
         public int MaxWmoGroupsPerLoad;      // group files one load may ask for
         public int MaxWmoPlacementsPerLoad;  // placements one load places
+        // Protocol 17 (docs/world-viewer/07-doodads.md): the doodad budgets the host states and enforces; a protocol-16 host
+        // states none and the world places no doodad.
+        public bool Doodads;
+        public int MaxM2FileBytes;           // one doodad model or skin file
+        public int MaxM2BytesPerLoad;        // model and skin bytes the host reads for one load
+        public int MaxM2TextureBytes;        // one doodad texture
+        public int MaxM2TextureBytesPerLoad;
+        public int MaxM2ModelsPerLoad;       // unique doodad models one load may ask for
+        public int MaxM2TexturesPerLoad;     // doodad texture ids one load may ask for
+        public int MaxDoodadInstancesPerLoad;   // doodads one load places
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
 
         /// <summary>The load places world models (a protocol-16 loadWorld with its budgets).</summary>
         public bool WorldModelsOffered { get { return World && MaxWmoModelsPerLoad > 0; } }
+
+        /// <summary>The load places doodads (a protocol-17 loadWorld with its doodad budgets).</summary>
+        public bool DoodadsOffered { get { return World && MaxM2ModelsPerLoad > 0; } }
 
         public override string ToString()
         {
@@ -576,7 +604,13 @@ public class WmvIpcClient : MonoBehaviour
                                                      "maxWmoTextureBytesPerLoad {3} maxWmoTexturesPerLoad {4} maxWmoModelsPerLoad {5} " +
                                                      "maxWmoGroupsPerLoad {6} maxWmoPlacementsPerLoad {7}", MaxWmoFileBytes, MaxWmoBytesPerLoad,
                                                      MaxWmoTextureBytes, MaxWmoTextureBytesPerLoad, MaxWmoTexturesPerLoad, MaxWmoModelsPerLoad,
-                                                     MaxWmoGroupsPerLoad, MaxWmoPlacementsPerLoad)
+                                                     MaxWmoGroupsPerLoad, MaxWmoPlacementsPerLoad) +
+                                       (DoodadsOffered
+                                            ? string.Format("; doodads: maxM2FileBytes {0} maxM2BytesPerLoad {1} maxM2TextureBytes {2} " +
+                                                            "maxM2TextureBytesPerLoad {3} maxM2ModelsPerLoad {4} maxM2TexturesPerLoad {5} " +
+                                                            "maxDoodadInstancesPerLoad {6}", MaxM2FileBytes, MaxM2BytesPerLoad, MaxM2TextureBytes,
+                                                            MaxM2TextureBytesPerLoad, MaxM2ModelsPerLoad, MaxM2TexturesPerLoad, MaxDoodadInstancesPerLoad)
+                                            : "; no doodads offered")
                                      : World ? "; world models asked for, but no budget stated" : "");
         }
     }
@@ -696,6 +730,11 @@ public class WmvIpcClient : MonoBehaviour
         public int FilesAsked, FilesAnswered;
         public long BytesReceived;
         public double ElapsedMs;
+        // Protocol 17: the doodads (-1 where they were not offered).
+        public bool HasDoodads;
+        public string DoodadPhase = "none";
+        public int DoodadInstances, DoodadPlaced, DoodadModels, DoodadModelsBuilt, DoodadModelsFailed, DoodadFilesAsked, DoodadFilesAnswered;
+        public long DoodadBytes;
     }
 
     public void ReportWorldProgress(WorldProgressReport r) { Send(WorldProgressLine(r)); }
@@ -719,8 +758,18 @@ public class WmvIpcClient : MonoBehaviour
           .Append(",\"filesAsked\":").Append(r.FilesAsked)
           .Append(",\"filesAnswered\":").Append(r.FilesAnswered)
           .Append(",\"bytesReceived\":").Append(r.BytesReceived)
-          .Append(",\"elapsedMs\":").Append(r.ElapsedMs.ToString("0.#", inv))
-          .Append('}');
+          .Append(",\"elapsedMs\":").Append(r.ElapsedMs.ToString("0.#", inv));
+        if (r.HasDoodads)
+            sb.Append(",\"doodadPhase\":\"").Append(Escape(r.DoodadPhase ?? "")).Append('"')
+              .Append(",\"doodadInstances\":").Append(r.DoodadInstances)
+              .Append(",\"doodadPlaced\":").Append(r.DoodadPlaced)
+              .Append(",\"doodadModels\":").Append(r.DoodadModels)
+              .Append(",\"doodadModelsBuilt\":").Append(r.DoodadModelsBuilt)
+              .Append(",\"doodadModelsFailed\":").Append(r.DoodadModelsFailed)
+              .Append(",\"doodadFilesAsked\":").Append(r.DoodadFilesAsked)
+              .Append(",\"doodadFilesAnswered\":").Append(r.DoodadFilesAnswered)
+              .Append(",\"doodadBytes\":").Append(r.DoodadBytes);
+        sb.Append('}');
         return sb.ToString();
     }
 
@@ -1046,6 +1095,10 @@ public class WmvIpcClient : MonoBehaviour
         public bool globalWmo;
         public int maxWmoFileBytes, maxWmoBytesPerLoad, maxWmoTextureBytes, maxWmoTextureBytesPerLoad, maxWmoTexturesPerLoad;
         public int maxWmoModelsPerLoad, maxWmoGroupsPerLoad, maxWmoPlacementsPerLoad;
+        // protocol 17: loadWorld's doodad budgets
+        public bool doodads;
+        public int maxM2FileBytes, maxM2BytesPerLoad, maxM2TextureBytes, maxM2TextureBytesPerLoad, maxM2ModelsPerLoad, maxM2TexturesPerLoad;
+        public int maxDoodadInstancesPerLoad;
         public int wmoFileDataID;
         public float[] wmoPosition;
         public float[] wmoRotation;
@@ -1576,6 +1629,10 @@ public class WmvIpcClient : MonoBehaviour
                     MaxWmoTextureBytesPerLoad = msg.maxWmoTextureBytesPerLoad, MaxWmoTexturesPerLoad = msg.maxWmoTexturesPerLoad,
                     MaxWmoModelsPerLoad = msg.maxWmoModelsPerLoad, MaxWmoGroupsPerLoad = msg.maxWmoGroupsPerLoad,
                     MaxWmoPlacementsPerLoad = msg.maxWmoPlacementsPerLoad,
+                    Doodads = msg.doodads, MaxM2FileBytes = msg.maxM2FileBytes, MaxM2BytesPerLoad = msg.maxM2BytesPerLoad,
+                    MaxM2TextureBytes = msg.maxM2TextureBytes, MaxM2TextureBytesPerLoad = msg.maxM2TextureBytesPerLoad,
+                    MaxM2ModelsPerLoad = msg.doodads ? msg.maxM2ModelsPerLoad : 0, MaxM2TexturesPerLoad = msg.maxM2TexturesPerLoad,
+                    MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad,
                 });
                 break;
 
@@ -2037,6 +2094,38 @@ public class WmvIpcClient : MonoBehaviour
         public double[] WorldStartPoint = new double[3];
         public string WorldStartReason = "";
         public List<WorldPlacementReport> WorldPlacementList = new List<WorldPlacementReport>();
+        // Protocol 17: the whole world's assembly and its doodads (written when HasDoodads).
+        public string WorldAssembly = "";               // "complete" | "partial" | "none" | "failed" | "ended"
+        public bool HasDoodads;
+        public string DoodadState = "", DoodadReason = "";   // "complete" | "partial" | "none" | "failed" | "ended" | "notOffered"
+        public int DoodadMddfRecords, DoodadMddfPlacements, DoodadWmoRecords, DoodadWmoPlacements;
+        public List<DoodadSetReport> DoodadSets = new List<DoodadSetReport>();
+        public int DoodadSetsTotal;
+        public int DoodadInstances, DoodadPlaced, DoodadFailed, DoodadUnsupported, DoodadNotRequested, DoodadEnded;
+        public int DoodadModels, DoodadModelsBuilt, DoodadModelsFailed, DoodadModelsUnsupported, DoodadModelsNotRequested, DoodadModelsPartial;
+        public int DoodadTextures, DoodadTexturesDecoded, DoodadTexturesMissing, DoodadTextureUses, DoodadTextureUploads;
+        public long DoodadFileBytes, DoodadTextureBytes, DoodadGpuGeometryBytes, DoodadGpuTextureBytes;
+        public double DoodadDiscoverMs = -1, DoodadFirstVisibleMs = -1, DoodadFetchMs = -1, DoodadParseMs = -1, DoodadDecodeMs = -1,
+                      DoodadBuildMs = -1, DoodadBuildMaxMs = -1, DoodadPlaceMs = -1, DoodadPlaceMaxMs = -1, DoodadReadyMs = -1;
+        public List<DoodadModelReport> DoodadList = new List<DoodadModelReport>();
+        public int DoodadListTotal;
+    }
+
+    /// <summary>A placed world model's doodad sets in terrainTileLoaded (at most WmvTerrainSession.ReportDoodadSetsMax): the
+    /// set its record names, the names of the sets drawn (set 0 plus that one), the root's set count, the MODD records drawn.</summary>
+    public class DoodadSetReport
+    {
+        public uint UniqueId, Wmo;
+        public int Set, SetCount, Active;
+        public string SetName = "", Reason = "";
+    }
+
+    /// <summary>One doodad model in terrainTileLoaded (at most WmvTerrainSession.ReportDoodadModelsMax: every model not built,
+    /// or built partially, first, then the most placed).</summary>
+    public class DoodadModelReport
+    {
+        public int FileDataID, Instances, Placed;
+        public string State = "", Reason = "";          // "built" | "partial" | "failed" | "unsupported" | "notRequested" | "ended"
     }
 
     /// <summary>One placement in terrainTileLoaded's world (at most WmvTerrainSession.ReportPlacementsMax listed): its
@@ -2372,6 +2461,80 @@ public class WmvIpcClient : MonoBehaviour
                 AppendDoubles(sb, "rendered", p.Rendered);
             sb.Append('}');
         }
+        sb.Append(']');
+        if (r.HasDoodads)
+            AppendDoodads(sb, r);
+        sb.Append('}');
+    }
+
+    /// <summary>Protocol 17: the world's assembly and its doodads, inside terrainTileLoaded's world (the lists capped, so a
+    /// report stays far below the host's line limit).</summary>
+    static void AppendDoodads(StringBuilder sb, TerrainTileReport r)
+    {
+        sb.Append(",\"assembly\":\"").Append(Escape(r.WorldAssembly ?? "")).Append('"')
+          .Append(",\"doodads\":{\"state\":\"").Append(Escape(r.DoodadState ?? "")).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.DoodadReason ?? "")).Append('"')
+          .Append(",\"mddfRecords\":").Append(r.DoodadMddfRecords)
+          .Append(",\"mddfPlacements\":").Append(r.DoodadMddfPlacements)
+          .Append(",\"wmoDoodadRecords\":").Append(r.DoodadWmoRecords)
+          .Append(",\"wmoPlacementsWithDoodads\":").Append(r.DoodadWmoPlacements)
+          .Append(",\"setsTotal\":").Append(r.DoodadSetsTotal)
+          .Append(",\"sets\":[");
+        for (int i = 0; r.DoodadSets != null && i < r.DoodadSets.Count; i++)
+        {
+            DoodadSetReport s = r.DoodadSets[i];
+            sb.Append(i > 0 ? ",{" : "{").Append("\"uniqueId\":").Append(s.UniqueId)
+              .Append(",\"wmo\":").Append(s.Wmo)
+              .Append(",\"set\":").Append(s.Set)
+              .Append(",\"setName\":\"").Append(Escape(s.SetName ?? "")).Append('"')
+              .Append(",\"setCount\":").Append(s.SetCount)
+              .Append(",\"active\":").Append(s.Active)
+              .Append(",\"reason\":\"").Append(Escape(s.Reason ?? "")).Append("\"}");
+        }
+        sb.Append(']')
+          .Append(",\"instances\":").Append(r.DoodadInstances)
+          .Append(",\"placed\":").Append(r.DoodadPlaced)
+          .Append(",\"failed\":").Append(r.DoodadFailed)
+          .Append(",\"unsupported\":").Append(r.DoodadUnsupported)
+          .Append(",\"notRequested\":").Append(r.DoodadNotRequested)
+          .Append(",\"ended\":").Append(r.DoodadEnded)
+          .Append(",\"models\":").Append(r.DoodadModels)
+          .Append(",\"modelsBuilt\":").Append(r.DoodadModelsBuilt)
+          .Append(",\"modelsFailed\":").Append(r.DoodadModelsFailed)
+          .Append(",\"modelsUnsupported\":").Append(r.DoodadModelsUnsupported)
+          .Append(",\"modelsNotRequested\":").Append(r.DoodadModelsNotRequested)
+          .Append(",\"modelsPartial\":").Append(r.DoodadModelsPartial)
+          .Append(",\"textures\":").Append(r.DoodadTextures)
+          .Append(",\"texturesDecoded\":").Append(r.DoodadTexturesDecoded)
+          .Append(",\"texturesMissing\":").Append(r.DoodadTexturesMissing)
+          .Append(",\"textureUses\":").Append(r.DoodadTextureUses)
+          .Append(",\"textureUploads\":").Append(r.DoodadTextureUploads)
+          .Append(",\"fileBytes\":").Append(r.DoodadFileBytes)
+          .Append(",\"textureBytes\":").Append(r.DoodadTextureBytes)
+          .Append(",\"gpuGeometryBytes\":").Append(r.DoodadGpuGeometryBytes)
+          .Append(",\"gpuTextureBytes\":").Append(r.DoodadGpuTextureBytes)
+          .Append(",\"timings\":{");
+        int timings = 0;
+        AppendTiming(sb, ref timings, "discoverMs", r.DoodadDiscoverMs);
+        AppendTiming(sb, ref timings, "firstVisibleMs", r.DoodadFirstVisibleMs);
+        AppendTiming(sb, ref timings, "fetchMs", r.DoodadFetchMs);
+        AppendTiming(sb, ref timings, "parseMs", r.DoodadParseMs);
+        AppendTiming(sb, ref timings, "decodeMs", r.DoodadDecodeMs);
+        AppendTiming(sb, ref timings, "buildMs", r.DoodadBuildMs);
+        AppendTiming(sb, ref timings, "buildMaxMs", r.DoodadBuildMaxMs);
+        AppendTiming(sb, ref timings, "placeMs", r.DoodadPlaceMs);
+        AppendTiming(sb, ref timings, "placeMaxMs", r.DoodadPlaceMaxMs);
+        AppendTiming(sb, ref timings, "readyMs", r.DoodadReadyMs);
+        sb.Append("},\"listTotal\":").Append(r.DoodadListTotal).Append(",\"list\":[");
+        for (int i = 0; r.DoodadList != null && i < r.DoodadList.Count; i++)
+        {
+            DoodadModelReport m = r.DoodadList[i];
+            sb.Append(i > 0 ? ",{" : "{").Append("\"fileDataID\":").Append(m.FileDataID)
+              .Append(",\"state\":\"").Append(Escape(m.State ?? "")).Append('"')
+              .Append(",\"reason\":\"").Append(Escape(m.Reason ?? "")).Append('"')
+              .Append(",\"instances\":").Append(m.Instances)
+              .Append(",\"placed\":").Append(m.Placed).Append('}');
+        }
         sb.Append("]}");
     }
 
@@ -2485,6 +2648,12 @@ public class WmvIpcClient : MonoBehaviour
         // median, 95th percentile and longest, in milliseconds (0 frames: the view was not on).
         public int WorldFrames;
         public double WorldFrameMsMedian, WorldFrameMsP95, WorldFrameMsMax;
+        // Protocol 17: the world scene's doodads (WmvWorldDoodads' tallies; 0 with none) and the culling as of the last frame;
+        // then every GameObject, Texture2D, Mesh and Material alive in the player (FindObjectsOfTypeAll).
+        public int DoodadInstances, DoodadPrototypes, DoodadMeshes, DoodadMaterials, DoodadTextures;
+        public long DoodadGpuGeometryBytes, DoodadGpuTextureBytes;
+        public int DoodadVisible, DoodadCulled;
+        public int LiveGameObjects, LiveTexture2D, LiveMeshes, LiveMaterials;
     }
 
     /// <summary>
@@ -2560,7 +2729,20 @@ public class WmvIpcClient : MonoBehaviour
              ",\"worldFrames\":" + r.WorldFrames +
              ",\"worldFrameMsMedian\":" + r.WorldFrameMsMedian.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
              ",\"worldFrameMsP95\":" + r.WorldFrameMsP95.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
-             ",\"worldFrameMsMax\":" + r.WorldFrameMsMax.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "}");
+             ",\"worldFrameMsMax\":" + r.WorldFrameMsMax.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+             ",\"doodadInstances\":" + r.DoodadInstances +
+             ",\"doodadPrototypes\":" + r.DoodadPrototypes +
+             ",\"doodadMeshes\":" + r.DoodadMeshes +
+             ",\"doodadMaterials\":" + r.DoodadMaterials +
+             ",\"doodadTextures\":" + r.DoodadTextures +
+             ",\"doodadGpuGeometryBytes\":" + r.DoodadGpuGeometryBytes +
+             ",\"doodadGpuTextureBytes\":" + r.DoodadGpuTextureBytes +
+             ",\"doodadVisible\":" + r.DoodadVisible +
+             ",\"doodadCulled\":" + r.DoodadCulled +
+             ",\"liveGameObjects\":" + r.LiveGameObjects +
+             ",\"liveTexture2D\":" + r.LiveTexture2D +
+             ",\"liveMeshes\":" + r.LiveMeshes +
+             ",\"liveMaterials\":" + r.LiveMaterials + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

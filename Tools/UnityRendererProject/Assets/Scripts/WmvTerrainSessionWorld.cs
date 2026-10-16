@@ -33,6 +33,8 @@
 //     tile load's world models then join the scene as they are built, each placement on screen the frame it is placed.
 //   - Shared data: one prototype per world model per load, every placement an instance of it; a texture is fetched and
 //     decoded once per load for every world model that samples it, its pixels released once the last of them is built.
+//   - DOODADS (protocol 17, WmvTerrainSessionDoodads.cs): once the world models are settled, a load that carries the doodad
+//     budgets places the tile's MDDF doodads and the placed world models' doodad sets; the report waits for them too.
 
 using System;
 using System.Collections.Generic;
@@ -58,6 +60,17 @@ public interface IWmvWorldModelView
     void WorldBuilt(WmvWorldScene scene);
     void ReportWorldShown(WmvIpcClient.WorldShownReport report);
     void ReportWorldProgress(WmvIpcClient.WorldProgressReport report);
+    /// <summary>The load's world models are settled (stage 07): the moment its camera is placed -- it stands on their floors --
+    /// before any doodad is fetched.</summary>
+    void WorldModelsSettled(WmvWorldScene scene, int load);
+    /// <summary>A doodad prototype for `scene` (its textures from the scene's shared cache): built inactive, never shown. May
+    /// throw (nothing is left built).</summary>
+    WmvDoodadPrototype BuildDoodadPrototype(WmvWorldScene scene, uint fileDataID, M2ParsedModel model, M2ParsedSkin skin,
+                                            Dictionary<int, BlpImage> texturesBySlot, Dictionary<int, uint> slotFiles);
+    /// <summary>An instance of `prototype` at `doodad`, relative to `origin`, active, on the world layer. May throw.</summary>
+    WmvDoodadInstance PlaceDoodad(WmvDoodadPrototype prototype, WorldDoodad doodad, WorldOrigin origin, int load);
+    /// <summary>Every doodad of `scene`: its instances, then its prototypes, then its shared textures.</summary>
+    void DisposeDoodads(WmvWorldScene scene);
 }
 
 public sealed partial class WmvTerrainSession
@@ -161,11 +174,12 @@ public sealed partial class WmvTerrainSession
         public double TimeoutStartedAtMs = double.NaN;
         public long LastCommitFrame;
         public double LastProgressMs = -1;
-        public string LastPhase = "";
+        public string LastPhase = "", LastDoodadPhase = "";
         public bool HasStart;
         public WorldPoint Start;
         public string StartReason = "";
         public string Failure;                 // a WMO-only map's world model could not be built
+        public DoodadsWork Doodads;            // protocol 17: the load's doodads (WmvTerrainSessionDoodads.cs)
         public int Out { get { return Pending + Preparing; } }
     }
 
@@ -243,6 +257,12 @@ public sealed partial class WmvTerrainSession
         Log("load {0}: obj0 ADT {1} ({2} bytes, md5 {3}) parsed in {4:0.###} ms on the worker: {5} MODF record(s), {6} MDDF record(s), " +
             "{7} issue(s)", j.Cmd.Load, w.Obj0FileDataID, bytes, md5, ms, obj0.Wmos.Length, obj0.Doodads.Length, obj0.Issues.Count);
         Plan(j, obj0.Wmos);
+        // The MDDF records wait for the world models to settle (WmvTerrainSessionDoodads.cs).
+        if (w.Doodads != null && w.Doodads.Offered)
+        {
+            w.Doodads.Mddf = obj0.Doodads;
+            w.Doodads.HaveMddf = true;
+        }
         AdvanceWorld(j);
     }
 
@@ -367,13 +387,20 @@ public sealed partial class WmvTerrainSession
         catch (Exception e) { Log("load {0}: sending worldShown failed: {1}", j.Cmd.Load, e.Message); }
     }
 
-    /// <summary>The scene's world models go (with its tiles: DisposeTiles): every instance, then every prototype.</summary>
+    /// <summary>The scene's world models go (with its tiles: DisposeTiles): its doodads first (instances, prototypes, textures),
+    /// then every world-model instance, then every world-model prototype.</summary>
     void DisposeWorldScene()
     {
         WmvWorldScene s = world;
         world = null;
         if (s == null || worldView == null)
             return;
+        int doodads = s.Doodads.Count, doodadPrototypes = s.DoodadPrototypes.Count;
+        try { worldView.DisposeDoodads(s); }
+        catch (Exception e) { Log("disposing the doodads failed: {0}", e.Message); }
+        if (doodads > 0 || doodadPrototypes > 0)
+            Log("the doodads of load {0} ({1}) disposed: {2} instance(s), {3} prototype(s); live doodad instances {4}, prototypes {5}, textures {6}",
+                s.Load, s.Kind, doodads, doodadPrototypes, WmvWorldDoodads.LiveInstances, WmvWorldDoodads.LivePrototypes, WmvWorldDoodads.LiveTextures);
         int instances = s.Instances.Count, prototypes = s.Prototypes.Count;
         foreach (WmvWorldInstance i in s.Instances)
         {
@@ -895,6 +922,13 @@ public sealed partial class WmvTerrainSession
         AdvanceWorld(j);
         if (j != current)
             return false;
+        // The doodads, once the world models are settled (WmvTerrainSessionDoodads.cs).
+        if (w.Done && w.Doodads != null && w.Doodads.Started && !w.Doodads.Done)
+        {
+            PumpDoodads(j, nowMs);
+            if (j != current)
+                return false;
+        }
         SendProgress(j, false);
         return true;
     }
@@ -1128,11 +1162,16 @@ public sealed partial class WmvTerrainSession
         w.Done = true;
         if (w.LastCommitFrame == 0)
             w.LastCommitFrame = frame;
+        Log("load {0}: the world models are settled ({1}); decoded texture pixels held at most {2:0.0} MB, {3:0.0} MB now; " +
+            "{4} texture(s) decoded, {5} decoded again for a later world model{6}",
+            j.Cmd.Load, WorldStateName(w), w.PixelBytesHeldMax / 1048576.0, w.PixelBytesHeld / 1048576.0,
+            w.TexturesDecoded, w.TexturesRedecoded,
+            w.Doodads != null && w.Doodads.Offered ? "; the doodads begin" : "; reported after frame " + (w.LastCommitFrame + 2));
+        // The camera's moment, then the doodads (WmvTerrainSessionDoodads.cs); the report waits for them.
+        StartDoodads(j);
+        if (j != current)
+            return;
         SendProgress(j, true);
-        Log("load {0}: the world models are settled ({1}); reported after frame {2}; decoded texture pixels held at most {3:0.0} MB, {4:0.0} MB now; " +
-            "{5} texture(s) decoded, {6} decoded again for a later world model",
-            j.Cmd.Load, WorldStateName(w), w.LastCommitFrame + 2, w.PixelBytesHeldMax / 1048576.0, w.PixelBytesHeld / 1048576.0,
-            w.TexturesDecoded, w.TexturesRedecoded);
     }
 
     /// <summary>A WMO-only map's world load: reported built once its scene has been on screen two frames (FinishBuilt's
@@ -1181,6 +1220,7 @@ public sealed partial class WmvTerrainSession
             m.Root = null;
             m.Groups = new WmoGroup[0];
         }
+        EndDoodads(j, ended);
     }
 
     // ---------------------------------------------------------------- progress and the report
@@ -1227,10 +1267,18 @@ public sealed partial class WmvTerrainSession
         if (worldView == null)
             return;
         double now = j.Clock.Elapsed.TotalMilliseconds;
-        string phase = WorldPhase(w);
-        if (!force && phase == w.LastPhase && w.LastProgressMs >= 0 && now - w.LastProgressMs < ProgressIntervalMs)
-            return;
+        string phase = WorldPhase(w), doodadPhase = DoodadPhase(w.Doodads);
+        // A phase change goes out at once -- the doodads' alone at most every DoodadPhaseIntervalMs (it can change every
+        // frame) -- and otherwise at most every ProgressIntervalMs.
+        if (!force && w.LastProgressMs >= 0)
+        {
+            double since = now - w.LastProgressMs;
+            bool doodadChange = doodadPhase != w.LastDoodadPhase && since >= DoodadPhaseIntervalMs;
+            if (phase == w.LastPhase && !doodadChange && since < ProgressIntervalMs)
+                return;
+        }
         w.LastPhase = phase;
+        w.LastDoodadPhase = doodadPhase;
         w.LastProgressMs = now;
         var r = new WmvIpcClient.WorldProgressReport
         {
@@ -1250,6 +1298,7 @@ public sealed partial class WmvTerrainSession
             else if (pw.State == "failed") r.PlacementsFailed++;
             else if (pw.State == "unsupported") r.ModelsUnsupported++;
         }
+        FillDoodadProgress(w, r);
         try { worldView.ReportWorldProgress(r); }
         catch (Exception e) { Log("load {0}: sending worldProgress failed: {1}", j.Cmd.Load, e.Message); }
     }
@@ -1353,6 +1402,12 @@ public sealed partial class WmvTerrainSession
             }
             r.WorldPlacementList.Add(e);
         }
+        // Protocol 17: the doodads, and the whole world's assembly.
+        if (w.Doodads != null)
+        {
+            FillDoodadReport(j, r);
+            r.WorldAssembly = AssemblyState(r.WorldState, r.DoodadState, r.WorldPlaced + r.DoodadPlaced > 0);
+        }
     }
 
     void LogWorld(int load, WmvIpcClient.TerrainTileReport r)
@@ -1373,5 +1428,7 @@ public sealed partial class WmvTerrainSession
                 p.Extents[3], p.Extents[4], p.Extents[5],
                 p.HasRendered ? string.Format(System.Globalization.CultureInfo.InvariantCulture, ", rendered ({0:0.##}, {1:0.##}, {2:0.##})..({3:0.##}, {4:0.##}, {5:0.##}), {6} group renderer(s)",
                                               p.Rendered[0], p.Rendered[1], p.Rendered[2], p.Rendered[3], p.Rendered[4], p.Rendered[5], p.GroupsDrawn) : "");
+        if (r.HasDoodads)
+            LogDoodads(load, r);
     }
 }

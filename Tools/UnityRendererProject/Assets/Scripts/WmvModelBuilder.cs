@@ -123,6 +123,45 @@ public class WmvBuildOptions
     /// slot (the host's hand-texture rule for merged parts). The key indexes the decoded textures
     /// dictionary like a slot does; the wrap flags still come from the batch's own slot.</summary>
     public Dictionary<int, int> BaseTextureOverride;
+    /// <summary>A world doodad (stage 07, docs/world-viewer/07-doodads.md): a static mesh whatever bones the model has (the
+    /// rest pose the file stores), no emitters and no animator. The material animator still applies the rest state (time 0)
+    /// once, as for every model; nothing evaluates per frame.</summary>
+    public bool Static;
+    /// <summary>The textures come from here instead of a new upload per build: (slot, decoded image, alpha dropped, wrap X,
+    /// wrap Y) -> the texture, owned by the provider (never in the model's Textures, never destroyed with it). Null: the
+    /// builder uploads its own.</summary>
+    public Func<int, BlpImage, bool, bool, bool, Texture2D> TextureProvider;
+    /// <summary>A build that throws destroys what it made (its mesh, materials, textures and objects) and leaves the
+    /// model count as it was, before the exception goes on.</summary>
+    public bool ReleaseOnFailure;
+}
+
+/// <summary>What a build has made so far, for WmvBuildOptions.ReleaseOnFailure.</summary>
+public sealed class WmvBuildScratch
+{
+    public WmvRuntimeModel Result;
+    public Mesh Mesh;
+    public List<Material> Materials;
+    public List<Texture2D> Textures;
+    public GameObject Root;
+
+    /// <summary>Builds released after throwing, and the objects the last one destroyed (the self-test's).</summary>
+    public static int Releases, LastReleasedObjects;
+
+    public void Release()
+    {
+        int n = 0;
+        if (Root != null) { UnityEngine.Object.Destroy(Root); n++; }
+        if (Mesh != null) { UnityEngine.Object.Destroy(Mesh); n++; }
+        if (Materials != null)
+            foreach (Material m in Materials) if (m != null) { UnityEngine.Object.Destroy(m); n++; }
+        if (Textures != null)
+            foreach (Texture2D t in Textures) if (t != null) { UnityEngine.Object.Destroy(t); n++; }
+        if (Result != null)
+            Result.Dispose();
+        Releases++;
+        LastReleasedObjects = n;
+    }
 }
 
 /// <summary>One texture upload and the decoded image it was made from.</summary>
@@ -231,15 +270,25 @@ public class WmvRuntimeModel
     /// </summary>
     public static int Live { get { return live; } }
     static int live;
-    bool disposed;
+    bool disposed, leftCount;
 
     public WmvRuntimeModel() { live++; }
+
+    /// <summary>Out of Live from now on (a world doodad's prototype: the world keeps its own tallies, WmvWorldDoodads);
+    /// Dispose then leaves the count alone.</summary>
+    public void LeaveLiveCount()
+    {
+        if (disposed || leftCount)
+            return;
+        leftCount = true;
+        live--;
+    }
 
     /// <summary>Destroy every runtime resource this model owns.</summary>
     public void Dispose()
     {
         // Idempotent for the count: a part can be disposed by the dresser and again by its owner.
-        if (!disposed) { disposed = true; live--; }
+        if (!disposed) { disposed = true; if (!leftCount) live--; }
         if (Root != null) UnityEngine.Object.Destroy(Root);
         if (Mesh != null) UnityEngine.Object.Destroy(Mesh);
         foreach (var m in Materials) if (m != null) UnityEngine.Object.Destroy(m);
@@ -1082,6 +1131,26 @@ public static class WmvModelBuilder
                                         bool[] submeshVisible = null,
                                         WmvBuildOptions options = null)
     {
+        if (options == null || !options.ReleaseOnFailure)
+            return BuildCore(model, skin, decodedTextures, objectName, log, geosets, submeshVisible, options, null);
+        var scratch = new WmvBuildScratch();
+        try
+        {
+            return BuildCore(model, skin, decodedTextures, objectName, log, geosets, submeshVisible, options, scratch);
+        }
+        catch
+        {
+            scratch.Release();
+            throw;
+        }
+    }
+
+    static WmvRuntimeModel BuildCore(M2ParsedModel model, M2ParsedSkin skin,
+                                     Dictionary<int, BlpImage> decodedTextures,
+                                     string objectName, Action<string> log,
+                                     HashSet<int> geosets, bool[] submeshVisible,
+                                     WmvBuildOptions options, WmvBuildScratch scratch)
+    {
         if (model == null || skin == null)
             throw new WowParseException("builder: nothing to build");
         // The host's per-submesh list only means something against the skin it was made for.
@@ -1099,6 +1168,7 @@ public static class WmvModelBuilder
             throw new WowParseException("builder: skin profile has no draw batches");
 
         var result = new WmvRuntimeModel();
+        if (scratch != null) scratch.Result = result;
 
         // ---- geometry: all model vertices once, converted to Unity space --------------
         int n = model.Vertices.Length;
@@ -1134,6 +1204,7 @@ public static class WmvModelBuilder
         }
 
         var mesh = new Mesh { name = objectName + "_mesh" };
+        if (scratch != null) scratch.Mesh = mesh;
         mesh.indexFormat = n > 65000
             ? UnityEngine.Rendering.IndexFormat.UInt32
             : UnityEngine.Rendering.IndexFormat.UInt16;
@@ -1151,6 +1222,8 @@ public static class WmvModelBuilder
         // Keyed by slot AND by whether the alpha channel was discarded, because the same slot
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
         var textureCache = new Dictionary<int, WmvTextureUpload>();
+        if (scratch != null) { scratch.Materials = materials; scratch.Textures = textures; }
+        Func<int, BlpImage, bool, bool, bool, Texture2D> provider = options != null ? options.TextureProvider : null;
         var drawOrder = new List<WmvDrawOrderKey>();
         var animBindings = new List<WmvMaterialAnimBinding>();
         var gateHidden = new List<bool>();
@@ -1289,7 +1362,7 @@ public static class WmvModelBuilder
             bool baseWrapX, baseWrapY;
             TextureWrap(model, wrapSlot, unit0Env, out baseWrapX, out baseWrapY);
             Texture2D tex = GetTexture(decodedTextures, textureCache, textures, null, textureSlot,
-                                       dropAlpha, baseWrapX, baseWrapY, objectName);
+                                       dropAlpha, baseWrapX, baseWrapY, objectName, provider);
             // An environment unit is sampled by generated sphere-map coordinates, which must not
             // wrap; a unit fed by a stored UV set is a normal repeating texture. Its own alpha is
             // kept whenever the combiner reads it.
@@ -1301,7 +1374,7 @@ public static class WmvModelBuilder
             bool unit1WrapX, unit1WrapY;
             TextureWrap(model, unit1Slot, unit1Env, out unit1WrapX, out unit1WrapY);
             Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, null, unit1Slot,
-                                            unit1DropAlpha, unit1WrapX, unit1WrapY, objectName);
+                                            unit1DropAlpha, unit1WrapX, unit1WrapY, objectName, provider);
             // Unit 2 keeps ITS OWN coordinate source and address mode. On the armour benchmark
             // the host binds the same file to unit 0 and unit 2, but the M2 gives them different
             // wrap flags (unit 0 repeats, unit 2 clamps), so reusing unit 0's sampler state would
@@ -1312,7 +1385,7 @@ public static class WmvModelBuilder
             bool unit2WrapX, unit2WrapY;
             TextureWrap(model, unit2Slot, unit2Env, out unit2WrapX, out unit2WrapY);
             Texture2D unit2Tex = GetTexture(decodedTextures, textureCache, textures, null, unit2Slot,
-                                            false, unit2WrapX, unit2WrapY, objectName);
+                                            false, unit2WrapX, unit2WrapY, objectName, provider);
 
             if (log != null)
             {
@@ -1485,6 +1558,7 @@ public static class WmvModelBuilder
         Bounds displayBounds = mesh.bounds;
 
         var go = new GameObject(objectName);
+        if (scratch != null) scratch.Root = go;
 
         // ---- material animation -------------------------------------------------------------
         result.Materials = materials.ToArray();
@@ -1602,6 +1676,12 @@ public static class WmvModelBuilder
         // approximate.
 
         SkinPlan skinPlan = PlanSkinning(model);
+        bool asStatic = options != null && options.Static;
+        if (asStatic && skinPlan.CanSkin)
+        {
+            skinPlan.CanSkin = false;
+            skinPlan.Reason = "a world doodad: built static, in the rest pose the file stores (WmvBuildOptions.Static)";
+        }
         var boneTransforms = new Transform[0];
         var restPositions = new Vector3[0];
 
@@ -1788,12 +1868,13 @@ public static class WmvModelBuilder
             if (log != null)
                 log("skin: drawn as a static mesh -- " + skinPlan.Reason);
             // No bones: an emitter still draws, at its authored model-space offset, with the
-            // identity where a bone matrix would be.
-            BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
-                          textures, objectName, log);
+            // identity where a bone matrix would be. A world doodad has none (WmvBuildOptions.Static).
+            if (!asStatic)
+                BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
+                              textures, objectName, log);
             // A static mesh has no bones to drive, but its materials may still move. The same
-            // animator supplies the clock, with nothing to pose.
-            if (!Debug_.NoAnim && NeedsClock(result) &&
+            // animator supplies the clock, with nothing to pose (none for a world doodad).
+            if (!asStatic && !Debug_.NoAnim && NeedsClock(result) &&
                 model.AnimatedSequence >= 0 && model.AnimatedSequence < model.Sequences.Length)
             {
                 var animator = go.AddComponent<WmvM2Animator>();
@@ -2907,6 +2988,24 @@ public static class WmvModelBuilder
         return (unit == 0 && model.Textures.Length > 0) ? 0 : -1;
     }
 
+    /// <summary>The texture slots a skin's batches bind on their declared units (ResolveTextureSlot, units 0 ..
+    /// TextureCount - 1): every texture a build of the model can sample, its emitters' aside. A world doodad fetches these
+    /// and no others (stage 07).</summary>
+    public static List<int> BatchTextureSlots(M2ParsedModel model, M2ParsedSkin skin)
+    {
+        var slots = new List<int>();
+        if (model == null || skin == null)
+            return slots;
+        foreach (M2Batch b in skin.Batches)
+            for (int u = 0; u < b.TextureCount; u++)
+            {
+                int s = ResolveTextureSlot(model, b, u);
+                if (s >= 0 && !slots.Contains(s))
+                    slots.Add(s);
+            }
+        return slots;
+    }
+
     /// <summary>
     /// Does the model want this batch drawn in its rest pose?
     ///
@@ -3299,7 +3398,8 @@ public static class WmvModelBuilder
     static Texture2D GetTexture(Dictionary<int, BlpImage> decodedTextures,
                                 Dictionary<int, WmvTextureUpload> cache, List<Texture2D> owned,
                                 Dictionary<int, WmvTextureUpload> reuse,
-                                int slot, bool dropAlpha, bool wrapX, bool wrapY, string objectName)
+                                int slot, bool dropAlpha, bool wrapX, bool wrapY, string objectName,
+                                Func<int, BlpImage, bool, bool, bool, Texture2D> provider = null)
     {
         if (slot < 0 || decodedTextures == null)
             return null;
@@ -3322,6 +3422,14 @@ public static class WmvModelBuilder
             return upload.Texture;
         }
 
+        if (provider != null)
+        {
+            // The provider's (WmvBuildOptions.TextureProvider): shared, owned by it, never added to the model's own.
+            Texture2D shared = provider(slot, decoded, dropAlpha, wrapX, wrapY);
+            if (shared != null)
+                cache[key] = new WmvTextureUpload { Image = decoded, Texture = shared };
+            return shared;
+        }
         Texture2D tex = CreateTexture(decoded, objectName + "_tex" + slot + (dropAlpha ? "_opaque" : ""),
                                       dropAlpha);
         // Per axis, from the texture's own flags: the legacy viewport sets GL_REPEAT on the axis

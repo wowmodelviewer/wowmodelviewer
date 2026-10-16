@@ -224,6 +224,7 @@ void MapsViewer::resetTile()
   m_loadShown = false;
   m_progress = UnityIpcServer::WorldProgress();
   m_worldDetail.clear();
+  m_doodadDetail.clear();
 }
 
 // ---------------------------------------------------------------- a map picked
@@ -1204,6 +1205,7 @@ void MapsViewer::EnterWorld()
     m_loadShown = false;
     m_progress = UnityIpcServer::WorldProgress();
     m_worldDetail = "The world model is being read.";
+    m_doodadDetail.clear();
     m_tilePhase = TilePhase::Loading;
     m_tileDetail = "Entering the world model: its root, groups and textures are being read and built.";
     m_entering = true;
@@ -1262,6 +1264,7 @@ void MapsViewer::EnterWorld()
   m_loadShown = false;
   m_progress = UnityIpcServer::WorldProgress();
   m_worldDetail = worldModels ? QString("Its world models are read once the tile is shown.") : QString();
+  m_doodadDetail.clear();
   m_tilePhase = TilePhase::Loading;
   m_tileDetail = "Entering the world at tile " + tileName(tx, ty) +
                  (worldModels ? QString(": its terrain, textures and world models are being read and built.")
@@ -1420,6 +1423,9 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
                         .arg(r.worldTextures) +
                       (r.worldReason.isEmpty() ? QString() : " " + r.worldReason);
   }
+  // The doodads' outcome (protocol 17), on a line of its own; a protocol-16 player's says why there are none.
+  m_doodadDetail = r.hasWorld ? doodadLine(r, global) : QString();
+  const bool doodadsOffered = r.hasDoodads && r.doodadState != "notOffered";
   if (r.status == "built" && global)
   {
     m_tilePhase = TilePhase::Loaded;
@@ -1428,7 +1434,8 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
     m_shownMap = r.mapId;
     m_shownView = r.view;
     m_tileDetail = "The world model loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + m_worldDetail +
-                   " No doodads, liquids or lighting.";
+                   (doodadsOffered ? " No liquids or lighting." : " No doodads, liquids or lighting.") +
+                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail);
   }
   else if (r.status == "built")
   {
@@ -1459,7 +1466,8 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
     if (r.holeCells > 0)
       geometry += QString(" %1 hole cell(s).").arg(r.holeCells);
     m_tileDetail = "Tile " + t + " loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + material + geometry +
-                   (r.hasWorld ? " " + m_worldDetail : QString());
+                   (r.hasWorld ? " " + m_worldDetail : QString()) +
+                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail);
   }
   else if (r.status == "failed")
   {
@@ -1560,12 +1568,42 @@ void MapsViewer::OnWorldShown(const UnityIpcServer::WorldShown & w)
 
 QString MapsViewer::progressLine(const UnityIpcServer::WorldProgress & p) const
 {
-  return QString("World models: %1 of %2 built").arg(p.modelsBuilt).arg(p.models) +
-         (p.modelsFailed > 0 ? QString(", %1 failed").arg(p.modelsFailed) : QString()) +
-         (p.modelsUnsupported > 0 ? QString(", %1 unsupported").arg(p.modelsUnsupported) : QString()) +
-         QString("; %1 of %2 placement(s) placed; %3 of %4 file(s) read (%5 MB); %6.")
-           .arg(p.placed).arg(p.placements).arg(p.filesAnswered).arg(p.filesAsked).arg(p.bytesReceived / 1048576.0, 0, 'f', 1)
-           .arg(p.phase);
+  const QString models = QString("World models: %1 of %2 built").arg(p.modelsBuilt).arg(p.models) +
+                         (p.modelsFailed > 0 ? QString(", %1 failed").arg(p.modelsFailed) : QString()) +
+                         (p.modelsUnsupported > 0 ? QString(", %1 unsupported").arg(p.modelsUnsupported) : QString()) +
+                         QString("; %1 of %2 placement(s) placed; %3 of %4 file(s) read (%5 MB); %6")
+                           .arg(p.placed).arg(p.placements).arg(p.filesAnswered).arg(p.filesAsked)
+                           .arg(p.bytesReceived / 1048576.0, 0, 'f', 1).arg(p.phase);
+  // Protocol 17: the doodads beside them, in their own phase (an older player, or a load that offered none, adds nothing).
+  if (p.doodadPhase.isEmpty() || p.doodadPhase == "notOffered")
+    return models + ".";
+  return models + QString("; doodads: %1 of %2 placed (%3 of %4 models built); ").arg(p.doodadPlaced).arg(p.doodadInstances)
+                    .arg(p.doodadModelsBuilt).arg(p.doodadModels) +
+         p.doodadPhase + ".";
+}
+
+QString MapsViewer::doodadLine(const UnityIpcServer::TerrainTileReport & r, bool global) const
+{
+  // A player before protocol 17 places none and reports none: said with why.
+  if (!r.hasDoodads)
+  {
+    UnityIpcServer * s = ipc();
+    const int protocol = s ? s->playerProtocolVersion() : 0;
+    return protocol > 0 && protocol < 17
+             ? QString("Doodads: not drawn by this Unity renderer build (protocol %1; doodads need 17).").arg(protocol)
+             : QString();
+  }
+  if (r.doodadState == "notOffered")
+    return "Doodads: not offered for this load" + (r.doodadReason.isEmpty() ? QString(".") : ": " + r.doodadReason + ".");
+  if (r.doodadInstances <= 0 && r.doodadPlaced <= 0)
+    return global ? QString("Doodads: none placed in this world model.") : QString("Doodads: none placed on this tile.");
+  // The player's reason appended, never passed through arg().
+  return QString("Doodads: %1 of %2 placed (%3 models, %4 textures); %5 failed, %6 unsupported, %7 not requested.")
+           .arg(r.doodadPlaced).arg(r.doodadInstances).arg(r.doodadModels).arg(r.doodadTextures).arg(r.doodadFailed)
+           .arg(r.doodadUnsupported).arg(r.doodadNotRequested) +
+         (r.doodadEnded > 0 ? QString(" %1 ended with the load.").arg(r.doodadEnded) : QString()) +
+         (r.doodadModelsPartial > 0 ? QString(" %1 model(s) drawn without some texture.").arg(r.doodadModelsPartial) : QString()) +
+         (r.doodadState != "complete" && !r.doodadReason.isEmpty() ? " " + r.doodadReason : QString());
 }
 
 void MapsViewer::OnWorldProgress(const UnityIpcServer::WorldProgress & p)

@@ -68,6 +68,11 @@ public sealed class WmvWorldScene
     public readonly List<WmvWorldInstance> Instances = new List<WmvWorldInstance>();
     /// <summary>Each placed world model's geometry (the floor and start-point queries; WorldModelScene.cs).</summary>
     public readonly List<WorldModelGeometry> Geometries = new List<WorldModelGeometry>();
+    /// <summary>Protocol 17: the scene's doodads (WmvWorldDoodads.cs) -- one prototype per M2, an instance per doodad, the
+    /// textures they share. Never floors, never in Geometries or the scene's box.</summary>
+    public readonly Dictionary<uint, WmvDoodadPrototype> DoodadPrototypes = new Dictionary<uint, WmvDoodadPrototype>();
+    public readonly List<WmvDoodadInstance> Doodads = new List<WmvDoodadInstance>();
+    public WmvDoodadTextures DoodadTextures;
     /// <summary>The world box of what is placed (game frame): a WMO-only scene's targets and its overview.</summary>
     public bool HasBox;
     public WorldPoint BoxMin, BoxMax;

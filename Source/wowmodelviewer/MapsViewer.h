@@ -265,6 +265,9 @@ public:
   bool worldModelShown() const { return m_shownGlobal; }
   // The world's state in words: its world models while they load, and their outcome (empty: no world load).
   QString worldDetail() const { return m_worldDetail; }
+  // Protocol 17: the doodads' outcome in words, one line (empty until a world load is reported); with a protocol-16 player,
+  // why there are none.
+  QString doodadDetail() const { return m_doodadDetail; }
   // The last progress of the current world load (load 0: none).
   const UnityIpcServer::WorldProgress & worldProgress() const { return m_progress; }
 
@@ -333,6 +336,8 @@ private:
   // A world is on screen: a tile, or a WMO-only map's world model.
   bool worldOnScreen() const { return m_shownX >= 0 || m_shownGlobal; }
   QString progressLine(const UnityIpcServer::WorldProgress & p) const;
+  // Protocol 17: the doodads' line of a world load's report (global: a WMO-only map's world model, no tile).
+  QString doodadLine(const UnityIpcServer::TerrainTileReport & r, bool global) const;
 
   ModelViewer * m_viewer;
   bool m_active = false;
@@ -423,6 +428,7 @@ private:
   bool m_shownGlobal = false;
   UnityIpcServer::WorldProgress m_progress;
   QString m_worldDetail;
+  QString m_doodadDetail;
 };
 
 #endif // MAPSVIEWER_H
