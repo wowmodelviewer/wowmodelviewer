@@ -125,13 +125,40 @@ public static partial class WmvLifecycleSelfTest
             {
                 Doodads.DisposeInstances(scene.Doodads);
                 foreach (WmvDoodadPrototype p in scene.DoodadPrototypes.Values)
-                    Doodads.DisposePrototype(p);
+                    Doodads.DisposePrototype(p, scene.DoodadTextures);
             }
             scene.Doodads.Clear();
             scene.DoodadPrototypes.Clear();
             if (scene.DoodadTextures != null)
                 scene.DoodadTextures.Dispose();
             scene.DoodadTextures = null;
+            foreach (UnityEngine.Object o in owned)
+                if (o != null) UnityEngine.Object.DestroyImmediate(o);
+        }
+
+        // Streaming (stage 08): one doodad prototype evicted, the instances of a closing tile.
+        public void DisposeDoodadPrototype(WmvWorldScene scene, WmvDoodadPrototype p)
+        {
+            var owned = new List<UnityEngine.Object>();
+            if (p != null && p.Runtime != null)
+            {
+                owned.Add(p.Runtime.Root);
+                owned.Add(p.Runtime.Mesh);
+                owned.AddRange(p.Runtime.Materials);
+            }
+            if (Doodads != null)
+                Doodads.DisposePrototype(p, scene != null ? scene.DoodadTextures : null);
+            foreach (UnityEngine.Object o in owned)
+                if (o != null) UnityEngine.Object.DestroyImmediate(o);
+        }
+
+        public void DisposeDoodadInstances(List<WmvDoodadInstance> instances)
+        {
+            var owned = new List<UnityEngine.Object>();
+            foreach (WmvDoodadInstance i in instances)
+                if (i != null && i.Root != null) owned.Add(i.Root);
+            if (Doodads != null)
+                Doodads.DisposeInstances(instances);
             foreach (UnityEngine.Object o in owned)
                 if (o != null) UnityEngine.Object.DestroyImmediate(o);
         }

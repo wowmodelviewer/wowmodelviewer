@@ -525,6 +525,19 @@ public class WmvRuntimeTerrainTile
     /// frame and needs them gone when it counts.</summary>
     public void DisposeImmediate() { Release(true); }
 
+    /// <summary>Streaming (stage 08): released now -- off every tally, its root hidden -- and its objects handed to `later`, which
+    /// destroys them over the next frames (a closed tile's hundreds of objects never in one frame).</summary>
+    public void DisposeLater(List<UnityEngine.Object> later)
+    {
+        if (Root != null)
+            Root.SetActive(false);
+        laterSink = later;
+        Release(false);
+        laterSink = null;
+    }
+
+    List<UnityEngine.Object> laterSink;
+
     void Release(bool immediate)
     {
         if (!disposed) { disposed = true; live--; }
@@ -561,10 +574,11 @@ public class WmvRuntimeTerrainTile
         Array.Clear(ChunkMaterials, 0, ChunkMaterials.Length);
     }
 
-    static void Destroy(UnityEngine.Object o, bool immediate)
+    void Destroy(UnityEngine.Object o, bool immediate)
     {
         if (o == null) return;
-        if (immediate) UnityEngine.Object.DestroyImmediate(o);
+        if (laterSink != null) laterSink.Add(o);
+        else if (immediate) UnityEngine.Object.DestroyImmediate(o);
         else UnityEngine.Object.Destroy(o);
     }
 }

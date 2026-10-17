@@ -467,7 +467,7 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 17;
+  static const int PROTOCOL_VERSION = 18;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -536,6 +536,32 @@ public:
   // that leave their results to the timer's poll, so the window gets its turn.
   static const int MAP_ASSET_WAKE_BURST_MS = 8;
   static const int MAP_ASSET_WAKE_BURST_GAP_US = 1000;
+  // THE TRANSPORT CAP (docs/world-viewer/08-streaming.md 1.5), for every message, not only map files. Above
+  // TRANSPORT_RECEIVE_PAUSE_BYTES waiting to be sent nothing more is received -- no request can add an answer, and TCP
+  // pushes back on the client -- until it falls below TRANSPORT_RECEIVE_RESUME_BYTES. A client with more than
+  // TRANSPORT_HARD_CAP_BYTES waiting, or whose bytes waited TRANSPORT_STALL_DROP_MS with no send making progress, does
+  // not read and is dropped: the message that would pass the cap is not queued, nothing more goes to that connection,
+  // and the drop happens at the next safe point of a poll. A poll handles at most TRANSPORT_LINES_PER_POLL lines; the
+  // rest wait in the receive buffer for the next poll.
+  static const long long TRANSPORT_RECEIVE_PAUSE_BYTES = 32LL * 1024 * 1024;
+  static const long long TRANSPORT_RECEIVE_RESUME_BYTES = 8LL * 1024 * 1024;
+  static const long long TRANSPORT_HARD_CAP_BYTES = 256LL * 1024 * 1024;
+  static const int TRANSPORT_STALL_DROP_MS = 30000;
+  static const int TRANSPORT_LINES_PER_POLL = 64;
+  // STREAMING (protocol 18, docs/world-viewer/08-streaming.md 1.7): the region the player keeps around its camera -- the
+  // tiles within STREAM_RADIUS of the camera's tile wanted, kept while within STREAM_KEEP_RADIUS, at most
+  // STREAM_MAX_RESIDENT_TILES resident -- the requests it keeps out at once for the whole session (STREAM_REQUEST_CREDIT),
+  // and the tile loads the host keeps open at most. While a session lasts the map asset queue holds STREAM_QUEUE_MAX
+  // requests (more than the credit: a request of the shipped player is never refused for room) and STREAM_READS_IN_FLIGHT
+  // reads are in flight; a single-tile load keeps MAP_ASSET_QUEUE_MAX and MAP_ASSET_READS_IN_FLIGHT. A request's
+  // "priority" orders the queue (smaller first; equal ones first come first served).
+  static const int STREAM_RADIUS = 1;
+  static const int STREAM_KEEP_RADIUS = 2;
+  static const int STREAM_MAX_RESIDENT_TILES = 16;
+  static const int STREAM_REQUEST_CREDIT = 24;
+  static const int STREAM_MAX_TILE_LOADS = 24;
+  static const int STREAM_QUEUE_MAX = 64;
+  static const int STREAM_READS_IN_FLIGHT = 4;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -616,6 +642,10 @@ public:
   // Protocol 17: doodads in the world (DOODADS above): loadWorld's doodad budgets, the doodad getMapAsset roles, and the
   // doodads in worldProgress, terrainTileLoaded and runtimeState.
   bool playerPlacesDoodads() const { return m_client && m_unityReady && m_playerProtocol >= 17; }
+  // Protocol 18 (docs/world-viewer/08-streaming.md): the player streams the tiles around its camera in a world load that
+  // asks for it (loadWorld "streaming"), opening and closing tile loads of its own (streamTile) and reporting the region
+  // (streamState). An older player gets the single-tile loadWorld, as before.
+  bool playerStreams() const { return m_client && m_unityReady && m_playerProtocol >= 18; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -848,6 +878,12 @@ public:
     int doodadTextures = -1;
     long long doodadGpuGeometryBytes = -1; // the GPU size of their geometry and textures, as the player estimates it
     long long doodadGpuTextureBytes = -1;
+    // Protocol 18 (STREAMING): the session (-1 from an older player), and whether the whole-player scans were skipped (a
+    // runtimeState asked light: liveGameObjects, liveTexture2D, liveMeshes, liveMaterials, meshObjects, materialObjects -1).
+    bool light = false;
+    int streaming = -1;                    // 1: a session is on, 0: none
+    int streamTiles = -1, streamJobs = -1, streamRequestsOut = -1, streamPlacements = -1, streamDoodads = -1, sceneTerrainTextures = -1;
+    long long streamPrototypesEvicted = -1, streamTexturesEvicted = -1, streamFilesAskedAgain = -1, streamImagesShared = -1;
     int doodadVisible = -1;                // doodad instances drawn and culled last frame
     int doodadCulled = -1;
     int liveGameObjects = -1;
@@ -858,7 +894,8 @@ public:
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
   // or 0 when nothing was sent (no player, or one older than protocol 4).
-  int requestRuntimeState();
+  // light (protocol 18): the player skips its whole-player object scans (cheap enough to ask while a world streams).
+  int requestRuntimeState(bool light = false);
   // Raised on the GUI thread for every runtimeState answer.
   std::function<void(const RuntimeState &)> onRuntimeState;
 
@@ -951,6 +988,9 @@ public:
     // Protocol 17 (DOODADS above): the world load offers the doodads -- sent ("doodads":true and these budgets) only when
     // it is set and the player places doodads; otherwise the load is the protocol-16 loadWorld.
     bool doodads = false;
+    // Protocol 18 (STREAMING above): the world load is a streaming session's entry -- sent ("streaming" and the region's
+    // numbers) only when it is set and the player streams; otherwise the load is the single-tile loadWorld.
+    bool streaming = false;
     int maxM2FileBytes = MAX_M2_FILE_BYTES;
     int maxM2BytesPerLoad = MAX_M2_BYTES_PER_LOAD;
     int maxM2TextureBytes = MAX_M2_TEXTURE_BYTES;
@@ -1116,6 +1156,56 @@ public:
     long long doodadBytes = -1;
   };
   std::function<void(const WorldProgress &)> onWorldProgress;
+  // streamState (protocol 18): the player's streaming session, at most every quarter second -- where the camera is, each
+  // tile of the region and what it has, the requests out, what is resident and pooled, and the frames since the last one
+  // (docs/world-viewer/08-streaming.md 1.10). A number the player did not send reads -1.
+  struct StreamTile
+  {
+    int x = -1, y = -1;
+    int load = 0;                    // its tile load (0: not opened yet)
+    QString state;                   // "wanted", "opening", "loading", "built", "settled", "failed", "closing"
+    int filesAsked = 0, filesAnswered = 0;
+    long long bytes = 0;
+    int worldPlaced = 0, worldPlacements = 0, doodadsPlaced = 0, doodadInstances = 0;
+  };
+  struct StreamState
+  {
+    int load = 0;
+    double cameraX = 0.0, cameraY = 0.0, cameraZ = 0.0;
+    int cameraTileX = -1, cameraTileY = -1;
+    std::vector<StreamTile> tiles;
+    int tilesResident = -1, tilesLoading = -1, tilesWanted = -1, tilesOpened = -1, tilesClosed = -1, tilesFailed = -1;
+    int requestsOut = -1, requestsWaiting = -1;
+    long long filesAsked = -1, filesAnswered = -1, bytesReceived = -1;
+    int worldPrototypes = -1, worldPrototypesPooled = -1, doodadPrototypes = -1, doodadPrototypesPooled = -1;
+    int textures = -1, texturesPooled = -1;
+    int worldInstances = -1, doodadInstances = -1;
+    long long gpuTextureBytes = -1, gpuGeometryBytes = -1, poolBytes = -1;
+    long long prototypesEvicted = -1, texturesEvicted = -1;
+    double frameMsMax = -1.0, frameMsP95 = -1.0, uploadMsMax = -1.0, workMsMax = -1.0;
+    int framesOver33 = -1, framesOver50 = -1;
+    long long managedHeapBytes = -1;
+    QJsonObject raw;                 // the message as received (the harness keeps it)
+    QString describe() const;
+  };
+  std::function<void(const StreamState &)> onStreamState;
+  const StreamState & lastStreamState() const { return m_lastStreamState; }
+  long long streamStatesReceived() const { return m_streamStatesReceived; }
+  // TEST (protocol 18, the harnesses' acceptance flight): the player's free camera flies the path itself -- points (x, y, z
+  // in yards, world frame), speed in yards a second, pitch in degrees -- answered testFlightDone; 0 to a player that does
+  // not stream.
+  int sendTestFlight(const std::vector<double> & points, double speed, double pitch);
+  struct TestFlightDone
+  {
+    int request = 0;
+    QString status, reason;                // "done" | "refused" | "stopped"
+    double seconds = -1.0, frameMsMax = -1.0, distance = -1.0;
+    int frames = -1;
+  };
+  std::function<void(const TestFlightDone &)> onTestFlightDone;
+  // streamTile (protocol 18): the player opens and closes tile loads of its session; the viewer answers which it opened
+  // (with their load ids), refused (why) and closed -- the answer is queued as the reply (empty: none).
+  std::function<QJsonObject(const QJsonObject &)> onStreamTile;
 
   // THE VIEWER'S OWN READS (the Maps viewer's WDT reads, docs/world-viewer/05-maps-viewer-ui.md): a job the viewer gives
   // the map asset worker itself, decided and leased by the viewer. Its result comes back through this server's polls
@@ -1201,6 +1291,29 @@ public:
   };
   const MapReadStats & mapReadStats() const { return m_mapReadStats; }
   long long unsentBytes() const;
+  // THE TRANSPORT CAP's accounting, since the process began.
+  struct TransportStats
+  {
+    long long receivePauses = 0;       // times receiving was paused (TRANSPORT_RECEIVE_PAUSE_BYTES)
+    long long pollsPaused = 0;         // polls that received nothing for it
+    long long linesHandled = 0;        // lines handled
+    long long pollsLinesDeferred = 0;  // polls that left complete lines for the next (TRANSPORT_LINES_PER_POLL)
+    long long dropsHardCap = 0;        // clients dropped over TRANSPORT_HARD_CAP_BYTES
+    long long dropsStalled = 0;        // ... whose bytes waited TRANSPORT_STALL_DROP_MS with no send progress
+    long long messagesNotQueued = 0;   // messages not queued: their connection was being dropped
+    long long unsentBytesMax = 0;      // the most bytes waiting to be sent, after any message was queued
+  };
+  const TransportStats & transportStats() const { return m_transportStats; }
+  bool receivePaused() const { return m_receivePaused; }
+  // STREAMING: a session begins or ends -- the queue's room and the reads in flight (STREAM_QUEUE_MAX,
+  // STREAM_READS_IN_FLIGHT), and the answers' log: one line per answer outside a session, during one a summary every two
+  // seconds (WMV_LOG_MAP_ANSWERS=1 keeps the line per answer).
+  void setStreaming(bool on);
+  // STREAMING: every request waiting whose load has ended (onMapAssetStale) answered stale now; returns how many.
+  int answerStaleWaiting();
+  bool streaming() const { return m_streaming; }
+  int mapAssetQueueMax() const { return m_mapAssetQueueMax; }
+  int mapReadsInFlightMax() const { return m_mapReadsInFlightMax; }
   // One getMapAsset answered: what was asked and what went back.
   struct MapAssetServed
   {
@@ -1292,6 +1405,8 @@ public:
   long long mapAssetsQueued() const { return m_mapAssetsQueued; }
   long long mapAssetsRefusedQueueFull() const { return m_mapAssetsRefusedQueueFull; }
   long long mapAssetsQueueDropped() const { return m_mapAssetsQueueDropped; }   // since the process began
+  // STREAMING: answered stale while they waited (their load ended: a tile closed), not at the queue's front.
+  long long mapAssetsAnsweredStaleWaiting() const { return m_mapAssetsAnsweredStaleWaiting; }
   int mapAssetQueueDepthMax() const { return m_mapAssetQueueDepthMax; }
 
   // TEST HOOKS (the -terraintile test only; inert unless it sets them). The next getMapAsset (of role, or of any role
@@ -1329,6 +1444,12 @@ public:
   bool testTerrainReportHeld() const { return !m_heldReport.isEmpty(); }
   void testReleaseTerrainReport();
   void testFakeUnsentBytes(long long bytes) { m_fakeUnsentBytes = bytes; }
+  // TEST HOOKS of the transport cap (the in-process check with a real socket): smaller marks, a smaller kernel send
+  // buffer for the connections accepted from now on (0: the usual), and bytes queued as a message of their own -- the
+  // same append every viewer push takes.
+  void testSetTransportLimits(long long pauseBytes, long long resumeBytes, long long hardCapBytes, int stallMs,
+                              int linesPerPoll, int sendBufferBytes);
+  void testPushBytes(long long bytes);
   void testReleaseMapRead();
   bool testWaitMapReads(int ms);
   // A terrainTileLoaded taken as if the player had sent it (the -terraintile in-process checks of what a report is read
@@ -1678,6 +1799,17 @@ private:
   static void addParticleColor(QJsonObject & msg, int m2FileDataID);
   void queueJson(const QJsonObject & obj);
   void dropClient(const char * why);
+  // THE TRANSPORT CAP: the receive pause updated from the bytes waiting; complete lines of the receive buffer handled
+  // while the poll's budget lasts (false: a handler dropped the client); a message admitted to the send buffer or not
+  // (the hard cap); the stall of the bytes waiting checked; the client dropped at a safe point of a poll when asked.
+  void handleStreamState(const QJsonObject & msg);
+  void logMapAnswerSummary(bool force);
+  void updateReceivePause();
+  bool handleBufferedLines(int & budget);
+  bool admitQueued(size_t bytes);
+  void noteQueued();
+  void checkSendStall();
+  void dropPendingClient();
 
   wxTimer m_timer;
   unsigned long long m_listen = 0;   // SOCKET (kept opaque here to keep winsock out of the header)
@@ -1751,8 +1883,51 @@ private:
   long long m_mapAssetPollsTotal = 0;
   long long m_mapAssetsQueued = 0;
   long long m_mapAssetsRefusedQueueFull = 0;
+  long long m_mapAssetsAnsweredStaleWaiting = 0;
   long long m_mapAssetsQueueDropped = 0;
   int m_mapAssetQueueDepthMax = 0;
+  // THE TRANSPORT CAP
+  TransportStats m_transportStats;
+  bool m_receivePaused = false;
+  std::string m_dropPending;            // why the client is to be dropped at the next safe point of a poll ("": not)
+  qint64 m_sendProgressNs = -1;         // m_clock when a send last made progress, or bytes began to wait
+  long long m_receivePauseBytes = TRANSPORT_RECEIVE_PAUSE_BYTES;
+  long long m_receiveResumeBytes = TRANSPORT_RECEIVE_RESUME_BYTES;
+  long long m_hardCapBytes = TRANSPORT_HARD_CAP_BYTES;
+  int m_stallDropMs = TRANSPORT_STALL_DROP_MS;
+  int m_linesPerPoll = TRANSPORT_LINES_PER_POLL;
+  int m_sendBufferBytes = 64 * 1024 * 1024;
+  // STREAMING
+  bool m_streaming = false;
+  int m_mapAssetQueueMax = MAP_ASSET_QUEUE_MAX;
+  int m_mapReadsInFlightMax = MAP_ASSET_READS_IN_FLIGHT;
+  bool m_logEachMapAnswer = true;
+  long long m_answersSinceSummary = 0, m_answeredAvailableSinceSummary = 0, m_answeredStaleSinceSummary = 0;
+  long long m_answeredOtherSinceSummary = 0, m_answerBytesSinceSummary = 0;
+  qint64 m_answerSummaryNs = -1;
+  StreamState m_lastStreamState;
+  long long m_streamStatesReceived = 0;
+  qint64 m_streamStateLogNs = -1;
+};
+
+// TEST HOOK (docs/world-viewer/08-streaming.md 1.5): a raw local client of a server's port, for the in-process check of
+// the transport cap with a real socket. It connects with a receive buffer of the given size, writes text whole, and
+// reads only when told to.
+class UnityIpcTestClient
+{
+public:
+  UnityIpcTestClient() = default;
+  ~UnityIpcTestClient();
+  UnityIpcTestClient(const UnityIpcTestClient &) = delete;
+  UnityIpcTestClient & operator=(const UnityIpcTestClient &) = delete;
+  bool connectTo(int port, int receiveBufferBytes);
+  bool sendText(const std::string & text);                  // blocking, whole
+  long long readAvailable(std::string * into = nullptr);    // what has arrived (non-blocking); -1 once the server closed
+  void close();
+  bool connected() const { return m_socket != 0; }
+
+private:
+  unsigned long long m_socket = 0;
 };
 
 #endif // UNITYIPCSERVER_H

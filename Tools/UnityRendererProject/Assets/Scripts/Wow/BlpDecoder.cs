@@ -53,6 +53,13 @@ namespace Wmv.Wow
         public int MipLevel;
         public string Encoding = ""; // human-readable, for diagnostics
         public bool HasAlpha;
+        /// <summary>Stage 08: the stored DXT levels flipped for the model convention (BlpBlocks.PrepareForModels), when the
+        /// image goes up as its own blocks; Rgba is then null.</summary>
+        public BlpBlockChain Blocks;
+        /// <summary>Why a file prepared for a block upload was decoded instead (null: blocks, or never asked).</summary>
+        public string BlocksNotUsed;
+        /// <summary>The bytes the image holds: its RGBA32 pixels or its blocks.</summary>
+        public long HeldBytes { get { return Rgba != null ? Rgba.LongLength : Blocks != null ? Blocks.Bytes : 0; } }
     }
 
     /// <summary>The pixel format of a BLP2 file, as Decode chooses it.</summary>

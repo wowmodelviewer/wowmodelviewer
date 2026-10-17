@@ -296,6 +296,20 @@ ModelViewer::ModelViewer()
       LOG_INFO << "[maps] a GUI update took" << ms << "ms (the panel and the overhead map" << panelMs << "ms, the viewport, its "
                   "notice and the labels" << ms - panelMs << "ms)";
   };
+  // STREAMING (protocol 18): the session's state (four times a second at most): the streaming line and the overhead map's
+  // streamed tiles, timed as onChanged is.
+  m_maps->onStreamChanged = [this]() {
+    QElapsedTimer t;
+    t.start();
+    if (fileControl)
+      fileControl->MapsStreamChanged();
+    if (mapOverview && isMapsMode())
+      mapOverview->StreamChanged();
+    const double ms = t.nsecsElapsed() / 1e6;
+    m_maps->noteUiUpdate(ms);
+    if (ms > 8.0)
+      LOG_INFO << "[maps] a streaming update took" << ms << "ms";
+  };
   // A minimap picture came: the overhead map repaints, nothing else.
   m_maps->onImagesChanged = [this]() {
     if (mapOverview && isMapsMode())
@@ -1904,6 +1918,7 @@ ModelViewer::~ModelViewer()
   if (m_maps)
   {
     m_maps->onChanged = nullptr;
+    m_maps->onStreamChanged = nullptr;
     m_maps->onImagesChanged = nullptr;
   }
   LOG_INFO << "Shutting down the program...";
@@ -2360,7 +2375,7 @@ void ModelViewer::CreateUnityViewport()
     m_modelAwaitedFailed = 0;
     m_playerContentPoll.Stop();
     // ... nor a terrain tile: no load of the player before it is answered or served any more.
-    m_terrainRequest = TerrainRequest();
+    ResetTerrainRequests();
     // The background before the model: a player started before the colour last changed has an older one from its
     // command line, and a restarted one may have been started by another run's settings.
     m_viewportBackgroundSent = wxColour();
@@ -2435,6 +2450,9 @@ void ModelViewer::CreateUnityViewport()
     if (m_maps)
       m_maps->OnWorldProgress(progress);
   };
+  // STREAMING (protocol 18): the player's tile loads, and its state of the session.
+  unityRendererHost->ipc()->onStreamTile = [this](const QJsonObject & msg) { return OnStreamTile(msg); };
+  unityRendererHost->ipc()->onStreamState = [this](const UnityIpcServer::StreamState & state) { OnStreamState(state); };
   unityRendererHost->ipc()->onWorldModelInspected = [this](const UnityIpcServer::WorldModelInspection & inspection) {
     if (m_maps)
       m_maps->OnWorldModelInspected(inspection);
@@ -3137,7 +3155,7 @@ void ModelViewer::SendLoadToUnity()
     m_sceneAwaitingRevision = 0;
     m_unityCharacterFailed = 0;
     // The player leaves the terrain view for it (a terrain load in flight is superseded): no terrain request is current.
-    m_terrainRequest = TerrainRequest();
+    ResetTerrainRequests();
     return;
   }
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
@@ -3178,7 +3196,7 @@ void ModelViewer::SendLoadToUnity()
   const bool mayShowOther = m_playerContent == PlayerContent::MapObject || m_playerContent == PlayerContent::Unknown ||
                             m_playerContent == PlayerContent::Terrain || recoloured || m_uncoverFence != 0;
   // ... and no terrain request is current any more (a terrain load in flight is superseded).
-  m_terrainRequest = TerrainRequest();
+  ResetTerrainRequests();
   m_uncoverFence = 0;
   if (mayShowOther && fileDataID > 0 && unityRendererHost->ipc()->playerDrawsMapObjects())
   {
@@ -3673,7 +3691,7 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
     const std::vector<int> & ids = group ? current->wmoGroupIds : current->wmoTextureIds;
     const int most = group ? current->maxWmoGroupsPerLoad : current->maxWmoTexturesPerLoad;
     const QString what = group ? "world-model group file" : "world-model texture";
-    if (current->wmoRootsServed <= 0)
+    if (current->wmoRootsServed <= 0 && current->sessionWmoRootsServed <= 0)
       return refused(QString("load %1 has been served no world-model root, so no %2 is").arg(load).arg(what));
     if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
       return refused(QString("load %1 has asked for %2 %3 before: each once per load").arg(load).arg(what).arg(fileDataID));
@@ -3694,9 +3712,10 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
     const std::vector<int> & ids = model ? current->m2ModelIds : skin ? current->m2SkinIds : current->m2TextureIds;
     const int most = model || skin ? current->maxM2ModelsPerLoad : current->maxM2TexturesPerLoad;
     const QString what = model ? "doodad model" : skin ? "doodad skin" : "doodad texture";
-    if (model && !current->obj0Served && current->wmoRootsServed <= 0)
+    if (model && !current->obj0Served && current->wmoRootsServed <= 0 && !current->sessionObj0Served &&
+        current->sessionWmoRootsServed <= 0)
       return refused(QString("load %1's obj0 ADT or world-model root has not been served, so no doodad model is").arg(load));
-    if (!model && current->m2ModelsServed <= 0)
+    if (!model && current->m2ModelsServed <= 0 && current->sessionM2ModelsServed <= 0)
       return refused(QString("load %1 has been served no doodad model, so no %2 is").arg(load).arg(what));
     if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
       return refused(QString("load %1 has asked for %2 %3 before: each once per load").arg(load).arg(what).arg(fileDataID));
@@ -4023,13 +4042,13 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
 }
 
 int ModelViewer::RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
-                              bool wdtInspected, const UnityIpcServer::WorldCamera * camera)
+                              bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming)
 {
-  return RequestLoad(mapId, tileX, tileY, true, globalWmo, globalWmoFileDataID, why, wdtInspected, camera);
+  return RequestLoad(mapId, tileX, tileY, true, globalWmo, globalWmoFileDataID, why, wdtInspected, camera, streaming);
 }
 
 int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
-                             bool wdtInspected, const UnityIpcServer::WorldCamera * camera)
+                             bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming)
 {
   why.clear();
   const bool noTile = world && globalWmo;
@@ -4070,6 +4089,8 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
   // DOODADS (protocol 17): a world load offers them to a player that places them, within the command's defaults
   // (UnityIpcServer::MAX_M2_*); an older player's load is the protocol-16 one, and no doodad file is served for it.
   command.doodads = world && ipc->playerPlacesDoodads();
+  // STREAMING (protocol 18): a tile map's world load to a player that streams, when asked for.
+  command.streaming = streaming && world && !noTile && command.doodads && ipc->playerStreams();
   if (!(world ? ipc->sendLoadWorld(command) : ipc->sendLoadTerrainTile(command)))
     return refuse("the load could not be sent to the player");
   // Raised only now that the load is out: the serial counts the loads the player was sent.
@@ -4109,7 +4130,10 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
     request.maxM2TexturesPerLoad = command.maxM2TexturesPerLoad;
     request.maxDoodadInstancesPerLoad = command.maxDoodadInstancesPerLoad;
   }
+  ResetTerrainRequests();
   m_terrainRequest = request;
+  m_streamSession = command.streaming;
+  ipc->setStreaming(command.streaming);
   // The player drops the model or world model it was building for this (the latest command wins; the one it shows stays,
   // hidden), so the waits for either end here. A model dropped so is one the player finished without, and what it shows
   // instead must not pass for it (m_modelAwaitedFailed; a tile on show needs no notice): a record kept, as one already
@@ -4139,9 +4163,203 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
            << (wdtInspected ? QString("; the WDT read whole by the map asset worker for the tile grid (%1 ms), none on this "
                                       "thread").arg(entry ? entry->inspection.milliseconds : -1.0)
                             : QString("; the WDT read whole on this thread first, in %1 ms")
-                                .arg(entry ? entry->inspection.milliseconds : -1.0));
+                                .arg(entry ? entry->inspection.milliseconds : -1.0))
+           << (command.streaming ? QString("; a streaming session: the tiles within %1 of the camera's (protocol 18)")
+                                     .arg(UnityIpcServer::STREAM_RADIUS)
+                                 : QString());
   UpdateUnityViewportState();
   return command.load;
+}
+
+ModelViewer::TerrainRequest * ModelViewer::terrainRequestFor(int load)
+{
+  if (load > 0 && load == m_terrainRequest.load)
+    return &m_terrainRequest;
+  auto it = m_streamLoads.find(load);
+  return it != m_streamLoads.end() ? &it->second : nullptr;
+}
+
+const ModelViewer::TerrainRequest * ModelViewer::terrainRequestFor(int load) const
+{
+  if (load > 0 && load == m_terrainRequest.load)
+    return &m_terrainRequest;
+  auto it = m_streamLoads.find(load);
+  return it != m_streamLoads.end() ? &it->second : nullptr;
+}
+
+void ModelViewer::ResetTerrainRequests()
+{
+  if (m_streamSession || !m_streamLoads.empty())
+    LOG_INFO << "[unity-stream] the streaming session of load" << m_terrainRequest.load << "ends:" << (int)m_streamLoads.size()
+             << "tile load(s) closed with it (" << m_streamTilesOpened << "opened," << m_streamTilesClosed << "closed,"
+             << m_streamTilesRefused << "refused in all)";
+  m_terrainRequest = TerrainRequest();
+  m_streamLoads.clear();
+  m_streamState = UnityIpcServer::StreamState();
+  if (m_streamSession)
+  {
+    m_streamSession = false;
+    UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
+    if (ipc)
+      ipc->setStreaming(false);
+  }
+}
+
+QJsonObject ModelViewer::OnStreamTile(const QJsonObject & msg)
+{
+  QJsonObject reply;
+  reply["type"] = "streamTileAnswer";
+  const int load = msg.value("load").toInt(0);
+  reply["load"] = load;
+  QJsonArray opened, refused, closed;
+  const bool session = m_streamSession && load > 0 && load == m_terrainRequest.load;
+  const bool loading = MapAssetWait();
+  // Closed first: their places go to the tiles opened in the same message.
+  for (const QJsonValue & v : msg.value("close").toArray())
+  {
+    const int tileLoad = v.toInt(0);
+    if (!session)
+      continue;
+    if (tileLoad == m_terrainRequest.load)
+    {
+      // The entry tile left the region: whatever its load still asks for is stale.
+      if (!m_terrainRequest.ended)
+      {
+        m_terrainRequest.ended = true;
+        m_terrainRequest.endedStatus = "closed by the streaming session";
+      }
+      closed.append(tileLoad);
+      m_streamTilesClosed++;
+      continue;
+    }
+    auto it = m_streamLoads.find(tileLoad);
+    if (it == m_streamLoads.end())
+      continue;
+    LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(it->second.tileX).arg(it->second.tileY)
+             << "closed (tile load" << tileLoad << ", read" << it->second.reads << "file(s))";
+    m_streamLoads.erase(it);
+    closed.append(tileLoad);
+    m_streamTilesClosed++;
+  }
+  for (const QJsonValue & v : msg.value("open").toArray())
+  {
+    const QJsonObject o = v.toObject();
+    const int x = o.value("x").toInt(-1), y = o.value("y").toInt(-1);
+    QJsonObject answer;
+    answer["x"] = x;
+    answer["y"] = y;
+    QString why;
+    if (!session)
+      why = QString("load %1 is not the current streaming session (current %2%3)").arg(load).arg(m_terrainRequest.load)
+              .arg(m_streamSession ? "" : ", not streaming");
+    else if (loading)
+      why = "a client is being loaded";
+    else if (m_terrainRequest.ended && x == m_terrainRequest.tileX && y == m_terrainRequest.tileY)
+      why.clear();   // the entry tile opened again: a load of its own, as any
+    if (why.isEmpty() && session && !loading)
+    {
+      for (const auto & kv : m_streamLoads)
+        if (kv.second.tileX == x && kv.second.tileY == y)
+          why = QString("tile %1_%2 is open already as load %3").arg(x).arg(y).arg(kv.first);
+      if (why.isEmpty() && !m_terrainRequest.ended && m_terrainRequest.tileX == x && m_terrainRequest.tileY == y)
+        why = QString("tile %1_%2 is the session's entry tile, load %3").arg(x).arg(y).arg(m_terrainRequest.load);
+      if (why.isEmpty() && (int)m_streamLoads.size() >= UnityIpcServer::STREAM_MAX_TILE_LOADS)
+        why = QString("%1 tile loads are open, at most %2").arg(m_streamLoads.size()).arg(UnityIpcServer::STREAM_MAX_TILE_LOADS);
+    }
+    UnityIpcServer::TerrainTileCommand command;
+    if (why.isEmpty())
+    {
+      // A tile of the session's map that the client has (the WDT's own check, from the map catalogue's inspection: no
+      // read on this thread).
+      QString unresolved;
+      if (!ResolveTerrainTile(m_terrainRequest.mapId, x, y, command, unresolved, true, false))
+        why = unresolved;
+      else if (command.wdtFileDataID != m_terrainRequest.wdtFileDataID)
+        why = QString("the tile's WDT %1 is not the session's %2").arg(command.wdtFileDataID).arg(m_terrainRequest.wdtFileDataID);
+    }
+    if (!why.isEmpty())
+    {
+      answer["refused"] = why;
+      refused.append(answer);
+      m_streamTilesRefused++;
+      LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(x).arg(y) << "not opened:" << why;
+      continue;
+    }
+    // A load of its own, from the serial every load comes from (a later loadWorld never takes its number).
+    // A fresh request: the entry's map, client, catalogue and budgets, nothing had yet (fields added to TerrainRequest
+    // later start empty here: a budget left out reads 0, which serves nothing).
+    const TerrainRequest & e = m_terrainRequest;
+    TerrainRequest t;
+    t.load = ++m_terrainLoadSerial;
+    t.epoch = e.epoch;
+    t.mapId = e.mapId;
+    t.tileX = x;
+    t.tileY = y;
+    t.wdtFileDataID = e.wdtFileDataID;
+    t.wdtServed = true;               // the session's WDT, which the player has
+    t.catalogueGeneration = e.catalogueGeneration;
+    t.maxAssetBytes = e.maxAssetBytes;
+    t.maxTextureBytes = e.maxTextureBytes;
+    t.maxTextureBytesPerLoad = e.maxTextureBytesPerLoad;
+    t.maxTexturesPerLoad = e.maxTexturesPerLoad;
+    t.world = e.world;
+    t.maxWmoFileBytes = e.maxWmoFileBytes;
+    t.maxWmoBytesPerLoad = e.maxWmoBytesPerLoad;
+    t.maxWmoTextureBytes = e.maxWmoTextureBytes;
+    t.maxWmoTextureBytesPerLoad = e.maxWmoTextureBytesPerLoad;
+    t.maxWmoTexturesPerLoad = e.maxWmoTexturesPerLoad;
+    t.maxWmoModelsPerLoad = e.maxWmoModelsPerLoad;
+    t.maxWmoGroupsPerLoad = e.maxWmoGroupsPerLoad;
+    t.maxM2FileBytes = e.maxM2FileBytes;
+    t.maxM2BytesPerLoad = e.maxM2BytesPerLoad;
+    t.maxM2TextureBytes = e.maxM2TextureBytes;
+    t.maxM2TextureBytesPerLoad = e.maxM2TextureBytesPerLoad;
+    t.maxM2ModelsPerLoad = e.maxM2ModelsPerLoad;
+    t.maxM2TexturesPerLoad = e.maxM2TexturesPerLoad;
+    t.maxDoodadInstancesPerLoad = e.maxDoodadInstancesPerLoad;
+    t.sessionObj0Served = e.sessionObj0Served;
+    t.sessionWmoRootsServed = e.sessionWmoRootsServed;
+    t.sessionM2ModelsServed = e.sessionM2ModelsServed;
+    m_streamLoads[t.load] = t;
+    m_streamTilesOpened++;
+    answer["tileLoad"] = t.load;
+    opened.append(answer);
+    LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(x).arg(y) << "opened as load" << t.load << "("
+             << (int)m_streamLoads.size() << "tile load(s) open)";
+  }
+  reply["opened"] = opened;
+  reply["refused"] = refused;
+  reply["closed"] = closed;
+  reply["assetEpoch"] = m_terrainRequest.epoch;
+  return reply;
+}
+
+void ModelViewer::noteStreamSessionServed(const TerrainRequest & own, const QString & role, bool available)
+{
+  if (!m_streamSession || !available || (role != "obj0Adt" && role != "wmoRoot" && role != "m2Model"))
+    return;
+  if (own.load != m_terrainRequest.load && m_streamLoads.find(own.load) == m_streamLoads.end())
+    return;
+  const auto note = [&role](TerrainRequest & t) {
+    if (role == "obj0Adt")
+      t.sessionObj0Served = true;
+    else if (role == "wmoRoot")
+      t.sessionWmoRootsServed++;
+    else
+      t.sessionM2ModelsServed++;
+  };
+  note(m_terrainRequest);
+  for (auto & kv : m_streamLoads)
+    note(kv.second);
+}
+
+void ModelViewer::OnStreamState(const UnityIpcServer::StreamState & state)
+{
+  if (!m_streamSession || state.load != m_terrainRequest.load)
+    return;
+  m_streamState = state;
+  if (m_maps)
+    m_maps->OnStreamState(state);
 }
 
 bool ModelViewer::ClearTerrain(const QString & reason)
@@ -4149,7 +4367,7 @@ bool ModelViewer::ClearTerrain(const QString & reason)
   UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
   if (!ipc || !ipc->sendClearTerrain(reason))
     return false;
-  m_terrainRequest = TerrainRequest();
+  ResetTerrainRequests();
   if (m_playerContent == PlayerContent::Terrain)
   {
     // The player leaves the terrain view for whatever it held under it.
@@ -4173,12 +4391,15 @@ QString ModelViewer::MapAssetStaleReason(const QJsonObject & request) const
   const bool loading = MapAssetWait();
   const int load = request.value("load").toInt(0);
   const int epoch = request.value("assetEpoch").toInt(0);
+  const TerrainRequest * own = terrainRequestFor(load);
   if (m_terrainRequest.load <= 0)
     stale << QString("no terrain load is current (request load %1)").arg(load);
-  else if (load != m_terrainRequest.load)
-    stale << QString("request load %1, current %2").arg(load).arg(m_terrainRequest.load);
-  else if (m_terrainRequest.ended)
-    stale << QString("load %1 was reported %2").arg(load).arg(m_terrainRequest.endedStatus);
+  else if (!own)
+    stale << QString("request load %1, current %2").arg(load).arg(m_terrainRequest.load) +
+               (m_streamSession ? QString(" (a streaming session: not one of its %1 open tile load(s))").arg(m_streamLoads.size())
+                                : QString());
+  else if (own->ended)
+    stale << QString("load %1 was reported %2").arg(load).arg(own->endedStatus);
   const int epochNow = UnityAssetAccess::clientEpoch();
   if (epoch != epochNow)
     stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
@@ -4194,7 +4415,10 @@ UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject
   QElapsedTimer step;
   step.start();
   const bool loading = m_clientLoading || UnityAssetAccess::isClientLoading();
-  const TerrainRequest * current = m_terrainRequest.load > 0 ? &m_terrainRequest : nullptr;
+  // The request's own load: the entry's or one of the streaming session's tile loads (STREAMING); for any other the
+  // decision compares it with the entry's and answers stale.
+  TerrainRequest * own = terrainRequestFor(request.value("load").toInt(0));
+  const TerrainRequest * current = own ? own : (m_terrainRequest.load > 0 ? &m_terrainRequest : nullptr);
   // (Not asked while a client loads: the decision refuses first, and the client is half replaced.)
   const bool belongs = !loading && terrainCatalogueBelongs();
   const int epochNow = UnityAssetAccess::clientEpoch();
@@ -4223,18 +4447,19 @@ UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject
   }
   // Accounted before the read, whatever comes of it: the read itself is what the load's limits count. A texture's
   // limit is held against the load's budget until its result comes (decideMapAssetRequest).
-  noteMapAssetRead(m_terrainRequest, request);
+  TerrainRequest & owner = *own;    // (the decision passed: the request's load is current)
+  noteMapAssetRead(owner, request);
   const QString role = request.value("role").toString();
   if (role == "texture")
-    m_terrainRequest.textureBytesReserved += decision.maxBytes;
+    owner.textureBytesReserved += decision.maxBytes;
   else if (role == "wmoRoot" || role == "wmoGroup")
-    m_terrainRequest.wmoBytesReserved += decision.maxBytes;
+    owner.wmoBytesReserved += decision.maxBytes;
   else if (role == "wmoTexture")
-    m_terrainRequest.wmoTextureBytesReserved += decision.maxBytes;
+    owner.wmoTextureBytesReserved += decision.maxBytes;
   else if (role == "m2Model" || role == "m2Skin")
-    m_terrainRequest.m2BytesReserved += decision.maxBytes;
+    owner.m2BytesReserved += decision.maxBytes;
   else if (role == "m2Texture")
-    m_terrainRequest.m2TextureBytesReserved += decision.maxBytes;
+    owner.m2TextureBytesReserved += decision.maxBytes;
   d.read = true;
   d.fileDataID = request.value("fileDataID").toInt(0);
   d.maxBytes = decision.maxBytes;
@@ -4324,17 +4549,19 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
   const int fileDataID = request.value("fileDataID").toInt(0);
   // A texture's reservation is released by its own load, whatever came of the read (a load replaced since took its
   // accounting with it).
-  const bool currentLoad = m_terrainRequest.load > 0 && request.value("load").toInt(0) == m_terrainRequest.load;
+  // (STREAMING: the request's own load, the entry's or an open tile load's; a load closed since took its accounting with it.)
+  TerrainRequest * own = terrainRequestFor(request.value("load").toInt(0));
+  const bool currentLoad = own != nullptr;
   if (currentLoad && role == "texture")
-    m_terrainRequest.textureBytesReserved = std::max<qint64>(0, m_terrainRequest.textureBytesReserved - result.maxBytes);
+    own->textureBytesReserved = std::max<qint64>(0, own->textureBytesReserved - result.maxBytes);
   else if (currentLoad && (role == "wmoRoot" || role == "wmoGroup"))
-    m_terrainRequest.wmoBytesReserved = std::max<qint64>(0, m_terrainRequest.wmoBytesReserved - result.maxBytes);
+    own->wmoBytesReserved = std::max<qint64>(0, own->wmoBytesReserved - result.maxBytes);
   else if (currentLoad && role == "wmoTexture")
-    m_terrainRequest.wmoTextureBytesReserved = std::max<qint64>(0, m_terrainRequest.wmoTextureBytesReserved - result.maxBytes);
+    own->wmoTextureBytesReserved = std::max<qint64>(0, own->wmoTextureBytesReserved - result.maxBytes);
   else if (currentLoad && (role == "m2Model" || role == "m2Skin"))
-    m_terrainRequest.m2BytesReserved = std::max<qint64>(0, m_terrainRequest.m2BytesReserved - result.maxBytes);
+    own->m2BytesReserved = std::max<qint64>(0, own->m2BytesReserved - result.maxBytes);
   else if (currentLoad && role == "m2Texture")
-    m_terrainRequest.m2TextureBytesReserved = std::max<qint64>(0, m_terrainRequest.m2TextureBytesReserved - result.maxBytes);
+    own->m2TextureBytesReserved = std::max<qint64>(0, own->m2TextureBytesReserved - result.maxBytes);
   const bool wasRead = result.outcome == MapAssetWorker::Result::Outcome::Read;
   const wow::WdtInspection & inspection = result.inspection;
   if (wasRead)
@@ -4368,7 +4595,7 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
                      : QString("stale");
     answer.detail = QString("FileDataID %1 was not read: ").arg(fileDataID) + result.detail;
     if (currentLoad)
-      noteMapAssetResult(m_terrainRequest, role, 0, false);
+      noteMapAssetResult(*own, role, 0, false);
     return answer;
   }
   answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
@@ -4403,7 +4630,11 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
     }
   }
   result.bytes = QByteArray();   // a file not served is freed here
-  noteMapAssetResult(m_terrainRequest, role, answer.bytesRead, available);
+  if (own)
+  {
+    noteMapAssetResult(*own, role, answer.bytesRead, available);
+    noteStreamSessionServed(*own, role, available);
+  }
   return answer;
 }
 
@@ -4447,14 +4678,41 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
         mv->m_maps->OnTerrainTileLoaded(r);
     }
   } tellMaps{ this, report };
-  // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared.
-  if (report.load == 0 || report.load != m_terrainRequest.load)
+  // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared. (A
+  // streaming session's tile load ends with its report; what the player shows is the entry's.)
+  if (report.load != 0 && report.load != m_terrainRequest.load)
+  {
+    TerrainRequest * tileLoad = terrainRequestFor(report.load);
+    if (tileLoad && !tileLoad->ended)
+    {
+      tileLoad->ended = true;
+      tileLoad->endedStatus = report.status;
+    }
+    return;
+  }
+  if (report.load == 0)
     return;
   // The player has answered the load: anything it still asks for this load is answered stale, unread (TERRAIN TEXTURES).
   if (!m_terrainRequest.ended)
   {
     m_terrainRequest.ended = true;
     m_terrainRequest.endedStatus = report.status;
+  }
+  if (report.status != "built" && (m_streamSession || !m_streamLoads.empty()))
+  {
+    // STREAMING: the player ends a session with an entry that was not built (it failed before its tile, or was cleared):
+    // so does the host -- its tile loads closed (what they still have waiting answered stale), the queue and the reads a
+    // single load's again.
+    LOG_INFO << "[unity-stream] the streaming session of load" << report.load << "ends with its entry (" << report.status << "):"
+             << (int)m_streamLoads.size() << "tile load(s) closed with it";
+    m_streamLoads.clear();
+    m_streamState = UnityIpcServer::StreamState();
+    if (m_streamSession)
+    {
+      m_streamSession = false;
+      if (UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr)
+        ipc->setStreaming(false);
+    }
   }
   const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
   // Protocol 17: the doodads' outcome, when the load offered them (the player's state name appended, never through arg()).
@@ -5221,7 +5479,7 @@ void ModelViewer::ResetClientState()
     UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
     if (ipc && ipc->playerDrawsTerrain())
       ipc->sendClearTerrain("the client was replaced");
-    m_terrainRequest = TerrainRequest();
+    ResetTerrainRequests();
     if (m_playerContent == PlayerContent::Terrain)
       m_playerContent = PlayerContent::Unknown;
   }

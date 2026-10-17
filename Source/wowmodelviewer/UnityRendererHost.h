@@ -267,6 +267,14 @@ private:
 
   UnityIpcServer * m_ipc = nullptr; // owned
 
+public:
+#ifdef _WINDOWS
+  // The player's process (0: none) -- the harnesses read its memory.
+  DWORD playerProcessId() const { return m_processId; }
+#endif
+
+private:
+
 #ifdef _WINDOWS
   // The player's top-level-turned-child window inside this panel (found lazily: the
   // player creates it asynchronously after process start).

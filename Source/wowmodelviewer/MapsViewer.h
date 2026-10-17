@@ -213,6 +213,8 @@ public:
   void OnWorldShown(const UnityIpcServer::WorldShown & shown);
   void OnWorldProgress(const UnityIpcServer::WorldProgress & progress);
   void OnWorldModelInspected(const UnityIpcServer::WorldModelInspection & inspection);
+  // Protocol 18: the player's streaming session around its camera (docs/world-viewer/08-streaming.md 1.10).
+  void OnStreamState(const UnityIpcServer::StreamState & state);
 
   // THE OVERHEAD MAP'S PICTURES (see the header): ThumbSide x ThumbSide RGBA thumbnails, MinimapBatch read at a time.
   static const int ThumbSide = 32;
@@ -270,6 +272,7 @@ public:
   QString doodadDetail() const { return m_doodadDetail; }
   // The last progress of the current world load (load 0: none).
   const UnityIpcServer::WorldProgress & worldProgress() const { return m_progress; }
+  const UnityIpcServer::StreamState & streamState() const { return m_stream; }
 
   // WHAT THE GRID AND THE NOTICE SHOW.
   int mapId() const { return m_mapId; }
@@ -306,6 +309,15 @@ public:
   const Timings & timings() const { return m_timings; }
   // Something shown changed: the panel repaints, the viewport's notice is decided again.
   std::function<void()> onChanged;
+  // STREAMING (protocol 18): the session's state changed (streamState, at most four times a second): the streaming line and
+  // the overhead map's streamed tiles follow -- nothing else, no layout (onChanged's work stays with what changes it).
+  std::function<void()> onStreamChanged;
+  // The session's line for the panel ("" with no session), and a tile's state in it ("" when it is not in the region).
+  QString streamDetail() const { return m_streamDetail; }
+  QString streamTileState(int x, int y) const;
+  bool streamOn() const { return m_load > 0 && m_stream.load == m_load; }
+  // Streaming: the target's tile is one the session holds (built or loading, not failed).
+  bool targetHeldByStream() const;
   // The current load (the terrain request it made), 0 for none.
   int load() const { return m_load; }
   int inspectionSerial() const { return m_inspection; }
@@ -427,6 +439,8 @@ private:
   bool m_loadShown = false;
   bool m_shownGlobal = false;
   UnityIpcServer::WorldProgress m_progress;
+  UnityIpcServer::StreamState m_stream;   // STREAMING: the session's last state (load 0: none)
+  QString m_streamDetail;
   QString m_worldDetail;
   QString m_doodadDetail;
 };

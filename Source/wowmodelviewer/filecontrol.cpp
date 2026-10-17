@@ -1328,6 +1328,12 @@ void FileControl::MapsChanged()
     m_mapPanel->Refresh2();
 }
 
+void FileControl::MapsStreamChanged()
+{
+  if (m_mapPanel && m_mode == ViewerMode::Maps)
+    m_mapPanel->StreamChanged();
+}
+
 namespace
 {
   // The catalogue's own states, in the order Browse lists them; a WDT the storage root does not list (a lookup, no

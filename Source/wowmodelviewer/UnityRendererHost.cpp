@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include <QElapsedTimer>
+
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
@@ -710,7 +712,14 @@ void UnityRendererHost::resizeEmbeddedWindow(bool puttingBack)
       }
       return;
     }
+    // Timed (stage 08): the move waits for the player's thread, which resizes its frame -- about 45 ms of this GUI thread
+    // when the Maps viewer's world is entered (the overhead map put away).
+    QElapsedTimer moveClock;
+    moveClock.start();
     MoveWindow(wnd, 0, 0, size.GetWidth(), size.GetHeight(), TRUE);
+    const double moveMs = moveClock.nsecsElapsed() / 1e6;
+    if (moveMs > 5.0)
+      LOG_INFO << "[viewport] sizing the player's window took" << moveMs << "ms (the player's thread answers it)";
   }
 }
 
@@ -852,7 +861,14 @@ void UnityRendererHost::handKeyboardOn(const char * from)
   }
   const HWND wnd = !m_notice && m_playerOnScreen && m_playerHold == 0 ? findEmbeddedWindow() : nullptr;
   if (wnd)
+  {
+    QElapsedTimer focusClock;
+    focusClock.start();
     ::SetFocus(wnd);
+    const double focusMs = focusClock.nsecsElapsed() / 1e6;
+    if (focusMs > 5.0)
+      LOG_INFO << "[input] handing the keyboard to the player took" << focusMs << "ms (the player's thread answers it)";
+  }
   if (inputTrace)
     LOG_INFO << "[input] host:" << from << "got the keyboard:"
              << (wnd ? "handed to the player" : m_notice ? "kept (a notice is up)" : !m_playerOnScreen ? "kept (the player is off screen)"

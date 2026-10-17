@@ -104,6 +104,8 @@ public interface IWmvTerrainView
     /// tile away (LeaveForModelLoad), and that load frames what it shows; otherwise clearTerrain did.</summary>
     void LeaveTerrainView(string why, bool forModelLoad);
     void DisposeTile(WmvRuntimeTerrainTile tile);
+    /// <summary>Streaming (stage 08): a closed tile -- released now, hidden, its objects destroyed over the next frames.</summary>
+    void DisposeTileLater(WmvRuntimeTerrainTile tile);
     /// <summary>Fill the counters of a report (live runtimes, Unity objects, memory), sampled now.</summary>
     void Sample(WmvIpcClient.TerrainTileReport report);
     /// <summary>A load is about to be reported "built" (its tile on screen two frames): the dumps, the capture.</summary>
@@ -192,6 +194,12 @@ public sealed partial class WmvTerrainSession
         public List<string> RetiredIds = new List<string>();
         // Protocol 16: the load's world models (null for a terrain load).
         public WorldWork World;
+        // Stage 08 (streaming, WmvTerrainSessionStream.cs): the tile of the session this job loads (null outside a session),
+        // the scene's terrain textures it holds a reference on until its tile binds them, and a tile ready to be added (the
+        // session adds it under its frame budget).
+        public StreamTile Stream;
+        public readonly List<uint> ResidentTextures = new List<uint>();
+        public bool AdoptReady;
 
         public string Tile2 { get { return Cmd.GlobalWmo ? "(no tile: a world model)" : Cmd.TileX + "_" + Cmd.TileY; } }
     }
@@ -317,10 +325,13 @@ public sealed partial class WmvTerrainSession
         if (cmd == null || disposed)
             return;
         Log("load {0}: loadTerrainTile {1}", cmd.Load, cmd);
+        StreamEnding();
         if (current != null)
             Supersede(current, "superseded by terrain load " + cmd.Load);
+        EndStream("superseded by terrain load " + cmd.Load);
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes };
-        if (cmd.TexturesOffered)
+        // The GPU's block formats: the tile's textures, and (stage 08) the world models' and doodads' block uploads.
+        if (cmd.TexturesOffered || cmd.World)
             j.Support = WmvTerrainFormatSupport.Query();
         if (cmd.World)
             j.World = new WorldWork
@@ -337,6 +348,9 @@ public sealed partial class WmvTerrainSession
             Fail(j, bad);
             return;
         }
+        // Protocol 18: a loadWorld with "streaming" is a session's entry (WmvTerrainSessionStream.cs).
+        if (StreamOffered(cmd))
+            BeginStream(j);
         j.Phase = Phase.Wdt;
         Ask(j, RoleWdt, cmd.WdtFileDataID);
     }
@@ -350,11 +364,13 @@ public sealed partial class WmvTerrainSession
         string why = string.IsNullOrEmpty(reason) ? "clearTerrain" : "clearTerrain: " + reason;
         Log("{0} -- {1}", why, current != null ? "load " + current.Cmd.Load + " in flight" : "no load in flight");
         Job j = current;
+        StreamEnding();
         if (j != null)
         {
             current = null;
             Report(j, "cleared", why);
         }
+        EndStream(why);
         TakeTheTileAway(why, false);
     }
 
@@ -365,11 +381,13 @@ public sealed partial class WmvTerrainSession
         if (disposed)
             return;
         Job j = current;
-        if (j == null && tiles.Count == 0 && !viewActive)
+        if (j == null && tiles.Count == 0 && !viewActive && stream == null)
             return;
         Log("a model load: {0}", reason);
+        StreamEnding();
         if (j != null)
             Supersede(j, reason);
+        EndStream(reason);
         TakeTheTileAway(reason, true);
     }
 
@@ -445,6 +463,8 @@ public sealed partial class WmvTerrainSession
         if (disposed || old == null || old.Disposed || shownMesh == null || shownContent == null)
         {
             reason = "no terrain tile is on screen: the view applies to the next one";
+            // A streaming session's resident tiles are drawn again in it all the same, one a frame.
+            QueueStreamRebuild(null);
             return "noTile";
         }
         load = old.Load;
@@ -482,8 +502,13 @@ public sealed partial class WmvTerrainSession
         tiles.Remove(key);
         tiles[key] = tile;
         shown = tile;
+        StreamTile rebuilt;
+        if (stream != null && stream.Tiles.TryGetValue(key, out rebuilt) && rebuilt.Tile == old)
+            rebuilt.Tile = tile;
         tile.Root.SetActive(true);
         KeepOnlyWhatAViewMayUpload(tile, shownContent);
+        // A streaming session: the other resident tiles follow, one a frame.
+        QueueStreamRebuild(tile);
         ms = clock.Elapsed.TotalMilliseconds;
         Log("rebuild of load {0} ({1}): tile {2}_{3} drawn {4} in {5:0.###} ms, {6} texture(s) handed over, {7} uploaded; live terrain tiles {8}",
             load, why, tile.TileX, tile.TileY, WmvTerrainDebug.ViewNames[(int)tile.View], ms, handed, tile.Textures.Count - handed,
@@ -498,6 +523,7 @@ public sealed partial class WmvTerrainSession
         if (disposed)
             return;
         disposed = true;
+        StreamEnding();
         if (current != null)
         {
             current.Dead = true;
@@ -505,6 +531,7 @@ public sealed partial class WmvTerrainSession
             Retire(current, "dropped at shutdown");
             current = null;
         }
+        EndStream("shutdown");
         int n = DisposeTiles(null);
         Log("session disposed: {0} tile(s) released", n);
         shown = null;
@@ -527,6 +554,10 @@ public sealed partial class WmvTerrainSession
             return false;
         Job j = current;
         string id = r.requestId ?? "";
+        // Streaming: a session's requests are routed to their own tile's job by id (WmvTerrainSessionStream.cs).
+        Job sj = StreamJobOf(id);
+        if (sj != null)
+            j = sj;
         Request q = !disposed && j != null && !j.Dead ? Find(j, id) : null;
         if (q == null || (r.load > 0 && r.load != j.Cmd.Load))
         {
@@ -552,6 +583,7 @@ public sealed partial class WmvTerrainSession
             return false;
         }
         j.Pending.Remove(q);
+        StreamRequestDone(id, r);
         try
         {
             switch (q.Role)
@@ -611,6 +643,12 @@ public sealed partial class WmvTerrainSession
                 if (current != null && current.Phase != Phase.Adopted)
                     Fail(current, "internal error applying the terrain worker's result: " + what);
             }
+        }
+        // A streaming session pumps its tiles' jobs, the entry's among them, nearest first (WmvTerrainSessionStream.cs).
+        if (stream != null && !disposed)
+        {
+            PumpStream(nowMs);
+            return;
         }
         Job j = current;
         if (j == null || disposed)
@@ -713,7 +751,7 @@ public sealed partial class WmvTerrainSession
         if (TileOut(j) >= MaxOutstanding)
             throw new InvalidOperationException("load " + j.Cmd.Load + " already has " + MaxOutstanding + " requests out");
         double at = j.Clock.Elapsed.TotalMilliseconds;
-        string id = requestMapAsset(role, fileDataID, j.Cmd.Load, j.Cmd.AssetEpoch);
+        string id = SendMapRequest(j, role, fileDataID);
         j.Pending.Add(new Request { Id = id, Role = role, FileDataID = fileDataID, AskedMs = at });
         OutstandingPeak = Math.Max(Outstanding, OutstandingPeak);
         Log("load {0}: getMapAsset {1} {2} (FileDataID {3}, epoch {4}); {5} out", j.Cmd.Load, id, role, fileDataID, j.Cmd.AssetEpoch,
@@ -794,6 +832,21 @@ public sealed partial class WmvTerrainSession
             StartGlobalWorld(j, wdt);
             return;
         }
+        // Streaming: the session's WDT, kept for its other tiles (read once).
+        if (j.Stream != null && stream != null)
+        {
+            stream.Wdt = wdt;
+            stream.WdtBytes = j.WdtBytes;
+            stream.WdtMd5 = j.WdtMd5;
+        }
+        StartTileFiles(j, wdt);
+    }
+
+    /// <summary>The tile's files after its WDT (OnWdt; a streaming session's other tiles with the session's WDT): its root,
+    /// beside it its tex0 when the host offers textures, and a world load's obj0.</summary>
+    void StartTileFiles(Job j, WdtFile wdt)
+    {
+        WmvIpcClient.TerrainTileCommand cmd = j.Cmd;
         if (!wdt.TileExists(cmd.TileX, cmd.TileY))
         {
             Fail(j, "no tile at " + j.Tile2 + " (MAIN flag clear)");
@@ -854,7 +907,8 @@ public sealed partial class WmvTerrainSession
         j.RootBytes = bytes.Length;
         string hostMd5 = r.md5 ?? "";
         int x = j.Cmd.TileX, y = j.Cmd.TileY;
-        WorldOrigin origin = WorldToUnity.TileOrigin(x, y);
+        // Streaming: every tile of the session against the scene's origin (the entry tile's north-west corner).
+        WorldOrigin origin = j.Stream != null && stream != null ? stream.Origin : WorldToUnity.TileOrigin(x, y);
         string what = string.Format("root ADT {0} ({1}_{2})", j.RootFileDataID, x, y);
         RunWorker(j, () =>
         {
@@ -898,9 +952,19 @@ public sealed partial class WmvTerrainSession
             lock (results)
                 results.Enqueue(() =>
                 {
-                    if (j.Dead || j != current)
+                    if (j.Dead || !Live(j))
                     {
                         Log("load {0}: its worker result came after the load ended -- dropped", j.Cmd.Load);
+                        return;
+                    }
+                    if (j.Stream != null && j != current)
+                    {
+                        // A tile of a streaming session: its own failure, never the load in flight's.
+                        try { apply(); }
+                        catch (Exception e)
+                        {
+                            FailStreamJob(j, "internal error applying the terrain worker's result: " + e.GetType().Name + ": " + e.Message);
+                        }
                         return;
                     }
                     apply();
@@ -987,7 +1051,7 @@ public sealed partial class WmvTerrainSession
     /// are settled.</summary>
     void Advance(Job j)
     {
-        if (j != current || j.Dead || j.Phase != Phase.Files)
+        if (!Live(j) || j.Dead || j.Phase != Phase.Files)
             return;
         if (!j.MaterialDone && !j.MaterialBuilding)
         {
@@ -999,7 +1063,13 @@ public sealed partial class WmvTerrainSession
         if (j.MaterialDone)
             AskTextures(j);
         if (j.Mesh != null && j.Root != null && j.MaterialDone && j.ToAsk.Count == 0 && TileOut(j) == 0)
-            Adopt(j);
+        {
+            // A tile of a streaming session is added under the session's frame budget (PumpStreamJob).
+            if (j.Stream != null && j != current)
+                j.AdoptReady = true;
+            else
+                Adopt(j);
+        }
     }
 
     void SettleUnavailable(Job j)
@@ -1087,6 +1157,10 @@ public sealed partial class WmvTerrainSession
                 t.Fail(WmvTerrainTexture.StateNotRequested, "FileDataID " + id + " is beyond what a request can carry");
                 notRequested++;
             }
+            else if (TakeResidentTerrainTexture(j, id))
+            {
+                // Streaming: uploaded for another tile and resident in the scene: bound from there, nothing asked.
+            }
             else
             {
                 j.ToAsk.Enqueue(id);
@@ -1112,7 +1186,7 @@ public sealed partial class WmvTerrainSession
 
     void AskTextures(Job j)
     {
-        while (j.ToAsk.Count > 0 && TileOut(j) < MaxOutstanding)
+        while (j.ToAsk.Count > 0 && TileOut(j) < MaxOutstanding && StreamCredit(j))
         {
             uint id = j.ToAsk.Dequeue();
             if (j.TexturesFirstAskedMs < 0)
@@ -1211,6 +1285,11 @@ public sealed partial class WmvTerrainSession
 
     void Adopt(Job j)
     {
+        if (j.Stream != null && j != current)
+        {
+            AdoptStreamTile(j);
+            return;
+        }
         WmvIpcClient.TerrainTileCommand cmd = j.Cmd;
         j.Content = new WmvTerrainTileContent
         {
@@ -1247,6 +1326,9 @@ public sealed partial class WmvTerrainSession
             if (j.World != null)
                 BeginTileWorld(j);
             committed = true;
+            // Protocol 18: a streaming session's entry -- its textures the scene's, the region begins.
+            if (j.Stream != null && stream != null)
+                StreamEntryCommitted(j, tile);
             Log("load {0}: committed tile {1} of map {2} ({3} replaced{4}); Unity objects built in {5:0.###} ms; live terrain tiles {6}",
                 cmd.Load, j.Tile2, cmd.MapId, replaced,
                 reset ? (fromEpoch == int.MinValue ? ", a new scene" : string.Format(", the scene reset: epoch {0} -> {1}, map {2} -> {3}",
@@ -1333,12 +1415,35 @@ public sealed partial class WmvTerrainSession
 
     void Fail(Job j, string reason)
     {
+        // A tile of a streaming session (not its entry in flight): no report of its own (WmvTerrainSessionStream.cs).
+        if (j.Stream != null && j != current)
+        {
+            FailStreamJob(j, reason);
+            return;
+        }
         if (current == j)
             current = null;
         if (j.Reported)
             return;
         Log("load {0}: FAILED: {1}", j.Cmd.Load, reason);
-        Report(j, "failed", reason);
+        if (j.Stream != null && stream != null && stream.Live && j.Tile != null && OwnsScene(j))
+        {
+            // A streaming session's entry, committed (its tile was on screen): reported built with why -- the session goes
+            // on (an entry not built ends it for the host) -- and the camera it carried placed now.
+            j.FirstFrameMs = j.Clock.Elapsed.TotalMilliseconds - j.AdoptedMs;
+            try { worldView.WorldModelsSettled(world, j.Cmd.Load); }
+            catch (Exception e) { Log("load {0}: placing the camera as the entry failed: {1}", j.Cmd.Load, e.Message); }
+            Report(j, "built", "on screen, then failed: " + reason);
+        }
+        else
+            Report(j, "failed", reason);
+        if (j.Stream != null && stream != null)
+        {
+            if (!stream.Live)
+                EndStream("its entry failed before its tile was committed: " + reason);
+            else
+                StreamJobEnded(j, StreamFailed, reason);
+        }
     }
 
     void Report(Job j, string status, string reason)
@@ -1461,7 +1566,7 @@ public sealed partial class WmvTerrainSession
         WmvRuntimeTerrainTile tile = j.Tile;
         if (tile != null && !tile.Disposed)
         {
-            r.TextureGpuBytes = tile.TextureGpuBytes;
+            r.TextureGpuBytes = tile.TextureGpuBytes + SceneTextureBytesOf(j);   // (streaming: the scene's it binds too)
             r.AlphaGpuBytes = tile.AlphaGpuBytes;
             r.MaterialVertexBytes = tile.MaterialVertexBytes;
             r.Materials = tile.TexturedMaterialCount;
@@ -1514,6 +1619,7 @@ public sealed partial class WmvTerrainSession
         RetiredTotal++;
         lastRetired = q.Id;
         j.RetiredIds.Add(q.Id);
+        StreamRequestDone(q.Id, null);
         Log("load {0}: request {1} ({2}) retired unanswered (the load ended \"{3}\"); {4} retired request(s) remembered, {5} retired in all",
             j.Cmd.Load, q.Id, q.Role, ended, retiredCount, RetiredTotal);
     }
@@ -1548,6 +1654,7 @@ public sealed partial class WmvTerrainSession
         }
         tiles.Clear();
         DisposeWorldScene();
+        DisposeTerrainTextures();
         return n;
     }
 

@@ -689,6 +689,26 @@ void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
     dc.SetBrush(wxBrush(p.warning));
     dc.DrawPolygon(4, diamond);
   }
+  // STREAMING (protocol 18): the session's tiles -- resident outlined in the accent, loading in the warning colour, failed
+  // dashed -- and the camera where the session last saw it.
+  if (m_maps->streamOn())
+  {
+    const UnityIpcServer::StreamState & st = m_maps->streamState();
+    for (const UnityIpcServer::StreamTile & t : st.tiles)
+    {
+      const bool resident = t.state == "built" || t.state == "settled";
+      const bool failed = t.state == "failed";
+      ring(t.x, t.y, resident ? p.accent : failed ? p.textSecondary : p.warning, std::max(2, FromDIP(2)),
+           failed ? wxPENSTYLE_SHORT_DASH : wxPENSTYLE_SOLID);
+    }
+    if (st.cameraTileX >= 0 && at(st.cameraX, st.cameraY, pt))
+    {
+      const int r = std::max(3, FromDIP(4));
+      dc.SetPen(wxPen(p.panelBackground));
+      dc.SetBrush(wxBrush(p.accent));
+      dc.DrawCircle(pt, r);
+    }
+  }
   if (m_hoverX >= 0)
     ring(m_hoverX, m_hoverY, p.borderStrong, 1, wxPENSTYLE_SOLID);
 
@@ -904,6 +924,12 @@ MapTilePanel::MapTilePanel(wxWindow * parent, MapsViewer * maps)
   m_back->SetName(wxT("mapBackToMap"));
   m_back->SetToolTip(_("Show the overhead map again; the world stays loaded behind it"));
   m_tile = new wxStaticText(this, wxID_ANY, wxEmptyString);
+  // STREAMING: four short lines, never wrapped again (ellipsized), so a streamState repaints the label and lays nothing out.
+  m_stream = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE | wxST_ELLIPSIZE_END);
+  m_stream->SetForegroundColour(UiStyle::palette().textSecondary);
+  m_stream->SetName(wxT("mapStreamLine"));
+  m_stream->SetMinSize(wxSize(FromDIP(100), 4 * m_stream->GetCharHeight() + FromDIP(2)));
+  m_stream->Hide();
   wxStaticText * cameraLabel = new wxStaticText(this, wxID_ANY, _("Camera"));
   m_camera = new wxChoice(this, wxID_ANY);
   m_camera->SetName(wxT("mapCamera"));
@@ -953,6 +979,7 @@ MapTilePanel::MapTilePanel(wxWindow * parent, MapsViewer * maps)
   top->Add(m_target, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, xs);
   top->Add(buttons, 0, wxLEFT | wxRIGHT | wxTOP, sp);
   top->Add(m_tile, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, xs);
+  top->Add(m_stream, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, xs);
   top->Add(camera, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
   top->Add(m_cameraNote, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, xs);
   top->Add(view, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
@@ -1023,6 +1050,37 @@ void MapTilePanel::setLabel(wxStaticText * label, const wxString & text)
   label->Show(!text.IsEmpty());
 }
 
+bool MapTilePanel::setStreamLine()
+{
+  const wxString text = qs(m_maps->streamDetail());
+  if (m_stream->GetLabel() != text)
+  {
+    m_stream->SetLabel(text);
+    m_stream->Refresh();
+  }
+  const bool show = !text.IsEmpty();
+  if (m_stream->IsShown() == show)
+    return false;
+  m_stream->Show(show);
+  return true;
+}
+
+void MapTilePanel::StreamChanged()
+{
+  // Its own height never changes (four lines, ellipsized): laid out only when the line appears or goes.
+  if (!setStreamLine())
+    return;
+  Layout();
+  const int height = GetSizer()->GetMinSize().y;
+  if (height != m_laidOutHeight)
+  {
+    m_laidOutHeight = height;
+    InvalidateBestSize();
+    if (GetParent())
+      GetParent()->Layout();
+  }
+}
+
 void MapTilePanel::Refresh2()
 {
   const int id = m_maps->mapId();
@@ -1082,6 +1140,7 @@ void MapTilePanel::Refresh2()
       break;
   }
   setLabel(m_tile, qs(tile));
+  setStreamLine();
   const int cameraIndex = m_maps->cameraMode() == MapsViewer::CameraMode::Overview ? 1 : 0;
   if (m_camera->GetSelection() != cameraIndex)
     m_camera->SetSelection(cameraIndex);

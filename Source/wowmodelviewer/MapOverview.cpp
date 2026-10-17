@@ -60,6 +60,12 @@ void MapOverview::ImagesChanged()
   m_grid->ImagesChanged();
 }
 
+void MapOverview::StreamChanged()
+{
+  if (IsShownOnScreen())
+    m_grid->Refresh(false);
+}
+
 void MapOverview::Refresh2()
 {
   const int id = m_maps->mapId();

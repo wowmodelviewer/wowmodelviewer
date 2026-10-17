@@ -127,6 +127,8 @@ public:
 
   // MapsViewer changed (its onChanged): the labels and the controls follow.
   void Refresh2();
+  // STREAMING (protocol 18): the session's line alone (MapsViewer::onStreamChanged), laid out only when its height changed.
+  void StreamChanged();
   wxChoice * viewChoice() const { return m_view; }
   wxChoice * cameraChoice() const { return m_camera; }
   UiButton * clearButton() const { return m_clear; }
@@ -138,6 +140,8 @@ public:
 
 private:
   void setLabel(wxStaticText * label, const wxString & text);
+  // STREAMING: the session's line set (true when it appeared or went: the panel needs laying out).
+  bool setStreamLine();
 
   MapsViewer * m_maps;
   wxStaticText * m_title = nullptr;
@@ -150,6 +154,7 @@ private:
   UiButton * m_enter = nullptr;
   UiButton * m_back = nullptr;
   wxStaticText * m_tile = nullptr;
+  wxStaticText * m_stream = nullptr;   // STREAMING: the session's line
   wxChoice * m_camera = nullptr;
   wxStaticText * m_cameraNote = nullptr;
   wxChoice * m_view = nullptr;

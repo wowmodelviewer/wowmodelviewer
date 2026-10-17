@@ -71,6 +71,12 @@ public interface IWmvWorldModelView
     WmvDoodadInstance PlaceDoodad(WmvDoodadPrototype prototype, WorldDoodad doodad, WorldOrigin origin, int load);
     /// <summary>Every doodad of `scene`: its instances, then its prototypes, then its shared textures.</summary>
     void DisposeDoodads(WmvWorldScene scene);
+    /// <summary>Streaming (stage 08): one doodad prototype evicted from the session's pool, its references on the scene's
+    /// textures given back (the caller has taken it out of the scene's dictionary).</summary>
+    void DisposeDoodadPrototype(WmvWorldScene scene, WmvDoodadPrototype prototype);
+    /// <summary>Streaming: the doodads a closing tile held alone, their own objects (the caller has taken them out of the
+    /// scene's list).</summary>
+    void DisposeDoodadInstances(List<WmvDoodadInstance> instances);
 }
 
 public sealed partial class WmvTerrainSession
@@ -87,7 +93,8 @@ public sealed partial class WmvTerrainSession
     /// <summary>The world models' own timeout, from the moment they began (the tile's commit, or a WMO-only map's WDT).</summary>
     public const double WorldTimeoutMs = 120000.0;
 
-    enum ModelState { Queued, Root, Groups, Textures, Ready, Built, Failed, NotRequested }
+    // Borrowed (streaming): waiting for the prototype another tile of the session is fetching.
+    enum ModelState { Queued, Root, Groups, Textures, Ready, Built, Failed, NotRequested, Borrowed }
 
     static string ModelStateName(ModelState s)
     {
@@ -100,6 +107,7 @@ public sealed partial class WmvTerrainSession
             case ModelState.Ready: return "ready";
             case ModelState.Built: return "built";
             case ModelState.Failed: return "failed";
+            case ModelState.Borrowed: return "waiting";
             default: return "notRequested";
         }
     }
@@ -116,11 +124,17 @@ public sealed partial class WmvTerrainSession
         public WmoGroup[] Groups = new WmoGroup[0];
         public string[] GroupErrors = new string[0];
         public int NextGroup, GroupsLanded;
+        public int GroupsRefused;               // streaming: group files the host refused for the tile's load
         public readonly List<uint> TextureIds = new List<uint>();
         public readonly HashSet<uint> TexturesWaiting = new HashSet<uint>();
         public bool Active;                    // counted against MaxActiveModels
         public long Bytes;
         public WmvWorldPrototype Built;
+        // Streaming (WmvTerrainSessionStream.cs): its job, the session's prototype entry it fetches or waits for, whether it
+        // met the session's prototypes yet, and whether it let go of its pin.
+        public Job Job;
+        public ProtoEntry Shared;
+        public bool Claimed, Unpinned;
     }
 
     /// <summary>A placement of the plan and what became of it.</summary>
@@ -130,6 +144,7 @@ public sealed partial class WmvTerrainSession
         public string State = "planned";       // "planned" | "placed" | "failed" | "unsupported" | "notRequested" | "ended"
         public string Reason = "";
         public WmvWorldInstance Instance;
+        public bool Shared;                    // streaming: placed for another tile of the session, found here
     }
 
     /// <summary>A texture of the load's world models: fetched and decoded once, shared by every model that samples it.</summary>
@@ -169,6 +184,7 @@ public sealed partial class WmvTerrainSession
         // is built; its file's bytes are kept to decode it again for a model fetched later -- the host serves an id once).
         public long PixelBytesHeld, PixelBytesHeldMax;
         public int TexturesRedecoded;          // decodes of a texture whose pixels had gone (Redecode)
+        public int TexturesAsBlocks, TexturesDecodedRgba;   // stage 08: prepared as their own DXT blocks, or decoded
         public double BeganMs = -1, ShownMs = -1, LastAnswerMs = -1;
         public double ParseCpuMs, DecodeCpuMs, BuildMs, BuildMaxMs, PlaceMs;
         public double TimeoutStartedAtMs = double.NaN;
@@ -326,7 +342,7 @@ public sealed partial class WmvTerrainSession
                     pw.Reason = "this load asks for at most " + modelsAllowed + " world models (maxWmoModelsPerLoad)";
                     continue;
                 }
-                m = new Model { FileDataID = p.FileDataID };
+                m = new Model { FileDataID = p.FileDataID, Job = j };
                 byId[p.FileDataID] = m;
                 w.Models.Add(m);
             }
@@ -424,13 +440,16 @@ public sealed partial class WmvTerrainSession
     void AdvanceWorld(Job j)
     {
         WorldWork w = j.World;
-        if (w == null || j != current || j.Dead || !w.PlanReady)
+        if (w == null || !Live(j) || j.Dead || !w.PlanReady)
             return;
         // A tile's world models wait for its commit; a WMO-only map's begin after its WDT.
         if (!w.Global && !w.Committed)
             return;
         WmvIpcClient.TerrainTileCommand cmd = j.Cmd;
-        while (w.Out < MaxWorldOutstanding)
+        // Streaming: the session's prototypes first (built ones placed from, fetches waited for: WmvTerrainSessionStream.cs).
+        if (j.Stream != null && stream != null)
+            ClaimWorldModels(j);
+        while (w.Out < MaxWorldOutstanding && StreamCredit(j))
         {
             // A texture decoded again counts against the same gate as a fetch, so a model sampling many textures does not
             // start them all on the worker at once.
@@ -489,7 +508,7 @@ public sealed partial class WmvTerrainSession
     {
         WorldWork w = j.World;
         double at = j.Clock.Elapsed.TotalMilliseconds;
-        string id = requestMapAsset(role, fileDataID, j.Cmd.Load, j.Cmd.AssetEpoch);
+        string id = SendMapRequest(j, role, fileDataID);
         j.Pending.Add(new Request { Id = id, Role = role, FileDataID = fileDataID, AskedMs = at, World = true, Model = m, Group = group });
         w.Pending++;
         w.FilesAsked++;
@@ -522,6 +541,9 @@ public sealed partial class WmvTerrainSession
         w.Pending--;
         w.FilesAnswered++;
         w.LastAnswerMs = j.Clock.Elapsed.TotalMilliseconds;
+        // Streaming: the world's timeout counts from its last answer (a tile waiting for the credit is not late).
+        if (j.Stream != null)
+            w.TimeoutStartedAtMs = double.NaN;
     }
 
     void OnWmoRoot(Job j, WmvIpcClient.AssetResponse r, Request q)
@@ -532,7 +554,10 @@ public sealed partial class WmvTerrainSession
         string why = WorldAnswerProblem(r, "world-model root", q.FileDataID, j.Cmd.MaxWmoFileBytes);
         if (why != null)
         {
-            FailModel(j, m, why);
+            if (j.Stream != null && RefusedForTheLoad(r))
+                FailForTheLoad(() => FailModel(j, m, why));
+            else
+                FailModel(j, m, why);
             return;
         }
         byte[] bytes = r.data;
@@ -601,6 +626,8 @@ public sealed partial class WmvTerrainSession
         string why = WorldAnswerProblem(r, "world-model group", q.FileDataID, j.Cmd.MaxWmoFileBytes);
         if (why != null)
         {
+            if (RefusedForTheLoad(r))
+                m.GroupsRefused++;
             m.GroupErrors[gi] = why;
             GroupLanded(j, m);
             return;
@@ -656,7 +683,11 @@ public sealed partial class WmvTerrainSession
         w.GroupFilesMissing += missing;
         if (missing == m.Groups.Length)
         {
-            FailModel(j, m, "no group file could be read: " + string.Join("; ", reasons.ToArray()));
+            string none = "no group file could be read: " + string.Join("; ", reasons.ToArray());
+            if (j.Stream != null && m.GroupsRefused > 0)
+                FailForTheLoad(() => FailModel(j, m, none));
+            else
+                FailModel(j, m, none);
             return;
         }
         if (missing > 0)
@@ -687,6 +718,10 @@ public sealed partial class WmvTerrainSession
                     t.Done = true;
                     w.TexturesNotRequested++;
                 }
+                else if (ClaimWmoTexture(j, t))
+                {
+                    // Streaming: the session's image attached, its failure taken, or another tile's fetch waited for.
+                }
                 else
                 {
                     t.Asked = true;
@@ -698,6 +733,10 @@ public sealed partial class WmvTerrainSession
             {
                 m.TexturesWaiting.Add(id);
                 t.Waiting.Add(m);
+            }
+            else if (t.Texture.Decoded && t.Texture.Image == null && t.Raw == null && ReattachWmoImage(j, t))
+            {
+                // Streaming: its pixels went with an earlier model of this job; the session keeps its image.
             }
             else if (t.Texture.Decoded && t.Texture.Image == null && t.Raw != null)
             {
@@ -731,6 +770,7 @@ public sealed partial class WmvTerrainSession
         {
             t.Texture.Error = why;
             TextureDone(j, t);
+            PublishWmoImage(j, t, null, why, false);
             return;
         }
         byte[] bytes = r.data;
@@ -739,6 +779,7 @@ public sealed partial class WmvTerrainSession
         w.Preparing++;
         WmvWmoTexture tex = t.Texture;
         t.Raw = bytes;
+        WmvTerrainFormatSupport support = j.Support;
         RunWorker(j, () =>
         {
             string md5 = Md5Hex(bytes);
@@ -749,7 +790,8 @@ public sealed partial class WmvTerrainSession
                 error = string.Format("the texture bytes received hash to {0}, the host served {1}", md5, hostMd5);
             else
             {
-                try { img = BlpDecoder.Decode(bytes); }
+                // Stage 08: its own DXT blocks when it qualifies, else decoded (BlpBlocks.PrepareForModels).
+                try { img = BlpBlocks.PrepareForModels(bytes, support.Supports); }
                 catch (Exception e) { error = "decode failed: " + e.Message; }
             }
             double ms = sw.Elapsed.TotalMilliseconds;
@@ -770,10 +812,13 @@ public sealed partial class WmvTerrainSession
                     tex.Width = img.Width;
                     tex.Height = img.Height;
                     tex.Encoding = img.Encoding;
-                    w.PixelBytesHeld += img.Rgba != null ? img.Rgba.LongLength : 0;
+                    w.PixelBytesHeld += img.HeldBytes;
                     w.PixelBytesHeldMax = Math.Max(w.PixelBytesHeldMax, w.PixelBytesHeld);
+                    if (img.Blocks != null) w.TexturesAsBlocks++;
+                    else w.TexturesDecodedRgba++;
                 }
                 TextureDone(j, t);
+                PublishWmoImage(j, t, img, error, true);
                 AdvanceWorld(j);
             };
         });
@@ -788,12 +833,13 @@ public sealed partial class WmvTerrainSession
         w.TexturesRedecoded++;
         byte[] bytes = t.Raw;
         WmvWmoTexture tex = t.Texture;
+        WmvTerrainFormatSupport support = j.Support;
         RunWorker(j, () =>
         {
             var sw = Stopwatch.StartNew();
             BlpImage img = null;
             string error = null;
-            try { img = BlpDecoder.Decode(bytes); }
+            try { img = BlpBlocks.PrepareForModels(bytes, support.Supports); }
             catch (Exception e) { error = "decode failed: " + e.Message; }
             double ms = sw.Elapsed.TotalMilliseconds;
             return () =>
@@ -806,7 +852,7 @@ public sealed partial class WmvTerrainSession
                 tex.Image = img;
                 if (img != null)
                 {
-                    w.PixelBytesHeld += img.Rgba != null ? img.Rgba.LongLength : 0;
+                    w.PixelBytesHeld += img.HeldBytes;
                     w.PixelBytesHeldMax = Math.Max(w.PixelBytesHeldMax, w.PixelBytesHeld);
                 }
                 else
@@ -855,6 +901,8 @@ public sealed partial class WmvTerrainSession
     /// <summary>A model ends without a prototype: failed or not requested, its placements with it, its textures released.</summary>
     void SettleModel(Job j, Model m, ModelState state, string reason)
     {
+        if (m.Shared != null)
+            WorldModelSettled(j, m, state, reason);
         WorldWork w = j.World;
         m.State = state;
         m.Reason = reason;
@@ -888,8 +936,8 @@ public sealed partial class WmvTerrainSession
     static void ReleasePixels(WorldWork w, SharedTexture t)
     {
         BlpImage img = t.Texture.Image;
-        if (img != null && img.Rgba != null)
-            w.PixelBytesHeld -= img.Rgba.LongLength;
+        if (img != null)
+            w.PixelBytesHeld -= img.HeldBytes;
         t.Texture.ReleasePixels();
     }
 
@@ -909,24 +957,26 @@ public sealed partial class WmvTerrainSession
         if (!w.Done && nowMs - w.TimeoutStartedAtMs > WorldTimeoutMs)
         {
             TimeOutWorld(j);
-            if (j != current)
+            if (!Live(j))
                 return false;
         }
-        if (w.BuildQueue.Count > 0)
+        // Streaming: one model a frame within the session's frame budget (the nearest tiles first).
+        if (w.BuildQueue.Count > 0 && (j.Stream == null || StreamMayWork()))
         {
             Model m = w.BuildQueue.Dequeue();
             BuildModel(j, m);
-            if (j != current)
+            StreamWorked();
+            if (!Live(j))
                 return false;
         }
         AdvanceWorld(j);
-        if (j != current)
+        if (!Live(j))
             return false;
         // The doodads, once the world models are settled (WmvTerrainSessionDoodads.cs).
         if (w.Done && w.Doodads != null && w.Doodads.Started && !w.Doodads.Done)
         {
             PumpDoodads(j, nowMs);
-            if (j != current)
+            if (!Live(j))
                 return false;
         }
         SendProgress(j, false);
@@ -936,6 +986,22 @@ public sealed partial class WmvTerrainSession
     void BuildModel(Job j, Model m)
     {
         WorldWork w = j.World;
+        if (m.Built != null && m.Shared != null)
+        {
+            // Streaming: the session's prototype (built for another tile, or pooled): placed from, never built again.
+            m.State = ModelState.Built;
+            m.Active = false;
+            PlaceAll(j, m, m.Built);
+            if (!m.Unpinned)
+            {
+                m.Unpinned = true;
+                Unpin(m.Shared);
+            }
+            Log("load {0}: world model {1}: the session's prototype placed from ({2} placement(s) of this tile)", j.Cmd.Load, m.FileDataID,
+                m.Placements.Count);
+            CheckWorldDone(j);
+            return;
+        }
         var textures = new Dictionary<uint, WmvWmoTexture>();
         foreach (uint id in m.TextureIds)
         {
@@ -968,7 +1034,14 @@ public sealed partial class WmvTerrainSession
         else
         {
             world.Prototypes[m.FileDataID] = proto;
+            if (m.Shared != null)
+                WorldPrototypeBuilt(m, proto);
             PlaceAll(j, m, proto);
+            if (m.Shared != null && !m.Unpinned)
+            {
+                m.Unpinned = true;
+                Unpin(m.Shared);
+            }
         }
         Log("load {0}: world model {1} built in {2:0.###} ms ({3} group(s), {4} renderer(s), {5} KB geometry, {6} KB textures); {7} placement(s) placed; " +
             "live world instances {8}, prototypes {9}", j.Cmd.Load, m.FileDataID, buildMs, proto.Runtime.GroupCount, proto.Runtime.Renderers,
@@ -983,13 +1056,19 @@ public sealed partial class WmvTerrainSession
         var clock = Stopwatch.StartNew();
         foreach (PlacementWork pw in m.Placements)
         {
+            // Streaming: a placement another tile of the session placed is found, never placed twice.
+            if (j.Stream != null && stream != null && FindSharedPlacement(j, pw))
+                continue;
             try
             {
                 pw.Instance = worldView.PlaceInstance(proto, pw.P, world.Origin, j.Cmd.Load);
                 world.Instances.Add(pw.Instance);
-                world.Geometries.Add(new WorldModelGeometry(pw.P, proto.Root, proto.Groups));
+                var geometry = new WorldModelGeometry(pw.P, proto.Root, proto.Groups);
+                world.Geometries.Add(geometry);
                 world.AddBox(pw.P.ExtentsMin, pw.P.ExtentsMax);
                 pw.State = "placed";
+                if (j.Stream != null && stream != null)
+                    RegisterPlacement(j, pw, geometry, m.Shared);
             }
             catch (Exception e)
             {
@@ -1121,9 +1200,15 @@ public sealed partial class WmvTerrainSession
         w.TextureQueue.Clear();
         w.RedecodeQueue.Clear();
         w.BuildQueue.Clear();
-        foreach (Model m in w.Models)
-            if (m.State != ModelState.Built && m.State != ModelState.Failed && m.State != ModelState.NotRequested)
-                FailModel(j, m, why);
+        bool wasTransient = streamTransientFailure;
+        streamTransientFailure = true;          // (streaming: a fetch that timed out is handed on, not failed for every tile)
+        try
+        {
+            foreach (Model m in w.Models)
+                if (m.State != ModelState.Built && m.State != ModelState.Failed && m.State != ModelState.NotRequested)
+                    FailModel(j, m, why);
+        }
+        finally { streamTransientFailure = wasTransient; }
         // No plan yet (the obj0 not answered or parsed): there is none now, said, so the load can be reported.
         if (!w.PlanReady)
         {
@@ -1133,6 +1218,8 @@ public sealed partial class WmvTerrainSession
         // Worker results still out are dropped when they come (TimedOut): the models are settled, Preparing no longer waited for.
         w.TimedOut = true;
         w.Preparing = 0;
+        if (j.Stream != null)
+            ReleaseJobImages(j);
         Log("load {0}: world models {1}", j.Cmd.Load, why);
         if (w.Global && !w.Committed)
         {
@@ -1169,7 +1256,7 @@ public sealed partial class WmvTerrainSession
             w.Doodads != null && w.Doodads.Offered ? "; the doodads begin" : "; reported after frame " + (w.LastCommitFrame + 2));
         // The camera's moment, then the doodads (WmvTerrainSessionDoodads.cs); the report waits for them.
         StartDoodads(j);
-        if (j != current)
+        if (!Live(j))
             return;
         SendProgress(j, true);
     }
@@ -1221,6 +1308,9 @@ public sealed partial class WmvTerrainSession
             m.Groups = new WmoGroup[0];
         }
         EndDoodads(j, ended);
+        // Streaming: its fetches handed on, its waits and pins let go (WmvTerrainSessionStream.cs).
+        if (j.Stream != null)
+            ReleaseJobModels(j);
     }
 
     // ---------------------------------------------------------------- progress and the report
@@ -1266,6 +1356,9 @@ public sealed partial class WmvTerrainSession
         WorldWork w = j.World;
         if (worldView == null)
             return;
+        // Streaming: the entry's progress alone (the other tiles say theirs in streamState).
+        if (j.Stream != null && !j.Stream.Entry)
+            return;
         double now = j.Clock.Elapsed.TotalMilliseconds;
         string phase = WorldPhase(w), doodadPhase = DoodadPhase(w.Doodads);
         // A phase change goes out at once -- the doodads' alone at most every DoodadPhaseIntervalMs (it can change every
@@ -1290,7 +1383,7 @@ public sealed partial class WmvTerrainSession
             if (m.State == ModelState.Built) r.ModelsBuilt++;
             else if (m.State == ModelState.Failed) r.ModelsFailed++;
             else if (m.State == ModelState.NotRequested) r.ModelsNotRequested++;
-            if (m.State >= ModelState.Groups && m.State != ModelState.NotRequested) r.ModelsParsed++;
+            if (m.State >= ModelState.Groups && m.State != ModelState.NotRequested && m.State != ModelState.Borrowed) r.ModelsParsed++;
         }
         foreach (PlacementWork pw in w.Placements)
         {
@@ -1368,7 +1461,7 @@ public sealed partial class WmvTerrainSession
         r.WorldBuildMs = w.BuildMs;
         r.WorldBuildMaxMs = w.BuildMaxMs;
         r.WorldPlaceMs = w.PlaceMs;
-        WorldOrigin o = world != null && world.Load == j.Cmd.Load ? world.Origin : (j.Mesh != null ? j.Mesh.Origin : new WorldOrigin(0, 0, 0));
+        WorldOrigin o = OwnsScene(j) ? world.Origin : (j.Mesh != null ? j.Mesh.Origin : new WorldOrigin(0, 0, 0));
         r.WorldOrigin = new[] { o.X, o.Y, o.Z };
         r.WorldStart = w.HasStart;
         r.WorldStartPoint = new[] { w.Start.X, w.Start.Y, w.Start.Z };

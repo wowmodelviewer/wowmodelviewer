@@ -713,6 +713,14 @@ public:
     qint64 m2BytesReserved = 0;         // the limits of the model and skin reads in flight
     qint64 m2TextureBytesRead = 0;      // doodad texture bytes read: at most maxM2TextureBytesPerLoad
     qint64 m2TextureBytesReserved = 0;  // the limits of those reads in flight
+    // STREAMING (protocol 18, docs/world-viewer/08-streaming.md 1.7): what any load of the load's streaming session was
+    // served -- an obj0, a world-model root, a doodad model -- so that a file the session's tiles share can be asked for
+    // again under another tile's load once the tile that first asked for it closed: its groups and textures after a root
+    // the session was served, its skins and textures after a model. Kept the same in the entry and every open tile load
+    // (noteStreamSessionServed); 0 for every load outside a session, whose own order rules are unchanged.
+    bool sessionObj0Served = false;
+    int sessionWmoRootsServed = 0;
+    int sessionM2ModelsServed = 0;
   };
   // What getMapAsset decided before anything is read: state "" goes on to the read (at most maxBytes), "refused" or
   // "stale" is the answer.
@@ -775,8 +783,10 @@ public:
   // RequestTerrainTile is, and without a protocol-16 player. The rest as RequestTerrainTile. To a player that places
   // doodads (protocol 17) the load offers them too, with the doodad budgets (UnityIpcServer::MAX_M2_*); an older one's
   // load carries none, and is served no doodad file.
+  // STREAMING (protocol 18): streaming asks a player that streams to keep the tiles around its camera loaded (a tile map's
+  // world load only; docs/world-viewer/08-streaming.md).
   int RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
-                   bool wdtInspected = false, const UnityIpcServer::WorldCamera * camera = nullptr);
+                   bool wdtInspected = false, const UnityIpcServer::WorldCamera * camera = nullptr, bool streaming = false);
   // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with
   // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect), unless
   // wdtInspected and the catalogue's inspection of it is Available.
@@ -834,7 +844,7 @@ public:
   void OnWorldShown(const UnityIpcServer::WorldShown & shown);
   // RequestTerrainTile and RequestWorld: one load sent (world: as loadWorld).
   int RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
-                  bool wdtInspected, const UnityIpcServer::WorldCamera * camera);
+                  bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming = false);
   // The headless terrain test's "staleload" step: a newer load the player never gets (the serial raised, the request
   // moved to it, nothing sent).
   void TerrainTestRaiseLoadWithoutSending();
@@ -842,6 +852,27 @@ public:
   bool terrainCatalogueBelongs() const;
   int m_terrainLoadSerial = 0;          // raised for every loadTerrainTile sent, never otherwise (but the test above)
   TerrainRequest m_terrainRequest;      // the latest load sent; cleared by clearTerrain, a model load, a player restart
+  // STREAMING (protocol 18, docs/world-viewer/08-streaming.md 1.7): a streaming session's tile loads beside its entry load
+  // (m_terrainRequest), each a TerrainRequest of its own -- its own load id (from m_terrainLoadSerial), budgets and order,
+  // the entry's map, epoch and catalogue, its WDT counted served (the session's) -- opened and closed by the player
+  // (streamTile, OnStreamTile); a request of a tile load that is not open is stale. All of them end with the session
+  // (ResetTerrainRequests: a new load, a clear, a model load, a client change, a player restart).
+  std::map<int, TerrainRequest> m_streamLoads;
+  bool m_streamSession = false;
+  long long m_streamTilesOpened = 0, m_streamTilesClosed = 0, m_streamTilesRefused = 0;
+  UnityIpcServer::StreamState m_streamState;   // the player's last streamState of the session
+  // The request of a load: the entry's, or an open tile load's (nullptr: neither).
+  TerrainRequest * terrainRequestFor(int load);
+  const TerrainRequest * terrainRequestFor(int load) const;
+  // Every terrain request goes: the entry's and the session's tile loads (the session ends).
+  void ResetTerrainRequests();
+  // streamTile: the tile loads the player opens (each checked as a tile of the session's map the client has) and closes;
+  // the answer (streamTileAnswer) names each with its load id or why it was refused.
+  QJsonObject OnStreamTile(const QJsonObject & msg);
+  void OnStreamState(const UnityIpcServer::StreamState & state);
+  // A file served for one of the session's loads: what it makes allowed session-wide (TerrainRequest::sessionObj0Served
+  // ...), noted in the entry and every open tile load.
+  void noteStreamSessionServed(const TerrainRequest & own, const QString & role, bool available);
   // The title bar names what the viewer mode shows (Models, Buildings); Textures keeps it.
   void UpdateTitle();
   struct SceneHold

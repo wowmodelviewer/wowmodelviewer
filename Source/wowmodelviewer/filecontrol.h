@@ -166,6 +166,8 @@ public:
   // changed (its onChanged): the grid follows.
   MapTilePanel * mapPanel() const { return m_mapPanel; }
   void MapsChanged();
+  // STREAMING (protocol 18): the Maps panel's streaming line alone.
+  void MapsStreamChanged();
   // What the last Maps listing took and listed (the tests and the document).
   double mapsListMs() const { return m_mapsListMs; }
   int mapsListed() const { return m_mapsListed; }

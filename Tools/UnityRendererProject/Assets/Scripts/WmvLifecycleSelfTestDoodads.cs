@@ -113,7 +113,124 @@ public static partial class WmvLifecycleSelfTest
               ", world models " + WorldTallies(), log);
         try { DoodadReleaseOnFailureTest(log); }
         catch (Exception e) { Check(false, "doodads: the failed-build test threw " + e.GetType().Name + ": " + e.Message + " at " + e.StackTrace, log); }
+        try { DoodadBlockUploadTests(log); }
+        catch (Exception e) { Check(false, "doodads: the block-upload test threw " + e.GetType().Name + ": " + e.Message + " at " + e.StackTrace, log); }
     }
+
+    /// <summary>A DXT1 BLP of w x h (whole blocks, full chain) in four solid bands from the top: red, green, blue, white -- at
+    /// every level, each band a quarter of the level's block rows (at least one).</summary>
+    static byte[] BandedDxt1(int w, int h)
+    {
+        ushort[] bands = { 0xF800, 0x07E0, 0x001F, 0xFFFF };   // 565: red, green, blue, white
+        var mips = new List<byte[]>();
+        for (int m = 0; m < BlpDecoder.FullChainLength(w, h); m++)
+        {
+            int mw = Math.Max(1, w >> m), mh = Math.Max(1, h >> m);
+            int bw = Math.Max(1, (mw + 3) / 4), bh = Math.Max(1, (mh + 3) / 4);
+            var d = new byte[bw * bh * 8];
+            for (int by = 0; by < bh; by++)
+            {
+                ushort c = bands[Math.Min(3, by * 4 / bh)];
+                for (int bx = 0; bx < bw; bx++)
+                {
+                    int o = (by * bw + bx) * 8;
+                    d[o] = (byte)c; d[o + 1] = (byte)(c >> 8); d[o + 2] = (byte)c; d[o + 3] = (byte)(c >> 8);   // indices 0: c0
+                }
+            }
+            mips.Add(d);
+        }
+        return Blp(2, 0, 0, w, h, null, mips);
+    }
+
+    /// <summary>Level 0 of tex as the GPU samples it (a blit to a linear target, read back).</summary>
+    static Color32[] ReadBack(Texture2D tex)
+    {
+        RenderTexture target = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+        RenderTexture prev = RenderTexture.active;
+        // A blit material of its own, destroyed after: Graphics.Blit without one makes Unity's internal blit material, which
+        // stays (and the terrain tests count every Material they leave).
+        Shader copy = Shader.Find("Hidden/BlitCopy");
+        Material blit = copy != null ? new Material(copy) : null;
+        if (blit != null)
+            Graphics.Blit(tex, target, blit);
+        else
+            Graphics.Blit(tex, target);
+        if (blit != null)
+            UnityEngine.Object.DestroyImmediate(blit);
+        RenderTexture.active = target;
+        var read = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false, true);
+        read.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+        read.Apply(false);
+        RenderTexture.active = prev;
+        RenderTexture.ReleaseTemporary(target);
+        Color32[] px = read.GetPixels32();
+        UnityEngine.Object.DestroyImmediate(read);
+        return px;
+    }
+
+    /// <summary>
+    /// Stage 08 (docs/world-viewer/08-streaming.md 1.9): a world texture of DXT blocks goes up as its own blocks -- the format,
+    /// every stored level, the exact bytes -- and reads back on the GPU as the decoded RGBA32 upload does (orientation
+    /// included: four colour bands from the top); the cache shares one block upload between an alpha-kept and an alpha-dropped
+    /// use, counts references and gives them back; a file that does not qualify goes up decoded, said why.
+    /// </summary>
+    static void DoodadBlockUploadTests(Action<string> log)
+    {
+        WmvTerrainFormatSupport gpu = WmvTerrainFormatSupport.Query();
+        if (!gpu.Dxt1)
+        {
+            log("lifecycle-test SKIP: block uploads: this GPU does not sample DXT1 (" + gpu + ")");
+            return;
+        }
+        byte[] file = BandedDxt1(16, 16);
+        BlpImage img = BlpBlocks.PrepareForModels(file, gpu.Supports);
+        Check(img.Blocks != null && img.Rgba == null && img.Blocks.Levels == 5 && img.BlocksNotUsed == null,
+              "block uploads: a full-chain DXT1 file is prepared as its own blocks (" + (img.Blocks != null ? img.Blocks.Levels + " levels, " +
+              img.Blocks.Bytes + " bytes" : "decoded: " + img.BlocksNotUsed) + ")", log);
+        int textures0 = WmvWorldDoodads.LiveTextures;
+        var cache = new WmvDoodadTextures();
+        Texture2D a = cache.Get(9960, img, false, true, true);
+        Texture2D b = cache.Get(9960, img, true, true, true);
+        bool format = a != null && a.graphicsFormat == UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT1_UNorm && a.mipmapCount == 5;
+        Check(format && ReferenceEquals(a, b) && cache.Uploads == 1 && cache.BlockUploads == 1 && cache.Uses == 2 && cache.References == 2 &&
+              cache.GpuBytes == img.Blocks.Bytes && WmvWorldDoodads.LiveTextures == textures0 + 1,
+              "block uploads: the cache uploads it once as RGBA_DXT1_UNorm with its 5 levels, " + img.Blocks.Bytes + " bytes, and an " +
+              "alpha-dropped use shares it (" + (a != null ? a.graphicsFormat + ", " + a.mipmapCount + " mip(s)" : "none") + "; uploads " +
+              cache.Uploads + ", uses " + cache.Uses + ", references " + cache.References + ", " + cache.GpuBytes + " bytes)", log);
+        // The GPU reads the blocks as the RGBA32 path's upload of the decoded file: within DXT1's own decode (3 levels of 255).
+        Texture2D rgba = WmvModelBuilder.CreateTexture(BlpDecoder.Decode(file), "block upload test (rgba)", false, true);
+        Color32[] fromBlocks = ReadBack(a), fromRgba = ReadBack(rgba);
+        int worst = 0;
+        for (int i = 0; i < fromBlocks.Length; i++)
+        {
+            worst = Math.Max(worst, Math.Abs(fromBlocks[i].r - fromRgba[i].r));
+            worst = Math.Max(worst, Math.Abs(fromBlocks[i].g - fromRgba[i].g));
+            worst = Math.Max(worst, Math.Abs(fromBlocks[i].b - fromRgba[i].b));
+        }
+        Color32 top = fromBlocks[15 * 16 + 8], bottom = fromBlocks[0 * 16 + 8];   // read-back row 15 is the texture's top
+        Check(worst <= 3 && top.r > 200 && top.g < 60 && top.b < 60 && bottom.r > 200 && bottom.g > 200 && bottom.b > 200,
+              string.Format("block uploads: on the GPU the blocks read as the decoded upload does -- the red band on top, white at the " +
+                            "bottom -- within {0}/255 (top {1}, bottom {2})", worst, top, bottom), log);
+        UnityEngine.Object.DestroyImmediate(rgba);
+        cache.Release(a);
+        cache.Release(b);
+        Check(cache.References == 0 && cache.Uploads == 1, "block uploads: the references go back; the upload stays the cache's until it goes", log);
+        // A file of one stored level (no mips) is decoded, and said why.
+        var one = new List<byte[]> { new byte[4 * 4 * 8] };
+        BlpImage decoded = BlpBlocks.PrepareForModels(Blp(2, 0, 0, 16, 16, null, one), gpu.Supports);
+        Texture2D c = cache.Get(9961, decoded, false, true, true);
+        Check(decoded.Blocks == null && decoded.Rgba != null && decoded.BlocksNotUsed != null && decoded.BlocksNotUsed.Contains("1 of the 5") &&
+              c != null && c.format == TextureFormat.RGBA32 && cache.RgbaUploads == 1 && cache.RgbaBytes == BlpBlocks.Rgba32ChainBytes(16, 16),
+              "block uploads: a file of one stored level is decoded to RGBA32 with generated mips, said why (" + decoded.BlocksNotUsed + "; " +
+              cache.RgbaBytes + " bytes)", log);
+        cache.Release(c);
+        cache.Dispose();
+        foreach (UnityEngine.Object o in new UnityEngine.Object[] { a, c })
+            if (o != null) UnityEngine.Object.DestroyImmediate(o);
+        Check(WmvWorldDoodads.LiveTextures == textures0 && WmvWorldDoodads.LiveGpuTextureBytes == 0,
+              "block uploads: the cache's uploads go with it (" + WmvWorldDoodads.LiveTextures + " texture(s), " + WmvWorldDoodads.LiveGpuTextureBytes + " bytes)", log);
+    }
+
 
     /// <summary>A prototype build that throws INSIDE the builder -- a second batch naming a submesh the skin does not have, after
     /// the first made its material and its texture (through the scene's cache) -- with WmvBuildOptions.ReleaseOnFailure: the
@@ -522,6 +639,26 @@ public static partial class WmvLifecycleSelfTest
                                                                      " placed, " + r.DoodadUnsupported + " unsupported of " + r.DoodadWmoRecords : "no report") + ")", log);
         h.Session.Clear("test");
         Check(clean(), "doodads: and nothing is left (" + state() + ")", log);
+
+        // ---- stage 08: the tile's doodads with their texture a full-chain DXT1 file -- uploaded as its own blocks
+        if (WmvTerrainFormatSupport.Query().Dxt1)
+        {
+            h = make();
+            WorldFiles dxt = filesWith(obj0);
+            dxt.Files[WmvTerrainSession.RoleM2Texture][(int)texS] = BandedDxt1(16, 16);
+            h.Session.Load(DoodadCommand(15, false));
+            dxt.Serve(h, 15);
+            r = h.For(15);
+            scene = h.Session.World;
+            WmvDoodadTextures cache = scene != null ? scene.DoodadTextures : null;
+            Check(r != null && r.DoodadState == "complete" && cache != null && cache.BlockUploads == 1 && cache.RgbaUploads == 0 &&
+                  cache.Uploads == 1 && r.DoodadTextureUploads == 1,
+                  "doodads: a DXT1 doodad texture goes up as its own blocks, once for both models (" +
+                  (cache != null ? cache.BlockUploads + " block upload(s), " + cache.RgbaUploads + " RGBA32, " + cache.GpuBytes + " bytes" : "no cache") +
+                  "; " + (r != null ? r.DoodadState : "no report") + ")", log);
+            h.Session.Clear("test");
+            Check(clean(), "doodads: and nothing is left (" + state() + ")", log);
+        }
     }
 
     const double buildBudgetDefault = 6.0, placeBudgetDefault = 4.0;

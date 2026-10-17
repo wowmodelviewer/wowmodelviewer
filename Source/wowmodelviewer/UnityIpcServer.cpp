@@ -176,6 +176,7 @@ bool UnityIpcServer::start()
   m_mapAssetPollsTotal = 0;
   m_mapAssetsQueued = 0;
   m_mapAssetsRefusedQueueFull = 0;
+  m_mapAssetsAnsweredStaleWaiting = 0;
   m_mapAssetQueueDepthMax = 0;
   m_timer.Start(POLL_INTERVAL_MS);
   LOG_INFO << "[unityipc] listening on 127.0.0.1:" << m_port << "(protocol v" << PROTOCOL_VERSION << ")";
@@ -222,16 +223,27 @@ void UnityIpcServer::poll()
   m_pollRecordMs = 0.0;
   PollTiming timing;
   pollAccept();
+  dropPendingClient();
   if (m_client)
-    pollReceive();
+  {
+    // THE TRANSPORT CAP: nothing is received while too much waits to be sent.
+    updateReceivePause();
+    if (m_receivePaused)
+      m_transportStats.pollsPaused++;
+    else
+      pollReceive();
+  }
   const qint64 receivedNs = m_clock.nsecsElapsed();
   const double recordMsBefore = m_pollRecordMs;
   // The map files asked for, in order, as far as this poll's budget goes (THE MAP ASSET QUEUE), and the worker's
   // results -- with or without a client: the results of reads whose connection ended are taken back and dropped.
   serveMapAssetQueue();
+  dropPendingClient();
   const qint64 servedNs = m_clock.nsecsElapsed();
   if (m_client)
     pollSend();
+  dropPendingClient();   // a stall found by pollSend
+  logMapAnswerSummary(false);
   timing.receiveMs = (receivedNs - startNs) / 1e6;
   timing.serveMs = (servedNs - receivedNs) / 1e6;
   timing.recordMs = m_pollRecordMs - recordMsBefore;
@@ -267,7 +279,7 @@ void UnityIpcServer::pollAccept()
   // an empty send buffer and usually leaves in the poll that queued it. Answers the player has not read yet share the
   // buffer; what does not fit goes out on the next ticks. The kernel takes only what is sent: a limit, not an
   // allocation.
-  int sendBuffer = 64 * 1024 * 1024;
+  int sendBuffer = m_sendBufferBytes;
   setsockopt(c, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const char *>(&sendBuffer), sizeof(sendBuffer));
   m_client = (unsigned long long)c;
   m_unityReady = false;
@@ -277,6 +289,9 @@ void UnityIpcServer::pollAccept()
   m_inBuf.clear();
   m_outBuf.clear();
   m_outPos = 0;
+  m_receivePaused = false;
+  m_dropPending.clear();
+  m_sendProgressNs = m_clock.nsecsElapsed();
   dropHeldMapAssets("a new connection");
   m_connectionSerial++;   // a read in flight of the connection before is never answered on this one
   m_stats.connections++;
@@ -290,6 +305,8 @@ void UnityIpcServer::dropClient(const char * why)
   LOG_INFO << "[unityipc] Unity disconnected (" << why << ")";
   closesocket((SOCKET)m_client);
   m_client = 0;
+  m_receivePaused = false;
+  m_dropPending.clear();
   m_unityReady = false;
   m_playerProtocol = 0;
   m_sentImages.clear();
@@ -302,6 +319,18 @@ void UnityIpcServer::dropClient(const char * why)
 
 void UnityIpcServer::pollReceive()
 {
+  // THE TRANSPORT CAP: at most m_linesPerPoll lines a poll, those left by the last poll first; complete lines beyond
+  // the budget stay in m_inBuf and nothing more is received this poll.
+  int budget = m_linesPerPoll;
+  if (!handleBufferedLines(budget))
+    return;   // a handler dropped the client
+  if (m_receivePaused)
+    return;   // a line's answers reached the mark: nothing more this poll
+  if (budget <= 0)
+  {
+    m_transportStats.pollsLinesDeferred++;
+    return;
+  }
   char buf[RECV_CHUNK];
   for (;;)
   {
@@ -309,20 +338,16 @@ void UnityIpcServer::pollReceive()
     if (n > 0)
     {
       m_inBuf.append(buf, (size_t)n);
-      // dispatch complete lines
-      size_t nl;
-      while ((nl = m_inBuf.find('\n')) != std::string::npos)
+      if (!handleBufferedLines(budget))
+        return;
+      if (m_receivePaused)
+        return;
+      if (budget <= 0)
       {
-        std::string line = m_inBuf.substr(0, nl);
-        m_inBuf.erase(0, nl + 1);
-        if (!line.empty() && line.back() == '\r')
-          line.pop_back();
-        if (!line.empty())
-          handleLine(line);
-        if (!m_client)
-          return; // a handler dropped the client
+        m_transportStats.pollsLinesDeferred++;
+        return;
       }
-      if (m_inBuf.size() > MAX_LINE)
+      if (m_inBuf.size() > MAX_LINE)   // (no complete line is left in it: a partial line this long is junk)
       {
         dropClient("oversized line");
         return;
@@ -351,6 +376,7 @@ void UnityIpcServer::pollSend()
     if (n > 0)
     {
       m_outPos += (size_t)n;
+      m_sendProgressNs = m_clock.nsecsElapsed();
       continue;
     }
     const int err = WSAGetLastError();
@@ -364,6 +390,7 @@ void UnityIpcServer::pollSend()
         m_outBuf.erase(0, m_outPos);
         m_outPos = 0;
       }
+      checkSendStall();
       return;
     }
     dropClient("send error");
@@ -373,7 +400,127 @@ void UnityIpcServer::pollSend()
   m_outPos = 0;
 }
 
+bool UnityIpcServer::handleBufferedLines(int & budget)
+{
+  size_t nl;
+  // (The pause is checked again after every line: one poll's lines -- a getAsset is answered on the spot -- must not
+  // take what waits to be sent past the mark.)
+  while (budget > 0 && !m_receivePaused && (nl = m_inBuf.find('\n')) != std::string::npos)
+  {
+    std::string line = m_inBuf.substr(0, nl);
+    m_inBuf.erase(0, nl + 1);
+    if (!line.empty() && line.back() == '\r')
+      line.pop_back();
+    budget--;
+    m_transportStats.linesHandled++;
+    if (!line.empty())
+      handleLine(line);
+    if (!m_client)
+      return false;
+    updateReceivePause();
+  }
+  return true;
+}
+
+void UnityIpcServer::checkSendStall()
+{
+  if (m_outPos >= m_outBuf.size() || m_sendProgressNs < 0 || !m_dropPending.empty())
+    return;
+  const double waitedMs = (m_clock.nsecsElapsed() - m_sendProgressNs) / 1e6;
+  if (waitedMs <= m_stallDropMs)
+    return;
+  m_transportStats.dropsStalled++;
+  m_dropPending = QString("the client does not read: %1 bytes waited %2 ms with no send progress")
+                    .arg(unsentBytes()).arg((qint64)waitedMs).toStdString();
+  LOG_WARNING << "[unityipc] transport:" << QString::fromStdString(m_dropPending);
+}
+
+UnityIpcTestClient::~UnityIpcTestClient()
+{
+  close();
+}
+
+bool UnityIpcTestClient::connectTo(int port, int receiveBufferBytes)
+{
+  close();
+  SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (s == INVALID_SOCKET)
+    return false;
+  if (receiveBufferBytes > 0)
+    setsockopt(s, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<const char *>(&receiveBufferBytes), sizeof(receiveBufferBytes));
+  sockaddr_in addr;
+  ZeroMemory(&addr, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  addr.sin_port = htons((u_short)port);
+  if (connect(s, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) != 0)
+  {
+    closesocket(s);
+    return false;
+  }
+  m_socket = (unsigned long long)s;
+  return true;
+}
+
+bool UnityIpcTestClient::sendText(const std::string & text)
+{
+  if (!m_socket)
+    return false;
+  size_t off = 0;
+  while (off < text.size())
+  {
+    const int n = send((SOCKET)m_socket, text.data() + off, (int)std::min<size_t>(text.size() - off, 64 * 1024), 0);
+    if (n <= 0)
+      return false;
+    off += (size_t)n;
+  }
+  return true;
+}
+
+long long UnityIpcTestClient::readAvailable(std::string * into)
+{
+  if (!m_socket)
+    return -1;
+  u_long nonBlocking = 1;
+  ioctlsocket((SOCKET)m_socket, FIONBIO, &nonBlocking);
+  long long total = 0;
+  char buf[64 * 1024];
+  bool closed = false;
+  for (;;)
+  {
+    const int n = recv((SOCKET)m_socket, buf, (int)sizeof(buf), 0);
+    if (n > 0)
+    {
+      total += n;
+      if (into)
+        into->append(buf, (size_t)n);
+      continue;
+    }
+    if (n == 0 || WSAGetLastError() != WSAEWOULDBLOCK)
+      closed = true;
+    break;
+  }
+  u_long blocking = 0;
+  ioctlsocket((SOCKET)m_socket, FIONBIO, &blocking);
+  return closed && total == 0 ? -1 : total;
+}
+
+void UnityIpcTestClient::close()
+{
+  if (m_socket)
+    closesocket((SOCKET)m_socket);
+  m_socket = 0;
+}
+
 #else // !_WINDOWS
+
+UnityIpcTestClient::~UnityIpcTestClient() {}
+bool UnityIpcTestClient::connectTo(int, int) { return false; }
+bool UnityIpcTestClient::sendText(const std::string &) { return false; }
+long long UnityIpcTestClient::readAvailable(std::string *) { return -1; }
+void UnityIpcTestClient::close() {}
+bool UnityIpcServer::handleBufferedLines(int &) { return true; }
+void UnityIpcServer::checkSendStall() {}
 
 bool UnityIpcServer::start() { LOG_INFO << "[unityipc] not supported on this platform"; return false; }
 void UnityIpcServer::stop() {}
@@ -407,9 +554,15 @@ void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
 {
   if (!m_client || m_detached)
     return;   // (detached: the viewer is shutting down, and nothing is sent any more -- not only from a poll)
+  size_t bytes = 1;
+  for (const QByteArray & part : parts)
+    bytes += (size_t)part.size();
+  if (!admitQueued(bytes))
+    return;
   for (const QByteArray & part : parts)
     m_outBuf.append(part.constData(), (size_t)part.size());
   m_outBuf.push_back('\n');
+  noteQueued();
 #ifdef _WINDOWS
   pollSend(); // try to push it out right away; leftovers go on the next poll
 #endif
@@ -419,12 +572,15 @@ void UnityIpcServer::queueFrame(const QByteArray & header, const QByteArray & pa
 {
   if (!m_client || m_detached)
     return;
+  if (!admitQueued((size_t)header.size() + (size_t)payload.size() + 2))
+    return;
   QElapsedTimer step;
   step.start();
   m_outBuf.append(header.constData(), (size_t)header.size());
   m_outBuf.push_back('\n');
   m_outBuf.append(payload.constData(), (size_t)payload.size());
   m_outBuf.push_back('\n');   // the player checks it: a payload not followed by its newline means out of step
+  noteQueued();
   if (appendMs)
     *appendMs = step.nsecsElapsed() / 1e6;
   step.restart();
@@ -700,14 +856,16 @@ QString UnityIpcServer::RuntimeState::describe() const
            .arg(liveGameObjects).arg(liveTexture2D).arg(liveMeshes).arg(liveMaterials);
 }
 
-int UnityIpcServer::requestRuntimeState()
+int UnityIpcServer::requestRuntimeState(bool light)
 {
   if (!playerDrawsMapObjects())
     return 0;
   QJsonObject msg;
   msg["type"] = "runtimeState";
   msg["query"] = ++m_runtimeQuery;
-  LOG_INFO << "[unityipc] -> runtimeState query=" << m_runtimeQuery;
+  if (light)
+    msg["light"] = true;
+  LOG_INFO << "[unityipc] -> runtimeState query=" << m_runtimeQuery << (light ? "(light)" : "");
   queueJson(msg);
   return m_runtimeQuery;
 }
@@ -821,6 +979,19 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.liveTexture2D = count("liveTexture2D");
   s.liveMeshes = count("liveMeshes");
   s.liveMaterials = count("liveMaterials");
+  // Protocol 18 (STREAMING).
+  s.light = msg.value(QLatin1String("light")).toBool(false);
+  s.streaming = msg.contains(QLatin1String("streaming")) ? (msg.value(QLatin1String("streaming")).toBool() ? 1 : 0) : -1;
+  s.streamTiles = count("streamTiles");
+  s.streamJobs = count("streamJobs");
+  s.streamRequestsOut = count("streamRequestsOut");
+  s.streamPlacements = count("streamPlacements");
+  s.streamDoodads = count("streamDoodads");
+  s.sceneTerrainTextures = count("sceneTerrainTextures");
+  s.streamPrototypesEvicted = count64("streamPrototypesEvicted");
+  s.streamTexturesEvicted = count64("streamTexturesEvicted");
+  s.streamFilesAskedAgain = count64("streamFilesAskedAgain");
+  s.streamImagesShared = count64("streamImagesShared");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -1335,6 +1506,34 @@ void UnityIpcServer::handleLine(const std::string & line)
   {
     handleWorldModelInspected(msg);
   }
+  else if (type == "streamTile")
+  {
+    // STREAMING (protocol 18): tile loads opened and closed by the player; the viewer's answer goes back as the reply.
+    QJsonObject reply;
+    if (onStreamTile)
+      reply = onStreamTile(msg);
+    if (!reply.isEmpty())
+      queueJson(reply);
+  }
+  else if (type == "streamState")
+  {
+    handleStreamState(msg);
+  }
+  else if (type == "testFlightDone")
+  {
+    TestFlightDone d;
+    d.request = msg.value("request").toInt(0);
+    d.status = msg.value("status").toString();
+    d.reason = msg.value("reason").toString();
+    d.seconds = msg.value("seconds").toDouble(-1.0);
+    d.frames = msg.value("frames").toInt(-1);
+    d.frameMsMax = msg.value("frameMsMax").toDouble(-1.0);
+    d.distance = msg.value("distance").toDouble(-1.0);
+    LOG_INFO << "[unityipc] <- testFlightDone" << d.request << d.status << d.reason << "after" << d.seconds << "s," << d.frames
+             << "frame(s), the longest" << d.frameMsMax << "ms," << d.distance << "yards";
+    if (onTestFlightDone)
+      onTestFlightDone(d);
+  }
   else
   {
     LOG_ERROR << "[unityipc] unknown message type from player:" << type;
@@ -1550,6 +1749,19 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
     msg["maxM2TexturesPerLoad"] = c.maxM2TexturesPerLoad;
     msg["maxDoodadInstancesPerLoad"] = c.maxDoodadInstancesPerLoad;
   }
+  // STREAMING (protocol 18): the region the player keeps around its camera, to a player that streams; otherwise the load
+  // is the single-tile one.
+  const bool streams = c.streaming && doodads && playerStreams();
+  if (streams)
+  {
+    QJsonObject s;
+    s["radius"] = STREAM_RADIUS;
+    s["keepRadius"] = STREAM_KEEP_RADIUS;
+    s["maxResidentTiles"] = STREAM_MAX_RESIDENT_TILES;
+    s["requestCredit"] = STREAM_REQUEST_CREDIT;
+    s["maxTileLoads"] = STREAM_MAX_TILE_LOADS;
+    msg["streaming"] = s;
+  }
   m_stats.terrainLoads++;
   m_stats.worldLoads++;
   LOG_INFO << "[unityipc] -> loadWorld load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId << c.mapDirectory
@@ -1570,9 +1782,191 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
                            .arg(c.maxM2ModelsPerLoad).arg(c.maxM2TexturesPerLoad).arg(c.maxDoodadInstancesPerLoad)
                        : playerPlacesDoodads() ? QString("no doodads offered")
                                                : QString("no doodads (a protocol %1 player)").arg(m_playerProtocol))
-           << (camera ? "camera: " + describeCamera(c.camera) : QString());
+           << (camera ? "camera: " + describeCamera(c.camera) : QString())
+           << (streams ? QString("streaming: radius %1, kept within %2, at most %3 resident, %4 requests out")
+                           .arg(STREAM_RADIUS).arg(STREAM_KEEP_RADIUS).arg(STREAM_MAX_RESIDENT_TILES).arg(STREAM_REQUEST_CREDIT)
+                       : QString());
   queueJson(msg);
   return true;
+}
+
+// ---------------------------------------------------------------- STREAMING (protocol 18)
+
+int UnityIpcServer::sendTestFlight(const std::vector<double> & points, double speed, double pitch)
+{
+  if (!playerStreams())
+    return 0;
+  static int serial = 0;
+  QJsonObject msg;
+  msg["type"] = "testFlight";
+  msg["request"] = ++serial;
+  QJsonArray p;
+  for (double v : points)
+    p.append(v);
+  msg["flightPoints"] = p;
+  msg["flightSpeed"] = speed;
+  msg["flightPitch"] = pitch;
+  LOG_INFO << "[unityipc] -> testFlight" << serial << ":" << (int)(points.size() / 3) << "point(s) at" << speed << "yards a second";
+  queueJson(msg);
+  return serial;
+}
+
+int UnityIpcServer::answerStaleWaiting()
+{
+  if (!onMapAssetStale)
+    return 0;
+  int answered = 0;
+  for (auto it = m_mapAssetQueue.begin(); it != m_mapAssetQueue.end();)
+  {
+    m_activity.mapCallbacks++;
+    const QString why = onMapAssetStale(it->request);
+    if (why.isEmpty())
+    {
+      ++it;
+      continue;
+    }
+    const QueuedMapAsset gone = *it;
+    it = m_mapAssetQueue.erase(it);
+    QElapsedTimer staleTimer;
+    staleTimer.start();
+    MapAssetAnswer stale;
+    stale.state = "stale";
+    stale.detail = why;
+    answerMapAsset(gone.request, (m_clock.nsecsElapsed() - gone.arrivedNs) / 1e6, stale, nullptr, nullptr, staleTimer);
+    m_mapAssetsAnsweredStaleWaiting++;
+    answered++;
+  }
+  return answered;
+}
+
+void UnityIpcServer::setStreaming(bool on)
+{
+  if (on == m_streaming)
+    return;
+  // A session ending: what its loads still have waiting is answered stale first, so the smaller queue of a single load is
+  // not already full of them.
+  if (!on)
+    answerStaleWaiting();
+  m_streaming = on;
+  m_mapAssetQueueMax = on ? STREAM_QUEUE_MAX : MAP_ASSET_QUEUE_MAX;
+  m_mapReadsInFlightMax = on ? STREAM_READS_IN_FLIGHT : MAP_ASSET_READS_IN_FLIGHT;
+  const QByteArray each = qgetenv("WMV_LOG_MAP_ANSWERS");
+  logMapAnswerSummary(true);
+  m_logEachMapAnswer = !on || each == "1";
+  LOG_INFO << "[unityipc] streaming" << (on ? "begins" : "ends") << ": map asset queue" << m_mapAssetQueueMax << ", reads in flight"
+           << m_mapReadsInFlightMax << ", answers logged" << (m_logEachMapAnswer ? "one line each" : "as a summary every 2 s");
+}
+
+void UnityIpcServer::logMapAnswerSummary(bool force)
+{
+  if (m_answersSinceSummary == 0)
+    return;
+  const qint64 now = m_clock.nsecsElapsed();
+  if (!force && m_answerSummaryNs >= 0 && now - m_answerSummaryNs < 2000LL * 1000 * 1000)
+    return;
+  LOG_INFO << "[unityipc] <- getMapAsset summary:" << m_answersSinceSummary << "answered (" << m_answeredAvailableSinceSummary
+           << "available," << m_answeredStaleSinceSummary << "stale," << m_answeredOtherSinceSummary << "other)," << m_answerBytesSinceSummary
+           << "bytes read; waiting" << (int)m_mapAssetQueue.size() << ", in flight" << (int)m_mapReadsInFlight.size();
+  m_answersSinceSummary = m_answeredAvailableSinceSummary = m_answeredStaleSinceSummary = m_answeredOtherSinceSummary = 0;
+  m_answerBytesSinceSummary = 0;
+  m_answerSummaryNs = now;
+}
+
+void UnityIpcServer::handleStreamState(const QJsonObject & msg)
+{
+  StreamState s;
+  const auto i = [&msg](const char * k) { return msg.contains(k) ? msg.value(k).toInt(-1) : -1; };
+  const auto l = [&msg](const char * k) { return msg.contains(k) ? (long long)msg.value(k).toDouble(-1) : -1LL; };
+  const auto d = [&msg](const char * k) { return msg.contains(k) ? msg.value(k).toDouble(-1.0) : -1.0; };
+  s.load = msg.value("load").toInt(0);
+  s.cameraX = msg.value("cameraX").toDouble(0.0);
+  s.cameraY = msg.value("cameraY").toDouble(0.0);
+  s.cameraZ = msg.value("cameraZ").toDouble(0.0);
+  s.cameraTileX = msg.value("cameraTileX").toInt(-1);
+  s.cameraTileY = msg.value("cameraTileY").toInt(-1);
+  const QJsonArray tiles = msg.value("tiles").toArray();
+  for (const QJsonValue & v : tiles)
+  {
+    if ((int)s.tiles.size() >= 64)
+      break;
+    const QJsonObject o = v.toObject();
+    StreamTile t;
+    t.x = o.value("x").toInt(-1);
+    t.y = o.value("y").toInt(-1);
+    t.load = o.value("load").toInt(0);
+    t.state = o.value("state").toString();
+    t.filesAsked = o.value("filesAsked").toInt(0);
+    t.filesAnswered = o.value("filesAnswered").toInt(0);
+    t.bytes = (long long)o.value("bytes").toDouble(0);
+    t.worldPlaced = o.value("worldPlaced").toInt(0);
+    t.worldPlacements = o.value("worldPlacements").toInt(0);
+    t.doodadsPlaced = o.value("doodadsPlaced").toInt(0);
+    t.doodadInstances = o.value("doodadInstances").toInt(0);
+    s.tiles.push_back(t);
+  }
+  s.tilesResident = i("tilesResident");
+  s.tilesLoading = i("tilesLoading");
+  s.tilesWanted = i("tilesWanted");
+  s.tilesOpened = i("tilesOpened");
+  s.tilesClosed = i("tilesClosed");
+  s.tilesFailed = i("tilesFailed");
+  s.requestsOut = i("requestsOut");
+  s.requestsWaiting = i("requestsWaiting");
+  s.filesAsked = l("filesAsked");
+  s.filesAnswered = l("filesAnswered");
+  s.bytesReceived = l("bytesReceived");
+  s.worldPrototypes = i("worldPrototypes");
+  s.worldPrototypesPooled = i("worldPrototypesPooled");
+  s.doodadPrototypes = i("doodadPrototypes");
+  s.doodadPrototypesPooled = i("doodadPrototypesPooled");
+  s.textures = i("textures");
+  s.texturesPooled = i("texturesPooled");
+  s.worldInstances = i("worldInstances");
+  s.doodadInstances = i("doodadInstances");
+  s.gpuTextureBytes = l("gpuTextureBytes");
+  s.gpuGeometryBytes = l("gpuGeometryBytes");
+  s.poolBytes = l("poolBytes");
+  s.prototypesEvicted = l("prototypesEvicted");
+  s.texturesEvicted = l("texturesEvicted");
+  s.frameMsMax = d("frameMsMax");
+  s.frameMsP95 = d("frameMsP95");
+  s.uploadMsMax = d("uploadMsMax");
+  s.workMsMax = d("workMsMax");
+  s.framesOver33 = i("framesOver33");
+  s.framesOver50 = i("framesOver50");
+  s.managedHeapBytes = l("managedHeapBytes");
+  s.raw = msg;
+  m_lastStreamState = s;
+  m_streamStatesReceived++;
+  // One line a second at most (the messages come four times a second).
+  const qint64 now = m_clock.nsecsElapsed();
+  if (m_streamStateLogNs < 0 || now - m_streamStateLogNs >= 1000LL * 1000 * 1000)
+  {
+    m_streamStateLogNs = now;
+    LOG_INFO << "[unityipc] <- streamState" << s.describe();
+  }
+  if (onStreamState)
+    onStreamState(s);
+}
+
+QString UnityIpcServer::StreamState::describe() const
+{
+  QStringList t;
+  for (const StreamTile & x : tiles)
+    t << QString("%1_%2:%3:%4/%5").arg(x.x).arg(x.y).arg(x.state).arg(x.filesAnswered).arg(x.filesAsked);
+  return QString("load=%1 camera=[%2,%3,%4] tile=%5_%6 resident=%7 loading=%8 wanted=%9")
+           .arg(load).arg(cameraX, 0, 'f', 1).arg(cameraY, 0, 'f', 1).arg(cameraZ, 0, 'f', 1).arg(cameraTileX).arg(cameraTileY)
+           .arg(tilesResident).arg(tilesLoading).arg(tilesWanted) +
+         QString(" opened=%1 closed=%2 failed=%3 requestsOut=%4 waiting=%5 files=%6/%7 bytes=%8")
+           .arg(tilesOpened).arg(tilesClosed).arg(tilesFailed).arg(requestsOut).arg(requestsWaiting).arg(filesAnswered)
+           .arg(filesAsked).arg(bytesReceived) +
+         QString(" prototypes=%1+%2/%3+%4 textures=%5+%6 instances=%7/%8 gpuTex=%9")
+           .arg(worldPrototypes).arg(worldPrototypesPooled).arg(doodadPrototypes).arg(doodadPrototypesPooled).arg(textures)
+           .arg(texturesPooled).arg(worldInstances).arg(doodadInstances).arg(gpuTextureBytes) +
+         QString(" gpuGeom=%1 pool=%2 evicted=%3/%4 frameMax=%5 p95=%6 over33=%7 over50=%8 uploadMax=%9")
+           .arg(gpuGeometryBytes).arg(poolBytes).arg(prototypesEvicted).arg(texturesEvicted).arg(frameMsMax, 0, 'f', 1)
+           .arg(frameMsP95, 0, 'f', 1).arg(framesOver33).arg(framesOver50).arg(uploadMsMax, 0, 'f', 1) +
+         " tiles " + t.join(" ");
 }
 
 void UnityIpcServer::putCamera(QJsonObject & msg, const WorldCamera & c)
@@ -2219,7 +2613,7 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
              << msg.value("load").toInt(0) << "held unanswered (" << (int)m_mapAssetsHeld.size() << "held)";
     return;
   }
-  if (m_mapAssetQueue.size() >= (size_t)MAP_ASSET_QUEUE_MAX)
+  if (m_mapAssetQueue.size() >= (size_t)m_mapAssetQueueMax)
   {
     QElapsedTimer handler;
     handler.start();
@@ -2227,11 +2621,21 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
     MapAssetAnswer refused;
     refused.state = "refused";
     refused.detail = QString("too many map requests waiting (%1 wait, at most %2)").arg(m_mapAssetQueue.size())
-                       .arg(MAP_ASSET_QUEUE_MAX);
+                       .arg(m_mapAssetQueueMax);
     answerMapAsset(msg, 0.0, refused, nullptr, nullptr, handler);
     return;
   }
-  m_mapAssetQueue.push_back({msg, m_clock.nsecsElapsed()});
+  // STREAMING: in the order of the request's priority (smaller first; absent is 0), first come first served among equals --
+  // requests without one (every request of a single-tile load) keep the order they came in.
+  const int priority = msg.value("priority").toInt(0);
+  auto at = m_mapAssetQueue.end();
+  for (auto it = m_mapAssetQueue.begin(); it != m_mapAssetQueue.end(); ++it)
+    if (it->request.value("priority").toInt(0) > priority)
+    {
+      at = it;
+      break;
+    }
+  m_mapAssetQueue.insert(at, {msg, m_clock.nsecsElapsed()});
   m_mapAssetsQueued++;
   if ((int)m_mapAssetQueue.size() > m_mapAssetQueueDepthMax)
     m_mapAssetQueueDepthMax = (int)m_mapAssetQueue.size();
@@ -2240,6 +2644,82 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
 long long UnityIpcServer::unsentBytes() const
 {
   return (long long)(m_outBuf.size() - m_outPos) + m_fakeUnsentBytes;
+}
+
+// ---------------------------------------------------------------- THE TRANSPORT CAP
+
+void UnityIpcServer::updateReceivePause()
+{
+  const long long unsent = unsentBytes();
+  if (!m_receivePaused && unsent >= m_receivePauseBytes)
+  {
+    m_receivePaused = true;
+    m_transportStats.receivePauses++;
+    LOG_INFO << "[unityipc] transport: receiving paused," << unsent << "bytes wait to be sent";
+  }
+  else if (m_receivePaused && unsent <= m_receiveResumeBytes)
+  {
+    m_receivePaused = false;
+    LOG_INFO << "[unityipc] transport: receiving resumed," << unsent << "bytes wait to be sent";
+  }
+}
+
+bool UnityIpcServer::admitQueued(size_t bytes)
+{
+  if (!m_dropPending.empty())
+  {
+    m_transportStats.messagesNotQueued++;
+    return false;
+  }
+  const long long unsent = unsentBytes();
+  if (unsent + (long long)bytes > m_hardCapBytes)
+  {
+    m_transportStats.dropsHardCap++;
+    m_transportStats.messagesNotQueued++;
+    m_dropPending = QString("the client does not read: %1 bytes wait to be sent and a message of %2 would pass the cap of %3")
+                      .arg(unsent).arg((qint64)bytes).arg(m_hardCapBytes).toStdString();
+    LOG_WARNING << "[unityipc] transport:" << QString::fromStdString(m_dropPending);
+    return false;
+  }
+  if (unsent == 0)
+    m_sendProgressNs = m_clock.nsecsElapsed();   // bytes begin to wait now (the stall is counted from here)
+  return true;
+}
+
+void UnityIpcServer::noteQueued()
+{
+  const long long unsent = unsentBytes();
+  if (unsent > m_transportStats.unsentBytesMax)
+    m_transportStats.unsentBytesMax = unsent;
+}
+
+void UnityIpcServer::dropPendingClient()
+{
+  if (m_dropPending.empty())
+    return;
+  const std::string why = m_dropPending;
+  m_dropPending.clear();
+  if (m_client)
+    dropClient(why.c_str());
+}
+
+void UnityIpcServer::testSetTransportLimits(long long pauseBytes, long long resumeBytes, long long hardCapBytes,
+                                            int stallMs, int linesPerPoll, int sendBufferBytes)
+{
+  m_receivePauseBytes = pauseBytes;
+  m_receiveResumeBytes = resumeBytes;
+  m_hardCapBytes = hardCapBytes;
+  m_stallDropMs = stallMs;
+  m_linesPerPoll = linesPerPoll;
+  m_sendBufferBytes = sendBufferBytes > 0 ? sendBufferBytes : 64 * 1024 * 1024;
+}
+
+void UnityIpcServer::testPushBytes(long long bytes)
+{
+  QJsonObject h;
+  h["type"] = "transportTestPayload";
+  h["payloadBytes"] = (double)bytes;
+  queueFrame(QJsonDocument(h).toJson(QJsonDocument::Compact), QByteArray((int)bytes, 'x'));
 }
 
 void UnityIpcServer::setMapAssetWorker(const std::shared_ptr<MapAssetWorker> & worker)
@@ -2444,10 +2924,15 @@ int UnityIpcServer::serveMapAssetQueue()
       poll.largeFiles++;
   }
 
+  // (3a) STREAMING: a request waiting for a load that has ended (a tile the player closed) is answered stale now, not when
+  // it reaches the front -- the player took its credit back at the close, so it must not keep the queue's room.
+  if (m_streaming && !waiting)
+    poll.served += answerStaleWaiting();
+
   // (3) Requests waiting: decided and dispatched while the worker has room and the player keeps reading.
   while (!m_mapAssetQueue.empty())
   {
-    if ((int)m_mapReadsInFlight.size() >= MAP_ASSET_READS_IN_FLIGHT)
+    if ((int)m_mapReadsInFlight.size() >= m_mapReadsInFlightMax)
       break;
     if (unsentBytes() > MAP_ASSET_SEND_HIGH_WATER)
     {
@@ -2654,10 +3139,25 @@ long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedM
     served.timings["completeMs"] = guiMs;
   QElapsedTimer logTimer;
   logTimer.start();
-  if (ok)
-    LOG_INFO << "[unityipc] <- getMapAsset" << served.describe();
+  if (m_logEachMapAnswer)
+  {
+    if (ok)
+      LOG_INFO << "[unityipc] <- getMapAsset" << served.describe();
+    else
+      LOG_WARNING << "[unityipc] <- getMapAsset" << served.describe();
+  }
   else
-    LOG_WARNING << "[unityipc] <- getMapAsset" << served.describe();
+  {
+    // STREAMING: counted for the summary every two seconds (logMapAnswerSummary).
+    m_answersSinceSummary++;
+    m_answerBytesSinceSummary += answer.bytesRead;
+    if (ok)
+      m_answeredAvailableSinceSummary++;
+    else if (answer.state == "stale")
+      m_answeredStaleSinceSummary++;
+    else
+      m_answeredOtherSinceSummary++;
+  }
   served.timings["logMs"] = logTimer.nsecsElapsed() / 1e6;
   m_pollMapAnswered++;
   recordMapAssetServed(served);

@@ -301,7 +301,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 17;
+    public const int ProtocolVersion = 18;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -326,6 +326,8 @@ public class WmvIpcClient : MonoBehaviour
     public Action<string> OnSetTerrainView;                    // the view terrain is drawn in (protocol 14)
     public Action<WorldCameraRequest> OnSetWorldCamera;        // place the world view's camera, or switch it (protocol 15)
     public Action<WorldModelRequest> OnInspectWorldModel;      // a WMO-only map's world model: its footprint (protocol 16)
+    public Action<StreamTileAnswer> OnStreamTileAnswer;        // the tile loads the host opened, refused, closed (protocol 18)
+    public Action<TestFlight> OnTestFlight;                    // TEST (protocol 18): the free camera flies a path itself
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -581,6 +583,9 @@ public class WmvIpcClient : MonoBehaviour
         public int MaxM2ModelsPerLoad;       // unique doodad models one load may ask for
         public int MaxM2TexturesPerLoad;     // doodad texture ids one load may ask for
         public int MaxDoodadInstancesPerLoad;   // doodads one load places
+        // Protocol 18 (docs/world-viewer/08-streaming.md): the load is a streaming session's entry -- the player keeps the tiles
+        // around its camera loaded, each a tile load of its own the host opens (streamTile). Null: the single-tile load.
+        public StreamingOffer Streaming;
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
@@ -609,7 +614,8 @@ public class WmvIpcClient : MonoBehaviour
                                             ? string.Format("; doodads: maxM2FileBytes {0} maxM2BytesPerLoad {1} maxM2TextureBytes {2} " +
                                                             "maxM2TextureBytesPerLoad {3} maxM2ModelsPerLoad {4} maxM2TexturesPerLoad {5} " +
                                                             "maxDoodadInstancesPerLoad {6}", MaxM2FileBytes, MaxM2BytesPerLoad, MaxM2TextureBytes,
-                                                            MaxM2TextureBytesPerLoad, MaxM2ModelsPerLoad, MaxM2TexturesPerLoad, MaxDoodadInstancesPerLoad)
+                                                            MaxM2TextureBytesPerLoad, MaxM2ModelsPerLoad, MaxM2TexturesPerLoad, MaxDoodadInstancesPerLoad) +
+                                                   (Streaming != null ? "; " + Streaming : "")
                                             : "; no doodads offered")
                                      : World ? "; world models asked for, but no budget stated" : "");
         }
@@ -701,6 +707,146 @@ public class WmvIpcClient : MonoBehaviour
     }
 
     public void ReportWorldShown(WorldShownReport r) { Send(WorldShownLine(r)); }
+
+    // ---------------------------------------------------------------- STREAMING (protocol 18, docs/world-viewer/08-streaming.md)
+
+    /// <summary>loadWorld's "streaming": the region the player keeps around its camera -- the tiles within Radius of the camera's
+    /// tile wanted, kept while within KeepRadius, at most MaxResidentTiles resident --, the requests it keeps out at once for
+    /// the whole session (RequestCredit) and the tile loads the host keeps open at most (MaxTileLoads).</summary>
+    public class StreamingOffer
+    {
+        public int Radius, KeepRadius, MaxResidentTiles, RequestCredit, MaxTileLoads;
+
+        public override string ToString()
+        {
+            return string.Format("streaming: radius {0}, kept within {1}, at most {2} resident, {3} requests out, {4} tile loads",
+                                 Radius, KeepRadius, MaxResidentTiles, RequestCredit, MaxTileLoads);
+        }
+    }
+
+    /// <summary>streamTileAnswer: the tile loads the host opened for the session (with their load ids), refused (why) and
+    /// closed.</summary>
+    public class StreamTileAnswer
+    {
+        public int Load, AssetEpoch;
+        public readonly List<StreamTileOpened> Opened = new List<StreamTileOpened>();
+        public readonly List<StreamTileOpened> Refused = new List<StreamTileOpened>();
+        public readonly List<int> Closed = new List<int>();
+    }
+
+    public class StreamTileOpened
+    {
+        public int X, Y, TileLoad;
+        public string Refused = "";
+    }
+
+    /// <summary>streamTile: the tiles the session opens (x, y) and the tile loads it closes.</summary>
+    public void SendStreamTile(int load, List<int[]> open, List<int> close)
+    {
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"streamTile\",\"load\":").Append(load).Append(",\"open\":[");
+        for (int i = 0; open != null && i < open.Count; i++)
+            sb.Append(i > 0 ? "," : "").Append("{\"x\":").Append(open[i][0]).Append(",\"y\":").Append(open[i][1]).Append('}');
+        sb.Append("],\"close\":[");
+        for (int i = 0; close != null && i < close.Count; i++)
+            sb.Append(i > 0 ? "," : "").Append(close[i]);
+        sb.Append("]}");
+        Send(sb.ToString());
+    }
+
+    /// <summary>streamState (at most every WmvTerrainSession.StreamStateIntervalMs): the session -- the camera, each tile of the
+    /// region and what it has, the requests out, what is resident and pooled, the frames since the last one.</summary>
+    public class StreamStateReport
+    {
+        public int Load;
+        public double CameraX, CameraY, CameraZ;
+        public int CameraTileX = -1, CameraTileY = -1;
+        public readonly List<StreamStateTile> Tiles = new List<StreamStateTile>();
+        public int TilesResident, TilesLoading, TilesWanted, TilesOpened, TilesClosed, TilesFailed;
+        public int RequestsOut, RequestsWaiting;
+        public long FilesAsked, FilesAnswered, BytesReceived;
+        public int WorldPrototypes, WorldPrototypesPooled, DoodadPrototypes, DoodadPrototypesPooled, Textures, TexturesPooled;
+        public int WorldInstances, DoodadInstances;
+        public long GpuTextureBytes, GpuGeometryBytes, PoolBytes, PrototypesEvicted, TexturesEvicted;
+        public double FrameMsMax, FrameMsP95, UploadMsMax, WorkMsMax;
+        public int FramesOver33, FramesOver50;
+        public long ManagedHeapBytes;
+    }
+
+    public class StreamStateTile
+    {
+        public int X, Y, Load;
+        public string State = "";
+        public int FilesAsked, FilesAnswered;
+        public long Bytes;
+        public int WorldPlaced, WorldPlacements, DoodadsPlaced, DoodadInstances;
+    }
+
+    public void ReportStreamState(StreamStateReport r) { Send(StreamStateLine(r)); }
+
+    /// <summary>TEST (protocol 18, the harnesses' acceptance flight): the free camera flies the path -- world points (x, y, z,
+    /// yards), at Speed yards a second, pitched Pitch degrees, facing the way it goes -- as a user would fly it, with no
+    /// message from the viewer on the way; answered testFlightDone.</summary>
+    public class TestFlight
+    {
+        public int Request;
+        public double[] Points = new double[0];
+        public double Speed;
+        public float Pitch;
+    }
+
+    public void ReportTestFlightDone(int request, string status, string reason, double seconds, int frames, double frameMsMax, double distance)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        Send("{\"type\":\"testFlightDone\",\"request\":" + request + ",\"status\":\"" + Escape(status ?? "") + "\",\"reason\":\"" +
+             Escape(reason ?? "") + "\",\"seconds\":" + seconds.ToString("0.###", inv) + ",\"frames\":" + frames + ",\"frameMsMax\":" +
+             frameMsMax.ToString("0.###", inv) + ",\"distance\":" + distance.ToString("0.###", inv) + "}");
+    }
+
+    public static string StreamStateLine(StreamStateReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"streamState\",\"load\":").Append(r.Load)
+          .Append(",\"cameraX\":").Append(r.CameraX.ToString("0.###", inv))
+          .Append(",\"cameraY\":").Append(r.CameraY.ToString("0.###", inv))
+          .Append(",\"cameraZ\":").Append(r.CameraZ.ToString("0.###", inv))
+          .Append(",\"cameraTileX\":").Append(r.CameraTileX)
+          .Append(",\"cameraTileY\":").Append(r.CameraTileY)
+          .Append(",\"tiles\":[");
+        for (int i = 0; i < r.Tiles.Count; i++)
+        {
+            StreamStateTile t = r.Tiles[i];
+            sb.Append(i > 0 ? "," : "").Append("{\"x\":").Append(t.X).Append(",\"y\":").Append(t.Y).Append(",\"load\":").Append(t.Load)
+              .Append(",\"state\":\"").Append(Escape(t.State ?? "")).Append('"')
+              .Append(",\"filesAsked\":").Append(t.FilesAsked).Append(",\"filesAnswered\":").Append(t.FilesAnswered)
+              .Append(",\"bytes\":").Append(t.Bytes).Append(",\"worldPlaced\":").Append(t.WorldPlaced)
+              .Append(",\"worldPlacements\":").Append(t.WorldPlacements).Append(",\"doodadsPlaced\":").Append(t.DoodadsPlaced)
+              .Append(",\"doodadInstances\":").Append(t.DoodadInstances).Append('}');
+        }
+        sb.Append(']')
+          .Append(",\"tilesResident\":").Append(r.TilesResident).Append(",\"tilesLoading\":").Append(r.TilesLoading)
+          .Append(",\"tilesWanted\":").Append(r.TilesWanted).Append(",\"tilesOpened\":").Append(r.TilesOpened)
+          .Append(",\"tilesClosed\":").Append(r.TilesClosed).Append(",\"tilesFailed\":").Append(r.TilesFailed)
+          .Append(",\"requestsOut\":").Append(r.RequestsOut).Append(",\"requestsWaiting\":").Append(r.RequestsWaiting)
+          .Append(",\"filesAsked\":").Append(r.FilesAsked).Append(",\"filesAnswered\":").Append(r.FilesAnswered)
+          .Append(",\"bytesReceived\":").Append(r.BytesReceived)
+          .Append(",\"worldPrototypes\":").Append(r.WorldPrototypes).Append(",\"worldPrototypesPooled\":").Append(r.WorldPrototypesPooled)
+          .Append(",\"doodadPrototypes\":").Append(r.DoodadPrototypes).Append(",\"doodadPrototypesPooled\":").Append(r.DoodadPrototypesPooled)
+          .Append(",\"textures\":").Append(r.Textures).Append(",\"texturesPooled\":").Append(r.TexturesPooled)
+          .Append(",\"worldInstances\":").Append(r.WorldInstances).Append(",\"doodadInstances\":").Append(r.DoodadInstances)
+          .Append(",\"gpuTextureBytes\":").Append(r.GpuTextureBytes).Append(",\"gpuGeometryBytes\":").Append(r.GpuGeometryBytes)
+          .Append(",\"poolBytes\":").Append(r.PoolBytes).Append(",\"prototypesEvicted\":").Append(r.PrototypesEvicted)
+          .Append(",\"texturesEvicted\":").Append(r.TexturesEvicted)
+          .Append(",\"frameMsMax\":").Append(r.FrameMsMax.ToString("0.###", inv))
+          .Append(",\"frameMsP95\":").Append(r.FrameMsP95.ToString("0.###", inv))
+          .Append(",\"uploadMsMax\":").Append(r.UploadMsMax.ToString("0.###", inv))
+          .Append(",\"workMsMax\":").Append(r.WorkMsMax.ToString("0.###", inv))
+          .Append(",\"framesOver33\":").Append(r.FramesOver33).Append(",\"framesOver50\":").Append(r.FramesOver50)
+          .Append(",\"managedHeapBytes\":").Append(r.ManagedHeapBytes)
+          .Append('}');
+        return sb.ToString();
+    }
 
     public static string WorldShownLine(WorldShownReport r)
     {
@@ -1006,6 +1152,31 @@ public class WmvIpcClient : MonoBehaviour
         public bool loop;
     }
 
+    [Serializable] class MsgStreaming
+    {
+        public int radius, keepRadius, maxResidentTiles, requestCredit, maxTileLoads;
+    }
+
+    [Serializable] class MsgStreamTile
+    {
+        public int x, y, tileLoad;
+        public string refused;
+    }
+
+    /// <summary>loadWorld's streaming offer (protocol 18), null when it carries none (a nested object always parses: its
+    /// radius says whether it was sent).</summary>
+    static StreamingOffer StreamingFrom(Msg msg)
+    {
+        MsgStreaming s = msg.streaming;
+        if (s == null || s.radius <= 0)
+            return null;
+        return new StreamingOffer
+        {
+            Radius = s.radius, KeepRadius = Math.Max(s.radius, s.keepRadius), MaxResidentTiles = s.maxResidentTiles,
+            RequestCredit = s.requestCredit, MaxTileLoads = s.maxTileLoads,
+        };
+    }
+
     [Serializable] class Msg
     {
         public MsgTexture[] textures;
@@ -1108,6 +1279,15 @@ public class WmvIpcClient : MonoBehaviour
         public int wmoScale;
         public long wmoUniqueId;
         public string state;          // assetResponse to getMapAsset: the host's decision
+        // protocol 18: loadWorld's streaming offer (radius 0: none), and streamTileAnswer's lists
+        public MsgStreaming streaming;
+        public bool light;            // runtimeState (protocol 18): skip the whole-player object scans
+        public double[] flightPoints;  // testFlight (protocol 18, a test hook); its number is "request" above
+        public double flightSpeed;
+        public float flightPitch;
+        public MsgStreamTile[] opened;
+        public MsgStreamTile[] refused;
+        public int[] closed;
         public string detail;
         public double readMs;
         public string md5;
@@ -1137,6 +1317,13 @@ public class WmvIpcClient : MonoBehaviour
     // frame, and the model on screen would stand still for all of it.
     readonly Queue<Msg> localAnswers = new Queue<Msg>();
     const double LocalAnswerBudgetMs = 8.0;
+    // THE INBOX's budget (stage 08, docs/world-viewer/08-streaming.md 1.5): the host's messages are dispatched in order, at least
+    // one a frame, then as many as fit InboxBudgetMs; the rest wait for the next frame. Counted for runtimeState.
+    public const double InboxBudgetMs = 8.0;
+    public static int InboxDepthMax;            // the most messages waiting at a frame's start
+    /// <summary>The runtimeState being answered was asked "light" (protocol 18): its whole-player object scans are skipped.</summary>
+    public static bool RuntimeStateLight;
+    public static long InboxFramesDeferred;     // frames that left messages for the next
 
     /// <summary>The asset cache, for the self-test and the log.</summary>
     public WmvAssetCache Cache { get { return cache; } }
@@ -1268,6 +1455,9 @@ public class WmvIpcClient : MonoBehaviour
             return;
         }
 
+        var inboxClock = System.Diagnostics.Stopwatch.StartNew();
+        lock (inbox)
+            InboxDepthMax = Math.Max(InboxDepthMax, inbox.Count);
         while (true)
         {
             Msg msg;
@@ -1278,6 +1468,12 @@ public class WmvIpcClient : MonoBehaviour
             }
             try { Dispatch(msg); }
             catch (Exception e) { Debug.LogWarning("WMV IPC: handler failed: " + e.Message); }
+            if (inboxClock.Elapsed.TotalMilliseconds >= InboxBudgetMs)
+            {
+                lock (inbox)
+                    if (inbox.Count > 0) InboxFramesDeferred++;
+                break;
+            }
         }
 
         // The asset cache's answers, after the host's messages of this frame: at least one, then as many as fit the
@@ -1595,6 +1791,7 @@ public class WmvIpcClient : MonoBehaviour
                 break;
 
             case "runtimeState":
+                RuntimeStateLight = msg.light;
                 OnRuntimeState?.Invoke(msg.query);
                 break;
 
@@ -1632,8 +1829,31 @@ public class WmvIpcClient : MonoBehaviour
                     Doodads = msg.doodads, MaxM2FileBytes = msg.maxM2FileBytes, MaxM2BytesPerLoad = msg.maxM2BytesPerLoad,
                     MaxM2TextureBytes = msg.maxM2TextureBytes, MaxM2TextureBytesPerLoad = msg.maxM2TextureBytesPerLoad,
                     MaxM2ModelsPerLoad = msg.doodads ? msg.maxM2ModelsPerLoad : 0, MaxM2TexturesPerLoad = msg.maxM2TexturesPerLoad,
-                    MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad,
+                    MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad, Streaming = StreamingFrom(msg),
                 });
+                break;
+
+            case "testFlight":
+                OnTestFlight?.Invoke(new TestFlight
+                {
+                    Request = msg.request, Points = msg.flightPoints ?? new double[0], Speed = msg.flightSpeed, Pitch = msg.flightPitch,
+                });
+                break;
+
+            // Protocol 18: the tile loads of a streaming session.
+            case "streamTileAnswer":
+                {
+                    var a = new StreamTileAnswer { Load = msg.load, AssetEpoch = msg.assetEpoch };
+                    if (msg.opened != null)
+                        foreach (MsgStreamTile t in msg.opened)
+                            a.Opened.Add(new StreamTileOpened { X = t.x, Y = t.y, TileLoad = t.tileLoad });
+                    if (msg.refused != null)
+                        foreach (MsgStreamTile t in msg.refused)
+                            a.Refused.Add(new StreamTileOpened { X = t.x, Y = t.y, Refused = t.refused ?? "" });
+                    if (msg.closed != null)
+                        a.Closed.AddRange(msg.closed);
+                    OnStreamTileAnswer?.Invoke(a);
+                }
                 break;
 
             case "inspectWorldModel":
@@ -1920,6 +2140,17 @@ public class WmvIpcClient : MonoBehaviour
         var id = MapRequestPrefix + (nextMapRequestId++);
         Send("{\"type\":\"getMapAsset\",\"requestId\":\"" + id + "\",\"load\":" + load + ",\"assetEpoch\":" + assetEpoch +
              ",\"role\":\"" + Escape(role) + "\",\"fileDataID\":" + fileDataID + "}");
+        return id;
+    }
+
+    /// <summary>A streaming session's map file (protocol 18): as RequestMapAsset, under one of its tile loads, with the tile it
+    /// is for and its priority (smaller is sooner: the host's queue is ordered by it).</summary>
+    public string RequestStreamMapAsset(string role, int fileDataID, int load, int assetEpoch, int tileX, int tileY, int priority)
+    {
+        var id = MapRequestPrefix + (nextMapRequestId++);
+        Send("{\"type\":\"getMapAsset\",\"requestId\":\"" + id + "\",\"load\":" + load + ",\"assetEpoch\":" + assetEpoch +
+             ",\"role\":\"" + Escape(role) + "\",\"fileDataID\":" + fileDataID + ",\"tile\":{\"x\":" + tileX + ",\"y\":" + tileY +
+             "},\"priority\":" + priority + "}");
         return id;
     }
 
@@ -2654,6 +2885,12 @@ public class WmvIpcClient : MonoBehaviour
         public long DoodadGpuGeometryBytes, DoodadGpuTextureBytes;
         public int DoodadVisible, DoodadCulled;
         public int LiveGameObjects, LiveTexture2D, LiveMeshes, LiveMaterials;
+        // Protocol 18 (streaming, docs/world-viewer/08-streaming.md 1.10): the session -- its tiles, jobs and requests out, what
+        // it shares and keeps, what it evicted and asked again -- and Light: the four whole-player object scans above (Mesh,
+        // Material, GameObject, Texture2D) skipped, -1 (a runtimeState asked "light": cheap enough to ask often).
+        public bool Streaming, Light;
+        public int StreamTiles, StreamJobs, StreamRequestsOut, StreamPlacements, StreamDoodads, SceneTerrainTextures;
+        public long StreamPrototypesEvicted, StreamTexturesEvicted, StreamFilesAskedAgain, StreamImagesShared;
     }
 
     /// <summary>
@@ -2742,7 +2979,19 @@ public class WmvIpcClient : MonoBehaviour
              ",\"liveGameObjects\":" + r.LiveGameObjects +
              ",\"liveTexture2D\":" + r.LiveTexture2D +
              ",\"liveMeshes\":" + r.LiveMeshes +
-             ",\"liveMaterials\":" + r.LiveMaterials + "}");
+             ",\"liveMaterials\":" + r.LiveMaterials +
+             ",\"light\":" + (r.Light ? "true" : "false") +
+             ",\"streaming\":" + (r.Streaming ? "true" : "false") +
+             ",\"streamTiles\":" + r.StreamTiles +
+             ",\"streamJobs\":" + r.StreamJobs +
+             ",\"streamRequestsOut\":" + r.StreamRequestsOut +
+             ",\"streamPlacements\":" + r.StreamPlacements +
+             ",\"streamDoodads\":" + r.StreamDoodads +
+             ",\"sceneTerrainTextures\":" + r.SceneTerrainTextures +
+             ",\"streamPrototypesEvicted\":" + r.StreamPrototypesEvicted +
+             ",\"streamTexturesEvicted\":" + r.StreamTexturesEvicted +
+             ",\"streamFilesAskedAgain\":" + r.StreamFilesAskedAgain +
+             ",\"streamImagesShared\":" + r.StreamImagesShared + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

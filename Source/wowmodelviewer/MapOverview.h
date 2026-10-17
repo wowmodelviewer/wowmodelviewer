@@ -33,6 +33,8 @@ public:
   void Refresh2();
   // A minimap picture came (MapsViewer::onImagesChanged).
   void ImagesChanged();
+  // STREAMING (protocol 18): the session's tiles changed (MapsViewer::onStreamChanged): the grid repaints, nothing else.
+  void StreamChanged();
   MapTileGrid * grid() const { return m_grid; }
   wxCheckBox * wholeGridBox() const { return m_wholeBox; }
   UiButton * enterButton() const { return m_enter; }

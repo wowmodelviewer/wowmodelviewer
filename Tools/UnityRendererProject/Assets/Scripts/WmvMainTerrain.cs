@@ -89,6 +89,11 @@ public partial class WmvMain
     // The tile world load whose world models are not settled yet (0: none): a camera asked for meanwhile waits for them too
     // (it stands on their floors), as the load's own camera does.
     int settlingLoad;
+    // Streaming (protocol 18): a fly request with no height over a tile the session had not loaded yet -- the camera went
+    // there at its own height and stands on the ground once that tile is built, unless it has moved since.
+    WmvIpcClient.WorldCameraRequest groundOwed;
+    Vector3 groundOwedAt;
+    float groundOwedYaw, groundOwedPitch;
     WmvWorldModels worldModels;           // the world scene's world models (protocol 16)
     WmvWorldDoodads worldDoodads;         // the world scene's doodads (protocol 17)
     // Protocol 16: the world view's frame times (unscaled, milliseconds), the last WorldFrameWindow frames since it was
@@ -123,6 +128,16 @@ public partial class WmvMain
         worldModels = new WmvWorldModels(TerrainSceneRoot());
         worldDoodads = new WmvWorldDoodads(TerrainSceneRoot());
         terrain.WorldView = new MainWorldView(this);
+        // Protocol 18: a streaming session's requests, its tile loads and its state, and where the free camera is.
+        terrain.RequestStreamMapAsset = ipc.RequestStreamMapAsset;
+        terrain.SendStreamTile = ipc.SendStreamTile;
+        terrain.ReportStreamState = ipc.ReportStreamState;
+        terrain.StreamCamera = StreamCameraPoint;
+        ipc.OnStreamTileAnswer = a =>
+        {
+            if (terrain != null)
+                terrain.OnStreamTileAnswer(a);
+        };
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering += CullWorldModels;
         WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
@@ -147,6 +162,124 @@ public partial class WmvMain
         ipc.OnSetTerrainView = HandleSetTerrainView;
         ipc.OnSetWorldCamera = HandleSetWorldCamera;
         ipc.OnInspectWorldModel = HandleInspectWorldModel;
+        ipc.OnTestFlight = HandleTestFlight;
+    }
+
+    // ---------------------------------------------------------------- the test flight (protocol 18, the harnesses only)
+
+    WmvIpcClient.TestFlight testFlight;
+    double testFlightStartS, testFlightLength, testFlightLastS, testFlightFrameMaxMs;
+    int testFlightFrames;
+
+    /// <summary>testFlight: the free camera flies the path itself, frame by frame, as a user's keys would move it (the viewer
+    /// sends nothing on the way); answered testFlightDone at its end, or refused, or stopped (a new flight, the world view
+    /// left).</summary>
+    void HandleTestFlight(WmvIpcClient.TestFlight f)
+    {
+        string why = null;
+        if (f == null || f.Points == null || f.Points.Length < 6 || f.Points.Length % 3 != 0)
+            why = "the path needs two points or more (x, y and z each)";
+        else if (!(f.Speed > 0))
+            why = "the speed must be above 0";
+        else if (!TerrainViewActive || terrain == null || terrain.World == null)
+            why = "no world is on screen";
+        if (why != null)
+        {
+            Debug.Log("WMV: [terrain] test flight refused: " + why);
+            ipc.ReportTestFlightDone(f != null ? f.Request : 0, "refused", why, 0, 0, 0, 0);
+            return;
+        }
+        if (testFlight != null)
+            FinishTestFlight("stopped", "a new flight began");
+        testFlight = f;
+        testFlightLength = 0;
+        for (int k = 3; k + 2 < f.Points.Length; k += 3)
+            testFlightLength += Distance3(f.Points, k - 3, k);
+        testFlightStartS = testFlightLastS = WmvIpcClient.NowSeconds;
+        testFlightFrames = 0;
+        testFlightFrameMaxMs = 0;
+        terrainViewMode.ApplyFly(UnityOfWorld(f.Points[0], f.Points[1], f.Points[2]), YawAlong(f.Points, 0), f.Pitch);
+        Debug.Log(string.Format(System.Globalization.CultureInfo.InvariantCulture, "WMV: [terrain] test flight {0}: {1} point(s), {2:0.#} yards at {3:0.#} " +
+                                "yards a second, pitch {4:0.#}", f.Request, f.Points.Length / 3, testFlightLength, f.Speed, f.Pitch));
+    }
+
+    static double Distance3(double[] p, int a, int b)
+    {
+        double dx = p[b] - p[a], dy = p[b + 1] - p[a + 1], dz = p[b + 2] - p[a + 2];
+        return System.Math.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    /// <summary>The free camera's yaw along the segment from point i (the world's (dx, dy) is Unity's (-dy, dx) in x and z;
+    /// yaw 0 faces Unity +z).</summary>
+    static float YawAlong(double[] p, int i)
+    {
+        int a = 3 * i, b = a + 3;
+        if (b + 2 >= p.Length)
+        {
+            a -= 3;
+            b -= 3;
+        }
+        double ux = -(p[b + 1] - p[a + 1]), uz = p[b] - p[a];
+        return (float)(System.Math.Atan2(ux, uz) * 180.0 / System.Math.PI);
+    }
+
+    Vector3 UnityOfWorld(double x, double y, double z)
+    {
+        double ux, uy, uz;
+        WorldToUnity.PositionD(x, y, z, terrain.World.Origin, out ux, out uy, out uz);
+        return TerrainSceneRoot().position + new Vector3((float)ux, (float)uy, (float)uz);
+    }
+
+    /// <summary>One frame of the test flight (PumpTerrain, before the session's frame: the region sees where the camera is now).</summary>
+    void PumpTestFlight()
+    {
+        WmvIpcClient.TestFlight f = testFlight;
+        if (f == null)
+            return;
+        if (!TerrainViewActive || terrain == null || terrain.World == null || !terrainViewMode.Flying)
+        {
+            FinishTestFlight("stopped", "the world view or the free camera was left");
+            return;
+        }
+        double now = WmvIpcClient.NowSeconds;
+        testFlightFrameMaxMs = System.Math.Max(testFlightFrameMaxMs, (now - testFlightLastS) * 1000.0);
+        testFlightLastS = now;
+        testFlightFrames++;
+        double along = (now - testFlightStartS) * f.Speed;
+        int seg = 0;
+        double from = 0;
+        for (; 3 * seg + 5 < f.Points.Length; seg++)
+        {
+            double len = Distance3(f.Points, 3 * seg, 3 * seg + 3);
+            if (along <= from + len)
+                break;
+            from += len;
+        }
+        if (3 * seg + 5 >= f.Points.Length)
+        {
+            int last = f.Points.Length - 3;
+            fly.Place(UnityOfWorld(f.Points[last], f.Points[last + 1], f.Points[last + 2]), YawAlong(f.Points, f.Points.Length / 3 - 2), f.Pitch);
+            FinishTestFlight("done", "");
+            return;
+        }
+        double segLen = Distance3(f.Points, 3 * seg, 3 * seg + 3);
+        double t = segLen > 0 ? (along - from) / segLen : 1.0;
+        int a = 3 * seg, b = a + 3;
+        fly.Place(UnityOfWorld(f.Points[a] + (f.Points[b] - f.Points[a]) * t, f.Points[a + 1] + (f.Points[b + 1] - f.Points[a + 1]) * t,
+                               f.Points[a + 2] + (f.Points[b + 2] - f.Points[a + 2]) * t), YawAlong(f.Points, seg), f.Pitch);
+    }
+
+    void FinishTestFlight(string status, string reason)
+    {
+        WmvIpcClient.TestFlight f = testFlight;
+        testFlight = null;
+        if (f == null)
+            return;
+        double seconds = WmvIpcClient.NowSeconds - testFlightStartS;
+        Debug.Log(string.Format(System.Globalization.CultureInfo.InvariantCulture, "WMV: [terrain] test flight {0} {1}{2} after {3:0.###} s, {4} frame(s), " +
+                                "the longest {5:0.###} ms", f.Request, status, string.IsNullOrEmpty(reason) ? "" : " (" + reason + ")", seconds,
+                                testFlightFrames, testFlightFrameMaxMs));
+        ipc.ReportTestFlightDone(f.Request, status, reason, seconds, testFlightFrames, testFlightFrameMaxMs, testFlightLength);
     }
 
     /// <summary>inspectWorldModel: a WMO-only map's footprint (WmvMapTiles.InspectWorldModel), answered at once.</summary>
@@ -191,6 +324,42 @@ public partial class WmvMain
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
         TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
         WmvWorldScene scene = terrain != null ? terrain.World : null;
+        // Streaming (protocol 18): the point stands on whichever resident tile of the session is under it.
+        if (q != null && q.Mode == "fly" && terrain != null && terrain.Streaming)
+        {
+            WmvRuntimeTerrainTile at;
+            TerrainTileMesh atMesh;
+            if (terrain.ResidentTileAt(q.X, q.Y, out at, out atMesh))
+            {
+                tile = at;
+                mesh = atMesh;
+            }
+            else if (scene != null && TerrainViewActive)
+            {
+                // A tile the session has not loaded yet: the point stands where asked, in the scene's frame -- at its height, or
+                // with none at the free camera's present height, stood on the ground once the tile is built (PumpGroundOwed).
+                double z = q.Z;
+                double fx, fy, fz;
+                if (!q.HasZ)
+                    z = FlyWorldPosition(out fx, out fy, out fz) ? fz : scene.Origin.Z;
+                terrainViewMode.ApplyFly(UnityOfWorld(q.X, q.Y, z), q.Yaw, q.Pitch);
+                groundOwed = q.HasZ ? null : q;
+                groundOwedAt = fly.transform.position;
+                groundOwedYaw = fly.Current.Yaw;
+                groundOwedPitch = fly.Current.Pitch;
+                r.Status = "applied";
+                r.Reason = q.HasZ ? "at the height asked for, over a tile the streaming session has not loaded yet"
+                                  : "over a tile the streaming session has not loaded yet: at the camera's height until that tile is built, " +
+                                    "then on its ground";
+                r.X = q.X;
+                r.Y = q.Y;
+                r.Z = z;
+                r.Yaw = fly.Current.Yaw;
+                r.Pitch = fly.Current.Pitch;
+                Debug.Log("WMV: [terrain] world camera " + q + ": applied -- " + r.Reason);
+                return r;
+            }
+        }
         r.Load = tile != null ? tile.Load : 0;
         if (tile == null && scene != null && scene.Kind == "globalWmo")
             return PlaceWorldModelCamera(q, r, scene);
@@ -482,7 +651,10 @@ public partial class WmvMain
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
         TerrainTileMesh mesh = terrain != null ? terrain.ShownMesh : null;
         WmvWorldScene scene = terrain != null ? terrain.World : null;
-        if ((tile == null || tile.Root == null || mesh == null) && scene != null && scene.Kind == "globalWmo")
+        // (A streaming session: every tile is built against the scene's origin, so the scene root answers whether or not a
+        // tile is shown -- every built tile may have closed behind a camera that flew on.)
+        if (((tile == null || tile.Root == null || mesh == null) && scene != null && scene.Kind == "globalWmo") ||
+            (scene != null && terrain.Streaming))
         {
             // A scene with no tile: relative to the scene root, with the scene's origin.
             Vector3 v = fly.transform.position - TerrainSceneRoot().position;
@@ -498,6 +670,20 @@ public partial class WmvMain
         y = mesh.Origin.Y - u.x;
         z = u.y + mesh.Origin.Z;
         return true;
+    }
+
+    /// <summary>Streaming (protocol 18): where the free camera is in the game's world frame and which way it looks (x, y, z,
+    /// then the forward x, y), or null when it is not flying (the session then keeps the tiles around its entry's).</summary>
+    double[] StreamCameraPoint()
+    {
+        if (!TerrainViewActive || fly == null || !terrainViewMode.Flying)
+            return null;
+        double x, y, z;
+        if (!FlyWorldPosition(out x, out y, out z))
+            return null;
+        // Unity (ux, uy, uz) = (-(y - O.Y), z - O.Z, x - O.X): a world step (dx, dy) is Unity (-dy, dz, dx).
+        Vector3 f = fly.transform.forward;
+        return new[] { x, y, z, (double)f.z, (double)-f.x };
     }
 
     /// <summary>Is world point (x, y) on tile (tileX, tileY)? Its north-west corner and the tile size (TerrainLayout.cs).</summary>
@@ -616,6 +802,7 @@ public partial class WmvMain
         // The latest load's camera only: an earlier load's, never placed, goes with that load.
         owedCamera = cmd.Camera;
         owedCameraLoad = cmd.Load;
+        groundOwed = null;
         owedCameraAtBuilt = cmd.World && !cmd.GlobalWmo;
         settlingLoad = owedCameraAtBuilt ? cmd.Load : 0;
         terrain.Load(cmd);
@@ -665,10 +852,43 @@ public partial class WmvMain
             terrain.LeaveForModelLoad("superseded by a model load");
     }
 
+    // STREAMING (stage 08): a closed tile's objects -- its terrain's, its doodads' -- destroyed a few hundred a frame (at least
+    // LaterDestroyMin, then until LaterDestroyBudgetMs), never thousands in one frame; all at once when the terrain goes.
+    internal readonly List<Object> laterDestroy = new List<Object>();
+    int laterDestroyNext;
+    public const int LaterDestroyMin = 100;
+    public const double LaterDestroyBudgetMs = 1.5;
+    public static long LaterDestroyed, LaterDestroyFrames;
+
+    void PumpLaterDestroy(bool all)
+    {
+        if (laterDestroyNext >= laterDestroy.Count)
+            return;
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        int n = 0;
+        while (laterDestroyNext < laterDestroy.Count && (all || n < LaterDestroyMin || clock.Elapsed.TotalMilliseconds < LaterDestroyBudgetMs))
+        {
+            Object o = laterDestroy[laterDestroyNext++];
+            if (o != null)
+                Destroy(o);
+            n++;
+        }
+        LaterDestroyed += n;
+        LaterDestroyFrames++;
+        if (laterDestroyNext >= laterDestroy.Count)
+        {
+            laterDestroy.Clear();
+            laterDestroyNext = 0;
+        }
+    }
+
     void PumpTerrain()
     {
+        PumpLaterDestroy(false);
+        PumpTestFlight();
         if (terrain != null)
             terrain.Pump(WmvIpcClient.NowSeconds * 1000.0);
+        PumpGroundOwed();
         // The world view's frame times (the view off: none kept, the next entry starts over).
         if (TerrainViewActive)
         {
@@ -678,6 +898,28 @@ public partial class WmvMain
         }
         else
             worldFrames = worldFrameNext = 0;
+    }
+
+    /// <summary>Streaming: the camera a fly request with no height left over a tile not loaded then, stood on the ground once
+    /// that tile is built (PlaceWorldCamera, answered already) -- dropped when the camera has moved or the view has gone.</summary>
+    void PumpGroundOwed()
+    {
+        WmvIpcClient.WorldCameraRequest q = groundOwed;
+        if (q == null)
+            return;
+        if (!TerrainViewActive || terrain == null || !terrain.Streaming || fly == null || !terrainViewMode.Flying ||
+            (fly.transform.position - groundOwedAt).sqrMagnitude > 1e-4f || fly.Current.Yaw != groundOwedYaw || fly.Current.Pitch != groundOwedPitch)
+        {
+            groundOwed = null;
+            return;
+        }
+        WmvRuntimeTerrainTile t;
+        TerrainTileMesh m;
+        if (!terrain.ResidentTileAt(q.X, q.Y, out t, out m))
+            return;
+        groundOwed = null;
+        WmvIpcClient.WorldCameraReport r = PlaceWorldCamera(q);
+        Debug.Log("WMV: [terrain] world camera " + q + ": its tile is built -- " + r.Status + ", " + r.Reason);
     }
 
     /// <summary>The world models' group culling and the doodads' instance culling, for the main camera as it renders (after
@@ -706,6 +948,7 @@ public partial class WmvMain
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= CullWorldModels;
         if (terrain != null)
             terrain.Dispose();
+        PumpLaterDestroy(true);
         if (terrainSceneRoot != null)
             Destroy(terrainSceneRoot);
         terrainSceneRoot = null;
@@ -982,8 +1225,11 @@ public partial class WmvMain
         r.TerrainLoading = terrain != null && terrain.Loading;
         r.TerrainView = TerrainViewActive;
         r.CameraMask = cam != null ? cam.cullingMask : 0;
-        r.MeshObjects = Resources.FindObjectsOfTypeAll<Mesh>().Length;
-        r.MaterialObjects = Resources.FindObjectsOfTypeAll<Material>().Length;
+        // Light (protocol 18): the whole-player scans skipped (-1), so the harness can ask while the world streams.
+        bool light = WmvIpcClient.RuntimeStateLight;
+        r.Light = light;
+        r.MeshObjects = light ? -1 : Resources.FindObjectsOfTypeAll<Mesh>().Length;
+        r.MaterialObjects = light ? -1 : Resources.FindObjectsOfTypeAll<Material>().Length;
         r.TerrainMeshes = WmvRuntimeTerrainTile.LiveMeshes;
         r.TerrainMaterials = WmvRuntimeTerrainTile.LiveMaterials;
         r.TerrainGameObjects = WmvRuntimeTerrainTile.LiveGameObjects;
@@ -995,8 +1241,9 @@ public partial class WmvMain
         r.TerrainLastRetiredRequest = terrain != null ? terrain.LastRetiredRequest : "";
         r.MapAnswersLate = terrain != null ? terrain.LateAnswersDropped : 0;
         r.MapAnswersUnowned = terrain != null ? terrain.UnownedAnswersDropped : 0;
-        r.TerrainTextures = WmvRuntimeTerrainTile.LiveTextures;
-        r.TerrainTextureBytes = WmvRuntimeTerrainTile.LiveTextureBytes;
+        // (Streaming: the scene's terrain textures too -- the tiles bind them, off their own tallies.)
+        r.TerrainTextures = WmvRuntimeTerrainTile.LiveTextures + (terrain != null ? terrain.SceneTerrainTextures : 0);
+        r.TerrainTextureBytes = WmvRuntimeTerrainTile.LiveTextureBytes + (terrain != null ? terrain.SceneTerrainTextureBytes : 0);
         r.TerrainAlphaArrays = WmvRuntimeTerrainTile.LiveAlphaArrays;
         // Protocol 16: the world models (their own tallies, never WmvRuntimeMapObject.Live).
         r.WorldInstances = WmvWorldModels.LiveInstances;
@@ -1026,8 +1273,23 @@ public partial class WmvMain
         bool doodadCulling = worldDoodads != null && worldDoodads.InstanceCount > 0 && TerrainViewActive;
         r.DoodadVisible = doodadCulling ? worldDoodads.Visible : 0;
         r.DoodadCulled = doodadCulling ? worldDoodads.Culled : 0;
-        r.LiveGameObjects = Resources.FindObjectsOfTypeAll<GameObject>().Length;
-        r.LiveTexture2D = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
+        r.LiveGameObjects = light ? -1 : Resources.FindObjectsOfTypeAll<GameObject>().Length;
+        r.LiveTexture2D = light ? -1 : Resources.FindObjectsOfTypeAll<Texture2D>().Length;
+        // Protocol 18: the streaming session.
+        r.Streaming = terrain != null && terrain.Streaming;
+        if (terrain != null)
+        {
+            r.StreamTiles = terrain.StreamTiles;
+            r.StreamJobs = terrain.StreamJobs;
+            r.StreamRequestsOut = terrain.StreamRequestsOut;
+            r.StreamPlacements = terrain.StreamPlacements;
+            r.StreamDoodads = terrain.StreamDoodads;
+            r.SceneTerrainTextures = terrain.SceneTerrainTextures;
+            r.StreamPrototypesEvicted = terrain.StreamPrototypesEvicted;
+            r.StreamTexturesEvicted = terrain.StreamTexturesEvicted;
+            r.StreamFilesAskedAgain = terrain.StreamFilesAskedAgain;
+            r.StreamImagesShared = terrain.StreamImagesShared;
+        }
         r.LiveMeshes = r.MeshObjects;
         r.LiveMaterials = r.MaterialObjects;
         r.WorldFrames = worldFrames;
@@ -1211,6 +1473,8 @@ public partial class WmvMain
 
         public void DisposeTile(WmvRuntimeTerrainTile tile) { tile.Dispose(); }
 
+        public void DisposeTileLater(WmvRuntimeTerrainTile tile) { tile.DisposeLater(main.laterDestroy); }
+
         public void Sample(WmvIpcClient.TerrainTileReport report) { WmvTerrainBuilder.SampleCounters(report); }
 
         public void TileBuilt(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh, WmvTerrainTileContent content,
@@ -1280,12 +1544,19 @@ public partial class WmvMain
             return main.worldDoodads.Place(prototype, doodad, origin, load);
         }
 
+        public void DisposeDoodadPrototype(WmvWorldScene scene, WmvDoodadPrototype prototype)
+        {
+            main.worldDoodads.DisposePrototype(prototype, scene != null ? scene.DoodadTextures : null);
+        }
+
+        public void DisposeDoodadInstances(List<WmvDoodadInstance> instances) { main.worldDoodads.DisposeInstances(instances, main.laterDestroy); }
+
         public void DisposeDoodads(WmvWorldScene scene)
         {
             main.worldDoodads.DisposeInstances(scene.Doodads);
             scene.Doodads.Clear();
             foreach (WmvDoodadPrototype p in scene.DoodadPrototypes.Values)
-                main.worldDoodads.DisposePrototype(p);
+                main.worldDoodads.DisposePrototype(p, scene.DoodadTextures);
             scene.DoodadPrototypes.Clear();
             if (scene.DoodadTextures != null)
                 scene.DoodadTextures.Dispose();
