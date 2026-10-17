@@ -298,7 +298,9 @@ ModelViewer::ModelViewer()
   };
   // STREAMING (protocol 18): the session's state (four times a second at most): the streaming line and the overhead map's
   // streamed tiles, timed as onChanged is.
-  m_maps->onStreamChanged = [this]() {
+  // It follows on a short timer -- at most one update in STREAM_UI_MS, never in the GUI round the streamState arrived
+  // in (at Enter world the session's first one lands in the click's own repaint).
+  m_streamUiTimer.Bind(wxEVT_TIMER, [this](wxTimerEvent &) {
     QElapsedTimer t;
     t.start();
     if (fileControl)
@@ -309,6 +311,10 @@ ModelViewer::ModelViewer()
     m_maps->noteUiUpdate(ms);
     if (ms > 8.0)
       LOG_INFO << "[maps] a streaming update took" << ms << "ms";
+  });
+  m_maps->onStreamChanged = [this]() {
+    if (!m_streamUiTimer.IsRunning())
+      m_streamUiTimer.StartOnce(STREAM_UI_MS);
   };
   // A minimap picture came: the overhead map repaints, nothing else.
   m_maps->onImagesChanged = [this]() {

@@ -314,6 +314,8 @@ public:
   std::function<void()> onStreamChanged;
   // The session's line for the panel ("" with no session), and a tile's state in it ("" when it is not in the region).
   QString streamDetail() const { return m_streamDetail; }
+  // The streaming lines' text when no session streams (what Enter world will do).
+  QString streamIdleLine() const;
   QString streamTileState(int x, int y) const;
   bool streamOn() const { return m_load > 0 && m_stream.load == m_load; }
   // Streaming: the target's tile is one the session holds (built or loading, not failed).

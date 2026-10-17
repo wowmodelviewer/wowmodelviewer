@@ -770,7 +770,9 @@ public sealed partial class WmvTerrainSession
         {
             t.Texture.Error = why;
             TextureDone(j, t);
-            PublishWmoImage(j, t, null, why, false);
+            // (A refusal for this tile's load, or a stale answer, hands the fetch on; the file's own failure -- not in storage,
+            // too large, no bytes -- is the session's: every tile takes it without asking.)
+            PublishWmoImage(j, t, null, why, !RefusedForTheLoad(r));
             return;
         }
         byte[] bytes = r.data;
@@ -960,8 +962,10 @@ public sealed partial class WmvTerrainSession
             if (!Live(j))
                 return false;
         }
-        // Streaming: one model a frame within the session's frame budget (the nearest tiles first).
-        if (w.BuildQueue.Count > 0 && (j.Stream == null || StreamMayWork()))
+        // Streaming: one model a frame within the session's frame budget (the nearest tiles first); one built from its files
+        // (not placed from the session's prototype) only as the frame's first item.
+        if (w.BuildQueue.Count > 0 &&
+            (j.Stream == null || (w.BuildQueue.Peek().Built != null && w.BuildQueue.Peek().Shared != null ? StreamMayWork() : StreamMayWorkHeavy())))
         {
             Model m = w.BuildQueue.Dequeue();
             BuildModel(j, m);

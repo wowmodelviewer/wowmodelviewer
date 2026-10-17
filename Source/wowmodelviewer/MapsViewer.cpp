@@ -1120,6 +1120,19 @@ bool MapsViewer::targetOnShownTile() const
   return m_hasTarget && m_shownX >= 0 && m_shownMap == m_mapId && tileOf(m_targetX, m_targetY, tx, ty) && tx == m_shownX && ty == m_shownY;
 }
 
+QString MapsViewer::streamIdleLine() const
+{
+  // Short lines: the Browse pane is narrow and each line is ellipsized, never wrapped.
+  if (worldModelMap())
+    return "Streaming: not used here --\na world-model map is one model.";
+  if (qgetenv("WMV_STREAMING") == "0")
+    return "Streaming is off (WMV_STREAMING=0):\nEnter world loads one tile.";
+  const UnityIpcServer * s = ipc();
+  if (s && s->isUnityReady() && !s->playerStreams())
+    return "Streaming: this Unity renderer loads\none tile (protocol 18 streams).";
+  return "Streaming: Enter world loads the tiles\naround the camera; they follow it\nas it flies.";
+}
+
 bool MapsViewer::targetHeldByStream() const
 {
   int tx, ty;
@@ -1154,7 +1167,7 @@ UnityIpcServer::WorldCamera MapsViewer::flyCameraOnShownTile()
   if (streamOn() ? targetHeldByStream() : targetOnShownTile())
     return flyCameraAtTarget();
   UnityIpcServer::WorldCamera c = flyCameraAtTarget();
-  if (streamOn())
+  if (streamOn() && m_stream.cameraTileX >= 0)
     pointIn(m_stream.cameraTileX, m_stream.cameraTileY, 0.5, 0.5, c.x, c.y);
   else
     pointIn(m_shownX, m_shownY, 0.5, 0.5, c.x, c.y);
@@ -1284,7 +1297,9 @@ void MapsViewer::EnterWorld()
   m_loadShown = false;
   m_progress = UnityIpcServer::WorldProgress();
   m_stream = UnityIpcServer::StreamState();
-  m_streamDetail.clear();
+  // STREAMING: the streaming lines appear now, in this update's layout, so the session's first streamState only relabels
+  // them (shown by it, they laid the Browse pane out and repainted it in one GUI round: 30-45 ms more at Enter world).
+  m_streamDetail = m_viewer->m_streamSession ? "Tiles: starting (around " + tileName(tx, ty) + ")" : QString();
   m_worldDetail = worldModels ? QString("Its world models are read once the tile is shown.") : QString();
   m_doodadDetail.clear();
   m_tilePhase = TilePhase::Loading;
@@ -1650,14 +1665,16 @@ void MapsViewer::OnStreamState(const UnityIpcServer::StreamState & s)
   // The files the session asked for so far: answered of asked (a denominator that grows as the files name more files,
   // never an estimate).
   const auto mb = [](long long b) { return QString::number(b / 1048576.0, 'f', 1); };
-  // Four short lines (the Browse pane is narrow; MapTilePanel keeps their height fixed).
-  m_streamDetail = QString("Streaming around tile %1: %2 resident, %3 loading%4")
-                     .arg(tileName(s.cameraTileX, s.cameraTileY)).arg(s.tilesResident).arg(s.tilesLoading)
-                     .arg(s.tilesFailed > 0 ? QString(", %1 failed").arg(s.tilesFailed) : QString()) +
-                   QString("\nFiles %1 of %2 asked so far (%3 MB), %4 out").arg(s.filesAnswered).arg(s.filesAsked)
-                     .arg(mb(s.bytesReceived)).arg(s.requestsOut) +
+  // Four short lines, the counts first (the Browse pane is narrow and each line is ellipsized; MapTilePanel keeps their
+  // height fixed and puts the whole text in the tooltip). Before the entry's tile is committed the session has no camera
+  // tile yet: the entry's is named.
+  const QString around = s.cameraTileX >= 0 ? tileName(s.cameraTileX, s.cameraTileY) : tileName(m_tileX, m_tileY);
+  m_streamDetail = QString("Tiles: %1 resident, %2 loading%3 (around %4)").arg(s.tilesResident).arg(s.tilesLoading)
+                     .arg(s.tilesFailed > 0 ? QString(", %1 failed").arg(s.tilesFailed) : QString()).arg(around) +
+                   QString("\n%1 out; files %2 of %3 asked so far (%4 MB)").arg(s.requestsOut).arg(s.filesAnswered)
+                     .arg(s.filesAsked).arg(mb(s.bytesReceived)) +
                    QString("\nGPU %1 MB textures, %2 MB geometry").arg(mb(s.gpuTextureBytes)).arg(mb(s.gpuGeometryBytes)) +
-                   QString("\nPools %1 MB; %2 model(s), %3 texture(s) evicted").arg(mb(s.poolBytes)).arg(s.prototypesEvicted)
+                   QString("\nPools %1 MB; evicted %2 model(s), %3 texture(s)").arg(mb(s.poolBytes)).arg(s.prototypesEvicted)
                      .arg(s.texturesEvicted);
   if (onStreamChanged)
     onStreamChanged();

@@ -340,7 +340,8 @@ liquids, lighting, effects, sky (milestones 09-12).
 
 Settled while building it (section 2 onwards describes what was built):
 
-- **Tile loads instead of tile records** (1.6, 1.7). Each streamed tile is a load of its own on the host: the player asks
+- **Tile loads instead of tile records** (1.6, 1.7). Each streamed tile is a load of its own on the host: the player
+  asks
   for it (`streamTile` open), the host allocates its load id from the same serial as every load, with the entry's map,
   client epoch, catalogue and budgets, and keeps it in a map beside the entry load. Closing a tile erases its load, so
   the existing stale check cancels whatever it still had queued or in flight -- no `cancelMapAssets`, no
@@ -363,6 +364,17 @@ Settled while building it (section 2 onwards describes what was built):
 - **The acceptance flight is flown by the player** (a test hook, `testFlight`): the free camera follows the path frame
   by frame as the user's keys would move it, so the viewer sees exactly what a user's flight sends -- streamState and
   the session's files -- and no per-step camera message.
+- **A tile's Unity objects are built in one piece** (1.8 planned batches of chunks): adding a tile -- its 256 chunk
+  objects, alpha array and materials -- takes 4-29 ms on Retail in one frame. Heavy items (a tile added or rebuilt, a
+  world-model prototype built from its files) run only as a frame's first item, so they no longer stack behind other
+  work; splitting the tile build is left for later (section 11).
+- **The streaming lines are always shown** (an idle text when no session streams), at a fixed height, and follow a
+  streamState on a 150 ms timer: their first appearance, and then the streamState's own update, landed in the Enter
+  world click's repaint round (section 10.2).
+- **Two budgets of 1.12 restated.** The host GUI thread's is the roadmap exit as written -- no round over 50 ms --,
+  measured from Enter world on and over the flight separately (section 8), not "during the acceptance flight" only. The
+  pools' reason holds only while what a route revisits fits them: re-entry without refetch is not achieved on the Retail
+  Stormwind loop (section 8.1).
 
 ## 2. Transport backpressure (requirement 1; built first)
 
@@ -378,8 +390,12 @@ Settled while building it (section 2 onwards describes what was built):
 | A client that reads | never paused or dropped | 8,388,608 of 8,388,608 payload bytes received, 0 pauses, 0 drops |
 
 The pause is checked again after every line handled (a line answered on the spot -- a `getAsset` -- must not take
-what waits past the mark within one poll; found by the review, section 10). A drop is decided where it is found and
-carried out at a safe point of the poll (`dropPendingClient`), never inside a send. The player's side: `WmvIpcClient.Update` dispatches the inbox until 8 ms are spent (at least one message a frame,
+what waits past the mark within one poll; found by the review, section 10). The hard-cap and stall drops are decided
+where
+they are found and carried out at a safe point of the poll (`dropPendingClient`); a send that fails (the connection
+reset) drops the client at once, as before this stage, so no code holds a queue iterator across a send: the stale sweep
+takes its entries out of the queue first and answers them afterwards (section 10.2). The player's side:
+`WmvIpcClient.Update` dispatches the inbox until 8 ms are spent (at least one message a frame,
 order kept), counted (`InboxDepthMax`, `InboxFramesDeferred`).
 
 ## 3. Block-compressed uploads (requirement 5)
@@ -400,7 +416,8 @@ order kept), counted (`InboxDepthMax`, `InboxFramesDeferred`).
 - **Where.** World-model prototypes (`WmvWmoBuilder.UploadTexture`) and doodads (`WmvDoodadTextures`, refcounted).
   The Models view, Characters and Buildings keep RGBA32.
 - **Tests.** Pure (`Tests/BlpBlockTests.cs`): 96 synthetic files / 540 levels flip exactly (every level height down to 1
-  x 1, both DXT5 alpha modes); every whole BLP2 file of the Stage 07 corpus on the four clients flips to the decoder's own
+  x 1, both DXT5 alpha modes); every whole BLP2 file of the Stage 07 corpus on the four clients flips to the decoder's
+  own
   level upside down -- Retail 1,194 supported files / 10,448 levels, Era 469 / 3,838, MoP 723 / 6,084, Beta 641 / 5,294:
   0 differ. Self-test: a DXT1 file uploaded as blocks and as RGBA32 reads back from the GPU 0/255 apart, its red band on
   top (the flip's direction).
@@ -420,7 +437,8 @@ order kept), counted (`InboxDepthMax`, `InboxFramesDeferred`).
 | Decoded pixels held at the most | 26.0 MB | 7.3 MB |
 
   Pictures (viewport crops, same cameras): mean absolute difference 0.6-0.95/255 in the close and outdoor views (at
-  most 2.38 % of pixels more than 8/255 apart); 2.22/255 in the dense view from above (11.92 % > 8/255, 1.55 % > 24/255).
+  most 2.38 % of pixels more than 8/255 apart); 2.22/255 in the dense view from above (11.92 % > 8/255, 1.55 % >
+  24/255).
   The difference is distant alpha-tested foliage: the files' own stored mips against Unity's box-filtered ones
   (`blocks1\compare_05_dense.png`). Not claimed equal; not claimed closer to the game (no in-game reference of these
   views).
@@ -433,8 +451,8 @@ order kept), counted (`InboxDepthMax`, `InboxFramesDeferred`).
 | `streamTile` | player -> host | `{load, open: [{x, y}], close: [tileLoad]}` |
 | `streamTileAnswer` | host -> player | `{load, opened: [{x, y, tileLoad}], refused: [{x, y, refused}], closed: [tileLoad], assetEpoch}` |
 | `getMapAsset` | player -> host | gains `tile {x, y}` and `priority` (smaller sooner: 1 + 3 x ring + family -- the tile's own files 0, world models 1, doodads 2); the queue inserts by priority, first come first served among equals (requests without one keep arrival order) |
-| `streamState` | player -> host, at most every 250 ms | the camera and its tile; per tile its load, state, files asked/answered, bytes, placements and doodads; requests out; prototypes and textures resident and pooled; instances; GPU texture and geometry bytes; pool bytes; evictions; frame times since the last one (max, p95, over 33 / 50 ms), work and upload maxima; the managed heap |
-| `runtimeState` | both | gains the session's tiles, jobs, requests, placements, doodads, scene terrain textures, evictions, files asked again, images shared; `light` skips the four whole-player object scans |
+| `streamState` | player -> host, at most every 250 ms | the camera and its tile; per tile its load, state, files asked/answered, bytes, placements and doodads; requests out; prototypes and textures resident and pooled; instances; GPU texture and geometry bytes (terrain alpha arrays and meshes included); pool bytes; evictions; the longest frame since the last one, the 95th percentile of the last 120 frames, frames over 33 / 50 ms; the longest streaming work and terrain tile build since the last one; the managed heap |
+| `runtimeState` | both | gains the session's tiles, jobs, requests, placements, doodads, scene terrain textures, evictions, files asked again, images shared; `light` skips the four whole-player object scans (implemented on both sides; nothing asks for it yet) |
 | `testFlight` / `testFlightDone` | host -> player / back | TEST hook: a path of world points, a speed and a pitch, flown by the free camera |
 
 Host (`ModelViewer`): `m_streamLoads` (tile loads of the session, `std::map<int, TerrainRequest>`), `terrainRequestFor`
@@ -482,8 +500,11 @@ and so is everything of the session's when it ends; an entry reported anything b
 - At most 24 requests out for the whole session; a tile of ring 1 leaves 4 for the nearer ones, a tile of ring 2 or more
   leaves 8; the jobs advance nearest first every frame.
 - One budget of 8 ms of main-thread work a frame for the whole session -- a tile's Unity objects, a prototype build,
-  placements, a rebuild -- at least one item a frame (nearest tile first). A world-model prototype is still built in
-  one frame (49.7 ms for the largest of the Retail region, 71.7 MB of textures): not split in this stage.
+  placements, a rebuild, evictions -- at least one item a frame (nearest tile first). A heavy item (a tile's Unity
+  objects added or rebuilt, a world-model prototype built from its files) runs only as the frame's first item. A
+  world-model prototype is still built in one frame: 48-50 ms for the largest of the Retail region, and the frames at
+  the
+  Era and Beta entries reached 126 and 137 ms (Stage 07 built them the same way, 114-128 ms); not split in this stage.
 
 ### 5.3 Placements by uniqueId
 
@@ -499,7 +520,9 @@ it meanwhile waits (a near tile takes over a far tile's fetch that has not begun
 first waiting job takes the fetch over under its own tile load; a file that fails for good (not in storage, cannot be
 parsed) fails every waiting model with the same reason, its own state kept (an "unsupported" model stays unsupported);
 a refusal for the owner's tile load (its budgets, the queue's room) or a stale answer is that tile's failure only, and
-the fetch is handed on. A built prototype stays while it has instances or a job will place from it; with neither it is
+the fetch is handed on. (A texture refused or capped for the owner's load is not handed on: the prototype is built
+without it and shared; latent, section 11.) A built prototype stays while it has instances or a job will place from it;
+with neither it is
 POOLED.
 
 ### 5.5 Terrain textures
@@ -514,7 +537,9 @@ Fetched and decoded once per session for every tile whose prototypes sample them
 scheme as prototypes; the decoded images are kept, least recently used out first, within 96 MiB of managed memory, for
 the prototypes built later -- never one a live tile took without its file's bytes (a later model of that tile may sample
 it again and it has nothing to decode it from). A fetch the host did not serve is handed to the next waiting job; a
-file that came and could not be decoded fails them all. Retail region: files asked twice 367 -> 43 (the 43: 15 terrain textures two tiles
+file that came and could not be decoded -- or the file's own failure (not in client storage, too large, no bytes) --
+fails them all, asked for once (a refusal for the tile's load or a stale answer is handed on). Retail region: files
+asked twice 367 -> 43 (the 43: 15 terrain textures two tiles
 fetched before either was committed, 28 images evicted and needed again).
 
 ### 5.7 Pools and eviction
@@ -524,7 +549,10 @@ no live prototype holds (held only by pooled prototypes, or by none), terrain te
 GPU bytes and 128 MiB of parsed world-model files. Over budget the uploads no prototype holds go first (their prototypes
 have gone), then the least recently used prototypes and terrain textures -- an M2 prototype with the uploads only it
 held, so what is taken off the pool is exactly what its eviction frees; over the parsed files' budget alone only world
-models go (nothing else holds parsed files). The scene's GPU budgets (1.5 GiB of textures, 512 MiB of geometry) are checked before a doodad prototype is
+models go (nothing else holds parsed files). Evictions are main-thread work under the frame budget (at least one a
+frame; the rest in the next frames -- the pools' budget is soft), and the pools are looked at when something may have
+joined them (a tile closed, a job ended) or an eviction is unfinished, and twice a second besides. The scene's GPU
+budgets (1.5 GiB of textures, 512 MiB of geometry) are checked before a doodad prototype is
 built, against everything on the GPU then. Self-test: a corner tile's M2, world model and terrain texture stay pooled
 while it is closed and serve it again with nothing asked; with no pool budget they are evicted at its close and asked
 again when it returns.
@@ -555,14 +583,19 @@ only while a view may still upload it).
 
 ## 6. Diagnostics (requirement 6)
 
-- **Maps panel**: four short streaming lines under the tile's, at a fixed height and never wrapped (ellipsized), so a
-  `streamState` repaints that label and lays nothing out (the pane is laid out only when the lines show or hide):
-  "Streaming around tile 31_48: 9 resident, 0 loading" / "Files 4,779 of 4,779 asked so far (390 MB), 0 out" / "GPU 286
-  MB textures, 64 MB geometry" / "Pools 0 MB; 0 model(s), 0 texture(s) evicted". The counts are the files actually asked
-  and answered ("asked so far": the denominator grows as files name more files, never an estimate).
+- **Maps panel**: four short streaming lines under the tile's, always shown at a fixed height and never wrapped
+  (ellipsized at the pane's width; the whole text in their tooltip), so a `streamState` relabels them and lays nothing
+  out -- on a 150 ms timer, at most once in that time and never in the GUI round the message arrived in. The counts come
+  first, so they survive a narrow pane: "Tiles: 9 resident, 0 loading (around 31_48)" / "0 out;
+  files 4766 of 4766 asked so far (372... MB)" / "GPU 321.8 MB textures, 79.3 MB geometry" / "Pools 0.0 MB; evicted 0
+  model(s), 0 textu..." (Retail, the region settled, as the pane shows them: `compat\ab_exp_wow_2_entered.png`). The
+  counts are the files actually asked and answered ("asked so far": the denominator grows as
+  files name more files, never an estimate). With no session they say what Enter world will do (stream, or load one
+  tile with streaming off or a renderer below protocol 18); from Enter world to the session's first state, "Tiles:
+  starting (around 31_48)".
 - **Overhead map**: the session's tiles outlined -- resident in the accent colour, loading in the warning colour,
-  failed dashed -- and the camera where the session last saw it (the grid repaints on `streamState` only while the
-  overhead map is shown).
+  failed dashed -- and the camera where the session last saw it (the grid repaints on a `streamState` only while the
+  overhead map is shown and only when a ring or the camera's dot changed).
 - **Enter world** at a target on a tile the session holds moves the camera only (no new load); **Fly** and **Look** aim
   at the target when the session holds its tile, else at the middle of the tile the camera is over (the entry's tile
   may have left the region). A camera with no height over a tile not loaded yet stands at the camera's height and on
@@ -588,85 +621,191 @@ The Maps UI test (`-mapsuitest`) gains:
 
 ## 8. Results (PROVEN_RUNTIME)
 
-All on the hidden desktop with the final build (viewer exe SHA-256 9ECF8A27..., player Assembly-CSharp MD5 813714EE...),
-through the Maps viewer's own controls (`-mapsuitest`) and the harness steps of section 7, on the installation of the
-header.
+All on the hidden desktop with the final build, through the Maps viewer's own controls (`-mapsuitest`) and the harness
+steps of section 7, on the installation of the header. The final build is viewer exe SHA-256 A7AF7037..., player
+Assembly-CSharp MD5 1031DFA1.... Sections 8.1-8.4 were run 14:32-15:00 on 2026-10-17; their logs are in
+`F:\wmv-build-fix\w08\st` and `pics`.
 
 ### 8.1 The acceptance run (Retail, Stormwind and the 3 x 3 around it)
 
-Enter world at (-8700, 400) in tile 31_48 (Stormwind). Once the region settles, the free camera flies 31_48 -> 34_48 ->
-34_50 -> 31_50 -> 31_48 (250 yards up, 60 yards a second: 5,333 yards in 88.9 s) six times, with the session's state and
-both processes' memory recorded after each loop. Every GUI round of the six loops is checked against 50 ms. Then the
-camera flies three tiles east (the entry's tile leaves the region) and switches to Overview and back to Fly; those
-rounds are checked against 50 ms on their own. Run `st\acc_wow` (12:00-12:09): **PASS, 35 passed, 0 failed**.
+The run (`st\acc_wow`, PASS 35 / 0):
+- Enter world at (-8700, 400) in tile 31_48 (Stormwind).
+- Once the region settles, the free camera flies 31_48 -> 34_48 -> 34_50 -> 31_50 -> 31_48 six times, 250 yards up at
+  60 yards a second (5,333 yards in 88.9 s a loop). The session's state and both processes' memory are recorded after
+  each loop, and every GUI round of the six loops is checked against 50 ms.
+- Then the camera flies three tiles east, so the entry's tile leaves the region, and switches to Overview and back to
+  Fly. Those rounds are checked against 50 ms on their own.
 
 | | Result |
 |---|---|
-| The region at entry | 9 tiles settled 17.3 s after the run began (Enter world at about 2 s): 4,772 files answered of 4,772 asked (372 MB), 56 world-model instances, 18,208 doodads, GPU 286 MB textures / 64 MB geometry |
-| **Viewer GUI thread over the six loops** | **longest round 18.0 ms -- roundcheck:50 PASS** |
-| **Far flight, Overview, Fly** | **longest round 26.7 ms -- roundcheck:50 PASS**; Overview framed a resident tile, Fly stood the camera on the ground at the middle of the camera's tile (34_48: "on the ground, 146.0, plus 2.0"; the entry's tile had left the region) |
-| Tiles during the loops | 28 opened and 22 closed in the first loop, 24 and 24 in each loop after; at most 3 loading at once, 0 failed or refused; the host's queue at most 23 deep, 0 refused for room |
-| Player frames | the longest frame per loop 26.9 / 36.1 / 30.9 / 28.2 / 28.0 / 29.4 ms; over 33 ms: 1 frame in the six loops, 4 in the whole run (2 at entry, 1 in the far flight at 120 yards a second); over 50 ms: 1 (at entry: a 48.4 ms streaming item, the largest world-model prototype) |
-| Streaming work per frame | at most 21.6-30.1 ms per loop (one item can exceed the 8 ms budget: a prototype build); uploads at most 28.9 ms |
-| After each loop | 15 tiles resident, 82 world-model instances, 26,080 doodads, GPU 333-334 MB textures / 84 MB geometry -- identical every loop; settled 2.2-2.5 s after the loop's end |
-| Pools | at their 256 MiB GPU budget during each loop; 488 prototypes and 386 textures evicted in the first loop, about 770 and 620 in each loop after (4,395 / 3,568 after six); every loop asked about 2,700 files again (8,537 after the first loop, 22,313 after six; 1.5 GB read in all) |
-| **Memory after loops 1-6** | **player 2,777 / 2,772 / 2,807 / 2,774 / 2,767 / 2,769 MB private, managed heap 469-495 MB; viewer 2,251-2,253 MB** -- flat |
-| After clearTerrain | player 2,098 MB private |
+| The region at entry | 9 tiles settled 17.4 s after the run began; 4,769 files answered of 4,769 asked (372 MB); 56 world-model instances, 18,208 doodads; GPU 322 MB textures, 79 MB geometry (terrain alpha arrays and meshes included) |
+| **Viewer GUI thread over the six loops** | **longest round 16.9 ms: roundcheck:50 PASS** |
+| **Far flight, Overview, Fly** | **longest round 24.5 ms: roundcheck:50 PASS**. Overview framed a resident tile; Fly stood the camera on the ground at the middle of the camera's tile (34_48), the entry's tile having left the region |
+| GUI rounds from Enter world to the settled region | the Enter world click 25.5 ms; over 50 ms only the round in which the world is shown, 71.4 ms (pre-existing, section 8.3) |
+| Tiles during the loops | 28 opened and 22 closed in the first loop, 24 and 24 in each loop after; at most 3 loading at once; 0 failed or refused. The host's queue was at most 21 deep, 0 requests refused for room |
+| Player frames | the longest frame per loop: 26.3 / 32.6 / 38.5 / 33.8 / 33.9 / 32.8 ms. The 95th percentile of the last 120 frames stayed at 16.8-18.0 ms (the 60 a second cap). Frames over 33 ms: 3 in the six loops, 7 in the whole run. Over 50 ms: 1, at entry (51.2 ms: the region's largest world-model prototype, 42.1 ms of streaming work) |
+| Streaming work and tile builds | streaming work at most 15.2-26.2 ms in a loop's frame. A tile's Unity objects (the terrain tile build, "upload" in streamState; the M2 builds are logged per tile when it settles) took at most 14.6-25.9 ms |
+| After each loop | 15 tiles resident, 82 world-model instances, 26,080 doodads, GPU 394 MB textures / 108 MB geometry: the same after every loop. The region settled 2.4-2.7 s after each loop |
+| Pools | at their 256 MiB budget during each loop, briefly above it (at most 260 MB) while evictions spread over frames. 487 prototypes and 389 textures were evicted in the first loop, about 780 and 635 in each loop after (4,394 and 3,573 after six). Every loop asked about 2,750 files again: 8,542 after the first loop, 22,316 after six, 1.5 GB read in all |
+| **Memory after loops 1-6** | **player 2,759 / 2,760 / 2,790 / 2,825 / 2,817 / 2,817 MB private, managed heap 468-482 MB; viewer 2,251-2,254 MB**: flat |
+| After clearTerrain | player 2,109 MB private; every live tally 0 |
 
-The pool budget is smaller than what the Stormwind loop revisits once the M2 textures are counted (section 10, row 11):
-the loop's pooled demand rises past 256 MiB in the first loop, and from then on eviction and refetching keep it at the
-budget with no measured cost in frames or GUI rounds (the region settles 2.2-2.5 s after a loop, against 0.3-0.5 s while
-nothing was evicted). The budget is one constant (`StreamPoolGpuBudget`). It is not raised here: the viewer often runs
-beside the game client on the same GPU, and the refetching costs no frame or GUI time.
+**The pool budget against this route.** Once the M2 textures are counted, what the Stormwind loop revisits exceeds the
+256 MiB budget. The final review estimated about 374 MiB of pool from the run data; that figure is not measured. Least
+recently used is the worst order for a loop: what was pooled longest ago is what the next loop needs first. So each loop
+evicts most of it and fetches it again.
+- The cost: the region settles 2.4-2.7 s after a loop instead of 0.3-0.5 s, and about 180 MB more is read per loop.
+- What it does not cost: GUI rounds stay at 17 ms. Frames over 33 ms number 3 in the six loops; the build that evicted
+  nothing (fl3) had 0 in its three loops.
+- On this route eviction does not lower the peak GPU. With the earlier accounting (terrain alpha arrays and meshes left
+  out), the scene was 417.8 MiB at a loop's end without eviction and 418.0 MiB with it.
+
+The budget is one constant (`StreamPoolGpuBudget`). It is not raised here, because the viewer often runs beside the game
+client on the same GPU (section 11).
 
 ### 8.2 The other clients (one loop each)
 
-Entry at the same point, the region settled, one loop of the same path; runs `st\c4f_*` (12:09-12:15).
+Entry at the same point, the region settled, one loop of the same path. Runs `st\c4f_*` (14:43-14:48); the GUI round
+check covers the flight and the settle after it.
 
 | | Classic Era 1.15.9.70003 | MoP Classic 5.5.4.70449 | Classic Beta 1.60.1.70450 |
 |---|---|---|---|
-| Region at entry: files (MB) | 1,956 (83 MB) | 3,033 (138 MB) | 2,165 (109 MB) |
+| Region at entry: files (MB) | 1,955 (83 MB) | 3,037 (139 MB) | 2,165 (109 MB) |
 | Instances world / doodads at entry | 22 / 11,676 | 49 / 15,664 | 31 / 12,463 |
-| GPU textures / geometry at entry | 29 / 39 MB | 80 / 43 MB | 38 / 41 MB |
-| After the loop: files; instances | 3,695; 48 / 19,493 | 4,952; 75 / 23,535 | 4,202; 57 / 20,298 |
-| GPU after the loop; pools | 60 / 55 MB; 30 MB | 118 / 60 MB; 39 MB | 80 / 60 MB; 42 MB |
+| GPU textures / geometry at entry | 42 / 50 MB | 116 / 58 MB | 74 / 60 MB |
+| After the loop: files; instances | 3,694; 48 / 19,493 | 4,952; 75 / 23,535 | 4,202; 57 / 20,298 |
+| GPU after the loop; pools | 73 / 74 MB; 30 MB | 178 / 85 MB; 39 MB | 140 / 91 MB; 42 MB |
 | Evicted prototypes / textures | 0 / 0 | 0 / 0 | 0 / 0 |
 | Tiles closed during the loop | 22 (failed 0) | 22 (failed 0) | 22 (failed 0) |
-| **Longest GUI round in the flight** | **16.6 ms** | **16.4 ms** | **16.4 ms** |
-| Player frames over 33 / 50 ms (whole run) | 1 / 1 (flight max 20.5 ms) | 2 / 0 (flight max 33.8 ms) | 2 / 1 (flight max 31.2 ms) |
-| Player private bytes before the loop | 1,451 MB | 1,868 MB | 1,612 MB |
-| Player / viewer private bytes after | 1,917 / 770 MB | 2,175 / 1,024 MB | 2,174 / 1,768 MB |
+| **Longest GUI round in the flight** | **16.3 ms** | **16.4 ms** | **16.5 ms** |
+| Player frames over 33 / 50 ms (whole run) | 1 / 1 (flight max 22.1 ms) | 1 / 0 (flight max 25.7 ms) | 1 / 1 (flight max 26.2 ms) |
+| Player private bytes before the loop | 1,444 MB | 1,877 MB | 1,637 MB |
+| Player / viewer private bytes after | 1,950 / 770 MB | 2,180 / 1,024 MB | 2,136 / 1,769 MB |
 | Harness | PASS 14 / 0 | PASS 14 / 0 | PASS 14 / 0 |
 
-### 8.3 GUI rounds at the Maps viewer's entry (not caused by streaming)
+### 8.3 GUI rounds over 50 ms
 
-Every run has the same long rounds at the Maps viewer's entry, and so do runs with streaming off (`WMV_STREAMING=0`,
-st2off): the mode switch to Maps 98-238 ms (the Maps viewer's first layout), the Enter world click 56-75 ms, and the
-round after it 76-85 ms, of which 43-45 ms is the synchronous resize of the player's window (`[viewport] sizing the
-player's window took 43.0 ms`; the player's thread answers it while it resizes its swap chain). The resize is
-synchronous by design (a later asynchronous resize could land after the one sent when the player is put back,
-`UnityRendererHost.h`), and `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of another
-process, because their input queues are attached (measured: 43.1 ms). These rounds are recorded as unresolved
-(section 11). The streaming flight never came near 50 ms.
+Every GUI round over 50 ms of the final runs, by step. The harness logs each round over 20 ms with its step; a GUI round
+is one IPC poll and one pass of the wx event queue, paints included.
+
+| Run | Mode switch to Maps | Map picked | Enter world click | World shown (waitworld) |
+|---|---|---|---|---|
+| Retail acceptance (`st\acc_wow`) | 111.3 ms | -- | 25.5 ms (under 50) | 71.4 ms |
+| Classic Era (`st\c4f_wow_classic_era`) | 92.4 ms | 51.5 ms | 24.6 ms (under 50) | 81.3 ms |
+| MoP Classic (`st\c4f_wow_classic`) | 106.5 ms | -- | 24.3 ms (under 50) | 79.4 ms |
+| Classic Beta (`st\c4f_wow_classic_beta`) | 92.2 ms | -- | 23.6 ms (under 50) | 68.8 ms |
+| Pictures, after (streaming) | 105.2 ms | -- | 24.5 ms (under 50) | 74.5 ms |
+| Pictures, before (`WMV_STREAMING=0`) | 109.0 ms | -- | 36.4 ms (under 50) | 74.9 ms |
+| Protocol-17 player (`compat\cmpf_newhost_p17`) | 120.7 ms | -- | 23.5 ms (under 50) | 64.8 ms |
+
+What each one is, and whether this stage made it:
+
+- **The mode switch and the map pick** (pre-existing): the map pick (Era, once) is the overhead map's first draw.
+  The mode switch: the Maps viewer's first layout and the Browse listing; no streaming code runs in it.
+  The Stage 07 host measured 134.8 ms in the same step (`compat\cmp_oldhost_p18`).
+- **The round in which the world is shown** (pre-existing): about 44 ms of it is the synchronous resize of the player's
+  window, which the player's thread answers while it resizes its swap chain. The Stage 07 host measured 77.5 ms here.
+  The resize is synchronous by design, since a later asynchronous resize could land after the one sent when the player
+  is put back (`UnityRendererHost.h`). `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of
+  another process, because their input queues are attached (measured: 43.1 ms).
+- **The Enter world click** (new in this stage, fixed). The final review found that this round went over 50 ms only with
+  streaming: 55-75 ms, against 22-49 ms with `WMV_STREAMING=0`, a protocol-17 player or the Stage 07 host. Two things
+  caused it:
+  - the session's first streamState showed the hidden streaming lines, which grew the panel and laid out and repainted
+    the Browse pane in the round of the click's own repaint;
+  - with the lines shown from the start, the streamState's UI update itself still landed in that round.
+
+  The streaming lines are now always shown, and a streamState's UI follows on a 150 ms timer, outside the round it
+  arrived in. Same build, same player, alternating runs (`compat\ab_timer.log`, Retail and Era):
+
+  | | Enter world round |
+  |---|---|
+  | Streaming, with the timer | 21.5 / 22.4 / 24.4 / 24.6 / 27.1 / 39.9 ms |
+  | Streaming, without the timer | 23.6 / 38.4 / 40.8 / 42.2 / 46.2 / 54.3 ms |
+  | Streaming off | 23.0 / 23.9 / 25.5 ms |
+
+- **The rounds while the entry's world models complete** (pre-existing mechanism). Each progress message is followed by
+  one full Maps panel update of 9-15 ms, the same cost as Stage 07 (median 9.5 ms on the Stage 07 host, 9.1 ms on this
+  build). Several of them land in one round when the entry's world models complete and its camera is placed: 45-76 ms
+  in some earlier runs, none over 50 ms in the final ones. With streaming this happens while the region's other tiles
+  load. Coalescing the panel's updates is
+  left to the work on the entry rounds (branch `world/08-entry-stalls`).
+- **None of the rounds over 50 ms is in the flight**: the acceptance flight's six loops, the far flight with Overview
+  and
+  Fly, and the other clients' loops stay at 16.1-24.5 ms.
 
 ### 8.4 Pictures
 
-`F:\wmv-build-fix\w08\pics\picf_wow_{before,after}_{over,east,west}.png`. The same viewer, player and cameras: before is
-the single-tile world (`WMV_STREAMING=0`, as Stage 07 enters it), after is the streaming session, settled. In the
-acceptance run, `st\acc_wow_{a_entered,b_afterloops,c_far,d_overview,e_flyback}.png`.
-- **Over 31_48, 1,800 yards up, looking straight down.** Before: tile 31_48 alone, with Stormwind's world models reaching
-  past its edges into empty space. After: the 3 x 3 -- all of Stormwind and the Elwynn Forest around it -- with the
-  terrain continuous across the nine tiles.
-- **At the east edge of 31_48, 180 yards up, looking east into 32_48.** Before: one tree at the tile's edge, and nothing
+`F:\wmv-build-fix\w08\pics\picf_wow_{before,after}_{over,east,west}.png`. The viewer, player and cameras are the same in
+both: before is the single-tile world (`WMV_STREAMING=0`, as Stage 07 enters it), after is the streaming session,
+settled. The acceptance run's pictures are `st\acc_wow_{a_entered,b_afterloops,c_far,d_overview,e_flyback}.png`.
+- **Over 31_48, 1,800 yards up, looking straight down.** Before: tile 31_48 alone, with Stormwind's world models
+  reaching
+  past its edges into empty space. After: the 3 x 3, all of Stormwind and the Elwynn Forest around it, with the terrain
+  continuous across the nine tiles.
+- **At the east edge of 31_48, 180 yards up, looking east into 32_48.** Before: one tree at the tile's edge and nothing
   beyond it. After: Elwynn's forest, hills and a chapel continue across the boundary.
-- **Overview after the far flight** (`acc_wow_d_overview`): with the entry's tile gone from the region, Overview frames a
-  resident tile, and the region around it is drawn.
+- **Overview after the far flight** (`acc_wow_d_overview`): the entry's tile has left the region; Overview frames a
+  resident tile, with the region around it drawn.
+
 No in-game reference was taken of these views, so nothing here is claimed to match the game's look.
+
+### 8.5 Session endings, cancellation and repeated loading (Retail, then Era)
+
+Two runs after the final review (`st\life08`, `st\life08b`; the final player, host 70322D6E -- the final host but for
+the stream-UI timer, which these steps do not depend on), Retail 12.1.5.70448 unless said:
+
+- **Cancellation with requests out** (`life08b`): Enter world at Stormwind, and as soon as the world is shown the free
+  camera flies at 2,000 yards a second about 10 tiles east and back. 65 tiles opened and 54 closed, most of them while
+  still loading. 44 requests were retired by those closes and 45 answers dropped as late (the 45th the entry's). The
+  host
+  answered 28 waiting requests stale while they waited, refused none for room (its queue at most 21 deep), and every
+  request the session still had out was answered or retired: 0 out at the end. No tile failed. PASS 10 / 0.
+- **Every other way a session ends** (`life08`, PASS 62 / 0):
+  - a new Enter world over a live session: Goldshire after a 400 yards-a-second flight;
+  - Clear while the entry loads (17 requests retired, 12 answered stale by the host);
+  - a model loaded in the Models viewer while a session loads (8 retired);
+  - four Enter world / settle / Clear cycles at Stormwind;
+  - a client switch while a session loads (16 requests out), then a session on Classic Era.
+  Every ending logs its tiles and requests, and every request asked was answered or retired; the next session holds
+  nothing of the last (its scene is built anew from the entry). After every Clear the player's live terrain tiles,
+  world-model and doodad instances,
+  prototypes and textures are 0.
+- **Memory over the four cycles**, private bytes after each Clear:
+
+  | | Cycle 1 | Cycle 2 | Cycle 3 | Cycle 4 |
+  |---|---|---|---|---|
+  | Player | 2,295 MB | 2,329 MB | 2,391 MB | 2,302 MB |
+  | Viewer | 2,267 MB | 2,267 MB | 2,268 MB | 2,268 MB |
+
+  With the region settled: 2,672 / 2,768 / 2,797 / 2,797 MB (player).
+- The 400 yards-a-second flight of `life08` closed 21 tiles, every one after it had settled; only the 2,000
+  yards-a-second
+  flight closed tiles while they loaded (the speeds between were not measured).
+
+### 8.6 Protocol compatibility
+
+The new host with the Stage 07 player (protocol 17, `compat\cmpf_newhost_p17`):
+- PASS 13 / 0.
+- No streaming was offered, and Stormwind 31_48 was entered as one tile with its world models and doodads, as at
+  Stage 07.
+- The Enter world round was 26.6 ms.
+
+The Stage 07 host (protocol 17) with the new player (`compat\cmpf_oldhost_p18`):
+- PASS 13 / 0.
+- The single-tile path ran, and Overview, Fly and Clear worked.
+- The Enter world round was 29.7 ms.
 
 ## 9. Regressions (Stages 03-07, Models, Characters, Buildings)
 
-The Stage 07 battery (`F:\wmv-build-fix\w07\battery`), run again on the final build (`w08\battery_final`) on the same
-client builds, and compared file by file:
+The Stage 07 battery (`F:\wmv-build-fix\w07\battery`), run again on the final build (`w08\battery_final`, 14:02-14:21)
+on
+the same client builds, and compared file by file. None of the battery's runs streams (only the Maps viewer's Enter
+world
+starts a session), so it covers the single-tile paths this stage changed -- block uploads, the session's `Live` tests,
+the transport -- and not streaming, which sections 8.1-8.6 cover. It ran on host A7AF7037's predecessor (70322D6E),
+which differs only in the timer that puts a streamState's UI update off by 150 ms -- code no battery run reaches; the
+final host's own `-terraintile` checks pass (tt_s8d below):
 
 | Set | What | Result against Stage 07 |
 |---|---|---|
@@ -678,21 +817,25 @@ client builds, and compared file by file:
 | shutdown | the read-in-flight shutdown checks on the four clients | 4 PASS, the same counts |
 | map catalogue | the catalogue sequences | PASS 27 / 0 and 44 / 0 (twice each), as at Stage 07 |
 
-`H_B_missingtex0` fails at Stage 07 and here alike, on the same check: its fixture expects map 2736 tile 32_29's material
+`H_B_missingtex0` fails at Stage 07 and here alike, on the same check: its fixture expects map 2736 tile 32_29's
+material
 to be unavailable (no tex0 ADT), and this installation's client serves a tex0 for it (the material is "textured"). It
 is not related to this stage.
 
 Characters (the three .chr cases of `w07\chars2.ps1`, animation pinned): the pictures are byte-identical to Stage 07's
-(`w08\chars_f08`). The host's `-terraintile` checks: 236 passed, 0 failed, 1 skipped (tt_s8a). The player's lifecycle
-self-test: 951 passed, 0 failed (948 before the review; the new checks of section 10). Pure tests (`Tests/Runner`, the
-corpus at `build\world-audit-data`): all suites pass, among them `BlpBlockTests`, `BlpBlockCorpusTests` and
-`StreamSeamTests`.
+(`w08\chars_f08`). The host's `-terraintile` checks: 237 passed, 0 failed, 1 skipped (tt_s8c, and tt_s8d on the final
+host; the stale-sweep check of
+section 10.2 added). The player's lifecycle self-test: 953 passed, 0 failed (the checks of sections 10.1 and 10.2
+added). Pure tests (`Tests/Runner`, the corpus at `build\world-audit-data`): all suites pass, among them
+`BlpBlockTests`, `BlpBlockCorpusTests` and `StreamSeamTests`. Protocol compatibility both ways: section 8.6.
 
 What changed on purpose: the single-tile world load uses block uploads for world-model and doodad textures too, so
 its pictures differ from Stage 07's where distant alpha-tested foliage samples the files' own mips (measured in
 section 3).
 
-## 10. Adversarial review
+## 10. Adversarial reviews
+
+### 10.1 The first review (before commit b9c688d4)
 
 Four independent reviews of the change (the player's session; the host's streaming and transport; texture residency and
 block uploads; the player's glue and IPC), each finding checked against the code before anything was changed. Confirmed
@@ -729,36 +872,91 @@ Not changed: a lost streamTile answer is not timed out (the host always answers;
 ends); a world model with only some groups refused for its tile's load is built partial and shared, as the single-tile
 load builds it; the single-tile world load now uses block uploads too (intended, requirement 5).
 
+### 10.2 The final independent review (of commit b9c688d4)
+
+Eight reviewers, one per question the owner asked -- the streaming lifecycle, cancellation, ownership and leaks; shared
+residency across tiles; transport backpressure and protocol 17 compatibility; the eviction and refetch on the Retail
+flight; the GUI stalls at the Maps viewer's entry; frame spikes; preservation of Models, Characters, Buildings and
+Stages
+03-07 and of the owner's uncommitted tabard fixes; every exit criterion against the evidence -- and every finding tried
+by
+one or two independent verifiers (44 agents in all). Nothing blocking was found in the streaming lifecycle (request
+credit balanced on every exit, late and stale answers never touching the scene, every object destroyed once, every tally
+back to 0). Confirmed, and fixed:
+
+| # | Finding (new in Stage 08 unless said) | Fix |
+|---|---|---|
+| 1 | **The Enter world click's GUI round over 50 ms only with streaming** (55-75 ms on every client; 22-49 ms with `WMV_STREAMING=0`, the Stage 07 host or a protocol-17 player) -- section 8.3 had called it pre-existing. The session's first streamState showed the hidden streaming lines: the panel grew, the Browse pane was laid out again and repainted, and the overhead map repainted, in the same round as the click's own repaint | The streaming lines are always shown at their fixed height (an idle text when no session streams, "Tiles: starting" from Enter world), so a streamState only relabels them; a streamState's UI follows on a 150 ms timer, never in the round it arrived in; the overhead map repaints on a streamState only when a ring or the camera's dot changed. The Enter world round with streaming: 21.5-39.9 ms against 23.0-25.5 ms with streaming off (same build, alternating runs; section 8.3) |
+| 2 | The stale sweep (`answerStaleWaiting`) held a queue iterator across a send: a send that fails (the player gone) drops the client at once and clears the queue -- a use after invalidation, a likely crash | Two passes: the stale entries are taken out of the queue, then answered; a connection lost meanwhile drops the rest. A new in-process check (`-terraintile`): 32 waiting requests made stale, 32 answered stale while waiting, each once |
+| 3 | A texture file's own failure (not in client storage, too large, no bytes) was handed on like a refusal: every waiting tile asked again | Only a refusal for the tile's load or a stale answer is handed on; the file's own failure is the session's. New self-test: a missing M2 texture asked for once across nine tiles |
+| 4 | streamState's p95 was always the maximum (95th percentile of ~15 frames) | The 95th percentile of the last 120 frames |
+| 5 | The scene's GPU bytes left out the terrain alpha arrays (4 MiB a tile) and meshes, in streamState and in the scene-budget check | Counted |
+| 6 | The pool bookkeeping ran every frame and allocated a dictionary each time (about 0.9 ms a frame, 2-4 MB/s of garbage) | Run when something may have joined the pools or an eviction is unfinished, and twice a second besides; the dictionary reused |
+| 7 | Evictions ran outside the 8 ms budget (up to 447 prototypes and 305 textures in one frame) | Under the frame budget, at least one a frame; an upload removed by its key (no scan) |
+| 8 | Heavy items stacked past the budget (a 28.9 ms tile add after other work: the only frame over 33 ms of the six loops) | A tile's Unity objects and a world-model prototype built from files run only as a frame's first item |
+| 9 | The streaming line read "tile -1_-1" until the entry's commit, and its counts were cut off at the default pane width | The entry's tile named until then; counts first; the whole text in a tooltip |
+| 10 | Settled tiles logged no doodad build or placement times | In the settle line |
+| 11 | Real-IPC cancellation, a new load over a live session, Clear while loading, a model load mid-session, a client switch, repeated enter/clear: none run on real data | Run (section 8.5), plus a self-test of a new load over a live session with requests out |
+
+Corrected in this document (the data did not support them): the entry rounds' attribution and their count (8.3, 11);
+"the refetching costs no frame or GUI time" (8.1: it costs settle time, and an eviction burst added 7-8 ms of streaming
+work to its frame before item 7); the frame spikes at the Era and Beta entries (126 and 137 ms, 5.2); the unsplit tile
+build (1.15); upload timing being the terrain tile build only (8.1); the protocol-17 runs (8.6).
+
+Not changed (section 11): the pool budget against the Stormwind loop (a policy choice, measured); an M2 texture fetched
+and decoded again though its upload is still on the GPU (efficiency); a texture refused or capped for the owning tile's
+load built into the shared prototype (latent: one answer of 22,708 was not "available" in the acceptance run); the
+player's inbox counters and the `light` runtimeState, implemented but not reported or asked for.
+
 ## 11. Unresolved and limitations
 
-- **GUI rounds at the Maps viewer's entry** (section 8.3): the mode switch to Maps 98-238 ms, the Enter world click
-  56-75 ms and the round after it 76-85 ms, the same with streaming off; 43-45 ms of the last is the synchronous resize of
-  the player's window. They come before any tile streams, and this stage neither causes nor fixes them. If the
-  acceptance scenario is taken to begin at the Enter world click rather than at the flight, these rounds are over its
-  50 ms limit. The flights, the tiles entering and leaving, Overview and Fly stay at or under 26.7 ms on all four
-  clients.
-- **One frame over 50 ms at entry** on Retail, Era and Beta (the largest world-model prototype is built in one piece:
-  48.4 ms of streaming work in one frame on Retail; splitting a prototype's build over frames is not done). In the six
-  Retail loops one frame went over 33 ms and none over 50 ms.
+Marked **new** (this stage's own) or **pre-existing** (present at develop 8f4e791f, measured the same with streaming
+off,
+the Stage 07 host or a protocol-17 player).
+
+- **GUI rounds over 50 ms at the Maps viewer's entry** (section 8.3). The roadmap exit's "no GUI-thread stall over
+  50 ms" holds over the flight and at the Enter world click; from Enter world to the settled region one pre-existing
+  round still exceeds it (the world shown), and the mode switch to Maps before it:
+  - pre-existing: the mode switch to Maps (the Maps viewer's first layout; 92-121 ms in the final runs), and the round
+    in which the world is shown, 43-45 ms of it the synchronous resize of the player's window (65-81 ms);
+  - pre-existing mechanism: one full Maps panel update (9-15 ms, the same as Stage 07) per progress message, several of
+    them in one round when the entry's world models complete -- with streaming, while the region's other tiles load
+    (45-76 ms in some earlier runs, none over 50 ms in the final ones);
+  - new, and fixed by the final review: the Enter world click's round, which streaming had pushed to 55-75 ms (the
+    streaming lines appearing, then a streamState's update, inside the click's repaint round). With streaming it is now
+    23.6-25.5 ms (the final runs), against 23.0-25.5 ms with streaming off.
+  Another session is working on the entry rounds (branch `world/08-entry-stalls`).
+- **Frames over 50 ms at entry** (pre-existing): the largest world-model prototype of a region is built in one piece --
+  48-50 ms on Retail, and frames of 126 and 137 ms at the Era and Beta entries (Stage 07 logged 114-128 ms builds of
+  world model 107243 the same way). A tile's Unity objects are built in one piece too (4-29 ms on Retail; new: 1.8
+  planned batches of chunks); heavy items now run only as a frame's first item, so they no longer stack.
 - **Managed-heap collections**: one 50.3 ms frame with 0.8 ms of streaming work in an earlier run (fl1) is most likely a
   collection; not measured further (the player's GC mode is Unity's default).
-- **The pool budget is below the Stormwind loop's revisit set** (section 8.1): each loop evicts about 770 prototypes and
-  620 textures and asks about 2,700 files again; the region settles 2.2-2.5 s after a loop instead of 0.3-0.5 s. No frame
-  or GUI cost was measured. The budget is one constant.
+- **The pool budget is below the Stormwind loop's revisit set** (new, a policy choice; section 8.1): an estimated 374
+  MiB would be needed against 256 MiB, so each loop evicts most of what the next loop needs (least recently used, the
+  worst order for a loop) and asks about 2,750 files again; the region settles 2.4-2.7 s after a loop instead of 0.3-0.5
+  s. The
+  budget is one constant (`StreamPoolGpuBudget`).
+- **An M2 texture is fetched and decoded again even when its upload is still on the GPU** (new, efficiency): the cache's
+  uploads are reused only with the decoded image; at least about 110 of the files asked again per Retail loop are such.
+- **A texture refused or capped for the owning tile's load** is left out of the prototype the whole session shares (new,
+  latent: 1 answer of 22,708 in the acceptance run was not "available"); so is a world model's group refused for it (its
+  per-file limit: Retail 2320850, group 3 is 4,476,010 bytes against the 4 MiB per read that existed before this stage
+  --
+  249 of its set doodads are not placed).
 - **Files asked twice besides evictions**: two tiles fetching the same terrain texture before either is committed both
   ask (15 at the Retail entry), and a reopened tile reads its root, tex0 and obj0 again (the tile files are not pooled,
   only what they name).
-- **The viewer's title line names the entry's tile** ("tile 31_48") for the whole session; the streaming lines name
-  the camera's tile.
-- **World-model textures are uploaded per prototype** (as in Stage 07): a texture two world models sample is decoded once
-  for the session (the image registry) but on the GPU once per prototype. Sharing those uploads across prototypes, as
-  the doodads' cache does, is not done.
-- **A world model with only some groups refused for its tile's load** (a budget) is built partial and shared with every
-  tile, as the single-tile load builds it.
-- **A lost `streamTileAnswer` is not timed out**: the host always answers, and the player exits when its connection ends.
+- **World-model textures are uploaded per prototype** (as in Stage 07): decoded once for the session, on the GPU once
+  per prototype.
+- **Reported but not asked for**: the player's inbox counters (`InboxDepthMax`, `InboxFramesDeferred`) and the `light`
+  runtimeState are implemented and never sent or requested.
+- **The viewer's title line names the entry's tile** for the whole session; the streaming lines name the camera's.
+- **A lost `streamTileAnswer` is not timed out**: the host always answers, and the player exits when its connection
+  ends.
 - **The view has no fog, sky or liquids** (unchanged): the region's outer edge is visible from high up.
-- **Map 0 only in the acceptance runs**: the streaming session is generic (any map with ADTs), but the flights and
-  pictures are of Eastern Kingdoms around Stormwind on each client.
+- **Map 0 only in the acceptance runs**: the session is generic (any map with ADTs), but the flights, the session
+  endings and the pictures are of Eastern Kingdoms around Stormwind.
 - **No parity claim**: no in-game reference was taken of any view in this stage.
 
 ## 12. Files
@@ -766,7 +964,8 @@ load builds it; the single-tile world load now uses block uploads too (intended,
 Host (`Source/wowmodelviewer`): `UnityIpcServer.h/.cpp` (protocol 18, receive pause and caps, streamTile, streamState,
 testFlight, the queue's priorities and the answer summary); `modelviewer.h/.cpp` (the session's tile loads, streamTile,
 the session-wide order prerequisites, stale checks by a request's own load); `MapsViewer.h/.cpp`, `MapTilePanel.h/.cpp`,
-`MapOverview.h/.cpp`, `filecontrol.h/.cpp` (the streaming lines and the overhead map's rings); `UnityRendererHost.h/.cpp`
+`MapOverview.h/.cpp`, `filecontrol.h/.cpp` (the streaming lines and the overhead map's rings);
+`UnityRendererHost.h/.cpp`
 (the resize timing line, the player's process id for the harness); `app.cpp` (the session's checks, the harness steps).
 
 Player (`Tools/UnityRendererProject/Assets/Scripts`): `WmvTerrainSessionStream.cs` (new: the region, jobs, credit,

@@ -928,8 +928,9 @@ MapTilePanel::MapTilePanel(wxWindow * parent, MapsViewer * maps)
   m_stream = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE | wxST_ELLIPSIZE_END);
   m_stream->SetForegroundColour(UiStyle::palette().textSecondary);
   m_stream->SetName(wxT("mapStreamLine"));
+  // Always shown, at a fixed height (an idle text when no session streams): its appearing would change the panel's
+  // height and lay the Browse pane out again -- the map list re-measured and repainted, 30-45 ms at Enter world.
   m_stream->SetMinSize(wxSize(FromDIP(100), 4 * m_stream->GetCharHeight() + FromDIP(2)));
-  m_stream->Hide();
   wxStaticText * cameraLabel = new wxStaticText(this, wxID_ANY, _("Camera"));
   m_camera = new wxChoice(this, wxID_ANY);
   m_camera->SetName(wxT("mapCamera"));
@@ -1050,35 +1051,22 @@ void MapTilePanel::setLabel(wxStaticText * label, const wxString & text)
   label->Show(!text.IsEmpty());
 }
 
-bool MapTilePanel::setStreamLine()
+void MapTilePanel::setStreamLine()
 {
-  const wxString text = qs(m_maps->streamDetail());
+  const QString detail = m_maps->streamDetail();
+  const wxString text = qs(detail.isEmpty() ? m_maps->streamIdleLine() : detail);
   if (m_stream->GetLabel() != text)
   {
     m_stream->SetLabel(text);
+    m_stream->SetToolTip(text);   // (the lines are ellipsized at the pane's width: the whole text on hover)
     m_stream->Refresh();
   }
-  const bool show = !text.IsEmpty();
-  if (m_stream->IsShown() == show)
-    return false;
-  m_stream->Show(show);
-  return true;
 }
 
 void MapTilePanel::StreamChanged()
 {
-  // Its own height never changes (four lines, ellipsized): laid out only when the line appears or goes.
-  if (!setStreamLine())
-    return;
-  Layout();
-  const int height = GetSizer()->GetMinSize().y;
-  if (height != m_laidOutHeight)
-  {
-    m_laidOutHeight = height;
-    InvalidateBestSize();
-    if (GetParent())
-      GetParent()->Layout();
-  }
+  // Its height never changes (four lines, ellipsized, always shown): the label is relabelled, nothing is laid out.
+  setStreamLine();
 }
 
 void MapTilePanel::Refresh2()

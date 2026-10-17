@@ -611,6 +611,8 @@ public:
                                 // dropped it for a terrain tile
   wxStopWatch m_modelAwaitedClock;   // since the wait began (monotonic)
   wxTimer m_playerContentPoll;
+  wxTimer m_streamUiTimer;      // STREAMING: a streamState's streaming lines and rings, after STREAM_UI_MS (coalesced)
+  static const int STREAM_UI_MS = 150;
   static const int POLL_MS = 100;
   static const long MODEL_AWAIT_TIMEOUT_MS = 60000;
   void OnPlayerContentPoll(wxTimerEvent & event);

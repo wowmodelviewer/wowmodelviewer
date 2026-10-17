@@ -590,7 +590,8 @@ public sealed partial class WmvTerrainSession
         {
             t.Error = why;
             DoodadTextureDone(j, t, true);
-            PublishDoodadImage(j, t, null, why, false);
+            // (A refusal for this tile's load, or a stale answer, hands the fetch on; the file's own failure is the session's.)
+            PublishDoodadImage(j, t, null, why, !RefusedForTheLoad(r));
             return;
         }
         byte[] bytes = r.data;

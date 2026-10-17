@@ -12,7 +12,9 @@
 // asking; with no pool budget evicted and asked again); a tile closed with its requests out (retired, their answers
 // dropped as late, nothing built); a prototype fetch taken over when the tile fetching it closes (the entry reported
 // "built" once: the session goes on); one streamTile out at a time, closes only too; a refusal for one tile's load handed
-// on to another tile; the entry failing (no session); clearTerrain taking everything away -- and every tally back to 0.
+// on to another tile; a texture missing from storage asked for once; a new load over a live session with requests out
+// (the old one ended first, its answers late); the entry failing (no session); clearTerrain taking everything away -- and
+// every tally back to 0.
 
 using System;
 using System.Collections.Generic;
@@ -578,6 +580,50 @@ public static partial class WmvLifecycleSelfTest
               WmvWorldModels.LivePrototypes == 1,
               "streaming: the world model refused for the entry's load is fetched under another tile's load and built -- 500 and 501 placed " +
               "(asked " + h.Asked(rw, StreamWmo) + " times; " + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- a texture file's own failure (not in client storage) is the session's: asked for once, every tile takes it
+        h = make();
+        s = h.H.Session;
+        h.Files.Files[rmt].Remove((int)StreamM2Tex);
+        s.Load(StreamCommand(11));
+        settled = h.Until(() => h.H.For(11) != null && h.Settled() && s.StreamTiles == 9);
+        scene = s.World;
+        Check(settled && h.Asked(rmt, StreamM2Tex) == 1 && scene != null && scene.Doodads.Count == 12,
+              "streaming: an M2 texture missing from client storage is asked for once in the session -- every tile's models take " +
+              "the failure without asking, and their doodads are placed untextured (asked " + h.Asked(rmt, StreamM2Tex) + " time(s); " +
+              state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- a new load over a live session with fetches out (a new Enter world): the old session ends first -- its requests
+        // retired, their late answers dropped, nothing asked for its tiles after the new load, nothing of it in the new scene
+        h = make();
+        s = h.H.Session;
+        h.WithheldTiles.Add("33_50");
+        h.WithheldTiles.Add("31_50");
+        s.Load(StreamCommand(12));
+        bool liveOld = h.Until(() => h.H.For(12) != null && s.StreamTiles == 9 && s.StreamJobs >= 2, 400);
+        var oldLoads = new HashSet<string>();
+        int oldOut = 0;
+        foreach (string[] q in h.H.Sent)
+        {
+            oldLoads.Add(q[3]);
+            if (!h.Answered.Contains(q[0])) oldOut++;
+        }
+        int sentBefore = h.H.Sent.Count, lateBefore12 = s.LateAnswersDropped;
+        s.Load(StreamCommand(13));
+        h.WithheldTiles.Clear();
+        settled = h.Until(() => h.H.For(13) != null && h.Settled() && s.StreamTiles == 9);
+        int oldAskedAfter = 0;
+        for (int k = sentBefore; k < h.H.Sent.Count; k++)
+            if (oldLoads.Contains(h.H.Sent[k][3])) oldAskedAfter++;
+        scene = s.World;
+        Check(liveOld && oldOut > 0 && settled && oldAskedAfter == 0 && s.LateAnswersDropped - lateBefore12 >= oldOut &&
+              h.H.CountFor(12) == 1 && h.H.For(13) != null && h.H.For(13).Status == "built" && WmvRuntimeTerrainTile.Live == 9 &&
+              scene != null && scene.Load == 13 && scene.Doodads.Count == 12 && CountPlacements(scene, 500) == 1,
+              "streaming: a new load over a live session with " + oldOut + " request(s) out ends the old session first -- nothing asked " +
+              "for its tiles afterwards (" + oldAskedAfter + "), its answers dropped as late (" + (s.LateAnswersDropped - lateBefore12) +
+              "), reported once; the new session's region is whole and holds nothing of the old (" + state(h) + ")", log);
         s.Clear("test");
 
         // ---- the entry failing before its tile: no session, nothing opened

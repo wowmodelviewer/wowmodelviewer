@@ -141,7 +141,7 @@ public:
 private:
   void setLabel(wxStaticText * label, const wxString & text);
   // STREAMING: the session's line set (true when it appeared or went: the panel needs laying out).
-  bool setStreamLine();
+  void setStreamLine();
 
   MapsViewer * m_maps;
   wxStaticText * m_title = nullptr;

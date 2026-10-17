@@ -7571,6 +7571,36 @@ static void checkStreamQueue(TerrainTestLog & tally)
                 waiting == (size_t)UnityIpcServer::STREAM_QUEUE_MAX && refused == 1 && named,
                 QString("%1 waiting, %2 refused%3").arg(waiting).arg(refused)
                   .arg(records.empty() ? QString() : ": \"" + records[0].detail + "\""));
+    {
+      // Half of those waiting become stale (their tile closed): answered stale in the next serving pass, while they wait --
+      // not when they reach the front -- and taken out of the queue before any is answered (answerStaleWaiting).
+      QSet<QString> dispatched;
+      for (const QString & id : order)
+        dispatched.insert(id);
+      // (Counted as the check marks them: the queue's own entries, never the reads in flight or earlier answers.)
+      int marked = 0;
+      q.onMapAssetStale = [&dispatched, &marked](const QJsonObject & r) {
+        const QString id = r.value("requestId").toString();
+        if (dispatched.contains(id) || r.value("fileDataID").toInt(0) % 2 != 0)
+          return QString();
+        marked++;
+        return QString("made stale by the terrain test");
+      };
+      records.clear();
+      const size_t waitingBefore = q.mapAssetsWaiting();
+      const long long staleBefore = q.mapAssetsAnsweredStaleWaiting();
+      q.testServeMapAssetQueue();
+      int staleRecords = 0;
+      for (const UnityIpcServer::MapAssetServed & r : records)
+        if (r.state == "stale" && r.detail == "made stale by the terrain test")
+          staleRecords++;
+      const long long answeredStale = q.mapAssetsAnsweredStaleWaiting() - staleBefore;
+      q.onMapAssetStale = [](const QJsonObject &) { return QString(); };
+      tally.check("stream queue: requests whose tile closed are answered stale while they wait, each once, and leave the queue",
+                  marked > 0 && answeredStale == marked && staleRecords == marked && q.mapAssetsWaiting() <= waitingBefore - (size_t)marked,
+                  QString("%1 made stale of %2 waiting: %3 answered stale while waiting, %4 stale answer(s) recorded; %5 waiting after")
+                    .arg(marked).arg(waitingBefore).arg(answeredStale).arg(staleRecords).arg(q.mapAssetsWaiting()));
+    }
     for (int i = 0; i < 64 && q.mapAssetsWaiting() + q.mapReadsInFlight() > 0; ++i)
       poll();
     q.setStreaming(false);

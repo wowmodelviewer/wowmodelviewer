@@ -51,6 +51,7 @@ public sealed partial class WmvTerrainSession
     public const double StreamFrameBudgetMs = 8.0;
     /// <summary>streamState at most this often.</summary>
     public const double StreamStateIntervalMs = 250.0;
+    const double PoolCheckIntervalMs = 500.0;   // the pools looked at at least this often (EvictPools)
     /// <summary>Credit a tile of ring 1, and of ring 2 or more, leaves for the nearer ones.</summary>
     public const int StreamReserveRing1 = 4, StreamReserveFar = 8;
     /// <summary>A tile the host refused, or whose job failed, is tried again after this long while it is still wanted.</summary>
@@ -215,6 +216,10 @@ public sealed partial class WmvTerrainSession
         public readonly Dictionary<long, ImageEntry> Images = new Dictionary<long, ImageEntry>();
         public long ImagesShared, ImagesWaited, ImagesEvicted, ImageTakeovers;
         public bool HasCamera;
+        public bool PoolsDirty = true;         // something may have joined the pools, or an eviction is unfinished
+        public double PoolsCheckedMs = -1;
+        public readonly float[] FrameRing = new float[120];   // the last frame times (p95 in streamState)
+        public int FrameRingNext, FrameRingCount;
         public bool CameraKnown;               // the region has been centred once (the camera tile below is its centre)
         public double CameraX, CameraY, CameraZ, ForwardX, ForwardY;
         public int CameraTileX = -1, CameraTileY = -1;
@@ -527,6 +532,14 @@ public sealed partial class WmvTerrainSession
         return stream == null || !stream.WorkedThisFrame || stream.WorkClock.Elapsed.TotalMilliseconds < StreamFrameBudgetMs;
     }
 
+    /// <summary>A heavy item -- a tile's Unity objects (added or rebuilt), a world-model prototype built from its files -- runs
+    /// only as the frame's first item: items no longer stack past the budget behind one another (a frame is at most its
+    /// heaviest item, or the 8 ms budget and one light item).</summary>
+    bool StreamMayWorkHeavy()
+    {
+        return stream == null || !stream.WorkedThisFrame;
+    }
+
     void StreamWorked()
     {
         if (stream != null)
@@ -542,6 +555,9 @@ public sealed partial class WmvTerrainSession
         {
             float ms = (float)(nowMs - s.LastPumpMs);
             s.FrameMs.Add(ms);
+            s.FrameRing[s.FrameRingNext] = ms;
+            s.FrameRingNext = (s.FrameRingNext + 1) % s.FrameRing.Length;
+            if (s.FrameRingCount < s.FrameRing.Length) s.FrameRingCount++;
             s.Frames++;
             if (ms > 33.4f) s.FramesOver33++;
             if (ms > 50f) s.FramesOver50++;
@@ -566,8 +582,14 @@ public sealed partial class WmvTerrainSession
         {
             UpdateRegion(nowMs);
             StartQueuedTiles(nowMs);
-            EvictPools();
-            if (StreamMayWork())
+            // The pools are looked at when something may have joined them (a tile closed, a job ended) or an eviction is
+            // unfinished, and twice a second besides -- not every frame.
+            if (s.PoolsDirty || s.PoolsCheckedMs < 0 || nowMs - s.PoolsCheckedMs >= PoolCheckIntervalMs)
+            {
+                s.PoolsCheckedMs = nowMs;
+                EvictPools();
+            }
+            if (StreamMayWorkHeavy())
                 RebuildNextStreamTile();
         }
         double work = s.WorkClock.Elapsed.TotalMilliseconds;
@@ -598,7 +620,7 @@ public sealed partial class WmvTerrainSession
         }
         if (j.Phase == Phase.Wdt || j.Phase == Phase.Files)
         {
-            if (j.AdoptReady && StreamMayWork())
+            if (j.AdoptReady && StreamMayWorkHeavy())
             {
                 j.AdoptReady = false;
                 AdoptStreamTile(j);
@@ -1092,9 +1114,12 @@ public sealed partial class WmvTerrainSession
         Retire(j, "settled");
         Log("load {0}: tile {1} (load {2}) settled after {3:0.#} ms: terrain {4:0.###} ms; {5} of {6} world-model placement(s) placed ({7} " +
             "shared), {8} of {9} doodad(s) placed ({10} shared); {11} file(s) asked, {12} answered, {13} bytes; {14} request(s) out in the session; " +
-            "{15} file(s) of the session asked more than once ({16})",
+            "{15} file(s) of the session asked more than once ({16}); doodad builds {17:0.###} ms (at most {18:0.###} in one), placements " +
+            "{19:0.###} ms (at most {20:0.###})",
             stream.EntryLoad, st.Name, j.Cmd.Load, j.Clock.Elapsed.TotalMilliseconds, j.UploadMs, placed, st.WorldPlacements, shared, dplaced,
-            st.DoodadInstances, dshared, st.FilesAsked, st.FilesAnswered, st.Bytes, stream.RequestsOut, stream.FilesAskedAgain, AskedAgainLine(stream));
+            st.DoodadInstances, dshared, st.FilesAsked, st.FilesAnswered, st.Bytes, stream.RequestsOut, stream.FilesAskedAgain, AskedAgainLine(stream),
+            w != null && w.Doodads != null ? w.Doodads.BuildMs : 0, w != null && w.Doodads != null ? w.Doodads.BuildMaxMs : 0,
+            w != null && w.Doodads != null ? w.Doodads.PlaceMs : 0, w != null && w.Doodads != null ? w.Doodads.PlaceMaxMs : 0);
         StreamJobEnded(j, StreamSettled, "");
     }
 
@@ -1103,6 +1128,8 @@ public sealed partial class WmvTerrainSession
     /// either way), or closed (null: the tile goes).</summary>
     void StreamJobEnded(Job j, string state, string reason)
     {
+        if (stream != null)
+            stream.PoolsDirty = true;           // (what its models pinned may be pooled now)
         StreamTile st = j.Stream;
         if (st == null || stream == null)
             return;
@@ -1159,6 +1186,8 @@ public sealed partial class WmvTerrainSession
     void CloseStreamTile(StreamTile st, string why)
     {
         StreamWork s = stream;
+        if (s != null)
+            s.PoolsDirty = true;                // (what only it held is pooled now)
         Job j = st.Job;
         if (j != null)
         {
@@ -2058,6 +2087,7 @@ public sealed partial class WmvTerrainSession
     {
         if (stream == null)
             return;
+        stream.PoolsDirty = false;
         EvictImages();
         if (world == null)
             return;
@@ -2088,9 +2118,17 @@ public sealed partial class WmvTerrainSession
             bool overGpu = gpu > StreamPoolGpuBudget;
             if (!overGpu && managed <= StreamPoolManagedBudget)
                 break;
+            // Under the session's frame budget like any other work (at least one eviction a frame): the rest go in the next
+            // frames -- the pools' budget is soft, a few frames over it cost nothing.
+            if (prototypes + textures > 0 && !StreamMayWork())
+            {
+                stream.PoolsDirty = true;
+                break;
+            }
             var e = o as ProtoEntry;
             if (!overGpu && (e == null || e.Doodad))
                 continue;
+            StreamWorked();
             if (e != null)
             {
                 if (!e.Doodad)
@@ -2139,6 +2177,8 @@ public sealed partial class WmvTerrainSession
                 "{4:0.0} MB parsed", stream.EntryLoad, prototypes, textures, PooledGpuBytes() / 1048576.0, managed / 1048576.0);
     }
 
+    readonly Dictionary<UnityEngine.Texture2D, int> pooledRefsScratch = new Dictionary<UnityEngine.Texture2D, int>();
+
     static long LastUseOf(object o)
     {
         var e = o as ProtoEntry;
@@ -2155,7 +2195,8 @@ public sealed partial class WmvTerrainSession
             return 0;
         WmvDoodadTextures cache = world != null ? world.DoodadTextures : null;
         foreach (ProtoEntry e in stream.Wmos.Values) if (e.Pooled && e.Wmo != null) gpu += e.GpuBytes;
-        var pooledRefs = new Dictionary<UnityEngine.Texture2D, int>();
+        Dictionary<UnityEngine.Texture2D, int> pooledRefs = pooledRefsScratch;   // (reused: no garbage a call)
+        pooledRefs.Clear();
         foreach (ProtoEntry e in stream.M2s.Values)
             if (e.Pooled && e.M2 != null)
             {
@@ -2185,6 +2226,14 @@ public sealed partial class WmvTerrainSession
         foreach (TerrainTexEntry t in terrainTextures.Values)
             textures += t.GpuBytes;
         geometry = WmvWorldModels.LiveGpuGeometryBytes + WmvWorldDoodads.LiveGpuGeometryBytes;
+        // The resident tiles' alpha arrays (texture memory, never in LiveTextureBytes) and their meshes and material vertices.
+        if (stream != null)
+            foreach (StreamTile st in stream.Tiles.Values)
+                if (st.Tile != null && !st.Tile.Disposed)
+                {
+                    textures += st.Tile.AlphaGpuBytes;
+                    geometry += (st.Mesh != null ? st.Mesh.MeshBytes : 0) + st.Tile.MaterialVertexBytes;
+                }
     }
 
     // ---------------------------------------------------------------- streamState
@@ -2238,10 +2287,19 @@ public sealed partial class WmvTerrainSession
         r.PoolBytes = PooledGpuBytes();
         if (s.FrameMs.Count > 0)
         {
-            var a = s.FrameMs.ToArray();
+            float max = 0;
+            foreach (float f in s.FrameMs) max = Math.Max(max, f);
+            r.FrameMsMax = max;
+        }
+        // The 95th percentile of the last frames (about 2 s at 60 a second), not of the ~15 since the last streamState (of
+        // which it would be the largest); -1 until 20 frames have been seen.
+        r.FrameMsP95 = -1;
+        if (s.FrameRingCount >= 20)
+        {
+            var a = new float[s.FrameRingCount];
+            Array.Copy(s.FrameRing, a, s.FrameRingCount);
             Array.Sort(a);
-            r.FrameMsMax = a[a.Length - 1];
-            r.FrameMsP95 = a[Math.Min(a.Length - 1, (int)Math.Ceiling(0.95 * a.Length) - 1)];
+            r.FrameMsP95 = a[(int)Math.Ceiling(0.95 * a.Length) - 1];
         }
         r.UploadMsMax = s.UploadMsMax;
         r.WorkMsMax = s.WorkMsMax;

@@ -19,6 +19,8 @@
     #include <wx/wx.h>
 #endif
 
+#include <string>
+
 class MapsViewer;
 class MapTileGrid;
 class UiButton;
@@ -48,6 +50,7 @@ private:
   wxCheckBox * m_wholeBox = nullptr;
   UiButton * m_enter = nullptr;
   MapTileGrid * m_grid = nullptr;
+  std::string m_streamOverlay;          // what the grid last drew of the streaming session (StreamChanged)
   wxStaticText * m_hover = nullptr;
   wxStaticText * m_target = nullptr;
 };

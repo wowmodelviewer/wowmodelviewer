@@ -72,6 +72,7 @@ public sealed class WmvDoodadTextures
         public int Refs;
         public bool Blocks;
         public long LastUse;                  // streaming: the cache's use counter when last taken or given back
+        public long Key;
     }
 
     readonly Dictionary<long, Upload> uploads = new Dictionary<long, Upload>();
@@ -138,7 +139,7 @@ public sealed class WmvDoodadTextures
         tex.wrapModeV = wrapY ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
         // Exact: the stored levels of a block upload; RGBA32 with its full mip chain otherwise.
         long b = BlpBlocks.UploadBytes(image);
-        u = new Upload { Texture = tex, Bytes = b, Refs = 1, Blocks = blocks, LastUse = ++use };
+        u = new Upload { Texture = tex, Bytes = b, Refs = 1, Blocks = blocks, LastUse = ++use, Key = key };
         uploads[key] = u;
         byTexture[tex] = u;
         int n;
@@ -206,12 +207,7 @@ public sealed class WmvDoodadTextures
             Upload u;
             if (t == null || !byTexture.TryGetValue(t, out u) || u.Refs > 0)
                 continue;
-            foreach (KeyValuePair<long, Upload> kv in uploads)
-                if (kv.Value == u)
-                {
-                    Remove(kv.Key, u, destroy);
-                    break;
-                }
+            Remove(u.Key, u, destroy);
             freed += u.Bytes;
             count++;
         }

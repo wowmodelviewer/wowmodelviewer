@@ -1815,24 +1815,38 @@ int UnityIpcServer::answerStaleWaiting()
 {
   if (!onMapAssetStale)
     return 0;
-  int answered = 0;
+  // Two passes: the stale ones are taken out of the queue first, then answered. An answer is sent at once, and a send
+  // that fails drops the client and clears the queue (dropClient -> dropHeldMapAssets): no queue iterator may live
+  // across it.
+  std::vector<std::pair<QueuedMapAsset, QString>> gone;
   for (auto it = m_mapAssetQueue.begin(); it != m_mapAssetQueue.end();)
   {
     m_activity.mapCallbacks++;
-    const QString why = onMapAssetStale(it->request);
+    QString why = onMapAssetStale(it->request);
     if (why.isEmpty())
     {
       ++it;
       continue;
     }
-    const QueuedMapAsset gone = *it;
+    gone.emplace_back(*it, std::move(why));
     it = m_mapAssetQueue.erase(it);
+  }
+  int answered = 0;
+  const bool connected = m_client != 0;
+  for (const auto & g : gone)
+  {
+    if (connected && !m_client)
+    {
+      // The connection ended while they were answered: the rest go unanswered, as the queue would have with it.
+      m_mapAssetsQueueDropped++;
+      continue;
+    }
     QElapsedTimer staleTimer;
     staleTimer.start();
     MapAssetAnswer stale;
     stale.state = "stale";
-    stale.detail = why;
-    answerMapAsset(gone.request, (m_clock.nsecsElapsed() - gone.arrivedNs) / 1e6, stale, nullptr, nullptr, staleTimer);
+    stale.detail = g.second;
+    answerMapAsset(g.first.request, (m_clock.nsecsElapsed() - g.first.arrivedNs) / 1e6, stale, nullptr, nullptr, staleTimer);
     m_mapAssetsAnsweredStaleWaiting++;
     answered++;
   }
