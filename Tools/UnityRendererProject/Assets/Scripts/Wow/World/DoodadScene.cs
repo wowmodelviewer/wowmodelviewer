@@ -255,10 +255,25 @@ namespace Wmv.Wow.World
                         d.FileDataID = ids[def.NameIndex];
                     if (!(def.Scale > 0f) || float.IsInfinity(def.Scale))
                         d.Unsupported = d.Unsupported ?? string.Format("MODD {0} has scale {1}", k, def.Scale);
+                    if (!Finite(d.Position))
+                        d.Unsupported = d.Unsupported ?? string.Format("MODD {0} has a position that is not a finite number ({1}, {2}, {3})", k,
+                                                                       def.Position.X, def.Position.Y, def.Position.Z);
                     list.Add(d);
                 }
             }
             return list;
+        }
+
+        // Finite as the float the instance's position becomes (a double past float's range is infinite there).
+        static bool Finite(WorldPoint p)
+        {
+            return FiniteAsFloat(p.X) && FiniteAsFloat(p.Y) && FiniteAsFloat(p.Z);
+        }
+
+        static bool FiniteAsFloat(double v)
+        {
+            float f = (float)v;
+            return !float.IsNaN(f) && !float.IsInfinity(f);
         }
 
         /// <summary>
@@ -282,30 +297,41 @@ namespace Wmv.Wow.World
         }
 
         /// <summary>
-        /// A world model built without some of its group files: each doodad whose MODD record only groups that could not be
-        /// read list (MODR) would stand where no geometry was built -- it is marked Unsupported, said. A record no group
-        /// lists is kept (no group claims it). `owners` is GroupMembership's, `groups` the world model's LOD0 groups as
-        /// built (null where a file could not be read). Returns how many were marked.
+        /// A world model built without some of its group files: a doodad whose MODD record no group that was read lists
+        /// (MODR) may stand where no geometry was built -- it is marked Unsupported, said. The missing groups' MODR cannot be
+        /// read, so such a record is told by what the read groups do not list: on the four clients every MODD record is
+        /// listed by some group (07-doodads section 3.5), so with every group read nothing is marked, and with some missing
+        /// a record no read group lists is one only the missing groups can list. `owners` is GroupMembership's over the same
+        /// `groups` (the world model's LOD0 groups as built, null where a file could not be read). Returns how many were
+        /// marked.
         /// </summary>
         public static int MarkMissingGroups(List<WorldDoodad> doodads, List<int>[] owners, WmoGroup[] groups)
         {
             int marked = 0;
             if (doodads == null || owners == null || groups == null)
                 return 0;
+            var missing = new List<int>();
+            for (int g = 0; g < groups.Length; g++)
+                if (groups[g] == null)
+                    missing.Add(g);
+            if (missing.Count == 0)
+                return 0;
+            string reason = "no group of its world model that was read lists it (group(s) " + string.Join(", ", missing) + " could not be read)";
             foreach (WorldDoodad d in doodads)
             {
-                if (d.Unsupported != null || d.ModdIndex < 0 || d.ModdIndex >= owners.Length || owners[d.ModdIndex] == null)
+                if (d.Unsupported != null || d.ModdIndex < 0 || d.ModdIndex >= owners.Length)
                     continue;
                 bool any = false;
-                foreach (int g in owners[d.ModdIndex])
-                    if (g >= 0 && g < groups.Length && groups[g] != null)
-                    {
-                        any = true;
-                        break;
-                    }
+                if (owners[d.ModdIndex] != null)
+                    foreach (int g in owners[d.ModdIndex])
+                        if (g >= 0 && g < groups.Length && groups[g] != null)
+                        {
+                            any = true;
+                            break;
+                        }
                 if (any)
                     continue;
-                d.Unsupported = "it stands in group(s) " + string.Join(", ", owners[d.ModdIndex]) + " of its world model, whose file(s) could not be read";
+                d.Unsupported = reason;
                 marked++;
             }
             return marked;

@@ -4,19 +4,20 @@ Branch `world/07-doodads`, from `develop` c223ea97 (Stage 06, PR #120). This doc
 was done: the architecture first (section 1, written before any code), then the evidence, the implementation and its
 verification.
 
-Evidence grades: **PROVEN_RUNTIME** (observed in the running viewer or player on real client data), **PROVEN_SOURCE**
-(read in the source or the client's own files), **INFERRED** (follows from proven facts, not observed directly),
-**UNKNOWN**. Test outcomes: **PASS**, **FAIL**, **SKIP** (not run, said why), **UNSUPPORTED** (the case cannot be run on
+Evidence grades: **PROVEN_BYTES** (decided by the client's own files: the rule reproduces values the client stores),
+**PROVEN_RUNTIME** (observed in the running viewer or player on real client data), **PROVEN_SOURCE** (read in the source
+or the client's own files), **INFERRED** (follows from proven facts, not observed directly; a statistical test on the
+client's bytes is graded so), **UNKNOWN**. Test outcomes: **PASS**, **FAIL**, **SKIP** (not run, said why), **UNSUPPORTED** (the case cannot be run on
 this data or by this design, said why).
 
-Clients (the same installation throughout):
+Clients (one installation; it updated three clients overnight between the two final campaigns, 2026-10-16/17):
 
-| Client | Product | Build |
-|---|---|---|
-| Retail | wow | 12.1.5.70391 |
-| Classic Era | wow_classic_era | 1.15.9.70003 |
-| MoP Classic | wow_classic | 5.5.4.70268 |
-| Classic Beta | wow_classic_beta | 1.60.1.70425 |
+| Client | Product | Build: census, evidence, sections 7-9 | Build: sections 10-11 (memory, battery, Characters) |
+|---|---|---|---|
+| Retail | wow | 12.1.5.70391 | 12.1.5.70448 |
+| Classic Era | wow_classic_era | 1.15.9.70003 | 1.15.9.70003 |
+| MoP Classic | wow_classic | 5.5.4.70268 | 5.5.4.70449 |
+| Classic Beta | wow_classic_beta | 1.60.1.70425 | 1.60.1.70450 |
 
 ## 1. Architecture (proposed before implementation)
 
@@ -37,7 +38,7 @@ Investigated before planning (the findings are in sections 2-4):
 | Component | Today | Stage 07 |
 |---|---|---|
 | `M2Parser`, `M2SkinParser`, `BlpDecoder` | pure functions of bytes, no Unity calls; the model path runs them on the main thread | reused unchanged, on the session's worker threads |
-| `WmvModelBuilder.Build` | one M2 from (model, skin, decoded textures); skinned when the model has bones; emitters; a per-build texture cache; a CPU copy of each texture; counted in `WmvRuntimeModel.Live` | reused through **opt-in build options** (static mesh, no emitters or animators, textures not kept readable, textures from a shared provider, outside the model count, cleanup on failure). Callers that do not set them build byte-identical models (Models, Characters, mounts) |
+| `WmvModelBuilder.Build` | one M2 from (model, skin, decoded textures); skinned when the model has bones; emitters; a per-build texture cache; a CPU copy of each texture; counted in `WmvRuntimeModel.Live` | reused through **opt-in build options** (static mesh, no emitters or animators, textures not kept readable, textures from a shared provider, outside the model count, cleanup on failure). Callers that do not set them build as before (Models, Characters, mounts) |
 | Model path (`loadWoWModel`, `getAsset`, the model slot) | GUI-thread reads, no content-key check, adoption disposes the scene | **not used** for doodads: it would end the world scene |
 | `AdtParser.ParseObj0` | gives every MDDF record (`AdtObj0.Doodads`); Stage 06 logs the count and drops them | the MDDF records become doodad placements |
 | `WmoParser` | parses MODS, MODI, MODD (quaternion x, y, z, w) and keeps MODR raw; the root stays alive with each world prototype | reused; MODR decoded for group membership |
@@ -163,7 +164,7 @@ on real records (3.6). No client file stores a doodad's world transform, so the 
 only reading under which a doodad keeps its place in its world model wherever the world model is placed, and the one the
 Stockade and Stormwind pictures show (section 9).
 
-### 3.3 The MODD rotation convention: R(q), no turn after it -- PROVEN_BYTES (statistical), four clients
+### 3.3 The MODD rotation convention: R(q), no turn after it -- INFERRED (a statistical test on the bytes), four clients
 
 A quaternion can be applied as R(q) or as its transpose (the inverse turn); a turn about z only differs between the two
 by the sign of its angle, so a wrong reading turns most doodads the wrong way about their own origin. The client files
@@ -225,8 +226,10 @@ On every LOD0 group of the corpus (Retail 457, Classic Era 437, MoP Classic 477,
 exactly when the group's flag 0x800 is set (0 differ) and every index lies inside its root's MODD (0 outside). Every
 MODD record is listed by some group (0 unlisted); some by several (Retail 63 of 8,970, Classic Era 139 of 10,439, MoP
 Classic 66 of 8,589, Classic Beta 312 of 11,057), and a few groups list records of several sets (4, 1, 3, 6). The plan
-decodes it (`DoodadPlan.GroupMembership`, tested) but draws no doodad by it: with no portal or indoor/outdoor rule in this
-stage (none is established), a doodad is drawn when its own box is in the camera's view (section 5).
+decodes it (`DoodadPlan.GroupMembership`, tested) for one use: a world model built without some of its group files leaves
+"unsupported" the doodads no group that was read lists (5.3) -- every record being listed by some group, those are the
+ones only the missing groups can list. It decides nothing else: with no portal or indoor/outdoor rule in this stage (none
+is established), a doodad is drawn when its own box is in the camera's view (section 5).
 
 ### 3.6 Reference cases -- PROVEN (independent arithmetic)
 
@@ -313,7 +316,9 @@ the blend modes and the shader of the Models view -- with new opt-in `WmvBuildOp
 `WmvRuntimeModel.LeaveLiveCount()` takes a prototype out of `WmvRuntimeModel.Live` (the Models view's count), as
 `WmvRuntimeMapObject.LeaveLiveCount` does for world-model prototypes. `WmvModelBuilder.BatchTextureSlots(model, skin)`
 lists the slots a skin's batches bind (the textures a doodad fetches). With no option set the builder's path is the one it
-was: the Models and Characters captures are compared byte for byte (section 10).
+was: the Models view's bear.m2, the Buildings view's WMO 108631 and six character captures (.chr loads and bulky-belt sets)
+are compared byte for byte with Stage 06 (section 11); mounts take the same default path (no caller but `WmvWorldDoodads`
+sets an option) and were not captured.
 
 ### 5.3 Dependency resolution
 
@@ -323,8 +328,9 @@ on the worker; kind SKIN) -> the textures its batches bind, by their `TXID` File
 on the worker; kind BLP2), each id once per load, shared by every model that binds it. An M2 with no SFID entry is
 "unsupported"; a skin with no batch (a model of emitters alone) "unsupported"; a slot with no FileDataID -- a replaceable
 texture, or a texture an M2 without TXID names by path -- is left without its texture and the model is "partial", named.
-A doodad whose MODD record only group files that could not be read list (MODR) is "unsupported" (it would stand where no
-geometry was built); an MDDF record of scale 0 likewise.
+A world model built without some of its group files: a doodad whose MODD record no group that was read lists (MODR) is
+"unsupported" (it may stand where no geometry was built; 3.5). A MODD record whose position is not a finite number, and an
+MDDF record of scale 0, likewise.
 
 ### 5.4 Ownership
 
@@ -353,8 +359,10 @@ Models view's and the world models'.
 An instance is a bare GameObject with a MeshFilter and a MeshRenderer, on layer 30 under the scene root: position
 `WorldToUnity.PositionD(W, origin)` (the scene's one floating origin, as terrain and world models), rotation U = M R M^T
 (`WmvWorldModels.UnityRotation`, the converter's model space is the same for M2 and WMO), uniform scale. Its box is the
-prototype's mesh box placed (static). Once per frame in the world view each instance box is tested against the camera's
-frustum; a renderer outside is disabled (counted: `doodadVisible`, `doodadCulled`). Doodads are never floors: they are
+prototype's mesh box placed (static) -- not the obj1 MLDX box the roadmap named: MLDX exists for MDDF doodads only, the
+mesh box serves both kinds, and MLDX verifies the MDDF placement instead (3.1). Once per frame in the world view each
+instance box is tested against the camera's frustum; a renderer outside is disabled (counted: `doodadVisible`,
+`doodadCulled`; both 0 once the scene's doodads are gone). Doodads are never floors: they are
 in neither `Geometries` nor the scene's box, so the camera's floor rules and the world's framing are unchanged.
 
 ### 5.7 The load's order and responsiveness
@@ -389,7 +397,7 @@ textures); F failed, U unsupported, R not requested."), and its progress line th
 |---|---|
 | placed | on screen |
 | failed | its model could not be had or built (the host's answer quoted, a parse failure, a build that threw, the timeout) |
-| unsupported | its record names no FileDataID, or scale 0; it stands in group files that could not be read; or its M2 has no skin profile or no batch |
+| unsupported | its record names no FileDataID, has scale 0 or a position that is not a finite number; no group file that was read lists it (its world model built without some groups); or its M2 has no skin profile or no batch |
 | notRequested | past a budget: instances or models (nothing fetched); the GPU budgets (fetched, but not built: the reason says so) |
 | ended | the load ended before it was placed |
 
@@ -402,13 +410,13 @@ was placed.
 
 Every GUI run is on a separate, never-shown Win32 desktop (the established harness: the viewer and the player it starts
 run there; nothing reaches the owner's screens, focus or input). The final build: host `wowmodelviewer.exe` SHA-256
-538ED9F3, player Assembly-CSharp MD5 3B202B69 (p17d).
+538ED9F3, player Assembly-CSharp MD5 FA5E41BB (p17g).
 
 | Suite | How | What it covers (Stage 07) | Result |
 |---|---|---|---|
-| Pure tests, synthetic | `dotnet run -c Release --project Tools/UnityRendererProject/Tests/Runner/WowParserTestRunner.csproj` | `DoodadTests`: MDDF de-duplication and the Tile frame with worked numbers (a1 90 is Rz(270), a0 90 tips z, the half turn), scale u16/1024 and scale 0, name-table and FileDataID-0 records; set selection (set 0 only, set 0 plus another, a set past the root's, ranges past MODD, an empty set 0, the diagnostic); MODD composition with a moved, turned, tilted and scaled world model (doodad(x) == wmo(p + s_q R(q) x)); R(q) against its transpose, component order, normalisation, determinant; unsupported MODD records; MODR membership and doodads of unreadable groups | **PASS**, 54 checks |
-| Pure tests, real client bytes | the same, `WMV_WORLD_AUDIT_CORPUS` set | `DoodadCorpusTests`: section 3.1's MLDX replay on four clients, the plan against the census on every load, the set and MODR facts, the R(q) wall test with the independent probe's counts pinned, section 3.6's reference positions | **PASS**, 77 checks (with the Stage 01-06 suites: 0 failures, 1,932 checks) |
-| Player self-test | `UnityRenderer.exe -wmvLifecycleTest -logFile <log>` | `TerrainDoodadTests`: section 9's doodad suite (below) beside the Stage 03-06 suites | **PASS**, 921 passed, 0 failed |
+| Pure tests, synthetic | `dotnet run -c Release --project Tools/UnityRendererProject/Tests/Runner/WowParserTestRunner.csproj` | `DoodadTests`: MDDF de-duplication and the Tile frame with worked numbers (a1 90 is Rz(270), a0 90 tips z, the half turn), scale u16/1024 and scale 0, name-table and FileDataID-0 records; set selection (set 0 only, set 0 plus another, a set past the root's, ranges past MODD, an empty set 0, the diagnostic); MODD composition with a moved, turned, tilted and scaled world model (doodad(x) == wmo(p + s_q R(q) x)); R(q) against its transpose, component order, normalisation, determinant; unsupported MODD records (a position not finite, or past float's range once composed); MODR membership and the doodads of groups that could not be read (membership and marking from the same groups; nothing marked when every group was read) | **PASS**, 58 checks |
+| Pure tests, real client bytes | the same, `WMV_WORLD_AUDIT_CORPUS` set | `DoodadCorpusTests`: section 3.1's MLDX replay on four clients, the plan against the census on every load, the set and MODR facts, the R(q) wall test with the independent probe's counts pinned, section 3.6's reference positions | **PASS**, 77 checks (with the Stage 01-06 suites: 0 failures, 1,936 checks) |
+| Player self-test | `UnityRenderer.exe -wmvLifecycleTest -logFile <log>` | `TerrainDoodadTests`: section 9's doodad suite (below) beside the Stage 03-06 suites | **PASS**, 923 passed, 0 failed |
 | Host in-process tests | `wowmodelviewer -terraintile 0 30 49 <out.json> -product wow` | the three roles' decisions (37 cases: a protocol-16 load refused every role, the order, once per id, the count caps, the byte budgets with reservations, the doodad read family beside the terrain's and the world models'), the accounting, 11 kind checks, the report's doodad fields read by their wire names | **PASS**, 218 passed, 0 failed, 1 skipped |
 | Maps UI, four clients | `-mapsuitest`, section 7 | each client's tiles 30_47 and 31_48 and maps 34 and 429 entered through the viewer's own Maps panel | **PASS**, 4 x 56 checks |
 | Lifecycle, keyboard, pictures, memory | `-mapsuitest`, sections 8-10 | | **PASS** (all runs) |
@@ -423,7 +431,8 @@ doodads; worldProgress's doodad phase; a protocol-16 load asks for no M2 ("notOf
 instance budgets with an unsupported record (every doodad counted once); a file that is not an M2; a prototype build that
 throws; the doodads' timeout (one report, the models "timed out", their requests retired); the load ended while an M2 read
 is out, between a decode and its result, between prototype builds, between placements, and by a newer load of another
-epoch -- each reported once, every late answer dropped, nothing left; a WMO-only map's set-0 doodad; and a build that
+epoch -- each reported once, every late answer dropped, nothing left; a WMO-only map's set-0 doodad; a world model built
+without one of its two group files (the doodad its read group lists placed, the other "unsupported"); and a build that
 throws inside the builder releasing what it made (`ReleaseOnFailure`). After each case every tally is back to 0.
 
 ## 7. The four-client matrix (PROVEN_RUNTIME)
@@ -432,26 +441,27 @@ Each client entered at Retail-frame target (-8515, 850) on tile 30_47 and (-8900
 and 429 at their footprints, through the viewer's own Maps panel (the final build; the client builds of the table in the
 header). Every doodad count equals the census (section 4) and the plan's own counts in the pure tests.
 
-| Client | Load | Doodads | MDDF | WMO-set | Placed | M2s built | Textures | Uploads / uses | Files MB (M2+skin / textures) | GPU MB (geometry / textures) | First visible ms | Builds s | Ready s | Assembly |
+| Client | Load | Doodads | MDDF | WMO-set | Placed | M2s built | Textures | Uploads / uses | Files MB (M2+skin / textures) | GPU MiB (geometry / textures) | First visible ms | Builds s | Ready s | Assembly |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Retail | 30_47 | complete | 2451 | 3269 | 5720 of 5720 | 616 of 616 | 522 (0 missing) | 548 / 1096 | 16.3 / 56.4 | 9.2 / 283.0 | 175 | 0.4 | 17.7 | complete |
-| Retail | 31_48 | complete | 650 | 2907 | 3557 of 3557 | 333 of 333 | 333 (0 missing) | 353 / 552 | 8.3 / 19.9 | 4.1 / 112.4 | 139 | 0.2 | 9.5 | complete |
-| Retail | map 34 | complete | 0 | 748 | 748 of 748 | 24 of 24 | 29 (0 missing) | 28 / 31 | 0.3 / 1.9 | 0.2 / 9.8 | 155 | 0.0 | 0.8 | complete |
-| Retail | map 429 | complete | 0 | 3543 | 3543 of 3543 | 186 of 186 | 160 (0 missing) | 165 / 313 | 2.6 / 5.9 | 1.4 / 33.0 | 137 | 0.1 | 5.0 | complete |
-| Classic Era | 30_47 | partial | 0 | 6026 | 6026 of 6026 | 279 of 279 (1 partial) | 261 (0 missing) | 276 / 434 | 3.2 / 7.3 | 1.9 / 48.9 | 173 | 0.1 | 7.7 | partial |
-| Classic Era | 31_48 | partial | 219 | 6062 | 6281 of 6281 | 298 of 298 (1 partial) | 277 (0 missing) | 293 / 463 | 3.3 / 7.6 | 1.9 / 50.2 | 140 | 0.1 | 8.3 | partial |
-| Classic Era | map 34 | complete | 0 | 740 | 740 of 740 | 20 of 20 | 25 (0 missing) | 25 / 28 | 0.2 / 0.5 | 0.1 / 3.0 | 155 | 0.0 | 0.7 | complete |
+| Retail | 30_47 | complete | 2451 | 3269 | 5720 of 5720 | 616 of 616 | 522 (0 missing) | 548 / 1096 | 16.3 / 56.4 | 9.2 / 283.0 | 173 | 0.4 | 17.6 | complete |
+| Retail | 31_48 | complete | 650 | 2907 | 3557 of 3557 | 333 of 333 | 333 (0 missing) | 353 / 552 | 8.3 / 19.9 | 4.1 / 112.4 | 121 | 0.2 | 9.4 | complete |
+| Retail | map 34 | complete | 0 | 748 | 748 of 748 | 24 of 24 | 29 (0 missing) | 28 / 31 | 0.3 / 1.9 | 0.2 / 9.8 | 140 | 0.0 | 0.8 | complete |
+| Retail | map 429 | complete | 0 | 3543 | 3543 of 3543 | 186 of 186 | 160 (0 missing) | 165 / 313 | 2.6 / 5.9 | 1.4 / 33.0 | 115 | 0.1 | 5.0 | complete |
+| Classic Era | 30_47 | partial | 0 | 6026 | 6026 of 6026 | 279 of 279 (1 partial) | 261 (0 missing) | 276 / 434 | 3.2 / 7.3 | 1.9 / 48.9 | 165 | 0.1 | 7.7 | partial |
+| Classic Era | 31_48 | partial | 219 | 6062 | 6281 of 6281 | 298 of 298 (1 partial) | 277 (0 missing) | 293 / 463 | 3.3 / 7.6 | 1.9 / 50.2 | 144 | 0.1 | 8.3 | partial |
+| Classic Era | map 34 | complete | 0 | 740 | 740 of 740 | 20 of 20 | 25 (0 missing) | 25 / 28 | 0.2 / 0.5 | 0.1 / 3.0 | 120 | 0.0 | 0.6 | complete |
 | Classic Era | map 429 | partial | 0 | 3541 | 3541 of 3541 | 186 of 186 (2 partial) | 156 (0 missing) | 161 / 317 | 2.6 / 5.3 | 1.4 / 30.9 | 137 | 0.1 | 5.2 | partial |
-| MoP Classic | 30_47 | complete | 2291 | 2888 | 5179 of 5179 | 414 of 414 | 382 (0 missing) | 409 / 727 | 10.7 / 23.8 | 5.3 / 135.7 | 174 | 0.2 | 11.9 | complete |
-| MoP Classic | 31_48 | complete | 636 | 3091 | 3727 of 3727 | 326 of 326 | 316 (0 missing) | 340 / 542 | 7.4 / 14.0 | 3.5 / 86.4 | 105 | 0.2 | 9.0 | complete |
-| MoP Classic | map 34 | complete | 0 | 740 | 740 of 740 | 20 of 20 | 24 (0 missing) | 24 / 27 | 0.2 / 0.5 | 0.1 / 3.5 | 169 | 0.0 | 0.6 | complete |
-| MoP Classic | map 429 | complete | 0 | 3543 | 3543 of 3543 | 186 of 186 | 159 (0 missing) | 165 / 315 | 2.6 / 5.7 | 1.4 / 32.2 | 138 | 0.1 | 5.1 | complete |
-| Classic Beta | 30_47 | partial | 290 | 6248 | 6538 of 6538 | 354 of 354 (1 partial) | 353 (1 missing) | 378 / 577 | 5.8 / 14.7 | 3.5 / 85.8 | 159 | 0.2 | 10.0 | partial |
-| Classic Beta | 31_48 | partial | 230 | 6142 | 6372 of 6372 | 330 of 330 (1 partial) | 322 (1 missing) | 343 / 518 | 4.9 / 11.7 | 3.0 / 71.7 | 151 | 0.1 | 8.9 | partial |
+| MoP Classic | 30_47 | complete | 2291 | 2888 | 5179 of 5179 | 414 of 414 | 382 (0 missing) | 409 / 727 | 10.7 / 23.8 | 5.3 / 135.7 | 190 | 0.2 | 11.9 | complete |
+| MoP Classic | 31_48 | complete | 636 | 3091 | 3727 of 3727 | 326 of 326 | 316 (0 missing) | 340 / 542 | 7.4 / 14.0 | 3.5 / 86.4 | 120 | 0.1 | 9.2 | complete |
+| MoP Classic | map 34 | complete | 0 | 740 | 740 of 740 | 20 of 20 | 24 (0 missing) | 24 / 27 | 0.2 / 0.5 | 0.1 / 3.5 | 152 | 0.0 | 0.7 | complete |
+| MoP Classic | map 429 | complete | 0 | 3543 | 3543 of 3543 | 186 of 186 | 159 (0 missing) | 165 / 315 | 2.6 / 5.7 | 1.4 / 32.2 | 141 | 0.1 | 4.8 | complete |
+| Classic Beta | 30_47 | partial | 290 | 6248 | 6538 of 6538 | 354 of 354 (1 partial) | 353 (1 missing) | 378 / 577 | 5.8 / 14.7 | 3.5 / 85.8 | 158 | 0.2 | 10.2 | partial |
+| Classic Beta | 31_48 | partial | 230 | 6142 | 6372 of 6372 | 330 of 330 (1 partial) | 322 (1 missing) | 343 / 518 | 4.9 / 11.7 | 3.0 / 71.7 | 146 | 0.1 | 9.2 | partial |
 | Classic Beta | map 34 | complete | 0 | 748 | 748 of 748 | 24 of 24 | 27 (0 missing) | 27 / 30 | 0.2 / 2.1 | 0.1 / 9.6 | 140 | 0.0 | 0.8 | complete |
-| Classic Beta | map 429 | partial | 0 | 3543 | 3537 of 3543 | 185 of 186 (1 unsupported) | 163 (0 missing) | 169 / 321 | 2.9 / 7.2 | 1.6 / 38.2 | 156 | 0.1 | 5.0 | partial |
+| Classic Beta | map 429 | partial | 0 | 3543 | 3537 of 3543 | 185 of 186 (1 unsupported) | 163 (0 missing) | 169 / 321 | 2.9 / 7.2 | 1.6 / 38.2 | 120 | 0.1 | 5.1 | partial |
 
 "First visible": from the world models' settle to the first doodad placed. "Ready": from the settle to the last placement.
+Files in MB (10^6 bytes), GPU memory in MiB (2^20 bytes).
 The partial states are what the files say: Classic Era's M2 201660 has a replaceable texture slot (type 11), and 190104
 (a rowboat) and 202305 (a herb node) name their textures by path (no TXID chunk); Classic Beta's texture 137237 is listed
 by the client's storage but not downloaded ("not installed locally", quoted); Classic Beta's 202363 on map 429 is a model
@@ -464,10 +474,10 @@ The viewer's own window on the hidden desktop, the final build:
 | Run | What | Result |
 |---|---|---|
 | Retail battery | map 34 (748 doodads) entered; Back to map (the world stays, 748); entered again; map 0 picked (0 left); 30_47 (5,720); 31_47; Clear (0 doodads, 0 world models, no terrain); 30_47 again; Models (0 left); Maps; 30_47; Buildings with WMO 108631 (0 left); map 34 again (748) | **PASS**, 68 checks |
-| Client switch during the doodads | Retail 30_47 switched to Classic Era with 4,090 of 5,720 doodads placed: the load answered "cleared", its doodad requests retired and their answers dropped as late, 0 doodads, prototypes and textures left; Era's 30_47 then complete (6,026); map 34 switched to MoP Classic: 0 left | **PASS**, 30 checks |
+| Client switch during the doodads | Retail 30_47 switched to Classic Era with 4,181 of 5,720 doodads placed: the load answered "cleared", its doodad requests retired and their answers dropped as late, 0 doodads, prototypes and textures left; Era's 30_47 then complete (6,026); map 34 switched to MoP Classic: 0 left | **PASS**, 30 checks |
 | The window closed with an M2 read held | `holdclose:m2Model`, `holdclose:m2Skin` (Retail 30_47), `holdclose:m2Texture` (map 34): the read held in the host's worker, the window closed | **PASS**, each 8 checks and the shutdown check 9 of 9 |
 | The window closed while the doodads are requesting, building, placing | `closeworld:doodadRequesting`, `doodadBuilding`, `doodadPlacing` (Retail), `doodadBuilding` (Classic Beta) | **PASS**, each 6 checks |
-| The window closed while placing, Classic Era | `closeworld:doodadPlacing` | **PASS** (life2 run, the same build's player data) |
+| The window closed while placing, Classic Era | `closeworld:doodadPlacing` on Classic Era | **PASS**, 6 checks |
 
 Clear, a model load, Buildings, a newer load and a client switch dispose the scene's doodads before its world models
 and tiles; Back to map keeps the world on screen (Stage 06's behaviour). The self-test (section 6) ends a load at every
@@ -475,7 +485,9 @@ stage of the doodads deterministically.
 
 ## 9. Pictures (PROVEN_RUNTIME; what is drawn, not a claim of the game's look)
 
-Taken by the harness through the viewer's own window (PrintWindow) on the hidden desktop, the final build. The doodads
+Taken by the harness through the viewer's own window (PrintWindow) on the hidden desktop, the final build (taken again
+after the second review round: every viewport is pixel-identical to the first campaign's but one pixel of 09a; the panels'
+load times and memory figures differ from run to run). The doodads
 are drawn by the Models renderer's materials under its preview key and fill, without shadow maps, static in their rest
 pose; no WoW lighting, fog or sky. No claim of in-game appearance is made (no in-game reference of these places).
 
@@ -496,72 +508,80 @@ pose; no WoW lighting, fog or sky. No claim of in-game appearance is made (no in
 | 13 | `S_retail_13_m2_materials_closeup.png` | the farm's table: bread, cheese, fruit, a mug, chairs -- M2 materials and textures close up |
 | 14 | `S_retail_14_models_after_maps.png` | the Models view after leaving Maps: no world object left in it |
 | 15 | `S_retail_15_buildings_after_maps.png` | Buildings after leaving Maps, WMO 108631 alone |
-| 16 | `S_retail_16_partially_loaded.png` | Retail 30_47 during the doodads, the panel's progress line: "doodads: 2566 of 5720 placed (156 of 616 models built); placing" |
+| 16 | `S_retail_16_partially_loaded.png` | Retail 30_47 during the doodads, the panel's progress line: "doodads: 2566 of 5720 placed (156 of 616 models built); requesting" |
 
 ## 10. Performance and memory (PROVEN_RUNTIME)
 
 The final build through the real window on the hidden desktop, nothing else running, with a sampler reading the player's
 and the viewer's memory about once a second (process private bytes and working set; GPU dedicated memory per process).
-The display's refresh is 60 Hz and the player is capped to it, so a steady frame is 16.67 ms.
+The display's refresh is 60 Hz and the player is capped to it, so a steady frame is 16.67 ms. File sizes are in MB
+(10^6 bytes), memory in MiB (2^20 bytes).
 
 **Loading** (the player's report of each load; the doodads' times from the world models' settle):
 
 | Scene | Doodads | First visible | Reads (fetch) | Parse / decode (worker, summed) | Builds (summed / longest) | Placement (summed / longest frame) | Ready |
 |---|---|---|---|---|---|---|---|
-| Retail 30_47, 12 entries | 5,720 over 616 M2s, 522 textures (548 uploads), 16.3 MB of M2 and skin files, 56.4 MB of textures | 138-190 ms | 17.2-17.7 s | 0.34-0.41 s / 3.7-4.1 s | 345-382 ms / 5.8-19.0 ms | 37-54 ms / 1.9-4.1 ms | 17.2-17.8 s |
-| Map 34, 12 entries | 748 over 24 M2s | 121-194 ms | 0.74-0.86 s | 12-48 ms / 78-110 ms | 11-27 ms / 1.4-15.1 ms | 3.8-6.4 ms / 2.0-3.2 ms | 0.75-0.88 s |
-| Classic Era 30_47 | 6,026 over 279 M2s | 141 ms | 7.6 s | 0.10 s / 0.44 s | 99 ms / 3.7 ms | 38 ms / 4.0 ms | 7.6 s |
+| Retail 30_47, 12 entries | 5,720 over 616 M2s, 522 textures (548 uploads), 16.3 MB of M2 and skin files, 56.4 MB of textures | 135-171 ms | 17.1-17.7 s | 0.37-0.43 s / 3.8-4.1 s | 331-380 ms / 5.7-17.7 ms | 39-53 ms / 1.9-4.2 ms | 17.2-17.8 s |
+| Map 34, 12 entries | 748 over 24 M2s | 120-210 ms | 0.72-0.88 s | 13-45 ms / 73-218 ms | 12-25 ms / 1.6-15.3 ms | 3.7-6.5 ms / 1.4-3.0 ms | 0.74-0.90 s |
+| Classic Era 30_47 | 6,026 over 279 M2s | 141 ms | 7.9 s | 0.12 s / 0.45 s | 93 ms / 4.2 ms | 39 ms / 4.0 ms | 7.9 s |
 
 The terrain and the world models are on screen first (Stage 06's times, unchanged: Retail 30_47's world models settle about
-5.4 s after Enter world); the camera is placed then, and doodads appear from 0.12-0.19 s later, model by model. The time
+5.4 s after Enter world); the camera is placed then, and doodads appear from 0.12-0.21 s later, model by model. The time
 is in the reads: at most four doodad requests are out at once, each a storage read on the host's worker, a content-key
 check, the transfer and the player's own check -- on Retail 30_47 1,754 files (616 models, 616 skins, 522 textures, each
 once) in about 17 s. Parsing and decoding run on worker threads; the main thread's share is the prototype builds (at most
-6 ms of a frame, at least one build: the longest single build 19 ms) and the placements (at most 4 ms of a frame: the
-longest frame's placements 4.1 ms). 431 of Retail 30_47's 522 textures are decoded a second time for a model fetched after
-their pixels went (their file bytes kept); the decoded pixels held peak at 9.4 MB.
+6 ms of a frame, at least one build: the longest single build 17.7 ms) and the placements (at most 4 ms of a frame: the
+longest frame's placements 4.2 ms). Over the final build's 17 loads of Retail 30_47, 430-453 of the 522 textures are
+decoded a second time for a model fetched after their pixels went (their file bytes kept); the decoded pixels held peak
+at 8.4-9.4 MiB.
 
 **Frames** (the world view's last 600 frames, runtimeState): with Retail 30_47's 5,720 doodads on screen -- at street
-level, above the city, in the overview -- median 16.67 ms, 95th percentile 16.67 ms, longest 16.9-17.6 ms: no frame
-dropped. The 600 frames before each of the 12 reports (the doodads' second half) have a longest frame of 17.3-19.3 ms;
-the same window in Stage 06 (its world models building) had 48-55 ms. On map 34 the window holds the world model's own
-build frame: 53-82 ms, as Stage 06 (51-75 ms without doodads).
+level, above the city, in the overview -- median 16.67 ms, 95th percentile 16.67 ms, longest 16.7-16.9 ms: no frame
+dropped. The 600 frames before each of the 12 reports (the doodads' second half) have a longest frame of 16.7-19.4 ms;
+the same window with the Stage 06 player (its world models building, no doodads) 44.0-54.7 ms. On map 34 the window holds
+the world model's own build frame: 53.7-79.9 ms (Stage 06: 51-75 ms without doodads).
 
 **Culling** (the last frame): Retail 30_47 at street level 2,779 of 5,720 doodads drawn (2,941 culled); above the city
 4,110 (1,610 culled); the overview all 5,720; Classic Era 30_47 3,045 of 6,026; inside the Stockade 158 of 748.
 
-**GPU memory of the doodads** (the player's tallies): Retail 30_47 9.2 MB of geometry and 283.0 MB of textures (548
-uploads of 522 files: RGBA32 with mips; the uploads are not block-compressed, Stage 08's subject); Classic Era 30_47 1.9 MB
-and 48.9 MB; map 34 0.2 MB and 9.8 MB. Within the 256 MiB and 1 GiB budgets.
+**GPU memory of the doodads** (the player's tallies): Retail 30_47 9.2 MiB of geometry and 283.0 MiB of textures (548
+uploads of 522 files: RGBA32 with mips; the uploads are not block-compressed, Stage 08's subject); Classic Era 30_47 1.9
+MiB and 48.9 MiB; map 34 0.2 MiB and 9.8 MiB. Within the 256 MiB and 1 GiB budgets.
 
-**Process memory, 12 entry/Clear cycles** (the sampler; MB):
+**Process memory, 12 entry/Clear cycles** (the sampler; MiB):
 
 | Step | Player private | Player working set | Player GPU dedicated | Viewer private |
 |---|---|---|---|---|
-| Maps, before any world | 818 | 549 | 220 | 2,230 |
-| Retail 30_47 entered (12 entries) | 1,573-1,908 | 987-1,080 | 285-782 | 2,250-2,251 |
-| after each Clear (12) | 1,269-1,392 (1st 1,333, 12th 1,345) | 937-1,052 | 285-291 | 2,250-2,251 |
-| Models after the 12th | 1,337 | 1,013 | 285 | 2,248 |
-| Map 34 entered (12 entries) | 1,015-1,030 | 643-660 | 284-309 | 2,236-2,237 |
-| after each Clear (12) | 981-1,003 (1st 990, 12th 991) | 639-660 | 284 | 2,236-2,237 |
-| Retail 30_47 with the Stage 06 player (no doodads), 12 entries | 1,356-1,440 | 828-908 | 279-478 | 2,248-2,250 |
-| after each Clear (12) | 1,167-1,260 (1st 1,167, 12th 1,238) | 814-885 | 279-285 | 2,245-2,250 |
+| Maps, before any world | 848 | 576 | 220 | 2,246 |
+| Retail 30_47 entered (12 entries) | 1,622-1,984 | 1,035-1,158 | 285-782 | 2,252-2,254 |
+| after each Clear (12) | 1,299-1,438 (1st 1,341, 12th 1,399) | 966-1,092 | 285-293 | 2,250-2,254 |
+| Models after the 12th | 1,399 | 1,065 | 285 | 2,250 |
+| Map 34 entered (12 entries) | 1,018-1,039 | 641-671 | 284-309 | 2,235-2,236 |
+| after each Clear (12) | 979-1,012 (1st 979, 12th 986) | 631-669 | 284 | 2,235-2,236 |
+| Retail 30_47 with the Stage 06 player (no doodads), 12 entries | 1,364-1,432 | 839-916 | 279-478 | 2,250-2,252 |
+| after each Clear (12) | 1,156-1,292 (1st 1,211, 12th 1,246) | 825-893 | 279-285 | 2,246-2,251 |
 
 After every Clear, Models, Buildings and client switch the player's doodad tallies are 0 (instances, prototypes, meshes,
-materials, textures, GPU bytes), and so are Unity's own object counts back to where they started: in the performance run
-GameObjects 7 -> 7,175 with 30_47's world -> 9 in Models, Texture2D 78 -> 1,007 -> 78, Mesh 1 -> 1,127 -> 1, Material
-62 -> 1,720 -> 62. The process's private bytes after a Clear do not grow over 12 cycles (Retail: 1,333 MB after the first,
-1,345 MB after the twelfth, between 1,269 and 1,392 in between; map 34: 990 and 991): what the managed heap and the
-engine's allocators keep for reuse after the first heavy load, not a leak. The same 12 cycles with the Stage 06 player (no doodads) keep 1,167 MB after the first Clear and 1,238 MB after the
-twelfth: the doodads raise the plateau the allocators keep by about 100-170 MB and add no growth of their own. The GPU dedicated reading of a loaded 30_47
-moves between 285 and 782 MB with the driver's residency (the same scene, sampled at different times); after a Clear it
-is 285 MB. The viewer's private bytes follow the client (2.23-2.26 GB for Retail, 1.2-1.75 GB for Classic Era) and do
-not grow with world loads.
+materials, textures, GPU bytes), and Unity's textures, meshes and materials are back where they started: Texture2D 78 ->
+1,007 with 30_47's world -> 78, Mesh 1 -> 1,127 -> 1, Material 62 -> 1,720 -> 62. GameObjects go 7 -> 7,175 -> 9: the
+two empty prototype holders (`_WmvWorldPrototypes`, Stage 06's, and `_WmvDoodadPrototypes`) are made at the first world
+and kept; the count is 9 after every one of the 24 Clears, not growing. The managed heap at each report stays between 155
+and 174 MiB with no trend, and the engine's native allocations at 194-196 MiB from the third cycle on.
 
-**GUI thread**: across the 12 Retail entries' 55,175 GUI rounds the longest was 104 ms; 10 rounds took over 50 ms. The
-longest rounds of the whole campaign are the mode switches that predate this stage (Textures 650 ms, Buildings 360-392
-ms; Stage 06: 625 and 412 ms). A world load's doodads run on the host's map asset worker and the player; the GUI thread
-only answers and records.
+The process's private bytes after a Clear moved from 1,299-1,341 MiB in the first four Retail cycles to 1,396-1,438 MiB in
+the last eight, flat over those eight (the first campaign's run of the same sequence: 1,269-1,392 MiB, 1,333 after the
+first and 1,345 after the twelfth). With every live object, the managed heap and the native allocations level, this is
+memory the allocators and the driver keep for reuse after heavy loads, not a leak; it does not grow over the last eight
+cycles. Map 34: 979 MiB after the first Clear and 986 after the twelfth. The same 12 Retail cycles with the Stage 06
+player (no doodads) keep 1,156-1,292 MiB: the doodads raise the plateau the allocators keep by about 100-200 MiB. The GPU
+dedicated reading of a loaded 30_47 moves between 285 and 782 MiB with the driver's residency (the same scene, sampled at
+different times); after a Clear it is 285-293 MiB. The viewer's private bytes follow the client (2,229-2,257 MiB for Retail,
+1,221-1,229 MiB for Classic Era) and do not grow with world loads.
+
+**GUI thread**: across the 12 Retail entries' 57,352 GUI rounds the longest was 134 ms; 4 rounds took over 50 ms. The
+runs that switch between Models, Buildings and Maps hold the campaign's longest rounds (333 and 352 ms), as Stage 06's
+did (412 ms): mode switches that predate this stage. A world load's doodads run on the host's map asset worker and the
+player; the GUI thread only answers and records.
 
 **Camera responsiveness**: the keyboard run (section 8's sequence of Stage 06, now in the Stockade with its 748 doodads):
 every one of the 14 segments moves the free camera as expected and stops when the key is released or the keyboard leaves
@@ -570,18 +590,20 @@ the view (79 checks, PASS).
 ## 11. Regressions and deployment
 
 The Stage 06 battery, run on the final build (host and protocol-17 player) and compared file by file with Stage 06's
-battery on the same client builds:
+battery. Stage 06's ran on the earlier client builds (the header's third column), this one on the updated ones: a
+difference is counted only where it is not the client's build named in a file:
 
 | Set | What | Result |
 |---|---|---|
-| Terrain geometry dumps | 6 tiles: Retail map 0 32_50 and 34_46, map 1051 31_29, map 2923 32_24; Classic Era 32_50; Classic Beta 32_48 | **PASS**, 6 of 6 byte-identical |
-| Composite dumps | 11 loads on Retail, Classic Era and Classic Beta | **PASS**, 98 of 98 files identical |
+| Terrain geometry dumps | 6 tiles: Retail map 0 32_50 and 34_46, map 1051 31_29, map 2923 32_24; Classic Era 32_50; Classic Beta 32_48 | **PASS**: every geometry line identical in all 6; Classic Era's file byte-identical, the other five differ only in their "meta build" line (the updated client) |
+| Composite dumps | 11 loads on Retail, Classic Era and Classic Beta | **PASS**: all 79 .raw and .png byte-identical; the 19 .json identical once the client-build and WDT-bytes fields are set aside (18 name the updated build) |
 | Models view | creature/bear/bear.m2 at animation time 0, 1600 px | **PASS**, byte-identical (MD5 52605ecc) |
 | Buildings view | WMO 108631, 1600 px | **PASS**, byte-identical (MD5 d3db7749) |
+| Characters | `character/human/male/humanmale_hd.m2` with Stage 06's .chr cases and bulky-belt sets, animation at time 0, on Stage 07 and on Stage 06 the same day: three .chr loads with a saved guild tabard design (`last_details`, the compact `fmt_details`, a slot-less .chr after it) and three belt sets (bulky belt, no belt, robe with bulky belt) | **PASS**, 6 of 6 byte-identical (Stage 06 run twice: identical too); the two .chr cases without a saved design are left out (their design is random each run, as before Stage 07) |
 | H battery | 12 runs: late answers, client switches with and without MoP Classic, the worst tile, lifecycles, Classic Era files not in storage, MDID 0, a missing texture, a protocol-12 player | **PASS** 11 of 12; `H_B_missingtex0` fails one check, identically in Stage 06's battery: it expects map 2736 tile 32_29's material "unavailable", and on today's client data the tile is textured |
-| W battery | 6 runs: reads, the heaviest tile, a switch, Classic Beta in process, memory | **PASS**, 6 of 6 (71, 31, 67, 22, 132 and 323 checks) |
+| W battery | 6 runs: reads, the heaviest tile, a switch, Classic Beta in process, memory | **PASS**, 6 of 6 (71, 31, 65, 22, 132 and 323 checks; the switch's two comparisons of MoP Classic with the audit corpus are skipped: the client's build is no longer the corpus's) |
 | Shutdown with a read held | four clients | **PASS**, 9 of 9 each |
-| Map catalogue sequences | four clients | **PASS**, 27, 44, 44 and 27 checks |
+| Map catalogue sequences | four client sequences: Retail, MoP Classic, Retail; Retail, Classic Beta, Retail; Classic Era, Retail; Retail, Retail | **PASS**, 44, 44, 27 and 27 checks |
 | Host in-process tests | `-terraintile 0 30 49`, the final host | **PASS**, 218 passed, 0 failed, 1 skipped |
 
 Stage 03-06 outputs are therefore unchanged on the same data; the Models view and Buildings draw exactly as before (the
@@ -592,7 +614,7 @@ builder's default path is untouched), and the protocol-17 player takes every old
 | File | Deployed (SHA-256) | Before |
 |---|---|---|
 | `wowmodelviewer.exe` (and its `.pdb`) | 538ED9F3 (the tested host) | 5C1347C7 (the Stage 06 integration build) |
-| `tools\unity-renderer\UnityRenderer_Data` | Assembly-CSharp MD5 3B202B69 (player p17d); 0 data files differing from the tested player's | Assembly-CSharp MD5 37B96198 (Stage 06) |
+| `tools\unity-renderer\UnityRenderer_Data` | Assembly-CSharp MD5 FA5E41BB (player p17g, the final build); 0 data files differing from the tested player's | Assembly-CSharp MD5 37B96198 (Stage 06) |
 | `wow.dll`, `core.dll` | not replaced: 0ED07B2C, 8472119A | the same |
 
 `wow.dll` and `core.dll` are not replaced: the owner's are the Stage 06 integration build (local branch
@@ -601,7 +623,9 @@ uncommitted in their own worktrees), byte for byte the ones every Stage 07 run a
 8472119A). Stage 07 changes neither; the two fixes' header changes (`WoWItem::clipsLowerTabard`, an inline function, and
 `WoWModel::hasGeoset`, a non-virtual declaration) change no class layout, so the Stage 07 exe built without them is
 binary-compatible with that wow.dll -- and it is that combination that was tested. Nothing of the fixes is merged into
-`world/07-doodads`. The replaced files are backed up in `_backup_world07_2026-10-16_2041`.
+`world/07-doodads`. The replaced files are backed up in `_backup_world07_2026-10-16_2041` (Stage 06's exe and player) and
+`_backup_world07_2026-10-17_0832` (the first Stage 07 player, deployed before the second review round and replaced by the
+final one; the exe was already the final one).
 
 
 ## 12. Adversarial review
@@ -627,6 +651,27 @@ campaign of sections 6-11 all ran after the fixes):
 | 12 | Cleanup | test gap, closed | `ReleaseOnFailure` was not exercised by a test: the self-test now drives a real throwing build (a batch naming a missing submesh after the first batch made its material and texture) and checks the release, the model count and the cache. Two narrow leak paths (a throw after `Build` returned, or after an instance's object was created) now clean up. |
 | 14 | Models and Buildings preserved | no defect | With no new option set every changed line of `WmvModelBuilder` is a no-op; no other caller sets them; `WmvWmoBuilder` is untouched. The pictures are compared byte for byte in section 11. |
 
+
+**Second round** (before the merge): five independent reviewers, read-only, one per dimension -- placement rules,
+lifecycle and ownership, the builder's reuse, the host and protocol 17, acceptance and documentation -- each finding then
+put to an adversarial verifier. What they found, and what was done:
+
+| Dimension | Verdict | Finding and action |
+|---|---|---|
+| Placement rules | defect (major), fixed | Round 1's fix of point 5 did not work: `MarkMissingGroups` looked for a read group among a record's MODR groups, but membership is decoded from the read groups alone, so a record only a missing group lists had no groups and was kept -- nothing was ever marked; its test marked with groups the membership had not been built from. Now, when a group is missing, a doodad no read group lists is "unsupported" (3.5, 5.3); the pure test takes membership and marking from the same groups (and checks that with every group read nothing is marked); the self-test builds a world model without one of its two group files: 1 placed, 1 "unsupported". |
+| Placement rules | defect (minor), fixed | A MODD position that is not a finite number was placed (Unity refuses the position and leaves the instance at the scene's origin): now "unsupported", judged on the float the instance's position becomes, so a composed position past float's range is caught too (tests). |
+| Lifecycle and ownership | cosmetic, fixed | No ownership, cancellation or leak defect. The culling counts kept the last frame's values after the scene's doodads went (a capture line could read "0 doodads ... 2779 drawn"): reset with the last instance. |
+| Builder reuse | cosmetic, fixed | The default path confirmed unchanged. The shader's resolution line was lost when a doodad prototype (built without a log) was the session's first build: kept and said by the next build that has a log. |
+| Builder reuse, acceptance | doc defect, fixed | 5.2 cited a Characters comparison that had not been run: Stage 06's .chr and bulky-belt character captures are now compared with Stage 07 (section 11); mounts rest on the code (no caller but `WmvWorldDoodads` sets an option). |
+| Host and protocol 17 | no defect | The protocol-16 fallback, the order and count rules, the byte budgets with their reservations, the kind checks, the threads and the panel's text confirmed. |
+| Acceptance and documentation | doc defects, fixed | Classic Era's close-while-placing row came from a build before round 1's fixes: re-run on the final build (section 8). The MODD rotation (3.3) is graded INFERRED (statistical), and gate row 7 says so. Section 10's figures are re-measured on the final build (re-decodes, the pixel peak, Stage 06's frame window, map 34's range; MB and MiB labelled). GameObjects after a Clear are not where they started (section 10). The roadmap's "bounds from MLDX" (5.6). |
+
+The fixes were reviewed in turn (two reviewers, read-only: their correctness, and the risk to the other views): no defect;
+an unreadable group is the only way a world model's group is missing (the group budget refuses a whole model, a timeout
+fails it), so the rule marks nothing on a world model whose files were all read. One point -- the finite check first made in
+double while the position is narrowed to float -- was taken into the fix above. Every run of sections 6-11 was then made
+again on the final build (the player rebuilt; the host unchanged).
+
 ## 13. Known limitations
 
 - **Static doodads in their rest pose.** A doodad is drawn as its M2's file stores it (the builder's bind pose): no
@@ -640,6 +685,10 @@ campaign of sections 6-11 all ran after the fixes):
   order); Unity sorts transparent renderers by queue before distance, so two blended doodads overlapping on screen can
   blend in queue order rather than back to front. Alpha-keyed foliage (most doodads) is not affected.
 - **Doodad sets** (3.4): INFERRED.
+- **World models built without some group files** (a file the client does not have, one over the per-file budget, or
+  one that fails its checks): Stage 06 rates the world by its placements, so the world reads "complete" with the missing
+  files counted; the doodads no read group lists are "unsupported" and the doodads and the assembly "partial". With a
+  group missing, a record no group lists at all is marked with them (none such on the four clients, 3.5).
 - **Visibility**: per-instance frustum culling only; no portal, BSP, indoor/outdoor or MODR visibility.
 - **Lighting**: the Models renderer's preview light and fill, no WoW lighting, MOCV, fog or sky.
 - **Skins shared between M2s**: the host serves an id once per load; two M2s naming the same skin file would leave the
@@ -668,20 +717,21 @@ campaign of sections 6-11 all ran after the fixes):
 | 4 | Rotations and scales verified | MDDF: the MLDX replay, tilted doodads included, the half turn decided (3.1); MODD: R(q) by the wall test on four clients, the independent probe's counts reproduced (3.3) | **PASS** (MDDF PROVEN_BYTES; MODD statistical) |
 | 5 | M2 geometry and materials correct | the Models builder reused (5.2), its default path byte-identical (section 11); pictures 02-13 | **PASS** for what the Models view draws at rest; no in-game comparison |
 | 6 | WMO doodad sets read and selected | MODS/MODI/MODD on four clients; set 0 plus the placement's set (3.4); the report's sets | **PASS** (the rule INFERRED) |
-| 7 | Interior decorations positioned | the Stockade and the Lion's Rest farm (pictures 06-08, 13); the composition (3.2) | **PASS** |
+| 7 | Interior decorations positioned | the Stockade and the Lion's Rest farm (pictures 06-08, 13); the composition (3.2) | **PASS** (the composition INFERRED; the MODD rotation statistical, 3.3) |
 | 8 | Inactive sets excluded | Set_B not drawn in the self-test; the farm's Set_ExteriorDoodads absent by default and drawn by the diagnostic (picture 09) | **PASS** |
 | 9 | Shared reuse | one prototype per M2, one upload per texture variant: 5,720 instances over 616 prototypes and 548 uploads (Retail 30_47) | **PASS** |
 | 10 | Same scene and origin | instances under the scene root, placed relative to its floating origin (5.6); the global map's doodads in the Global frame (self-test, map 34/429) | **PASS** |
 | 11 | Camera unaffected | the camera placed at the world models' settle, before any doodad request (self-test; the log order); doodads are not floors | **PASS** |
-| 12 | Bounded and responsive | the budgets (section 4); per-frame time budgets; frames during the doodads' second half at most 19.3 ms, steady 16.67 ms (section 10) | **PASS** |
+| 12 | Bounded and responsive | the budgets (section 4); per-frame time budgets; frames during the doodads' second half at most 19.4 ms, steady 16.67 ms (section 10) | **PASS** |
 | 13 | Failures accounted | failed, unsupported, notRequested and ended counted per doodad and per model, the list of models not built, the reasons quoted (sections 5.9, 7) | **PASS** |
-| 14 | Clear disposes | 0 doodads, prototypes, textures and Unity objects back to their start after every Clear (sections 8, 10) | **PASS** |
+| 14 | Clear disposes | 0 doodads, prototypes and textures after every Clear; Unity's textures, meshes and materials back to their start, GameObjects 9 (the two prototype holders made at the first world, 7 before it) (sections 8, 10) | **PASS** |
 | 15 | Client switch leaves nothing stale | a switch mid-doodads: "cleared", requests retired, late answers dropped, 0 left (section 8) | **PASS** |
 | 16 | Four clients validated | section 7: 16 loads, every count equal to the census | **PASS** |
 | 17 | Regressions correct | section 11 | **PASS** (one pre-existing failure, identical in Stage 06: section 11) |
 | 18 | Screenshots of populated outdoor and interior | section 9 | **PASS** |
-| 19 | No leaks on repeated loads | 12 entry/Clear cycles of Retail 30_47 and of map 34: tallies 0, private bytes flat (section 10) | **PASS** |
+| 19 | No leaks on repeated loads | 12 entry/Clear cycles of Retail 30_47 and of map 34: tallies 0, live objects, managed heap and native allocations level; private bytes level over the last eight Retail cycles, after a step the allocators keep (section 10) | **PASS** |
 | 20 | Safe shutdown during doodad loading | the window closed with an M2 model, skin and texture read held, and while requesting, building and placing (section 8) | **PASS** |
 
 Grades used above: PROVEN_BYTES (the client's own files decide), PROVEN_RUNTIME (observed in the running viewer), INFERRED
-(the doodad-set rule; the MODD composition), UNKNOWN (the game's own look of these scenes: no in-game reference).
+(the doodad-set rule; the MODD composition; the MODD rotation convention, statistical), UNKNOWN (the game's own look of
+these scenes: no in-game reference).

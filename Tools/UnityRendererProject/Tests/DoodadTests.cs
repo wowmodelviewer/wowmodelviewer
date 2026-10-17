@@ -200,6 +200,31 @@ namespace Wmv.Wow.Tests
 
             Check(DoodadPlan.FromWmo(null, 0, root, sel).Count == 0 && DoodadPlan.FromWmo(wmo, 0, null, sel).Count == 0,
                   "WMO doodads: nothing without a placement or a root");
+
+            // A record whose position is not a finite number (a damaged file): unsupported, not placed at the scene's origin.
+            var damaged = new WmoRoot
+            {
+                DoodadSets = new[] { Set("Set_$DefaultGlobal", 0, 2) },
+                DoodadFileDataIDs = new uint[] { 189678 },
+                DoodadDefs = new[] { Modd(0, float.NaN, 0f, 0f, WowQuat.Identity, 1f), Modd(0, 0f, float.PositiveInfinity, 0f, WowQuat.Identity, 1f) },
+            };
+            List<WorldDoodad> bad = DoodadPlan.FromWmo(wmo, 0, damaged, DoodadPlan.SelectSets(damaged, wmo.UniqueId, wmo.FileDataID, 0));
+            Check(bad.Count == 2 && bad[0].Unsupported != null && bad[0].Unsupported.Contains("not a finite number") &&
+                  bad[1].Unsupported != null && bad[1].Unsupported.Contains("not a finite number"),
+                  "WMO doodads: a position that is not a finite number (NaN, infinity) is unsupported");
+            // A stored position finite as a float that the world model's scale (2, turned about z only) takes past float's range.
+            var rec3 = rec;
+            rec3.ScaleRaw = 2048;
+            WorldModelPlacement wmo3 = WorldModelPlan.Build(new[] { rec3 }, PlacementFrame.Tile, null)[0];
+            var huge = new WmoRoot
+            {
+                DoodadSets = new[] { Set("Set_$DefaultGlobal", 0, 1) },
+                DoodadFileDataIDs = new uint[] { 189678 },
+                DoodadDefs = new[] { Modd(0, 3.0e38f, 0f, 0f, WowQuat.Identity, 1f) },
+            };
+            List<WorldDoodad> over = DoodadPlan.FromWmo(wmo3, 0, huge, DoodadPlan.SelectSets(huge, wmo3.UniqueId, wmo3.FileDataID, 0));
+            Check(over.Count == 1 && over[0].Unsupported != null && over[0].Unsupported.Contains("not a finite number"),
+                  "WMO doodads: a composed position past float's range (the instance's position) is unsupported");
         }
 
         static void QuaternionTests()
@@ -255,16 +280,33 @@ namespace Wmv.Wow.Tests
             Check(owners[1] == null && owners[4] == null, "MODR: records no group lists have no owner");
             Check(owners[5] != null && owners[5][0] == 0, "MODR: indices are absolute MODD indices");
             Check(DoodadPlan.GroupMembership(root, null).Length == 6, "MODR: no groups, no owners");
-            // Group 3 could not be read (null): record 3 (only group 3 lists it) is unsupported; record 2 (groups 0 and 3) and
-            // record 1 (no group lists it) are kept.
+            // Marking takes membership over the SAME groups, as the session does (the groups as built, null where a file could
+            // not be read). Every group read: nothing is marked, not even records no group lists.
+            Func<List<WorldDoodad>> six = () =>
+            {
+                var l = new List<WorldDoodad>();
+                for (int k = 0; k < 6; k++)
+                    l.Add(new WorldDoodad { Source = DoodadSource.WmoSet, ModdIndex = k, FileDataID = 1 });
+                return l;
+            };
+            var all = new[] { a, none, b };
+            List<WorldDoodad> doodads = six();
+            int marked = DoodadPlan.MarkMissingGroups(doodads, DoodadPlan.GroupMembership(root, all), all);
+            Check(marked == 0 && doodads.TrueForAll(d => d.Unsupported == null), "MODR: every group read -- no doodad is marked");
+            // Group 3 (which lists records 2 and 3) could not be read: records 1, 3 and 4 -- no read group lists them -- are
+            // unsupported, the reason naming the missing groups; records 0, 2 and 5 (group 0 lists them) are kept.
             var built = new[] { a, none, null, null };
-            var doodads = new List<WorldDoodad>();
-            for (int k = 0; k < 6; k++)
-                doodads.Add(new WorldDoodad { Source = DoodadSource.WmoSet, ModdIndex = k, FileDataID = 1 });
-            int marked = DoodadPlan.MarkMissingGroups(doodads, owners, built);
-            Check(marked == 1 && doodads[3].Unsupported != null && doodads[3].Unsupported.Contains("group(s) 3") && doodads[2].Unsupported == null &&
-                  doodads[1].Unsupported == null && doodads[0].Unsupported == null,
-                  "MODR: a doodad only a group that could not be read lists is unsupported; one another group lists, or none, is kept");
+            doodads = six();
+            marked = DoodadPlan.MarkMissingGroups(doodads, DoodadPlan.GroupMembership(root, built), built);
+            Check(marked == 3 && doodads[1].Unsupported != null && doodads[3].Unsupported != null && doodads[4].Unsupported != null &&
+                  doodads[3].Unsupported.Contains("group(s) 2, 3 could not be read") &&
+                  doodads[0].Unsupported == null && doodads[2].Unsupported == null && doodads[5].Unsupported == null,
+                  "MODR: some groups not read -- a doodad no read group lists is unsupported, one a read group lists is kept");
+            // A doodad already unsupported keeps its own reason and is not counted again.
+            doodads = six();
+            doodads[3].Unsupported = "scale 0";
+            marked = DoodadPlan.MarkMissingGroups(doodads, DoodadPlan.GroupMembership(root, built), built);
+            Check(marked == 2 && doodads[3].Unsupported == "scale 0", "MODR: an unsupported doodad keeps its reason");
         }
 
         public static int RunAll(Action<string> output = null)

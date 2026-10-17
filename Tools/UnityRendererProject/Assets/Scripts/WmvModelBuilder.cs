@@ -3758,6 +3758,9 @@ public static class WmvModelBuilder
     // Resolved once per session; Shader.Find is not free and the answer cannot change.
     static Shader cachedShader;
     static bool shaderResolved;
+    // The resolution's lines when the first build to resolve the shader had no log (a doodad prototype): said by the next
+    // build that has one (the Models view's), as when that build resolved it.
+    static List<string> shaderLogPending;
     static bool shaderCanRenderOpaque;
 
     /// <summary>
@@ -3785,8 +3788,22 @@ public static class WmvModelBuilder
     static Shader FindRenderShader(Action<string> log)
     {
         if (shaderResolved)
+        {
+            if (log != null && shaderLogPending != null)
+            {
+                List<string> pending = shaderLogPending;
+                shaderLogPending = null;
+                foreach (string line in pending)
+                    log(line);
+            }
             return cachedShader;
+        }
         shaderResolved = true;
+        if (log == null)
+        {
+            shaderLogPending = new List<string>();
+            log = shaderLogPending.Add;
+        }
 
         // A shader written for one render pipeline draws MAGENTA under another, so the pipeline
         // decides which names may even be tried. null here means the built-in pipeline.

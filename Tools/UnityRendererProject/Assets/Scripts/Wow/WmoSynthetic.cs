@@ -342,7 +342,7 @@ namespace Wmv.Wow
         }
 
         /// <summary>Group `groupIndex` of SquaresRoot.</summary>
-        public static byte[] SquaresGroup(int groupIndex)
+        public static byte[] SquaresGroup(int groupIndex, ushort[] modr = null)
         {
             float x = 12f * groupIndex;
             var spec = new GroupSpec
@@ -355,6 +355,11 @@ namespace Wmv.Wow
                 Mpy2 = new byte[] { 0x20, 0, (byte)(groupIndex % 2), 0, 0x20, 0, (byte)(groupIndex % 2), 0 },
             };
             spec.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
+            if (modr != null)
+            {
+                spec.Flags |= 0x800;                       // has doodads: MODR present
+                spec.ExtraChunks.Add(new KeyValuePair<string, byte[]>("MODR", U16s(modr)));
+            }
             return BuildGroup(spec);
         }
     }

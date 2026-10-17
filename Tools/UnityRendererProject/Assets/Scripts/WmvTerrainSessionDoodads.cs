@@ -209,7 +209,7 @@ public sealed partial class WmvTerrainSession
                                                                    : DoodadPlan.SelectSets(root, pw.P.UniqueId, pw.P.FileDataID, pw.P.Record.Word58);
             d.Sets.Add(sel);
             List<WorldDoodad> list = DoodadPlan.FromWmo(pw.P, i, root, sel);
-            // A world model built without some of its group files: the doodads only those groups list are not placed.
+            // A world model built without some of its group files: the doodads no group that was read lists are not placed.
             WmoGroup[] groups = pw.Instance.Prototype.Groups;
             if (Array.IndexOf(groups, null) >= 0)
                 missingGroupDoodads += DoodadPlan.MarkMissingGroups(list, DoodadPlan.GroupMembership(root, groups), groups);

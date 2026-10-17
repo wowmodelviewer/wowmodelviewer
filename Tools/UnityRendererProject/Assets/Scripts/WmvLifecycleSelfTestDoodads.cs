@@ -7,7 +7,8 @@
 // Checked: the plan (MDDF by uniqueId, the placement's doodad set beside set 0, an unsupported record), one prototype per M2
 // and one upload per texture, the camera's moment before any doodad request, the report's doodads and the world's assembly,
 // the transforms; a protocol-16 load (no doodad budgets: nothing asked, "notOffered"); the budgets; a model that is not an
-// M2; a build that throws; the doodads' timeout; a WMO-only map's doodads; and the load ended at every stage -- an M2 read
+// M2; a build that throws; the doodads' timeout; a WMO-only map's doodads; a world model built without one of its group files
+// (the doodad no read group lists is "unsupported"); and the load ended at every stage -- an M2 read
 // out, a decode applied after the load ended, between prototype builds, between placements, a newer load -- each reported
 // once, every late answer dropped, and every tally back to 0.
 
@@ -487,6 +488,40 @@ public static partial class WmvLifecycleSelfTest
               (r != null ? r.Status + ", " + r.WorldKind + ", doodads " + r.DoodadState + " " + r.DoodadPlaced + "/" + r.DoodadInstances : "no report") + ")", log);
         h.Session.Clear("test");
         Check(clean(), "doodads: and nothing is left after the clear (" + state() + ")", log);
+
+        // ---- a world model built without one of its two group files: its MODD record 0 (group 0 lists it, MODR) is placed;
+        // record 1, which no group that was read lists, is "unsupported" -- not placed where no geometry was built. The world
+        // stays "complete" (Stage 06 rates placements; the missing file is counted apart); the doodads and the assembly are
+        // "partial".
+        const uint wmoTwo = 9720, wmoTwoGroup = 9721;               // group 1's file (9722) is not served
+        byte[] twoGroups = WmoSynthetic.Concat(WmoSynthetic.SquaresRoot(2, wmoTwoGroup, wmoTexture),
+                                               WmoSynthetic.Chunk("MODS", ModsRecord("Set_$DefaultGlobal", 0, 2)),
+                                               WmoSynthetic.Chunk("MODI", WmoSynthetic.U32s(m2B)),
+                                               WmoSynthetic.Chunk("MODD", WmoSynthetic.Concat(ModdRecord(0, 2f, 2f, 0f), ModdRecord(0, 14f, 2f, 0f))));
+        h = make();
+        var partialFiles = new WorldFiles();
+        partialFiles.Add(WmvTerrainSession.RoleWdt, TerrainTestWdt, tileWdt);
+        partialFiles.Add(WmvTerrainSession.RoleRootAdt, TerrainTestRoot, AdtSynthetic.FlatRoot(WorldTestTileX, WorldTestTileY));
+        partialFiles.Add(WmvTerrainSession.RoleObj0Adt, WorldTestObj0, AdtSynthetic.Cat(AdtSynthetic.Mver(),
+                                                                                        AdtSynthetic.Chunk("MODF", ModfWithSet(wmoTwo, 32, 0))));
+        partialFiles.Add(WmvTerrainSession.RoleWmoRoot, wmoTwo, twoGroups);
+        partialFiles.Add(WmvTerrainSession.RoleWmoGroup, wmoTwoGroup, WmoSynthetic.SquaresGroup(0, new ushort[] { 0 }));
+        partialFiles.Add(WmvTerrainSession.RoleWmoTexture, wmoTexture, RawBlp(13, 8, 8));
+        partialFiles.Add(WmvTerrainSession.RoleM2Model, m2B, DoodadM2((int)skinB, (int)texS));
+        partialFiles.Add(WmvTerrainSession.RoleM2Skin, skinB, M2Synthetic.GeosetSkin(new[] { 0 }));
+        partialFiles.Add(WmvTerrainSession.RoleM2Texture, texS, RawBlp(17, 8, 8));
+        h.Session.Load(DoodadCommand(14, false));
+        partialFiles.Serve(h, 14);
+        r = h.For(14);
+        scene = h.Session.World;
+        bool recordZero = scene != null && scene.Doodads.Count == 1 && scene.Doodads[0].Doodad.ModdIndex == 0;
+        Check(r != null && r.Status == "built" && r.WorldState == "complete" && r.WorldGroupFilesMissing == 1 && r.DoodadWmoRecords == 2 && r.DoodadPlaced == 1 &&
+              r.DoodadUnsupported == 1 && r.DoodadState == "partial" && r.WorldAssembly == "partial" && recordZero,
+              "doodads: a world model built without one of its group files places the doodad a read group lists and leaves the one no read " +
+              "group lists \"unsupported\" (" + (r != null ? r.Status + ", world " + r.WorldState + " (" + r.WorldGroupFilesMissing + " group file missing), doodads " + r.DoodadState + " " + r.DoodadPlaced +
+                                                                     " placed, " + r.DoodadUnsupported + " unsupported of " + r.DoodadWmoRecords : "no report") + ")", log);
+        h.Session.Clear("test");
+        Check(clean(), "doodads: and nothing is left (" + state() + ")", log);
     }
 
     const double buildBudgetDefault = 6.0, placeBudgetDefault = 4.0;

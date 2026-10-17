@@ -284,6 +284,8 @@ public sealed class WmvWorldDoodads
             inst.Prototype.Instances--;
         instances.Remove(inst);
         LiveInstances--;
+        if (instances.Count == 0)
+            Visible = Culled = 0;
     }
 
     /// <summary>Every instance at once (the scene goes): their own objects, the list cleared in one step.</summary>
@@ -307,6 +309,8 @@ public sealed class WmvWorldDoodads
             LiveInstances--;
         }
         instances.RemoveAll(i => gone.Contains(i));
+        if (instances.Count == 0)
+            Visible = Culled = 0;
     }
 
     public void DisposePrototype(WmvDoodadPrototype p)
