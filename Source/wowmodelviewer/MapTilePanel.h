@@ -28,6 +28,8 @@
 #define MAPTILEPANEL_H
 
 #include <functional>
+#include <map>
+#include <utility>
 #include <vector>
 
 #include <wx/wxprec.h>
@@ -116,6 +118,9 @@ private:
   int m_mx0 = 0, m_my0 = 0, m_mx1 = -1, m_my1 = -1;
   std::vector<bool> m_inMosaic;
   wxTimer m_repaintTimer;
+  // The paint's buffer, a bitmap of the screen's own format: wx's own buffer is a DIB, which goes to the window through
+  // StretchDIBits -- most of a paint's time on a large map.
+  wxBitmap m_paintBuffer;
   bool m_hoverWorld = false;         // the footprint: the world point under the mouse
   double m_hoverWX = 0.0, m_hoverWY = 0.0;
 };
@@ -163,6 +168,9 @@ private:
   bool m_refreshQueued = false;   // a size event's refresh waits (one at a time)
   int m_laidOutHeight = -1;       // the height the Browse pane last laid the panel out for
   bool m_fieldsEdited = false;    // the user typed in a target field since the target was last shown in them
+  // What setLabel last gave each label: its text (before wrapping) and the width it was wrapped to. A label set repaints
+  // at once, and once wrapped its own text and width are not these: compared with them, every refresh set every label.
+  std::map<wxStaticText *, std::pair<wxString, int>> m_labelsSet;
 };
 
 #endif // MAPTILEPANEL_H

@@ -445,6 +445,7 @@ private:
   QString m_streamDetail;
   QString m_worldDetail;
   QString m_doodadDetail;
+  bool m_progressShowQueued = false;   // OnWorldProgress: the GUI update it asked for is still to come
 };
 
 #endif // MAPSVIEWER_H

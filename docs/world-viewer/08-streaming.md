@@ -697,17 +697,19 @@ is one IPC poll and one pass of the wx event queue, paints included.
 | Pictures, after (streaming) | 105.2 ms | -- | 24.5 ms (under 50) | 74.5 ms |
 | Pictures, before (`WMV_STREAMING=0`) | 109.0 ms | -- | 36.4 ms (under 50) | 74.9 ms |
 | Protocol-17 player (`compat\cmpf_newhost_p17`) | 120.7 ms | -- | 23.5 ms (under 50) | 64.8 ms |
+| With the entry-stall fixes (section 8.7), Retail acceptance (`stalls\out_r2\acc_wow`) | 105.8 ms | -- | 9.7 ms | 17.5 ms |
+| ... Classic Era / MoP Classic / Classic Beta (`stalls\out_r2\c4_*`) | 83.4 / 92.9 / 82.2 ms | -- | 7.1 / 8.3 / 8.0 ms | 19.0 / 22.5 / 18.2 ms |
 
 What each one is, and whether this stage made it:
 
 - **The mode switch and the map pick** (pre-existing): the map pick (Era, once) is the overhead map's first draw.
   The mode switch: the Maps viewer's first layout and the Browse listing; no streaming code runs in it.
   The Stage 07 host measured 134.8 ms in the same step (`compat\cmp_oldhost_p18`).
-- **The round in which the world is shown** (pre-existing): about 44 ms of it is the synchronous resize of the player's
-  window, which the player's thread answers while it resizes its swap chain. The Stage 07 host measured 77.5 ms here.
-  The resize is synchronous by design, since a later asynchronous resize could land after the one sent when the player
-  is put back (`UnityRendererHost.h`). `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of
-  another process, because their input queues are attached (measured: 43.1 ms).
+- **The round in which the world is shown** (pre-existing, fixed after the stage): about 44 ms of it was the
+  synchronous resize of the player's window, which the player's thread answers while it resizes its swap chain. The
+  Stage 07 host measured 77.5 ms here. `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of
+  another process, because their input queues are attached (measured: 43.1 ms). The player's window is now sized from a
+  thread of the viewer's own when the load is sent, in order with every later resize (section 8.7): 17-23 ms.
 - **The Enter world click** (new in this stage, fixed). The final review found that this round went over 50 ms only with
   streaming: 55-75 ms, against 22-49 ms with `WMV_STREAMING=0`, a protocol-17 player or the Stage 07 host. Two things
   caused it:
@@ -728,8 +730,7 @@ What each one is, and whether this stage made it:
   one full Maps panel update of 9-15 ms, the same cost as Stage 07 (median 9.5 ms on the Stage 07 host, 9.1 ms on this
   build). Several of them land in one round when the entry's world models complete and its camera is placed: 45-76 ms
   in some earlier runs, none over 50 ms in the final ones. With streaming this happens while the region's other tiles
-  load. Coalescing the panel's updates is
-  left to the work on the entry rounds (branch `world/08-entry-stalls`).
+  load. Progress is now shown once for the messages that come together, and a panel update costs 2-6 ms (section 8.7).
 - **None of the rounds over 50 ms is in the flight**: the acceptance flight's six loops, the far flight with Overview
   and
   Fly, and the other clients' loops stay at 16.1-24.5 ms.
@@ -795,6 +796,84 @@ The Stage 07 host (protocol 17) with the new player (`compat\cmpf_oldhost_p18`):
 - PASS 13 / 0.
 - The single-tile path ran, and Overview, Fly and Clear worked.
 - The Enter world round was 29.7 ms.
+
+### 8.7 The entry rounds attributed, and their pre-existing parts fixed (after the stage)
+
+Attributed with a wall-clock stack sampler of the GUI thread (a temporary harness probe, not kept: a thread of the
+viewer's suspends the GUI thread about every 1-2 ms in a round over 3 ms and unwinds its stack) and temporary timers in
+the overhead map's paint and the panel's refresh. The harness runs the Enter world click's handler outside any round;
+its own time is 13-14 ms on Retail (43 ms on Beta).
+
+- **The round after Enter world** (76-85 ms): 43-45 ms is the resize of the player's window as the overhead map goes
+  (`showContent(false)` -> `applyEmbeddedVisibility` -> `resizeEmbeddedWindow`), the rest the panel's refresh. Fixed:
+  `UnityRendererHost::sizePlayerAhead`, called by `ModelViewer::RequestLoad` just before a load is sent, gives the
+  player's window the viewport's size while the content window covers it, from a thread of the viewer's own -- not
+  attached to the player's input queue, so the move waits there (38-49 ms) and the GUI thread does not. Putting the
+  player back when the world is shown finds the size right. `resizeEmbeddedWindow` first waits for that move
+  (`finishAheadMove`, taking sent messages while it waits, as the GUI thread's own moves do), so a later move never lands
+  before it; a player Windows considers hung is not waited for (the existing retry from the timer).
+- **The Enter world round** (56-75 ms with streaming; 27-41 ms with it off and on the Stage 07 host): the streaming part
+  -- the first `streamState` showing the four streaming lines (the panel and the Browse pane laid out again) and the
+  overhead map repainted at every `streamState` -- is fixed in the stage itself (section 8.3: the streaming lines always
+  shown, the streamState UI on a 150 ms timer); the first table below was measured without that fix. What this section
+  changes is the cost of each repaint and refresh in that round. The click queues two or three repaints of the overhead
+  map at 16-19 ms each: in a repaint, 26 of 43 samples were wx's buffered paint DC copying its buffer, a DIB, to the
+  window through `StretchDIBits`; the minimap pictures' own stretch was 0.1-1.0 ms. The grid now paints through a kept
+  bitmap of the screen's own format (`MapTileGrid::m_paintBuffer`), 7-10 ms a paint; three pictures of the overhead map
+  (fitted with the target, the whole 64 x 64 grid, zoomed) are pixel-identical to the stage's, the frame differing only
+  in the status bar's memory figure. The panel's refresh set six of its eight labels every time (each set repaints the
+  label at once, three times with the wrap): `MapTilePanel::setLabel` compared the label's own text and width, which
+  after a wrap are never what it was given (line breaks; the text's width under an `xs` border). It now remembers what
+  it gave each label: 6-16 ms -> 2-6 ms a refresh while one label changes.
+- **Two progress updates in one round** (54 ms in `st\acc_wow`, 74 ms once here): each `worldProgress` updated the
+  whole Maps GUI, and an update that changes the progress text's line count lays out the panel and the Browse pane again
+  (20-28 ms). `MapsViewer::OnWorldProgress` now shows progress once for what came together (`CallAfter`). One such
+  update can still bring a round near 50 ms (51.8 ms once, in a second entry).
+- **The mode switch to Maps** (98-238 ms): not fixed. It is the viewer switch: the keyboard handed to Browse's search
+  box (`ModelViewer::OnCommandBar`) waits for the player's thread when the player had it (18-30 ms: the player's window
+  is sent WM_KILLFOCUS and answers once per frame); the Maps panel is built on the first entry (about 20 ms); Browse's
+  list of maps is listed again on every entry (`FileControl::InitMaps`, 9 ms with no map picked, 26 ms with one -- not
+  the fraction of a millisecond `FollowViewerMode`'s comment says); the native tree re-measures its rows as it thaws
+  (12-27 ms); the other windows thaw and lay out (8-18 ms); the switch paints the new workspace at once (13-25 ms).
+  Entering Maps again, the panel built and the keyboard not in the player, took 177-193 ms. Under 50 ms needs a viewer
+  switch that neither lists Browse again nor repaints the whole frame in one round.
+
+First measured on the stage as committed (b9c688d4). The longest GUI round of each step, ms (`F:\wmv-build-fix\stalls`; "before" is the stage's exe, "after" this
+change, the same player p18l; "before" of the acceptance and the three clients is the stage's own runs of section 8):
+
+| Run | mode:maps | enter | waitworld | rounds over 50 ms |
+|---|---|---|---|---|
+| Retail entry, before (`out_b1\base_entry1/2`) | 105.4 / 119.9 | 71.7 / 66.7 | 70.0 / 65.6 | 3 / 3 |
+| Retail entry, after (`out_r1\entry1/2`) | 110.5 / 128.1 | 24.0 / 38.9 | 20.7 / 31.6 | 1 / 1 |
+| Retail, `WMV_STREAMING=0`, before / after | 108.5 / 122.7 | 23.7 / 16.2 | 80.8 / 19.1 | 2 / 1 |
+| Beta entry, before / after (`out_b1\base_beta`, `fix_beta`) | 99.4 / 122.0 | 61.7 / 16.9 | 75.0 / 21.9 | 3 / 1 |
+| Retail acceptance, before / after (`st\acc_wow`, `out_r1\acc_wow`) | 127.6 / 115.4 | 74.5 / 26.3 | 81.8 / 17.5 | 4 / 1 |
+| Era one loop, before / after | 98.0 / 80.8 | 66.1 / 13.8 | 84.7 / 18.1 | 3 / 1 |
+| MoP Classic one loop, before / after | 105.9 / 121.5 | 56.4 / 32.3 | 81.3 / 23.8 | 3 / 1 |
+| Beta one loop, before / after | 238.2 / 85.2 | 60.6 / 15.0 | 85.0 / 21.5 | 4 / 1 |
+
+After the change the only round over 50 ms in every run is the mode switch. The acceptance run passes (35 passed,
+0 failed): its loops' longest round 18.3 ms (17.96 before), the far flight, Overview and Fly 10.2 ms (26.7 before);
+the viewer's private bytes at each checkpoint 2,251-2,254 MB (2,251-2,257 before). The three clients pass (14 passed
+each), their flights' longest round 3.3-16.8 ms (16.4-16.6 before). The player's window was sized ahead in 34-47 ms
+on its own thread in every run. A back-and-forth (`out_r1\backforth`: enter, Back to map, Enter world again, Models,
+Maps, a second target and entry) passes 23 of 23; its rounds over 50 ms are the three viewer switches and one 51.8 ms
+progress update in the second entry.
+
+On the stage's final host (1d0d0b73, the streamState UI on its timer) and player p18m, before (`stalls\out_b2`, the
+final exe A7AF7037) and after (`stalls\out_r2`, this change on top of it):
+
+| Run | mode:maps | enter | waitworld | rounds over 50 ms |
+|---|---|---|---|---|
+| Retail entry (x2) | 115.0 / 101.1 -> 96.5 / 108.1 | 23.3 / 24.8 -> 10.9 / 10.7 | 67.6 / 69.5 -> 18.0 / 17.0 | 2 / 2 -> 1 / 1 |
+| Retail, `WMV_STREAMING=0` | 114.7 -> 109.9 | 23.9 -> 10.5 | 81.5 -> 17.2 | 2 -> 1 |
+| Beta entry | 102.7 -> 92.2 | 22.6 -> 8.2 | 66.6 -> 22.7 | 2 -> 1 |
+| Retail acceptance (after only) | 105.8 | 9.7 | 17.5 | 1 |
+| Era / MoP Classic / Beta one loop (after only) | 83.4 / 92.9 / 82.2 | 7.1 / 8.3 / 8.0 | 19.0 / 22.5 / 18.2 | 1 each |
+
+The acceptance run passes 35 / 0 (the loops' longest round 17.0 ms, the far flight with Overview and Fly 8.2 ms), the
+three clients 14 / 0 each (flights 9.5-16.8 ms), the back-and-forth 23 / 0 (only its three viewer switches over 50 ms).
+The map pick's round is 14-33 ms.
 
 ## 9. Regressions (Stages 03-07, Models, Characters, Buildings)
 
@@ -914,18 +993,17 @@ Marked **new** (this stage's own) or **pre-existing** (present at develop 8f4e79
 off,
 the Stage 07 host or a protocol-17 player).
 
-- **GUI rounds over 50 ms at the Maps viewer's entry** (section 8.3). The roadmap exit's "no GUI-thread stall over
-  50 ms" holds over the flight and at the Enter world click; from Enter world to the settled region one pre-existing
-  round still exceeds it (the world shown), and the mode switch to Maps before it:
-  - pre-existing: the mode switch to Maps (the Maps viewer's first layout; 92-121 ms in the final runs), and the round
-    in which the world is shown, 43-45 ms of it the synchronous resize of the player's window (65-81 ms);
-  - pre-existing mechanism: one full Maps panel update (9-15 ms, the same as Stage 07) per progress message, several of
-    them in one round when the entry's world models complete -- with streaming, while the region's other tiles load
-    (45-76 ms in some earlier runs, none over 50 ms in the final ones);
+- **The mode switch to Maps is over 50 ms** (sections 8.3 and 8.7; pre-existing). The roadmap exit's "no GUI-thread
+  stall over 50 ms" holds over the flight and from the Enter world click to the settled region:
+  - pre-existing, not fixed: the mode switch to Maps, 82-110 ms with the entry-stall fixes (92-121 ms in the stage's
+    final runs) -- Browse's list of maps listed again, the tree's thaw, the frame's layout and paint at once, the Maps
+    panel built on the first entry, and the keyboard's move from the player waiting for the player's thread;
+  - pre-existing, fixed after the stage (section 8.7): the round in which the world is shown (65-81 ms; now 17-23 ms,
+    the player's window sized ahead on a thread of its own), and the full Maps panel update per progress message (now
+    shown once per batch, 2-6 ms an update);
   - new, and fixed by the final review: the Enter world click's round, which streaming had pushed to 55-75 ms (the
     streaming lines appearing, then a streamState's update, inside the click's repaint round). With streaming it is now
     23.6-25.5 ms (the final runs), against 23.0-25.5 ms with streaming off.
-  Another session is working on the entry rounds (branch `world/08-entry-stalls`).
 - **Frames over 50 ms at entry** (pre-existing): the largest world-model prototype of a region is built in one piece --
   48-50 ms on Retail, and frames of 126 and 137 ms at the Era and Beta entries (Stage 07 logged 114-128 ms builds of
   world model 107243 the same way). A tile's Unity objects are built in one piece too (4-29 ms on Retail; new: 1.8
@@ -967,6 +1045,9 @@ the session-wide order prerequisites, stale checks by a request's own load); `Ma
 `MapOverview.h/.cpp`, `filecontrol.h/.cpp` (the streaming lines and the overhead map's rings);
 `UnityRendererHost.h/.cpp`
 (the resize timing line, the player's process id for the harness); `app.cpp` (the session's checks, the harness steps).
+After the stage (section 8.7): `UnityRendererHost.h/.cpp` (`sizePlayerAhead`, `finishAheadMove`), `modelviewer.cpp`
+(`RequestLoad` sizes the player ahead), `MapTilePanel.h/.cpp` (the grid's paint buffer, `setLabel`'s memory),
+`MapsViewer.h/.cpp` (progress shown once per batch).
 
 Player (`Tools/UnityRendererProject/Assets/Scripts`): `WmvTerrainSessionStream.cs` (new: the region, jobs, credit,
 registries, pools, closing, reports); `WmvTerrainSession.cs`, `WmvTerrainSessionWorld.cs`, `WmvTerrainSessionDoodads.cs`
