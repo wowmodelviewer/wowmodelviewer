@@ -368,9 +368,11 @@ UnityRendererHost::~UnityRendererHost()
   stopInputTrace();
 #endif
   shutdown();
-  // (The player is gone: a move sizePlayerAhead started has returned.)
-  if (m_aheadThread.joinable())
-    m_aheadThread.join();
+#ifdef _WINDOWS
+  // (The player is gone: a move sizePlayerAhead started has returned, or is let go -- it holds nothing of this panel's.)
+  if (!finishAheadMove(2000))
+    m_aheadThread.detach();
+#endif
   delete m_ipc;
   m_ipc = nullptr;
 }
@@ -670,7 +672,13 @@ void UnityRendererHost::shutdown()
   m_process = nullptr;
   m_processId = 0;
   m_embeddedWnd = nullptr;
-  finishAheadMove();
+  // A move sizePlayerAhead started returns once the player is gone; a player whose process is slow to end is not waited
+  // for longer than this (the move's thread holds only the window and its own state).
+  if (!finishAheadMove(2000))
+  {
+    LOG_INFO << "[viewport] the player's window move made ahead had not returned 2 s after the player was closed: let go";
+    m_aheadThread.detach();
+  }
 
   if (m_ipc)
     m_ipc->stop();
@@ -761,6 +769,9 @@ void UnityRendererHost::sizePlayerAhead()
   // notice, sizePlayerForLoad sizes it).
   if (!isRunning() || m_playerHold > 0 || !m_contentShown || !m_playerFrame)
     return;
+  // Never waits on an earlier move still under way (a player in a long frame): the put-back corrects the size.
+  if (m_aheadThread.joinable() && !m_ahead->done)
+    return;
   HWND wnd = findEmbeddedWindow();
   if (!wnd || !finishAheadMove() || ::IsHungAppWindow(wnd))
     return;
@@ -784,16 +795,21 @@ void UnityRendererHost::sizePlayerAhead()
            << ", on a thread of its own: what it is sent next shows in the viewport";
 }
 
-bool UnityRendererHost::finishAheadMove()
+bool UnityRendererHost::finishAheadMove(long limitMs)
 {
   if (!m_aheadThread.joinable())
     return true;
   // Waited for as this thread's own move waits for the player (a sent message): what is sent to this thread meanwhile is
-  // taken, so nothing the move sends here can wait on this wait.
-  while (!m_ahead->done)
+  // taken, so nothing the move sends here can wait on this wait. A handler that runs so can wait for the move too, and
+  // join it: the thread is looked at again after each turn.
+  QElapsedTimer waited;
+  waited.start();
+  while (m_aheadThread.joinable() && !m_ahead->done)
   {
     HWND wnd = findEmbeddedWindow();
     if (wnd && ::IsHungAppWindow(wnd))
+      return false;
+    if (limitMs >= 0 && waited.elapsed() >= limitMs)
       return false;
     HANDLE thread = (HANDLE)m_aheadThread.native_handle();
     if (MsgWaitForMultipleObjects(1, &thread, FALSE, 50, QS_SENDMESSAGE) == WAIT_OBJECT_0 + 1)
@@ -802,6 +818,8 @@ bool UnityRendererHost::finishAheadMove()
       PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE | PM_QS_SENDMESSAGE);
     }
   }
+  if (!m_aheadThread.joinable())
+    return true;
   m_aheadThread.join();
   LOG_INFO << "[viewport] the player's window was sized ahead to" << m_ahead->width << "x" << m_ahead->height << "in"
            << m_ahead->ms.load() << "ms, waited for on its own thread";

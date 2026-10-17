@@ -285,8 +285,9 @@ private:
   };
   std::thread m_aheadThread;
   std::shared_ptr<AheadMove> m_ahead;
-  // That move waited for -- not while it still waits on a player Windows considers hung (false: it is not over).
-  bool finishAheadMove();
+  // That move waited for -- not while it still waits on a player Windows considers hung, nor longer than limitMs when one
+  // is given (false: it is not over).
+  bool finishAheadMove(long limitMs = -1);
 
   UnityIpcServer * m_ipc = nullptr; // owned
 
