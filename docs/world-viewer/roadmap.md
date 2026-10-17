@@ -44,7 +44,7 @@ builder, the orbit camera, and the IPC asset path.
 
 ## 3. The gap, feature by feature
 
-| Feature of the video | Today (after Stage 06) | Milestone |
+| Feature of the video | Today (after Stage 07) | Milestone |
 |---|---|---|
 | Map list with search | done | 05 |
 | Overhead map from minimap images | done in 05 (see 4) | 05 |
@@ -54,7 +54,7 @@ builder, the orbit camera, and the IPC asset path.
 | Free-flying camera | done in 05 | 05 |
 | World-model-only maps (instances) entered from Maps | done in 06 (old-form WDTs: unsupported) | 06 |
 | World models placed on terrain (MODF) | done in 06 (the loaded tile's) | 06 |
-| Doodads (MDDF, WMO doodad sets) | no | 07 |
+| Doodads (MDDF, WMO doodad sets) | done in 07 (the loaded tile's MDDF and the placed world models' sets; static, in their rest pose) | 07 |
 | Several tiles, streaming around the camera | no (single tile) | 08 |
 | Liquids (MH2O, WMO MLIQ) | no | 09 |
 | World-model interior lighting (vertex colours, lights) | no | 10 |
@@ -92,7 +92,7 @@ evidence from the client files, all four clients, no claim of game parity withou
 | # | Milestone | Content | Entry | Exit (done when) |
 |---|---|---|---|---|
 | 06 | World models in the world | A world scene (the terrain session generalised) that holds placed objects beside the tiles, under the one floating origin. MODF placements of the loaded tile and the global world model of world-model-only maps, with the proven transform (`00-audit.md` 6.3-6.4, the DireMaul yaw), the existing WMO renderer per instance, group culling by extents. Maps enters world-model-only maps at a target inside the model's extents. | 05 merged | map 34 (Stormwind jail, world-model-only) entered and flown through; Retail 30_47's world models placed within their MODF extents; Era DireMaul's yaw applied; WMO pictures in Buildings unchanged |
-| 07 | Doodads | MDDF placements of the tile and the doodad sets of placed world models (set 0 plus the placement's set, U15), static M2s with shared meshes and materials, bounds from MLDX, instance budget | 06 | one city tile's doodads placed (MLDX boxes match), within a recorded memory budget; M2 pictures unchanged |
+| 07 | Doodads | MDDF placements of the tile and the doodad sets of placed world models (set 0 plus the placement's set, U15), static M2s with shared meshes and materials, bounds from the mesh (MLDX verifies the MDDF placement), instance budget | 06 | one city tile's doodads placed (MLDX boxes match), within a recorded memory budget; M2 pictures unchanged |
 | 08 | Streaming | Tiles around the camera (from 3 x 3), residency and eviction, a prioritised cancellable scheduler, block-compressed upload, GPU and memory budgets, loading progress by file count. First: the transport-wide send cap (`04b-asset-serving.md` 18.2); the Maps entry cost was cut by the lazy Browse list (`05-maps-viewer-ui.md` 13.1) | 07 | a 3 x 3 city flown through within the budgets; frame and upload times recorded; no GUI-thread stall over 50 ms |
 | 09 | Liquids | MH2O on terrain, MLIQ in world models; their tables' layouts per client | U14 settled (definitions, byte checks) | water tiles against references on Retail and Era |
 | 10 | World-model lighting | vertex colours (MOCV), interior and exterior groups, the model's lights (MOLT), ambient | 06 | interiors against in-game references |

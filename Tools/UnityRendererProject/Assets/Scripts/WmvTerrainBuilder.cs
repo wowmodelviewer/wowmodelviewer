@@ -54,7 +54,8 @@
 // rendered alone at its validation size into <dump name>_c<n>.*) and -wmvTerrainTexelDump=<bare name> (each
 // texture's mip 0 as the GPU decodes it, by Load, with its role) -- the formats of
 // Tools/world-audit/compare_terrain_material.py. The composite dumps are taken in the textured view only (any other
-// view is refused: it is not the authored composite).
+// view is refused: it is not the authored composite). Stage 07: -wmvDoodadSets=all, a DIAGNOSTIC that draws every doodad
+// set of every placed world model (the inactive ones too, for comparison; said in the log and the report).
 
 using System;
 using System.Collections.Generic;
@@ -132,6 +133,7 @@ public static class WmvTerrainDebug
     static int compositeSize = WmvTerrainComposite.DefaultTileSize;
     static readonly List<int> compositeChunks = new List<int>();
     static double timeoutMs = WmvTerrainSession.DefaultTimeoutMs;
+    static bool allDoodadSets;
     static readonly List<string> notes = new List<string>();
 
     /// <summary>-wmvTerrainView: the view asked for; Shaded when none was (see ViewGiven and EffectiveView).</summary>
@@ -177,18 +179,22 @@ public static class WmvTerrainDebug
     public static double TimeoutMs { get { Parse(); return timeoutMs; } }
     /// <summary>What the parse refused (a bad value is said once in the log, never guessed at).</summary>
     public static IList<string> Notes { get { Parse(); return notes; } }
+    /// <summary>-wmvDoodadSets=all (stage 07): a DIAGNOSTIC -- every doodad set of every placed world model is drawn, not set 0
+    /// plus the one its placement names (DoodadPlan.AllSets).</summary>
+    public static bool AllDoodadSets { get { Parse(); return allDoodadSets; } }
 
     public static string Describe()
     {
         Parse();
-        return string.Format("view {0}{1}{2}{3}{4}{5}{6}{7}{8}",
+        return string.Format("view {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}",
                              viewGiven ? ViewName : "auto (textured when the tile's material is textured or partial, else shaded)",
                              onlyChunk >= 0 ? ", only chunk " + onlyChunk : "", focus >= 0 ? ", focus chunk " + focus : "",
                              topDown ? ", top-down" : "", dumpName != null ? ", dump " + dumpName : "",
                              validate ? ", VALIDATION sampling" : "",
                              compositeName != null ? ", composite dump " + compositeName + " at " + compositeSize + " px" : "",
                              compositeChunks.Count > 0 ? ", chunk renders " + string.Join(",", compositeChunks) : "",
-                             texelName != null ? ", texel dump " + texelName : "");
+                             texelName != null ? ", texel dump " + texelName : "",
+                             allDoodadSets ? ", EVERY DOODAD SET DRAWN (DIAGNOSTIC)" : "");
     }
 
     static bool BareName(string v) { return v.Length > 0 && v.IndexOfAny(new[] { '/', '\\', ':' }) < 0 && v != "." && v != ".."; }
@@ -232,6 +238,10 @@ public static class WmvTerrainDebug
                 topDown = true;
             else if (a == "-wmvTerrainValidate")
                 validate = true;
+            else if (a == "-wmvDoodadSets=all")
+                allDoodadSets = true;
+            else if (a.StartsWith("-wmvDoodadSets=", StringComparison.Ordinal))
+                notes.Add(a + " is not -wmvDoodadSets=all -- the doodad sets follow the placements");
             else if (a.StartsWith("-wmvTerrainDump=", StringComparison.Ordinal))
             {
                 string v = a.Substring("-wmvTerrainDump=".Length);

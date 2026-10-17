@@ -74,6 +74,68 @@ public static partial class WmvLifecycleSelfTest
         public void ReportWorldShown(WmvIpcClient.WorldShownReport report) { ShownReports.Add(report); }
         public void ReportWorldProgress(WmvIpcClient.WorldProgressReport report) { Progress.Add(report); }
 
+        // Protocol 17: the doodads, by the real WmvWorldDoodads under the same inactive root; disposal at once (DestroyImmediate).
+        public WmvWorldDoodads Doodads;
+        public readonly List<int> SettledLoads = new List<int>();
+        /// <summary>Requests the harness had sent when the world models settled (the camera's moment), per settle.</summary>
+        public readonly List<int> SentAtSettle = new List<int>();
+        public Func<int> SentCount;
+        /// <summary>A doodad prototype build throws (the build failure path).</summary>
+        public bool FailDoodadBuilds;
+
+        public void WorldModelsSettled(WmvWorldScene scene, int load)
+        {
+            SettledLoads.Add(load);
+            SentAtSettle.Add(SentCount != null ? SentCount() : -1);
+        }
+
+        public WmvDoodadPrototype BuildDoodadPrototype(WmvWorldScene scene, uint fileDataID, M2ParsedModel model, M2ParsedSkin skin,
+                                                       Dictionary<int, BlpImage> texturesBySlot, Dictionary<int, uint> slotFiles)
+        {
+            if (Doodads == null)
+                Doodads = new WmvWorldDoodads(Root.transform);
+            if (FailDoodadBuilds)
+                throw new InvalidOperationException("test: doodad builds fail");
+            if (scene.DoodadTextures == null)
+                scene.DoodadTextures = new WmvDoodadTextures();
+            return Doodads.BuildPrototype(fileDataID, model, skin, texturesBySlot, slotFiles, scene.DoodadTextures);
+        }
+
+        public WmvDoodadInstance PlaceDoodad(WmvDoodadPrototype prototype, WorldDoodad doodad, WorldOrigin origin, int load)
+        {
+            return Doodads.Place(prototype, doodad, origin, load);
+        }
+
+        public void DisposeDoodads(WmvWorldScene scene)
+        {
+            var owned = new List<UnityEngine.Object>();
+            foreach (WmvDoodadInstance i in scene.Doodads)
+                if (i != null && i.Root != null) owned.Add(i.Root);
+            foreach (WmvDoodadPrototype p in scene.DoodadPrototypes.Values)
+                if (p != null && p.Runtime != null)
+                {
+                    owned.Add(p.Runtime.Root);
+                    owned.Add(p.Runtime.Mesh);
+                    owned.AddRange(p.Runtime.Materials);
+                }
+            if (scene.DoodadTextures != null)
+                foreach (Texture2D t in scene.DoodadTextures.All)
+                    owned.Add(t);
+            if (Doodads != null)
+            {
+                Doodads.DisposeInstances(scene.Doodads);
+                foreach (WmvDoodadPrototype p in scene.DoodadPrototypes.Values)
+                    Doodads.DisposePrototype(p);
+            }
+            scene.Doodads.Clear();
+            scene.DoodadPrototypes.Clear();
+            if (scene.DoodadTextures != null)
+                scene.DoodadTextures.Dispose();
+            scene.DoodadTextures = null;
+            foreach (UnityEngine.Object o in owned)
+                if (o != null) UnityEngine.Object.DestroyImmediate(o);
+        }
+
         public void Destroy() { UnityEngine.Object.DestroyImmediate(Root); }
     }
 

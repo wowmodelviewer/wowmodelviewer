@@ -53,6 +53,16 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   `Tools/world-audit/tests/corpus_hashes.json` (243 files, 19 file sets). It then recomputes the audit's tables and
   verdicts from the C# parse results and writes them to `<corpus>/results/csharp_parsers.json`. It runs only when
   `WMV_WORLD_AUDIT_CORPUS` names the extracted audit data; otherwise it reports SKIPPED, which is not a pass.
+- `WorldModelTests.cs` and `WorldModelCorpusTests.cs`: the world-model placement layer of stage 06
+  (`docs/world-viewer/06-world-models-in-world.md`), synthetic and on the world06 corpus.
+- `DoodadTests.cs`: the doodad placement layer of stage 07 (`Assets/Scripts/Wow/World/DoodadScene.cs`,
+  `docs/world-viewer/07-doodads.md`) on hand-built records: MDDF by uniqueId and the Tile frame with worked numbers, the
+  doodad-set selection, the composition of a MODD record with a moved, turned and scaled world model, R(q) against its
+  transpose, unsupported records, MODR membership and doodads of group files that could not be read.
+- `DoodadCorpusTests.cs`: the same on the world07 corpus (`Tools/world-audit/world07_corpus.py`, under
+  `<WMV_WORLD_AUDIT_CORPUS>/world07`): every MDDF doodad's placed M2 box against the client's MLDX box on four clients,
+  the plan's counts against the census, the doodad-set and MODR facts, the MODD rotation convention measured against the
+  world models' walls (the counts of an independent probe pinned), and reference positions computed independently.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

@@ -27,7 +27,8 @@
 //                       terrainViewApplied
 //   loadWorld        -> (protocol 16) a world: the tile and its world models, or a WMO-only map's world model with no tile
 //                       (WmvTerrainSession, WmvTerrainSessionWorld.cs); the world models built and placed by WmvWorldModels
-//                       through MainWorldView, on the terrain layer under the same scene root, culled per group every frame
+//                       through MainWorldView, on the terrain layer under the same scene root, culled per group every frame;
+//                       (protocol 17) and their doodads, built and placed by WmvWorldDoodads, culled per instance every frame
 //   inspectWorldModel-> (protocol 16) a WMO-only map's footprint (WmvMapTiles.InspectWorldModel), answered at once
 //   setWorldCamera   -> (protocol 15) the world view's camera: "fly" puts the free camera (WmvFlyCamera) at a position of
 //                       the game's world frame -- on the ground under it (TerrainHeight on the shown tile's own mesh) plus
@@ -89,6 +90,7 @@ public partial class WmvMain
     // (it stands on their floors), as the load's own camera does.
     int settlingLoad;
     WmvWorldModels worldModels;           // the world scene's world models (protocol 16)
+    WmvWorldDoodads worldDoodads;         // the world scene's doodads (protocol 17)
     // Protocol 16: the world view's frame times (unscaled, milliseconds), the last WorldFrameWindow frames since it was
     // last entered, for runtimeState's distribution.
     public const int WorldFrameWindow = 600;
@@ -119,6 +121,7 @@ public partial class WmvMain
                                         s => Debug.Log("WMV: " + s),
                                         a => System.Threading.ThreadPool.QueueUserWorkItem(_ => a()), WmvTerrainDebug.TimeoutMs);
         worldModels = new WmvWorldModels(TerrainSceneRoot());
+        worldDoodads = new WmvWorldDoodads(TerrainSceneRoot());
         terrain.WorldView = new MainWorldView(this);
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering += CullWorldModels;
         WireTerrainMessages();
@@ -677,12 +680,25 @@ public partial class WmvMain
             worldFrames = worldFrameNext = 0;
     }
 
-    /// <summary>The world models' group culling, for the main camera as it renders (after every camera of the frame has
-    /// moved, and for a capture's own aspect): WmvWorldModels.Cull.</summary>
+    /// <summary>The world models' group culling and the doodads' instance culling, for the main camera as it renders (after
+    /// every camera of the frame has moved, and for a capture's own aspect): WmvWorldModels.Cull, WmvWorldDoodads.Cull.</summary>
     void CullWorldModels(UnityEngine.Rendering.ScriptableRenderContext context, Camera cam)
     {
-        if (cam != null && cam == Camera.main && worldModels != null && worldModels.InstanceCount > 0 && TerrainViewActive)
+        if (cam == null || cam != Camera.main || !TerrainViewActive)
+            return;
+        if (worldModels != null && worldModels.InstanceCount > 0)
             worldModels.Cull(cam);
+        if (worldDoodads != null && worldDoodads.InstanceCount > 0)
+            worldDoodads.Cull(cam);
+    }
+
+    /// <summary>A tile world load's world models are settled (protocol 17: before its doodads): its camera now -- it stands on
+    /// their floors -- and a camera asked for meanwhile no longer waits.</summary>
+    void WorldModelsSettled(int load)
+    {
+        if (settlingLoad == load)
+            settlingLoad = 0;
+        PlaceOwedCamera(load);
     }
 
     void DisposeTerrain()
@@ -843,6 +859,9 @@ public partial class WmvMain
                                  WmvTerrainDebug.ViewNames[(int)tile.View]) +
                    (terrain.World != null && terrain.World.Instances.Count > 0
                         ? string.Format("; {0} world model instance(s) of {1} world model(s)", terrain.World.Instances.Count, terrain.World.Prototypes.Count)
+                        : "") +
+                   (terrain.World != null && terrain.World.Doodads.Count > 0
+                        ? string.Format("; {0} doodad(s) of {1} M2(s)", terrain.World.Doodads.Count, terrain.World.DoodadPrototypes.Count)
                         : ""));
         // A tile's world load: its camera now that its world models are settled (owedCameraAtBuilt), before the capture.
         if (settlingLoad == tile.Load)
@@ -996,6 +1015,21 @@ public partial class WmvMain
         WmvWorldScene scene = terrain != null ? terrain.World : null;
         r.WorldLoad = scene != null ? scene.Load : 0;
         r.WorldKind = scene != null ? scene.Kind : "";
+        // Protocol 17: the doodads (their own tallies), their culling as of the last frame drawn, and every object alive.
+        r.DoodadInstances = WmvWorldDoodads.LiveInstances;
+        r.DoodadPrototypes = WmvWorldDoodads.LivePrototypes;
+        r.DoodadMeshes = WmvWorldDoodads.LiveMeshes;
+        r.DoodadMaterials = WmvWorldDoodads.LiveMaterials;
+        r.DoodadTextures = WmvWorldDoodads.LiveTextures;
+        r.DoodadGpuGeometryBytes = WmvWorldDoodads.LiveGpuGeometryBytes;
+        r.DoodadGpuTextureBytes = WmvWorldDoodads.LiveGpuTextureBytes;
+        bool doodadCulling = worldDoodads != null && worldDoodads.InstanceCount > 0 && TerrainViewActive;
+        r.DoodadVisible = doodadCulling ? worldDoodads.Visible : 0;
+        r.DoodadCulled = doodadCulling ? worldDoodads.Culled : 0;
+        r.LiveGameObjects = Resources.FindObjectsOfTypeAll<GameObject>().Length;
+        r.LiveTexture2D = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
+        r.LiveMeshes = r.MeshObjects;
+        r.LiveMaterials = r.MaterialObjects;
         r.WorldFrames = worldFrames;
         if (worldFrames > 0)
         {
@@ -1017,11 +1051,13 @@ public partial class WmvMain
         Camera cam = Camera.main;
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         string what = WhatTheViewShows(tile);
-        if (scene != null && scene.Instances.Count > 0)
+        if (scene != null && (scene.Instances.Count > 0 || scene.Doodads.Count > 0))
         {
-            string models = string.Format(inv, "{0} world model instance(s) of {1} world model(s), {2} of {3} group(s) drawn ({4} culled) -- {5}",
+            string models = string.Format(inv, "{0} world model instance(s) of {1} world model(s), {2} of {3} group(s) drawn ({4} culled); " +
+                                          "{5} doodad(s) of {6} M2(s), {7} drawn ({8} culled) -- {9}",
                                           scene.Instances.Count, scene.Prototypes.Count, worldModels.GroupsVisible, worldModels.Groups,
-                                          worldModels.GroupsCulled, WorldModelsLabel);
+                                          worldModels.GroupsCulled, scene.Doodads.Count, scene.DoodadPrototypes.Count, worldDoodads.Visible,
+                                          worldDoodads.Culled, WorldModelsLabel);
             what = tile == null ? string.Format(inv, "map {0} world model (load {1}): {2}", scene.MapId, scene.Load, models) : what + "; plus " + models;
         }
         Debug.Log(string.Format(inv,
@@ -1224,11 +1260,43 @@ public partial class WmvMain
         public void ReportWorldShown(WmvIpcClient.WorldShownReport report) { main.ipc.ReportWorldShown(report); }
 
         public void ReportWorldProgress(WmvIpcClient.WorldProgressReport report) { main.ipc.ReportWorldProgress(report); }
+
+        public void WorldModelsSettled(WmvWorldScene scene, int load)
+        {
+            if (scene != null && scene.Kind == "tile")
+                main.WorldModelsSettled(load);
+        }
+
+        public WmvDoodadPrototype BuildDoodadPrototype(WmvWorldScene scene, uint fileDataID, Wmv.Wow.M2ParsedModel model, Wmv.Wow.M2ParsedSkin skin,
+                                                       Dictionary<int, Wmv.Wow.BlpImage> texturesBySlot, Dictionary<int, uint> slotFiles)
+        {
+            if (scene.DoodadTextures == null)
+                scene.DoodadTextures = new WmvDoodadTextures();
+            return main.worldDoodads.BuildPrototype(fileDataID, model, skin, texturesBySlot, slotFiles, scene.DoodadTextures);
+        }
+
+        public WmvDoodadInstance PlaceDoodad(WmvDoodadPrototype prototype, WorldDoodad doodad, WorldOrigin origin, int load)
+        {
+            return main.worldDoodads.Place(prototype, doodad, origin, load);
+        }
+
+        public void DisposeDoodads(WmvWorldScene scene)
+        {
+            main.worldDoodads.DisposeInstances(scene.Doodads);
+            scene.Doodads.Clear();
+            foreach (WmvDoodadPrototype p in scene.DoodadPrototypes.Values)
+                main.worldDoodads.DisposePrototype(p);
+            scene.DoodadPrototypes.Clear();
+            if (scene.DoodadTextures != null)
+                scene.DoodadTextures.Dispose();
+            scene.DoodadTextures = null;
+        }
     }
 
-    /// <summary>What a picture of placed world models is (the status line and the capture's log line).</summary>
-    public const string WorldModelsLabel = "WORLD MODELS (the Buildings renderer's WMO materials under its preview key and fill, without its shadow maps; " +
-                                           "no WoW lighting, doodads, liquids, sky or fog)";
+    /// <summary>What a picture of placed world models and doodads is (the status line and the capture's log line).</summary>
+    public const string WorldModelsLabel = "WORLD MODELS AND DOODADS (the Buildings renderer's WMO materials and the Models renderer's M2 materials " +
+                                           "under its preview key and fill, without shadow maps; doodads static in their rest pose, no particles; " +
+                                           "no WoW lighting, liquids, sky or fog)";
 }
 
 /// <summary>

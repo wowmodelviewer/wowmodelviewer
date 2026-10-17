@@ -64,7 +64,7 @@ namespace Wmv.Wow.Tests
             new[] { -55.97, 159.87, -3.46 }, new[] { 24.56, 159.45, -3.47 }, new[] { 255.25, -9.06, -2.59 }, new[] { 580.75, 487.51, 29.46 },
         };
 
-        sealed class ClientFiles
+        internal sealed class ClientFiles
         {
             public string Name, Build, Folder;
             public Dictionary<uint, string> Sha = new Dictionary<uint, string>();
@@ -89,7 +89,7 @@ namespace Wmv.Wow.Tests
             public bool Has(uint fid) { return Sha.ContainsKey(fid); }
         }
 
-        static Dictionary<string, ClientFiles> LoadManifest(string folder)
+        internal static Dictionary<string, ClientFiles> LoadManifest(string folder)
         {
             var result = new Dictionary<string, ClientFiles>();
             using (JsonDocument doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "manifest.json"))))

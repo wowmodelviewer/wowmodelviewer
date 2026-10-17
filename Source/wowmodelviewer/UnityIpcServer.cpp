@@ -691,7 +691,13 @@ QString UnityIpcServer::RuntimeState::describe() const
            .arg(worldGroups).arg(worldGroupsVisible).arg(worldGroupsCulled).arg(worldInstancesCulled).arg(worldLoad) +
          " worldKind=" + (worldKind.isEmpty() ? QString("-") : worldKind) +
          QString(" worldFrames=%1 worldFrameMsMedian=%2 worldFrameMsP95=%3 worldFrameMsMax=%4").arg(worldFrames)
-           .arg(worldFrameMsMedian, 0, 'f', 2).arg(worldFrameMsP95, 0, 'f', 2).arg(worldFrameMsMax, 0, 'f', 2);
+           .arg(worldFrameMsMedian, 0, 'f', 2).arg(worldFrameMsP95, 0, 'f', 2).arg(worldFrameMsMax, 0, 'f', 2) +
+         QString(" doodadInstances=%1 doodadPrototypes=%2 doodadMeshes=%3 doodadMaterials=%4 doodadTextures=%5"
+                 " doodadGpuGeometryBytes=%6 doodadGpuTextureBytes=%7 doodadVisible=%8 doodadCulled=%9")
+           .arg(doodadInstances).arg(doodadPrototypes).arg(doodadMeshes).arg(doodadMaterials).arg(doodadTextures)
+           .arg(doodadGpuGeometryBytes).arg(doodadGpuTextureBytes).arg(doodadVisible).arg(doodadCulled) +
+         QString(" liveGameObjects=%1 liveTexture2D=%2 liveMeshes=%3 liveMaterials=%4")
+           .arg(liveGameObjects).arg(liveTexture2D).arg(liveMeshes).arg(liveMaterials);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -801,6 +807,20 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.worldFrameMsMedian = ms("worldFrameMsMedian");
   s.worldFrameMsP95 = ms("worldFrameMsP95");
   s.worldFrameMsMax = ms("worldFrameMsMax");
+  // Protocol 17 (DOODADS).
+  s.doodadInstances = count("doodadInstances");
+  s.doodadPrototypes = count("doodadPrototypes");
+  s.doodadMeshes = count("doodadMeshes");
+  s.doodadMaterials = count("doodadMaterials");
+  s.doodadTextures = count("doodadTextures");
+  s.doodadGpuGeometryBytes = count64("doodadGpuGeometryBytes");
+  s.doodadGpuTextureBytes = count64("doodadGpuTextureBytes");
+  s.doodadVisible = count("doodadVisible");
+  s.doodadCulled = count("doodadCulled");
+  s.liveGameObjects = count("liveGameObjects");
+  s.liveTexture2D = count("liveTexture2D");
+  s.liveMeshes = count("liveMeshes");
+  s.liveMaterials = count("liveMaterials");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -1515,6 +1535,21 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
   msg["maxWmoModelsPerLoad"] = c.maxWmoModelsPerLoad;
   msg["maxWmoGroupsPerLoad"] = c.maxWmoGroupsPerLoad;
   msg["maxWmoPlacementsPerLoad"] = c.maxWmoPlacementsPerLoad;
+  // DOODADS (protocol 17): only to a player that places them, and only when the load offers them. A protocol-17 player
+  // that finds no doodad budget loads the world without doodads (a protocol-16 host), and an older one is sent exactly
+  // the protocol-16 message.
+  const bool doodads = c.doodads && playerPlacesDoodads();
+  if (doodads)
+  {
+    msg["doodads"] = true;
+    msg["maxM2FileBytes"] = c.maxM2FileBytes;
+    msg["maxM2BytesPerLoad"] = c.maxM2BytesPerLoad;
+    msg["maxM2TextureBytes"] = c.maxM2TextureBytes;
+    msg["maxM2TextureBytesPerLoad"] = c.maxM2TextureBytesPerLoad;
+    msg["maxM2ModelsPerLoad"] = c.maxM2ModelsPerLoad;
+    msg["maxM2TexturesPerLoad"] = c.maxM2TexturesPerLoad;
+    msg["maxDoodadInstancesPerLoad"] = c.maxDoodadInstancesPerLoad;
+  }
   m_stats.terrainLoads++;
   m_stats.worldLoads++;
   LOG_INFO << "[unityipc] -> loadWorld load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId << c.mapDirectory
@@ -1529,6 +1564,12 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
                       " maxWmoTexturesPerLoad=%5 maxWmoModelsPerLoad=%6 maxWmoGroupsPerLoad=%7 maxWmoPlacementsPerLoad=%8")
                 .arg(c.maxWmoFileBytes).arg(c.maxWmoBytesPerLoad).arg(c.maxWmoTextureBytes).arg(c.maxWmoTextureBytesPerLoad)
                 .arg(c.maxWmoTexturesPerLoad).arg(c.maxWmoModelsPerLoad).arg(c.maxWmoGroupsPerLoad).arg(c.maxWmoPlacementsPerLoad)
+           << (doodads ? QString("doodads: maxM2FileBytes=%1 maxM2BytesPerLoad=%2 maxM2TextureBytes=%3 maxM2TextureBytesPerLoad=%4"
+                                 " maxM2ModelsPerLoad=%5 maxM2TexturesPerLoad=%6 maxDoodadInstancesPerLoad=%7")
+                           .arg(c.maxM2FileBytes).arg(c.maxM2BytesPerLoad).arg(c.maxM2TextureBytes).arg(c.maxM2TextureBytesPerLoad)
+                           .arg(c.maxM2ModelsPerLoad).arg(c.maxM2TexturesPerLoad).arg(c.maxDoodadInstancesPerLoad)
+                       : playerPlacesDoodads() ? QString("no doodads offered")
+                                               : QString("no doodads (a protocol %1 player)").arg(m_playerProtocol))
            << (camera ? "camera: " + describeCamera(c.camera) : QString());
   queueJson(msg);
   return true;
@@ -1894,14 +1935,32 @@ void UnityIpcServer::handleWorldProgress(const QJsonObject & msg)
   const QJsonValue bytes = msg.value("bytesReceived");
   r.bytesReceived = bytes.isDouble() ? (long long)bytes.toDouble() : -1LL;
   r.elapsedMs = msg.value("elapsedMs").toDouble(-1.0);
+  // Protocol 17 (DOODADS): the doodads apart from the world models; an older player sends none (empty, -1).
+  r.doodadPhase = msg.value("doodadPhase").toString();
+  r.doodadInstances = count("doodadInstances");
+  r.doodadPlaced = count("doodadPlaced");
+  r.doodadModels = count("doodadModels");
+  r.doodadModelsBuilt = count("doodadModelsBuilt");
+  r.doodadModelsFailed = count("doodadModelsFailed");
+  r.doodadFilesAsked = count("doodadFilesAsked");
+  r.doodadFilesAnswered = count("doodadFilesAnswered");
+  const QJsonValue doodadBytes = msg.value("doodadBytes");
+  r.doodadBytes = doodadBytes.isDouble() ? (long long)doodadBytes.toDouble() : -1LL;
   m_stats.worldProgress++;
+  // The player's phase names are appended, never passed through arg().
   LOG_INFO << "[unityipc] <- worldProgress load" << r.load << r.phase << QString("models %1 requested %2 parsed %3 built %4 failed %5"
                                                                              " unsupported %6 not requested %7; placed %8 of %9 (%10"
                                                                              " failed); files %11 of %12, %13 bytes; %14 ms")
                                                     .arg(r.models).arg(r.modelsRequested).arg(r.modelsParsed).arg(r.modelsBuilt)
                                                     .arg(r.modelsFailed).arg(r.modelsUnsupported).arg(r.modelsNotRequested)
                                                     .arg(r.placed).arg(r.placements).arg(r.placementsFailed).arg(r.filesAnswered)
-                                                    .arg(r.filesAsked).arg(r.bytesReceived).arg(r.elapsedMs, 0, 'f', 1);
+                                                    .arg(r.filesAsked).arg(r.bytesReceived).arg(r.elapsedMs, 0, 'f', 1)
+           << (r.doodadPhase.isEmpty() ? QString()
+                                       : "; doodads " + r.doodadPhase +
+                                           QString(": placed %1 of %2, models built %3 of %4 (%5 failed); files %6 of %7, %8 bytes")
+                                             .arg(r.doodadPlaced).arg(r.doodadInstances).arg(r.doodadModelsBuilt).arg(r.doodadModels)
+                                             .arg(r.doodadModelsFailed).arg(r.doodadFilesAnswered).arg(r.doodadFilesAsked)
+                                             .arg(r.doodadBytes));
   if (onWorldProgress)
     onWorldProgress(r);
 }
@@ -2680,7 +2739,42 @@ QString UnityIpcServer::TerrainTileReport::describeWorld() const
          QString(" shownMs=%1 fetchMs=%2 parseMs=%3 decodeMs=%4 buildMs=%5 buildMaxMs=%6 placeMs=%7")
            .arg(ms(worldShownMs)).arg(ms(worldFetchMs)).arg(ms(worldParseMs)).arg(ms(worldDecodeMs)).arg(ms(worldBuildMs))
            .arg(ms(worldBuildMaxMs)).arg(ms(worldPlaceMs)) +
-         " reason=\"" + worldReason + "\"";
+         " reason=\"" + worldReason + "\"" +
+         // Protocol 17: the whole world's assembly and the doodads in brief (describeDoodads has the rest).
+         (worldAssembly.isEmpty() ? QString() : " assembly=" + worldAssembly) +
+         (!hasDoodads ? QString(" doodads=-")
+                      : " doodads=" + doodadState +
+                          QString(" doodadsPlaced=%1 doodadInstances=%2 doodadModelsBuilt=%3 doodadModels=%4")
+                            .arg(doodadPlaced).arg(doodadInstances).arg(doodadModelsBuilt).arg(doodadModels));
+}
+
+QString UnityIpcServer::TerrainTileReport::describeDoodads() const
+{
+  if (!hasDoodads)
+    return QString();
+  const auto ms = [](double v) { return v < 0.0 ? QString("-") : QString::number(v, 'f', 1); };
+  // The player's free text is appended, never passed through arg().
+  return "doodads state=" + doodadState +
+         QString(" mddfRecords=%1 mddfPlacements=%2 wmoDoodadRecords=%3 wmoPlacementsWithDoodads=%4 sets=%5 instances=%6")
+           .arg(doodadMddfRecords).arg(doodadMddfPlacements).arg(doodadWmoRecords).arg(doodadWmoPlacements)
+           .arg(doodadSetsSent).arg(doodadInstances) +
+         QString(" placed=%1 failed=%2 unsupported=%3 notRequested=%4 ended=%5")
+           .arg(doodadPlaced).arg(doodadFailed).arg(doodadUnsupported).arg(doodadNotRequested).arg(doodadEnded) +
+         QString(" models=%1 modelsBuilt=%2 modelsFailed=%3 modelsUnsupported=%4 modelsNotRequested=%5 modelsPartial=%6")
+           .arg(doodadModels).arg(doodadModelsBuilt).arg(doodadModelsFailed).arg(doodadModelsUnsupported)
+           .arg(doodadModelsNotRequested).arg(doodadModelsPartial) +
+         QString(" textures=%1 texturesDecoded=%2 texturesMissing=%3 textureUses=%4 textureUploads=%5")
+           .arg(doodadTextures).arg(doodadTexturesDecoded).arg(doodadTexturesMissing).arg(doodadTextureUses)
+           .arg(doodadTextureUploads) +
+         QString(" fileBytes=%1 textureBytes=%2 gpuGeometryBytes=%3 gpuTextureBytes=%4")
+           .arg(doodadFileBytes).arg(doodadTextureBytes).arg(doodadGpuGeometryBytes).arg(doodadGpuTextureBytes) +
+         QString(" discoverMs=%1 firstVisibleMs=%2 fetchMs=%3 parseMs=%4 decodeMs=%5 buildMs=%6 buildMaxMs=%7 placeMs=%8"
+                 " placeMaxMs=%9")
+           .arg(ms(doodadDiscoverMs)).arg(ms(doodadFirstVisibleMs)).arg(ms(doodadFetchMs)).arg(ms(doodadParseMs))
+           .arg(ms(doodadDecodeMs)).arg(ms(doodadBuildMs)).arg(ms(doodadBuildMaxMs)).arg(ms(doodadPlaceMs))
+           .arg(ms(doodadPlaceMaxMs)) +
+         " readyMs=" + ms(doodadReadyMs) + QString(" list=%1").arg(doodadListSent) +
+         " reason=\"" + doodadReason + "\"";
 }
 
 int UnityIpcServer::TerrainTileReport::chunkState(const QString & name) const
@@ -2952,6 +3046,109 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
         r.worldList.push_back(pl);
       }
     }
+    // Protocol 17 (DOODADS): the whole world's assembly, and the doodads' outcome; their sets and models read up to
+    // TERRAIN_REPORT_DOODAD_SETS_MAX and TERRAIN_REPORT_DOODAD_MODELS_MAX.
+    r.worldAssembly = w.value("assembly").toString();
+    const QJsonValue doodadsValue = w.value("doodads");
+    if (doodadsValue.isObject())
+    {
+      const QJsonObject d = doodadsValue.toObject();
+      const auto dcount = [&d](const char * key) {
+        const QJsonValue v = d.value(QLatin1String(key));
+        return v.isDouble() ? (int)v.toDouble() : -1;
+      };
+      const auto dcount64 = [&d](const char * key) {
+        const QJsonValue v = d.value(QLatin1String(key));
+        return v.isDouble() ? (long long)v.toDouble() : -1LL;
+      };
+      r.hasDoodads = true;
+      r.doodadState = d.value("state").toString();
+      r.doodadReason = d.value("reason").toString();
+      r.doodadMddfRecords = dcount("mddfRecords");
+      r.doodadMddfPlacements = dcount("mddfPlacements");
+      r.doodadWmoRecords = dcount("wmoDoodadRecords");
+      r.doodadWmoPlacements = dcount("wmoPlacementsWithDoodads");
+      r.doodadInstances = dcount("instances");
+      r.doodadPlaced = dcount("placed");
+      r.doodadFailed = dcount("failed");
+      r.doodadUnsupported = dcount("unsupported");
+      r.doodadNotRequested = dcount("notRequested");
+      r.doodadEnded = dcount("ended");
+      r.doodadModels = dcount("models");
+      r.doodadModelsBuilt = dcount("modelsBuilt");
+      r.doodadModelsFailed = dcount("modelsFailed");
+      r.doodadModelsUnsupported = dcount("modelsUnsupported");
+      r.doodadModelsNotRequested = dcount("modelsNotRequested");
+      r.doodadModelsPartial = dcount("modelsPartial");
+      r.doodadTextures = dcount("textures");
+      r.doodadTexturesDecoded = dcount("texturesDecoded");
+      r.doodadTexturesMissing = dcount("texturesMissing");
+      r.doodadTextureUses = dcount("textureUses");
+      r.doodadTextureUploads = dcount("textureUploads");
+      r.doodadFileBytes = dcount64("fileBytes");
+      r.doodadTextureBytes = dcount64("textureBytes");
+      r.doodadGpuGeometryBytes = dcount64("gpuGeometryBytes");
+      r.doodadGpuTextureBytes = dcount64("gpuTextureBytes");
+      const QJsonObject dt = d.value("timings").toObject();
+      const auto dtiming = [&dt](const char * key) {
+        const QJsonValue v = dt.value(QLatin1String(key));
+        return v.isDouble() ? v.toDouble() : -1.0;
+      };
+      r.doodadDiscoverMs = dtiming("discoverMs");
+      r.doodadFirstVisibleMs = dtiming("firstVisibleMs");
+      r.doodadFetchMs = dtiming("fetchMs");
+      r.doodadParseMs = dtiming("parseMs");
+      r.doodadDecodeMs = dtiming("decodeMs");
+      r.doodadBuildMs = dtiming("buildMs");
+      r.doodadBuildMaxMs = dtiming("buildMaxMs");
+      r.doodadPlaceMs = dtiming("placeMs");
+      r.doodadPlaceMaxMs = dtiming("placeMaxMs");
+      r.doodadReadyMs = dtiming("readyMs");
+      const auto number = [](const QJsonObject & e, const char * key) {
+        const QJsonValue v = e.value(QLatin1String(key));
+        return v.isDouble() ? (int)v.toDouble() : -1;
+      };
+      const QJsonValue setsValue = d.value("sets");
+      if (setsValue.isArray())
+      {
+        const QJsonArray sets = setsValue.toArray();
+        r.doodadSetsSent = sets.size();
+        for (int i = 0; i < sets.size() && i < TERRAIN_REPORT_DOODAD_SETS_MAX; i++)
+        {
+          const QJsonObject e = sets.at(i).toObject();
+          TerrainTileReport::DoodadSet set;
+          set.uniqueId = (quint32)e.value("uniqueId").toDouble(0);
+          set.wmo = number(e, "wmo");
+          set.set = number(e, "set");
+          set.setName = e.value("setName").toString();
+          set.setCount = number(e, "setCount");
+          set.active = number(e, "active");
+          set.reason = e.value("reason").toString();
+          r.doodadSets.push_back(set);
+        }
+      }
+      // The player lists at most 64 sets and 128 models and states how many there were (setsTotal, listTotal).
+      r.doodadSetsSent = std::max<int>(r.doodadSetsSent, d.value("setsTotal").toInt(-1));
+      const QJsonValue modelsValue = d.value("list");
+      if (modelsValue.isArray())
+      {
+        const QJsonArray list = modelsValue.toArray();
+        r.doodadListSent = list.size();
+        for (int i = 0; i < list.size() && i < TERRAIN_REPORT_DOODAD_MODELS_MAX; i++)
+        {
+          const QJsonObject e = list.at(i).toObject();
+          TerrainTileReport::DoodadModel model;
+          model.fileDataID = number(e, "fileDataID");
+          model.state = e.value("state").toString();
+          model.reason = e.value("reason").toString();
+          model.instances = number(e, "instances");
+          model.placed = number(e, "placed");
+          r.doodadList.push_back(model);
+        }
+      }
+      r.doodadListSent = std::max<int>(r.doodadListSent, d.value("listTotal").toInt(-1));
+      m_stats.doodadReports++;
+    }
     m_stats.worldReports++;
   }
 
@@ -3016,6 +3213,38 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
     if (r.worldListSent > (int)r.worldList.size())
       LOG_WARNING << "[unityipc]    load" << r.load << ":" << r.worldListSent << "placements sent," << (int)r.worldList.size()
                   << "read (at most" << TERRAIN_REPORT_PLACEMENTS_MAX << ")";
+  }
+  // Protocol 17: the doodads on one line, then the first TERRAIN_REPORT_DOODAD_LOG_MAX models one per line (the player
+  // lists the models not built first) and the rest counted by state: a line per doodad would be thousands per load.
+  if (r.hasDoodads)
+  {
+    LOG_INFO << "[unityipc]    load" << r.load << r.describeDoodads();
+    std::map<QString, int> modelsNotLogged;
+    int modelsLogged = 0;
+    for (const TerrainTileReport::DoodadModel & m : r.doodadList)
+    {
+      if (modelsLogged >= TERRAIN_REPORT_DOODAD_LOG_MAX)
+      {
+        modelsNotLogged[m.state]++;
+        continue;
+      }
+      modelsLogged++;
+      LOG_INFO << "[unityipc]    load" << r.load << "doodad model" << m.fileDataID << m.state
+               << QString("placed %1 of %2").arg(m.placed).arg(m.instances) +
+                    (m.reason.isEmpty() ? QString() : " reason=\"" + m.reason + "\"");
+    }
+    if (!modelsNotLogged.empty())
+    {
+      QStringList counts;
+      for (const auto & n : modelsNotLogged)
+        counts << n.first + QString(" %1").arg(n.second);
+      LOG_INFO << "[unityipc]    load" << r.load << ":" << (int)r.doodadList.size() - modelsLogged
+               << "more doodad models, by state: " + counts.join(", ");
+    }
+    if (r.doodadSetsSent > (int)r.doodadSets.size() || r.doodadListSent > (int)r.doodadList.size())
+      LOG_INFO << "[unityipc]    load" << r.load << ":" << r.doodadSetsSent << "doodad sets and" << r.doodadListSent
+                  << "doodad models in the load," << (int)r.doodadSets.size() << "and" << (int)r.doodadList.size() << "listed (at most"
+                  << TERRAIN_REPORT_DOODAD_SETS_MAX << "and" << TERRAIN_REPORT_DOODAD_MODELS_MAX << ")";
   }
   if (onTerrainTileLoaded)
     onTerrainTileLoaded(r);
