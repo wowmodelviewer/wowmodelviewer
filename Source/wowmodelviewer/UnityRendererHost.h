@@ -32,6 +32,10 @@
 #endif
 #include <wx/timer.h>
 
+#include <atomic>
+#include <memory>
+#include <thread>
+
 #include <QString>
 
 #ifdef _WINDOWS
@@ -160,6 +164,12 @@ public:
   // own aspect, once, when built). Sent and waited for -- one frame of the player's at most -- like every resize of it.
   // On screen it has the viewport's size already.
   void sizePlayerForLoad();
+  // A load about to be sent while the content window (the Maps viewer's overhead map) covers the player: its window given
+  // the viewport's size now, by a thread of this process's own -- the move waits for the player's thread, which resizes its
+  // frame (about 45 ms), and this thread does not wait --, so putting it back when the world is shown finds it sized.
+  // resizeEmbeddedWindow waits for this move before it makes one: the two never land out of order. Not for a player
+  // Windows considers hung: it is sized as it is put back, as before.
+  void sizePlayerAhead();
   // The keyboard is in the player's window. Asked without asking that window anything: wxWindow::FindFocus sends it
   // WM_GETDLGCODE to find a wx window for it, which waits on the player's thread (once per frame it draws).
   bool playerHasKeyboard();
@@ -264,6 +274,19 @@ private:
   // considers hung (no message taken for 5 s, e.g. a long build): this thread would hang with it. On screen it is then
   // tried again from the timer until it responds; parked, as it is put back.
   void resizeEmbeddedWindow(bool puttingBack = false);
+  // sizePlayerAhead's move: its thread, the size it moves to, and (set by that thread) whether it is over and how long
+  // it waited for the player's thread.
+  struct AheadMove
+  {
+    int width = 0;
+    int height = 0;
+    std::atomic<bool> done{ false };
+    std::atomic<double> ms{ 0.0 };
+  };
+  std::thread m_aheadThread;
+  std::shared_ptr<AheadMove> m_ahead;
+  // That move waited for -- not while it still waits on a player Windows considers hung (false: it is not over).
+  bool finishAheadMove();
 
   UnityIpcServer * m_ipc = nullptr; // owned
 

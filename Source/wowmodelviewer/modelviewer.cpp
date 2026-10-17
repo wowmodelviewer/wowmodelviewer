@@ -4097,6 +4097,9 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
   command.doodads = world && ipc->playerPlacesDoodads();
   // STREAMING (protocol 18): a tile map's world load to a player that streams, when asked for.
   command.streaming = streaming && world && !noTile && command.doodads && ipc->playerStreams();
+  // What it loads goes into the viewport, which the overhead map covers until then: the player's window sized for it now,
+  // without waiting for the player (so the overhead map's going does not wait for it either).
+  unityRendererHost->sizePlayerAhead();
   if (!(world ? ipc->sendLoadWorld(command) : ipc->sendLoadTerrainTile(command)))
     return refuse("the load could not be sent to the player");
   // Raised only now that the load is out: the serial counts the loads the player was sent.

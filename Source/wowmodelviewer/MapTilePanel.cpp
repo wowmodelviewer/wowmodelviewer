@@ -506,7 +506,11 @@ void MapTileGrid::footprintKey(wxKeyEvent & event)
 
 void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
 {
-  wxAutoBufferedPaintDC dc(this);
+  // Buffered in a bitmap of the screen's own format, kept from paint to paint (m_paintBuffer).
+  const wxSize bufferSize(std::max(1, GetClientSize().x), std::max(1, GetClientSize().y));
+  if (!m_paintBuffer.IsOk() || m_paintBuffer.GetSize() != bufferSize)
+    m_paintBuffer = wxBitmap(bufferSize.x, bufferSize.y);
+  wxBufferedPaintDC dc(this, m_paintBuffer);
   const UiStyle::Palette & p = UiStyle::palette();
   dc.SetBackground(wxBrush(p.panelBackground));
   dc.Clear();
@@ -1041,8 +1045,10 @@ bool MapTilePanel::ApplyTargetFields()
 void MapTilePanel::setLabel(wxStaticText * label, const wxString & text)
 {
   const int width = std::max(FromDIP(100), GetClientSize().x - 2 * FromDIP(UiStyle::S));
-  if (label->GetLabel() != text || label->GetSize().x != width)
+  std::pair<wxString, int> & set = m_labelsSet[label];
+  if (set.first != text || set.second != width)
   {
+    set = std::make_pair(text, width);
     label->SetLabel(text);
     label->Wrap(-1);
     label->Wrap(width);

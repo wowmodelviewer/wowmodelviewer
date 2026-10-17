@@ -1654,7 +1654,15 @@ void MapsViewer::OnWorldProgress(const UnityIpcServer::WorldProgress & p)
     return;
   m_progress = p;
   m_worldDetail = progressLine(p);
-  changed();
+  // Shown once for the progress that came together (several can come in one poll): a GUI update that changes the
+  // panel's line count lays the Browse pane out again, and two in a row were one 74 ms stall.
+  if (m_progressShowQueued)
+    return;
+  m_progressShowQueued = true;
+  m_viewer->CallAfter([this]() {
+    m_progressShowQueued = false;
+    changed();
+  });
 }
 
 void MapsViewer::OnStreamState(const UnityIpcServer::StreamState & s)
