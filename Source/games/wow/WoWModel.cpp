@@ -3125,6 +3125,14 @@ void WoWModel::setGeosetDisplayById(int geosetId, bool display)
   }
 }
 
+bool WoWModel::hasGeoset(int geosetId) const
+{
+  for (const auto * g : rawGeosets)
+    if (g->id == geosetId)
+      return true;
+  return false;
+}
+
 void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 {
   // Hide geosets that were set by old creatureGeosetData:

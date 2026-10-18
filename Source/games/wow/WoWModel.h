@@ -391,6 +391,7 @@ public:
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setGeosetDisplayById(int geosetId, bool display); // toggle the exact geoset id(s); never id 0
+  bool hasGeoset(int geosetId) const; // whether the model itself (no merged model) has a geoset with this id
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
 
   WoWModel* mergeModel(QString & name, int type = 1, bool noRefresh = false);
