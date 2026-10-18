@@ -28,6 +28,8 @@
 #define MAPTILEPANEL_H
 
 #include <functional>
+#include <map>
+#include <utility>
 #include <vector>
 
 #include <wx/wxprec.h>
@@ -81,6 +83,15 @@ public:
   static const int RepaintMs = 100;
   // At most this long drawing pictures into the mosaic in one paint (one 60 Hz frame); the rest at the next repaint.
   static const int MosaicPaintBudgetMs = 16;
+  // A viewer switch's paint (ModelViewer::FinishViewerSwitch, around its PaintNow): the minimap pictures that came while
+  // Maps was left wait for the next repaint (OnPaint).
+  void SetSwitchPaint(bool on) { m_switchPaint = on; }
+  // Pictures that came while the overhead map was away, not yet drawn into the mosaic: a viewer switch in turns draws them
+  // on a turn of its own before its repaint (prepareMosaic: MosaicPaintBudgetMs at most, and the grid's picture drawn
+  // again with them while the grid keeps the size it was drawn at -- the switch's paint, which keeps the picture, then
+  // shows them; sized anew by the switch, its paint draws the grid again, the mosaic already brought up).
+  bool picturesWaiting() const;
+  void prepareMosaic();
 
 private:
   void layoutCells() const;
@@ -116,6 +127,18 @@ private:
   int m_mx0 = 0, m_my0 = 0, m_mx1 = -1, m_my1 = -1;
   std::vector<bool> m_inMosaic;
   wxTimer m_repaintTimer;
+  // The paint's buffer, a bitmap of the screen's own format: wx's own buffer is a DIB, which goes to the window through
+  // StretchDIBits -- most of a paint's time on a large map.
+  wxBitmap m_paintBuffer;
+  // The grid's own picture, and what it showed when drawn (OnPaint): all of it, and all but the minimap pictures in it
+  // (gridKey); the mosaic's changes counted.
+  wxBitmap m_gridPicture;
+  std::vector<long long> m_gridKey;
+  std::vector<long long> m_gridLayoutKey;
+  int m_mosaicVersion = 0;
+  bool m_switchPaint = false;
+  std::vector<long long> gridKey(bool withPictures) const;
+  void paintGrid(wxDC & dc);
   bool m_hoverWorld = false;         // the footprint: the world point under the mouse
   double m_hoverWX = 0.0, m_hoverWY = 0.0;
 };
@@ -127,6 +150,8 @@ public:
 
   // MapsViewer changed (its onChanged): the labels and the controls follow.
   void Refresh2();
+  // STREAMING (protocol 18): the session's line alone (MapsViewer::onStreamChanged), laid out only when its height changed.
+  void StreamChanged();
   wxChoice * viewChoice() const { return m_view; }
   wxChoice * cameraChoice() const { return m_camera; }
   UiButton * clearButton() const { return m_clear; }
@@ -138,6 +163,8 @@ public:
 
 private:
   void setLabel(wxStaticText * label, const wxString & text);
+  // STREAMING: the session's line set (true when it appeared or went: the panel needs laying out).
+  void setStreamLine();
 
   MapsViewer * m_maps;
   wxStaticText * m_title = nullptr;
@@ -150,6 +177,7 @@ private:
   UiButton * m_enter = nullptr;
   UiButton * m_back = nullptr;
   wxStaticText * m_tile = nullptr;
+  wxStaticText * m_stream = nullptr;   // STREAMING: the session's line
   wxChoice * m_camera = nullptr;
   wxStaticText * m_cameraNote = nullptr;
   wxChoice * m_view = nullptr;
@@ -158,6 +186,9 @@ private:
   bool m_refreshQueued = false;   // a size event's refresh waits (one at a time)
   int m_laidOutHeight = -1;       // the height the Browse pane last laid the panel out for
   bool m_fieldsEdited = false;    // the user typed in a target field since the target was last shown in them
+  // What setLabel last gave each label: its text (before wrapping) and the width it was wrapped to. A label set repaints
+  // at once, and once wrapped its own text and width are not these: compared with them, every refresh set every label.
+  std::map<wxStaticText *, std::pair<wxString, int>> m_labelsSet;
 };
 
 #endif // MAPTILEPANEL_H

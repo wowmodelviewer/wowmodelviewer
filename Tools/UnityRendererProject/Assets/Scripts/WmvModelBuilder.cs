@@ -3523,6 +3523,50 @@ public static class WmvModelBuilder
     /// exactly as it was, and the lifecycle self-test reads a model texture's texel back), and the
     /// world-model builder turns it on,
     /// because nothing reads a world-model texel and a modern WMO uploads hundreds of megabytes.</summary>
+    /// <summary>
+    /// Stage 08 (docs/world-viewer/08-streaming.md 1.9): a texture of a prepared image's own DXT blocks (BlpBlocks, flipped for
+    /// the model convention already), every stored level as stored -- no CPU decode, no generated mips, no readable copy. The
+    /// colour domain follows CreateTexture's: UNorm (the authored values) unless AuthoredTextureDomain is off (sRGB). Repeat
+    /// and bilinear as CreateTexture's; the caller sets the wrap.
+    /// </summary>
+    internal static Texture2D CreateBlockTexture(BlpBlockChain chain, string name)
+    {
+        UnityEngine.Experimental.Rendering.GraphicsFormat f;
+        switch (chain.Format)
+        {
+            case BlpPixelFormat.Dxt1:
+                f = AuthoredTextureDomain ? UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT1_UNorm
+                                          : UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT1_SRGB;
+                break;
+            case BlpPixelFormat.Dxt3:
+                f = AuthoredTextureDomain ? UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT3_UNorm
+                                          : UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT3_SRGB;
+                break;
+            default:
+                f = AuthoredTextureDomain ? UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT5_UNorm
+                                          : UnityEngine.Experimental.Rendering.GraphicsFormat.RGBA_DXT5_SRGB;
+                break;
+        }
+        var flags = UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels |
+                    (chain.Levels > 1 ? UnityEngine.Experimental.Rendering.TextureCreationFlags.MipChain
+                                      : UnityEngine.Experimental.Rendering.TextureCreationFlags.None);
+        var tex = new Texture2D(chain.Width, chain.Height, f, chain.Levels, flags) { name = name };
+        try
+        {
+            for (int m = 0; m < chain.Levels; m++)
+                tex.SetPixelData(chain.Data, m, chain.LevelOffsets[m]);
+            tex.Apply(false, true);
+        }
+        catch
+        {
+            UnityEngine.Object.Destroy(tex);
+            throw;
+        }
+        tex.wrapMode = TextureWrapMode.Repeat;
+        tex.filterMode = FilterMode.Bilinear;
+        return tex;
+    }
+
     internal static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha, bool makeNoLongerReadable = false)
     {
         // ROW ORDER: a BLP stores its rows top-down (row 0 = top of the image), but a Unity

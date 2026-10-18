@@ -44,18 +44,18 @@ builder, the orbit camera, and the IPC asset path.
 
 ## 3. The gap, feature by feature
 
-| Feature of the video | Today (after Stage 07) | Milestone |
+| Feature of the video | Today (after Stage 08) | Milestone |
 |---|---|---|
 | Map list with search | done | 05 |
 | Overhead map from minimap images | done in 05 (see 4) | 05 |
 | Target position, tile and world coordinates, typed coordinates | done in 05 | 05 |
-| Load World at the target | one tile at the target | 05 (one tile), 08 (the tiles around) |
-| Loading progress by file count | the state line only | 08 (with streaming, where counts matter) |
+| Load World at the target | done in 08: the 3 x 3 around the target, streamed with the camera | 05 (one tile), 08 (the tiles around) |
+| Loading progress by file count | done in 08: files answered of asked so far, tiles resident and loading (the Maps panel), the overhead map's tile rings | 08 (with streaming, where counts matter) |
 | Free-flying camera | done in 05 | 05 |
 | World-model-only maps (instances) entered from Maps | done in 06 (old-form WDTs: unsupported) | 06 |
 | World models placed on terrain (MODF) | done in 06 (the loaded tile's) | 06 |
 | Doodads (MDDF, WMO doodad sets) | done in 07 (the loaded tile's MDDF and the placed world models' sets; static, in their rest pose) | 07 |
-| Several tiles, streaming around the camera | no (single tile) | 08 |
+| Several tiles, streaming around the camera | done in 08 (3 x 3 around the camera, kept within 2 tiles, at most 16 resident; Stormwind flown through on four clients) | 08 |
 | Liquids (MH2O, WMO MLIQ) | no | 09 |
 | World-model interior lighting (vertex colours, lights) | no | 10 |
 | Animated doodads and particle effects in the world | no | 11 |

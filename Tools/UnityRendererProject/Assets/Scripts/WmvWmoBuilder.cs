@@ -213,6 +213,8 @@ public class WmvRuntimeMapObject
     /// the geometry it uploaded, and the textures with their mip chains (RGBA32, 4/3 of the base level; GPU
     /// only, no CPU-readable copy is kept).</summary>
     public long ManagedBytes, GpuGeometryBytes, GpuTextureBytes;
+    /// <summary>Stage 08: textures uploaded as their own DXT blocks (a world prototype's prepared images).</summary>
+    public int BlockTextures;
 
     /// <summary>World models built and not yet disposed (see WmvRuntimeModel.Live for why a count).</summary>
     public static int Live { get { return live; } }
@@ -1144,19 +1146,31 @@ public static class WmvWmoBuilder
         WmvWmoTexture t;
         if (!textures.TryGetValue(fileDataID, out t) || t == null || t.Image == null)
             return null;
-        long key = ((long)fileDataID << 3) | (dropAlpha ? 4L : 0L) | (clampU ? 2L : 0L) | (clampV ? 1L : 0L);
+        // Stage 08: a world prototype's image may be its own DXT blocks (BlpBlocks.PrepareForModels). Their alpha needs no
+        // opaque variant -- a material that drops it reads none -- so one upload per wrap serves both.
+        bool blocks = t.Image.Blocks != null;
+        long key = ((long)fileDataID << 3) | (dropAlpha && !blocks ? 4L : 0L) | (clampU ? 2L : 0L) | (clampV ? 1L : 0L);
         Texture2D tex;
         if (textureCache.TryGetValue(key, out tex))
             return tex;
-        tex = WmvModelBuilder.CreateTexture(t.Image, objectName + "_tex" + fileDataID + (dropAlpha ? "_opaque" : "") +
-                                            (clampU ? "_clampU" : "") + (clampV ? "_clampV" : ""), dropAlpha, true);
+        string name = objectName + "_tex" + fileDataID + (dropAlpha && !blocks ? "_opaque" : "") + (clampU ? "_clampU" : "") +
+                      (clampV ? "_clampV" : "") + (blocks ? "_" + t.Image.Encoding : "");
+        tex = blocks ? WmvModelBuilder.CreateBlockTexture(t.Image.Blocks, name) : WmvModelBuilder.CreateTexture(t.Image, name, dropAlpha, true);
         owned.Add(tex);     // owned before anything else can throw (see Build)
         // Repeat is the format's default addressing; F_CLAMP_S / F_CLAMP_T switch an axis to clamp.
         tex.wrapModeU = clampU ? TextureWrapMode.Clamp : TextureWrapMode.Repeat;
         tex.wrapModeV = clampV ? TextureWrapMode.Clamp : TextureWrapMode.Repeat;
         textureCache[key] = tex;
-        rt.GpuTextureBytes += (long)t.Image.Width * t.Image.Height * 4 * 4 / 3;
-        rt.ManagedBytes += (long)t.Image.Width * t.Image.Height * 4;   // CreateTexture's row-flipped copy
+        if (blocks)
+        {
+            rt.GpuTextureBytes += t.Image.Blocks.Bytes;     // the stored levels, exactly
+            rt.BlockTextures++;
+        }
+        else
+        {
+            rt.GpuTextureBytes += (long)t.Image.Width * t.Image.Height * 4 * 4 / 3;
+            rt.ManagedBytes += (long)t.Image.Width * t.Image.Height * 4;   // CreateTexture's row-flipped copy
+        }
         return tex;
     }
 

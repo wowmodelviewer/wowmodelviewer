@@ -19,6 +19,8 @@
     #include <wx/wx.h>
 #endif
 
+#include <string>
+
 class MapsViewer;
 class MapTileGrid;
 class UiButton;
@@ -33,6 +35,8 @@ public:
   void Refresh2();
   // A minimap picture came (MapsViewer::onImagesChanged).
   void ImagesChanged();
+  // STREAMING (protocol 18): the session's tiles changed (MapsViewer::onStreamChanged): the grid repaints, nothing else.
+  void StreamChanged();
   MapTileGrid * grid() const { return m_grid; }
   wxCheckBox * wholeGridBox() const { return m_wholeBox; }
   UiButton * enterButton() const { return m_enter; }
@@ -46,6 +50,7 @@ private:
   wxCheckBox * m_wholeBox = nullptr;
   UiButton * m_enter = nullptr;
   MapTileGrid * m_grid = nullptr;
+  std::string m_streamOverlay;          // what the grid last drew of the streaming session (StreamChanged)
   wxStaticText * m_hover = nullptr;
   wxStaticText * m_target = nullptr;
 };

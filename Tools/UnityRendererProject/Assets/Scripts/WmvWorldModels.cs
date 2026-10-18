@@ -73,6 +73,13 @@ public sealed class WmvWorldScene
     public readonly Dictionary<uint, WmvDoodadPrototype> DoodadPrototypes = new Dictionary<uint, WmvDoodadPrototype>();
     public readonly List<WmvDoodadInstance> Doodads = new List<WmvDoodadInstance>();
     public WmvDoodadTextures DoodadTextures;
+    /// <summary>Streaming (stage 08): world-model and doodad prototypes built for the one tile whose own load could not get
+    /// all of them (a group file or texture refused, stale, or past the load's count cap) -- never the session's: not in
+    /// Prototypes / DoodadPrototypes (one per FileDataID, the session's), never pooled; each disposed once no job will place
+    /// from it and no instance shows it (WmvTerrainSessionStream.cs, DisposeUnusedPrivate), or with the scene
+    /// (DisposeWorldScene).</summary>
+    public readonly List<WmvWorldPrototype> PrivatePrototypes = new List<WmvWorldPrototype>();
+    public readonly List<WmvDoodadPrototype> PrivateDoodadPrototypes = new List<WmvDoodadPrototype>();
     /// <summary>The world box of what is placed (game frame): a WMO-only scene's targets and its overview.</summary>
     public bool HasBox;
     public WorldPoint BoxMin, BoxMax;

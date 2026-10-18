@@ -73,6 +73,21 @@ static class Program
         else
             failures += DoodadCorpusTests.Run(corpus, Console.WriteLine);
 
+        // Stage 08: the block-compressed upload's flip, synthetic, then on every whole BLP2 file of the world07 corpus.
+        Console.WriteLine("== BlpBlockTests (DXT block flip for block-compressed uploads; synthetic)");
+        failures += BlpBlockTests.RunAll(Console.WriteLine);
+        Console.WriteLine("== BlpBlockCorpusTests (the flip on real client textures)");
+        if (string.IsNullOrEmpty(corpus))
+            Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
+        else
+            failures += BlpBlockTests.Run(corpus, Console.WriteLine);
+        // Stage 08: the seams of the streaming region's tiles, built against one origin, on the four clients.
+        Console.WriteLine("== StreamSeamTests (neighbouring tiles' shared edges against one origin)");
+        if (string.IsNullOrEmpty(corpus))
+            Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
+        else
+            failures += StreamSeamTests.Run(corpus, Console.WriteLine);
+
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))
         {

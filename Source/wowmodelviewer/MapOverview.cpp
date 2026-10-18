@@ -11,9 +11,36 @@
 #include "UiControls.h"
 #include "UiStyle.h"
 
+#include <algorithm>
+#include <cmath>
+#include <string>
+#include <vector>
+
 namespace
 {
   wxString qs(const QString & s) { return wxString(s.toStdWString()); }
+
+  // What the grid draws of a streaming session: each tile's ring (resident, loading or failed) and the camera's dot (to
+  // about 8 yards, under a pixel at any zoom the grid offers).
+  std::string streamOverlay(const MapsViewer * maps)
+  {
+    if (!maps->streamOn())
+      return std::string();
+    const UnityIpcServer::StreamState & st = maps->streamState();
+    std::vector<std::string> rings;
+    for (const UnityIpcServer::StreamTile & t : st.tiles)
+    {
+      const char kind = (t.state == "built" || t.state == "settled") ? 'r' : t.state == "failed" ? 'f' : 'l';
+      rings.push_back(std::to_string(t.x) + "_" + std::to_string(t.y) + kind);
+    }
+    std::sort(rings.begin(), rings.end());
+    std::string s;
+    for (const std::string & r : rings)
+      s += r + ";";
+    if (st.cameraTileX >= 0)
+      s += "@" + std::to_string((long long)std::floor(st.cameraX / 8.0)) + "," + std::to_string((long long)std::floor(st.cameraY / 8.0));
+    return s;
+  }
 }
 
 MapOverview::MapOverview(wxWindow * parent, MapsViewer * maps)
@@ -58,6 +85,18 @@ MapOverview::MapOverview(wxWindow * parent, MapsViewer * maps)
 void MapOverview::ImagesChanged()
 {
   m_grid->ImagesChanged();
+}
+
+void MapOverview::StreamChanged()
+{
+  // Repainted only when what it draws of the session changed -- a tile's ring or the camera's dot --, not on every
+  // streamState (four a second, each a whole repaint of the overhead map and its minimap pictures).
+  std::string overlay = streamOverlay(m_maps);
+  if (overlay == m_streamOverlay)
+    return;
+  m_streamOverlay = std::move(overlay);
+  if (IsShownOnScreen())
+    m_grid->Refresh(false);
 }
 
 void MapOverview::Refresh2()

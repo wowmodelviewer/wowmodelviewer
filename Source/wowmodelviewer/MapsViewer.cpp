@@ -99,7 +99,7 @@ bool MapsViewer::clientCurrent(int epoch, quint64 generation) const
 
 // ---------------------------------------------------------------- the viewer mode and the client
 
-void MapsViewer::Entered()
+void MapsViewer::Entered(bool pumpNow)
 {
   m_active = true;
   // The view the user chose, again, for a player that was restarted while another viewer was on.
@@ -111,9 +111,12 @@ void MapsViewer::Entered()
     m_viewSent = view;
   }
   LOG_INFO << "[maps] entered" << (m_mapId >= 0 ? QString("with map %1 picked").arg(m_mapId) : QString("with no map picked"));
-  pumpMinimaps();
+  if (pumpNow)
+    pumpMinimaps();
   changed();
 }
+
+void MapsViewer::PumpAfterEntry() { pumpMinimaps(); }
 
 void MapsViewer::Left()
 {
@@ -1120,6 +1123,28 @@ bool MapsViewer::targetOnShownTile() const
   return m_hasTarget && m_shownX >= 0 && m_shownMap == m_mapId && tileOf(m_targetX, m_targetY, tx, ty) && tx == m_shownX && ty == m_shownY;
 }
 
+QString MapsViewer::streamIdleLine() const
+{
+  // Short lines: the Browse pane is narrow and each line is ellipsized, never wrapped.
+  if (worldModelMap())
+    return "Streaming: not used here --\na world-model map is one model.";
+  if (qgetenv("WMV_STREAMING") == "0")
+    return "Streaming is off (WMV_STREAMING=0):\nEnter world loads one tile.";
+  const UnityIpcServer * s = ipc();
+  if (s && s->isUnityReady() && !s->playerStreams())
+    return "Streaming: this Unity renderer loads\none tile (protocol 18 streams).";
+  return "Streaming: Enter world loads the tiles\naround the camera; they follow it\nas it flies.";
+}
+
+bool MapsViewer::targetHeldByStream() const
+{
+  int tx, ty;
+  if (!m_hasTarget || m_shownMap != m_mapId || !tileOf(m_targetX, m_targetY, tx, ty))
+    return false;
+  const QString state = streamTileState(tx, ty);
+  return !state.isEmpty() && state != "failed";
+}
+
 UnityIpcServer::WorldCamera MapsViewer::startCamera()
 {
   // The world model's own start point (the player's, from its geometry): x, y, z and the heading are the player's.
@@ -1139,11 +1164,16 @@ UnityIpcServer::WorldCamera MapsViewer::flyCameraOnShownTile()
   if (m_shownGlobal)
     return m_hasTarget ? flyCameraAtTarget() : startCamera();
   // At the target when it is on the tile on screen; else at that tile's middle, on the ground (a target typed for another
-  // tile waits for Enter world, and the free camera never leaves the tile it stands on).
-  if (targetOnShownTile())
+  // tile waits for Enter world, and the free camera never leaves the tile it stands on). A streaming session (protocol 18):
+  // at the target when the session holds its tile, else at the middle of the tile the camera is over (the entry's tile
+  // may have left the region).
+  if (streamOn() ? targetHeldByStream() : targetOnShownTile())
     return flyCameraAtTarget();
   UnityIpcServer::WorldCamera c = flyCameraAtTarget();
-  pointIn(m_shownX, m_shownY, 0.5, 0.5, c.x, c.y);
+  if (streamOn() && m_stream.cameraTileX >= 0)
+    pointIn(m_stream.cameraTileX, m_stream.cameraTileY, 0.5, 0.5, c.x, c.y);
+  else
+    pointIn(m_shownX, m_shownY, 0.5, 0.5, c.x, c.y);
   c.hasZ = false;
   c.z = 0.0;
   return c;
@@ -1226,9 +1256,11 @@ void MapsViewer::EnterWorld()
   tileOf(m_targetX, m_targetY, tx, ty);
   UnityIpcServer::WorldCamera camera = flies ? flyCameraAtTarget() : UnityIpcServer::WorldCamera();
   m_cameraMode = CameraMode::Fly;
-  // The target's tile on screen already (its world models perhaps still loading): only the camera moves.
-  if ((m_tilePhase == TilePhase::Loaded || (m_tilePhase == TilePhase::Loading && m_loadShown)) && m_shownX == tx && m_shownY == ty &&
-      m_shownMap == m_mapId)
+  // The target's tile on screen already (its world models perhaps still loading): only the camera moves. In a streaming
+  // session (protocol 18) a tile the session holds instead -- built, or loading (the camera stands on it once it is built)
+  // -- and the region follows the camera there; the entry's tile only while the session still holds it.
+  const bool held = streamOn() ? targetHeldByStream() : (m_shownX == tx && m_shownY == ty);
+  if ((m_tilePhase == TilePhase::Loaded || (m_tilePhase == TilePhase::Loading && m_loadShown)) && m_shownMap == m_mapId && held)
   {
     if (!flies)
     {
@@ -1247,7 +1279,11 @@ void MapsViewer::EnterWorld()
   }
   QElapsedTimer clock;
   clock.start();
-  const int load = worldModels ? m_viewer->RequestWorld(m_mapId, tx, ty, false, 0, why, true, flies ? &camera : nullptr)
+  // STREAMING (protocol 18): Enter world streams the tiles around the camera, to a player that can (WMV_STREAMING=0: the
+  // single tile, as before).
+  const bool streaming = qgetenv("WMV_STREAMING") != "0";
+  m_stream = UnityIpcServer::StreamState();
+  const int load = worldModels ? m_viewer->RequestWorld(m_mapId, tx, ty, false, 0, why, true, flies ? &camera : nullptr, streaming)
                                : m_viewer->RequestTerrainTile(m_mapId, tx, ty, why, true, flies ? &camera : nullptr);
   m_timings.requestMs = msOf(clock);
   if (load <= 0)
@@ -1263,6 +1299,10 @@ void MapsViewer::EnterWorld()
   m_load = load;
   m_loadShown = false;
   m_progress = UnityIpcServer::WorldProgress();
+  m_stream = UnityIpcServer::StreamState();
+  // STREAMING: the streaming lines appear now, in this update's layout, so the session's first streamState only relabels
+  // them (shown by it, they laid the Browse pane out and repainted it in one GUI round: 30-45 ms more at Enter world).
+  m_streamDetail = m_viewer->m_streamSession ? "Tiles: starting (around " + tileName(tx, ty) + ")" : QString();
   m_worldDetail = worldModels ? QString("Its world models are read once the tile is shown.") : QString();
   m_doodadDetail.clear();
   m_tilePhase = TilePhase::Loading;
@@ -1296,6 +1336,8 @@ void MapsViewer::BackToMap()
 
 void MapsViewer::leaveWorld()
 {
+  m_stream = UnityIpcServer::StreamState();
+  m_streamDetail.clear();
   m_worldShown = false;
   m_entering = false;
   m_cameraRequest = 0;
@@ -1488,6 +1530,9 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
   if (r.status != "built")
   {
     m_load = 0;
+    // (A streaming session ends with its entry's load: its line and the overhead map's rings go with it.)
+    m_stream = UnityIpcServer::StreamState();
+    m_streamDetail.clear();
     // Enter world ended without a world: the overhead map stays, with why (a load shown before it ended keeps what it put
     // on screen until a newer load or a clear takes it away); the camera it carried does not come now.
     m_entering = false;
@@ -1612,7 +1657,48 @@ void MapsViewer::OnWorldProgress(const UnityIpcServer::WorldProgress & p)
     return;
   m_progress = p;
   m_worldDetail = progressLine(p);
-  changed();
+  // Shown once for the progress that came together (several can come in one poll): a GUI update that changes the
+  // panel's line count lays the Browse pane out again, and two in a row were one 74 ms stall.
+  if (m_progressShowQueued)
+    return;
+  m_progressShowQueued = true;
+  m_viewer->CallAfter([this]() {
+    m_progressShowQueued = false;
+    changed();
+  });
+}
+
+void MapsViewer::OnStreamState(const UnityIpcServer::StreamState & s)
+{
+  if (m_load == 0 || s.load != m_load)
+    return;
+  m_stream = s;
+  // The files the session asked for so far: answered of asked (a denominator that grows as the files name more files,
+  // never an estimate).
+  const auto mb = [](long long b) { return QString::number(b / 1048576.0, 'f', 1); };
+  // Four short lines, the counts first (the Browse pane is narrow and each line is ellipsized; MapTilePanel keeps their
+  // height fixed and puts the whole text in the tooltip). Before the entry's tile is committed the session has no camera
+  // tile yet: the entry's is named.
+  const QString around = s.cameraTileX >= 0 ? tileName(s.cameraTileX, s.cameraTileY) : tileName(m_tileX, m_tileY);
+  m_streamDetail = QString("Tiles: %1 resident, %2 loading%3 (around %4)").arg(s.tilesResident).arg(s.tilesLoading)
+                     .arg(s.tilesFailed > 0 ? QString(", %1 failed").arg(s.tilesFailed) : QString()).arg(around) +
+                   QString("\n%1 out; files %2 of %3 asked so far (%4 MB)").arg(s.requestsOut).arg(s.filesAnswered)
+                     .arg(s.filesAsked).arg(mb(s.bytesReceived)) +
+                   QString("\nGPU %1 MB textures, %2 MB geometry").arg(mb(s.gpuTextureBytes)).arg(mb(s.gpuGeometryBytes)) +
+                   QString("\nPools %1 MB; evicted %2 model(s), %3 texture(s)").arg(mb(s.poolBytes)).arg(s.prototypesEvicted)
+                     .arg(s.texturesEvicted);
+  if (onStreamChanged)
+    onStreamChanged();
+}
+
+QString MapsViewer::streamTileState(int x, int y) const
+{
+  if (!streamOn())
+    return QString();
+  for (const UnityIpcServer::StreamTile & t : m_stream.tiles)
+    if (t.x == x && t.y == y)
+      return t.state;
+  return QString();
 }
 
 void MapsViewer::ClearTerrain()

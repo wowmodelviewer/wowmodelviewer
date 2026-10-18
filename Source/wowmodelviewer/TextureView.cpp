@@ -395,7 +395,7 @@ void TextureView::schedule()
 void TextureView::OnIdle(wxIdleEvent & event)
 {
   event.Skip();
-  if (!m_decodePending || !m_active || m_shutdown || m_keysRepeating)
+  if (!m_decodePending || !m_active || m_shutdown || m_keysRepeating || m_decodeHeld)
     return;
   m_decodePending = false;
   decodeNow();
@@ -611,14 +611,22 @@ void TextureView::emptyState()
     m_preview->setMessage(_("Select a texture in Browse"));
 }
 
-void TextureView::entered()
+void TextureView::entered(bool holdDecode)
 {
   m_active = true;
+  m_decodeHeld = holdDecode;
   if (selection() == Selection::None)
     emptyState();
-  else if (m_decodePending)
+  else if (m_decodePending && !m_decodeHeld)
     schedule();
   showInfo();
+}
+
+void TextureView::resumeDecode()
+{
+  m_decodeHeld = false;
+  if (m_decodePending)
+    schedule();   // (returns while not in Textures)
 }
 
 void TextureView::left()
@@ -626,6 +634,7 @@ void TextureView::left()
   // A decode on its way waits for the next entry; what the preview derives from the texture is freed
   // (the texture itself stays, so coming back shows it at once).
   m_active = false;
+  m_decodeHeld = false;
   m_keysRepeating = false;
   m_preview->setNote(wxEmptyString);
   if (m_notice)

@@ -3501,27 +3501,53 @@ static GameFile * resolveGameFileArg(const QString & arg)
 // g_pumpBusy, when set, is handed how long each round kept this thread busy: the poll and the wx queue, everything this
 // thread ran between two sleeps.
 static std::function<void(double)> g_pumpBusy;
+// THE BUSY STRETCH, when g_pumpStretch is set: what this thread ran with no sleep between, handed over as one -- the event
+// loop would run it so. A slot's last Yield and the next poll and Yield follow each other with no wait, and a wait for a
+// map result that ends at once (one already made) is no sleep either. g_pumpBusy goes on handing over each round alone
+// (comparable with older runs). g_pumpCarry is the stretch still open, handed over once a sleep ends it.
+static std::function<void(double)> g_pumpStretch;
+static double g_pumpCarry = 0.0;
+static void pumpStretchEnd()
+{
+  if (g_pumpCarry > 0.0 && g_pumpStretch)
+    g_pumpStretch(g_pumpCarry);
+  g_pumpCarry = 0.0;
+}
+static void pumpBusyTook(double ms)
+{
+  if (g_pumpBusy)
+    g_pumpBusy(ms);
+  g_pumpCarry += ms;
+}
+// One poll and one pass of the wx queue, with no sleep after it: where the stretch ends is the caller's (pumpIpc at its next
+// sleep; the maps UI test's modenow at once, the event loop waiting there for the next input).
+static void pumpRound(UnityIpcServer * ipc)
+{
+  wxStopWatch busy;
+  ipc->poll();
+  wxTheApp->Yield(true);
+  pumpBusyTook(busy.TimeInMicro().ToDouble() / 1000.0);
+}
 static void pumpIpc(UnityIpcServer * ipc, int n)
 {
   for (int i = 0; i < n; i++)
   {
-    wxStopWatch busy;
-    ipc->poll();
-    wxTheApp->Yield(true);
-    if (g_pumpBusy)
-      g_pumpBusy(busy.TimeInMicro().ToDouble() / 1000.0);
+    pumpRound(ipc);
     // The 10 ms between polls (n of them last at least n * 10 ms). A map read's result is answered as soon as it is
     // made: its wake, a wxThreadEvent the worker posted, is handled in a Yield, as the viewer's event loop would -- a
     // poll that answers the read --, and the slot goes on.
     wxStopWatch slot;
     for (long left = 10; left > 0; left = 10 - slot.Time())
     {
+      wxStopWatch waited;
       ipc->waitForMapResult((int)left);
+      if (waited.TimeInMicro().ToDouble() >= 500.0)
+        pumpStretchEnd();   // it slept: the stretch before it is over
       wxStopWatch woken;
       wxTheApp->Yield(true);
-      if (g_pumpBusy)
-        g_pumpBusy(woken.TimeInMicro().ToDouble() / 1000.0);
+      pumpBusyTook(woken.TimeInMicro().ToDouble() / 1000.0);
     }
+    // (The slot's last Yield stays in the open stretch: the next poll follows it with no sleep.)
   }
 }
 
@@ -5663,11 +5689,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // entries up to TERRAIN_REPORT_TEXTURES_MAX, retired ids and chunk-state counters up to TERRAIN_REPORT_LIST_MAX, the rest
 // counted) and how the material check judges a texture list, real reads through the host's own handler
 // (ModelViewer::ServeMapAsset) under a made-up load -- a root asked for as a tex0 and a tex0 as a texture fail their kinds,
-// the tex0 and a texture are served with the content key as md5, a texture over what is left of the load's budget is not
-// read, a spent budget and a reported load read nothing --, the map's WDT inspected with a 1000-byte limit (Unreadable, the
-// detail naming its size and the limit, no bytes) and with the map-file limit (read whole), the WDT a load would name as
-// this client's family resolves it (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a
-// failed load while an earlier tile is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
+// the tex0 and a texture are served with the content key as md5, a texture over what is left of the load's budget is
+// refused for the load, unread (over its per-file limit: unreadable), a spent budget and a reported load read nothing --,
+// the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no bytes) and
+// with the map-file limit (read whole), the WDT a load would name as this client's family resolves it
+// (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
+// is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
 // (StartUnityRenderer(true)); one older than protocol 12 ends the run "FAIL player too old". A protocol-12 player draws
 // geometry alone: every textured check is skipped naming why, and each of its built loads must have no material and only
 // its two files served. Otherwise the player's object counts are taken with no terrain (every count reported, the
@@ -6820,6 +6847,71 @@ static void checkMapAssetAccounting(TerrainTestLog & tally)
   }
 }
 
+// The budget refusal of a cut read (ModelViewer::mapAssetBudgetRefusal) on made-up sizes: a read decideMapAssetRequest cut
+// to what was left of its load's budget that finds the file larger than that, but within the role's per-file limit, is
+// the load's refusal (its size, what was left and the load named); a file over the per-file limit, a read not cut, a file
+// that fits, an unknown size, the roles whose read is never cut and a load without that family's limits are not. Nothing
+// is read.
+static void checkMapAssetBudgetRefusals(TerrainTestLog & tally)
+{
+  ModelViewer::TerrainRequest load;
+  load.load = 9;
+  load.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  load.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  load.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+  load.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+  load.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+  load.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+  load.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+  load.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+  load.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+  load.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+  ModelViewer::TerrainRequest noDoodads = load;
+  noDoodads.maxM2FileBytes = noDoodads.maxM2TextureBytes = 0;
+  struct Row
+  {
+    const ModelViewer::TerrainRequest * load;
+    const char * role;
+    qint64 size;
+    qint64 limit;
+    bool refused;
+    const char * what;
+  };
+  const Row rows[] = {
+    {&load, "m2Texture", 1399300, 1000, true, "the largest doodad texture"},
+    {&load, "m2Texture", 8388608, 1000, true, "a doodad texture at its per-file limit"},
+    {&load, "m2Texture", 8388608, 8388607, true, "a doodad texture one byte over what is left"},
+    {&load, "m2Texture", 8388609, 1000, false, "a doodad texture over its per-file limit"},
+    {&load, "m2Texture", 9000000, 1000, false, "a doodad texture over its per-file limit"},
+    {&load, "m2Texture", 9000000, 8388608, false, "a doodad texture read not cut"},
+    {&load, "m2Texture", 900, 1000, false, "a doodad texture that fits"},
+    {&load, "m2Texture", -1, 1000, false, "a doodad texture of unknown size"},
+    {&load, "m2Model", 2423632, 1000, true, "the largest doodad model"},
+    {&load, "m2Skin", 214960, 1000, true, "the largest doodad skin"},
+    {&load, "wmoGroup", 2432598, 1000, true, "the largest world-model group read"},
+    {&load, "wmoGroup", 4476010, 1000, false, "Retail 2320850's group 3, over 4 MiB"},
+    {&load, "wmoGroup", 4476010, 4194304, false, "Retail 2320850's group 3, read not cut"},
+    {&load, "wmoRoot", 438824, 1000, true, "the largest world-model root"},
+    {&load, "wmoTexture", 2098324, 1000, true, "the largest world-model texture"},
+    {&load, "texture", 5593604, 1000, true, "the largest terrain texture"},
+    {&load, "wdt", 5000000, 1000, false, "a WDT (never cut)"},
+    {&load, "rootAdt", 5000000, 1000, false, "a root ADT (never cut)"},
+    {&load, "tex0Adt", 5000000, 1000, false, "a tex0 ADT (never cut)"},
+    {&load, "obj0Adt", 5000000, 1000, false, "an obj0 ADT (never cut)"},
+    {&noDoodads, "m2Texture", 1399300, 1000, false, "a doodad texture of a load without doodad limits"},
+  };
+  for (const Row & r : rows)
+  {
+    const QString detail = ModelViewer::mapAssetBudgetRefusal(*r.load, r.role, r.size, r.limit);
+    const bool ok = r.refused ? detail.contains(QString("it is %1 bytes").arg(r.size)) &&
+                                  detail.contains(QString("%1 bytes left").arg(r.limit)) && detail.contains("load 9")
+                              : detail.isEmpty();
+    tally.check(QString("budget refusal: %1 of %2 bytes (%3) with %4 bytes left is %5").arg(r.role).arg(r.size).arg(r.what)
+                  .arg(r.limit).arg(r.refused ? "refused for the load" : "not the load's refusal"),
+                ok, detail.isEmpty() ? QString("no refusal") : detail);
+  }
+}
+
 // The kind check after a read (ModelViewer::mapAssetKindProblem) on made-up bytes: a tex0 head (MVER, MAMP), a root head
 // (MVER, MHDR), a BLP2 head, short and odd files; and the roles it does not apply to.
 static void checkMapAssetKinds(TerrainTestLog & tally)
@@ -7248,11 +7340,599 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
   worker->stop();
 }
 
+// THE TRANSPORT CAP (docs/world-viewer/08-streaming.md 1.5) with a real socket: a server of its own on the loopback with
+// small marks, and raw clients that read late or never. Requests are unknown-type requests with a requestId (the server
+// answers each once); pushes go through the append every viewer push takes (testPushBytes).
+static void checkTransportCap(TerrainTestLog & tally)
+{
+  UnityIpcServer s;
+  if (!s.start())
+  {
+    tally.check("transport cap: a server of its own listens on the loopback", false, "start() failed");
+    return;
+  }
+  const long long pauseAt = 1024 * 1024, resumeAt = 256 * 1024, cap = 4 * 1024 * 1024;
+  const int stallMs = 1500, linesPerPoll = 8;
+  s.testSetTransportLimits(pauseAt, resumeAt, cap, stallMs, linesPerPoll, 64 * 1024);
+  const UnityIpcServer::TransportStats & ts = s.transportStats();
+  const auto pollFor = [&s](int ms) {
+    QElapsedTimer t;
+    t.start();
+    do
+    {
+      s.poll();
+      Sleep(2);
+    } while (t.elapsed() < ms);
+  };
+  const auto pollUntil = [&s](const std::function<bool()> & done, int ms) {
+    QElapsedTimer t;
+    t.start();
+    while (!done() && t.elapsed() < ms)
+    {
+      s.poll();
+      Sleep(2);
+    }
+    return done();
+  };
+  int serial = 0;
+  const auto requests = [&serial](int n) {
+    std::string text;
+    for (int i = 0; i < n; i++)
+      text += QString("{\"type\":\"transportTestRequest\",\"requestId\":\"t%1\"}\n").arg(++serial).toStdString();
+    return text;
+  };
+  const auto answersIn = [](const std::string & text) {
+    int n = 0;
+    size_t p = 0;
+    while ((p = text.find("\"requestId\":\"t", p)) != std::string::npos)
+    {
+      n++;
+      p++;
+    }
+    return n;
+  };
+  const auto connect = [&s, &pollUntil](UnityIpcTestClient & c, int receiveBuffer) {
+    return c.connectTo(s.port(), receiveBuffer) && pollUntil([&s]() { return s.isConnected(); }, 2000);
+  };
+  const auto disconnect = [&s, &pollUntil](UnityIpcTestClient & c) {
+    c.close();
+    pollUntil([&s]() { return !s.isConnected(); }, 2000);
+  };
+
+  // 1. The lines a poll handles: 40 requests in one write; a poll handles at most its budget; all are answered, once.
+  {
+    UnityIpcTestClient c;
+    const bool connected = connect(c, 0);
+    const long long before = ts.linesHandled;
+    c.sendText(requests(40));
+    Sleep(50);
+    s.poll();
+    const long long firstPoll = ts.linesHandled - before;
+    pollUntil([&]() { return ts.linesHandled - before >= 40; }, 3000);
+    std::string got;
+    pollUntil([&]() {
+      c.readAvailable(&got);
+      return answersIn(got) >= 40;
+    }, 3000);
+    tally.check("transport cap: a poll handles at most its budget of lines, the rest in later polls, each request answered once",
+                connected && firstPoll >= 1 && firstPoll <= linesPerPoll && ts.linesHandled - before == 40 &&
+                  answersIn(got) == 40,
+                QString("first poll %1 line(s) (budget %2), %3 in all, %4 answer(s) read; %5 poll(s) left lines for the next")
+                  .arg(firstPoll).arg(linesPerPoll).arg(ts.linesHandled - before).arg(answersIn(got))
+                  .arg(ts.pollsLinesDeferred));
+    disconnect(c);
+  }
+
+  // 2. Receiving pauses above the mark and resumes below the low one: a client that reads late.
+  {
+    UnityIpcTestClient c;
+    const bool connected = connect(c, 16 * 1024);
+    const long long pausesBefore = ts.receivePauses;
+    int pushes = 0;
+    while (s.unsentBytes() < pauseAt + 256 * 1024 && s.unsentBytes() + 512 * 1024 < cap && pushes < 64)
+    {
+      s.testPushBytes(256 * 1024);
+      pushes++;
+    }
+    const long long filled = s.unsentBytes();
+    s.poll();
+    const bool paused = s.receivePaused() && ts.receivePauses == pausesBefore + 1;
+    const long long handledBefore = ts.linesHandled;
+    c.sendText(requests(5));
+    pollFor(200);
+    const long long handledWhilePaused = ts.linesHandled - handledBefore;
+    std::string got;
+    const bool resumed = pollUntil([&]() {
+      c.readAvailable(&got);
+      return !s.receivePaused() && ts.linesHandled - handledBefore >= 5;
+    }, 5000);
+    pollUntil([&]() {
+      c.readAvailable(&got);
+      return answersIn(got) >= 5;
+    }, 3000);
+    tally.check("transport cap: above the pause mark nothing is received; below the low mark receiving resumes and the "
+                "requests are answered",
+                connected && paused && handledWhilePaused == 0 && resumed && answersIn(got) == 5 && s.isConnected(),
+                QString("%1 bytes waited after %2 push(es) (pause at %3, resume at %4): paused %5, %6 line(s) handled while "
+                        "paused, resumed %7, %8 answer(s) read")
+                  .arg(filled).arg(pushes).arg(pauseAt).arg(resumeAt).arg(paused ? "yes" : "no").arg(handledWhilePaused)
+                  .arg(resumed ? "yes" : "no").arg(answersIn(got)));
+    disconnect(c);
+  }
+
+  // 3. The hard cap: a client that never reads is dropped once more would wait than the cap; nothing more is queued for
+  // it, and its connection ends.
+  {
+    UnityIpcTestClient c;
+    const bool connected = connect(c, 16 * 1024);
+    const long long dropsBefore = ts.dropsHardCap, notQueuedBefore = ts.messagesNotQueued;
+    int pushes = 0;
+    while (s.isConnected() && pushes < 64)
+    {
+      s.testPushBytes(512 * 1024);
+      pushes++;
+      s.poll();
+    }
+    const bool dropped = !s.isConnected() && ts.dropsHardCap == dropsBefore + 1;
+    std::string got;
+    bool ended = false;
+    QElapsedTimer t;
+    t.start();
+    while (t.elapsed() < 3000)
+    {
+      if (c.readAvailable(&got) < 0)
+      {
+        ended = true;
+        break;
+      }
+      Sleep(5);
+    }
+    tally.check("transport cap: a client that never reads is dropped at the hard cap, the message past it not queued, "
+                "and its connection ends",
+                connected && dropped && s.unsentBytes() == 0 && ts.messagesNotQueued > notQueuedBefore &&
+                  ts.unsentBytesMax <= cap && ended,
+                QString("dropped after %1 push(es) of 512 KiB (cap %2): %3; the most ever waiting %4 bytes; %5 message(s) "
+                        "not queued; the client read %6 bytes and saw the end: %7")
+                  .arg(pushes).arg(cap).arg(dropped ? "yes" : "no").arg(ts.unsentBytesMax)
+                  .arg(ts.messagesNotQueued - notQueuedBefore).arg((qint64)got.size()).arg(ended ? "yes" : "no"));
+    c.close();
+  }
+
+  // 4. The stall: bytes that wait with no send progress for the stall time drop the client, under the cap.
+  {
+    UnityIpcTestClient c;
+    const bool connected = connect(c, 16 * 1024);
+    const long long stalledBefore = ts.dropsStalled;
+    s.testPushBytes(512 * 1024);
+    s.poll();
+    const long long waiting = s.unsentBytes();
+    QElapsedTimer t;
+    t.start();
+    pollUntil([&s]() { return !s.isConnected(); }, stallMs + 3000);
+    const qint64 ms = t.elapsed();
+    tally.check("transport cap: a client whose bytes wait with no send progress for the stall time is dropped, under the cap",
+                connected && waiting > 0 && waiting < pauseAt && !s.isConnected() &&
+                  ts.dropsStalled == stalledBefore + 1 && ms >= stallMs - 50,
+                QString("%1 bytes waiting; dropped after %2 ms (stall %3 ms): %4")
+                  .arg(waiting).arg(ms).arg(stallMs).arg(!s.isConnected() ? "yes" : "no"));
+    c.close();
+  }
+
+  // 5. A client that reads: never paused or dropped, and every byte of every frame arrives.
+  {
+    UnityIpcTestClient c;
+    const bool connected = connect(c, 0);
+    const long long pausesBefore = ts.receivePauses, dropsBefore = ts.dropsHardCap + ts.dropsStalled;
+    std::string got;
+    const int frames = 16, frameBytes = 512 * 1024;
+    for (int i = 0; i < frames; i++)
+    {
+      s.testPushBytes(frameBytes);
+      pollUntil([&]() {
+        c.readAvailable(&got);
+        return s.unsentBytes() == 0;
+      }, 2000);
+    }
+    pollUntil([&]() {
+      c.readAvailable(&got);
+      return (long long)std::count(got.begin(), got.end(), 'x') >= (long long)frames * frameBytes;
+    }, 3000);
+    const long long xs = (long long)std::count(got.begin(), got.end(), 'x');
+    tally.check("transport cap: a client that reads is never paused or dropped, and gets every byte",
+                connected && s.isConnected() && ts.receivePauses == pausesBefore &&
+                  ts.dropsHardCap + ts.dropsStalled == dropsBefore && xs == (long long)frames * frameBytes,
+                QString("%1 of %2 payload bytes received; pauses %3, drops %4")
+                  .arg(xs).arg((long long)frames * frameBytes).arg(ts.receivePauses - pausesBefore)
+                  .arg(ts.dropsHardCap + ts.dropsStalled - dropsBefore));
+    disconnect(c);
+  }
+  s.stop();
+}
+
+// STREAMING (protocol 18, docs/world-viewer/08-streaming.md 1.7), the server's side: a session gives the queue its room
+// (STREAM_QUEUE_MAX) and reads in flight (STREAM_READS_IN_FLIGHT) and takes them back when it ends; requests are dispatched
+// in the order of their priority (smaller first, absent 0, first come first served among equals); a request past the
+// session's room is refused, the room named; the answers of a session are summed up, not logged one by one.
+static void checkStreamQueue(TerrainTestLog & tally)
+{
+  auto worker = std::make_shared<MapAssetWorker>([](const MapAssetWorker::Job & job, const MapAssetWorker::Lease &,
+                                                    const CASCFolder::ReadHooks *) {
+    MapAssetWorker::Result r;
+    r.outcome = MapAssetWorker::Result::Outcome::Read;
+    r.inspection.state = wow::WdtAvailability::NotInClientStorage;
+    r.inspection.detail = "made up by the terrain test";
+    r.inspection.readBytes = job.maxBytes;
+    r.inspection.milliseconds = 0.0;
+    return r;
+  });
+  UnityIpcServer q;
+  q.setMapAssetWorker(worker);
+  QStringList order;
+  q.onDispatchMapAsset = [&order](const QJsonObject & r) {
+    order << r.value("requestId").toString();
+    UnityIpcServer::MapAssetDispatch d;
+    d.read = true;
+    d.fileDataID = r.value("fileDataID").toInt(0);
+    d.maxBytes = 4096;
+    return d;
+  };
+  q.onCompleteMapAsset = [](const QJsonObject &, MapAssetWorker::Result & res) {
+    UnityIpcServer::MapAssetAnswer a;
+    a.state = res.outcome == MapAssetWorker::Result::Outcome::Read ? QString("not in client storage") : QString("stale");
+    a.bytesRead = res.inspection.readBytes;
+    return a;
+  };
+  q.onMapAssetStale = [](const QJsonObject &) { return QString(); };
+  std::vector<UnityIpcServer::MapAssetServed> records;
+  q.onMapAssetServed = [&records](const UnityIpcServer::MapAssetServed & s) { records.push_back(s); };
+  int serial = 0;
+  const auto receive = [&q, &serial](int priority) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = QString("s%1").arg(++serial);
+    r["load"] = 1;
+    r["assetEpoch"] = 1;
+    r["role"] = "m2Texture";
+    r["fileDataID"] = serial;
+    if (priority >= 0)
+      r["priority"] = priority;
+    q.testReceiveMapAsset(r);
+  };
+  const auto poll = [&q]() {
+    q.testWaitMapReads(10000);
+    return q.testServeMapAssetQueue();
+  };
+  const bool defaults = !q.streaming() && q.mapAssetQueueMax() == UnityIpcServer::MAP_ASSET_QUEUE_MAX &&
+                        q.mapReadsInFlightMax() == UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT;
+  q.setStreaming(true);
+  const bool streamingRoom = q.streaming() && q.mapAssetQueueMax() == UnityIpcServer::STREAM_QUEUE_MAX &&
+                             q.mapReadsInFlightMax() == UnityIpcServer::STREAM_READS_IN_FLIGHT;
+  q.setStreaming(false);
+  const bool back = !q.streaming() && q.mapAssetQueueMax() == UnityIpcServer::MAP_ASSET_QUEUE_MAX &&
+                    q.mapReadsInFlightMax() == UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT;
+  tally.check(QString("stream queue: a session gives the queue room for %1 and %2 reads in flight, and takes them back (%3 and %4)")
+                .arg(UnityIpcServer::STREAM_QUEUE_MAX).arg(UnityIpcServer::STREAM_READS_IN_FLIGHT)
+                .arg(UnityIpcServer::MAP_ASSET_QUEUE_MAX).arg(UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT),
+              defaults && streamingRoom && back,
+              QString("defaults %1, streaming %2, after %3").arg(defaults ? "yes" : "no").arg(streamingRoom ? "yes" : "no")
+                .arg(back ? "yes" : "no"));
+  {
+    // Priorities 5, 1, none, 3, 1, 2 (s1..s6): dispatched s3 (0), s2, s5 (1, in the order they came), s6 (2), s4 (3), s1 (5).
+    q.setStreaming(true);
+    order.clear();
+    records.clear();
+    for (int p : {5, 1, -1, 3, 1, 2})
+      receive(p);
+    const int first = poll();   // four dispatched, none answered
+    const QString firstOrder = order.join(",");
+    const size_t inFlight = q.mapReadsInFlight();
+    for (int i = 0; i < 6 && q.mapAssetsWaiting() + q.mapReadsInFlight() > 0; ++i)
+      poll();
+    tally.check("stream queue: requests are dispatched by priority, smaller first, absent as 0, equals in the order they came; "
+                "four reads in flight during a session",
+                first == 0 && inFlight == 4 && firstOrder == "s3,s2,s5,s6" && order.join(",") == "s3,s2,s5,s6,s4,s1" &&
+                  records.size() == 6,
+                QString("first poll answered %1, %2 in flight, dispatched %3 then %4; %5 answered").arg(first).arg(inFlight)
+                  .arg(firstOrder).arg(order.join(",")).arg(records.size()));
+    q.setStreaming(false);
+  }
+  {
+    // Without priorities (a single-tile load) the order is the order they came, as before.
+    order.clear();
+    records.clear();
+    for (int i = 0; i < 5; ++i)
+      receive(-1);
+    for (int i = 0; i < 8 && q.mapAssetsWaiting() + q.mapReadsInFlight() > 0; ++i)
+      poll();
+    const QString expect = QString("s%1,s%2,s%3,s%4,s%5").arg(serial - 4).arg(serial - 3).arg(serial - 2).arg(serial - 1).arg(serial);
+    tally.check("stream queue: requests without a priority keep the order they came in", order.join(",") == expect,
+                order.join(",") + " (expected " + expect + ")");
+  }
+  {
+    // A session's room: STREAM_QUEUE_MAX wait, the next is refused with the room named; outside a session the room is
+    // MAP_ASSET_QUEUE_MAX again.
+    q.setStreaming(true);
+    records.clear();
+    const long long refusedBefore = q.mapAssetsRefusedQueueFull();
+    for (int i = 0; i < UnityIpcServer::STREAM_QUEUE_MAX + 1; ++i)
+      receive(i % 7);
+    const size_t waiting = q.mapAssetsWaiting();
+    const long long refused = q.mapAssetsRefusedQueueFull() - refusedBefore;
+    const bool named = records.size() == 1 && records[0].state == "refused" &&
+                       records[0].detail.contains(QString("at most %1").arg(UnityIpcServer::STREAM_QUEUE_MAX));
+    tally.check(QString("stream queue: %1 requests wait during a session, the next is refused with the room named")
+                  .arg(UnityIpcServer::STREAM_QUEUE_MAX),
+                waiting == (size_t)UnityIpcServer::STREAM_QUEUE_MAX && refused == 1 && named,
+                QString("%1 waiting, %2 refused%3").arg(waiting).arg(refused)
+                  .arg(records.empty() ? QString() : ": \"" + records[0].detail + "\""));
+    {
+      // Half of those waiting become stale (their tile closed): answered stale in the next serving pass, while they wait --
+      // not when they reach the front -- and taken out of the queue before any is answered (answerStaleWaiting).
+      QSet<QString> dispatched;
+      for (const QString & id : order)
+        dispatched.insert(id);
+      // (Counted as the check marks them: the queue's own entries, never the reads in flight or earlier answers.)
+      int marked = 0;
+      q.onMapAssetStale = [&dispatched, &marked](const QJsonObject & r) {
+        const QString id = r.value("requestId").toString();
+        if (dispatched.contains(id) || r.value("fileDataID").toInt(0) % 2 != 0)
+          return QString();
+        marked++;
+        return QString("made stale by the terrain test");
+      };
+      records.clear();
+      const size_t waitingBefore = q.mapAssetsWaiting();
+      const long long staleBefore = q.mapAssetsAnsweredStaleWaiting();
+      q.testServeMapAssetQueue();
+      int staleRecords = 0;
+      for (const UnityIpcServer::MapAssetServed & r : records)
+        if (r.state == "stale" && r.detail == "made stale by the terrain test")
+          staleRecords++;
+      const long long answeredStale = q.mapAssetsAnsweredStaleWaiting() - staleBefore;
+      q.onMapAssetStale = [](const QJsonObject &) { return QString(); };
+      tally.check("stream queue: requests whose tile closed are answered stale while they wait, each once, and leave the queue",
+                  marked > 0 && answeredStale == marked && staleRecords == marked && q.mapAssetsWaiting() <= waitingBefore - (size_t)marked,
+                  QString("%1 made stale of %2 waiting: %3 answered stale while waiting, %4 stale answer(s) recorded; %5 waiting after")
+                    .arg(marked).arg(waitingBefore).arg(answeredStale).arg(staleRecords).arg(q.mapAssetsWaiting()));
+    }
+    for (int i = 0; i < 64 && q.mapAssetsWaiting() + q.mapReadsInFlight() > 0; ++i)
+      poll();
+    q.setStreaming(false);
+  }
+}
+
+// STREAMING (protocol 18, docs/world-viewer/08-streaming.md 1.7), the viewer's side: the tile loads a streaming session's
+// player opens and closes (ModelViewer::OnStreamTile), with a made-up entry load of the loaded client (no player involved,
+// nothing sent). Each opened tile is a load of its own: its id from the load serial, the entry's map, WDT and budgets, its
+// requests accounted to it and not to the entry; the entry tile, a tile already open, a tile off the grid and a load that is
+// not the session are refused, each with why; closing a tile makes its requests stale; the cap of tile loads holds; closing
+// the entry ends it; ResetTerrainRequests ends the session. Azeroth's root 778037 (32_50) is read for a tile load, as in the
+// reads check. The host's terrain requests are put back afterwards.
+static void checkStreamLoads(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const std::shared_ptr<wow::WorldMapCatalog> catalog = frame->mapCatalog();
+  if (!catalog || catalog->status() != wow::WorldMapCatalog::Status::Ready || !catalog->find(0))
+  {
+    tally.skip("stream loads: the viewer's tile loads of a streaming session", "the map catalogue is not ready or has no map 0");
+    return;
+  }
+  UnityIpcServer::TerrainTileCommand resolved;
+  QString unresolved;
+  if (!frame->ResolveTerrainTile(0, 31, 48, resolved, unresolved, true, false))
+  {
+    tally.skip("stream loads: the viewer's tile loads of a streaming session", "tile 0 31_48 does not resolve: " + unresolved);
+    return;
+  }
+  const ModelViewer::TerrainRequest savedRequest = frame->m_terrainRequest;
+  const std::map<int, ModelViewer::TerrainRequest> savedLoads = frame->m_streamLoads;
+  const bool savedSession = frame->m_streamSession;
+  ModelViewer::TerrainRequest entry;
+  entry.load = ++frame->m_terrainLoadSerial;
+  entry.epoch = UnityAssetAccess::clientEpoch();
+  entry.mapId = 0;
+  entry.tileX = 31;
+  entry.tileY = 48;
+  entry.wdtFileDataID = resolved.wdtFileDataID;
+  entry.wdtServed = true;
+  entry.catalogueGeneration = catalog->client().storageGeneration;
+  entry.world = true;
+  entry.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  entry.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  entry.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  entry.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+  entry.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+  entry.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+  entry.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+  entry.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+  entry.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+  entry.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+  frame->m_terrainRequest = entry;
+  frame->m_streamLoads.clear();
+  frame->m_streamSession = true;
+  const auto tileOf = [](int x, int y) {
+    QJsonObject o;
+    o["x"] = x;
+    o["y"] = y;
+    return o;
+  };
+  const auto streamTile = [&frame](int load, const QJsonArray & open, const QJsonArray & close) {
+    QJsonObject m;
+    m["type"] = "streamTile";
+    m["load"] = load;
+    m["open"] = open;
+    m["close"] = close;
+    return frame->OnStreamTile(m);
+  };
+  const auto refusedWhy = [](const QJsonObject & reply, int i) {
+    return reply.value("refused").toArray().at(i).toObject().value("refused").toString();
+  };
+  // 1. Opened: two neighbours; the entry tile refused (it is the entry's load).
+  const QJsonObject a = streamTile(entry.load, QJsonArray{tileOf(30, 47), tileOf(31, 48), tileOf(32, 49)}, QJsonArray());
+  const QJsonArray opened = a.value("opened").toArray();
+  const int loadA = opened.size() > 0 ? opened.at(0).toObject().value("tileLoad").toInt(0) : 0;
+  const int loadB = opened.size() > 1 ? opened.at(1).toObject().value("tileLoad").toInt(0) : 0;
+  const ModelViewer::TerrainRequest * ra = frame->terrainRequestFor(loadA);
+  const bool aOk = a.value("type").toString() == "streamTileAnswer" && opened.size() == 2 && loadA > entry.load &&
+                   loadB == loadA + 1 && ra && ra->tileX == 30 && ra->tileY == 47 && ra->mapId == 0 &&
+                   ra->wdtFileDataID == entry.wdtFileDataID && ra->wdtServed && ra->epoch == entry.epoch &&
+                   ra->maxM2ModelsPerLoad == entry.maxM2ModelsPerLoad && ra->reads == 0 &&
+                   a.value("refused").toArray().size() == 1 && refusedWhy(a, 0).contains("the session's entry tile");
+  tally.check("stream loads: two tiles open as loads of their own (the next serials, the entry's map, WDT and budgets, nothing "
+              "had); the entry tile is refused as the entry's",
+              aOk, QString(QJsonDocument(a).toJson(QJsonDocument::Compact)));
+  // 2. Refused: a tile open already, a tile off the grid, a load that is not the session.
+  const QJsonObject b = streamTile(entry.load, QJsonArray{tileOf(30, 47), tileOf(64, 2)}, QJsonArray());
+  const QJsonObject c = streamTile(entry.load + 1000, QJsonArray{tileOf(29, 47)}, QJsonArray());
+  tally.check("stream loads: a tile open already, a tile off the grid and a load that is not the session's are refused, each "
+              "with why",
+              b.value("opened").toArray().isEmpty() && refusedWhy(b, 0).contains("open already") &&
+                refusedWhy(b, 1).contains("outside a map's 64 x 64 tile grid") && c.value("opened").toArray().isEmpty() &&
+                refusedWhy(c, 0).contains("not the current streaming session"),
+              QString(QJsonDocument(b).toJson(QJsonDocument::Compact)) + " " +
+                QString(QJsonDocument(c).toJson(QJsonDocument::Compact)));
+  // 3. A tile load's request is current, and accounted to its own load; the entry's untouched.
+  const auto ask = [](int load, int epoch, const QString & role, int id) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "stream0";
+    r["load"] = load;
+    r["assetEpoch"] = epoch;
+    r["role"] = role;
+    r["fileDataID"] = id;
+    r["tile"] = QJsonObject{{"x", 30}, {"y", 47}};
+    r["priority"] = 3;
+    return r;
+  };
+  const QString staleNone = frame->MapAssetStaleReason(ask(loadA, entry.epoch, "rootAdt", 778037));
+  const QString staleOther = frame->MapAssetStaleReason(ask(loadB + 50, entry.epoch, "rootAdt", 778037));
+  const UnityIpcServer::MapAssetAnswer served = frame->ServeMapAssetAndWait(ask(loadA, entry.epoch, "rootAdt", 778037));
+  ra = frame->terrainRequestFor(loadA);
+  tally.check("stream loads: a tile load's request is current and accounted to its own load (the entry's untouched); a load "
+              "that is neither is stale, the session named",
+              staleNone.isEmpty() && staleOther.contains("not one of its 2 open tile load(s)") && served.state == "available" &&
+                ra && ra->reads == 1 && ra->rootFileDataID == 778037 && frame->m_terrainRequest.reads == 0 &&
+                frame->m_terrainRequest.rootFileDataID == 0,
+              QString("stale \"%1\" / \"%2\"; answer %3 \"%4\"; tile reads %5 root %6; entry reads %7 root %8")
+                .arg(staleNone, staleOther, served.state, served.detail).arg(ra ? ra->reads : -1)
+                .arg(ra ? ra->rootFileDataID : -1).arg(frame->m_terrainRequest.reads).arg(frame->m_terrainRequest.rootFileDataID));
+  // 4. Closed: its requests are stale, its place free for another tile.
+  const QJsonObject d = streamTile(entry.load, QJsonArray{tileOf(29, 47)}, QJsonArray{loadA});
+  const QString staleClosed = frame->MapAssetStaleReason(ask(loadA, entry.epoch, "texture", 187115));
+  const QJsonArray dOpened = d.value("opened").toArray();
+  tally.check("stream loads: a closed tile load's requests are stale; a tile opened in the same message takes the next serial",
+              d.value("closed").toArray().size() == 1 && d.value("closed").toArray().at(0).toInt() == loadA &&
+                !frame->terrainRequestFor(loadA) && !staleClosed.isEmpty() && dOpened.size() == 1 &&
+                dOpened.at(0).toObject().value("tileLoad").toInt() == loadB + 1 && frame->m_streamLoads.size() == 2,
+              QString("closed %1; stale \"%2\"; %3").arg(QString(QJsonDocument(d.value("closed").toArray()).toJson(QJsonDocument::Compact)))
+                .arg(staleClosed).arg(QString(QJsonDocument(dOpened).toJson(QJsonDocument::Compact))));
+  // 5. The cap: STREAM_MAX_TILE_LOADS open at most.
+  QJsonArray many;
+  for (int i = 0; i < UnityIpcServer::STREAM_MAX_TILE_LOADS + 2; ++i)
+    many.append(tileOf(10 + i % 40, 10 + i / 40));
+  const QJsonObject e = streamTile(entry.load, many, QJsonArray());
+  const int capRefused = e.value("refused").toArray().size();
+  tally.check(QString("stream loads: at most %1 tile loads are open; the rest are refused with the cap named")
+                .arg(UnityIpcServer::STREAM_MAX_TILE_LOADS),
+              (int)frame->m_streamLoads.size() == UnityIpcServer::STREAM_MAX_TILE_LOADS && capRefused == 4 &&
+                refusedWhy(e, 0).contains(QString("at most %1").arg(UnityIpcServer::STREAM_MAX_TILE_LOADS)),
+              QString("%1 open, %2 refused%3").arg(frame->m_streamLoads.size()).arg(capRefused)
+                .arg(capRefused > 0 ? ": \"" + refusedWhy(e, 0) + "\"" : QString()));
+  // 6. Closing the entry tile ends the entry's load (its requests stale); the session's tile loads stay.
+  const QJsonObject f = streamTile(entry.load, QJsonArray(), QJsonArray{entry.load});
+  const QString staleEntry = frame->MapAssetStaleReason(ask(entry.load, entry.epoch, "rootAdt", 778037));
+  tally.check("stream loads: closing the entry tile ends its load (its requests stale), the tile loads stay",
+              f.value("closed").toArray().size() == 1 && frame->m_terrainRequest.ended &&
+                staleEntry.contains("closed by the streaming session") &&
+                (int)frame->m_streamLoads.size() == UnityIpcServer::STREAM_MAX_TILE_LOADS,
+              QString("stale \"%1\", %2 tile load(s)").arg(staleEntry).arg(frame->m_streamLoads.size()));
+  // 6b. Order prerequisites session-wide: a tile load that was served no world-model root or doodad model may ask for a
+  // group, a world-model texture, a skin or a doodad texture once another load of the session was served one (a shared
+  // file asked again after the tile that first asked for it closed); outside a session the load's own rule holds.
+  {
+    ModelViewer::TerrainRequest t;
+    t.load = 9;
+    t.epoch = 3;
+    t.wdtFileDataID = 775971;
+    t.wdtServed = true;
+    t.world = true;
+    t.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+    t.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+    t.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+    t.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+    t.maxWmoTexturesPerLoad = UnityIpcServer::MAX_WMO_TEXTURES_PER_LOAD;
+    t.maxWmoModelsPerLoad = UnityIpcServer::MAX_WMO_MODELS_PER_LOAD;
+    t.maxWmoGroupsPerLoad = UnityIpcServer::MAX_WMO_GROUPS_PER_LOAD;
+    t.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+    t.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+    t.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+    t.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+    t.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+    t.maxM2TexturesPerLoad = UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+    const auto decide = [](const ModelViewer::TerrainRequest & r, const QString & role, int id) {
+      QJsonObject q;
+      q["type"] = "getMapAsset";
+      q["requestId"] = "pre";
+      q["load"] = r.load;
+      q["assetEpoch"] = r.epoch;
+      q["role"] = role;
+      q["fileDataID"] = id;
+      const ModelViewer::MapAssetDecision d = ModelViewer::decideMapAssetRequest(q, &r, r.epoch, true, false);
+      return d.state.isEmpty() ? QString("read") : d.state + ": " + d.detail;
+    };
+    ModelViewer::TerrainRequest session = t;
+    session.sessionObj0Served = true;
+    session.sessionWmoRootsServed = 1;
+    session.sessionM2ModelsServed = 1;
+    const QStringList own = {decide(t, "wmoGroup", 108700), decide(t, "wmoTexture", 108701), decide(t, "m2Model", 189077),
+                             decide(t, "m2Skin", 189078), decide(t, "m2Texture", 189079)};
+    const QStringList shared = {decide(session, "wmoGroup", 108700), decide(session, "wmoTexture", 108701),
+                                decide(session, "m2Model", 189077), decide(session, "m2Skin", 189078),
+                                decide(session, "m2Texture", 189079)};
+    bool ownRefused = true;
+    for (const QString & s : own)
+      ownRefused = ownRefused && s.startsWith("refused");
+    tally.check("stream loads: a load's own order rules stand outside a session; a tile load may ask for a shared group, "
+                "texture, model or skin once the session was served what they follow",
+                ownRefused && shared == QStringList({"read", "read", "read", "read", "read"}),
+                "own [" + own.join(" | ") + "]; session [" + shared.join(" | ") + "]");
+    // Propagated: a root served for one tile load counts for the entry and every open tile load, and for tiles opened
+    // after it.
+    const int before = frame->m_terrainRequest.sessionWmoRootsServed;
+    frame->noteStreamSessionServed(frame->m_streamLoads.begin()->second, "wmoRoot", true);
+    frame->noteStreamSessionServed(frame->m_streamLoads.begin()->second, "wmoGroup", true);
+    frame->noteStreamSessionServed(frame->m_streamLoads.begin()->second, "m2Model", false);
+    bool all = frame->m_terrainRequest.sessionWmoRootsServed == before + 1;
+    for (const auto & kv : frame->m_streamLoads)
+      all = all && kv.second.sessionWmoRootsServed == before + 1 && kv.second.sessionM2ModelsServed == 0;
+    const int firstLoad = frame->m_streamLoads.begin()->first;
+    const QJsonObject g = streamTile(entry.load, QJsonArray{tileOf(50, 50)}, QJsonArray{firstLoad});
+    const int gLoad = g.value("opened").toArray().at(0).toObject().value("tileLoad").toInt(0);
+    const ModelViewer::TerrainRequest * gr = frame->terrainRequestFor(gLoad);
+    tally.check("stream loads: a root served for one tile load counts for the entry, every open tile load and a tile opened "
+                "later; a group or a model not served counts for nothing",
+                all && gr && gr->sessionWmoRootsServed == before + 1 && gr->sessionM2ModelsServed == 0,
+                QString("entry %1, opened later %2").arg(frame->m_terrainRequest.sessionWmoRootsServed)
+                  .arg(gr ? gr->sessionWmoRootsServed : -1));
+  }
+  // 7. The session ends with ResetTerrainRequests: no tile load is left, and none is current.
+  const int anyLoad = frame->m_streamLoads.empty() ? 0 : frame->m_streamLoads.begin()->first;
+  frame->ResetTerrainRequests();
+  tally.check("stream loads: the session ends with the terrain requests -- no tile load left, none current",
+              frame->m_streamLoads.empty() && !frame->m_streamSession && frame->m_terrainRequest.load == 0 &&
+                !frame->terrainRequestFor(anyLoad) &&
+                frame->MapAssetStaleReason(ask(anyLoad, entry.epoch, "rootAdt", 778037)).contains("no terrain load is current"),
+              QString("%1 tile load(s), session %2").arg(frame->m_streamLoads.size()).arg(frame->m_streamSession ? "on" : "off"));
+  frame->m_terrainRequest = savedRequest;
+  frame->m_streamLoads = savedLoads;
+  frame->m_streamSession = savedSession;
+}
+
 // Real reads through the host's own handler (ModelViewer::ServeMapAsset) with a made-up current load of the loaded client
 // (no player is involved, nothing is sent): a root ADT asked for as a tex0 ADT and a tex0 as a texture fail their kinds
 // ("unreadable", the bytes found named), the tex0 itself and a texture are served with the content key as their MD5 (the
-// test hashes the bytes once to show it), a texture read with only 1000 bytes of the load's budget left is not read
-// (the limit applied named), one with none left is refused unread, and a reported load is stale. The pinned files are
+// test hashes the bytes once to show it), a texture read with only 1000 bytes of the load's budget left is refused for
+// the load, unread (its size, what was left and the limit named); one over its per-file limit is unreadable; the same for
+// a doodad texture; one with none left is refused unread, and a reported load is stale. The pinned files are
 // Azeroth 32_50's (root 778037, tex0 778040, texture 187115, in Retail, Classic Era and Classic Beta): a client that cannot
 // read one skips the checks that need it. The host's terrain request is put back afterwards.
 static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
@@ -7360,13 +8040,70 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     nearly.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
     frame->m_terrainRequest = nearly;
     const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAssetAndWait(ask("texture", textureId));
-    tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is not read: \"unreadable\", "
-                        "the limit applied named").arg(textureId),
-                b.state == "unreadable" &&
+    tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is refused for the load, "
+                        "unread").arg(textureId),
+                b.state == "refused" &&
+                  b.detail.contains(QString("it is %1 bytes, more than the 1000 bytes left").arg(textureSize)) &&
                   b.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(textureSize)) &&
                   b.bytes.isEmpty() && b.bytesRead == 0 && b.readMs >= 0.0 &&
-                  frame->m_terrainRequest.textureBytesRead == nearly.textureBytesRead,
-                describe(b));
+                  frame->m_terrainRequest.textureBytesRead == nearly.textureBytesRead &&
+                  frame->m_terrainRequest.textureBytesReserved == 0,
+                describe(b) + QString("; texture bytes read %1, reserved %2").arg(frame->m_terrainRequest.textureBytesRead)
+                                .arg(frame->m_terrainRequest.textureBytesReserved));
+    // A file over its per-file limit, the load's budget whole: the file's own failure, as before.
+    ModelViewer::TerrainRequest overLimit = withTex0;
+    overLimit.maxTextureBytes = 1000;
+    frame->m_terrainRequest = overLimit;
+    const UnityIpcServer::MapAssetAnswer over = frame->ServeMapAssetAndWait(ask("texture", textureId));
+    tally.check(QString("reads: with a per-file limit of 1000 bytes, texture %1 is \"unreadable\" -- the file's failure, not "
+                        "the load's refusal").arg(textureId),
+                over.state == "unreadable" &&
+                  over.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(textureSize)) &&
+                  !over.detail.contains("not the file's failure") && over.bytesRead == 0 &&
+                  frame->m_terrainRequest.textureBytesReserved == 0,
+                describe(over) + QString("; texture bytes reserved %1").arg(frame->m_terrainRequest.textureBytesReserved));
+    // The same file read as a doodad texture (the host's kind check for m2Texture is BLP2 alone): served; cut to what is
+    // left of the load's doodad texture budget, refused for the load; over a per-file limit of 1000 bytes, unreadable.
+    ModelViewer::TerrainRequest doodads = withTex0;
+    doodads.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+    doodads.maxM2TexturesPerLoad = UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+    doodads.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+    doodads.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+    doodads.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+    doodads.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+    doodads.m2ModelsServed = 1;   // a doodad texture is served only after a model
+    frame->m_terrainRequest = doodads;
+    const UnityIpcServer::MapAssetAnswer m2 = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: texture %1 read as a doodad texture is served whole, its md5 the content key, counted on "
+                        "the load's doodad texture budget").arg(textureId),
+                m2.state == "available" && m2.md5 == md5Of(m2.bytes) &&
+                  frame->m_terrainRequest.m2TextureBytesRead == textureSize && frame->m_terrainRequest.m2TextureIds.size() == 1,
+                describe(m2) + QString("; doodad texture bytes read %1, %2 id(s)").arg(frame->m_terrainRequest.m2TextureBytesRead)
+                                 .arg(frame->m_terrainRequest.m2TextureIds.size()));
+    ModelViewer::TerrainRequest m2Nearly = doodads;
+    m2Nearly.m2TextureBytesRead = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD - 1000;
+    frame->m_terrainRequest = m2Nearly;
+    const UnityIpcServer::MapAssetAnswer m2Cut = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: with 1000 bytes of the load's doodad texture budget left, doodad texture %1 is refused for "
+                        "the load, unread").arg(textureId),
+                m2Cut.state == "refused" && m2Cut.detail.contains("doodad textures") &&
+                  m2Cut.detail.contains(QString("it is %1 bytes").arg(textureSize)) && m2Cut.detail.contains("the limit is 1000)") &&
+                  m2Cut.bytes.isEmpty() && m2Cut.bytesRead == 0 && frame->m_terrainRequest.m2TextureBytesReserved == 0 &&
+                  frame->m_terrainRequest.m2TextureBytesRead == m2Nearly.m2TextureBytesRead &&
+                  frame->m_terrainRequest.m2TextureIds.size() == 1,
+                describe(m2Cut) + QString("; doodad texture bytes read %1, reserved %2, %3 id(s)")
+                                    .arg(frame->m_terrainRequest.m2TextureBytesRead)
+                                    .arg(frame->m_terrainRequest.m2TextureBytesReserved)
+                                    .arg(frame->m_terrainRequest.m2TextureIds.size()));
+    ModelViewer::TerrainRequest m2Small = doodads;
+    m2Small.maxM2TextureBytes = 1000;
+    frame->m_terrainRequest = m2Small;
+    const UnityIpcServer::MapAssetAnswer m2Over = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: with a per-file limit of 1000 bytes, doodad texture %1 is \"unreadable\" -- the file's "
+                        "failure, not the load's refusal").arg(textureId),
+                m2Over.state == "unreadable" && m2Over.detail.contains("the limit is 1000") &&
+                  !m2Over.detail.contains("not the file's failure") && frame->m_terrainRequest.m2TextureBytesReserved == 0,
+                describe(m2Over) + QString("; doodad texture bytes reserved %1").arg(frame->m_terrainRequest.m2TextureBytesReserved));
     ModelViewer::TerrainRequest spent = withTex0;
     spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
     frame->m_terrainRequest = spent;
@@ -7435,8 +8172,8 @@ static void checkMapAssetWorkerReads(ModelViewer * frame, TerrainTestLog & tally
                 r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Unreadable &&
                   r.inspection.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)")
                                                  .arg(direct.size())) &&
-                  r.bytes.isEmpty() && r.inspection.readBytes == 0,
-                describe(r));
+                  r.bytes.isEmpty() && r.inspection.readBytes == 0 && r.inspection.tooLargeSize == direct.size(),
+                describe(r) + QString("; its size as handed back %1").arg(r.inspection.tooLargeSize));
   }
   {
     const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, true, false, false);
@@ -7988,19 +8725,23 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   bool readHoldBeforeOpen = false;       // readswitch ...:start: the worker's read held before its file is opened
   QString currentStep = "start";         // the step running (a long poll's or GUI round's log line names it)
 
-  // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, its read tracker and
-  // record ring, and the size limit of the catalogue's read. (That a refused file is never read is shown where the reads
-  // can be counted: scripts/tests/casc-whole-read, case 9.)
+  // THE IN-PROCESS CHECKS, before any player: the decision, the budget refusal of a cut read, the host's bookkeeping of a
+  // failed load, its read tracker and record ring, and the size limit of the catalogue's read. (That a refused file is
+  // never read is shown where the reads can be counted: scripts/tests/casc-whole-read, case 9.)
   checkMapAssetDecisions(tally);
   checkMapAssetAccounting(tally);
+  checkMapAssetBudgetRefusals(tally);
   checkMapAssetKinds(tally);
   checkMapAssetQueue(tally);
+  checkTransportCap(tally);
   checkFailedLoadBookkeeping(frame, tally);
   checkMapAssetReadTracker(tally);
   checkMapAssetRecordRing(tally);
   checkTerrainReportLists(tally);
   checkMapAssetReads(frame, tally);
   checkMapAssetWorkerReads(frame, tally);
+  checkStreamQueue(tally);
+  checkStreamLoads(frame, tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -8018,12 +8759,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       const wow::WdtInspection tooLarge = startCatalog->inspectFile(entry->wdt, &bytes, 1000);
       const QString expected = QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(size);
       tally.check(tooLargeCheck, tooLarge.state == wow::WdtAvailability::Unreadable &&
-                  tooLarge.detail.contains(expected) && bytes.isEmpty() && tooLarge.bytes < 0,
+                  tooLarge.detail.contains(expected) && bytes.isEmpty() && tooLarge.bytes < 0 && tooLarge.tooLargeSize == size,
                 wow::WorldMapCatalog::availabilityName(tooLarge.state) + ": " + tooLarge.detail +
-                  QString(" (%1 bytes handed back)").arg(bytes.size()));
+                  QString(" (%1 bytes handed back; its size as handed back %2)").arg(bytes.size()).arg(tooLarge.tooLargeSize));
       const wow::WdtInspection whole = startCatalog->inspectFile(entry->wdt, &bytes, UnityIpcServer::MAX_MAP_ASSET_BYTES);
       tally.check("inspectFile at the map-file limit reads the WDT whole", whole.state == wow::WdtAvailability::Available &&
-                  bytes.size() == size, wow::WorldMapCatalog::availabilityName(whole.state) +
+                  bytes.size() == size && whole.tooLargeSize < 0, wow::WorldMapCatalog::availabilityName(whole.state) +
                   QString(", %1 of %2 bytes").arg(bytes.size()).arg(size));
       const wow::WdtInspection unchanged = startCatalog->inspectFile(entry->wdt, &bytes);
       tally.check("inspectFile at its default limit reads the WDT whole", unchanged.state == wow::WdtAvailability::Available &&
@@ -10429,7 +11170,18 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 // at 1920 x 1080 at the desktop's corner -- the rigs run it on a desktop of its own, never the user's -- and the player
 // started as the viewer starts it. Then WMV_MAPSUITEST_SEQUENCE (comma-separated) drives the interface as a user does,
 // through window messages to the controls themselves (never SendInput: nothing reaches another window):
-//   mode:<models|textures|buildings|maps>   a click on that command bar tool (the toolbar's own window)
+//   mode:<models|textures|buildings|maps>   a click on that command bar tool (the toolbar's own window), then until the
+//                                            viewer switch is repainted; its rounds, report and structural film recorded,
+//                                            what it let go of checked (:real after the mode: the press and the release
+//                                            in rounds of their own)
+//   modenow:<mode>[:real] | modefilm:<mode>  the click's first round only, the switch left on its way; as mode, with a
+//                                            picture of the frame after every pump while it is on its way (not repainted)
+//   settle[:<word>]                          until no switch is on its way and no turn after one waits; what it let go
+//                                            of, the films; with a word, what finished the last switch (key, press, ...)
+//   clickframe:<x>:<y>                       a click on the frame's own window (where a click on a frozen panel lands)
+//   closenow                                 the last step: the frame deleted at once, a switch on its way (THE ABORT
+//                                            CHECK, runAbortCheck)
+//   roundmark | roundcheck[:<ms>]            the longest GUI round and busy stretch since the mark, checked
 //   search:<text>                            the text typed into Browse's search box, then Enter
 //   pick:<mapId>                             a click on that map's row in Browse (made visible first)
 //   waitgrid[:<ms>]                          until the map's tile grid is known (or why not)
@@ -10488,8 +11240,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //                                            grid awaited: the census of states, the orientation check of each, the
 //                                            times; nothing loaded
 // Every step's time, the longest single GUI round in it (g_pumpBusy: what one poll and one pass of the wx queue kept this
-// thread), the Maps viewer's timings and the samples go to <out.json>; "[maps-test] PASS|FAIL|SKIP <check>" to the log,
-// then "[maps-test] RESULT".
+// thread) and the longest busy stretch (g_pumpStretch: rounds with no sleep between), the Maps viewer's timings and the
+// samples go to <out.json>; "[maps-test] PASS|FAIL|SKIP <check>" to the log, then "[maps-test] RESULT".
 namespace
 {
   typedef HRESULT(WINAPI * DwmFlushFn)();
@@ -10511,12 +11263,19 @@ namespace
 
   // A picture of a top-level window as it is drawn (PrintWindow with PW_RENDERFULLCONTENT, its children included), cut to
   // what is visible of it (DWMWA_EXTENDED_FRAME_BOUNDS). Never a copy of a screen: nothing of another window can be in it.
-  bool printWindowPng(HWND hwnd, const QString & path, QSize & size, double & viewportMean, const wxRect & viewport)
+  // Without redrawFirst it is not repainted first: what it holds now (a viewer switch's gap filmed; on a hidden desktop that
+  // can come back black, and a picture taken after a forced repaint would show the windows' state, not the screen).
+  bool printWindowPng(HWND hwnd, const QString & path, QSize & size, double & viewportMean, const wxRect & viewport,
+                      bool redrawFirst = true)
   {
-    RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME);
-    dwmFlushNow();
-    Sleep(80);
-    dwmFlushNow();
+    if (redrawFirst)
+    {
+      pumpStretchEnd();   // (the sleep below ends the busy stretch)
+      RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME);
+      dwmFlushNow();
+      Sleep(80);
+      dwmFlushNow();
+    }
     RECT wr;
     if (!GetWindowRect(hwnd, &wr))
       return false;
@@ -10576,6 +11335,89 @@ namespace
     PostMessage(hwnd, WM_MOUSEMOVE, 0, at);
     PostMessage(hwnd, right ? WM_RBUTTONDOWN : WM_LBUTTONDOWN, right ? MK_RBUTTON : MK_LBUTTON, at);
     PostMessage(hwnd, right ? WM_RBUTTONUP : WM_LBUTTONUP, 0, at);
+  }
+
+  QJsonArray jsonArray(const std::vector<double> & values)
+  {
+    QJsonArray a;
+    for (double v : values)
+      a.append(v);
+    return a;
+  }
+
+  QString viewerModeName(ViewerMode m)
+  {
+    return m == ViewerMode::Maps ? "maps" : m == ViewerMode::Buildings ? "buildings" : m == ViewerMode::Textures ? "textures"
+                                                                                                                 : "models";
+  }
+
+  // A viewer switch's report (ModelViewer::FinishViewerSwitch): its turns, what finished it, the click to the repaint.
+  QJsonObject switchReportJson(const ModelViewer::ViewerSwitchReport & r)
+  {
+    QJsonObject o;
+    o["to"] = r.to;
+    o["finishedBy"] = r.finishedBy;
+    o["turns"] = r.turns;
+    o["turnMs"] = jsonArray(r.turnMs);
+    o["clickToRepaintMs"] = (double)r.clickToRepaintMs;
+    o["split"] = r.split;
+    o["layoutInB"] = r.layoutInB;
+    return o;
+  }
+
+  // THE ABORT CHECK of the maps UI test's closenow step: the frame deleted with a viewer switch on its way (the harness's
+  // end deletes the frame, it does not close it; so would a fatal exception) drops the switch without its repaint and lets
+  // go of everything it held (ModelViewer::AbortViewerSwitch). Run by ~ModelViewer through ModelViewer::testShutdownProbe;
+  // its lines go to the log only, ending with "[maps-test] SHUTDOWN RESULT: PASS|FAIL".
+  struct AbortCheck
+  {
+    bool armed = false;
+    int passed = 0;
+    int failed = 0;
+
+    void check(const QString & what, bool ok, const QString & detail)
+    {
+      ok ? passed++ : failed++;
+      const QString line = QString("[maps-test] %1 abort: ").arg(ok ? "PASS" : "FAIL") + what + " -- " + detail;
+      if (ok)
+        LOG_INFO << line;
+      else
+        LOG_ERROR << line;
+    }
+  };
+  AbortCheck g_abortCheck;
+
+  void runAbortCheck(ModelViewer & mv, ModelViewer::ShutdownPoint point)
+  {
+    AbortCheck & c = g_abortCheck;
+    if (!c.armed)
+      return;
+    UnityRendererHost * host = mv.unityRendererHost;
+    const int hold = host ? host->playerHoldCount() : -1;
+    switch (point)
+    {
+      case ModelViewer::ShutdownPoint::Begin:
+        c.check("the frame goes with a viewer switch on its way, the player held", mv.viewerSwitchPending() && hold > 0,
+                QString("switch %1, the player's hold %2, the frame frozen %3").arg(mv.viewerSwitchPhaseName()).arg(hold)
+                  .arg(mv.IsFrozen() ? 1 : 0));
+        break;
+      case ModelViewer::ShutdownPoint::BeforeWorkerStop:
+        // (After AbortViewerSwitch, before the player is shut down.)
+        c.check("the switch was dropped, everything it held let go",
+                !mv.viewerSwitchPending() && !mv.IsFrozen() && mv.m_layoutBatch == 0 && hold == 0 && mv.m_later.empty(),
+                QString("switch %1, the frame frozen %2, the layout batch %3, the player's hold %4, %5 later turn(s) waiting")
+                  .arg(mv.viewerSwitchPhaseName()).arg(mv.IsFrozen() ? 1 : 0).arg(mv.m_layoutBatch).arg(hold)
+                  .arg((int)mv.m_later.size()));
+        break;
+      case ModelViewer::ShutdownPoint::AfterPlayerShutdown:
+        c.check("the player is shut down", host && !host->isRunning(), host ? "" : "no host");
+        LOG_INFO << QString("[maps-test] SHUTDOWN RESULT: %1 (a viewer switch dropped: %2 passed, %3 failed)")
+                      .arg(c.failed == 0 ? "PASS" : "FAIL").arg(c.passed).arg(c.failed);
+        c.armed = false;
+        break;
+      default:
+        break;
+    }
   }
 
   HWND playerWindowOf(UnityRendererHost * host)
@@ -10716,17 +11558,171 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     return 1;
   }
   UnityIpcServer * ipc = frame->unityRendererHost->ipc();
-  // Every GUI round: the longest of the run and of the step.
+  // Every GUI round: the longest of the run and of the step. A round over 20 ms is named with its step and the last
+  // poll's parts (stage 08: a round much longer than its poll was the wx queue's -- a paint, a layout, a handler).
   double roundMax = 0.0, stepRoundMax = 0.0;
   long long rounds = 0, roundsOver16 = 0, roundsOver50 = 0;
+  // Every busy stretch (g_pumpStretch: rounds with no sleep between, one), the same way.
+  double stretchMax = 0.0, stepStretchMax = 0.0;
+  long long stretches = 0, stretchesOver50 = 0;
+  QString currentLabel = "start";
+  UnityIpcServer::PollTiming lastPoll;
+  std::function<void(const UnityIpcServer::PollTiming &)> previousPollTiming = ipc->onPollTiming;
+  ipc->onPollTiming = [&](const UnityIpcServer::PollTiming & p) {
+    lastPoll = p;
+    if (previousPollTiming)
+      previousPollTiming(p);
+  };
+  // STREAMING (protocol 18): the longest round since the last roundmark step (roundcheck checks it), every streamState the
+  // player sent (the run's continuous samples), and the test flight's answer. (And the longest busy stretch since the mark.)
+  double markRoundMax = 0.0, markStretchMax = 0.0;
+  QJsonArray streamSamples;
+  UnityIpcServer::StreamState lastStream;
+  long long streamStatesSeen = 0;
+  wxStopWatch runClock;
+  std::function<void(const UnityIpcServer::StreamState &)> previousStream = ipc->onStreamState;
+  ipc->onStreamState = [&](const UnityIpcServer::StreamState & s) {
+    lastStream = s;
+    streamStatesSeen++;
+    QJsonObject o;
+    o["t"] = (double)runClock.Time();
+    o["camera"] = QString("%1_%2").arg(s.cameraTileX).arg(s.cameraTileY);
+    o["resident"] = s.tilesResident;
+    o["loading"] = s.tilesLoading;
+    o["opened"] = s.tilesOpened;
+    o["closed"] = s.tilesClosed;
+    o["failed"] = s.tilesFailed;
+    o["requestsOut"] = s.requestsOut;
+    o["filesAsked"] = (double)s.filesAsked;
+    o["filesAnswered"] = (double)s.filesAnswered;
+    o["bytes"] = (double)s.bytesReceived;
+    o["worldInstances"] = s.worldInstances;
+    o["doodadInstances"] = s.doodadInstances;
+    o["gpuTextureBytes"] = (double)s.gpuTextureBytes;
+    o["gpuGeometryBytes"] = (double)s.gpuGeometryBytes;
+    o["poolBytes"] = (double)s.poolBytes;
+    o["prototypesEvicted"] = (double)s.prototypesEvicted;
+    o["texturesEvicted"] = (double)s.texturesEvicted;
+    o["frameMsMax"] = s.frameMsMax;
+    o["frameMsP95"] = s.frameMsP95;
+    o["framesOver33"] = s.framesOver33;
+    o["framesOver50"] = s.framesOver50;
+    o["workMsMax"] = s.workMsMax;
+    o["uploadMsMax"] = s.uploadMsMax;
+    o["managedHeapBytes"] = (double)s.managedHeapBytes;
+    streamSamples.append(o);
+    if (previousStream)
+      previousStream(s);
+  };
+  UnityIpcServer::TestFlightDone lastFlight;
+  int flightAnswered = 0;
+  std::function<void(const UnityIpcServer::TestFlightDone &)> previousFlight = ipc->onTestFlightDone;
+  ipc->onTestFlightDone = [&](const UnityIpcServer::TestFlightDone & f) {
+    lastFlight = f;
+    flightAnswered = f.request;
+    if (previousFlight)
+      previousFlight(f);
+  };
+  // The player's private bytes (its process), -1 when it cannot be read.
+  const auto playerPrivateBytes = [&]() -> long long {
+    const DWORD pid = frame->unityRendererHost ? frame->unityRendererHost->playerProcessId() : 0;
+    if (!pid)
+      return -1;
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!h)
+      return -1;
+    PROCESS_MEMORY_COUNTERS_EX pmc = {};
+    pmc.cb = sizeof(pmc);
+    long long b = K32GetProcessMemoryInfo(h, reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&pmc), sizeof(pmc)) ? (long long)pmc.PrivateUsage : -1;
+    CloseHandle(h);
+    return b;
+  };
+  // THE VIEWER SWITCH (the command bar's, in turns: ModelViewer::BeginViewerSwitch). switchRounds, when set, gets every
+  // round's time (a mode step's, from the click to the repaint). THE STRUCTURAL FILM: from a mode step's click until its
+  // switch is repainted, every round checks that nothing changed before the repaint -- the caption as at the click, the
+  // player's frame on or off screen as at the click, the frame frozen and its own drawing held back -- and is logged with
+  // the switch's phase. filmViolations counts every film's, filmChecked those a mode or settle step has checked.
+  struct SwitchFilm
+  {
+    bool active = false;
+    wxString title;
+    bool player = false;
+    bool caption = true;   // the caption and the player's place checked (known at the click)
+    int rounds = 0;
+    int violations = 0;
+    QString first;
+    QJsonArray log;
+  };
+  SwitchFilm film;
+  int filmViolations = 0, filmChecked = 0;
+  QString filmFirst;   // the first violation not checked yet
+  std::vector<double> * switchRounds = nullptr;
   g_pumpBusy = [&](double ms) {
     rounds++;
     roundMax = std::max(roundMax, ms);
     stepRoundMax = std::max(stepRoundMax, ms);
+    markRoundMax = std::max(markRoundMax, ms);
     if (ms > 16.7)
       roundsOver16++;
     if (ms > 50.0)
       roundsOver50++;
+    if (ms > 20.0)
+      LOG_INFO << "[maps-test] a GUI round of" << QString::number(ms, 'f', 3) << "ms at" << currentLabel
+               << QString("(its last poll %1 ms: receive %2, map serving %3, send %4, %5 map answer(s))").arg(lastPoll.pollMs, 0, 'f', 3)
+                    .arg(lastPoll.receiveMs, 0, 'f', 3).arg(lastPoll.serveMs - lastPoll.recordMs, 0, 'f', 3).arg(lastPoll.sendMs, 0, 'f', 3)
+                    .arg(lastPoll.mapAnswered);
+    if (switchRounds)
+      switchRounds->push_back(ms);
+    if (film.active)
+    {
+      if (!frame->viewerSwitchPending())
+      {
+        // Over once its switch was seen and is gone (not before it: a real click's press comes a round before the switch).
+        if (film.rounds > 0)
+          film.active = false;
+      }
+      else
+      {
+        QStringList changed;
+        if (film.caption && frame->GetTitle() != film.title)
+          changed << "the caption changed";
+        const bool player = frame->unityRendererHost && frame->unityRendererHost->playerOnScreen();
+        if (film.caption && player != film.player)
+          changed << (film.player ? "the player's frame went off screen" : "the player's frame came on screen");
+        if (!frame->IsFrozen())
+          changed << "the frame is not frozen";
+        if (!frame->viewerSwitchDrawHeld())
+          changed << "the frame's own drawing is not held back";
+        film.rounds++;
+        QJsonObject o;
+        o["phase"] = frame->viewerSwitchPhaseName();
+        o["ms"] = ms;
+        if (!changed.isEmpty())
+        {
+          o["changed"] = changed.join("; ");
+          const QString what = QString("round %1 of the switch (%2, %3 ms) at %4: %5").arg(film.rounds)
+                                 .arg(frame->viewerSwitchPhaseName()).arg(ms, 0, 'f', 1).arg(currentLabel).arg(changed.join("; "));
+          if (film.violations++ == 0)
+            film.first = what;
+          if (filmViolations == filmChecked)
+            filmFirst = what;
+          filmViolations++;
+        }
+        film.log.append(o);
+      }
+    }
+  };
+  g_pumpCarry = 0.0;
+  g_pumpStretch = [&](double ms) {
+    stretches++;
+    stretchMax = std::max(stretchMax, ms);
+    stepStretchMax = std::max(stepStretchMax, ms);
+    markStretchMax = std::max(markStretchMax, ms);
+    if (ms > 50.0)
+    {
+      stretchesOver50++;
+      LOG_INFO << "[maps-test] a GUI busy stretch of" << QString::number(ms, 'f', 3) << "ms at" << currentLabel;
+    }
   };
   const auto pump = [&](long ms) {
     wxStopWatch w;
@@ -10843,11 +11839,69 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     LOG_INFO << "[maps-test] sample" << label << QJsonDocument(o).toJson(QJsonDocument::Compact);
     return o;
   };
+  // THE SWITCH LET EVERYTHING GO: none on its way, the frame thawed, every frozen window of the frame one parkHidden froze
+  // (or inside one), the player's hold and the layout batch back to none, Browse in the viewer's mode.
+  const auto switchLetGo = [&](QString & why) {
+    QStringList bad;
+    if (frame->viewerSwitchPending())
+      bad << QString("a switch is still on its way (%1)").arg(frame->viewerSwitchPhaseName());
+    if (frame->IsFrozen())
+      bad << "the frame is still frozen";
+    int loose = 0;
+    QString firstLoose;
+    std::function<void(wxWindow *, bool)> visit = [&](wxWindow * parent, bool inParked) {
+      for (wxWindow * child : parent->GetChildren())
+      {
+        if (child->IsTopLevel())
+          continue;
+        const bool parked = inParked || frame->m_parked.count(child) > 0;
+        if (child->IsFrozen() && !parked && loose++ == 0)
+          firstLoose = QString::fromWCharArray((wxString(child->GetClassInfo()->GetClassName()) + wxT(" \"") + child->GetName() +
+                                                wxT("\"")).wc_str());
+        visit(child, parked);
+      }
+    };
+    visit(frame, false);
+    if (loose > 0)
+      bad << QString("%1 frozen window(s) not parked (the first: %2)").arg(loose).arg(firstLoose);
+    const int hold = frame->unityRendererHost ? frame->unityRendererHost->playerHoldCount() : 0;
+    if (hold != 0)
+      bad << QString("the player is held (%1)").arg(hold);
+    if (frame->m_layoutBatch != 0)
+      bad << QString("the layout batch is open (%1)").arg(frame->m_layoutBatch);
+    const ViewerMode browse = fc->ShowsMaps() ? ViewerMode::Maps : fc->ShowsTextures() ? ViewerMode::Textures
+                            : fc->ShowsBuildings() ? ViewerMode::Buildings : ViewerMode::Models;
+    if (browse != frame->viewerMode())
+      bad << QString("Browse shows %1, the viewer %2").arg(viewerModeName(browse)).arg(viewerModeName(frame->viewerMode()));
+    why = bad.isEmpty() ? QString("Browse in %1, the player not held, %2 window(s) parked").arg(viewerModeName(browse))
+                            .arg((int)frame->m_parked.size())
+                        : bad.join("; ");
+    return bad.isEmpty();
+  };
+  // The structural films since the last check: no round of them saw anything change before the repaint.
+  const auto checkFilm = [&](const QString & label) {
+    tally.check(label + ": nothing changed before the repaint (structural film)", filmViolations == filmChecked,
+                filmViolations == filmChecked ? QString("the last film %1 round(s)").arg(film.rounds)
+                                              : QString("%1 round(s) changed; the first: %2").arg(filmViolations - filmChecked)
+                                                  .arg(filmFirst));
+    filmChecked = filmViolations;
+  };
+  int filmPictures = 0;   // modefilm's pictures, numbered through the run
 
   // The player, connected.
   if (!pumpUntil([&]() { return ipc->isUnityReady(); }, 60000))
   {
     tally.check("the Unity player announces itself", false, "no unityReady within 60 s");
+    // (The callbacks set above point at this function's locals: given back before it returns.)
+    ipc->onRuntimeState = previousRuntime;
+    ipc->onTerrainTileLoaded = previousReport;
+    ipc->onWorldShown = previousShown;
+    ipc->onWorldProgress = previousProgress;
+    ipc->onPollTiming = previousPollTiming;
+    ipc->onStreamState = previousStream;
+    ipc->onTestFlightDone = previousFlight;
+    g_pumpBusy = nullptr;
+    g_pumpStretch = nullptr;
     return 1;
   }
   tally.check("the player is connected and speaks protocol 14 (the Maps viewer)", ipc->playerInspectsMapTiles(),
@@ -10859,7 +11913,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   const QStringList seq = spec.split(',', QString::SkipEmptyParts);
   LOG_INFO << "[maps-test] client" << frame->mapCatalog()->client().product << frame->mapCatalog()->client().build
            << "sequence:" << spec;
-  bool holdClose = false, closeWorld = false;
+  bool holdClose = false, closeWorld = false, closeNow = false;
   QString holdRole = "rootAdt";
   for (int s = 0; s < seq.size(); s++)
   {
@@ -10868,22 +11922,168 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     const QString arg = step.section(':', 1).trimmed();
     const QString label = QString("step %1 %2").arg(s + 1).arg(step);
     LOG_INFO << "[maps-test]" << label;
+    currentLabel = label;
     wxStopWatch stepClock;
     stepRoundMax = 0.0;
+    stepStretchMax = 0.0;
     QJsonObject rec;
     rec["step"] = step;
-    if (kind == "mode")
+    if (kind == "mode" || kind == "modenow" || kind == "modefilm")
     {
-      const int id = arg == "maps" ? ID_UI_MAPS : arg == "buildings" ? ID_UI_BUILDINGS : arg == "textures" ? ID_UI_TEXTURES
-                                                                                                           : ID_UI_MODELS;
-      const ViewerMode want = arg == "maps" ? ViewerMode::Maps : arg == "buildings" ? ViewerMode::Buildings
-                            : arg == "textures" ? ViewerMode::Textures : ViewerMode::Models;
+      // mode:<m>[:real] -- the command bar's tool clicked, then until the switch is repainted (its turns, when it is made in
+      // turns of its own): the rounds from the click to the repaint, the switch's report and its structural film recorded,
+      // and what it let go of checked. :real posts the press and the release in rounds of their own, as a hand makes them
+      // (postClick posts both at once).
+      // modenow:<m>[:real] -- the click's first round only, no sleep after it (the next turn's timer, armed at that round's
+      // idle, is not due yet): the switch is left on its way for the steps after it -- a key, a press, a load, another
+      // click finishes it; settle checks what it left.
+      // modefilm:<m> -- as mode, and a picture of the frame after every pump while the switch is on its way, as it holds it
+      // (not repainted first: <out>_film_<n>.png; on a hidden desktop it can come back black, and is then no evidence).
+      const QString m = arg.section(':', 0, 0);
+      const bool real = arg.section(':', 1, 1) == "real";
+      const int id = m == "maps" ? ID_UI_MAPS : m == "buildings" ? ID_UI_BUILDINGS : m == "textures" ? ID_UI_TEXTURES
+                                                                                                     : ID_UI_MODELS;
+      const ViewerMode want = m == "maps" ? ViewerMode::Maps : m == "buildings" ? ViewerMode::Buildings
+                            : m == "textures" ? ViewerMode::Textures : ViewerMode::Models;
       const wxRect r = frame->commandBar->GetToolRect(id);
-      postClick((HWND)frame->commandBar->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
-      const bool switched = pumpUntil([&]() { return frame->viewerMode() == want; }, 5000);
+      const HWND bar = (HWND)frame->commandBar->GetHWND();
+      const wxPoint at(r.x + r.width / 2, r.y + r.height / 2);
+      const QString toolRect = QString("tool rect %1,%2 %3x%4").arg(r.x).arg(r.y).arg(r.width).arg(r.height);
+      rec["from"] = viewerModeName(frame->viewerMode());
+      rec["to"] = viewerModeName(want);
+      film = SwitchFilm();
+      film.active = true;
+      film.title = frame->GetTitle();
+      film.player = frame->unityRendererHost && frame->unityRendererHost->playerOnScreen();
+      // A switch still on its way (a modenow's) is finished by this click's press, in the round its successor begins: the
+      // caption and the player's place are that one's to change, so this film checks only the freeze and the drawing.
+      film.caption = !frame->viewerSwitchPending();
+      std::vector<double> clickRounds;
+      switchRounds = &clickRounds;
+      const long long roundsBefore = rounds;
+      wxStopWatch clickClock;
+      if (real)
+      {
+        const LPARAM lp = MAKELPARAM(at.x, at.y);
+        PostMessage(bar, WM_MOUSEMOVE, 0, lp);
+        PostMessage(bar, WM_LBUTTONDOWN, MK_LBUTTON, lp);
+        pumpIpc(ipc, 1);
+        PostMessage(bar, WM_LBUTTONUP, 0, lp);
+      }
+      else
+        postClick(bar, at);
+      if (kind == "modenow")
+      {
+        pumpRound(ipc);
+        // (The event loop waits here for what comes next -- the key, the press or the click that finishes the switch is a
+        // round of its own after a wait --, so the click's round is a busy stretch of its own, not the next step's.)
+        pumpStretchEnd();
+        rec["pendingAfterClick"] = frame->viewerSwitchPending();
+        rec["phaseAfterClick"] = frame->viewerSwitchPhaseName();
+        // (A switch a modenow before this one left on its way: finished by this click's press.)
+        rec["switchBefore"] = switchReportJson(frame->lastViewerSwitch());
+        tally.check(label + ": the switch is on its way after its first turn",
+                    frame->viewerMode() == want && frame->viewerSwitchPending(),
+                    QString("%1; mode %2, switch %3").arg(toolRect).arg(viewerModeName(frame->viewerMode()))
+                      .arg(frame->viewerSwitchPhaseName()));
+      }
+      else
+      {
+        bool switched = false, settled = false;
+        QJsonArray pictures;
+        if (kind == "modefilm")
+        {
+          wxStopWatch w;
+          while ((frame->viewerMode() != want || frame->viewerSwitchPending()) && w.Time() < 8000)
+          {
+            pumpIpc(ipc, 1);
+            if (!frame->viewerSwitchPending() || outBase.isEmpty() || pictures.size() >= 100)
+              continue;
+            const QString path = outBase + QString("_film_%1.png").arg(++filmPictures);
+            QSize size;
+            double mean = -1.0;
+            const wxRect vp = frame->unityRendererHost->GetScreenRect();
+            const wxRect fr = frame->GetScreenRect();
+            const bool ok = printWindowPng((HWND)frame->GetHWND(), path, size, mean,
+                                           wxRect(vp.x - fr.x, vp.y - fr.y, vp.width, vp.height), false);
+            QJsonObject o;
+            o["path"] = path;
+            o["written"] = ok;
+            o["phase"] = frame->viewerSwitchPhaseName();
+            o["t"] = (double)clickClock.Time();
+            o["viewportMean"] = mean;
+            pictures.append(o);
+          }
+          switched = frame->viewerMode() == want;
+          settled = !frame->viewerSwitchPending();
+          rec["filmPictures"] = pictures;
+        }
+        else
+        {
+          switched = pumpUntil([&]() { return frame->viewerMode() == want; }, 5000);
+          settled = pumpUntil([&]() { return !frame->viewerSwitchPending(); }, 3000);
+        }
+        rec["switchMs"] = (double)clickClock.Time();
+        rec["switchRounds"] = (double)(rounds - roundsBefore);
+        rec["switchRoundsMs"] = jsonArray(clickRounds);
+        switchRounds = nullptr;
+        rec["switch"] = switchReportJson(frame->lastViewerSwitch());
+        rec["switchFilm"] = film.log;
+        film.active = false;   // (a switch in one turn is never seen on its way)
+        pump(300);
+        tally.check(label + ": the command bar's tool switches the viewer", switched, toolRect);
+        QString why;
+        const bool letGo = switchLetGo(why);
+        tally.check(label + ": the switch let everything go", settled && letGo,
+                    settled ? why : "still on its way after 3 s; " + why);
+        checkFilm(label);
+      }
+      switchRounds = nullptr;
+    }
+    else if (kind == "settle")
+    {
+      // settle[:<word>]: until no viewer switch is on its way and no turn after one waits (the item chooser's end, the
+      // minimap reads, the texture decode, Browse's tree freed), at most 3 s; then what the switch let go of, the structural
+      // films since the last check and -- with a word (key, press, command, load, client, closing, turn) -- what finished
+      // the last switch.
+      const bool settled = pumpUntil([&]() { return !frame->viewerSwitchPending() && !frame->laterWorkPending(); }, 3000);
+      const ModelViewer::ViewerSwitchReport last = frame->lastViewerSwitch();
+      rec["switch"] = switchReportJson(last);
+      QString why;
+      const bool letGo = switchLetGo(why);
+      tally.check(label + ": the switch let everything go", settled && letGo,
+                  settled ? why : QString("still on its way or a later turn waiting after 3 s (switch %1); %2")
+                                    .arg(frame->viewerSwitchPhaseName()).arg(why));
+      checkFilm(label);
+      if (!arg.isEmpty())
+        tally.check(label + ": the last switch was finished by " + arg, last.finishedBy.contains(arg, Qt::CaseInsensitive),
+                    QString("finished by \"%1\" (to %2, %3 turn(s))").arg(last.finishedBy).arg(last.to).arg(last.turns));
       pump(300);
-      tally.check(label + ": the command bar's tool switches the viewer", switched,
-                  QString("tool rect %1,%2 %3x%4").arg(r.x).arg(r.y).arg(r.width).arg(r.height));
+    }
+    else if (kind == "clickframe")
+    {
+      // clickframe:<x>:<y>: a left click posted to the frame's own window at that point of its client area -- where a real
+      // click on a frozen panel lands (a frozen window reads hidden to Windows: it is not hit-tested). A switch on its way
+      // is finished by its press.
+      postClick((HWND)frame->GetHWND(), wxPoint(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toInt()));
+      pump(50);
+    }
+    else if (kind == "closenow")
+    {
+      // The last step: the run ends at once, with no round after the step before it -- a switch a modenow left on its way
+      // is still on its way when the frame goes (the harness's end deletes the frame, it does not close it). THE ABORT
+      // CHECK (runAbortCheck) is run by ~ModelViewer; the player is closed by it too.
+      if (s != seq.size() - 1)
+      {
+        tally.check(label, false, "closenow must be the last step");
+        continue;
+      }
+      rec["pending"] = frame->viewerSwitchPending();
+      LOG_INFO << "[maps-test] closenow: the frame goes now; a viewer switch on its way:" << frame->viewerSwitchPhaseName();
+      g_abortCheck = AbortCheck();
+      g_abortCheck.armed = true;
+      ModelViewer::testShutdownProbe = &runAbortCheck;
+      closeNow = true;
     }
     else if (kind == "search")
     {
@@ -11179,12 +12379,16 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       const QString key = arg.section(':', 0, 0).toLower();
       const bool down = arg.section(':', 1, 1).toLower() != "up";
       // ("lshift": the left Shift's own code. A posted generic Shift leaves the system's keyboard state as it is, which the
-      // player's input reads to tell the side; a real Shift updates it.)
+      // player's input reads to tell the side; a real Shift updates it.) The arrows are the extended keys, as the
+      // keyboard's own arrow keys send them (not the number pad's).
       const UINT vk = key == "space" ? VK_SPACE : key == "shift" ? VK_SHIFT : key == "lshift" ? VK_LSHIFT
+                    : key == "up" ? VK_UP : key == "down" ? VK_DOWN : key == "left" ? VK_LEFT : key == "right" ? VK_RIGHT
+                    : key == "return" ? VK_RETURN : key == "escape" ? VK_ESCAPE : key == "tab" ? VK_TAB
                     : key.size() == 1 ? (UINT)key.toUpper()[0].unicode() : 0;
+      const bool extended = vk == VK_UP || vk == VK_DOWN || vk == VK_LEFT || vk == VK_RIGHT;
       const HWND target = kind == "keyplayer" ? frame->unityRendererHost->playerWindow() : ::GetFocus();
       const UINT scan = ::MapVirtualKeyW(vk == VK_SHIFT ? VK_LSHIFT : vk, MAPVK_VK_TO_VSC);
-      const LPARAM lp = (LPARAM)(1u | (scan << 16) | (down ? 0u : (3u << 30)));
+      const LPARAM lp = (LPARAM)(1u | (scan << 16) | (extended ? (1u << 24) : 0u) | (down ? 0u : (3u << 30)));
       const bool posted = vk != 0 && target && ::PostMessageW(target, down ? WM_KEYDOWN : WM_KEYUP, vk, lp);
       rec["target"] = frame->unityRendererHost->describeWindow(target);
       LOG_INFO << "[input] harness posted" << (down ? "WM_KEYDOWN" : "WM_KEYUP") << key << "to" << rec["target"].toString();
@@ -12084,6 +13288,84 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       pump(arg.toLong());
     else if (kind == "state")
       sample(arg.isEmpty() ? label : arg);
+    else if (kind == "flight")
+    {
+      // flight:<speed>:<pitch>:<x>/<y>/<z>/<x>/<y>/<z>... (protocol 18): the player's free camera flies the path itself (a test
+      // hook: no message on the way); the step waits for its answer -- the path's length at the speed, and a minute more.
+      const QStringList a = arg.split(':');
+      const double speed = a.value(0).toDouble(), pitch = a.value(1).toDouble();
+      std::vector<double> pts;
+      for (const QString & v : a.value(2).split('/', QString::SkipEmptyParts))
+        pts.push_back(v.toDouble());
+      double length = 0.0;
+      for (size_t i = 3; i + 2 < pts.size(); i += 3)
+        length += std::sqrt((pts[i] - pts[i - 3]) * (pts[i] - pts[i - 3]) + (pts[i + 1] - pts[i - 2]) * (pts[i + 1] - pts[i - 2]) +
+                            (pts[i + 2] - pts[i - 1]) * (pts[i + 2] - pts[i - 1]));
+      const long long statesBefore = streamStatesSeen;
+      const int q = ipc->sendTestFlight(pts, speed, pitch);
+      const long limit = (long)(length / std::max(1.0, speed) * 1000.0) + 60000;
+      const bool done = q > 0 && pumpUntil([&]() { return flightAnswered == q; }, limit);
+      rec["flightLength"] = length;
+      rec["flightSeconds"] = lastFlight.seconds;
+      rec["flightFrames"] = lastFlight.frames;
+      rec["flightFrameMsMax"] = lastFlight.frameMsMax;
+      rec["streamStates"] = (double)(streamStatesSeen - statesBefore);
+      tally.check(label + ": the free camera flies the path", done && lastFlight.status == "done",
+                  QString("%1 (%2): %3 yards in %4 s, %5 frame(s), the longest %6 ms; %7 streamState(s) meanwhile")
+                    .arg(done ? lastFlight.status : QString("no answer")).arg(lastFlight.reason).arg(length, 0, 'f', 1)
+                    .arg(lastFlight.seconds, 0, 'f', 2).arg(lastFlight.frames).arg(lastFlight.frameMsMax, 0, 'f', 1)
+                    .arg(streamStatesSeen - statesBefore));
+    }
+    else if (kind == "waitstream")
+    {
+      // waitstream:<ms>: until a streamState after this step began says nothing loads and no request is out (the session's
+      // tiles settled), at most ms; the time it took.
+      const long ms = arg.isEmpty() ? 180000 : arg.toLong();
+      const long long statesBefore = streamStatesSeen;
+      wxStopWatch w;
+      const bool settled = pumpUntil([&]() {
+        return streamStatesSeen > statesBefore + 1 && lastStream.load > 0 && lastStream.tilesLoading == 0 && lastStream.requestsOut == 0;
+      }, ms);
+      rec["settleMs"] = (double)w.Time();
+      rec["stream"] = lastStream.describe();
+      tally.check(label + ": the streaming session settles", settled,
+                  QString("after %1 ms: %2").arg(w.Time()).arg(lastStream.describe()));
+    }
+    else if (kind == "streamstate")
+    {
+      // streamstate:<label>: the session's last state, the player's and the viewer's memory.
+      QJsonObject o = lastStream.raw;
+      o["label"] = arg.isEmpty() ? label : arg;
+      o["playerPrivateBytes"] = (double)playerPrivateBytes();
+      o["viewerPrivateBytes"] = (double)privateBytesNow();
+      o["t"] = (double)runClock.Time();
+      if (UnityIpcServer * q = frame->unityRendererHost ? frame->unityRendererHost->ipc() : nullptr)
+      {
+        // The host's queue: no live request refused for room, a closed tile's requests answered stale while they waited.
+        o["hostRefusedQueueFull"] = (double)q->mapAssetsRefusedQueueFull();
+        o["hostAnsweredStaleWaiting"] = (double)q->mapAssetsAnsweredStaleWaiting();
+        o["hostQueueDepthMax"] = q->mapAssetQueueDepthMax();
+      }
+      rec["streamState"] = o;
+      samples.append(o);
+      LOG_INFO << "[maps-test]" << label << ": the player's private bytes" << (qint64)o["playerPrivateBytes"].toDouble() << ", the viewer's"
+               << (qint64)o["viewerPrivateBytes"].toDouble() << ";" << lastStream.describe();
+    }
+    else if (kind == "roundmark")
+    {
+      markRoundMax = 0.0;
+      markStretchMax = 0.0;
+    }
+    else if (kind == "roundcheck")
+    {
+      const double limit = arg.isEmpty() ? 50.0 : arg.toDouble();
+      rec["roundMaxSinceMark"] = markRoundMax;
+      rec["stretchMaxSinceMark"] = markStretchMax;
+      tally.check(label + QString(": no GUI round over %1 ms since the mark").arg(limit), markRoundMax <= limit,
+                  QString("the longest %1 ms").arg(markRoundMax, 0, 'f', 3));
+      tally.check(label + QString(": no GUI busy stretch over %1 ms since the mark").arg(limit), markStretchMax <= limit,
+                  QString("the longest %1 ms").arg(markStretchMax, 0, 'f', 3));
+    }
     else if (kind == "shot" || kind == "shotnow")
     {
       if (kind == "shot")
@@ -12116,6 +13398,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       tally.check(label, false, "unknown step");
     rec["ms"] = (double)stepClock.Time();
     rec["guiRoundMaxMs"] = stepRoundMax;
+    rec["guiStretchMaxMs"] = stepStretchMax;
     rec["timings"] = timingsJson(maps->timings());
     rec["mapPhase"] = mapPhaseName(maps->mapPhase());
     rec["tilePhase"] = tilePhaseName(maps->tilePhase());
@@ -12123,17 +13406,24 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     rec["minimapsLoaded"] = maps->minimapsLoaded();
     rec["privateBytes"] = (double)privateBytesNow();
     steps.append(rec);
-    LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax << "ms";
+    LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax
+             << "ms, the longest busy stretch" << stepStretchMax << "ms";
   }
+  pumpStretchEnd();   // (the stretch still open: the run's last)
 
   out["steps"] = steps;
   out["shots"] = shots;
   out["samples"] = samples;
+  out["streamSamples"] = streamSamples;
   out["checks"] = tally.checks;
   out["guiRounds"] = (double)rounds;
   out["guiRoundMaxMs"] = roundMax;
   out["guiRoundsOver16ms"] = (double)roundsOver16;
   out["guiRoundsOver50ms"] = (double)roundsOver50;
+  out["guiStretches"] = (double)stretches;
+  out["guiStretchMaxMs"] = stretchMax;
+  out["guiStretchesOver50ms"] = (double)stretchesOver50;
+  out["switchFilmViolations"] = filmViolations;
   out["client"] = frame->mapCatalog()->client().product + " " + frame->mapCatalog()->client().build;
   out["passed"] = tally.passed;
   out["failed"] = tally.failed;
@@ -12145,8 +13435,10 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       f.write(QJsonDocument(out).toJson(QJsonDocument::Indented));
   }
   LOG_INFO << QString("[maps-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped); GUI rounds %5, the longest %6 ms, %7 over 16.7 ms, "
-                      "%8 over 50 ms").arg(tally.failed == 0 ? "PASS" : "FAIL").arg(tally.passed).arg(tally.failed)
-                .arg(tally.skipped).arg(rounds).arg(roundMax, 0, 'f', 2).arg(roundsOver16).arg(roundsOver50);
+                      "%8 over 50 ms; busy stretches %9, the longest %10 ms, %11 over 50 ms")
+                .arg(tally.failed == 0 ? "PASS" : "FAIL").arg(tally.passed).arg(tally.failed)
+                .arg(tally.skipped).arg(rounds).arg(roundMax, 0, 'f', 2).arg(roundsOver16).arg(roundsOver50)
+                .arg(stretches).arg(stretchMax, 0, 'f', 2).arg(stretchesOver50);
   std::printf("WMV: maps ui test %s (%d passed, %d failed, %d skipped)\n", tally.failed == 0 ? "PASS" : "FAIL", tally.passed,
               tally.failed, tally.skipped);
   std::fflush(stdout);
@@ -12154,9 +13446,15 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   ipc->onTerrainTileLoaded = previousReport;
   ipc->onWorldShown = previousShown;
   ipc->onWorldProgress = previousProgress;
+  ipc->onPollTiming = previousPollTiming;
+  ipc->onStreamState = previousStream;
+  ipc->onTestFlightDone = previousFlight;
   g_pumpBusy = nullptr;
+  g_pumpStretch = nullptr;
   if (closeWorld)
     return tally.failed;   // the player left running: the frame's destructor closes it with the world load in flight
+  if (closeNow)
+    return tally.failed;   // a viewer switch left on its way: the frame's destructor drops it (THE ABORT CHECK), closes the player
   if (holdClose)
   {
     // A tile requested with its root ADT read held in the worker, then the window closed (the frame's destructor) with

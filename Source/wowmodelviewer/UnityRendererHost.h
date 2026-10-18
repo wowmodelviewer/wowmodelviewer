@@ -32,6 +32,10 @@
 #endif
 #include <wx/timer.h>
 
+#include <atomic>
+#include <memory>
+#include <thread>
+
 #include <QString>
 
 #ifdef _WINDOWS
@@ -152,7 +156,16 @@ public:
   // would show). The player's window is not resized while the texture view covers it (it
   // keeps the size of the viewer it was covered from); it is sized to the viewport again just before it is put back.
   void holdPlayer();
-  void releasePlayer();
+  // sizeAsync (a split viewer switch's repaint turn, ModelViewer::FinishViewerSwitch): a player on screen at another size,
+  // or put back before the move that sized it is over, is sized by a thread of this process's own and not waited for --
+  // the GUI thread does not wait the 43-45 ms of one of the player's frames; the player takes the size with its next frame.
+  void releasePlayer(bool sizeAsync = false);
+  // A viewer switch dropped without its repaint (the frame being deleted): the hold counted down, nothing applied.
+  void dropHold() { if (m_playerHold > 0) m_playerHold--; }
+  int playerHoldCount() const { return m_playerHold; }   // the harness
+  // The player's frame in the panel's client area, a player running: a viewer switch lays out with the repaint then (a
+  // layout moves or cuts the frame of a player on screen at once, frozen or not -- unmeasured, docs 08-streaming 8.9).
+  bool playerOnScreen() { return m_playerFrame && m_playerOnScreen && isRunning(); }
   // The player's frame (see m_playerFrame), or null where there is no player (not Windows).
   wxWindow * playerFrame() const { return m_playerFrame; }
   // A load about to be sent to the player: while it is parked (behind a notice) since a switch -- which does not size
@@ -160,6 +173,18 @@ public:
   // own aspect, once, when built). Sent and waited for -- one frame of the player's at most -- like every resize of it.
   // On screen it has the viewport's size already.
   void sizePlayerForLoad();
+  // A load about to be sent while the content window (the Maps viewer's overhead map) covers the player: its window given
+  // the viewport's size now, by a thread of this process's own -- the move waits for the player's thread, which resizes its
+  // frame (about 45 ms), and this thread does not wait --, so putting it back when the world is shown finds it sized.
+  // resizeEmbeddedWindow waits for this move before it makes one: the two never land out of order. Not for a player
+  // Windows considers hung: it is sized as it is put back, as before.
+  void sizePlayerAhead();
+  // A viewer switch's first turn (held, laid out): a player parked now that its release will put back (no notice, no
+  // content window) given the viewport's new size by a thread of this process's own, off screen, so the put-back finds it
+  // sized. True when a move was started (the switch waits for it a turn at a time: aheadMoveInFlight).
+  bool sizeParkedPlayerAhead();
+  // A move sizePlayerAhead, sizeParkedPlayerAhead or a switch's release started is still waiting on the player's thread.
+  bool aheadMoveInFlight() const { return m_aheadThread.joinable() && m_ahead && !m_ahead->done; }
   // The keyboard is in the player's window. Asked without asking that window anything: wxWindow::FindFocus sends it
   // WM_GETDLGCODE to find a wx window for it, which waits on the player's thread (once per frame it draws).
   bool playerHasKeyboard();
@@ -168,6 +193,9 @@ public:
   // not fly gives it back. The move waits on the player's thread (it is sent the focus change) -- not for one Windows
   // considers hung: that player keeps it until a click elsewhere. True when the keyboard moved.
   bool takeKeyboardFromPlayer(wxWindow * to);
+  // How long a keyboard handoff from the player waits for a turn of its own (releaseKeyboardFromPlayer,
+  // ModelViewer::handKeyboardSoon): longer than the rest of the turn that asked for it, its paints included.
+  static const int KeyboardHandoffDelayMs = 50;
   // A viewer switch ending on a notice (held): the player's frame off screen now, at the end of the freeze -- the
   // old workspace stays whole until then, and the switch's repaint paints the notice where it was. Its release finds
   // it done. True when it was on screen until now: paintPlainNow once the freeze is over.
@@ -238,6 +266,7 @@ private:
   int m_noticeActionId = 0;
   wxButton * m_noticeButton = nullptr;
   wxTimer m_noticeTimer;   // watchEmbeddedVisibility
+  wxTimer m_keyboardTimer; // releaseKeyboardFromPlayer
   int m_noticeTicksLeft = -1;
   int m_playerHold = 0;     // holdPlayer() count
 
@@ -264,8 +293,36 @@ private:
   // considers hung (no message taken for 5 s, e.g. a long build): this thread would hang with it. On screen it is then
   // tried again from the timer until it responds; parked, as it is put back.
   void resizeEmbeddedWindow(bool puttingBack = false);
+  // sizePlayerAhead's move: its thread, the size it moves to, and (set by that thread) whether it is over and how long
+  // it waited for the player's thread.
+  struct AheadMove
+  {
+    int width = 0;
+    int height = 0;
+    std::atomic<bool> done{ false };
+    std::atomic<double> ms{ 0.0 };
+  };
+  std::thread m_aheadThread;
+  std::shared_ptr<AheadMove> m_ahead;
+  // That move waited for -- not while it still waits on a player Windows considers hung, nor longer than limitMs when one
+  // is given (false: it is not over).
+  bool finishAheadMove(long limitMs = -1);
+  bool m_sizeAsync = false;   // releasePlayer(true) applying: resizeEmbeddedWindow does not wait for the player
+#ifdef _WINDOWS
+  // The move on a thread (sizePlayerAhead's): false when an earlier one is still under way (a thread is never replaced
+  // while it runs: an earlier one that is over is joined first, finishAheadMove).
+  bool startAheadMove(HWND wnd, const wxSize & size);
+#endif
 
   UnityIpcServer * m_ipc = nullptr; // owned
+
+public:
+#ifdef _WINDOWS
+  // The player's process (0: none) -- the harnesses read its memory.
+  DWORD playerProcessId() const { return m_processId; }
+#endif
+
+private:
 
 #ifdef _WINDOWS
   // The player's top-level-turned-child window inside this panel (found lazily: the

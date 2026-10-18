@@ -105,6 +105,9 @@ namespace wow
                                  // hash, a missing key (encrypted) or the storage partway: at most that size, an upper
                                  // bound), 0 when nothing was read (not listed, not local, too large, no storage, its size
                                  // unreadable)
+    qint64 tooLargeSize = -1;    // TooLarge (the file over the read's limit, decided from its size before any byte is read):
+                                 // the file's size as the storage gave it -- a caller that cut the limit to a budget's
+                                 // remainder tells its refusal from the file's failure by it; -1 for every other outcome
     double milliseconds = 0.0;   // how long the inspection took
     double rootMs = -1.0;        // of it, the storage root's answer (listed, local); -1 when not asked
     CASCFolder::ReadTimings read; // of it, the read's steps (CASCFolder::readWholeFile); all -1 when nothing was read

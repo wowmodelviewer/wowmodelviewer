@@ -109,7 +109,10 @@ public:
 
   // Textures mode is entered (the view is shown: the selection, or the empty state) or left (a decode
   // on its way waits for the next entry).
-  void entered();
+  // holdDecode (the command bar's switch in turns): a decode on its way waits for resumeDecode, a turn after the switch's
+  // repaint -- at an idle event of the switch's own turns it would lengthen them.
+  void entered(bool holdDecode = false);
+  void resumeDecode();
   void left();
   // An arrow key repeating in Browse's tree (true), or let go (false): see THE SELECTION.
   void setKeysRepeating(bool repeating);
@@ -240,6 +243,7 @@ private:
   TextureEntry m_pending;          // picked, to be read and decoded
   bool m_pendingLookup = false;
   bool m_decodePending = false;   // decoded at the next idle event
+  bool m_decodeHeld = false;      // entered(true) until resumeDecode
   bool m_keysRepeating = false;
   bool m_active = false;           // Textures mode
   bool m_shutdown = false;

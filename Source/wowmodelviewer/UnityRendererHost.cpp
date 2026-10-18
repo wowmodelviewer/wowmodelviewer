@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include <QElapsedTimer>
+
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
@@ -264,10 +266,14 @@ void UnityRendererHost::holdPlayer()
   m_playerHold++;
 }
 
-void UnityRendererHost::releasePlayer()
+void UnityRendererHost::releasePlayer(bool sizeAsync)
 {
   if (m_playerHold > 0 && --m_playerHold == 0)
+  {
+    m_sizeAsync = sizeAsync;
     applyEmbeddedVisibility();
+    m_sizeAsync = false;
+  }
 }
 
 void UnityRendererHost::OnNoticeTimer(wxTimerEvent & WXUNUSED(event))
@@ -358,6 +364,7 @@ UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 #endif
   m_ipc = new UnityIpcServer();
   m_noticeTimer.SetOwner(this);
+  m_keyboardTimer.Bind(wxEVT_TIMER, [this](wxTimerEvent &) { takeKeyboardFromParkedPlayer(); });
 }
 
 UnityRendererHost::~UnityRendererHost()
@@ -366,6 +373,11 @@ UnityRendererHost::~UnityRendererHost()
   stopInputTrace();
 #endif
   shutdown();
+#ifdef _WINDOWS
+  // (The player is gone: a move sizePlayerAhead started has returned, or is let go -- it holds nothing of this panel's.)
+  if (!finishAheadMove(2000))
+    m_aheadThread.detach();
+#endif
   delete m_ipc;
   m_ipc = nullptr;
 }
@@ -665,6 +677,13 @@ void UnityRendererHost::shutdown()
   m_process = nullptr;
   m_processId = 0;
   m_embeddedWnd = nullptr;
+  // A move sizePlayerAhead started returns once the player is gone; a player whose process is slow to end is not waited
+  // for longer than this (the move's thread holds only the window and its own state).
+  if (!finishAheadMove(2000))
+  {
+    LOG_INFO << "[viewport] the player's window move made ahead had not returned 2 s after the player was closed: let go";
+    m_aheadThread.detach();
+  }
 
   if (m_ipc)
     m_ipc->stop();
@@ -695,11 +714,15 @@ void UnityRendererHost::resizeEmbeddedWindow(bool puttingBack)
     return;
   if (HWND wnd = findEmbeddedWindow())
   {
+    // A move sizePlayerAhead started is waited for first: this one must land after it. (Not in a split viewer switch's
+    // repaint turn, m_sizeAsync: a put-back that finds it still under way is sized again from the timer.)
+    const bool aheadOver = finishAheadMove(m_sizeAsync ? 0 : -1);
     const wxSize size = GetClientSize();
     RECT rect;
-    if (::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() && rect.bottom - rect.top == size.GetHeight())
+    if (aheadOver && ::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() &&
+        rect.bottom - rect.top == size.GetHeight())
       return;
-    if (::IsHungAppWindow(wnd))
+    if (!aheadOver || ::IsHungAppWindow(wnd))
     {
       // Not waited for. Going on screen (or on it): again from the timer until it responds; parked, as it is put back.
       if (m_playerOnScreen || puttingBack)
@@ -710,7 +733,25 @@ void UnityRendererHost::resizeEmbeddedWindow(bool puttingBack)
       }
       return;
     }
+    if (m_sizeAsync && startAheadMove(wnd, size))
+    {
+      // A SPLIT VIEWER SWITCH'S REPAINT: the move on a thread, not waited for -- the player takes the size with its next
+      // frame (up to one frame of it shown at the old size). Checked again from the timer: the thread joined, the size seen.
+      LOG_INFO << "[viewport] sizing the player's window to" << size.GetWidth() << "x" << size.GetHeight()
+               << "on a thread of its own, not waited for (a viewer switch's repaint)";
+      m_noticeTicksLeft = std::max(m_noticeTicksLeft, 2);
+      if (!m_noticeTimer.IsRunning())
+        m_noticeTimer.Start(100);
+      return;
+    }
+    // Timed (stage 08): the move waits for the player's thread, which resizes its frame -- about 45 ms of this GUI thread.
+    // (Entering the Maps viewer's world no longer waits for it here: sizePlayerAhead has sized it.)
+    QElapsedTimer moveClock;
+    moveClock.start();
     MoveWindow(wnd, 0, 0, size.GetWidth(), size.GetHeight(), TRUE);
+    const double moveMs = moveClock.nsecsElapsed() / 1e6;
+    if (moveMs > 5.0)
+      LOG_INFO << "[viewport] sizing the player's window took" << moveMs << "ms (the player's thread answers it)";
   }
 }
 
@@ -739,6 +780,98 @@ void UnityRendererHost::sizePlayerForLoad()
     resizeEmbeddedWindow(true);
 }
 
+void UnityRendererHost::sizePlayerAhead()
+{
+  // Only behind the content window: elsewhere the player is sized as before (on screen it has the size; parked behind a
+  // notice, sizePlayerForLoad sizes it).
+  if (!isRunning() || m_playerHold > 0 || !m_contentShown || !m_playerFrame)
+    return;
+  // Never waits on an earlier move still under way (a player in a long frame): the put-back corrects the size.
+  if (m_aheadThread.joinable() && !m_ahead->done)
+    return;
+  HWND wnd = findEmbeddedWindow();
+  if (!wnd || !finishAheadMove() || ::IsHungAppWindow(wnd))
+    return;
+  const wxSize size = GetClientSize();
+  RECT rect;
+  if (::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() && rect.bottom - rect.top == size.GetHeight())
+    return;
+  if (!startAheadMove(wnd, size))
+    return;
+  LOG_INFO << "[viewport] sizing the player's window ahead, to" << size.GetWidth() << "x" << size.GetHeight()
+           << ", on a thread of its own: what it is sent next shows in the viewport";
+}
+
+bool UnityRendererHost::finishAheadMove(long limitMs)
+{
+  if (!m_aheadThread.joinable())
+    return true;
+  // Waited for as this thread's own move waits for the player (a sent message): what is sent to this thread meanwhile is
+  // taken, so nothing the move sends here can wait on this wait. A handler that runs so can wait for the move too, and
+  // join it: the thread is looked at again after each turn.
+  QElapsedTimer waited;
+  waited.start();
+  while (m_aheadThread.joinable() && !m_ahead->done)
+  {
+    HWND wnd = findEmbeddedWindow();
+    if (wnd && ::IsHungAppWindow(wnd))
+      return false;
+    if (limitMs >= 0 && waited.elapsed() >= limitMs)
+      return false;
+    HANDLE thread = (HANDLE)m_aheadThread.native_handle();
+    if (MsgWaitForMultipleObjects(1, &thread, FALSE, 50, QS_SENDMESSAGE) == WAIT_OBJECT_0 + 1)
+    {
+      MSG msg;
+      PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE | PM_QS_SENDMESSAGE);
+    }
+  }
+  if (!m_aheadThread.joinable())
+    return true;
+  m_aheadThread.join();
+  LOG_INFO << "[viewport] the player's window was sized ahead to" << m_ahead->width << "x" << m_ahead->height << "in"
+           << m_ahead->ms.load() << "ms, waited for on its own thread";
+  return true;
+}
+
+bool UnityRendererHost::startAheadMove(HWND wnd, const wxSize & size)
+{
+  if (!finishAheadMove(0))
+    return false;   // an earlier move still waits on the player's thread
+  std::shared_ptr<AheadMove> move = std::make_shared<AheadMove>();
+  move->width = size.GetWidth();
+  move->height = size.GetHeight();
+  m_ahead = move;
+  // (Only the window and the move: the thread touches nothing of this panel's.)
+  m_aheadThread = std::thread([wnd, move]() {
+    QElapsedTimer clock;
+    clock.start();
+    MoveWindow(wnd, 0, 0, move->width, move->height, TRUE);
+    move->ms = clock.nsecsElapsed() / 1e6;
+    move->done = true;
+  });
+  return true;
+}
+
+bool UnityRendererHost::sizeParkedPlayerAhead()
+{
+  // Parked now, and put back by the release (nothing covers it), not hung: sized now, off screen (its frame is parked).
+  // Unlike sizePlayerAhead, while held: the switch's hold is what keeps it parked until its repaint.
+  if (!isRunning() || !m_playerFrame || m_playerOnScreen || playerCovered())
+    return false;
+  HWND wnd = findEmbeddedWindow();
+  if (!wnd || ::IsHungAppWindow(wnd))
+    return false;
+  const wxSize size = GetClientSize();
+  RECT rect;
+  if (::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() && rect.bottom - rect.top == size.GetHeight())
+    return false;
+  if (!startAheadMove(wnd, size))
+    return false;
+  LOG_INFO << "[viewport] sizing the parked player's window for its put-back, to" << size.GetWidth() << "x"
+           << size.GetHeight() << ", on a thread of its own (a viewer switch's first turn)";
+  return true;
+}
+
 bool UnityRendererHost::playerHasKeyboard()
 {
   HWND wnd = findEmbeddedWindow();
@@ -764,9 +897,11 @@ bool UnityRendererHost::takeKeyboardFromPlayer(wxWindow * to)
 
 void UnityRendererHost::releaseKeyboardFromPlayer()
 {
-  // On the next turn of the event loop -- which comes before the paint that is pending (wx runs these first) -- so
-  // that paint is made here first: the move waits on the player's thread, and the notice is not left unpainted meanwhile.
-  CallAfter([this]() { takeKeyboardFromParkedPlayer(); });
+  // On a turn of its own, a little later: the move waits on the player's thread for one of its frames, which the turn
+  // that covered the player (a viewer-mode switch's, its whole workspace painted) is not to wait for too
+  // (docs/world-viewer/08-streaming.md, section 8.8). The pending paint goes first, so the notice is not left unpainted
+  // meanwhile.
+  m_keyboardTimer.StartOnce(KeyboardHandoffDelayMs);
 }
 
 void UnityRendererHost::takeKeyboardFromParkedPlayer()
@@ -817,7 +952,10 @@ void UnityRendererHost::applyEmbeddedVisibility()
       placePlayerFrame();
       paintPlainNow();
       releaseKeyboardFromPlayer();
-      Refresh(false);
+      // (Under the content window nothing of this panel shows; refreshed, the content window -- its child -- would be
+      // painted a second time in the switch's round.)
+      if (!m_contentShown)
+        Refresh(false);
     }
     else if (onScreen)
       resizeEmbeddedWindow();
@@ -852,7 +990,14 @@ void UnityRendererHost::handKeyboardOn(const char * from)
   }
   const HWND wnd = !m_notice && m_playerOnScreen && m_playerHold == 0 ? findEmbeddedWindow() : nullptr;
   if (wnd)
+  {
+    QElapsedTimer focusClock;
+    focusClock.start();
     ::SetFocus(wnd);
+    const double focusMs = focusClock.nsecsElapsed() / 1e6;
+    if (focusMs > 5.0)
+      LOG_INFO << "[input] handing the keyboard to the player took" << focusMs << "ms (the player's thread answers it)";
+  }
   if (inputTrace)
     LOG_INFO << "[input] host:" << from << "got the keyboard:"
              << (wnd ? "handed to the player" : m_notice ? "kept (a notice is up)" : !m_playerOnScreen ? "kept (the player is off screen)"
@@ -899,6 +1044,8 @@ void UnityRendererHost::resizeEmbeddedWindow(bool) {}
 void UnityRendererHost::releaseKeyboardFromPlayer() {}
 void UnityRendererHost::takeKeyboardFromParkedPlayer() {}
 void UnityRendererHost::sizePlayerForLoad() {}
+void UnityRendererHost::sizePlayerAhead() {}
+bool UnityRendererHost::sizeParkedPlayerAhead() { return false; }
 bool UnityRendererHost::playerHasKeyboard() { return false; }
 bool UnityRendererHost::takeKeyboardFromPlayer(wxWindow *) { return false; }
 void UnityRendererHost::paintPlainNow() {}

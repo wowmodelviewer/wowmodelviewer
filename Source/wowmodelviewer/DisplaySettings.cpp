@@ -146,7 +146,7 @@ void DisplaySettings::OnButton(wxCommandEvent &event)
 
     g_modelViewer->SaveSession();
     g_modelViewer->interfaceManager.GetPane(this->GetParent()).Show(false);
-    g_modelViewer->interfaceManager.Update();
+    g_modelViewer->LayoutNow();
   }
 }
 

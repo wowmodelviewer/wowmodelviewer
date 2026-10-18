@@ -33,6 +33,8 @@
     <Compile Include="..\WorldModelCorpusTests.cs" />
     <Compile Include="..\DoodadTests.cs" />
     <Compile Include="..\DoodadCorpusTests.cs" />
+    <Compile Include="..\BlpBlockTests.cs" />
+    <Compile Include="..\StreamSeamTests.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>

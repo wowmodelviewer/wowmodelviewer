@@ -60,7 +60,8 @@ public sealed partial class WmvTerrainSession
     /// frame: building, placing, requesting).</summary>
     public const double DoodadPhaseIntervalMs = 100.0;
 
-    enum DoodadModelState { Queued, Model, Skin, Textures, Ready, Built, Failed, NotRequested, Unsupported }
+    // Borrowed (streaming): waiting for the prototype another tile of the session is fetching.
+    enum DoodadModelState { Queued, Model, Skin, Textures, Ready, Built, Failed, NotRequested, Unsupported, Borrowed }
 
     static string DoodadModelStateName(DoodadModelState s)
     {
@@ -74,6 +75,7 @@ public sealed partial class WmvTerrainSession
             case DoodadModelState.Built: return "built";
             case DoodadModelState.Failed: return "failed";
             case DoodadModelState.Unsupported: return "unsupported";
+            case DoodadModelState.Borrowed: return "waiting";
             default: return "notRequested";
         }
     }
@@ -97,6 +99,10 @@ public sealed partial class WmvTerrainSession
         public string Partial;                 // why some of it is drawn without its texture, or null
         public WmvDoodadPrototype Built;
         public int Placed;
+        // Streaming (WmvTerrainSessionStream.cs): as a world model's (Model).
+        public Job Job;
+        public ProtoEntry Shared;
+        public bool Claimed, Unpinned;
     }
 
     /// <summary>A doodad of the plan and what became of it.</summary>
@@ -107,6 +113,7 @@ public sealed partial class WmvTerrainSession
         public string State = "planned";       // "planned" | "placed" | "failed" | "unsupported" | "notRequested" | "ended"
         public string Reason = "";
         public WmvDoodadInstance Instance;
+        public bool Shared;                    // streaming: placed for another tile of the session, found here
     }
 
     /// <summary>A texture of the load's doodad models: fetched and decoded once, shared by every model that binds it.</summary>
@@ -118,6 +125,8 @@ public sealed partial class WmvTerrainSession
         public bool Asked, Done, Decoded, Decoding;
         public int Users;                      // models not yet built that bind it
         public byte[] Raw;                     // the file's bytes, checked: decoded again for a model after the pixels went
+        public bool ForTheLoad;                // streaming: missing for this tile's load only (refused, stale, past
+                                               // maxM2TexturesPerLoad)
         public readonly List<DoodadModel> Waiting = new List<DoodadModel>();
     }
 
@@ -160,7 +169,7 @@ public sealed partial class WmvTerrainSession
             return;
         d.Started = true;
         d.BeganMs = j.Clock.Elapsed.TotalMilliseconds;
-        if (world != null && world.Load == j.Cmd.Load)
+        if (OwnsScene(j))
         {
             try { worldView.WorldModelsSettled(world, j.Cmd.Load); }
             catch (Exception e) { Log("load {0}: placing the camera at the world models' settle failed: {1}", j.Cmd.Load, e.Message); }
@@ -173,7 +182,7 @@ public sealed partial class WmvTerrainSession
             Log("load {0}: doodads not offered: {1}", j.Cmd.Load, d.Reason);
             return;
         }
-        if (world == null || world.Load != j.Cmd.Load)
+        if (!OwnsScene(j))
         {
             d.Done = true;
             d.State = "none";
@@ -253,7 +262,7 @@ public sealed partial class WmvTerrainSession
                     notRequested++;
                     continue;
                 }
-                m = new DoodadModel { FileDataID = dd.FileDataID };
+                m = new DoodadModel { FileDataID = dd.FileDataID, Job = j };
                 byId[dd.FileDataID] = m;
                 d.Models.Add(m);
             }
@@ -283,9 +292,12 @@ public sealed partial class WmvTerrainSession
     {
         WorldWork w = j.World;
         DoodadsWork d = w != null ? w.Doodads : null;
-        if (d == null || !d.Started || d.Done || d.TimedOut || j != current || j.Dead)
+        if (d == null || !d.Started || d.Done || d.TimedOut || !Live(j) || j.Dead)
             return;
-        while (d.Out < MaxDoodadOutstanding)
+        // Streaming: the session's prototypes first (WmvTerrainSessionStream.cs).
+        if (j.Stream != null && stream != null)
+            ClaimDoodadModels(j);
+        while (d.Out < MaxDoodadOutstanding && StreamCredit(j))
         {
             if (d.RedecodeQueue.Count > 0)
             {
@@ -336,7 +348,7 @@ public sealed partial class WmvTerrainSession
     {
         DoodadsWork d = j.World.Doodads;
         double at = j.Clock.Elapsed.TotalMilliseconds;
-        string id = requestMapAsset(role, fileDataID, j.Cmd.Load, j.Cmd.AssetEpoch);
+        string id = SendMapRequest(j, role, fileDataID);
         j.Pending.Add(new Request { Id = id, Role = role, FileDataID = fileDataID, AskedMs = at, Doodad = true, DModel = m });
         d.Pending++;
         d.FilesAsked++;
@@ -352,6 +364,9 @@ public sealed partial class WmvTerrainSession
         d.Pending--;
         d.FilesAnswered++;
         d.LastAnswerMs = j.Clock.Elapsed.TotalMilliseconds;
+        // Streaming: the doodads' timeout counts from their last answer.
+        if (j.Stream != null)
+            d.TimeoutStartedAtMs = double.NaN;
     }
 
     /// <summary>The kind of a doodad model's bytes: MD21 in reading order, its payload starting MD20 (the host checks the
@@ -375,7 +390,10 @@ public sealed partial class WmvTerrainSession
         string why = WorldAnswerProblem(r, "doodad model", q.FileDataID, j.Cmd.MaxM2FileBytes);
         if (why != null)
         {
-            FailDoodadModel(j, m, why);
+            if (j.Stream != null && RefusedForTheLoad(r))
+                FailForTheLoad(() => FailDoodadModel(j, m, why));
+            else
+                FailDoodadModel(j, m, why);
             return;
         }
         byte[] bytes = r.data;
@@ -434,7 +452,10 @@ public sealed partial class WmvTerrainSession
         string why = WorldAnswerProblem(r, "doodad skin", q.FileDataID, j.Cmd.MaxM2FileBytes);
         if (why != null)
         {
-            FailDoodadModel(j, m, why);
+            if (j.Stream != null && RefusedForTheLoad(r))
+                FailForTheLoad(() => FailDoodadModel(j, m, why));
+            else
+                FailDoodadModel(j, m, why);
             return;
         }
         byte[] bytes = r.data;
@@ -513,9 +534,17 @@ public sealed partial class WmvTerrainSession
                 d.Textures[id] = t;
                 if (d.TexturesAsked + d.TextureQueue.Count >= cap)
                 {
-                    t.Error = "not requested: this load asks for at most " + cap + " doodad textures (maxM2TexturesPerLoad)";
-                    t.Done = true;
-                    d.TexturesNotRequested++;
+                    if (!TakeSessionDoodadImage(j, t))
+                    {
+                        t.Error = "not requested: this load asks for at most " + cap + " doodad textures (maxM2TexturesPerLoad)";
+                        t.Done = true;
+                        t.ForTheLoad = j.Stream != null;
+                        d.TexturesNotRequested++;
+                    }
+                }
+                else if (ClaimDoodadTexture(j, t))
+                {
+                    // Streaming: the session's image attached, its failure taken, or another tile's fetch waited for.
                 }
                 else
                 {
@@ -528,6 +557,10 @@ public sealed partial class WmvTerrainSession
             {
                 m.TexturesWaiting.Add(id);
                 t.Waiting.Add(m);
+            }
+            else if (t.Decoded && t.Image == null && t.Raw == null && ReattachDoodadImage(j, t))
+            {
+                // Streaming: its pixels went with an earlier model of this job; the session keeps its image.
             }
             else if (t.Decoded && t.Image == null && t.Raw != null)
             {
@@ -562,7 +595,11 @@ public sealed partial class WmvTerrainSession
         if (why != null)
         {
             t.Error = why;
+            if (j.Stream != null && RefusedForTheLoad(r))
+                t.ForTheLoad = true;            // this tile's gap, not the file's: a prototype built without it is the tile's own
             DoodadTextureDone(j, t, true);
+            // (A refusal for this tile's load, or a stale answer, hands the fetch on; the file's own failure is the session's.)
+            PublishDoodadImage(j, t, null, why, !RefusedForTheLoad(r));
             return;
         }
         byte[] bytes = r.data;
@@ -570,6 +607,7 @@ public sealed partial class WmvTerrainSession
         d.TextureBytes += bytes.Length;
         d.Preparing++;
         t.Raw = bytes;
+        WmvTerrainFormatSupport support = j.Support;
         RunWorker(j, () =>
         {
             string md5 = Md5Hex(bytes);
@@ -580,7 +618,8 @@ public sealed partial class WmvTerrainSession
                 error = string.Format("the doodad texture bytes received hash to {0}, the host served {1}", md5, hostMd5);
             else
             {
-                try { img = BlpDecoder.Decode(bytes); }
+                // Stage 08: its own DXT blocks when it qualifies, else decoded (BlpBlocks.PrepareForModels).
+                try { img = BlpBlocks.PrepareForModels(bytes, support.Supports); }
                 catch (Exception e) { error = "decode failed: " + e.Message; }
             }
             double ms = sw.Elapsed.TotalMilliseconds;
@@ -598,6 +637,7 @@ public sealed partial class WmvTerrainSession
                 else
                     HoldPixels(d, img);
                 DoodadTextureDone(j, t, true);
+                PublishDoodadImage(j, t, img, error, true);
                 AdvanceDoodads(j);
             };
         });
@@ -605,7 +645,7 @@ public sealed partial class WmvTerrainSession
 
     static void HoldPixels(DoodadsWork d, BlpImage img)
     {
-        d.PixelBytesHeld += img.Rgba != null ? img.Rgba.LongLength : 0;
+        d.PixelBytesHeld += img.HeldBytes;
         d.PixelBytesHeldMax = Math.Max(d.PixelBytesHeldMax, d.PixelBytesHeld);
     }
 
@@ -615,12 +655,13 @@ public sealed partial class WmvTerrainSession
         d.Preparing++;
         d.TexturesRedecoded++;
         byte[] bytes = t.Raw;
+        WmvTerrainFormatSupport support = j.Support;
         RunWorker(j, () =>
         {
             var sw = Stopwatch.StartNew();
             BlpImage img = null;
             string error = null;
-            try { img = BlpDecoder.Decode(bytes); }
+            try { img = BlpBlocks.PrepareForModels(bytes, support.Supports); }
             catch (Exception e) { error = "decode failed: " + e.Message; }
             double ms = sw.Elapsed.TotalMilliseconds;
             return () =>
@@ -679,6 +720,8 @@ public sealed partial class WmvTerrainSession
     /// released.</summary>
     void SettleDoodadModel(Job j, DoodadModel m, DoodadModelState state, string reason)
     {
+        if (m.Shared != null)
+            DoodadModelSettledShared(j, m, state, reason);
         DoodadsWork d = j.World.Doodads;
         m.State = state;
         m.Reason = reason;
@@ -712,8 +755,8 @@ public sealed partial class WmvTerrainSession
 
     static void ReleaseDoodadPixels(DoodadsWork d, DoodadTexture t)
     {
-        if (t.Image != null && t.Image.Rgba != null)
-            d.PixelBytesHeld -= t.Image.Rgba.LongLength;
+        if (t.Image != null)
+            d.PixelBytesHeld -= t.Image.HeldBytes;     // (what HoldPixels added: an image of DXT blocks too)
         t.Image = null;
     }
 
@@ -730,21 +773,25 @@ public sealed partial class WmvTerrainSession
             TimeOutDoodads(j);
         var clock = Stopwatch.StartNew();
         int built = 0;
-        while (d.BuildQueue.Count > 0 && (built == 0 || clock.Elapsed.TotalMilliseconds < DoodadBuildBudgetMs))
+        bool streaming = j.Stream != null && stream != null;
+        // Streaming: the session's one frame budget for every tile (the nearest first), not one per tile.
+        while (d.BuildQueue.Count > 0 && (streaming ? StreamMayWork() : (built == 0 || clock.Elapsed.TotalMilliseconds < DoodadBuildBudgetMs)))
         {
             BuildDoodadModel(j, d.BuildQueue.Dequeue());
             built++;
-            if (j != current)
+            StreamWorked();
+            if (!Live(j))
                 return;
         }
-        if (d.PlaceQueue.Count > 0)
+        if (d.PlaceQueue.Count > 0 && (!streaming || StreamMayWork()))
         {
             var place = Stopwatch.StartNew();
             int placed = 0;
-            while (d.PlaceQueue.Count > 0 && (placed == 0 || place.Elapsed.TotalMilliseconds < DoodadPlaceBudgetMs))
+            while (d.PlaceQueue.Count > 0 && (streaming ? (placed == 0 || StreamMayWork()) : (placed == 0 || place.Elapsed.TotalMilliseconds < DoodadPlaceBudgetMs)))
             {
                 PlaceDoodad(j, d.PlaceQueue.Dequeue());
                 placed++;
+                StreamWorked();
             }
             double ms = place.Elapsed.TotalMilliseconds;
             d.PlaceMs += ms;
@@ -758,6 +805,16 @@ public sealed partial class WmvTerrainSession
     void BuildDoodadModel(Job j, DoodadModel m)
     {
         DoodadsWork d = j.World.Doodads;
+        if (m.Built != null && m.Shared != null)
+        {
+            // Streaming: the session's prototype (built for another tile, or pooled): its doodads placed from it, never built again.
+            m.State = DoodadModelState.Built;
+            m.Active = false;
+            foreach (DoodadWork dw in m.Instances)
+                if (dw.State == "planned")
+                    d.PlaceQueue.Enqueue(dw);
+            return;
+        }
         var bySlot = new Dictionary<int, BlpImage>();
         var missing = new List<string>();
         // The texture budget against what the scene's cache has uploaded (every alpha and wrap variant counted), plus one upload
@@ -766,6 +823,7 @@ public sealed partial class WmvTerrainSession
         long texturesUploaded = cache != null ? cache.GpuBytes : 0;
         long textureEstimate = 0;
         var newTextures = new List<uint>();
+        var forTheLoad = new List<string>();     // streaming: what of it this tile's load could not get
         foreach (KeyValuePair<int, uint> kv in m.SlotFiles)
         {
             DoodadTexture t;
@@ -775,11 +833,15 @@ public sealed partial class WmvTerrainSession
                 if ((cache == null || !cache.HasFile(kv.Value)) && !newTextures.Contains(kv.Value))
                 {
                     newTextures.Add(kv.Value);
-                    textureEstimate += (long)t.Image.Width * t.Image.Height * 4L * 4L / 3L;
+                    textureEstimate += BlpBlocks.UploadBytes(t.Image);   // exact: the blocks, or RGBA32 with its chain
                 }
             }
             else
+            {
                 missing.Add("texture " + kv.Value + (t != null && t.Error != null ? " (" + t.Error + ")" : ""));
+                if (t != null && t.ForTheLoad && !t.Decoded && !forTheLoad.Contains("texture " + kv.Value))
+                    forTheLoad.Add("texture " + kv.Value);
+            }
         }
         if (missing.Count > 0)
             m.Partial = (m.Partial != null ? m.Partial + "; " : "") + "drawn without " + string.Join(", ", missing.ToArray());
@@ -789,12 +851,20 @@ public sealed partial class WmvTerrainSession
         foreach (M2Submesh s in m.Skin.Submeshes)
             indices += s.IndexCount;
         long geometryEstimate = (long)m.Parsed.Vertices.Length * 40L + indices * (m.Parsed.Vertices.Length > 65000 ? 4L : 2L);
-        if (d.GpuGeometryPlanned + geometryEstimate > DoodadGpuGeometryBudget || texturesUploaded + textureEstimate > DoodadGpuTextureBudget)
+        long geometryUsed = d.GpuGeometryPlanned, geometryBudget = DoodadGpuGeometryBudget, textureBudget = DoodadGpuTextureBudget;
+        if (j.Stream != null && stream != null)
         {
-            bool geometry = d.GpuGeometryPlanned + geometryEstimate > DoodadGpuGeometryBudget;
+            // Streaming: the scene's budgets, against everything on the GPU now (terrain, world models, doodads).
+            SceneGpuBytes(out texturesUploaded, out geometryUsed);
+            geometryBudget = StreamGpuGeometryBudget;
+            textureBudget = StreamGpuTextureBudget;
+        }
+        if (geometryUsed + geometryEstimate > geometryBudget || texturesUploaded + textureEstimate > textureBudget)
+        {
+            bool geometry = geometryUsed + geometryEstimate > geometryBudget;
             SettleDoodadModel(j, m, DoodadModelState.NotRequested, string.Format(
                 "fetched, but not built: the doodads' GPU {0} budget ({1} MB; {2} MB used, this model {3} MB)", geometry ? "geometry" : "texture",
-                (geometry ? DoodadGpuGeometryBudget : DoodadGpuTextureBudget) >> 20, (geometry ? d.GpuGeometryPlanned : texturesUploaded) >> 20,
+                (geometry ? geometryBudget : textureBudget) >> 20, (geometry ? geometryUsed : texturesUploaded) >> 20,
                 (geometry ? geometryEstimate : textureEstimate) >> 20));
             return;
         }
@@ -813,7 +883,19 @@ public sealed partial class WmvTerrainSession
         m.Built = proto;
         m.State = DoodadModelState.Built;
         m.Active = false;
-        world.DoodadPrototypes[m.FileDataID] = proto;
+        if (forTheLoad.Count > 0 && m.Shared != null && j.Stream != null && stream != null)
+        {
+            string why = "built without " + string.Join(", ", forTheLoad.ToArray()) + ", which tile " + j.Stream.Name +
+                         "'s load could not get";
+            m.Partial = (m.Partial != null ? m.Partial + "; " : "") + "kept for this tile: " + why;
+            KeepDoodadModelForTheTile(j, m, proto, why);
+        }
+        else
+        {
+            world.DoodadPrototypes[m.FileDataID] = proto;
+            if (m.Shared != null)
+                DoodadPrototypeBuilt(m, proto);
+        }
         ReleaseDoodadModelTextures(d, m);
         m.Parsed = null;
         m.Skin = null;
@@ -827,11 +909,22 @@ public sealed partial class WmvTerrainSession
         DoodadsWork d = j.World.Doodads;
         if (dw.State != "planned" || dw.Model == null || dw.Model.Built == null || dw.Model.Built.Disposed)
             return;
+        // Streaming: a doodad another tile of the session placed is found, never placed twice -- one placed from a tile's private
+        // prototype is replaced by this one when this one is complete (WmvTerrainSessionStream.cs).
+        DoodadEntry replace = null;
+        if (j.Stream != null && stream != null && FindSharedDoodad(j, dw, !IsPrivate(dw.Model.Shared), out replace))
+        {
+            dw.Model.Placed++;
+            d.Placed++;
+            return;
+        }
         try
         {
             dw.Instance = worldView.PlaceDoodad(dw.Model.Built, dw.D, world.Origin, j.Cmd.Load);
             world.Doodads.Add(dw.Instance);
             dw.State = "placed";
+            if (j.Stream != null && stream != null)
+                RegisterDoodad(j, dw, replace);
             dw.Model.Placed++;
             d.Placed++;
             if (d.FirstVisibleMs < 0)
@@ -863,14 +956,22 @@ public sealed partial class WmvTerrainSession
         d.TextureQueue.Clear();
         d.RedecodeQueue.Clear();
         d.BuildQueue.Clear();
-        foreach (DoodadModel m in d.Models)
-            if (m.State != DoodadModelState.Built && m.State != DoodadModelState.Failed && m.State != DoodadModelState.NotRequested &&
-                m.State != DoodadModelState.Unsupported)
-                FailDoodadModel(j, m, why);
+        bool wasTransient = streamTransientFailure;
+        streamTransientFailure = true;          // (streaming: a fetch that timed out is handed on, not failed for every tile)
+        try
+        {
+            foreach (DoodadModel m in d.Models)
+                if (m.State != DoodadModelState.Built && m.State != DoodadModelState.Failed && m.State != DoodadModelState.NotRequested &&
+                    m.State != DoodadModelState.Unsupported)
+                    FailDoodadModel(j, m, why);
+        }
+        finally { streamTransientFailure = wasTransient; }
         // Worker results still out are dropped when they come (TimedOut); the models are settled. Placements of the models
         // already built go on (PlaceQueue).
         d.TimedOut = true;
         d.Preparing = 0;
+        if (j.Stream != null)
+            ReleaseJobImages(j);
         Log("load {0}: doodads {1}", j.Cmd.Load, why);
         CheckDoodadsDone(j);
     }
@@ -889,6 +990,14 @@ public sealed partial class WmvTerrainSession
                 return;
         d.Done = true;
         d.ReadyMs = j.Clock.Elapsed.TotalMilliseconds - d.BeganMs;
+        // Streaming: every doodad of the tile placed: its models let go of their pins (their instances hold the prototypes).
+        if (j.Stream != null && stream != null)
+            foreach (DoodadModel m in d.Models)
+                if (m.Shared != null && !m.Unpinned)
+                {
+                    m.Unpinned = true;
+                    Unpin(m.Shared);
+                }
         if (d.LastPlaceFrame == 0)
             d.LastPlaceFrame = frame;
         d.State = DoodadStateName(d);
@@ -901,8 +1010,8 @@ public sealed partial class WmvTerrainSession
         SendProgress(j, true);
         Log("load {0}: the doodads are settled ({1}) after {2:0.#} ms: {3} of {4} placed over {5} prototype(s); decoded texture pixels held at most " +
             "{6:0.0} MB; {7} texture(s) decoded, {8} decoded again for a later model; reported after frame {9}", j.Cmd.Load, d.State, d.ReadyMs, d.Placed,
-            d.Instances.Count, world != null ? world.DoodadPrototypes.Count : 0, d.PixelBytesHeldMax / 1048576.0, d.TexturesDecoded,
-            d.TexturesRedecoded, Math.Max(w.LastCommitFrame, d.LastPlaceFrame) + 2);
+            d.Instances.Count, world != null ? world.DoodadPrototypes.Count + world.PrivateDoodadPrototypes.Count : 0,
+            d.PixelBytesHeldMax / 1048576.0, d.TexturesDecoded, d.TexturesRedecoded, Math.Max(w.LastCommitFrame, d.LastPlaceFrame) + 2);
     }
 
     /// <summary>The load ended (any report, a timeout, Dispose): the doodads' queues go, every texture's pixels and bytes
@@ -1103,7 +1212,7 @@ public sealed partial class WmvTerrainSession
                 case DoodadModelState.Built:
                     r.DoodadModelsBuilt++;
                     if (m.Partial != null) r.DoodadModelsPartial++;
-                    if (m.Built != null) r.DoodadGpuGeometryBytes += m.Built.GpuGeometryBytes;
+                    if (m.Built != null && !m.Built.Disposed) r.DoodadGpuGeometryBytes += m.Built.GpuGeometryBytes;
                     break;
                 case DoodadModelState.Failed: r.DoodadModelsFailed++; break;
                 case DoodadModelState.Unsupported: r.DoodadModelsUnsupported++; break;
@@ -1113,7 +1222,7 @@ public sealed partial class WmvTerrainSession
         r.DoodadTextures = d.Textures.Count;
         r.DoodadTexturesDecoded = d.TexturesDecoded;
         r.DoodadTexturesMissing = d.TexturesMissing + d.TexturesNotRequested;
-        WmvDoodadTextures cache = world != null && world.Load == j.Cmd.Load ? world.DoodadTextures : null;
+        WmvDoodadTextures cache = OwnsScene(j) ? world.DoodadTextures : null;
         r.DoodadTextureUses = cache != null ? cache.Uses : 0;
         r.DoodadTextureUploads = cache != null ? cache.Uploads : 0;
         r.DoodadGpuTextureBytes = cache != null ? cache.GpuBytes : 0;

@@ -154,6 +154,18 @@ public sealed class WmvTerrainTexture
         ReleaseUploadData();
     }
 
+    /// <summary>Streaming (stage 08): this texture as a tile that binds the scene's upload of it sees it -- available, the
+    /// facts it was prepared with, no data (nothing to upload, UploadMs -1).</summary>
+    public WmvTerrainTexture ResidentCopy()
+    {
+        return new WmvTerrainTexture
+        {
+            FileDataID = FileDataID, State = StateAvailable, Detail = "resident: uploaded for another tile of the streaming session",
+            Bytes = Bytes, Md5 = Md5, Width = Width, Height = Height, Mips = Mips, Format = Format, Encoding = Encoding,
+            AlphaDepth = AlphaDepth, GpuBytes = GpuBytes, graphicsFormat = graphicsFormat,
+        };
+    }
+
     /// <summary>Drop the prepared data (after the upload, or with the load).</summary>
     public void ReleaseUploadData()
     {
