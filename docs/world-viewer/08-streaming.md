@@ -735,6 +735,7 @@ is one IPC poll and one pass of the wx event queue, paints included.
 | Protocol-17 player (`compat\cmpf_newhost_p17`) | 120.7 ms | -- | 23.5 ms (under 50) | 64.8 ms |
 | With the entry-stall fixes (section 8.7), Retail acceptance (`stalls\out_r2\acc_wow`) | 105.8 ms | -- | 9.7 ms | 17.5 ms |
 | ... Classic Era / MoP Classic / Classic Beta (`stalls\out_r2\c4_*`) | 83.4 / 92.9 / 82.2 ms | -- | 7.1 / 8.3 / 8.0 ms | 19.0 / 22.5 / 18.2 ms |
+| Final build (section 8.10), Retail / Classic Era / MoP Classic / Classic Beta (`w08\fin\fin_acc_wow`, `fin_c4_*`) | 32.0 / 28.7 / 30.3 / 35.7 ms (under 50) | 40.8 / 35.0 / 30.7 / 11.5 ms (under 50) | 18.3 / 12.5 / 14.9 / 11.2 ms (under 50) | 29.3 / 26.2 / 25.9 / 26.4 ms (under 50) |
 
 What each one is, and whether this stage made it:
 
@@ -743,8 +744,9 @@ What each one is, and whether this stage made it:
   code runs in it. The Stage 07 host measured 134.8 ms in the same step (`compat\cmp_oldhost_p18`). Fixed after the
   stage (sections 8.8 and 8.9): the switch is now made in turns, and none of its rounds is over 50 ms -- the longest
   34.6 ms in 74 switches between Models and Maps over the four clients, against 54.0-162.3 ms on the stage's host with
-  the entry-stall fixes in the same session. Measured before the final battery, whose runs will replace this table's
-  'Mode switch to Maps' column.
+  the entry-stall fixes in the same session. On the final build (section 8.10, the table's last row) the first entry
+  into Maps is 28.7-35.7 ms over the four clients, and the 74 cycle switches are at most 36.6 ms, against 63.8-240.8 ms
+  on the stage's host.
 - **The round in which the world is shown** (pre-existing, fixed after the stage): about 44 ms of it was the
   synchronous resize of the player's window, which the player's thread answers while it resizes its swap chain. The
   Stage 07 host measured 77.5 ms here. `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of
@@ -838,8 +840,11 @@ The Stage 07 host (protocol 17) with the new player (`compat\cmpf_oldhost_p18`):
 
 After the stage (10.3) the host answers a read cut to the load's remaining budget `refused` instead of `unreadable`: no
 new state. The Stage 07 player only quotes the state for world-model and doodad roles and stores a terrain texture's as
-given; the new player's single-tile path draws the same picture (the self-test's load 18, 10.3). Neither run above has
-been repeated since this change; the final battery comes later.
+given; the new player's single-tile path draws the same picture (the self-test's load 18, 10.3). Both runs were repeated
+on the final build (section 8.10; `w08\fin\fin_cmp_newhost_p17`, `fin_cmp_oldhost_p18`): the final host with the
+protocol-17 player passes 15 / 0 (the 13 checks above plus two of the switch's own), offers no streaming (no streaming
+lines in its log) and its Enter world round is 20.1 ms; the Stage 07 host with the final player passes 13 / 0, its Enter
+world round 35.0 ms.
 
 ### 8.7 The entry rounds attributed, and their pre-existing parts fixed (after the stage)
 
@@ -937,7 +942,9 @@ from its hand-over notes, kept as `w08\mst\mode_switch_under_50ms_changes.txt`.
 - Maps has its own Browse tree. A switch lists neither tree again while it still lists what `Init` would.
 - `BrowseTree` freezes the native tree only when rows are added or removed while it is frozen: a tree left as it was is
   not measured again at the thaw.
-- The Maps panel is built with the frame, and a client's maps are listed into the hidden tree at the end of its load.
+- The Maps panel is built with the frame (`FileControl::PrepareMaps`). A client's maps were also listed into the hidden
+  tree at the end of its load (`FileControl::PrepareMapList`); the final build removed that (section 8.10), and the
+  first entry into Maps lists them in a turn of its own.
 - The keyboard taken from the player after a switch moves on a turn of its own, 50 ms later
   (`ModelViewer::handKeyboardSoon`): the move waits for the player's thread (17-30 ms).
 - The frame's windows a switch leaves hidden keep a freeze of their own (`parkHidden`).
@@ -1104,20 +1111,20 @@ player's resize, as before).
 The harness posts the move, the press and the release in one round, so a switch's first round holds the command bar's
 own hover and press paints (3.5-3.7 ms, section 8.8); a hand's press and release come in rounds of their own.
 
-**Results** (measured before the final battery; section 8.10 measures the switch again on the final build). Viewer exe 489D5E8E..., player
-p18o, rig `F:\wmv-build-fix\w08\mst` (`run_abc.ps1 -Rig cycles -Tag s1 -Reps 1 -Arms split,base -Cycles 8`;
-`out_s1_split_1` and `out_s1_base_1`, summarised by `cyc2.py`). The exe was built at 13:12, before three review changes
-now in the code: `clearTerrain` held for turn B only with the player on screen, the one-turn fallback while a panel
-floats (`floatedPanelChanges`), and the switch's timer stopped in turn A, so a later turn's tick on its way is not taken
-for the switch's next turn. No panel floated in these runs; the parked player's `clearTerrain` on leaving Maps, one
-message, went with turn B here and goes in turn A now. "Split" is this change (489D5E8E, `w08\run_ui`); "Base" is the
-stage's host with the entry-stall fixes (0845259D, `w08\run_base`), the same player, the two run one after the other in
-one session, one repetition each (the base's switches are slower than in section 8.8's first measure, 55 of 74 over 50
-ms there with player p18m; not explained, so compare within a session only). Each client: Models -> Maps (the first
-entry) and a map picked, then 8 cycles Models <-> Maps, 600 ms after each switch (1,500 ms once the world is entered);
-Retail then enters the world at Stormwind (-8700, 400) and makes 3 more cycles. No model is loaded: Models shows its
-notice, the player parked. 74 switches a build: 23 on Retail, 17 on each other client. Every switch step is
-`roundmark,mode:<m>,roundcheck:50`.
+**Results** (measured before the final battery; section 8.10 measures the switch again on the final build). Viewer exe
+489D5E8E..., player p18o, rig `F:\wmv-build-fix\w08\mst` (`run_abc.ps1 -Rig cycles -Tag s1 -Reps 1 -Arms split,base
+-Cycles 8`; `out_s1_split_1` and `out_s1_base_1`, summarised by `cyc2.py`). The exe was built at 13:12, before three
+review changes now in the code: `clearTerrain` held for turn B only with the player on screen, the one-turn fallback
+while a panel floats (`floatedPanelChanges`), and the switch's timer stopped in turn A, so a later turn's tick on its
+way is not taken for the switch's next turn. No panel floated in these runs; the parked player's `clearTerrain` on
+leaving Maps, one message, went with turn B here and goes in turn A now. "Split" is this change (489D5E8E,
+`w08\run_ui`); "Base" is the stage's host with the entry-stall fixes (0845259D, `w08\run_base`), the same player, the
+two run one after the other in one session, one repetition each (the base's switches are slower than in section 8.8's
+first measure, 55 of 74 over 50 ms there with player p18m; not explained, so compare within a session only). Each
+client: Models -> Maps (the first entry) and a map picked, then 8 cycles Models <-> Maps, 600 ms after each switch
+(1,500 ms once the world is entered); Retail then enters the world at Stormwind (-8700, 400) and makes 3 more cycles. No
+model is loaded: Models shows its notice, the player parked. 74 switches a build: 23 on Retail, 17 on each other client.
+Every switch step is `roundmark,mode:<m>,roundcheck:50`.
 
 | | Split, Maps -> Models | Split, Models -> Maps | Base, Maps -> Models | Base, Models -> Maps |
 |---|---|---|---|---|
@@ -1174,48 +1181,60 @@ only with their go-ahead).
 ### 8.10 The final build (after the stage)
 
 The tree that merges: this branch with the per-load gaps kept off the session (section 10.3) and the switch in turns
-(section 8.9), merged with develop f58ab27f. Built in `D:\wmv-final\build`: host exe 24FE3DA6..., wow.dll 6BFC5A63...,
-core.dll 9C79B61E...; player p18o (Assembly-CSharp MD5 3D2250E3). Since section 8.9's runs the host no longer lists
-Maps' tree ahead at the end of a client load (`FileControl::PrepareMapList`, removed: it made that round longer, section
-11); the first entry into Maps lists it in a turn of its own. Rig `F:\wmv-build-fix\w08` (`final_battery.ps1 -Phase
-func` 14:28-14:52 and `-Phase timing` 15:04-15:24; results in `w08\fin`, the cycles in `w08\mst\out_fin_split` and
-`out_fin_base`, summarised by `cyc2.py`). The timing phase ran on a quiet machine.
+(section 8.9), merged with develop f58ab27f. Built in `D:\wmv-final\build` and run from its runtime copies
+`D:\wmv-final\run`, `run2` and `run3` (the build directory's exe was later replaced by a probe build of the same tree):
+host exe 24FE3DA6..., wow.dll 6BFC5A63..., core.dll 9C79B61E...; player p18o (Assembly-CSharp MD5 3D2250E3). Since
+section 8.9's runs the host no longer lists Maps' tree ahead at the end of a client load (`FileControl::PrepareMapList`,
+removed: it put the listing of the client's maps into that round, section 11); the first entry into Maps lists it in a
+turn of its own. Rig `F:\wmv-build-fix\w08` (`final_battery.ps1 -Phase func` 14:28-14:52 and `-Phase timing`
+15:04-15:24; results in `w08\fin`, the cycles in `w08\mst\out_fin_split` and `out_fin_base`, summarised by `cyc2.py`).
+The timing phase ran on a quiet machine.
 
 | Run | Result | GUI rounds over 50 ms | Longest round |
 |---|---|---|---|
 | Retail acceptance (Stormwind, six loops of the 3 x 3 flight, far flight, Overview, Fly) | PASS 39 / 0 | 0 of 84,743 | 46.1 ms, the start round (before step 1) |
 | Classic Era, one loop | PASS 17 / 0 | 0 of 15,174 | 47.7 ms, the start round |
-| MoP Classic, one loop | PASS 17 / 0 | 0 of 15,556 | 39.3 ms |
-| Classic Beta, one loop | PASS 17 / 0 | 0 of 15,596 | 44.2 ms |
+| MoP Classic, one loop | PASS 17 / 0 | 0 of 15,556 | 39.3 ms, the start round |
+| Classic Beta, one loop | PASS 17 / 0 | 0 of 15,596 | 44.2 ms, the start round |
 | Switch cycles, the four clients (section 8.9's runs) | PASS 122 / 0 (Retail), 88 / 0 each other client | 0 | 40.4 ms (Retail, run-wide) |
 | The same cycles on the stage's host (0845259D, `w08\run_base`) | 30 / 23 (Retail), 20 / 17 each other client: every `roundcheck:50` of a switch fails | 75 | 240.8 ms |
 
+Two earlier timing phases of the same script, on builds that still listed Maps' tree ahead (13:37, exe EEF69DE7; 14:03,
+exe A0D3AAB0, otherwise this tree), passed the same runs (39 / 0, 17 / 0 each) with rounds over 50 ms: Retail 2 and 1
+(longest 75.5 and 74.0 ms, the latter the start round), Classic Era 1 and 0 (67.0 and 38.9 ms), MoP Classic 4 and 3
+(148.0 and 96.7 ms), Classic Beta 1 and 1 (88.1 and 52.4 ms) (`w08\final_battery.log`; the final run overwrote their
+result files). The figures in this section are the final exe's own run.
+
 - The Retail acceptance's longest round per step: mode:maps 32.0, pick 40.8, waitgrid 13.4, enter 18.3, waitworld (the
   round in which the world is shown among them) 29.3, waittile 16.8, the settling, the loops, the far flight, Overview
-  and Fly 14.5,
-  clear 32.5 ms.
+  and Fly 14.5, clear 32.5 ms.
 - The 74 switches: Maps -> Models median 18.1, 95th percentile 22.2, max 23.3 ms (turn A median 10.6, turn B 17.6 ms);
   Models -> Maps median 20.8, 95th percentile 34.2, max 36.6 ms (turn A 10.7, turn B 20.0 ms). Every switch was
   finished by its own turn, and laid out in turn A but one (the first after Enter world, in turn B). The click to the
   repaint: medians 44 and 48 ms, at most 50 ms into Models and 122 ms into Maps (14 of the 39 over 50 ms). On the
   stage's host the switch's round was 87.1 / 156.5 ms (median / max) into Models and 100.0 / 240.8 ms into Maps.
-- Alternated with the stage's host on the same machine, quiet (`D:\wmv-final\probe\ab`): the first entry into Maps
-  26.1-28.8 ms (129.7-134.9 ms on the stage's host); a Retail world entry's round with the world shown 22.3-24.3 ms
-  (24.2-25.2 ms); the round after a client load ('start') 32.5-40.2 ms on MoP Classic (29.7-32.9 ms) and 34.7-40.0 ms on
-  Retail (33.4-39.2 ms; beside the regression battery, both arms).
+- Alternated with the stage's host (0845259D) on the same machine (`D:\wmv-final\probe\ab`; quiet unless said): the
+  first entry into Maps 26.1-28.8 ms (129.7-134.9 ms on the stage's host); a Retail world entry's round with the world
+  shown 22.3-24.3 ms (24.2-25.2 ms); the round after a client load ('start') 32.5-40.2 ms on MoP Classic (29.7-32.9 ms),
+  and, beside the regression battery (both arms), 34.7-40.0 ms on Retail (33.4-39.2 ms) and 32.4-52.8 ms on MoP Classic
+  (31.0-32.6 ms).
 - Functional, on the same binaries: the player's lifecycle self-test 965 passed, 0 failed; the host's `-terraintile`
   checks 262 passed, 0 failed, 1 skipped (the Beta-only encrypted-file case); protocol compatibility (section 8.6)
   PASS 15 / 0 (the final host with the protocol 17 player) and 13 / 0 (the stage's host with the final player); session
   endings and cancellation (section 8.5) PASS 70 / 0 (`life08`) and 12 / 0 (`life08b`); the map catalogue sequences
   PASS 44 / 0 and 27 / 0. The rounds over 50 ms in those runs are in section 11.
 - The Stage 07 battery (section 9) again (`w08\fin\battery`): every set with the outcomes of section 9; the host's
-  in-process checks count the 25 checks of section 10.3 more in each run; `H_B_missingtex0` fails the same check; the
-  98 e2e files and both reg pictures byte-identical.
-- Characters (the three .chr cases, animation pinned) on the owner's deploy build (this tree with the owner's two
-  uncommitted tabard changes): byte-identical to the owner's build before it (`w08\fin\chars_union`,
-  `chars_cur`).
-- The census of section 10.3 on the four clients: no repeated group ids; one tile over a streaming refusal point
-  (Retail 30_48, its M2 textures 113.74 MiB against 104 MiB).
+  in-process checks add the 25 of section 10.3 in each run (its RESULT totals grow by 25 or 26 a run); `H_B_missingtex0`
+  fails the same check; the 98 e2e dump files and both reg pictures byte-identical to those of `w07\battery` and
+  `w08\battery_final` (compared by content; the set's own `cmp_*.json` files do not hold that comparison; each run's
+  result and check files differ, as they carry timings).
+- Characters (the three .chr cases, animation pinned): on this tree alone (`w08\fin\chars_fin`), fmt_details is
+  byte-identical to Stage 07's picture, last_details differs and noslot_after_tabard hangs (timed out at 180 s):
+  develop's tabard code without the owner's two uncommitted tabard fixes (the .chr tabard hang, the guild tabard
+  default). With those fixes (the owner's deploy build, `w08\fin\chars_union`) all three are byte-identical to the
+  owner's build before it (`chars_cur`) and to Stage 07's pictures.
+- The census of section 10.3 (read-only client data, not run again: it does not depend on the build): no repeated group
+  ids; one tile over a streaming refusal point (Retail 30_48, its M2 textures 113.74 MiB against 104 MiB).
 
 ## 9. Regressions (Stages 03-07, Models, Characters, Buildings)
 
@@ -1245,11 +1264,11 @@ is not related to this stage.
 
 Characters (the three .chr cases of `w07\chars2.ps1`, animation pinned): the pictures are byte-identical to Stage 07's
 (`w08\chars_f08`). The host's `-terraintile` checks: 237 passed, 0 failed, 1 skipped (tt_s8c, and tt_s8d on the final
-host; the stale-sweep check of
-section 10.2 added). The player's lifecycle self-test: 953 passed, 0 failed (the checks of sections 10.1 and 10.2
-added). After the stage (10.3): 262 passed, 0 failed, 1 skipped (tt_p1) and 965 passed, 0 failed (p18o); the battery ran
-again on the final build (section 8.10). Pure tests (`Tests/Runner`, the corpus at `build\world-audit-data`): all suites pass,
-among them `BlpBlockTests`, `BlpBlockCorpusTests` and `StreamSeamTests`. Protocol compatibility both ways: section 8.6.
+host; the stale-sweep check of section 10.2 added). The player's lifecycle self-test: 953 passed, 0 failed (the checks
+of sections 10.1 and 10.2 added). After the stage (10.3): 262 passed, 0 failed, 1 skipped (tt_p1) and 965 passed, 0
+failed (p18o); the battery ran again on the final build (section 8.10). Pure tests (`Tests/Runner`, the corpus at
+`build\world-audit-data`): all suites pass, among them `BlpBlockTests`, `BlpBlockCorpusTests` and `StreamSeamTests`.
+Protocol compatibility both ways: section 8.6.
 
 What changed on purpose: the single-tile world load uses block uploads for world-model and doodad textures too, so
 its pictures differ from Stage 07's where distant alpha-tested foliage samples the files' own mips (measured in
@@ -1404,7 +1423,8 @@ limit. The worker and `inspectFile` hand back the size of a file too large for t
 - Real data, Retail, one loop of the 3 x 3 flight (`st\early_p18n`, player p18n -- before p18o's count-cap changes and
   loads 21-22 -- on tt_p1's host): PASS 13 / 0. The session's end line: "0 prototype(s) kept for their tile (0 live, 0
   disposed), 0 placement(s) and 0 doodad(s) replaced by complete ones, 0 repeated group ask(s)".
-- The protocol-17 compatibility runs (8.6) have not been repeated since this change; the final battery comes later.
+- On the final build (section 8.10; host 24FE3DA6, wow.dll 6BFC5A63, player p18o): the self-test passes 965 / 0, the
+  `-terraintile` checks 262 / 0 / 1 (`w08inin_tt.json`), and the protocol-17 runs of 8.6 15 / 0 and 13 / 0.
 
 ## 11. Unresolved and limitations
 
@@ -1412,8 +1432,8 @@ Marked **new** (this stage's own) or **pre-existing** (present at develop 8f4e79
 off, the Stage 07 host or a protocol-17 player).
 
 - **GUI rounds over 50 ms** (sections 8.3 and 8.7-8.9). The roadmap exit's "no GUI-thread stall over 50 ms" holds over
-  the flight, from the Enter world click to the settled region and -- measured before the final battery -- over the
-  viewer switches between Models and Maps:
+  the flight, from the Enter world click to the settled region and -- on the final build too (section 8.10: none of 74
+  switch rounds over 50 ms, the longest 36.6 ms) -- over the viewer switches between Models and Maps:
   - pre-existing, fixed after the stage (sections 8.8 and 8.9): the mode switch to Maps, 82-110 ms with the entry-stall
     fixes (92-121 ms in the stage's final runs) -- Browse's list of maps listed again, the tree's thaw, the frame's
     layout and paint at once, the Maps panel built on the first entry, and the keyboard's move from the player waiting
@@ -1433,11 +1453,12 @@ off, the Stage 07 host or a protocol-17 player).
     measured it at 14-33 ms) in the Stage 05 suite.
 - **The viewer switch in turns** (new, after the stage; section 8.9):
   - the screen changes later than with one turn: 36-98 ms from the click to the repaint in the cycles (medians 43 ms
-    into Models and 54 ms into Maps; on the final build medians 44 and 48 ms, at most 122 ms, section 8.10); 37-105 ms elsewhere in the Stage 05 suite (the 105 ms with a listing step), and
-    374-676 ms at the first Textures and Buildings entries, whose listing has a turn of its own. Each turn waits for its
-    timer (at least 10 ms), a step adds a turn, and a parked player sized for its put-back is waited for until at most
-    250 ms after turn A (none in the runs). Heavy message traffic from the player delays a turn's timer (Windows sends
-    WM_TIMER last); the idle check finishes a switch whose turn has not come 500 ms after its last;
+    into Models and 54 ms into Maps; on the final build medians 44 and 48 ms, at most 122 ms, section 8.10); 37-105 ms
+    elsewhere in the Stage 05 suite (the 105 ms with a listing step), and 374-676 ms at the first Textures and Buildings
+    entries, whose listing has a turn of its own. Each turn waits for its timer (at least 10 ms), a step adds a turn,
+    and a parked player sized for its put-back is waited for until at most 250 ms after turn A (none in the runs). Heavy
+    message traffic from the player delays a turn's timer (Windows sends WM_TIMER last); the idle check finishes a
+    switch whose turn has not come 500 ms after its last;
   - with Browse, Animation or Model floating, the command bar's switch is made in one turn (one round, as in section
     8.8, where it was 22-44 ms; not measured);
   - what the user does in the gap finishes the switch in that event's own round, any step still due included: that round
@@ -1465,16 +1486,27 @@ off, the Stage 07 host or a protocol-17 player).
   on the stage's host with the entry-stall fixes, 29.9-135.2 ms with the mode-switch change and 33.0-82.9 ms with the
   switch in turns; in the cycle runs (`w08\mst\out_c1*`, `out_f1*`, `out_s1_*`), 23.6-55.4 ms on that host and 27.9-98.2
   ms with the changes. From the mode-switch change until the final build that deferred update also listed Maps' tree
-  ahead (`FileControl::PrepareMapList`), which made the round longer (50-135 ms where other work ran on the machine);
-  it is removed, and the first entry into Maps lists the tree in a turn of its own (26-29 ms). On the final build,
-  alternated with the stage's host on a quiet machine, the round is 32.5-40.2 ms on MoP Classic (29.7-32.9 ms) and
-  34.7-40.0 ms on Retail (33.4-39.2 ms): still a few ms longer, not attributed further. It is outside every switch.
+  ahead (`FileControl::PrepareMapList`), putting the listing of the client's maps into this round; it is removed, and
+  the first entry into Maps lists the tree in a step turn of its own (4.6-13.2 ms in the cycle runs; the entry's longest
+  round at most 36.6 ms on the final build). Whether the listing made this round longer was not measured alternately
+  with and without it. Without it, with other work on the machine, the round still reaches 50-166 ms (`w08\fin\start`
+  50.1 and 92.8 ms, `life08b` 166.0 ms, the protocol-17 run 66.2 ms). Alternated with the stage's host it is 32.5-40.2
+  ms on MoP Classic, quiet (29.7-32.9 ms), and 34.7-40.0 ms on Retail, both arms beside the regression battery
+  (33.4-39.2 ms): still a few ms longer. A stack probe of one such round under load (78.4 ms,
+  `D:\wmv-final\probe\out\log_pr_p1.txt`) found the Model panel's page rebuild (`ModelInspector::RebuildGeosetTree` and
+  `RebuildInfo`, about 30 ms), the command bar's first paint (its SVG icons and button looks), and the frame's paints
+  and layout. It is outside every switch.
 - **Rounds over 50 ms in the final build's functional runs** (section 8.10; not alternated with the stage's host, and
   other work ran on the machine then -- a probe build compiled at 14:32 and ran beside `life08b`): in `life08`, a
   progress round of a Retail entry, before the world was shown, that held two Maps panel updates (31.5 and 19.7 ms; the
-  round 67.9 ms; the stage's own `life08` had three such rounds, 56.3-86.7 ms), and a model load in Models right after a
-  switch (68.8 ms, in the load's round that serves its first assets; 48.5 ms in the stage's `life08`, 68.1 ms in section
-  8.9's suite); start rounds of 166.0 ms (`life08b`) and 66.2 ms (protocol 17). Not attributed further.
+  round 67.9 ms; the stage's own `life08` had one such round, 56.3 ms with updates of 12.9 and 14.5 ms, besides two
+  rounds in which the world is shown, 86.7 and 82.0 ms, the resize fixed in section 8.7), and a model load in Models
+  right after a switch (68.8 ms, in the load's round that serves its first assets; 48.5 ms in the stage's `life08`, 68.1
+  ms in section 8.9's suite); start rounds of 166.0 ms (`life08b`) and 66.2 ms (protocol 17). Busy stretches over 50 ms
+  besides those two: the client switch to Era in `life08` (9, 56.3-81.2 ms; client loads, as in section 8.9's suite).
+  Start rounds on the final exe with other work on the machine: 50.1 and 92.8 ms (`w08\fin\start`, right after its
+  build) and 52.8 ms (`probe\ab\abm_final_4`, beside the battery; 31.0-32.6 ms on the stage's host). Not attributed
+  further.
 - **The viewport's notice after Maps -> Models** (pre-existing, not investigated): in some window pictures "No model
   loaded" is drawn without its second line, or with no text (section 8.8; the stage's host shows the same).
 - **Frames over 50 ms at entry** (pre-existing): the largest world-model prototype of a region is built in one piece --

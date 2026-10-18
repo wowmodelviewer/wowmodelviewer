@@ -6079,7 +6079,7 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     TexturesClientLoaded();
     // The Maps viewer's list of the new catalogue (built after Browse was listed; listed only once the client counts
     // as active, which it does not inside the load). Another viewer on, the maps are listed at the next entry into Maps,
-    // in a turn of its own (section 8.9): listed here, ahead, they made this round 50-135 ms.
+    // in a turn of its own (section 8.9); listed here, ahead, they added that listing to this round.
     if (isMapsMode() && fileControl)
       fileControl->Init(this);
     DisplayedContentChanged();
