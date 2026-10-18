@@ -32,6 +32,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   on some screens, Maps on others) lost its icon for the whole session, while its label stayed. The icon's drawing
   was read from memory the viewer had already released, so whether it survived was down to chance. Every button
   now shows its icon (the known issue listed for 1.1).
+- **A tabard's front flap hung over a bulky belt's buckle.** Some belts have a large buckle or plate that hangs
+  down the front, and the tabard's front flap was drawn over or through it. As in the game, such a belt now hides
+  the front flap, and the tabard keeps its back flap. This covers 1,492 of Retail's 4,347 belt displays; none in
+  the Classic clients. The pre-HD character models, whose tabard is a single piece, keep it whole.
 
 ## [1.1] — 2026-10-14
 

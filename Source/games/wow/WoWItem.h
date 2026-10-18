@@ -92,6 +92,9 @@ class _WOWITEM_API_ WoWItem : public Component
     // Whether the item's display sets this geoset group itself (its GeosetGroup is not 0), rather than leaving the
     // group at its default variant (see refresh()).
     bool declaresGeosetGroup(CharGeosets group) const;
+    // Whether the item's display is a bulky belt, which hides a tabard's front flap (ItemDisplayInfo Flags 0x200, "clips
+    // lower tabard geoset"; see refresh()).
+    bool clipsLowerTabard() const { return (displayFlags_ & 0x200) != 0; }
     // Whether the item shows anything at all -- a texture, a model or a geoset group of its own. An NPC's equipment
     // can name an empty display, which is no garment.
     bool showsAnything() const;

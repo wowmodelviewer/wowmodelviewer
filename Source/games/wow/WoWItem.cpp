@@ -275,6 +275,9 @@ void WoWItem::unload()
   // clear map
   itemGeosets_.clear();
 
+  // forget the display's flags too: an item taken off, or whose display cannot be read, has none
+  displayFlags_ = 0;
+
   // remove any existing attachement
   if (charModel_->attachment)
     charModel_->attachment->delSlot(slot_);
@@ -915,6 +918,16 @@ void WoWItem::refresh()
       // not isWearingARobe(): a kilt's skirt is a dress too, and a robe whose display has no skirt is not one.
       if (charModel_->equipmentDeclaredGeosets.count(CG_TROUSERS) != 0)
         charModel_->cd.geosets[CG_TABARD] = 0;
+      // A bulky belt hides the tabard's front flap. With no dress, the client shows 1203, the back flap alone, in place
+      // of the variant the tabard's display sets, under a belt whose display has Flags 0x200 (GeosRenderPrep, as above).
+      // A tabard that leaves the group at its default keeps it. Only the models that split the flaps carry 1203 (1202
+      // both, 1203 back, 1204 front); on a model without it, such as the pre-HD ones, the tabard keeps its own variant.
+      else if (declaresGeosetGroup(CG_TABARD))
+      {
+        const WoWItem * belt = charModel_->getItem(CS_BELT);
+        if (belt != nullptr && belt->clipsLowerTabard() && charModel_->hasGeoset(1203))
+          charModel_->cd.geosets[CG_TABARD] = 3;
+      }
 
       if (isCustomizableTabard())
       {
