@@ -5,6 +5,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **FBX export of all of a character's customization options (by mubilla).** The FBX Export Options dialog has a
+  new **Appearance** choice. **Current appearance** exports as before. **All customization options** writes a
+  `<name>.fbx.customization` folder: the FBX with every alternative geometry, the source textures, a
+  `catalog.json` listing every option and choice the character's body and class can use (geosets, texture layers,
+  collection models and facial bone corrections) and a `README.txt` with the rules a program must apply to build
+  a look from them. **Include equipment** adds the current outfit as a separate layer. A character the catalog
+  cannot describe faithfully is refused with the reason, and a failed or cancelled export leaves no package. It
+  needs the FBX exporter plugin, which the release does not include; `docs/fbx-customization.md` describes the
+  format. The database cache is rebuilt once after updating (schema 19, for the new ChrCustomizationBoneSet
+  table).
+
 ### Fixed
 - **Some Classic helms, shoulders, bracers, belts and pants painted a whole outfit on the body (#110).** In the
   Classic clients' data, some of these displays also list a full set's chest, sleeve and leg textures, and the

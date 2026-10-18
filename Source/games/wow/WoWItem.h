@@ -86,6 +86,8 @@ class _WOWITEM_API_ WoWItem : public Component
     unsigned int nbLevels() const { return nbLevels_; }
 
     std::map<POSITION_SLOTS, WoWModel *> models() const { return itemModels_; }
+    const std::map<CharGeosets, int> & geosetGroups() const { return itemGeosets_; }
+    WoWModel * mergedModel() const { return mergedModel_; }
 
     // Whether the item's display sets this geoset group itself (its GeosetGroup is not 0), rather than leaving the
     // group at its default variant (see refresh()).

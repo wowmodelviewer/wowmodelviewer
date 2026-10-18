@@ -72,6 +72,10 @@ class _CHARTEXTURE_API_ CharTexture
     static void initRegions();
     // A newly loaded client: drop the texture layouts and the decoded images read from the previous one.
     static void clearClientCaches();
+    const std::vector<CharTextureComponent> & components() const { return m_components; }
+    static bool layout(unsigned int id, LayoutSize & size, std::map<int, CharRegionCoords> & regions);
+    // Raw source pixels, before atlas composition; used by portable customization packages.
+    static QImage sourceImage(GameFile * file);
 
     // Decode + layer a stack of full-image textures into ONE new GL texture, returning its id
     // (0 on failure). Used for a slot the model samples as a single texture but that

@@ -177,7 +177,8 @@ static void writeFbxStatus(const QString & outPath, const std::string & content)
 // to stdout, and write the status sidecar. Shared by every headless asset branch (-mo/.chr/-npc).
 static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
                                 bool mesh, bool skel, bool skin, bool anim, const QString & clipsCsv,
-                                bool component = false, const QString & equipmentPath = QString())
+                                bool component = false, const QString & equipmentPath = QString(),
+                                bool allCustomizations = false, bool includeEquipment = false)
 {
   if (!equipmentPath.isEmpty() && !frame->LoadFbxEquipment(equipmentPath))
   {
@@ -222,6 +223,7 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
 
   plugin->setExportOptions(mesh, skel, skin, anim);
   plugin->setComponentRawExport(component);
+  plugin->setCustomizationExport(allCustomizations, includeEquipment, frame->m_loadedBuild.toStdString(), frame->m_loadedProduct.toStdString());
 
   std::vector<int> clips;
   if (anim && !clipsCsv.isEmpty())
@@ -12520,6 +12522,7 @@ bool WowModelViewApp::OnInit()
   // clips (the exporter falls back to none/first-N only if -fbxanim and no -fbxclips).
   int optMesh = 1, optSkel = 1, optSkin = 1, optAnim = 1;
   int optComponent = 0;   // -fbxcomponent : opt-in raw/node-based item-component export (UV2 + raw units + sidecar v2)
+  bool optCustomizations = false, optEquipment = false;
   int itemSkinFileId = 0; // -itemskin <fileDataID> : re-bind an item/weapon's on-screen skin after -mo load
   bool unityIpcTest = false; // -unityipctest : with -mo, -item or -wmo, run the embedded Unity renderer IPC self-test (see doHeadlessUnityIpcTest)
   QString fbxClipsArg;    // -fbxclips i,j,k : positions in the model's animation array
@@ -12711,6 +12714,8 @@ bool WowModelViewApp::OnInit()
     else if (cmd == "-fbxanim")  { if (i + 1 < argc) { i++; optAnim = QString::fromWCharArray(argv[i]).toInt(); } }
     else if (cmd == "-fbxclips") { if (i + 1 < argc) { i++; fbxClipsArg = QString::fromWCharArray(argv[i]); } }
     else if (cmd == "-fbxcomponent") { optComponent = 1; }
+    else if (cmd == "-fbxcustomizations") { optCustomizations = true; }
+    else if (cmd == "-fbxincludeequipment") { if (i + 1 < argc) optEquipment = QString::fromWCharArray(argv[++i]).toInt() != 0; }
     else if (cmd == "-unityipctest") { unityIpcTest = true; }
     else if (cmd == "-itemskin") {
       // "-mo <item.m2> -itemskin <fileDataID>": after loading the model, re-bind this texture to
@@ -12949,7 +12954,7 @@ bool WowModelViewApp::OnInit()
       // Headless FBX export of the loaded model (out-of-process export child runs this path).
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath, optCustomizations, optEquipment);
         return false; // headless export done -> exit
       }
 
@@ -12967,7 +12972,7 @@ bool WowModelViewApp::OnInit()
       frame->LoadChar(snapCharPath);
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath, optCustomizations, optEquipment);
         return false;
       }
       logNoHeadlessScreenshot();
@@ -12986,7 +12991,7 @@ bool WowModelViewApp::OnInit()
       frame->LoadNPCByDisplay(npcId, dispId);
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath, optCustomizations, optEquipment);
         return false;
       }
       logNoHeadlessScreenshot();

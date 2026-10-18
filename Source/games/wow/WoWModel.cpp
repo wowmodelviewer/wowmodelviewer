@@ -3773,6 +3773,7 @@ void WoWModel::refresh()
   // ears re-shown by the "*01"/built-in-ears rules -- ear variant 1 is geoset id 701,
   // which the "*01" default rule turns back on regardless of the helmet).
   const auto headItemId = getItemId(CS_HEAD);
+  equipmentHiddenGroups_.clear();
   // The helm's geosets should only be hidden while the helm is actually on screen. If the helm
   // has its own attached model(s) and the user has hidden them (View > Attachments > Render off),
   // the covered hair/ears/horns must come back. Helms with no separate model (merged/geoset-only)
@@ -3811,6 +3812,7 @@ void WoWModel::refresh()
       for (auto it : helmetInfos.values)
       {
         setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+        equipmentHiddenGroups_.insert(it[0].toInt());
       }
     }
   }

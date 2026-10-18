@@ -151,6 +151,11 @@
     <field type="int32" name="ChrCustomizationCondModelID" pos="6" />
     <field type="int32" name="ChrCustomizationDisplayInfoID" pos="7" />
   </table>
+  <table name="ChrCustomizationBoneSet" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="BoneFileDataID" pos="0" />
+    <field type="int32" name="ModelFileDataID" pos="1" />
+  </table>
   <table name="ChrCustomizationGeoset">
     <field type="int32" name="ID" primary="yes" />
     <field type="int32" name="GeosetType" pos="0" />

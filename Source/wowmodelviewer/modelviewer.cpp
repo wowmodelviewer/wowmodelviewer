@@ -5973,7 +5973,7 @@ bool ModelViewer::LoadFbxEquipment(QString fn)
   return true;
 }
 
-bool ModelViewer::PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath)
+bool ModelViewer::PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath, bool customizations)
 {
   args.clear();
   label.clear();
@@ -6015,6 +6015,37 @@ bool ModelViewer::PrepareFbxAsset(wxString & args, wxString & label, wxString & 
       if (wxFileName::FileExists(tempCharPath)) wxRemoveFile(tempCharPath);
       tempCharPath.clear();
       return false;
+    }
+    if (customizations)
+    {
+      // Export-only state: ordinary .chr saves and Current appearance keep their
+      // existing behavior. The worker must see the state captured at confirmation.
+      QFile snapshot(QString::fromStdWString(tempCharPath.ToStdWstring()));
+      QDomDocument doc;
+      const auto failed = [&]() {
+        snapshot.close();
+        wxRemoveFile(tempCharPath);
+        tempCharPath.clear();
+        return false;
+      };
+      if (!snapshot.open(QIODevice::ReadOnly) || !doc.setContent(&snapshot)) return failed();
+      snapshot.close();
+      auto state = doc.createElement("fbxCustomizationState");
+      state.setAttribute("sheathed", m->bSheathe ? 1 : 0);
+      state.setAttribute("autoHideHead", m->cd.autoHideGeosetsForHeadItems ? 1 : 0);
+      for (auto * item : *m)
+        for (const auto & model : item->models())
+        {
+          auto part = doc.createElement("attachment");
+          part.setAttribute("slot", (int)item->slot());
+          part.setAttribute("position", (int)model.first);
+          part.setAttribute("visible", model.second->showModel ? 1 : 0);
+          state.appendChild(part);
+        }
+      doc.documentElement().appendChild(state);
+      const auto bytes = doc.toByteArray();
+      if (!snapshot.open(QIODevice::WriteOnly | QIODevice::Truncate) ||
+          snapshot.write(bytes) != bytes.size() || !snapshot.flush()) return failed();
     }
     if (isChar)
     {
@@ -6226,6 +6257,28 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
     }
   }
 
+  // Only export snapshots carry this node. Restore it after all items have been
+  // loaded and before refresh resolves attachment points and helmet hiding.
+  if (!equipmentOnly)
+  {
+    file.seek(0);
+    QDomDocument snapshot;
+    if (snapshot.setContent(&file))
+    {
+      const auto state = snapshot.documentElement().firstChildElement("fbxCustomizationState");
+      auto * model = const_cast<WoWModel *>(canvas->model());
+      if (!state.isNull() && model)
+      {
+        model->bSheathe = state.attribute("sheathed", "0").toInt() != 0;
+        model->cd.autoHideGeosetsForHeadItems = state.attribute("autoHideHead", "1").toInt() != 0;
+        for (auto part = state.firstChildElement("attachment"); !part.isNull(); part = part.nextSiblingElement("attachment"))
+          if (auto * item = model->getItem((CharSlots)part.attribute("slot").toInt()))
+            for (const auto & attached : item->models())
+              if ((int)attached.first == part.attribute("position").toInt())
+                attached.second->showModel = part.attribute("visible", "1").toInt() != 0;
+      }
+    }
+  }
   charControl->RefreshModel();
   charControl->RefreshEquipment();
   // Rebuild the attachment list (View > Attachments) so a loaded character's helm/shoulders/weapon models
@@ -7998,6 +8051,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       // Component/raw export (UV2 + raw per-unit textures + node-based sidecar for the Blender
       // add-on) is ALWAYS on -- it is the only FBX export mode now, no longer a dialog option.
       bool optMesh = true, optSkel = true, optSkin = true, optAnim = true, optComponent = true;
+      bool optCustomizations = false, optEquipment = false;
       std::vector<int> animsToExport;
       if (plugin->canExportAnimation())
       {
@@ -8017,7 +8071,10 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           animationIds.Add(animationId);
         }
 
-        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("FBX Export Options"), values, animationIds);
+        std::wstring customizationReason;
+        const bool supportsCustomization = plugin->canExportCustomizations(m, customizationReason);
+        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("FBX Export Options"), values, animationIds,
+          supportsCustomization, wxString(customizationReason));
         if (animChoiceDlg.ShowModal() == wxID_CANCEL)
           return;
 
@@ -8025,6 +8082,8 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         optSkel = animChoiceDlg.exportSkeleton();
         optSkin = animChoiceDlg.exportSkinning();
         optAnim = animChoiceDlg.exportAnimations();
+        optCustomizations = animChoiceDlg.exportAllCustomizations();
+        optEquipment = animChoiceDlg.includeEquipment();
 
         // Clip selection only matters when animations are being exported.
         if (optAnim)
@@ -8042,7 +8101,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       {
         // Build the descriptor a fresh process needs to reload exactly this asset.
         wxString assetArgs, assetLabel, tempCharPath;
-        if (PrepareFbxAsset(assetArgs, assetLabel, tempCharPath))
+        if (PrepareFbxAsset(assetArgs, assetLabel, tempCharPath, optCustomizations))
         {
           ExportJobManager::Request req;
           req.assetArgs    = assetArgs;
@@ -8055,6 +8114,8 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           req.skinning     = optSkin;
           req.animation    = optAnim;
           req.component    = optComponent;
+          req.allCustomizations = optCustomizations;
+          req.includeEquipment = optEquipment;
           req.tempCharPath = tempCharPath;
           wxString csv;
           for (size_t I = 0; I < animsToExport.size(); I++)
@@ -8076,6 +8137,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
       // ---------- In-process export (non-FBX, or FBX fallback) ----------
       plugin->setExportOptions(optMesh, optSkel, optSkin, optAnim);
+      plugin->setCustomizationExport(optCustomizations, optEquipment, m_loadedBuild.toStdString(), m_loadedProduct.toStdString());
       plugin->setAnimationsToExport(animsToExport);
 
       WoWModel * m = const_cast<WoWModel *>(canvas->model());

@@ -59,6 +59,7 @@ struct ExportJob
   wxString   assetKey;        // dedupe identity: asset descriptor + output path
   wxString   assetLabel;      // human label for the dialog
   wxString   outPath;         // target .fbx
+  wxString   resultPath;      // file, or complete customization package directory
   wxString   statusPath;      // outPath + ".status" (written by the child; authoritative)
   wxString   logPath;         // outPath + ".export.log"
   wxString   lockPath;        // outPath + ".lock"
@@ -106,6 +107,8 @@ class ExportJobManager : public wxEvtHandler
       bool     skinning;
       bool     animation;
       bool     component;   // opt-in raw/node-based item-component export (-fbxcomponent)
+      bool allCustomizations = false;
+      bool includeEquipment = false;
       wxString clipsCsv;    // comma-separated clip indices (empty => no clips)
       wxString tempCharPath;// temp .chr to delete when done (empty if none)
 

@@ -11,6 +11,7 @@ set(src animated.cpp
       CASCFolder.cpp
       CascFileProvider.cpp
       CharDetails.cpp
+      CustomizationCatalog.cpp
       CharTexture.cpp
       database.cpp
       dbdfile.cpp

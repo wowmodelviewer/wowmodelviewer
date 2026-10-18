@@ -29,7 +29,8 @@
 #include <climits>
 
 AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const wxString &message,
-    const wxString &caption, const wxArrayString &choices, const wxArrayInt &animationIds)
+    const wxString &caption, const wxArrayString &choices, const wxArrayInt &animationIds,
+    bool customizationSupported, const wxString &customizationReason)
   : wxDialog(parent, wxID_ANY, caption, wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_animationIds(animationIds), m_names(choices), m_checked(choices.GetCount(), true)
@@ -49,6 +50,39 @@ AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const
     options->Add(box, 0, wxRIGHT, FromDIP(8));
   }
   content->Add(options, 0, wxBOTTOM, gap);
+  // Shared extension point for future model-variant exporters. Availability is a capability,
+  // not merely an isChar flag or the presence of animation clips.
+  auto appearance = new wxBoxSizer(wxHORIZONTAL);
+  appearance->Add(new wxStaticText(this, wxID_ANY, _("Appearance:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+  m_currentAppearance = new wxRadioButton(this, wxID_ANY, _("Current appearance"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+  m_allCustomizations = new wxRadioButton(this, wxID_ANY, _("All customization options"));
+  m_includeEquipment = new wxCheckBox(this, wxID_ANY, _("Include equipment"));
+  m_currentAppearance->SetValue(true);
+  m_includeEquipment->SetValue(true);
+  m_currentAppearance->Enable(customizationSupported);
+  m_allCustomizations->Enable(customizationSupported);
+  m_includeEquipment->Enable(false);
+  const wxString help = customizationSupported
+    ? _("Export all player customization options for this body and current class context, not other classes or NPC-only appearances. Creates a .fbx.customization folder containing the FBX, textures and catalog. A package reader is needed to apply the catalog.")
+    : (customizationReason.IsEmpty() ? _("Customization export is not available for this model.") : customizationReason);
+  m_currentAppearance->SetToolTip(help);
+  m_allCustomizations->SetToolTip(help);
+  m_includeEquipment->SetToolTip(_("Include the currently equipped items separately, preserving the complete customizable base. Current appearance keeps the existing equipment export behavior."));
+  appearance->Add(m_currentAppearance, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+  appearance->Add(m_allCustomizations, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+  appearance->Add(m_includeEquipment, 0, wxALIGN_CENTER_VERTICAL);
+  content->Add(appearance, 0, wxBOTTOM, gap);
+  if (!customizationSupported)
+  {
+    // Disabled native controls do not reliably expose their tooltips. Keep the
+    // capability failure readable without hovering over an unavailable radio.
+    auto reason = new wxStaticText(this, wxID_ANY, help);
+    reason->SetName("Customization availability reason");
+    reason->Wrap(FromDIP(440));
+    content->Add(reason, 0, wxEXPAND | wxBOTTOM, gap);
+  }
+  m_currentAppearance->Bind(wxEVT_RADIOBUTTON, [this](wxCommandEvent &) { UpdateAppearance(); });
+  m_allCustomizations->Bind(wxEVT_RADIOBUTTON, [this](wxCommandEvent &) { UpdateAppearance(); });
   content->Add(new wxStaticText(this, wxID_ANY,
       message.IsEmpty() ? _("Select animations you want to export") : message), 0, wxBOTTOM, gap);
 
@@ -236,3 +270,36 @@ bool AnimationExportChoiceDialog::exportMesh() const { return m_cbMesh->GetValue
 bool AnimationExportChoiceDialog::exportSkeleton() const { return m_cbSkeleton->GetValue(); }
 bool AnimationExportChoiceDialog::exportSkinning() const { return m_cbSkinning->GetValue(); }
 bool AnimationExportChoiceDialog::exportAnimations() const { return m_cbAnimations->GetValue(); }
+bool AnimationExportChoiceDialog::exportAllCustomizations() const { return m_allMode; }
+bool AnimationExportChoiceDialog::includeEquipment() const { return m_includeEquipment->GetValue(); }
+
+void AnimationExportChoiceDialog::UpdateAppearance()
+{
+  const bool all = m_allCustomizations->IsEnabled() && m_allCustomizations->GetValue();
+  if (all == m_allMode) return;
+  if (all)
+  {
+    m_savedMesh = m_cbMesh->GetValue();
+    m_savedSkeleton = m_cbSkeleton->GetValue();
+    m_savedSkinning = m_cbSkinning->GetValue();
+    m_cbMesh->SetValue(true);
+    m_cbSkeleton->SetValue(true);
+    m_cbSkinning->SetValue(true);
+    m_includeEquipment->SetValue(m_savedEquipment);
+  }
+  else
+  {
+    m_savedEquipment = m_includeEquipment->GetValue();
+    m_cbMesh->SetValue(m_savedMesh);
+    m_cbSkeleton->SetValue(m_savedSkeleton);
+    m_cbSkinning->SetValue(m_savedSkinning);
+    m_includeEquipment->SetValue(true);
+  }
+  m_allMode = all;
+  for (auto * box : {m_cbMesh, m_cbSkeleton, m_cbSkinning})
+  {
+    box->Enable(!all);
+    box->SetToolTip(all ? _("Required for a complete customization package.") : wxEmptyString);
+  }
+  m_includeEquipment->Enable(all);
+}
