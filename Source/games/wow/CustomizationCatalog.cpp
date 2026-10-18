@@ -14,7 +14,7 @@ namespace
   // Verified neutral Night Elf female faces, not a general missing-file fallback.
   // Their DB2 references are absent from CASC and the skeleton's BFID list; the
   // corresponding inline FacePose sequences contain no per-sequence transforms.
-  // Wowhead's independent renderer clears the previous correction in this case.
+  // An independent reference renderer clears the previous correction in this case.
   // Keep the selection and explicitly serialize an identity set (see docs).
   bool verifiedNeutralFace(const WoWModel & model, int modelId, uint choice, uint set, int file)
   {

@@ -69,14 +69,9 @@ match the exported model. A version-1 `.bone` contains paired BIDA bone indices 
 BOMT affine matrices. Read the original matrices; do not infer them from FacePose
 clips, transpose them, or swap quaternion components based on a visual resemblance.
 
-The independently implemented reference is the public
-[Wowhead viewer](https://wow.zamimg.com/modelviewer/live/viewer/viewer.min.js),
-inspected on 2026-10-17. In the inspected bundle, `Ql.j` resolves the selected bone
-file, `bl`/`C`/`ba` load and assign its corrections, and `Eo.A` applies each correction
-after its animation matrix and before parent accumulation. Function names are
-minified and can change. The inspected UTF-8 bundle's SHA-256 was
-`ce4ceffb220830b806a9ec9483118e84471a4a4b47edfbb3c672914e96cdd241`.
-No viewer implementation or game assets are vendored into this repository.
+The rule below was checked against an independently implemented public web renderer
+that applies these corrections after each bone's animation matrix and before parent
+accumulation. No third-party code or game assets are included in this repository.
 
 For column vectors, let `A` be a native M2 bone's animated local skin matrix, `p`
 its model-space bind pivot, and `C` its correction. The reference computes:
@@ -130,17 +125,17 @@ an independent renderer fixture (assets/fixtures are not committed).
 
 The research corpus uses client 12.1.5.70391: 30 Night Elf male/female bone files,
 1,000 corrections, and 16,000 animated samples across IDs 0, 4, 5 and 804. The
-reference fixture executes the inspected arithmetic branch from Wowhead, while the
-WMV evaluator is independently written. Maximum C++ matrix-component difference:
+reference fixture reproduces the reference renderer's arithmetic, while the WMV
+evaluator is independently written. Maximum C++ matrix-component difference:
 `2.27e-7` in source units. An independent FBX-local coordinate derivation differs
 by at most `1.62e-5` centimeters. Reversed-order and fixed-pivot alternatives differ
-in 7,864 and 2,893 samples respectively. Two remote reference bone files (1060751
-and 1053759) are byte-identical to the local client files.
+in 7,864 and 2,893 samples respectively. The reference's copies of bone files 1060751
+and 1053759 are byte-identical to the local client's.
 
 This validates agreement with an independent renderer, **not** a numeric capture
-of Blizzard's proprietary client. Mauricio visually inspected every male Night Elf
-face in the local client and confirmed small nose/chin changes and paired mouth
-expressions for faces 7–8, 9–10 and 11–12. That is visual evidence of shape changes,
+of Blizzard's proprietary client. Every male Night Elf face was also inspected in
+the local client, which showed small nose/chin changes and paired mouth
+expressions for faces 7-8, 9-10 and 11-12. That is visual evidence of shape changes,
 not a per-vertex verification of the matrix formula.
 
 `scripts/tests/customization-dialog.cpp` exercises supported/unsupported models,
@@ -179,10 +174,10 @@ identified a neutral-face reference rather than an unavailable nonneutral shape:
 choice 825/set 580 names this absent file, while the owning skeleton omits it from
 BFID and inline FacePose 808/subanimation 1 contains no per-sequence transforms on
 any bone. The same pattern holds for choice 834/set 581/file 1053760/subanimation
-10, which remains outside the ordinary class context. The independent Wowhead
+10, which remains outside the ordinary class context. The independent reference
 renderer clears all previous corrections before attempting either absent file and
-keeps the base pose on the failed request. Its actual method was executed with a
-failed request and pre-existing corrections to check that transition.
+keeps the base pose on the failed request. That transition was checked by running
+the reference with a failed request and pre-existing corrections.
 
 The exporter recognizes only these verified model/choice/set/file tuples, only
 when CASC reports NotListed and the loaded inline, non-aliased FacePose sequence
@@ -212,7 +207,7 @@ disabled-control tooltips alone are insufficient. The conventional Current appea
 with four clips. Its baked-texture path hits the pre-existing hidden OpenGL
 PixelBuffer failure, reproduced with both the changed and previous daily binaries.
 
-### Independent contribution validation — 18 October 2026
+### Independent contribution validation - 18 October 2026
 
 The contribution was rebuilt on official develop 8f4e791f in Release x64. Catalog geoset group rules follow this base's customization behavior. A normal code review corrected export snapshot preservation of sheathed weapons, helmet suppression preferences and attached-model visibility. Hidden equipment resources remain reusable with their captured `defaultVisible` value.
 
