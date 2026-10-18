@@ -98,6 +98,11 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // transparency, glow emission, animated UV scroll). Default off -> the legacy bake pipeline,
     // whose output stays byte-for-byte unchanged.
     void setComponentRawExport(bool v) { m_exportComponentRaw = v; }
+    // Defaults keep ordinary export unchanged. Capability queries must not mutate the model.
+    virtual bool canExportCustomizations(Model *, std::wstring & reason) const
+    { reason = L"Customization export is not available for this model."; return false; }
+    void setCustomizationExport(bool all, bool equipment, const std::string & build = "", const std::string & product = "")
+    { m_exportAllCustomizations = all; m_includeEquipment = equipment; m_exportBuild = build; m_exportProduct = product; }
 
     // Human-readable reason the most recent exportModel() returned false (empty if unknown).
     // Lets the UI surface an actionable message instead of a generic "export failed".
@@ -163,6 +168,9 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
 
     // Opt-in raw/node-based item-component export (see setComponentRawExport). Off -> legacy bake.
     bool m_exportComponentRaw = false;
+    bool m_exportAllCustomizations = false;
+    bool m_includeEquipment = false;
+    std::string m_exportBuild, m_exportProduct;
 
     // Set by exporters when exportModel() fails, read by the UI via lastError().
     std::wstring m_lastError;

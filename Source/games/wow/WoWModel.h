@@ -86,6 +86,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   // Bumped whenever refresh() or refreshMerging() has rebuilt what the model draws; see stateVersion().
   unsigned int stateVersion_ = 0;
+  std::set<int> equipmentHiddenGroups_;
 
   inline void drawModel();
   void initCommon();
@@ -375,11 +376,16 @@ public:
   // Everything below reads state refresh()/refreshMerging() already computed for the model;
   // nothing re-derives a rule.
   const std::vector<MergedPart> & mergedParts() const { return mergedParts_; }
+  // Rebuild geometry after adding export-only variant parts, without reapplying the current
+  // appearance (which would remove those parts). Call only on an isolated export model.
+  void rebuildExportGeometry() { refreshMerging(); }
+  const std::set<int> & equipmentHiddenGroups() const { return equipmentHiddenGroups_; }
   unsigned int stateVersion() const { return stateVersion_; }
   const QImage & eyeCompositeImage() const { return eyeCompositeImage_; }
   GLuint eyeCompositeTexture() const { return eyeCompositeTex_; }
   // The M2 texture TYPE of this model's own texture slot (0 = a file texture), or -1 out of range.
   int textureTypeForSlot(size_t slot) const;
+  const std::vector<ModelVertex> & sourceVertices() const { return rawVertices; }
   // The FileDataID behind a GL texture id the texture manager created, or 0.
   static int fileDataIdForGLTexture(GLuint id);
   bool isGeosetDisplayed(uint geosetindex);

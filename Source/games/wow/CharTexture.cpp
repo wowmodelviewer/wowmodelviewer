@@ -254,6 +254,25 @@ void CharTexture::clearClientCaches()
   s_imageLru.clear();
 }
 
+bool CharTexture::layout(unsigned int id, LayoutSize & size, std::map<int, CharRegionCoords> & regions)
+{
+  const auto it = LAYOUTS.find(id);
+  if (it == LAYOUTS.end()) return false;
+  size = it->second.first;
+  regions = it->second.second;
+  return size.width > 0 && size.height > 0;
+}
+
+QImage CharTexture::sourceImage(GameFile * file)
+{
+  if (!file) return QImage();
+  QImage * image = gameFileToQImage(file);
+  if (!image) return QImage();
+  const QImage result = *image;
+  delete image;
+  return result;
+}
+
 QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
   // A character composition decodes the same source BLP many times: each layer is

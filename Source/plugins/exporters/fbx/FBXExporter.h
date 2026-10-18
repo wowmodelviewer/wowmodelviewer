@@ -38,6 +38,7 @@
 #include <QtPlugin>
 #include <qlist.h>
 #include <qmutex.h>
+#include <QJsonArray>
 
 // Externals
 #include "fbxsdk.h"
@@ -130,7 +131,7 @@ class FBXExporter : public ExporterPlugin
     FBXExporter();
 
     // Destructors
-    ~FBXExporter() {}
+    ~FBXExporter() { reset(); }
 
     // Methods
    std::wstring menuLabel() const;
@@ -139,6 +140,7 @@ class FBXExporter : public ExporterPlugin
    std::wstring fileSaveFilter() const;
 
    bool exportModel(Model *, std::wstring file);
+   bool canExportCustomizations(Model *, std::wstring & reason) const override;
 
    // Read-only forensic dump of an existing FBX (per-mesh verts/weights/clusters/bones/parent/
    // bind-pose + scene unit/axis/takes) to the log. See ExporterPlugin::dumpForensics.
@@ -174,6 +176,10 @@ class FBXExporter : public ExporterPlugin
     void linkMeshAndSkeleton();
     void createAnimations();
     void reset();
+    bool exportCustomizationPackage(WoWModel *, const std::wstring & target);
+    bool describeCustomizationGeometry();
+    bool m_packageScene = false;
+    QJsonArray m_packageGeometry;
 
     // Bakes a multi-texture-unit M2 combiner pass (see ModelRenderPass::init()/render(), the
     // "War Within+ cosmic/void materials" GLSL combiner) into a single flat RGBA texture, by

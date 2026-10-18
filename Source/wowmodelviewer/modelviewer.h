@@ -177,7 +177,7 @@ public:
   bool SaveChar(QString fn, bool equipmentOnly = false);
   // FBX child-process state; equipment restoration must not customize an exclusive NPC's body.
   bool LoadFbxEquipment(QString fn);
-  bool PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath);
+  bool PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath, bool customizations = false);
 
   // raceID/sexID name the race the model should be read as, for the races that share a model
   // file with another race (Mag'har Orc on the Orc model); -1 leaves the model to resolve it.

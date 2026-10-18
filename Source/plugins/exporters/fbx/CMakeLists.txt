@@ -14,6 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
 include_directories(${CMAKE_SOURCE_DIR}/Source/wowmodelviewer) # needed for util.h inclusion
 
 set(src FBXExporter.cpp
+  FBXCustomizationExporter.cpp
   FBXAnimExporter.cpp
   FBXHeaders.cpp)
 

@@ -34,16 +34,20 @@ class AnimationExportChoiceDialog : public wxDialog
 {
 public:
   AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption,
-                              const wxArrayString &choices, const wxArrayInt &animationIds);
+                              const wxArrayString &choices, const wxArrayInt &animationIds,
+                              bool customizationSupported = false, const wxString &customizationReason = wxEmptyString);
   bool exportMesh() const;
   bool exportSkeleton() const;
   bool exportSkinning() const;
   bool exportAnimations() const;
+  bool exportAllCustomizations() const;
+  bool includeEquipment() const;
   wxArrayInt GetAnimationSelections() const;
 
 private:
   void RefreshList();
   void UpdateControls();
+  void UpdateAppearance();
   void FitColumns();
   bool ReadRange(long &from, long &to) const;
   wxArrayInt m_animationIds;
@@ -62,5 +66,10 @@ private:
   wxStaticText *m_rangeLabel, *m_rangeSeparator;
   wxTextCtrl *m_rangeFrom, *m_rangeTo;
   wxCheckBox *m_cbMesh, *m_cbSkeleton, *m_cbSkinning, *m_cbAnimations;
+  wxRadioButton *m_currentAppearance, *m_allCustomizations;
+  wxCheckBox *m_includeEquipment;
+  bool m_allMode = false;
+  bool m_savedMesh = true, m_savedSkeleton = true, m_savedSkinning = true;
+  bool m_savedEquipment = false;
 };
 #endif

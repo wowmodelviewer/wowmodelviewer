@@ -161,6 +161,8 @@ bool ExportJobManager::startExport(const Request & req)
       << wxT(" -fbxanim ") << (req.animation ? 1 : 0);
   if (req.component)
     cmd << wxT(" -fbxcomponent");
+  if (req.allCustomizations)
+    cmd << wxT(" -fbxcustomizations -fbxincludeequipment ") << (req.includeEquipment ? 1 : 0);
   if (!req.clipsCsv.IsEmpty())
     cmd << wxT(" -fbxclips ") << req.clipsCsv;
   if (!req.build.IsEmpty())
@@ -173,6 +175,7 @@ bool ExportJobManager::startExport(const Request & req)
   job->assetKey     = assetKey;
   job->assetLabel   = req.assetLabel;
   job->outPath      = req.outPath;
+  job->resultPath   = req.outPath + (req.allCustomizations ? wxT(".customization") : wxT(""));
   job->statusPath   = statusPath;
   job->logPath      = req.outPath + wxT(".export.log");
   job->lockPath     = lockPath;
@@ -470,7 +473,7 @@ void ExportJobManager::finalize(ExportJob * job)
   else if (ok)
   {
     LOG_INFO << "[export] SUCCESS:" << (const char*)job->outPath.mb_str();
-    wxMessageBox(wxT("Export completed successfully:\n") + job->outPath,
+    wxMessageBox(wxT("Export completed successfully:\n") + job->resultPath,
                  wxT("Export done"), wxOK | wxICON_INFORMATION, m_owner);
   }
   else

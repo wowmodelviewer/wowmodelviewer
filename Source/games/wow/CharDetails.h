@@ -21,6 +21,7 @@ class sqlResult;
 class WoWModel;
 class QXmlStreamWriter;
 class QXmlStreamReader;
+class QJsonObject;
 
 
 #ifdef _WIN32
@@ -267,6 +268,10 @@ public:
   // demonHunter: the class context, where the client has the class. An NPC's stored choices are cleared: switching
   // model generation is for player characters, which have none.
   void applyAppearance(const std::map<uint, uint> & wanted, bool demonHunter, bool exact);
+
+  // Read-only export description of the whole current player context, not the filtered UI list.
+  // Returns false for rules/effects we cannot faithfully describe; never mutates the selection.
+  bool customizationCatalog(QJsonObject & catalog, QString & reason) const;
 
 private:
 
