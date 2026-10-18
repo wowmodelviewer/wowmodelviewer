@@ -2428,6 +2428,12 @@ bool UnityIpcServer::sendClearTerrain(const QString & reason)
   return true;
 }
 
+void UnityIpcServer::deferNextPoll()
+{
+  if (m_timer.IsRunning())
+    m_timer.Start(POLL_INTERVAL_MS);
+}
+
 QString UnityIpcServer::MapAssetServed::describe() const
 {
   // The request's id and the detail are appended, never passed through arg().

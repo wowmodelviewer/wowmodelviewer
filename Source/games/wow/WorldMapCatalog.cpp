@@ -529,6 +529,7 @@ wow::WdtInspection wow::WorldMapCatalog::inspectInStorage(const CASCFolder::Stor
         // Decided from the size the storage gives, before any byte is read.
         r.state = WdtAvailability::Unreadable;
         r.detail = QString("%1 is larger than this read allows (%2 bytes, the limit is %3)").arg(what).arg(size).arg(maxBytes);
+        r.tooLargeSize = size;
         break;
       case CASCFolder::ReadOutcome::NoStorage:
         r.state = WdtAvailability::Unreadable;

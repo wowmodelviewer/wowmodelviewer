@@ -5,8 +5,10 @@
 
 #include "AnimationExportChoiceDialog.h"
 #include "ArmoryImportDialog.h"
+#include "itemselection.h"   // ChoiceDialog: the item chooser a viewer switch puts away
 #include "TextureView.h"
 #include "MapOverview.h"
+#include "MapTilePanel.h"
 #include "MapsViewer.h"
 #include "AnimManager.h"
 
@@ -255,20 +257,123 @@ EVT_TIMER(ID_STATUS_REFRESH_TIMER, ModelViewer::OnStatusBarRefreshTimer)
 
 END_EVENT_TABLE()
 
+// A/B RUNS IN ONE SESSION, and the gap filmed (docs/world-viewer/08-streaming.md 8.9). Read once.
+//   WMV_SWITCH_TURNS=1      the command bar's switch in one turn, as before the split
+//   WMV_SWITCH_LAYOUT=a     a split switch laid out in its first turn even with the player on screen (the F experiment)
+//   WMV_SWITCH_LAYOUT=grow  ... only when the viewport keeps its top-left corner and does not shrink (layoutMovesViewport)
+//   WMV_SWITCH_LAYOUT=b     always laid out with the repaint
+//   WMV_SWITCH_HOLD_MS=n    each turn of a split switch armed n ms after the last (the gap long enough to see and film)
+//   WMV_SWITCH_SIZE=wait    the repaint turn waits for the player's resize, as before (the look of T5/T6 compared)
+static wxString viewerSwitchEnv(const wxChar * name)
+{
+  wxString value;
+  wxGetEnv(name, &value);
+  return value.Lower();
+}
+static bool viewerSwitchOneTurn() { static const bool v = viewerSwitchEnv(wxT("WMV_SWITCH_TURNS")) == wxT("1"); return v; }
+static bool viewerSwitchSizeWaits() { static const bool v = viewerSwitchEnv(wxT("WMV_SWITCH_SIZE")) == wxT("wait"); return v; }
+static const wxString & viewerSwitchLayoutRule() { static const wxString v = viewerSwitchEnv(wxT("WMV_SWITCH_LAYOUT")); return v; }
+static long viewerSwitchHoldMs()
+{
+  static const long v = [] { long ms = 0; return viewerSwitchEnv(wxT("WMV_SWITCH_HOLD_MS")).ToLong(&ms) && ms > 0 ? ms : 0L; }();
+  return v;
+}
+
+// THE VIEWER SWITCH'S GAP as the rest of the program meets it: a filter every event passes first (wxEvtHandler::
+// ProcessEvent), installed with the frame for its whole life -- never removed during an event: RemoveFilter cuts the walk
+// short (MountCard.cpp) -- and inert unless a switch is on its way.
+class ModelViewer::ViewerSwitchFilter : public wxEventFilter
+{
+public:
+  explicit ViewerSwitchFilter(ModelViewer * frame) : m_frame(frame) {}
+  int FilterEvent(wxEvent & event) override
+  {
+    ModelViewer::ViewerSwitch * s = m_frame->m_switch.get();
+    if (!s)
+      return Event_Skip;
+    const wxEventType type = event.GetEventType();
+    // HELD UNTIL THE THAW: the frame's own drawing. Its paint clears and draws the panel manager's parts over its frozen
+    // windows (a frozen window reads hidden to Windows: it is not clipped out), and the manager draws straight to the
+    // screen from Update, a resize and a hover (a client DC; wxEVT_AUI_RENDER is offered to the frame first). A paint left
+    // without a wxPaintDC is validated by Windows, its pixels untouched; the thaw invalidates the frame again. And the
+    // erase Windows makes of a window of the frame as it is shown, frozen (a panel given back).
+    if (s->drawHeld)
+    {
+      wxObject * object = event.GetEventObject();
+      if (type == wxEVT_PAINT && object == m_frame)
+        return Event_Processed;
+      if (type == wxEVT_AUI_RENDER &&
+          static_cast<wxAuiManagerEvent &>(event).GetManager() == &m_frame->interfaceManager)
+        return Event_Processed;
+      if (type == wxEVT_ERASE_BACKGROUND)
+      {
+        wxWindow * window = wxDynamicCast(object, wxWindow);
+        return window && window != m_frame && wxGetTopLevelParent(window) == m_frame ? Event_Processed : Event_Skip;
+      }
+    }
+    // WHAT THE USER DOES BETWEEN THE TURNS finds the switch done: finished first (its repaint), and the event goes on to
+    // what is on screen then. (Not inside a turn of it: that turn ends as planned.)
+    if (s->phase == ModelViewer::ViewerSwitch::Phase::Waiting)
+      if (const char * why = userAction(event))
+        m_frame->FinishViewerSwitch(why);   // (s is gone after this)
+    return Event_Skip;
+  }
+
+private:
+  const char * userAction(const wxEvent & event) const
+  {
+    const wxEventType t = event.GetEventType();
+    if (t == wxEVT_LEFT_DOWN || t == wxEVT_RIGHT_DOWN || t == wxEVT_MIDDLE_DOWN || t == wxEVT_AUX1_DOWN ||
+        t == wxEVT_AUX2_DOWN || t == wxEVT_LEFT_DCLICK || t == wxEVT_RIGHT_DCLICK || t == wxEVT_MIDDLE_DCLICK ||
+        t == wxEVT_MOUSEWHEEL || t == wxEVT_CONTEXT_MENU)
+      return "a press";
+    if (t == wxEVT_CHAR_HOOK || t == wxEVT_KEY_DOWN)
+      return "a key";
+    if (t == wxEVT_MENU || t == wxEVT_MENU_OPEN)
+      return "a command";
+    if (t == wxEVT_CLOSE_WINDOW)
+      return "a window closing";
+    if ((t == wxEVT_SIZE || t == wxEVT_DPI_CHANGED) && event.GetEventObject() == m_frame)
+      return "the window resized";
+    return nullptr;
+  }
+  ModelViewer * m_frame;
+};
+
 ModelViewer::ModelViewer()
 #ifdef _LINUX
 // Transparency in interfaceManager crashes with Linux compositing
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
 #else
-// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the Unity
-// player's window at every mouse move, and wxAuiManager::Update would lay out an unfrozen frame, which
-// the one-step viewer-mode switch (SetViewerMode) relies on it not doing. (It also drops the docking
-// hint's fade-in, which these keep.)
+// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the Unity player's window at
+// every mouse move. (Without live resizing wxAuiManager::Update locks the frame, which on MSW freezes only the frame's
+// windows -- wxTopLevelWindowMSW::DoFreeze does nothing -- and it draws its parts straight to the screen through a client
+// DC: a viewer switch holds that drawing back itself, ViewerSwitchFilter.) (It also drops the docking hint's fade-in,
+// which these keep.)
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_TRANSPARENT_HINT | wxAUI_MGR_HINT_FADE)
 #endif
 {
   m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
   m_playerContentPoll.Bind(wxEVT_TIMER, &ModelViewer::OnPlayerContentPoll, this);
+  m_keyboardHandoff.Bind(wxEVT_TIMER, [this](wxTimerEvent &) {
+    // The player's thread still sizing its window (a viewer switch's resize on a thread of this process's own): the
+    // handoff, which waits on that thread too, waits for it a turn at a time -- at most KeyboardHandoffWaitMs.
+    if (unityRendererHost && unityRendererHost->aheadMoveInFlight() && m_keyboardHandoffClock.Time() < KeyboardHandoffWaitMs)
+    {
+      m_keyboardHandoff.StartOnce(UnityRendererHost::KeyboardHandoffDelayMs);
+      return;
+    }
+    std::function<void()> handoff;
+    handoff.swap(m_keyboardHandoffDo);
+    if (handoff)
+      handoff();
+  });
+  // THE VIEWER SWITCH IN TURNS: its turns' timer (and the turns after a switch), the idle check that arms it, and the gap's
+  // filter.
+  m_switchTimer.Bind(wxEVT_TIMER, &ModelViewer::OnViewerSwitchTimer, this);
+  Bind(wxEVT_IDLE, &ModelViewer::OnViewerSwitchIdle, this);
+  m_switchFilter.reset(new ViewerSwitchFilter(this));
+  wxEvtHandler::AddFilter(m_switchFilter.get());
   PLUGINMANAGER.init("./plugins");
   // Until a client loads, the map catalogue says there is none (mapCatalog() is never null).
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
@@ -279,7 +384,9 @@ ModelViewer::ModelViewer()
   m_maps->onChanged = [this]() {
     QElapsedTimer t;
     t.start();
-    if (fileControl)
+    // (Not while a viewer switch leaves the Maps viewer, in its first turn: Browse's map panel goes with it, 2-6 ms of a
+    // refresh no one sees; FollowViewerMode refreshes it when Maps comes back.)
+    if (fileControl && !(m_switch && m_switch->phase == ViewerSwitch::Phase::Building && m_switch->previous == ViewerMode::Maps))
       fileControl->MapsChanged();
     if (mapOverview && isMapsMode())
       mapOverview->Refresh2();
@@ -648,6 +755,8 @@ void ModelViewer::InitObjects()
   }
 
   g_modelViewer = this;
+  // The Maps viewer's panel made now, hidden: made at the first entry into Maps, it took 27-32 ms of that switch's turn.
+  fileControl->PrepareMaps();
   g_animControl = animControl;
   g_charControl = charControl;
   g_canvas = canvas;
@@ -947,6 +1056,7 @@ void ModelViewer::InitDocking()
 
 void ModelViewer::ResetLayout()
 {
+  FinishViewerSwitch("a layout reset");
   // Every panel goes back to where InitDocking put it. The Unity viewport stays the centre pane; the
   // archived canvas is not a pane and is not touched. In a viewer that puts panels away (Textures,
   // Buildings), the default layout is what they are given back to, and they are put away again until it goes.
@@ -1029,6 +1139,7 @@ void ModelViewer::SaveSession()
 
 void ModelViewer::LoadLayout()
 {
+  FinishViewerSwitch("a layout loaded");
   QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   int posx = config.value("Session/PositionX", "").toInt();
@@ -1886,6 +1997,7 @@ void ModelViewer::Relaunch()
 // This is called when the window is closing
 void ModelViewer::OnClose(wxCloseEvent &event)
 {
+  FinishViewerSwitch("closing");   // (repainted whole; SaveLayout then reads pane info the windows follow)
   // The background window goes with the frame, first: left open it would stay on screen, unresponsive, while the
   // frame tears down (the player's shutdown waits seconds), and be destroyed after the frame state it reads.
   if (m_backgroundDialog)
@@ -1914,6 +2026,14 @@ ModelViewer::~ModelViewer()
 {
   if (testShutdownProbe)
     testShutdownProbe(*this, ShutdownPoint::Begin);
+  // THE VIEWER SWITCH: none left on its way (OnClose finishes one; a frame deleted without being closed -- the harness's
+  // end, a fatal exception -- drops it without its repaint), no later turn left, and the filter out of the program's list
+  // (not inside its walk: the frame is deleted by idle-time deletion or the application's clean-up).
+  m_switchTimer.Stop();
+  AbortViewerSwitch();
+  m_later.clear();
+  if (m_switchFilter)
+    wxEvtHandler::RemoveFilter(m_switchFilter.get());
   // THE IPC SERVER DETACHED FIRST (docs/world-viewer/04b-asset-serving.md 18.1): from here on no poll serves -- no player
   // message handled, no map callback into this half-destroyed viewer, nothing sent -- whatever runs it (the server's
   // timer, a wake the worker queued, wx's message hook during the player's shutdown pump below), and no result the worker
@@ -2045,6 +2165,8 @@ ModelViewer::~ModelViewer()
     enchants->Destroy();
     enchants = NULL;
   }
+  // The windows parked (parkHidden) that are left go with the frame's base class, after its members.
+  *m_parkAlive = false;
 }
 
 // The docked pane whose window holds the keyboard reads as active (UiDockArt draws its caption in the
@@ -2145,7 +2267,7 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
       pane.BestSize(given.bestSize);
     return;
   }
-  interfaceManager.Update();
+  LayoutNow();
 }
 
 // A panel closed with its own close button while a viewer has panels put away stays closed afterwards.
@@ -2291,12 +2413,25 @@ void ModelViewer::commitDocksAtTheirSize()
     m_layoutUncapped = true;
     return;
   }
+  commitDocksNow();
+}
+
+void ModelViewer::commitDocksNow()
+{
   // wxAUI caps only a dock it makes anew, and only in this layout: the cap goes back right after.
   double capX = 0.3, capY = 0.3;
   interfaceManager.GetDockSizeConstraint(&capX, &capY);
   interfaceManager.SetDockSizeConstraint(1.0, 1.0);
   interfaceManager.Update();
   interfaceManager.SetDockSizeConstraint(capX, capY);
+}
+
+// An unbatched layout made now: a viewer switch on its way is finished first -- laid out under it, the panel manager would
+// lay the panels out while the old workspace is held on screen, and its repaint is the switch's.
+void ModelViewer::LayoutNow()
+{
+  FinishViewerSwitch("a layout");
+  interfaceManager.Update();
 }
 
 wxString ModelViewer::userPerspective()
@@ -2637,7 +2772,7 @@ void ModelViewer::ShowExportSettings()
   interfaceManager.GetPane(settingsControl).Show(true);
   settingsControl->Open();
   settingsControl->ShowExportPage();
-  interfaceManager.Update();
+  LayoutNow();
 }
 
 // Esc leaves fullscreen. Only that -- it is a way out, not a shortcut for anything else, and it
@@ -3104,7 +3239,7 @@ void ModelViewer::UpdateUnityViewportState()
   // player's window is not shown for a moment between.
   applyWorkspace(workspacePanes(m_viewerMode));
   if (m_layoutBatch > 0)
-    m_uncoverPending = true;   // SetViewerMode puts it away after its one layout
+    m_uncoverPending = true;   // put away after the batch's layout (commitLayoutBatchNow)
   else
     unityRendererHost->showContent(false);
   // The Geosets tab says whether the viewport shows the model; a stopped or restarted player changes
@@ -3117,6 +3252,7 @@ void ModelViewer::UpdateUnityViewportState()
 // selection and state the control then pushes are about a model the player already expects.
 void ModelViewer::SendLoadToUnity()
 {
+  FinishViewerSwitch("a load");
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return;
   if (isWMO && canvas && canvas->wmo)
@@ -3901,6 +4037,48 @@ void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & r
     current.m2TextureBytesRead += std::max<qint64>(0, bytesRead);
 }
 
+QString ModelViewer::mapAssetBudgetRefusal(const TerrainRequest & load, const QString & role, qint64 fileSize, qint64 readLimit)
+{
+  // The role's limit per file and the budget family decideMapAssetRequest cuts the read to.
+  qint64 perFile = 0, perLoad = 0;
+  QString what;
+  if (role == "texture")
+  {
+    perFile = load.maxTextureBytes;
+    perLoad = load.maxTextureBytesPerLoad;
+    what = "terrain textures";
+  }
+  else if (role == "wmoRoot" || role == "wmoGroup")
+  {
+    perFile = load.maxWmoFileBytes;
+    perLoad = load.maxWmoBytesPerLoad;
+    what = "world-model roots and groups";
+  }
+  else if (role == "wmoTexture")
+  {
+    perFile = load.maxWmoTextureBytes;
+    perLoad = load.maxWmoTextureBytesPerLoad;
+    what = "world-model textures";
+  }
+  else if (role == "m2Model" || role == "m2Skin")
+  {
+    perFile = load.maxM2FileBytes;
+    perLoad = load.maxM2BytesPerLoad;
+    what = "doodad models and skins";
+  }
+  else if (role == "m2Texture")
+  {
+    perFile = load.maxM2TextureBytes;
+    perLoad = load.maxM2TextureBytesPerLoad;
+    what = "doodad textures";
+  }
+  if (perFile <= 0 || fileSize <= 0 || readLimit < 0 || fileSize <= readLimit || readLimit >= perFile || fileSize > perFile)
+    return QString();
+  return QString("it is %1 bytes, more than the %2 bytes left of load %3's %4 budget (%5 per load, the reads in flight "
+                 "reserved), within the %6-byte limit per file: refused for this load's budget, not the file's failure")
+           .arg(fileSize).arg(readLimit).arg(load.load).arg(what).arg(perLoad).arg(perFile);
+}
+
 QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray & bytes)
 {
   // Four-character codes as they stand in the file, readable where they are printable, with their bytes in hex.
@@ -4056,6 +4234,7 @@ int ModelViewer::RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, i
 int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
                              bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming)
 {
+  FinishViewerSwitch("a world load");   // (before its sizePlayerAhead, which a hold would skip)
   why.clear();
   const bool noTile = world && globalWmo;
   const QString tile = noTile ? QString("(its world model)") : QString("%1_%2").arg(tileX).arg(tileY);
@@ -4374,8 +4553,16 @@ void ModelViewer::OnStreamState(const UnityIpcServer::StreamState & state)
 bool ModelViewer::ClearTerrain(const QString & reason)
 {
   UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
-  if (!ipc || !ipc->sendClearTerrain(reason))
+  if (!ipc || !ipc->playerDrawsTerrain())   // (sendClearTerrain's only refusal)
     return false;
+  // THE COMMAND BAR'S SWITCH leaving the Maps viewer, in its first turn, the player on screen at the click: it is told with
+  // the switch's repaint -- told now, it would drop the terrain inside the old workspace. Parked (behind the overhead map or
+  // a notice), it is told now, off screen, so its put-back in turn B does not show the world. What the viewport shows is
+  // decided now.
+  if (m_switch && m_switch->split && m_switch->phase == ViewerSwitch::Phase::Building && m_switch->playerWasOnScreen)
+    m_switch->clearTerrainReason = reason;
+  else
+    ipc->sendClearTerrain(reason);
   ResetTerrainRequests();
   if (m_playerContent == PlayerContent::Terrain)
   {
@@ -4609,6 +4796,19 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
   }
   answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
   answer.detail = inspection.detail;
+  // A read cut to what was left of its load's budget that found the file larger than that: the load's refusal, as one
+  // decided before the read would be -- the streaming player hands the file on to another tile's load rather than take
+  // it as the file's failure for the session (docs/world-viewer/08-streaming.md 5.4). A file over its per-file limit
+  // stays "unreadable": no load reads it. (Nothing was read; the reservation was given back above.)
+  if (own && inspection.state == wow::WdtAvailability::Unreadable && inspection.tooLargeSize > 0)
+  {
+    const QString refusal = mapAssetBudgetRefusal(*own, role, inspection.tooLargeSize, result.maxBytes);
+    if (!refusal.isEmpty())
+    {
+      answer.state = "refused";
+      answer.detail = QString("FileDataID %1 was not read: ").arg(fileDataID) + refusal + " (" + inspection.detail + ")";
+    }
+  }
   bool available = inspection.state == wow::WdtAvailability::Available;
   if (available)
   {
@@ -5036,6 +5236,7 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 // loaded before (if any) is still loaded meanwhile.
 void ModelViewer::PromptAndLoadClient()
 {
+  FinishViewerSwitch("the client prompt");
   if (m_clientLoading) // the loading window yields to the event loop: no second load inside the first
     return;
   for (;;)
@@ -5524,6 +5725,7 @@ void ModelViewer::ResetClientState()
 
 bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgress * progress)
 {
+  FinishViewerSwitch("a client load");
   // One load at a time: the loading window yields to the event loop, where File > Load World of Warcraft (or the
   // empty viewer's button) could otherwise start a second one inside this one.
   if (m_clientLoading)
@@ -5876,7 +6078,8 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     UpdateUnityViewportState();
     TexturesClientLoaded();
     // The Maps viewer's list of the new catalogue (built after Browse was listed; listed only once the client counts
-    // as active, which it does not inside the load).
+    // as active, which it does not inside the load). Another viewer on, the maps are listed at the next entry into Maps,
+    // in a turn of its own (section 8.9): listed here, ahead, they made this round 50-135 ms.
     if (isMapsMode() && fileControl)
       fileControl->Init(this);
     DisplayedContentChanged();
@@ -5908,6 +6111,14 @@ void ModelViewer::OnIdleFreeDetached(wxIdleEvent & event)
   event.Skip();
   if (m_clientLoading || UnityAssetAccess::isClientLoading())
     return; // a load is under way (a yield inside it): wait for it to finish
+  // NOT IN A VIEWER SWITCH'S ROUNDS: while one is on its way, and at the idle of a round a switch's turn or a turn after it
+  // ran in (m_turnSerial). A share asked for more is run again at once by the event loop, and a switch turn due meanwhile
+  // would follow it in the same busy stretch. The next idle (the next poll's) goes on.
+  if (m_switch || m_turnSerial != m_freeDetachedTurnSeen)
+  {
+    m_freeDetachedTurnSeen = m_turnSerial;
+    return;
+  }
   wow::WoWFolder * live = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
   wxStopWatch clock;
   const size_t left = live ? live->freeDetachedFiles(100000) : 0; // ~25 ms a share
@@ -6760,6 +6971,7 @@ void ModelViewer::DisplayedContentChanged()
 // lifted when panels come back) and everything is painted at once (PaintNow). The player -- another process,
 // which the freeze does not stop -- changes with that repaint (the hold): its frame moved off screen at the end
 // of the freeze (a notice) or once the texture view is painted, sized and put back as the repaint starts.
+// For the command bar's click the change is made in turns of their own; see BeginViewerSwitch.
 void ModelViewer::beginLayoutBatch()
 {
   m_layoutBatch++;
@@ -6769,13 +6981,28 @@ void ModelViewer::endLayoutBatch()
 {
   if (m_layoutBatch <= 0 || --m_layoutBatch > 0)
     return;
+  commitLayoutBatchNow();
+}
+
+// The batch's layout made now: one wxAuiManager::Update (the dock cap lifted when panels came back), the panels given back
+// their own best size, then the texture view or the overhead map put away after it (the player uncovered at its final
+// size). A viewer switch's first turn makes it with the batch still open -- what is asked for meanwhile is laid out in its
+// last turn. Inside a switch (its drawing held back) the floating panels keep their windows as they are until its repaint,
+// and a docked panel given back is moved off the frame before wxAUI shows it.
+void ModelViewer::commitLayoutBatchNow()
+{
   if (m_layoutPending)
   {
     m_layoutPending = false;
+    if (m_switch && m_switch->drawHeld)
+    {
+      holdFloatingPanes();
+      moveGivenBackPanesOff();
+    }
     if (m_layoutUncapped)
     {
       m_layoutUncapped = false;
-      commitDocksAtTheirSize();
+      commitDocksNow();
     }
     else
       interfaceManager.Update();
@@ -6785,162 +7012,829 @@ void ModelViewer::endLayoutBatch()
     m_finishWorkspacePending = false;
     finishWorkspace();
   }
+  if (m_uncoverPending)
+  {
+    m_uncoverPending = false;
+    if (unityRendererHost)
+      unityRendererHost->showContent(false);
+  }
+}
+
+// A floating panel's window (Attachments) shown or hidden by a switch's layout would change at once, over the old workspace
+// (wxAuiManager::Update: Show on its frame): its pane keeps the window's state through the layout, and what is due is
+// applied after the repaint (FinishViewerSwitch). (The layout makes the frame of a floating panel that has none yet, hidden.)
+void ModelViewer::holdFloatingPanes()
+{
+  ViewerSwitch & s = *m_switch;
+  wxAuiPaneInfoArray & panes = interfaceManager.GetAllPanes();
+  for (size_t i = 0; i < panes.GetCount(); i++)
+  {
+    wxAuiPaneInfo & p = panes[i];
+    if (!p.window || !p.IsFloating())
+      continue;
+    const bool shownNow = p.frame && p.frame->IsShown();
+    if (p.IsShown() == shownNow)
+      continue;
+    bool recorded = false;
+    for (std::pair<wxString, bool> & due : s.floatingDue)
+      if (due.first == p.name)
+      {
+        due.second = p.IsShown();
+        recorded = true;
+      }
+    if (!recorded)
+      s.floatingDue.emplace_back(p.name, p.IsShown());
+    p.Show(shownNow);
+  }
+}
+
+// Their panes back to what is due (their windows unchanged): before the thaw, so their toggles paint with the rest.
+void ModelViewer::restoreFloatingPanes()
+{
+  for (const std::pair<wxString, bool> & due : m_switch->floatingDue)
+  {
+    wxAuiPaneInfo & p = interfaceManager.GetPane(due.first);
+    if (p.IsOk())
+      p.Show(due.second);
+  }
+}
+
+// wxAUI shows a docked panel given back before it places it, and Windows erases a window as it is shown -- where the panel
+// was when it went, over the old workspace. Moved off the frame first, that erase draws nothing on screen (the filter
+// swallows it besides); the layout then places it, frozen.
+void ModelViewer::moveGivenBackPanesOff()
+{
+  wxAuiPaneInfoArray & panes = interfaceManager.GetAllPanes();
+  for (size_t i = 0; i < panes.GetCount(); i++)
+  {
+    wxAuiPaneInfo & p = panes[i];
+    if (p.window && p.IsDocked() && p.IsShown() && !p.window->IsShown())
+      p.window->Move(-32000, -32000);
+  }
+}
+
+void ModelViewer::paintTree(wxWindow * window)
+{
+  if (!window->IsShown())
+    return;
+  window->Update();
+  for (wxWindow * child : window->GetChildren())
+    if (!child->IsTopLevel())
+      paintTree(child);
 }
 
 void ModelViewer::PaintNow()
 {
-  std::function<void(wxWindow *)> paint = [&](wxWindow * w) {
-    if (!w->IsShown())
-      return;
-    w->Update();
-    for (wxWindow * child : w->GetChildren())
-      if (!child->IsTopLevel())
-        paint(child);
+  paintTree(this);
+}
+
+// HIDDEN WINDOWS STAY FROZEN. wx's freeze of a window freezes every window in it, and a viewer-mode switch freezes and
+// thaws every window of the frame: in the panels put away too, whose controls each had the redraw turned off and on and
+// were refreshed -- 6-27 ms of a switch's turn for the Model, animation and light panels, hidden
+// (docs/world-viewer/08-streaming.md, section 8.8). So a window of the frame a switch leaves hidden keeps a freeze of
+// its own until it is shown, and the next switches' freezes and thaws only count it (nothing in it is drawn while it is
+// hidden either way). Its show thaws it: its wxEVT_SHOW, which a switch's own shows send inside the switch's freeze, so
+// the window still changes with everything else; and the idle check, for a show that comes another way.
+// Hidden windows inside shown ones too -- the texture view in the viewport's place, the overhead map, the Maps panel
+// under Browse's list: a freeze goes on into a hidden window's own windows, and each switch turned the redraw of their
+// 40 controls off and on (about a third of the switch's 190 WM_SETREDRAWs, section 8.8). A hidden window without
+// windows of its own is not parked: there is nothing in it to freeze, and a tree listed while hidden (Browse's map tree)
+// must not read as frozen.
+void ModelViewer::parkHidden()
+{
+  std::function<void(wxWindow *)> visit = [&](wxWindow * parent) {
+    for (wxWindow * child : parent->GetChildren())
+    {
+      if (child->IsTopLevel())
+        continue;
+      const bool parked = m_parked.count(child) > 0;
+      if (!child->IsShown())
+      {
+        if (!parked && !child->GetChildren().empty())
+        {
+          if (m_parkWatched.insert(child).second)
+          {
+            // (Not once the frame's own members are gone: a window the frame's base class destroys.)
+            const std::shared_ptr<bool> alive = m_parkAlive;
+            child->Bind(wxEVT_SHOW, [this, child, alive](wxShowEvent & e) {
+              e.Skip();
+              if (*alive && e.IsShown())
+                unpark(child);
+            });
+            child->Bind(wxEVT_DESTROY, [this, child, alive](wxWindowDestroyEvent & e) {
+              e.Skip();
+              if (*alive && e.GetEventObject() == child)
+              {
+                m_parked.erase(child);
+                m_parkWatched.erase(child);
+              }
+            });
+          }
+          child->Freeze();
+          m_parked.insert(child);
+        }
+        // (Nothing in a hidden window is on screen.)
+        continue;
+      }
+      if (parked)
+        unpark(child);
+      visit(child);
+    }
   };
-  paint(this);
+  visit(this);
+  if (!m_parked.empty() && !m_parkIdleBound)
+  {
+    m_parkIdleBound = true;
+    Bind(wxEVT_IDLE, &ModelViewer::OnParkedIdle, this);
+  }
+}
+
+void ModelViewer::unpark(wxWindow * window)
+{
+  if (m_parked.erase(window))
+    window->Thaw();
+}
+
+void ModelViewer::OnParkedIdle(wxIdleEvent & event)
+{
+  event.Skip();
+  std::vector<wxWindow *> shown;
+  for (wxWindow * w : m_parked)
+    if (w->IsShown())
+      shown.push_back(w);
+  for (wxWindow * w : shown)
+    unpark(w);
+}
+
+void ModelViewer::handKeyboardSoon(std::function<void()> handoff)
+{
+  m_keyboardHandoffDo = std::move(handoff);
+  m_keyboardHandoffClock.Start();
+  m_keyboardHandoff.StartOnce(UnityRendererHost::KeyboardHandoffDelayMs);
 }
 
 void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
 {
+  // In one call: every caller goes on to work that needs the switch made (a load sizes the player and lays out at once; a
+  // texture is shown in the view entered). A switch the command bar left on its way is finished first -- before the
+  // same-mode return, which would otherwise leave it half made.
+  FinishViewerSwitch("a viewer-mode change or a load");
+  if (BeginViewerSwitch(mode, openBrowse, paintNow, false))
+    FinishViewerSwitch("its one turn");
+}
+
+// THE VIEWER SWITCH (ONE CHANGE ON SCREEN, the comment above beginLayoutBatch), for the command bar's click in turns of
+// their own (split), so no GUI round is long:
+//   turn A (the click's round, here): every change, behind the frame's freeze, the player held, the frame's own drawing held
+//     back (ViewerSwitchFilter); laid out now when the player is parked, and a parked player its release puts back sized now
+//     by a thread;
+//   the steps (turns of their own, only when due): Browse listed, its rows measured, the overhead map's waiting pictures
+//     drawn -- still frozen;
+//   turn B (FinishViewerSwitch): the layout when it waited (the player on screen at the click), the thaw, the player let go,
+//     the repaint; the tool windows and the caption after it.
+// Each next turn is a one-shot timer armed at the first idle after the turn before (OnViewerSwitchIdle): the thread has run
+// out of work and waits between them -- in the event loop and the harness's pump alike (a CallAfter, a posted message or
+// more idle would run in the same busy stretch). What the user does in between finishes the switch first. Every other
+// caller makes it in one call (SetViewerMode: split false).
+bool ModelViewer::BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paintNow, bool split)
+{
+  if (m_switch)
+  {
+    // (Every way in finishes a waiting switch first: this is one asked for inside a switch's own turn.)
+    LOG_ERROR << "[viewport] a viewer switch asked for inside a viewer switch's turn: refused";
+    return false;
+  }
   if (mode == m_viewerMode)
-    return;
-  const ViewerMode previous = m_viewerMode;
+    return false;
+  wxStopWatch turn;
+  m_turnSerial++;
+  m_switch.reset(new ViewerSwitch());
+  // The turns after the last switch share its timer (runOnLaterTurn): a tick of theirs already on its way is not this
+  // switch's next turn -- that one is armed at the first idle after turn A (OnViewerSwitchIdle); theirs again once it is done.
+  m_switchTimer.Stop();
+  ViewerSwitch & s = *m_switch;
+  s.previous = m_viewerMode;
+  s.mode = mode;
+  s.paintNow = paintNow;
+  s.split = split;
+  s.loop = wxEventLoopBase::GetActive();
+  const bool textures = mode == ViewerMode::Textures;
+  UnityRendererHost * host = unityRendererHost;
+  // A handoff the last switch left waiting is this one's to make.
+  m_keyboardHandoff.Stop();
+  m_keyboardHandoffDo = nullptr;
   m_viewerMode = mode;
   LOG_INFO << "[viewport] viewer mode:"
            << (mode == ViewerMode::Textures ? "Textures" : mode == ViewerMode::Buildings ? "Buildings"
-               : mode == ViewerMode::Maps ? "Maps" : "Models");
-  const bool textures = mode == ViewerMode::Textures;
-  struct PlayerHold
+               : mode == ViewerMode::Maps ? "Maps" : "Models")
+           << (split ? "(in turns)" : "");
+  // THE HOLD first: every notice or content change below applies the player's visibility.
+  if (host)
   {
-    UnityRendererHost * host;
-    explicit PlayerHold(UnityRendererHost * h) : host(h) { if (host) host->holdPlayer(); }
-    ~PlayerHold() { release(); }
-    void release() { if (host) host->releasePlayer(); host = nullptr; }
-  } hold(unityRendererHost);
+    s.playerWasOnScreen = host->playerOnScreen();
+    host->holdPlayer();
+    s.held = true;
+  }
+  // THE FREEZE: the frame frozen -- wx freezes its windows, hidden ones too, and one made meanwhile as it is added
+  // (wxWindowBase::AddChild); on MSW the top-level window's own freeze does nothing (wxTopLevelWindowMSW::DoFreeze), so the
+  // frame stays visible and hit-testable, as ApplyTheme relies on -- and its own drawing held back until the thaw.
+  Freeze();
+  s.frozen = true;
+  s.drawHeld = true;
+  s.titleHeld = true;
+  beginLayoutBatch();
+  // The selector: a switch made by a load from a menu does not come through the toolbar.
+  if (commandBar)
+    commandBar->ToggleTool(textures ? ID_UI_TEXTURES : mode == ViewerMode::Buildings ? ID_UI_BUILDINGS
+                           : mode == ViewerMode::Maps ? ID_UI_MAPS : ID_UI_MODELS,
+                           true);
+  // THE MAPS VIEWER: its terrain goes when it is left -- its request state now (the viewport is decided on it below), a
+  // player on screen at the click told with the repaint in a split switch (ClearTerrain); entered, the grid comes back as it
+  // was left, its minimap reads after the repaint in a split switch (PumpAfterEntry).
+  if (m_maps && s.previous == ViewerMode::Maps)
+    m_maps->Left();
+  if (m_maps && mode == ViewerMode::Maps)
+    m_maps->Entered(!split);
+  if (textureView)
+  {
+    if (textures)
+      textureView->entered(split);   // a decode on its way waits for resumeDecode, a turn after the switch
+    else if (s.previous == ViewerMode::Textures)
+      textureView->left();
+  }
+  // TOOL WINDOWS of the viewer left -- a chooser a model command left open (View NPC, View Item, an equipment slot, an item
+  // set, a start outfit, a mount; picked from in another viewer it would load into the Models viewer), and the Models
+  // viewport's background window: greyed to input now and put away after the repaint, with the rest of the old workspace.
+  // (Disabling a top-level window greys nothing in it: wxWindowBase::NotifyWindowOnEnableChange.) Models gives the background
+  // window back if it was open, after the repaint (without taking the keyboard from the viewer).
+  if (s.previous == ViewerMode::Models && charControl && charControl->itemDialog)
+  {
+    charControl->itemDialog->Disable();
+    s.itemDialogAway = true;
+  }
+  if (m_backgroundDialog)
+  {
+    if (s.previous == ViewerMode::Models)
+    {
+      m_backgroundDialogPutAway = m_backgroundDialog->IsShown();
+      if (m_backgroundDialogPutAway)
+      {
+        m_backgroundDialog->Disable();
+        s.backgroundAway = true;
+      }
+    }
+    else if (mode == ViewerMode::Models && m_backgroundDialogPutAway)
+    {
+      m_backgroundDialogPutAway = false;
+      s.backgroundBack = true;
+    }
+  }
+  // (The viewport's clear colour follows what the player draws, not the viewer: a switch sends none.)
+  // The centre, the panels and the menus (UpdateInterface -> DisplayedContentChanged -> UpdateUnityViewportState puts the
+  // panels away or gives them back), and Browse opened when asked.
+  if (fileControl)
+    fileControl->UpdateInterface();
+  else
+    DisplayedContentChanged();
+  if (openBrowse && fileControl)
+  {
+    wxAuiPaneInfo & browse = interfaceManager.GetPane(fileControl);
+    if (!browse.IsShown())
+    {
+      browse.Show(true);
+      m_layoutPending = true;
+    }
+  }
+  // BROWSE follows: its mode, tree, search and controls now; its rows listed now -- or, split, on a turn of their own, as
+  // is the native tree's measure of rows changed while frozen, and the overhead map's pictures that came while it was away.
+  if (fileControl && fileControl->FollowViewerMode(mode, !split))
+    s.steps.push_back(ViewerSwitch::Step::Listing);
+  else if (split && fileControl && fileControl->RowsToSettle() > 0)
+    s.steps.push_back(ViewerSwitch::Step::SettleRows);
+  if (split && mode == ViewerMode::Maps && mapOverview && mapOverview->grid() && mapOverview->grid()->picturesWaiting())
+    s.steps.push_back(ViewerSwitch::Step::Mosaic);
+  // THE LAYOUT now -- its drawing held back -- unless the player is on screen: then with the repaint (a layout moves or cuts
+  // an on-screen player's frame at once, frozen or not -- assumed until measured: WMV_SWITCH_LAYOUT).
+  const wxString & rule = viewerSwitchLayoutRule();
+  s.layoutInB = split && (rule == wxT("b") ||
+                          (rule != wxT("a") && s.playerWasOnScreen && (rule != wxT("grow") || layoutMovesViewport())));
+  if (!s.layoutInB)
+  {
+    commitLayoutBatchNow();   // the batch stays open: what is asked for meanwhile is laid out in turn B
+    parkHidden();
+  }
+  // The panel toggles answered now, not one idle later, so they change with everything else; and the menus, which wx
+  // answers only when one opens, while a shortcut is checked against its menu item.
+  if (commandBar)
+    commandBar->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+  DoMenuUpdates();
+  // THE KEYBOARD OFF A WINDOW THE SWITCH PUTS AWAY, now (split): a key pressed before the repaint finishes the switch first,
+  // but Windows has already given it to the window with the keyboard. (Asked of the player first: FindFocus would wait on
+  // its thread.)
+  if (split && fileControl && fileControl->txtContent && !(host && host->playerHasKeyboard()))
+    if (wxWindow * focus = wxWindow::FindFocus())
+      if (focus != fileControl->txtContent && !(host && focus == host->playerFrame()) && !willBeShownOnScreen(focus) &&
+          willBeShownOnScreen(fileControl->txtContent))
+        fileControl->txtContent->SetFocus();
+  // A PARKED PLAYER THE REPAINT PUTS BACK: sized for the new viewport now, off screen, by a thread (waited for between the
+  // turns, at most ViewerSwitchSizeWaitMs).
+  if (split && !s.layoutInB && host && host->sizeParkedPlayerAhead())
+  {
+    s.presized = true;
+    s.presizeClock.Start();
+  }
+  viewerSwitchTurnDone(turn.TimeInMicro().ToDouble() / 1000.0);
+  return true;
+}
+
+void ModelViewer::viewerSwitchTurnDone(double ms)
+{
+  ViewerSwitch & s = *m_switch;
+  s.turnMs.push_back(ms);
+  s.phase = ViewerSwitch::Phase::Waiting;
+  s.timerArmed = false;
+  s.sinceTurn.Start();
+  // The player's messages: the next poll a whole interval from now, not at once after this turn in the same busy stretch.
+  if (s.split && unityRendererHost && unityRendererHost->ipc())
+    unityRendererHost->ipc()->deferNextPoll();
+}
+
+double ModelViewer::viewerSwitchStepEstimateMs(ViewerSwitch::Step step) const
+{
+  switch (step)
+  {
+    case ViewerSwitch::Step::Listing:
+      return 1e9;   // 11 ms to 750 ms, unknown ahead: a turn of its own
+    case ViewerSwitch::Step::SettleRows:
+      return fileControl ? fileControl->RowsToSettle() * 0.02 : 0.0;   // ~20 us a row (BrowseTree, filecontrol.cpp)
+    case ViewerSwitch::Step::Mosaic:
+      // At most MosaicPaintBudgetMs of pictures, then the grid's own picture drawn again with them (6.5-9 ms,
+      // MapTileGrid::prepareMosaic).
+      return MapTileGrid::MosaicPaintBudgetMs + 9.0;
+  }
+  return 1e9;
+}
+
+void ModelViewer::runViewerSwitchStep(ViewerSwitch::Step step)
+{
+  ViewerSwitch & s = *m_switch;
+  switch (step)
+  {
+    case ViewerSwitch::Step::Listing:
+      if (fileControl)
+      {
+        fileControl->ListForViewerMode();
+        if (fileControl->RowsToSettle() > 0 &&
+            std::find(s.steps.begin(), s.steps.end(), ViewerSwitch::Step::SettleRows) == s.steps.end())
+          s.steps.push_front(ViewerSwitch::Step::SettleRows);
+      }
+      break;
+    case ViewerSwitch::Step::SettleRows:
+      if (fileControl)
+        fileControl->SettleRows();
+      break;
+    case ViewerSwitch::Step::Mosaic:
+      if (mapOverview && mapOverview->grid())
+        mapOverview->grid()->prepareMosaic();
+      break;
+  }
+}
+
+// The steps due, as many as fit one turn (all: every one now -- the switch finished before their turns came). The first of
+// a turn always runs; the listing never follows another in a turn.
+void ModelViewer::runViewerSwitchSteps(bool all)
+{
+  ViewerSwitch & s = *m_switch;
+  wxStopWatch turn;
+  bool ran = false;
+  while (!s.steps.empty())
+  {
+    const ViewerSwitch::Step step = s.steps.front();
+    if (!all && ran && turn.TimeInMicro().ToDouble() / 1000.0 + viewerSwitchStepEstimateMs(step) > ViewerSwitchTurnBudgetMs)
+      return;
+    s.steps.pop_front();
+    runViewerSwitchStep(step);
+    ran = true;
+  }
+}
+
+// What became due after turn A planned the steps (a client load's deferred interface refresh listing Browse, rows changed
+// while frozen): run before the repaint, which keeps its turn to itself.
+void ModelViewer::queueLateViewerSwitchSteps()
+{
+  ViewerSwitch & s = *m_switch;
+  if (!s.split || !fileControl)
+    return;
+  const auto queued = [&](ViewerSwitch::Step step) { return std::find(s.steps.begin(), s.steps.end(), step) != s.steps.end(); };
+  if (fileControl->listingDue() && !queued(ViewerSwitch::Step::Listing))
+    s.steps.push_front(ViewerSwitch::Step::Listing);
+  else if (!fileControl->listingDue() && fileControl->RowsToSettle() > 0 && !queued(ViewerSwitch::Step::SettleRows))
+    s.steps.push_front(ViewerSwitch::Step::SettleRows);
+}
+
+void ModelViewer::FinishViewerSwitch(const char * why)
+{
+  if (!m_switch || m_switch->phase != ViewerSwitch::Phase::Waiting)
+    return;   // none; or one of its own turns is running (A, a step, B): that turn ends as planned
+  // NOTHING IS DESTROYED HERE: this runs inside the event filter and wx's keyboard hook, with the event that finished the
+  // switch still to be handled (the item chooser goes on a later turn).
+  ViewerSwitch & s = *m_switch;
+  s.phase = ViewerSwitch::Phase::Finishing;
+  m_switchTimer.Stop();
+  m_turnSerial++;
+  wxStopWatch turn;
+  UnityRendererHost * host = unityRendererHost;
+  const bool textures = s.mode == ViewerMode::Textures;
+  // Finished before the steps' turns came (input, a load, another switch, closing): their work now, in this turn.
+  queueLateViewerSwitchSteps();
+  runViewerSwitchSteps(true);
+  // THE LAYOUT when it waited for this turn, and what was asked for since turn A: the batch closes -- one
+  // wxAuiManager::Update at most, its drawing still held back, the floating panels held as they are (commitLayoutBatchNow).
+  endLayoutBatch();
+  // A NOTICE ENDING THE SWITCH: the player's frame off screen here, at the end of the freeze -- the old workspace stayed
+  // whole until now. (Not for the texture view: it is painted before the player goes.)
   bool parkedNow = false;
+  if (!textures && host && host->hasNotice())
+    parkedNow = host->coverPlayerNow();
+  // What this switch leaves hidden stays frozen past the thaw below.
+  parkHidden();
+  // The floating panels' panes back to what is due (their windows change after the repaint), and the toggles that show it.
+  if (!s.floatingDue.empty())
   {
-    // Every window of the frame frozen, hidden ones too (a panel shown during the switch stays frozen) --
-    // but not the frame itself: a frozen top-level window is invisible to Windows' hit-testing, and a
-    // click during a long switch (the first Textures listing) would go to the window behind it.
-    std::vector<std::unique_ptr<wxWindowUpdateLocker>> freeze;
-    for (wxWindow * child : GetChildren())
-      if (!child->IsTopLevel())
-        freeze.emplace_back(new wxWindowUpdateLocker(child));
-    beginLayoutBatch();
-    // The selector: a switch made by a load from a menu does not come through the toolbar.
-    if (commandBar)
-      commandBar->ToggleTool(textures ? ID_UI_TEXTURES : mode == ViewerMode::Buildings ? ID_UI_BUILDINGS
-                             : mode == ViewerMode::Maps ? ID_UI_MAPS : ID_UI_MODELS,
-                             true);
-    // THE MAPS VIEWER: its terrain goes when it is left (the player's model view comes back as it was); entered, the
-    // tile grid comes back as it was left.
-    if (m_maps && previous == ViewerMode::Maps)
-      m_maps->Left();
-    if (m_maps && mode == ViewerMode::Maps)
-      m_maps->Entered();
-    if (textureView)
-    {
-      if (textures)
-        textureView->entered();
-      else if (previous == ViewerMode::Textures)
-        textureView->left();
-    }
-    // A chooser a model command left open (View NPC, View Item, an equipment slot, an item set, a start
-    // outfit, a mount): picked from in another viewer, it would load into the Models viewer or change the
-    // model behind it. It is not opened again in Models.
-    if (previous == ViewerMode::Models && charControl)
-      charControl->ClearItemDialog();
-    // The Models viewport's background window is put away like the model panels: what it sets is not on show in
-    // the other viewers, where its command is greyed. Models gives it back if it was open (without taking the
-    // keyboard from the viewer).
-    if (m_backgroundDialog)
-    {
-      if (previous == ViewerMode::Models)
-      {
-        m_backgroundDialogPutAway = m_backgroundDialog->IsShown();
-        if (m_backgroundDialogPutAway)
-          m_backgroundDialog->Hide();
-      }
-      else if (mode == ViewerMode::Models && m_backgroundDialogPutAway)
-      {
-        m_backgroundDialogPutAway = false;
-        m_backgroundDialog->Sync();
-        m_backgroundDialog->ShowWithoutActivating();
-      }
-    }
-    // (The viewport's clear colour follows what the player draws, not the viewer: a switch sends none.)
-    // The centre, the panels and the menus (UpdateInterface -> DisplayedContentChanged ->
-    // UpdateUnityViewportState puts the panels away or gives them back), Browse opened when asked, and
-    // Browse's list, which the first entry into Textures after a client load lists from a catalogue
-    // built there.
-    if (fileControl)
-      fileControl->UpdateInterface();
-    else
-      DisplayedContentChanged();
-    if (openBrowse && fileControl)
-    {
-      wxAuiPaneInfo & browse = interfaceManager.GetPane(fileControl);
-      if (!browse.IsShown())
-      {
-        browse.Show(true);
-        m_layoutPending = true;
-      }
-    }
-    if (fileControl)
-      fileControl->FollowViewerMode(mode);
-    endLayoutBatch();
-    if (m_uncoverPending)
-    {
-      m_uncoverPending = false;
-      unityRendererHost->showContent(false);
-    }
-    // The panel toggles answered now, not one idle later, so they change with everything else; and the
-    // menus, which wx answers only when one opens, while a shortcut is checked against its menu item.
+    restoreFloatingPanes();
     if (commandBar)
       commandBar->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
     DoMenuUpdates();
-    // A notice now covers the player (the viewer has nothing of its own to show): its frame goes off screen here, at
-    // the end of the freeze -- the old workspace stayed whole until now. (Not for the texture view: it is painted
-    // before the player goes, after PaintNow.) The viewport is let go of with the rest: let go of first, the player
-    // was seen on screen in the new workspace for a few milliseconds before it went.
-    if (!textures && unityRendererHost && unityRendererHost->hasNotice())
-      parkedNow = unityRendererHost->coverPlayerNow();
   }
-  // Where it was, plain dark at once, before anything else (a load that made this switch goes on before the repaint):
-  // not what was under the player's window. The notice follows with the repaint.
-  if (parkedNow)
-    unityRendererHost->paintPlainNow();
-  // Going to Models or Buildings the player is let go as the repaint starts: put back (its frame) and sized as the
-  // panels paint -- or, behind a notice, it went at the end of the freeze. Going to Textures it is taken off screen
-  // after the repaint, so the texture view -- raised above it, but no cover while it is on screen -- is already
-  // painted when it goes.
-  // THE MAPS VIEWER'S WORLD VIEW left for Models or Buildings: the keyboard its free camera took (a press in the
-  // viewport, WmvKeyboardFocus.cs) comes back to Browse's search box, as those viewers have it -- their player does not
-  // fly, and the app's own keys must work again. (Going to Textures, the texture view covers the player and the
-  // keyboard leaves it then.) The move waits on the player's thread for one of its frames.
-  if (previous == ViewerMode::Maps && !textures && unityRendererHost && unityRendererHost->playerHasKeyboard())
+  // THE FREEZE OVER: the frame's windows thawed (each invalidated), the frame's own drawing back and its area invalidated
+  // (what it was asked to paint since turn A was validated unpainted).
+  if (s.frozen)
   {
-    wxWindow * to = fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen() ? (wxWindow *)fileControl->txtContent
-                                                                                                         : (wxWindow *)this;
-    unityRendererHost->takeKeyboardFromPlayer(to);
+    s.frozen = false;
+    Thaw();
   }
-  // A window that had the keyboard and was put away while frozen keeps it (a hidden window's hide moves
-  // the focus away only when Windows sees it hidden, and frozen it already reads so): the keyboard to
-  // Browse's search box, or the frame. Not the player's window (seen here as its frame): it keeps the keyboard,
-  // and taking it away would wait on the player's thread.
-  // (Asked of the player first, which FindFocus would ask WM_GETDLGCODE and wait for.)
-  if (wxWindow * focus = unityRendererHost && unityRendererHost->playerHasKeyboard() ? nullptr : wxWindow::FindFocus())
-    if (!focus->IsShownOnScreen() && !(unityRendererHost && focus == unityRendererHost->playerFrame()))
+  s.drawHeld = false;
+#ifdef _WINDOWS
+  ::RedrawWindow((HWND)GetHWND(), nullptr, nullptr, RDW_INVALIDATE | RDW_NOCHILDREN);
+#else
+  Refresh(false);
+#endif
+  // Where the player was, plain dark at once (a load that made this switch goes on before the repaint).
+  if (parkedNow)
+    host->paintPlainNow();
+  // THE KEYBOARD before the repaint, so what a focus change repaints is painted with the rest -- not while a modal window has
+  // the program (a split switch's turn can come inside its loop; the keyboard is its). Taken from the player it waits on the
+  // player's thread for one of its frames: after the repaint, on a turn of its own (handKeyboardSoon).
+  const bool takesInput = !s.split || frameTakesInputNow();
+  const bool playerKeyboard = host && host->playerHasKeyboard();
+  std::function<void()> handoff;
+  if (takesInput)
+  {
+    // A window that had the keyboard and was put away while frozen keeps it (a hidden window's hide moves the focus away
+    // only when Windows sees it hidden, and frozen it already reads so): the keyboard to Browse's search box, or the frame.
+    // Not the player's window (seen here as its frame): it keeps the keyboard, and taking it away would wait on its thread.
+    if (wxWindow * focus = playerKeyboard ? nullptr : wxWindow::FindFocus())
+      if (!focus->IsShownOnScreen() && !(host && focus == host->playerFrame()))
+      {
+        if (fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen())
+          fileControl->txtContent->SetFocus();
+        else
+          SetFocus();
+      }
+    const ViewerMode mode = s.mode;
+    if (s.focusBrowse)
     {
-      if (fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen())
-        fileControl->txtContent->SetFocus();
+      // The command bar's: the keyboard to Browse (its tree when a row is picked there, else its search box).
+      if (playerKeyboard)
+        handoff = [this, mode]() { focusBrowseFor(mode); };
       else
-        SetFocus();
+        focusBrowseFor(mode);
     }
-  if (!textures)
-    hold.release();
-  if (paintNow)
+    else if (s.previous == ViewerMode::Maps && !textures && playerKeyboard)
+    {
+      // THE MAPS VIEWER'S WORLD VIEW left for Models or Buildings: the keyboard its free camera took comes back to Browse's
+      // search box, as those viewers have it (their player does not fly; the app's own keys must work again).
+      handoff = [this, mode]() {
+        if (m_viewerMode != mode || !unityRendererHost)
+          return;
+        wxWindow * to = fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen()
+                          ? (wxWindow *)fileControl->txtContent : (wxWindow *)this;
+        unityRendererHost->takeKeyboardFromPlayer(to);
+      };
+    }
+  }
+  // Into Maps, the overhead map keeps its picture as it was left -- or as the Mosaic step drew it: minimap pictures that came
+  // since are drawn in at its next repaint (MapTileGrid::SetSwitchPaint), through the switch's paints below.
+  MapTileGrid * grid = s.paintNow && s.mode == ViewerMode::Maps && mapOverview ? mapOverview->grid() : nullptr;
+  if (grid)
+    grid->SetSwitchPaint(true);
+  // THE CONTENT WINDOW over a player still on screen (the texture view, the overhead map): painted first -- raised above it,
+  // it is no cover while the player is on screen -- and the player goes once it is.
+  if (s.paintNow && host && host->isShowingContent() && host->playerOnScreen() && host->content())
+    paintTree(host->content());
+  // THE PLAYER LET GO: put back (sized ahead in turn A), parked, or -- on screen at another size -- sized; a split switch's
+  // resize by a thread, not waited for in this turn (UnityRendererHost::releasePlayer).
+  if (s.held)
+  {
+    s.held = false;
+    host->releasePlayer(s.split && !viewerSwitchSizeWaits());
+  }
+  // The Maps viewer left with the player on screen at the click: told now, as the screen changes (ClearTerrain).
+  if (!s.clearTerrainReason.isEmpty())
+  {
+    if (UnityIpcServer * ipc = host ? host->ipc() : nullptr)
+      ipc->sendClearTerrain(s.clearTerrainReason);
+    s.clearTerrainReason.clear();
+  }
+  if (s.paintNow)
     PaintNow();
+  if (grid)
+    grid->SetSwitchPaint(false);
+  // AFTER THE REPAINT, what is outside the frame's client area: the caption, the floating panels' windows, the tool windows.
+  s.titleHeld = false;
+  UpdateTitle();
+  bool unmade = false;
+  for (const std::pair<wxString, bool> & due : s.floatingDue)
+  {
+    wxAuiPaneInfo & p = interfaceManager.GetPane(due.first);
+    if (!p.IsOk())
+      continue;
+    if (p.frame)
+      p.frame->Show(due.second);   // what wxAuiManager::Update does for it (framemanager.cpp 3252)
+    else if (due.second)
+      unmade = true;
+  }
+  if (unmade)
+    interfaceManager.Update();   // (not expected: the switch's layout makes every floating panel's frame, 3194-3212)
+  if (s.backgroundAway && m_backgroundDialog)
+  {
+    m_backgroundDialog->Hide();
+    m_backgroundDialog->Enable();
+  }
+  if (s.backgroundBack && m_backgroundDialog && isModelsMode())
+  {
+    m_backgroundDialog->Sync();
+    m_backgroundDialog->ShowWithoutActivating();
+  }
+  if (s.itemDialogAway && charControl && charControl->itemDialog)
+  {
+    wxWindow * chooser = charControl->itemDialog;
+    chooser->Hide();
+    if (s.split)
+    {
+      const wxWeakRef<wxWindow> gone(chooser);
+      runOnLaterTurn([this, gone]() {
+        if (gone && charControl && static_cast<wxWindow *>(charControl->itemDialog) == gone.get())
+          charControl->ClearItemDialog();
+        return false;
+      });
+    }
+    else
+      charControl->ClearItemDialog();
+  }
+  if (handoff)
+    handKeyboardSoon(std::move(handoff));   // its delay counts from the end of this turn's work
+  // THE TURNS AFTER THE SWITCH: what would lengthen its rounds.
+  if (s.split)
+  {
+    if (m_maps && s.mode == ViewerMode::Maps)
+      runOnLaterTurn([this]() {
+        if (m_maps && isMapsMode())
+          m_maps->PumpAfterEntry();
+        return false;
+      });
+    if (textureView && textures)
+      runOnLaterTurn([this]() {
+        if (textureView)
+          textureView->resumeDecode();
+        return false;
+      });
+    if (host && host->ipc())
+      host->ipc()->deferNextPoll();
+  }
+  s.turnMs.push_back(turn.TimeInMicro().ToDouble() / 1000.0);
+  m_lastSwitch = ViewerSwitchReport();
+  m_lastSwitch.to = s.mode == ViewerMode::Textures ? "Textures" : s.mode == ViewerMode::Buildings ? "Buildings"
+                  : s.mode == ViewerMode::Maps ? "Maps" : "Models";
+  m_lastSwitch.finishedBy = why;
+  m_lastSwitch.turns = (int)s.turnMs.size();
+  m_lastSwitch.turnMs = s.turnMs;
+  m_lastSwitch.clickToRepaintMs = s.sinceClick.Time();
+  m_lastSwitch.split = s.split;
+  m_lastSwitch.layoutInB = s.layoutInB;
+  if (s.split)
+  {
+    QString list;
+    for (double ms : s.turnMs)
+      list += QString(list.isEmpty() ? "%1" : " %1").arg(ms, 0, 'f', 1);
+    LOG_INFO << "[viewport] viewer switch done (" << why << "):" << m_lastSwitch.turns << "turn(s), ms:" << list << ";"
+             << m_lastSwitch.clickToRepaintMs << "ms from the click to the repaint; laid out in turn" << (s.layoutInB ? "B" : "A");
+  }
+  m_switch.reset();
+}
+
+// A switch dropped without its repaint: the frame being deleted (~ModelViewer; OnClose finishes one). Its freeze, batch and
+// floating panels' state let go of (the layout saved is the user's); the player's hold only counted down -- its release
+// would move, size and paint the player during the teardown.
+void ModelViewer::AbortViewerSwitch()
+{
+  if (!m_switch)
+    return;
+  ViewerSwitch & s = *m_switch;
+  s.phase = ViewerSwitch::Phase::Finishing;
+  m_switchTimer.Stop();
+  m_layoutBatch = 0;   // (the switch's batch is the only one: SetViewerMode was its only user)
+  m_layoutPending = m_layoutUncapped = m_finishWorkspacePending = m_uncoverPending = false;
+  restoreFloatingPanes();
+  if (s.frozen)
+  {
+    s.frozen = false;
+    Thaw();
+  }
+  s.drawHeld = false;
+  if (s.held && unityRendererHost)
+  {
+    s.held = false;
+    unityRendererHost->dropHold();
+  }
+  if (s.backgroundAway && m_backgroundDialog)
+    m_backgroundDialog->Enable();
+  if (s.itemDialogAway && charControl && charControl->itemDialog)
+    charControl->itemDialog->Enable();
+  LOG_INFO << "[viewport] a viewer switch dropped without its repaint: the window is going";
+  m_switch.reset();
+}
+
+void ModelViewer::OnViewerSwitchIdle(wxIdleEvent & event)
+{
+  event.Skip();
+  if (IsBeingDeleted() || wxTheApp->IsScheduledForDestruction(this))
+    return;
+  if (m_switch)
+  {
+    ViewerSwitch & s = *m_switch;
+    if (s.phase != ViewerSwitch::Phase::Waiting || !s.split)
+      return;
+    // Armed now, at the first idle after a turn -- the thread has run out of work, its paints included, and waits next -- so
+    // the next turn is a round of its own (Windows makes the delay at least 10 ms).
+    if (!s.timerArmed)
+    {
+      s.timerArmed = true;
+      m_switchTimer.StartOnce(viewerSwitchHoldMs() > 0 ? (int)viewerSwitchHoldMs() : 1);
+    }
+    else if (!m_switchTimer.IsRunning())
+      m_switchTimer.StartOnce(1);   // its tick lost (a yield that drops one-shot timers' messages)
+    else if (s.sinceTurn.Time() > ViewerSwitchGapLimitMs + viewerSwitchHoldMs())
+      FinishViewerSwitch("its turn never came");
+    return;
+  }
+  if (!m_later.empty() && !m_switchTimer.IsRunning())
+    m_switchTimer.StartOnce(1);
+}
+
+void ModelViewer::OnViewerSwitchTimer(wxTimerEvent & WXUNUSED(event))
+{
+  if (IsBeingDeleted() || wxTheApp->IsScheduledForDestruction(this))
+    return;
+  m_turnSerial++;
+  if (m_switch)
+  {
+    ViewerSwitch & s = *m_switch;
+    if (s.phase != ViewerSwitch::Phase::Waiting)
+      return;
+    s.timerArmed = false;
+    // Inside another event loop (a modal window, a native one's tick): the rest at once, not as a turn behind it.
+    if (wxEventLoopBase::GetActive() != s.loop)
+    {
+      FinishViewerSwitch("another event loop is running");
+      return;
+    }
+    queueLateViewerSwitchSteps();
+    if (!s.steps.empty())
+    {
+      wxStopWatch turn;
+      s.phase = ViewerSwitch::Phase::Stepping;
+      runViewerSwitchSteps(false);
+      viewerSwitchTurnDone(turn.TimeInMicro().ToDouble() / 1000.0);
+      return;
+    }
+    // A parked player being sized for its put-back: waited for a turn at a time (armed again at the next idle), so turn B
+    // does not wait on the player's thread -- at most ViewerSwitchSizeWaitMs.
+    if (s.presized && unityRendererHost && unityRendererHost->aheadMoveInFlight() &&
+        s.presizeClock.Time() < ViewerSwitchSizeWaitMs)
+      return;
+    FinishViewerSwitch("its turn");
+    return;
+  }
+  // THE TURNS AFTER A SWITCH (runOnLaterTurn): work until LaterTurnShareMs; the rest on the next turn.
+  wxStopWatch turn;
+  while (!m_later.empty())
+  {
+    std::function<bool()> work = std::move(m_later.front());
+    m_later.pop_front();
+    if (work())
+    {
+      m_later.push_front(std::move(work));
+      break;
+    }
+    if (turn.Time() >= LaterTurnShareMs)
+      break;
+  }
+}
+
+void ModelViewer::runOnLaterTurn(std::function<bool()> work)
+{
+  m_later.push_back(std::move(work));
+  wxWakeUpIdle();   // (armed at the next idle: OnViewerSwitchIdle)
+}
+
+const char * ModelViewer::viewerSwitchPhaseName() const
+{
+  if (!m_switch)
+    return "none";
+  switch (m_switch->phase)
+  {
+    case ViewerSwitch::Phase::Building: return "building";
+    case ViewerSwitch::Phase::Waiting: return "waiting";
+    case ViewerSwitch::Phase::Stepping: return "stepping";
+    case ViewerSwitch::Phase::Finishing: return "finishing";
+  }
+  return "?";
+}
+
+bool ModelViewer::frameTakesInputNow() const
+{
+#ifdef _WINDOWS
+  return ::IsWindowEnabled((HWND)GetHWND()) != FALSE;   // a modal window, wx's or Windows' own, disables it natively
+#else
+  return IsEnabled();
+#endif
+}
+
+// A panel the switch changes (Browse, Animation, Model), floated: a top-level window of its own, which the frame's freeze
+// skips (wxWindowBase::Freeze) and whose drawing ViewerSwitchFilter does not hold -- what turn A changes in it would be on
+// screen a turn before the rest. The command bar's switch is made in one turn then.
+bool ModelViewer::floatedPanelChanges()
+{
+  for (wxWindow * w : { static_cast<wxWindow *>(fileControl), static_cast<wxWindow *>(animControl),
+                        static_cast<wxWindow *>(modelInspector) })
+  {
+    if (!w)
+      continue;
+    const wxAuiPaneInfo & p = interfaceManager.GetPane(w);
+    if (p.IsOk() && p.IsFloating() && p.frame && p.frame->IsShown())
+      return true;
+  }
+  return false;
+}
+
+// OnCommandBar's keyboard to Browse: its tree when a row is picked there (the model loaded, the texture shown), to go on
+// from it; otherwise its search box.
+void ModelViewer::focusBrowseFor(ViewerMode mode)
+{
+  if (m_viewerMode != mode || !fileControl || !interfaceManager.GetPane(fileControl).IsShown())
+    return;
+  if (fileControl->fileTree->GetSelection().IsOk())
+    fileControl->fileTree->SetFocus();
+  else if (fileControl->txtContent)
+    fileControl->txtContent->SetFocus();
+}
+
+// Whether the layout due moves the viewport's top-left corner or makes it smaller: a docked panel shown (it takes room from
+// the centre), or one docked left or at the top hidden. (WMV_SWITCH_LAYOUT=grow only: the F experiment.)
+bool ModelViewer::layoutMovesViewport()
+{
+  wxAuiPaneInfoArray & panes = interfaceManager.GetAllPanes();
+  for (size_t i = 0; i < panes.GetCount(); i++)
+  {
+    const wxAuiPaneInfo & p = panes[i];
+    if (!p.window || p.IsFloating() || p.dock_direction == wxAUI_DOCK_CENTER)
+      continue;
+    const bool showing = p.IsShown() && !p.window->IsShown();
+    const bool hiding = !p.IsShown() && p.window->IsShown();
+    if (showing || (hiding && (p.dock_direction == wxAUI_DOCK_LEFT || p.dock_direction == wxAUI_DOCK_TOP)))
+      return true;
+  }
+  return false;
+}
+
+// Whether `window` is on screen once the layout due is made: its panel's shown state (the layout follows it), and shown
+// itself up to it.
+bool ModelViewer::willBeShownOnScreen(wxWindow * window)
+{
+  for (wxWindow * w = window; w && w != this; w = w->GetParent())
+  {
+    if (w->IsTopLevel())
+      return w->IsShown();
+    if (w->GetParent() == this)
+    {
+      const wxAuiPaneInfo & pane = interfaceManager.GetPane(w);
+      return pane.IsOk() ? pane.IsShown() : w->IsShown();
+    }
+    if (!w->IsShown())
+      return false;
+  }
+  return true;
 }
 
 void ModelViewer::ShowTexture(const TextureEntry & entry, bool lookup)
@@ -7015,8 +7909,22 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
                             : event.GetId() == ID_UI_BUILDINGS   ? ViewerMode::Buildings
                             : event.GetId() == ID_UI_MAPS        ? ViewerMode::Maps
                                                                  : ViewerMode::Models;
+      // A switch the last click left on its way is finished first (a click before its repaint).
+      FinishViewerSwitch("another viewer-mode click");
       // Browse (closed) opens in the same layout as the switch, when there is a client to list in it.
       const bool openBrowse = UnityAssetAccess::hasActiveClient() && !interfaceManager.GetPane(fileControl).IsShown();
+      // WITH A CLIENT, IN TURNS OF ITS OWN (BeginViewerSwitch): made behind the freeze now, the screen changed on a later
+      // turn, where the keyboard then goes to Browse. Not without an event loop to run its turns, nor while a modal window
+      // has the program (its loop would run them), nor while a panel it changes floats (floatedPanelChanges), nor for the
+      // one-turn comparison runs (WMV_SWITCH_TURNS=1). Browse, opened in the switch, needs no layout here.
+      if (UnityAssetAccess::hasActiveClient() && !viewerSwitchOneTurn() && wxEventLoopBase::GetActive() &&
+          frameTakesInputNow() && !floatedPanelChanges() && BeginViewerSwitch(mode, openBrowse, true, true))
+      {
+        m_switch->focusBrowse = true;
+        break;
+      }
+      // Without a client -- made whole now, before the prompt (its modal loop would run the turns behind it) -- or the mode
+      // already this one: in one call, as before.
       SetViewerMode(mode, openBrowse, true);
       if (!UnityAssetAccess::hasActiveClient())
       {
@@ -7031,12 +7939,12 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
         browse.Show(true);
         interfaceManager.Update();
       }
-      // The keyboard to Browse: its tree when a row is picked there (the model loaded, the texture shown),
-      // to go on from it; otherwise its search box.
-      if (fileControl->fileTree->GetSelection().IsOk())
-        fileControl->fileTree->SetFocus();
-      else if (fileControl->txtContent)
-        fileControl->txtContent->SetFocus();
+      // The keyboard to Browse (focusBrowseFor). Taken from the player, it waits on the player's thread for one of its
+      // frames: on a turn of its own.
+      if (unityRendererHost && unityRendererHost->playerHasKeyboard())
+        handKeyboardSoon([this, mode]() { focusBrowseFor(mode); });
+      else
+        focusBrowseFor(mode);
       break;
     }
     case ID_UI_SCREENSHOT:
@@ -7321,6 +8229,9 @@ bool ModelViewer::canvasHoldsModesContent() const
 
 void ModelViewer::UpdateTitle()
 {
+  // A viewer switch on its way: the caption changes after its repaint (FinishViewerSwitch).
+  if (m_switch && m_switch->titleHeld)
+    return;
   if (isTextureMode())
     return;   // the Textures viewer leaves the title as it was
   wxString name;
@@ -7552,6 +8463,7 @@ void ModelViewer::ApplyTheme()
 
 void ModelViewer::OnThemeChangedOutside()
 {
+  FinishViewerSwitch("a theme change");   // (ApplyTheme may recreate the status bar)
   // Windows' app mode or high contrast changed: a light run follows high contrast at once (ApplyTheme);
   // what would need the other of light and dark is offered as a restart, once.
   ApplyTheme();

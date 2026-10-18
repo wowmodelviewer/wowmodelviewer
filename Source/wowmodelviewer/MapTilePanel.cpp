@@ -205,6 +205,7 @@ void MapTileGrid::updateMosaic()
       m_mosaic = wxNullBitmap;
     m_inMosaic.clear();
     m_mosaicMap = -2;
+    m_mosaicVersion++;
     return;
   }
   const int side = MapsViewer::ThumbSide;
@@ -213,6 +214,7 @@ void MapTileGrid::updateMosaic()
     // A map (or a new inspection of it): a new mosaic over its box, empty.
     int minX, minY, maxX, maxY;
     m_inMosaic.assign(MapsViewer::Tiles * MapsViewer::Tiles, false);
+    m_mosaicVersion++;
     if (!m_maps->tileExtent(minX, minY, maxX, maxY))
     {
       m_mosaic = wxNullBitmap;
@@ -271,6 +273,7 @@ void MapTileGrid::updateMosaic()
       dc.DrawBitmap(wxBitmap(image, 24), (x - m_mx0) * side, (y - m_my0) * side, false);
       m_inMosaic[i] = true;
       drawn++;
+      m_mosaicVersion++;
     }
   if (more)
   {
@@ -281,6 +284,40 @@ void MapTileGrid::updateMosaic()
     return;   // (the serial stays behind: the next paint goes on)
   }
   m_mosaicSerial = m_maps->imagesSerial();
+}
+
+bool MapTileGrid::picturesWaiting() const
+{
+  // (A WMO-only map's footprint draws no mosaic: OnPaint.)
+  if (!m_maps->hasGrid() || m_maps->worldModelMap())
+    return false;
+  if (m_mosaicMap != m_maps->mapId() || m_mosaicInspection != m_maps->inspectionSerial())
+    return true;
+  return m_mosaic.IsOk() && m_mosaicSerial != m_maps->imagesSerial();
+}
+
+void MapTileGrid::prepareMosaic()
+{
+  updateMosaic();
+  // The grid's picture drawn again too, with them, while the grid has the size it was drawn at: the switch's paint
+  // (SetSwitchPaint) keeps the picture, so it shows them -- none of the drawing in the switch's repaint, nor a repaint
+  // RepaintMs later for them. (Sized anew by the switch, its paint draws the grid again as before.)
+  if (!m_maps->hasGrid() || m_maps->worldModelMap() || !m_gridPicture.IsOk())
+    return;
+  const wxSize bufferSize(std::max(1, GetClientSize().x), std::max(1, GetClientSize().y));
+  if (m_gridPicture.GetSize() != bufferSize)
+    return;
+  layoutCells();
+  const std::vector<long long> key = gridKey(true);
+  if (key == m_gridKey)
+    return;
+  wxMemoryDC picture(m_gridPicture);
+  picture.SetBackground(wxBrush(UiStyle::palette().panelBackground));
+  picture.Clear();
+  picture.SetFont(GetFont());
+  paintGrid(picture);
+  m_gridKey = key;
+  m_gridLayoutKey = gridKey(false);
 }
 
 // ---------------------------------------------------------------- a WMO-only map's footprint
@@ -542,8 +579,139 @@ void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
     return;
   }
 
-  updateMosaic();
   layoutCells();
+  // A VIEWER SWITCH'S PAINT (SetSwitchPaint) keeps the grid's picture as Maps left it when nothing but minimap pictures
+  // came meanwhile -- the reads that were in flight as Maps was left (32 of the Retail Eastern Kingdoms' pictures, each
+  // time): they are drawn in at the next repaint (RepaintMs), on a turn of its own. Drawing the whole grid again for them
+  // took 8-9 ms of the switch's turn (docs/world-viewer/08-streaming.md, section 8.8).
+  const bool keepPicture = m_switchPaint && m_gridPicture.IsOk() && m_gridPicture.GetSize() == bufferSize &&
+                           gridKey(false) == m_gridLayoutKey;
+  if (keepPicture && (gridKey(true) != m_gridKey || m_maps->imagesSerial() != m_mosaicSerial) && !m_repaintTimer.IsRunning())
+    m_repaintTimer.StartOnce(RepaintMs);
+  if (!keepPicture)
+    updateMosaic();
+  // THE GRID'S OWN PICTURE -- the coordinates, the cells and their pictures, the borders, the legend -- kept from paint to
+  // paint while what it shows is the same (gridKey): a paint is a copy of it and the marks over it. Drawn whole, it took
+  // 6.5-7 ms of every paint on a map with pictures (each entry into Maps, each hover and streaming change;
+  // docs/world-viewer/08-streaming.md, section 8.8).
+  const std::vector<long long> key = keepPicture ? m_gridKey : gridKey(true);
+  if (!keepPicture && (!m_gridPicture.IsOk() || m_gridPicture.GetSize() != bufferSize || key != m_gridKey))
+  {
+    if (!m_gridPicture.IsOk() || m_gridPicture.GetSize() != bufferSize)
+      m_gridPicture = wxBitmap(bufferSize.x, bufferSize.y);
+    wxMemoryDC picture(m_gridPicture);
+    picture.SetBackground(wxBrush(p.panelBackground));
+    picture.Clear();
+    picture.SetFont(GetFont());
+    paintGrid(picture);
+    m_gridKey = key;
+    m_gridLayoutKey = gridKey(false);
+  }
+  {
+    wxMemoryDC picture(m_gridPicture);
+    dc.Blit(0, 0, bufferSize.x, bufferSize.y, &picture, 0, 0);
+  }
+  const int gap = m_cell >= 6 ? 1 : 0;
+
+  // The tile on screen (a dot), the target's tile (a ring) and point (a marker), the camera after a flight (a diamond),
+  // the mouse's tile.
+  const auto ring = [&](int x, int y, const wxColour & c, int width, wxPenStyle style) {
+    if (x < m_x0 || x > m_x1 || y < m_y0 || y > m_y1)
+      return;
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.SetPen(wxPen(c, width, style));
+    const wxRect r = TileRect(x, y);
+    dc.DrawRectangle(r.x - width / 2, r.y - width / 2, r.width + width - gap, r.height + width - gap);
+  };
+  // A world point's position on the grid.
+  const auto at = [&](double wx, double wy, wxPoint & pt) {
+    const double col = 32.0 - wy / MapsViewer::TileSize, row = 32.0 - wx / MapsViewer::TileSize;
+    if (col < m_x0 || col > m_x1 + 1 || row < m_y0 || row > m_y1 + 1)
+      return false;
+    pt = wxPoint(m_left + (int)std::floor((col - m_x0) * m_cell), m_top + (int)std::floor((row - m_y0) * m_cell));
+    return true;
+  };
+  if (m_maps->shownMap() == m_maps->mapId() && m_maps->shownTileX() >= 0 && m_maps->shownTileX() >= m_x0 &&
+      m_maps->shownTileX() <= m_x1 && m_maps->shownTileY() >= m_y0 && m_maps->shownTileY() <= m_y1)
+  {
+    const wxRect r = TileRect(m_maps->shownTileX(), m_maps->shownTileY());
+    const int d = std::max(3, m_cell / 4);
+    dc.SetPen(wxPen(p.panelBackground));
+    dc.SetBrush(wxBrush(p.text));
+    dc.DrawEllipse(r.x + FromDIP(3), r.y + FromDIP(3), d, d);
+  }
+  if (m_maps->tileX() >= 0)
+    ring(m_maps->tileX(), m_maps->tileY(), p.text, std::max(2, FromDIP(2)), wxPENSTYLE_SOLID);
+  wxPoint pt;
+  if (m_maps->hasTarget() && at(m_maps->targetX(), m_maps->targetY(), pt))
+  {
+    const int r = std::max(4, FromDIP(6));
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.SetPen(wxPen(p.panelBackground, std::max(3, FromDIP(3))));
+    dc.DrawCircle(pt, r);
+    dc.SetPen(wxPen(p.accent, std::max(2, FromDIP(2))));
+    dc.DrawCircle(pt, r);
+    dc.DrawLine(pt.x - r - FromDIP(4), pt.y, pt.x - r + FromDIP(2), pt.y);
+    dc.DrawLine(pt.x + r - FromDIP(2), pt.y, pt.x + r + FromDIP(4), pt.y);
+    dc.DrawLine(pt.x, pt.y - r - FromDIP(4), pt.x, pt.y - r + FromDIP(2));
+    dc.DrawLine(pt.x, pt.y + r - FromDIP(2), pt.x, pt.y + r + FromDIP(4));
+  }
+  if (m_maps->cameraPlaced() && at(m_maps->cameraX(), m_maps->cameraY(), pt))
+  {
+    const int r = std::max(3, FromDIP(5));
+    const wxPoint diamond[4] = { wxPoint(pt.x, pt.y - r), wxPoint(pt.x + r, pt.y), wxPoint(pt.x, pt.y + r), wxPoint(pt.x - r, pt.y) };
+    dc.SetPen(wxPen(p.panelBackground));
+    dc.SetBrush(wxBrush(p.warning));
+    dc.DrawPolygon(4, diamond);
+  }
+  // STREAMING (protocol 18): the session's tiles -- resident outlined in the accent, loading in the warning colour, failed
+  // dashed -- and the camera where the session last saw it.
+  if (m_maps->streamOn())
+  {
+    const UnityIpcServer::StreamState & st = m_maps->streamState();
+    for (const UnityIpcServer::StreamTile & t : st.tiles)
+    {
+      const bool resident = t.state == "built" || t.state == "settled";
+      const bool failed = t.state == "failed";
+      ring(t.x, t.y, resident ? p.accent : failed ? p.textSecondary : p.warning, std::max(2, FromDIP(2)),
+           failed ? wxPENSTYLE_SHORT_DASH : wxPENSTYLE_SOLID);
+    }
+    if (st.cameraTileX >= 0 && at(st.cameraX, st.cameraY, pt))
+    {
+      const int r = std::max(3, FromDIP(4));
+      dc.SetPen(wxPen(p.panelBackground));
+      dc.SetBrush(wxBrush(p.accent));
+      dc.DrawCircle(pt, r);
+    }
+  }
+  if (m_hoverX >= 0)
+    ring(m_hoverX, m_hoverY, p.borderStrong, 1, wxPENSTYLE_SOLID);
+}
+
+std::vector<long long> MapTileGrid::gridKey(bool withPictures) const
+{
+  const UiStyle::Palette & p = UiStyle::palette();
+  std::vector<long long> key = { GetClientSize().x, GetClientSize().y, m_x0, m_y0, m_x1, m_y1, m_cell, m_left, m_top,
+                                 m_maps->mapId(), m_maps->inspectionSerial(), m_maps->minimapsWanted(),
+                                 (long long)p.panelBackground.GetRGB(), (long long)p.text.GetRGB() };
+  unsigned long long states = 0;
+  for (int y = m_y0; y <= m_y1; y++)
+    for (int x = m_x0; x <= m_x1; x++)
+      states = states * 31u + (unsigned long long)m_maps->tileState(x, y) + 1u;
+  key.push_back((long long)states);
+  if (withPictures)
+  {
+    key.push_back(m_mosaicVersion);
+    key.push_back(m_maps->minimapsLoaded());
+    key.push_back(m_maps->minimapsLoading() ? 1 : 0);
+  }
+  return key;
+}
+
+void MapTileGrid::paintGrid(wxDC & dc)
+{
+  const UiStyle::Palette & p = UiStyle::palette();
+  const wxSize size = GetClientSize();
   const int cols = m_x1 - m_x0 + 1, rows = m_y1 - m_y0 + 1;
   const int side = MapsViewer::ThumbSide;
 
@@ -641,80 +809,6 @@ void MapTileGrid::OnPaint(wxPaintEvent & WXUNUSED(event))
         dc.DrawLine(m_left, m_top + (y - m_y0) * m_cell, m_left + cols * m_cell, m_top + (y - m_y0) * m_cell);
     }
   }
-
-  // The tile on screen (a dot), the target's tile (a ring) and point (a marker), the camera after a flight (a diamond),
-  // the mouse's tile.
-  const auto ring = [&](int x, int y, const wxColour & c, int width, wxPenStyle style) {
-    if (x < m_x0 || x > m_x1 || y < m_y0 || y > m_y1)
-      return;
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(wxPen(c, width, style));
-    const wxRect r = TileRect(x, y);
-    dc.DrawRectangle(r.x - width / 2, r.y - width / 2, r.width + width - gap, r.height + width - gap);
-  };
-  // A world point's position on the grid.
-  const auto at = [&](double wx, double wy, wxPoint & pt) {
-    const double col = 32.0 - wy / MapsViewer::TileSize, row = 32.0 - wx / MapsViewer::TileSize;
-    if (col < m_x0 || col > m_x1 + 1 || row < m_y0 || row > m_y1 + 1)
-      return false;
-    pt = wxPoint(m_left + (int)std::floor((col - m_x0) * m_cell), m_top + (int)std::floor((row - m_y0) * m_cell));
-    return true;
-  };
-  if (m_maps->shownMap() == m_maps->mapId() && m_maps->shownTileX() >= 0 && m_maps->shownTileX() >= m_x0 &&
-      m_maps->shownTileX() <= m_x1 && m_maps->shownTileY() >= m_y0 && m_maps->shownTileY() <= m_y1)
-  {
-    const wxRect r = TileRect(m_maps->shownTileX(), m_maps->shownTileY());
-    const int d = std::max(3, m_cell / 4);
-    dc.SetPen(wxPen(p.panelBackground));
-    dc.SetBrush(wxBrush(p.text));
-    dc.DrawEllipse(r.x + FromDIP(3), r.y + FromDIP(3), d, d);
-  }
-  if (m_maps->tileX() >= 0)
-    ring(m_maps->tileX(), m_maps->tileY(), p.text, std::max(2, FromDIP(2)), wxPENSTYLE_SOLID);
-  wxPoint pt;
-  if (m_maps->hasTarget() && at(m_maps->targetX(), m_maps->targetY(), pt))
-  {
-    const int r = std::max(4, FromDIP(6));
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(wxPen(p.panelBackground, std::max(3, FromDIP(3))));
-    dc.DrawCircle(pt, r);
-    dc.SetPen(wxPen(p.accent, std::max(2, FromDIP(2))));
-    dc.DrawCircle(pt, r);
-    dc.DrawLine(pt.x - r - FromDIP(4), pt.y, pt.x - r + FromDIP(2), pt.y);
-    dc.DrawLine(pt.x + r - FromDIP(2), pt.y, pt.x + r + FromDIP(4), pt.y);
-    dc.DrawLine(pt.x, pt.y - r - FromDIP(4), pt.x, pt.y - r + FromDIP(2));
-    dc.DrawLine(pt.x, pt.y + r - FromDIP(2), pt.x, pt.y + r + FromDIP(4));
-  }
-  if (m_maps->cameraPlaced() && at(m_maps->cameraX(), m_maps->cameraY(), pt))
-  {
-    const int r = std::max(3, FromDIP(5));
-    const wxPoint diamond[4] = { wxPoint(pt.x, pt.y - r), wxPoint(pt.x + r, pt.y), wxPoint(pt.x, pt.y + r), wxPoint(pt.x - r, pt.y) };
-    dc.SetPen(wxPen(p.panelBackground));
-    dc.SetBrush(wxBrush(p.warning));
-    dc.DrawPolygon(4, diamond);
-  }
-  // STREAMING (protocol 18): the session's tiles -- resident outlined in the accent, loading in the warning colour, failed
-  // dashed -- and the camera where the session last saw it.
-  if (m_maps->streamOn())
-  {
-    const UnityIpcServer::StreamState & st = m_maps->streamState();
-    for (const UnityIpcServer::StreamTile & t : st.tiles)
-    {
-      const bool resident = t.state == "built" || t.state == "settled";
-      const bool failed = t.state == "failed";
-      ring(t.x, t.y, resident ? p.accent : failed ? p.textSecondary : p.warning, std::max(2, FromDIP(2)),
-           failed ? wxPENSTYLE_SHORT_DASH : wxPENSTYLE_SOLID);
-    }
-    if (st.cameraTileX >= 0 && at(st.cameraX, st.cameraY, pt))
-    {
-      const int r = std::max(3, FromDIP(4));
-      dc.SetPen(wxPen(p.panelBackground));
-      dc.SetBrush(wxBrush(p.accent));
-      dc.DrawCircle(pt, r);
-    }
-  }
-  if (m_hoverX >= 0)
-    ring(m_hoverX, m_hoverY, p.borderStrong, 1, wxPENSTYLE_SOLID);
 
   // The legend.
   struct Key
@@ -1010,6 +1104,13 @@ MapTilePanel::MapTilePanel(wxWindow * parent, MapsViewer * maps)
   m_clear->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { m_maps->ClearTerrain(); });
   Bind(wxEVT_SIZE, [this](wxSizeEvent & e) {
     e.Skip();
+    // Laid out by a viewer switch (frozen): refreshed now, so the switch's one repaint draws it laid out -- queued, the
+    // refresh would come after that repaint and paint the panel again.
+    if (IsFrozen())
+    {
+      Refresh2();
+      return;
+    }
     if (m_refreshQueued)
       return;   // a sash dragged: one refresh after the events, not one per event
     m_refreshQueued = true;

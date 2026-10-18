@@ -19,11 +19,13 @@
 //              uniqueId; a world model's MODD doodad: its placement and MODD index) is one instance whatever tiles list it,
 //              held by every tile that placed or found it and destroyed with the last; a PROTOTYPE (world model, M2) is built
 //              once per FileDataID -- a tile that needs one another tile is fetching waits for it, takes the fetch over when
-//              that tile closes first, and a near tile takes over a far tile's fetch not yet begun; a TERRAIN TEXTURE is
-//              uploaded once per FileDataID and bound by every tile that uses it (a tile asks only for what is not resident);
-//              a world-model or doodad TEXTURE is fetched and decoded once per FileDataID for every tile whose prototypes sample
-//              it (one another tile is fetching is waited for, its fetch taken over when that tile closes first), its image
-//              kept within StreamImageBudget for the prototypes built later.
+//              that tile closes first, and a near tile takes over a far tile's fetch not yet begun; a prototype built without
+//              part of it that its own tile's load could not get (refused, stale, past its count cap) is that tile's PRIVATE
+//              one -- placed for it alone, never shared or pooled -- and its fetch is handed on; a complete placement replaces
+//              a private one under the same key; a TERRAIN TEXTURE is uploaded once per FileDataID and bound by every tile that
+//              uses it (a tile asks only for what is not resident); a world-model or doodad TEXTURE is fetched and decoded once
+//              per FileDataID for every tile whose prototypes sample it (one another tile is fetching is waited for, its fetch
+//              taken over when that tile closes first), its image kept within StreamImageBudget for the prototypes built later.
 //   residency  what no tile holds any more stays POOLED (prototypes, terrain textures, M2 texture uploads) while the pools fit
 //              StreamPoolGpuBudget and StreamPoolManagedBudget, least recently used out first; a tile coming back uses what
 //              is pooled without asking the host.
@@ -96,12 +98,16 @@ public sealed partial class WmvTerrainSession
         public string Name { get { return X + "_" + Y; } }
     }
 
+    const string ProtoPrivate = "private";     // a tile's own prototype record (KeepWorldModelForTheTile): never in Wmos or M2s
+
+    static bool IsPrivate(ProtoEntry e) { return e != null && e.State == ProtoPrivate; }
+
     /// <summary>A prototype of the session (world model or M2), by FileDataID.</summary>
     sealed class ProtoEntry
     {
         public bool Doodad;
         public uint FileDataID;
-        public string State = "fetching";      // "fetching" | "built" | "failed"
+        public string State = "fetching";      // "fetching" | "built" | "failed" | "private"
         public string Reason = "";
         public int FailState = -1;             // the doodad model state it failed in (unsupported stays unsupported)
         public Model Owner;                    // the world model fetching it (null: none -- the next waiting one takes it)
@@ -215,6 +221,11 @@ public sealed partial class WmvTerrainSession
         public readonly Dictionary<DoodadKey, DoodadEntry> Doodads = new Dictionary<DoodadKey, DoodadEntry>();
         public readonly Dictionary<long, ImageEntry> Images = new Dictionary<long, ImageEntry>();
         public long ImagesShared, ImagesWaited, ImagesEvicted, ImageTakeovers;
+        // Prototypes kept for the one tile whose load could not get all of them (KeepWorldModelForTheTile): the live records,
+        // each holding its prototype and the pin of the model that built it; one goes once it has neither (DisposeUnusedPrivate).
+        public readonly List<ProtoEntry> Private = new List<ProtoEntry>();
+        public readonly Dictionary<long, int> KeptBuilds = new Dictionary<long, int>();   // (doodad << 32 | FileDataID): times kept
+        public long PrototypesKept, PrivateDisposed, PlacementsReplaced, DoodadsReplaced, GroupRepeats;
         public bool HasCamera;
         public bool PoolsDirty = true;         // something may have joined the pools, or an eviction is unfinished
         public double PoolsCheckedMs = -1;
@@ -299,6 +310,11 @@ public sealed partial class WmvTerrainSession
     public long StreamTexturesEvicted { get { return stream != null ? stream.TexturesEvicted : 0; } }
     public long StreamImagesShared { get { return stream != null ? stream.ImagesShared : 0; } }
     public long StreamFilesAskedAgain { get { return stream != null ? stream.FilesAskedAgain : 0; } }
+    public long StreamPrototypesKept { get { return stream != null ? stream.PrototypesKept : 0; } }
+    public int StreamPrivatePrototypes { get { return stream != null ? stream.Private.Count : 0; } }
+    public long StreamPlacementsReplaced { get { return stream != null ? stream.PlacementsReplaced : 0; } }
+    public long StreamDoodadsReplaced { get { return stream != null ? stream.DoodadsReplaced : 0; } }
+    public long StreamGroupRepeats { get { return stream != null ? stream.GroupRepeats : 0; } }
 
     /// <summary>The resident tiles (x, y, load, state), nearest first: the self-test's and the log's.</summary>
     public List<string> StreamTileStates()
@@ -418,10 +434,12 @@ public sealed partial class WmvTerrainSession
             "{7} refused in all; {8} file(s) asked, {9} answered, {10} bytes; {11} placement(s) shared, {12} doodad(s) shared, {13} prototype(s) " +
             "shared ({14} fetches taken over), {15} evicted; {16} terrain texture(s) shared, {17} uploaded, {18} M2/terrain texture(s) evicted; " +
             "most requests out at once {19}; {20} file(s) asked more than once ({21}); model texture images: {22} shared, {23} waited for, {24} " +
-            "fetches taken over, {25} evicted", s.EntryLoad, why, s.Tiles.Count, jobs, s.TilesOpened,
+            "fetches taken over, {25} evicted; {26} prototype(s) kept for their tile ({27} live, {28} disposed), {29} placement(s) and " +
+            "{30} doodad(s) replaced by complete ones, {31} repeated group ask(s)", s.EntryLoad, why, s.Tiles.Count, jobs, s.TilesOpened,
             s.TilesClosed, s.TilesFailed, s.TilesRefused, s.FilesAsked, s.FilesAnswered, s.BytesReceived, s.PlacementsShared, s.DoodadsShared,
             s.PrototypesShared, s.PrototypeTakeovers, s.PrototypesEvicted, s.TerrainTexturesShared, s.TerrainTexturesUploaded, s.TexturesEvicted,
-            s.RequestsOutMax, s.FilesAskedAgain, AskedAgainLine(s), s.ImagesShared, s.ImagesWaited, s.ImageTakeovers, s.ImagesEvicted);
+            s.RequestsOutMax, s.FilesAskedAgain, AskedAgainLine(s), s.ImagesShared, s.ImagesWaited, s.ImageTakeovers, s.ImagesEvicted,
+            s.PrototypesKept, s.Private.Count, s.PrivateDisposed, s.PlacementsReplaced, s.DoodadsReplaced, s.GroupRepeats);
         s.Jobs.Clear();
         s.PendingById.Clear();
         s.RequestsOut = 0;
@@ -1349,7 +1367,9 @@ public sealed partial class WmvTerrainSession
             e.Holders.Remove(st);
             if (e.Holders.Count > 0)
                 continue;
-            stream.Doodads.Remove(e.Key);
+            DoodadEntry registered;
+            if (stream.Doodads.TryGetValue(e.Key, out registered) && registered == e)
+                stream.Doodads.Remove(e.Key);
             if (e.Instance != null)
                 goneDoodads.Add(e.Instance);
             if (e.Proto != null)
@@ -1369,7 +1389,9 @@ public sealed partial class WmvTerrainSession
             e.Holders.Remove(st);
             if (e.Holders.Count > 0)
                 continue;
-            stream.Placements.Remove(e.Key);
+            PlacementEntry registeredPlacement;
+            if (stream.Placements.TryGetValue(e.Key, out registeredPlacement) && registeredPlacement == e)
+                stream.Placements.Remove(e.Key);
             if (world != null)
             {
                 if (e.Instance != null)
@@ -1413,7 +1435,11 @@ public sealed partial class WmvTerrainSession
         if (e.Pins > 0)
             e.Pins--;
         if (stream != null)
+        {
             e.LastUse = ++stream.Use;
+            if (IsPrivate(e) && e.Pins <= 0)
+                stream.PoolsDirty = true;      // (no job places from it now: it goes once no instance shows it)
+        }
     }
 
     /// <summary>A job's queued world models meet the session's prototypes before anything is fetched: one built is placed from
@@ -1561,7 +1587,7 @@ public sealed partial class WmvTerrainSession
             AdvanceOther(() => AdvanceWorld(b.Job));
             return;
         }
-        if (e.State == "fetching")
+        if (e.State == "fetching" && Find(stream.Wmos, e.FileDataID) == e)
             stream.Wmos.Remove(e.FileDataID);
     }
 
@@ -1682,8 +1708,88 @@ public sealed partial class WmvTerrainSession
             AdvanceOther(() => AdvanceDoodads(b.Job));
             return;
         }
-        if (e.State == "fetching")
+        if (e.State == "fetching" && Find(stream.M2s, e.FileDataID) == e)
             stream.M2s.Remove(e.FileDataID);
+    }
+
+    /// <summary>Streaming: the owner built its world model without part of it that its own tile's load could not get (a group
+    /// file or texture refused or stale for that load, or past its count cap). The prototype is that tile's alone -- drawn as
+    /// the single-tile load draws it, placed for that tile only (its placements register private), never in the scene's
+    /// dictionary, never published, never pooled. The model's one pin moves to a private record (released where the model's
+    /// pin is: BuildModel, ReleaseJobModels); the session's fetch is handed on: a waiting model fetches the whole model under
+    /// its own load; none -- the "fetching" entry goes, and whoever needs the model next fetches it. The record goes once it
+    /// has neither pin nor instance (DisposeUnusedPrivate), or with the scene. Called before PlaceAll.</summary>
+    void KeepWorldModelForTheTile(Job j, Model m, WmvWorldPrototype proto, string why)
+    {
+        ProtoEntry e = m.Shared;
+        bool pinned = !m.Unpinned;
+        var p = new ProtoEntry { FileDataID = m.FileDataID, State = ProtoPrivate, Reason = why, Wmo = proto, Pins = pinned ? 1 : 0,
+                                 LastUse = ++stream.Use };
+        // On the scene's list and the model's record BEFORE the hand-over: that advances another tile's job at once.
+        stream.Private.Add(p);
+        world.PrivatePrototypes.Add(proto);
+        stream.PrototypesKept++;
+        int times = NoteKeptBuild(false, m.FileDataID);
+        m.Shared = p;
+        m.Reason = why;
+        string next = "no tile waits for it";
+        if (e != null)
+        {
+            e.Borrowers.Remove(m);
+            if (pinned)
+                Unpin(e);                       // (its pin is the private record's now; m.Unpinned stays false for it)
+            if (e.Owner == m)
+            {
+                e.Owner = null;
+                HandOverWorldFetch(e);
+                if (e.Owner != null && e.Owner.Job != null && e.Owner.Job.Stream != null)
+                    next = "its fetch taken over by tile " + e.Owner.Job.Stream.Name;
+            }
+        }
+        Log("load {0}: world model {1} kept for tile {2} alone ({3}); {4}{5}", stream.EntryLoad, m.FileDataID, j.Stream.Name, why, next,
+            times > 2 ? "; kept " + times + " times in this session -- no tile's load so far could have it whole" : "");
+    }
+
+    /// <summary>As KeepWorldModelForTheTile, for an M2: its doodads register private; its pin goes at CheckDoodadsDone (its
+    /// doodads are placed over later frames) or ReleaseJobModels, as before.</summary>
+    void KeepDoodadModelForTheTile(Job j, DoodadModel m, WmvDoodadPrototype proto, string why)
+    {
+        ProtoEntry e = m.Shared;
+        bool pinned = !m.Unpinned;
+        var p = new ProtoEntry { Doodad = true, FileDataID = m.FileDataID, State = ProtoPrivate, Reason = why, M2 = proto,
+                                 Pins = pinned ? 1 : 0, LastUse = ++stream.Use };
+        stream.Private.Add(p);
+        world.PrivateDoodadPrototypes.Add(proto);
+        stream.PrototypesKept++;
+        int times = NoteKeptBuild(true, m.FileDataID);
+        m.Shared = p;
+        string next = "no tile waits for it";
+        if (e != null)
+        {
+            e.DBorrowers.Remove(m);
+            if (pinned)
+                Unpin(e);
+            if (e.DOwner == m)
+            {
+                e.DOwner = null;
+                HandOverDoodadFetch(e);
+                if (e.DOwner != null && e.DOwner.Job != null && e.DOwner.Job.Stream != null)
+                    next = "its fetch taken over by tile " + e.DOwner.Job.Stream.Name;
+            }
+        }
+        Log("load {0}: doodad model {1} kept for tile {2} alone ({3}); {4}{5}", stream.EntryLoad, m.FileDataID, j.Stream.Name, why, next,
+            times > 2 ? "; kept " + times + " times in this session -- no tile's load so far could have it whole" : "");
+    }
+
+    /// <summary>How many times this session kept a prototype of the FileDataID for its tile (the evidence for a model no
+    /// single load can have whole).</summary>
+    int NoteKeptBuild(bool doodad, uint fileDataID)
+    {
+        long key = ((doodad ? 1L : 0L) << 32) | fileDataID;
+        int n;
+        stream.KeptBuilds.TryGetValue(key, out n);
+        stream.KeptBuilds[key] = ++n;
+        return n;
     }
 
     /// <summary>A job ends (Retire -> EndWorld): every model of it lets go of the session's prototypes -- a fetch it owned is
@@ -1740,12 +1846,21 @@ public sealed partial class WmvTerrainSession
 
     static long PlacementKey(WorldModelPlacement p) { return ((long)p.FileDataID << 32) | p.UniqueId; }
 
-    /// <summary>A placement of `j`'s tile another tile has placed already: found (held by this tile too), nothing made.</summary>
-    bool FindSharedPlacement(Job j, PlacementWork pw)
+    /// <summary>A placement of `j`'s tile another tile has placed already: found (held by this tile too), nothing made. One
+    /// placed from a tile's private prototype (KeepWorldModelForTheTile) is found only by a tile whose own prototype is
+    /// private too (`complete` false: one instance per placement, whatever the gaps); a tile with the complete prototype
+    /// places its own, and its registration replaces that one (`replace`, RegisterPlacement).</summary>
+    bool FindSharedPlacement(Job j, PlacementWork pw, bool complete, out PlacementEntry replace)
     {
+        replace = null;
         PlacementEntry e;
         if (!stream.Placements.TryGetValue(PlacementKey(pw.P), out e) || e.Instance == null || e.Instance.Disposed)
             return false;
+        if (complete && IsPrivate(e.Proto))
+        {
+            replace = e;
+            return false;
+        }
         pw.Instance = e.Instance;
         pw.State = "placed";
         pw.Shared = true;
@@ -1759,12 +1874,60 @@ public sealed partial class WmvTerrainSession
         return true;
     }
 
-    void RegisterPlacement(Job j, PlacementWork pw, WorldModelGeometry g, ProtoEntry proto)
+    void RegisterPlacement(Job j, PlacementWork pw, WorldModelGeometry g, ProtoEntry proto, PlacementEntry replace)
     {
         var e = new PlacementEntry { Key = PlacementKey(pw.P), Instance = pw.Instance, Geometry = g, Proto = proto, PlacedBy = j.Stream };
         e.Holders.Add(j.Stream);
+        PlacementEntry was;
+        if (replace == null && stream.Placements.TryGetValue(e.Key, out was) && was.Instance != null && !was.Instance.Disposed)
+            Log("load {0}: placement {1} of world model {2} registered over a live one it does not replace (tile {3}) -- a fault of " +
+                "this viewer", stream.EntryLoad, pw.P.UniqueId, pw.P.FileDataID, j.Stream.Name);
         stream.Placements[e.Key] = e;
         j.Stream.Placements.Add(e);
+        if (replace != null)
+            ReplacePlacement(j, replace, e);
+    }
+
+    /// <summary>A complete placement registered over one placed from a tile's private prototype: every tile that held that one
+    /// holds this one (a live job's plan pointed at it: StartDoodads, the report), and that one is destroyed.</summary>
+    void ReplacePlacement(Job j, PlacementEntry old, PlacementEntry e)
+    {
+        foreach (StreamTile h in old.Holders)
+        {
+            int at = h.Placements.IndexOf(old);
+            if (e.Holders.Contains(h))
+            {
+                if (at >= 0) h.Placements.RemoveAt(at);
+            }
+            else
+            {
+                e.Holders.Add(h);
+                if (at >= 0) h.Placements[at] = e;
+                else h.Placements.Add(e);         // (Holders and the tile's list always mirror each other)
+            }
+            Job hj = h.Job;
+            if (hj != null && Live(hj) && hj.World != null)
+                foreach (PlacementWork other in hj.World.Placements)
+                    if (other.Instance == old.Instance)
+                    {
+                        other.Instance = e.Instance;
+                        other.Shared = true;
+                        other.Reason = "placed for tile " + j.Stream.Name + " of the session from the complete world model, in " +
+                                       "place of this tile's own (built without what its load could not get)";
+                    }
+        }
+        old.Holders.Clear();
+        if (world != null)
+        {
+            world.Instances.Remove(old.Instance);
+            if (old.Geometry != null)
+                world.Geometries.Remove(old.Geometry);
+        }
+        try { worldView.DisposeInstance(old.Instance); }
+        catch (Exception ex) { Log("replacing a world-model instance failed: {0}", ex.Message); }
+        old.Instance = null;
+        stream.PlacementsReplaced++;
+        stream.PoolsDirty = true;              // (its private prototype may show nothing now: DisposeUnusedPrivate)
     }
 
     static DoodadKey KeyOfDoodad(WorldDoodad d)
@@ -1774,11 +1937,17 @@ public sealed partial class WmvTerrainSession
         return new DoodadKey { Kind = 2, A = d.WmoFileDataID, B = d.UniqueId, C = d.ModdIndex };
     }
 
-    bool FindSharedDoodad(Job j, DoodadWork dw)
+    bool FindSharedDoodad(Job j, DoodadWork dw, bool complete, out DoodadEntry replace)
     {
+        replace = null;
         DoodadEntry e;
         if (!stream.Doodads.TryGetValue(KeyOfDoodad(dw.D), out e) || e.Instance == null || e.Instance.Disposed)
             return false;
+        if (complete && IsPrivate(e.Proto))
+        {
+            replace = e;
+            return false;
+        }
         dw.Instance = e.Instance;
         dw.State = "placed";
         dw.Shared = true;
@@ -1791,12 +1960,42 @@ public sealed partial class WmvTerrainSession
         return true;
     }
 
-    void RegisterDoodad(Job j, DoodadWork dw)
+    void RegisterDoodad(Job j, DoodadWork dw, DoodadEntry replace)
     {
         var e = new DoodadEntry { Key = KeyOfDoodad(dw.D), Instance = dw.Instance, Proto = dw.Model != null ? dw.Model.Shared : null };
         e.Holders.Add(j.Stream);
         stream.Doodads[e.Key] = e;
         j.Stream.Doodads.Add(e);
+        if (replace != null)
+            ReplaceDoodad(replace, e);
+    }
+
+    /// <summary>As ReplacePlacement, for a doodad. (DoodadWork.Instance is never read after RegisterDoodad: no plan to
+    /// re-point.)</summary>
+    void ReplaceDoodad(DoodadEntry old, DoodadEntry e)
+    {
+        foreach (StreamTile h in old.Holders)
+        {
+            int at = h.Doodads.IndexOf(old);
+            if (e.Holders.Contains(h))
+            {
+                if (at >= 0) h.Doodads.RemoveAt(at);
+            }
+            else
+            {
+                e.Holders.Add(h);
+                if (at >= 0) h.Doodads[at] = e;
+                else h.Doodads.Add(e);
+            }
+        }
+        old.Holders.Clear();
+        if (world != null)
+            world.Doodads.Remove(old.Instance);
+        try { worldView.DisposeDoodadInstances(new List<WmvDoodadInstance> { old.Instance }); }
+        catch (Exception ex) { Log("replacing a doodad failed: {0}", ex.Message); }
+        old.Instance = null;
+        stream.DoodadsReplaced++;
+        stream.PoolsDirty = true;
     }
 
     // ---------------------------------------------------------------- shared texture images
@@ -1818,6 +2017,26 @@ public sealed partial class WmvTerrainSession
             return false;
         }
         e.LastUse = ++stream.Use;
+        if (TakeSettledWmoImage(j, t, e))
+            return true;
+        if (e.Owner == null || !Live(e.Owner))
+        {
+            e.Owner = j;
+            stream.ImageTakeovers++;
+            return false;
+        }
+        if (!e.WaitJobs.Contains(j))
+            e.WaitJobs.Add(j);
+        t.Asked = true;
+        stream.ImagesWaited++;
+        return true;
+    }
+
+    /// <summary>The session's settled image of a world-model texture taken without asking: "ready" -- attached (done,
+    /// decoded); "failed" -- its file's failure taken (done, missing). False, nothing changed, while it is still fetching.
+    /// (The one implementation: ClaimWmoTexture, and TakeSessionWmoImage at the load's count cap.)</summary>
+    bool TakeSettledWmoImage(Job j, SharedTexture t, ImageEntry e)
+    {
         if (e.State == "ready" && e.Image != null)
         {
             AttachWmoImage(j, t, e);
@@ -1833,16 +2052,18 @@ public sealed partial class WmvTerrainSession
             j.World.TexturesMissing++;
             return true;
         }
-        if (e.Owner == null || !Live(e.Owner))
-        {
-            e.Owner = j;
-            stream.ImageTakeovers++;
+        return false;
+    }
+
+    /// <summary>Streaming, at the load's count cap (maxWmoTexturesPerLoad): what the session has settled of the texture -- its
+    /// image or its file's failure -- taken without asking (nothing is asked, so the cap does not apply); false when it has
+    /// neither (and outside a session): the texture is not requested.</summary>
+    bool TakeSessionWmoImage(Job j, SharedTexture t)
+    {
+        ImageEntry e;
+        if (j.Stream == null || stream == null || !stream.Images.TryGetValue(ImageKey(true, t.Id), out e) || !TakeSettledWmoImage(j, t, e))
             return false;
-        }
-        if (!e.WaitJobs.Contains(j))
-            e.WaitJobs.Add(j);
-        t.Asked = true;
-        stream.ImagesWaited++;
+        e.LastUse = ++stream.Use;
         return true;
     }
 
@@ -1919,6 +2140,24 @@ public sealed partial class WmvTerrainSession
             return false;
         }
         e.LastUse = ++stream.Use;
+        if (TakeSettledDoodadImage(j, t, e))
+            return true;
+        if (e.Owner == null || !Live(e.Owner))
+        {
+            e.Owner = j;
+            stream.ImageTakeovers++;
+            return false;
+        }
+        if (!e.WaitJobs.Contains(j))
+            e.WaitJobs.Add(j);
+        t.Asked = true;
+        stream.ImagesWaited++;
+        return true;
+    }
+
+    /// <summary>As TakeSettledWmoImage, for a doodad texture (ClaimDoodadTexture, TakeSessionDoodadImage).</summary>
+    bool TakeSettledDoodadImage(Job j, DoodadTexture t, ImageEntry e)
+    {
         if (e.State == "ready" && e.Image != null)
         {
             AttachDoodadImage(j, t, e);
@@ -1934,16 +2173,16 @@ public sealed partial class WmvTerrainSession
             j.World.Doodads.TexturesMissing++;
             return true;
         }
-        if (e.Owner == null || !Live(e.Owner))
-        {
-            e.Owner = j;
-            stream.ImageTakeovers++;
+        return false;
+    }
+
+    /// <summary>As TakeSessionWmoImage, at maxM2TexturesPerLoad.</summary>
+    bool TakeSessionDoodadImage(Job j, DoodadTexture t)
+    {
+        ImageEntry e;
+        if (j.Stream == null || stream == null || !stream.Images.TryGetValue(ImageKey(false, t.Id), out e) || !TakeSettledDoodadImage(j, t, e))
             return false;
-        }
-        if (!e.WaitJobs.Contains(j))
-            e.WaitJobs.Add(j);
-        t.Asked = true;
-        stream.ImagesWaited++;
+        e.LastUse = ++stream.Use;
         return true;
     }
 
@@ -2078,6 +2317,47 @@ public sealed partial class WmvTerrainSession
 
     // ---------------------------------------------------------------- pools
 
+    /// <summary>The private prototypes (KeepWorldModelForTheTile) no job will place from (no pin) and no instance shows:
+    /// disposed, never pooled -- under the session's frame budget (at least one a frame; the rest next frame). Pins AND
+    /// instances: an M2's doodads are placed over later frames, so a private M2 with no instance yet is still in use until
+    /// its tile's CheckDoodadsDone.</summary>
+    void DisposeUnusedPrivate()
+    {
+        int n = 0;
+        for (int i = stream.Private.Count - 1; i >= 0; i--)
+        {
+            ProtoEntry p = stream.Private[i];
+            if (p.Pins > 0 || p.Instances > 0)
+                continue;
+            if (n > 0 && !StreamMayWork())
+            {
+                stream.PoolsDirty = true;
+                break;                          // (the pools' pass goes on: EvictPools is not cut short)
+            }
+            StreamWorked();
+            stream.Private.RemoveAt(i);
+            if (p.Wmo != null)
+            {
+                world.PrivatePrototypes.Remove(p.Wmo);
+                try { worldView.DisposePrototype(p.Wmo); }
+                catch (Exception ex) { Log("disposing world model {0} kept for its tile failed: {1}", p.FileDataID, ex.Message); }
+                p.Wmo = null;
+            }
+            if (p.M2 != null)
+            {
+                world.PrivateDoodadPrototypes.Remove(p.M2);
+                try { worldView.DisposeDoodadPrototype(world, p.M2); }   // (its texture references given back to the cache)
+                catch (Exception ex) { Log("disposing doodad model {0} kept for its tile failed: {1}", p.FileDataID, ex.Message); }
+                p.M2 = null;
+            }
+            stream.PrivateDisposed++;
+            n++;
+        }
+        if (n > 0)
+            Log("load {0}: {1} prototype(s) kept for their tile disposed (no instance, no pin left); {2} still live", stream.EntryLoad, n,
+                stream.Private.Count);
+    }
+
     /// <summary>What no tile holds stays while the pools fit their budgets: one for their GPU bytes -- world-model prototypes
     /// with their textures, M2 prototypes' geometry, the M2 texture uploads no live prototype holds, terrain textures -- and
     /// one for the world models' parsed files. Over budget, the uploads no prototype holds go first (their prototypes have
@@ -2091,6 +2371,8 @@ public sealed partial class WmvTerrainSession
         EvictImages();
         if (world == null)
             return;
+        if (stream.Private.Count > 0)
+            DisposeUnusedPrivate();             // (private prototypes are never pooled: they go whatever the pools hold)
         WmvDoodadTextures cache = world.DoodadTextures;
         long managed = 0;
         foreach (ProtoEntry e in stream.Wmos.Values)
@@ -2273,6 +2555,11 @@ public sealed partial class WmvTerrainSession
             if (e.State == "built" && e.Wmo != null) { r.WorldPrototypes++; if (e.Pooled) r.WorldPrototypesPooled++; }
         foreach (ProtoEntry e in s.M2s.Values)
             if (e.State == "built" && e.M2 != null) { r.DoodadPrototypes++; if (e.Pooled) r.DoodadPrototypesPooled++; }
+        foreach (ProtoEntry e in s.Private)     // (resident, never pooled)
+        {
+            if (e.Wmo != null) r.WorldPrototypes++;
+            else if (e.M2 != null) r.DoodadPrototypes++;
+        }
         r.Textures = terrainTextures.Count + (world != null && world.DoodadTextures != null ? world.DoodadTextures.Uploads : 0);
         foreach (TerrainTexEntry t in terrainTextures.Values)
             if (t.Refs <= 0) r.TexturesPooled++;
@@ -2317,10 +2604,12 @@ public sealed partial class WmvTerrainSession
             return "no streaming session";
         return string.Format("entry load {0}, camera tile {1}_{2}, {3} tile(s) [{4}], {5} job(s), {6} request(s) out (most {7}), {8} placement(s), " +
                              "{9} doodad(s), {10} world prototype(s), {11} M2 prototype(s), {12} scene terrain texture(s); {13} placements and {14} " +
-                             "doodads shared, {15} prototypes shared, {16} fetches taken over, {17} prototypes and {18} textures evicted",
+                             "doodads shared, {15} prototypes shared, {16} fetches taken over, {17} prototypes and {18} textures evicted; " +
+                             "{19} prototype(s) kept for their tile ({20} live), {21} placement(s) and {22} doodad(s) replaced",
                              stream.EntryLoad, stream.CameraTileX, stream.CameraTileY, stream.Tiles.Count, string.Join(" ", StreamTileStates().ToArray()),
                              stream.Jobs.Count, stream.RequestsOut, stream.RequestsOutMax, stream.Placements.Count, stream.Doodads.Count,
                              stream.Wmos.Count, stream.M2s.Count, terrainTextures.Count, stream.PlacementsShared, stream.DoodadsShared,
-                             stream.PrototypesShared, stream.PrototypeTakeovers, stream.PrototypesEvicted, stream.TexturesEvicted);
+                             stream.PrototypesShared, stream.PrototypeTakeovers, stream.PrototypesEvicted, stream.TexturesEvicted,
+                             stream.PrototypesKept, stream.Private.Count, stream.PlacementsReplaced, stream.DoodadsReplaced);
     }
 }

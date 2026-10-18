@@ -155,7 +155,10 @@ public:
   static constexpr double EyeHeight = 2.0;
 
   // THE VIEWER MODE: entered (the grid comes back as it was left, for the same client), left (the terrain cleared).
-  void Entered();
+  // pumpNow false (the command bar's switch in turns): the minimap reads start on a turn after its repaint (PumpAfterEntry)
+  // -- pictures landing between its turns would be drawn in its repaint.
+  void Entered(bool pumpNow = true);
+  void PumpAfterEntry();
   void Left();
   bool active() const { return m_active; }
 

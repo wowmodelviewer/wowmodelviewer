@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <wx/control.h>
+#include <wx/dcmemory.h>
 #include <wx/graphics.h>
 
 #include "UiStyle.h"
@@ -48,6 +49,7 @@ wxAuiDockArt * UiDockArt::Clone()
 
 void UiDockArt::applyPalette()
 {
+  m_closeButtons.clear();
   const UiStyle::Palette & p = palette();
   SetColour(wxAUI_DOCKART_BACKGROUND_COLOUR, p.appBackground);
   SetColour(wxAUI_DOCKART_SASH_COLOUR, p.appBackground);
@@ -151,6 +153,36 @@ void UiDockArt::DrawPaneButton(wxDC & dc, wxWindow * window, int button, int but
     wxAuiDefaultDockArt::DrawPaneButton(dc, window, button, buttonState, rect, pane);
     return;
   }
+  if (rect.width <= 0 || rect.height <= 0)
+    return;
+  // EACH LOOK OF THE CLOSE BUTTON IS DRAWN ONCE: it paints its whole rectangle itself, from its state, size, scale and
+  // the palette alone. wxAUI draws the captions straight onto the frame's window -- its paint, and every
+  // wxAuiManager::Update -- and a graphics context made there read the window's pixels back first: most of a viewer
+  // switch's layout (4-15 ms giving the Model panels back) and 3-4 ms of the frame's paint
+  // (docs/world-viewer/08-streaming.md, section 8.8). Now a paint copies it.
+  const UiStyle::Palette & p = palette();
+  const wxWindow * scale = window ? window : m_frame;
+  const wxString key = wxString::Format(wxT("%d %d %d %d %u %u %u %u %u %u"), buttonState, rect.width, rect.height,
+                                        scale ? scale->FromDIP(1000) : 1000, (unsigned)p.panelBackground.GetRGB(),
+                                        (unsigned)p.separator.GetRGB(), (unsigned)p.text.GetRGB(),
+                                        (unsigned)p.textSecondary.GetRGB(), (unsigned)p.hover.GetRGB(),
+                                        (unsigned)p.pressed.GetRGB());
+  auto look = m_closeButtons.find(key);
+  if (look == m_closeButtons.end())
+  {
+    // (Of the screen's own format: one made for the DC can have an alpha channel, which copies as transparent.)
+    wxBitmap bitmap(rect.width, rect.height);
+    {
+      wxMemoryDC picture(bitmap);
+      drawCloseButton(picture, scale, buttonState, wxRect(rect.GetSize()));
+    }
+    look = m_closeButtons.emplace(key, bitmap).first;
+  }
+  dc.DrawBitmap(look->second, rect.x, rect.y, false);
+}
+
+void UiDockArt::drawCloseButton(wxDC & dc, const wxWindow * scale, int buttonState, const wxRect & rect) const
+{
   const UiStyle::Palette & p = palette();
   // Its own background: a hover change repaints the button alone.
   dc.SetPen(*wxTRANSPARENT_PEN);
@@ -162,7 +194,6 @@ void UiDockArt::DrawPaneButton(wxDC & dc, wxWindow * window, int button, int but
   std::unique_ptr<wxGraphicsContext> gc = graphicsFor(dc);
   if (!gc)
     return;
-  const wxWindow * scale = window ? window : m_frame;
   const bool hot = buttonState == wxAUI_BUTTON_STATE_HOVER || buttonState == wxAUI_BUTTON_STATE_PRESSED;
   const double side = std::min(rect.width, rect.height) - 2.0 * UiStyle::dip(scale, 3);
   const double x = rect.x + (rect.width - side) / 2.0, y = rect.y + (rect.height - 1 - side) / 2.0;
@@ -194,6 +225,8 @@ wxAuiToolBarArt * UiToolBarArt::Clone()
 void UiToolBarArt::UpdateColoursFromSystem()
 {
   wxAuiGenericToolBarArt::UpdateColoursFromSystem();
+  // (A palette change while running comes this way too: ModelViewer::ApplyTheme.)
+  m_buttons.clear();
 }
 
 UiToolBarArt::Role UiToolBarArt::roleOf(const wxAuiToolBarItem & item) const
@@ -277,7 +310,41 @@ wxSize UiToolBarArt::GetToolSize(wxReadOnlyDC & dc, wxWindow * wnd, const wxAuiT
   return wxSize(width + 2 * pad, height);
 }
 
+// EACH LOOK OF A BUTTON IS DRAWN ONCE. What drawButton draws depends on the button, its state, size and neighbours, the
+// palette and the scale, over the bar's background -- the panel's colour, which the bar keeps in a bitmap of its own --
+// and on nothing else. The bar is painted whole at each hover, press and release, seven times in a viewer switch's turn,
+// and its nine buttons drawn anew took 0.35-0.7 ms of each paint, every one through a graphics context of its own
+// (docs/world-viewer/08-streaming.md, section 8.8). Now a paint copies them.
 void UiToolBarArt::DrawButton(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item, const wxRect & rect)
+{
+  if (rect.width <= 0 || rect.height <= 0)
+    return;
+  const UiStyle::Palette & p = palette();
+  const wxString key = wxString::Format(wxT("%d %d %d %d %d %d %d %d %u %u %u %s"), item.GetId(), (int)item.GetKind(),
+                                        item.GetState(), rect.width, rect.height, segmentNeighbour(wnd, item, -1) ? 1 : 0,
+                                        segmentNeighbour(wnd, item, +1) ? 1 : 0, wnd ? wnd->FromDIP(1000) : 1000,
+                                        (unsigned)p.panelBackground.GetRGB(), (unsigned)p.text.GetRGB(),
+                                        (unsigned)p.accent.GetRGB(), item.GetLabel());
+  auto look = m_buttons.find(key);
+  if (look == m_buttons.end())
+  {
+    // Of the screen's own format, as the bar's paint buffer is (one made for the DC has an alpha channel, and copied over
+    // the bar it showed nothing); a pixel wider and taller than the button: a ghost's or a toggle's outline, not clipped
+    // as a segment's is, puts its smoothing a pixel past the button's right and bottom edges. (The bar draws its tools
+    // left to right, so a segment's next one covers that column again.)
+    wxBitmap bitmap(rect.width + 1, rect.height + 1);
+    {
+      wxMemoryDC picture(bitmap);
+      picture.SetBackground(wxBrush(p.panelBackground));
+      picture.Clear();
+      drawButton(picture, wnd, item, wxRect(rect.GetSize()));
+    }
+    look = m_buttons.emplace(key, bitmap).first;
+  }
+  dc.DrawBitmap(look->second, rect.x, rect.y, false);
+}
+
+void UiToolBarArt::drawButton(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item, const wxRect & rect)
 {
   const UiStyle::Palette & p = palette();
   const int state = item.GetState();

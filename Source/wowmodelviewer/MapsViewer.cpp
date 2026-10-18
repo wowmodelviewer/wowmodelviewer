@@ -99,7 +99,7 @@ bool MapsViewer::clientCurrent(int epoch, quint64 generation) const
 
 // ---------------------------------------------------------------- the viewer mode and the client
 
-void MapsViewer::Entered()
+void MapsViewer::Entered(bool pumpNow)
 {
   m_active = true;
   // The view the user chose, again, for a player that was restarted while another viewer was on.
@@ -111,9 +111,12 @@ void MapsViewer::Entered()
     m_viewSent = view;
   }
   LOG_INFO << "[maps] entered" << (m_mapId >= 0 ? QString("with map %1 picked").arg(m_mapId) : QString("with no map picked"));
-  pumpMinimaps();
+  if (pumpNow)
+    pumpMinimaps();
   changed();
 }
+
+void MapsViewer::PumpAfterEntry() { pumpMinimaps(); }
 
 void MapsViewer::Left()
 {

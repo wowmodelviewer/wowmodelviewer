@@ -145,6 +145,7 @@ public sealed partial class WmvTerrainSession
         public bool World;
         public Model Model;
         public int Group = -1;
+        public bool AskedBefore;               // a world-model group id this job had asked for already (AskWorld)
         // A world load's doodad request (protocol 17: counted against MaxDoodadOutstanding), and its model.
         public bool Doodad;
         public DoodadModel DModel;

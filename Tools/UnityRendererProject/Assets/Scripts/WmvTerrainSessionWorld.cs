@@ -72,7 +72,8 @@ public interface IWmvWorldModelView
     /// <summary>Every doodad of `scene`: its instances, then its prototypes, then its shared textures.</summary>
     void DisposeDoodads(WmvWorldScene scene);
     /// <summary>Streaming (stage 08): one doodad prototype evicted from the session's pool, its references on the scene's
-    /// textures given back (the caller has taken it out of the scene's dictionary).</summary>
+    /// textures given back (the caller has taken it out of the scene's dictionary), or a tile's private one (disposed unused;
+    /// or, at the scene's end, after DisposeDoodads -- the cache gone, nothing to give back).</summary>
     void DisposeDoodadPrototype(WmvWorldScene scene, WmvDoodadPrototype prototype);
     /// <summary>Streaming: the doodads a closing tile held alone, their own objects (the caller has taken them out of the
     /// scene's list).</summary>
@@ -125,6 +126,8 @@ public sealed partial class WmvTerrainSession
         public string[] GroupErrors = new string[0];
         public int NextGroup, GroupsLanded;
         public int GroupsRefused;               // streaming: group files the host refused for the tile's load
+        public int GroupsRepeated;              // streaming: group asks refused as repeats of one this load asked (the host's
+                                                // once-per-load rule)
         public readonly List<uint> TextureIds = new List<uint>();
         public readonly HashSet<uint> TexturesWaiting = new HashSet<uint>();
         public bool Active;                    // counted against MaxActiveModels
@@ -157,6 +160,8 @@ public sealed partial class WmvTerrainSession
         public byte[] Raw;                     // the file's bytes, checked: decoded again for a model that comes after the
                                                // pixels were released (null: none -- not fetched, or refused)
         public bool Decoding;                  // a decode of Raw is on the worker
+        public bool ForTheLoad;                // streaming: missing for this tile's load only (refused, stale, past its count
+                                               // cap): a prototype built without it is the tile's own
         public readonly List<Model> Waiting = new List<Model>();
     }
 
@@ -174,6 +179,8 @@ public sealed partial class WmvTerrainSession
         public readonly Queue<uint> TextureQueue = new Queue<uint>();
         public readonly Queue<SharedTexture> RedecodeQueue = new Queue<SharedTexture>();   // decoded again, within the gate
         public readonly Queue<Model> BuildQueue = new Queue<Model>();
+        public readonly HashSet<uint> GroupIdsAsked = new HashSet<uint>();     // group ids this load asked for (AskWorld)
+        public readonly HashSet<uint> GroupIdsRefused = new HashSet<uint>();   // ... of them answered refused or stale for it
         public int Pending, Preparing;         // world requests out; parses and decodes on the worker
         public int ModelsAsked, GroupFilesAsked, GroupFilesReserved, TexturesAsked, TexturesNotRequested;
         public bool TimedOut;                  // the world's timeout fired: worker results still out are dropped
@@ -411,13 +418,21 @@ public sealed partial class WmvTerrainSession
         world = null;
         if (s == null || worldView == null)
             return;
-        int doodads = s.Doodads.Count, doodadPrototypes = s.DoodadPrototypes.Count;
+        int doodads = s.Doodads.Count, doodadPrototypes = s.DoodadPrototypes.Count + s.PrivateDoodadPrototypes.Count;
         try { worldView.DisposeDoodads(s); }
         catch (Exception e) { Log("disposing the doodads failed: {0}", e.Message); }
+        // Streaming: the doodad prototypes kept for one tile (not in DoodadPrototypes) -- their instances went above, and the
+        // scene's texture cache with them (nothing is given back to it now).
+        foreach (WmvDoodadPrototype p in s.PrivateDoodadPrototypes)
+        {
+            try { worldView.DisposeDoodadPrototype(s, p); }
+            catch (Exception e) { Log("disposing a doodad prototype kept for its tile failed: {0}", e.Message); }
+        }
+        s.PrivateDoodadPrototypes.Clear();
         if (doodads > 0 || doodadPrototypes > 0)
             Log("the doodads of load {0} ({1}) disposed: {2} instance(s), {3} prototype(s); live doodad instances {4}, prototypes {5}, textures {6}",
                 s.Load, s.Kind, doodads, doodadPrototypes, WmvWorldDoodads.LiveInstances, WmvWorldDoodads.LivePrototypes, WmvWorldDoodads.LiveTextures);
-        int instances = s.Instances.Count, prototypes = s.Prototypes.Count;
+        int instances = s.Instances.Count, prototypes = s.Prototypes.Count + s.PrivatePrototypes.Count;
         foreach (WmvWorldInstance i in s.Instances)
         {
             try { worldView.DisposeInstance(i); }
@@ -428,6 +443,12 @@ public sealed partial class WmvTerrainSession
             try { worldView.DisposePrototype(p); }
             catch (Exception e) { Log("disposing a world-model prototype failed: {0}", e.Message); }
         }
+        foreach (WmvWorldPrototype p in s.PrivatePrototypes)
+        {
+            try { worldView.DisposePrototype(p); }
+            catch (Exception e) { Log("disposing a world-model prototype kept for its tile failed: {0}", e.Message); }
+        }
+        s.PrivatePrototypes.Clear();
         Log("the world models of load {0} ({1}) disposed: {2} instance(s), {3} prototype(s); live world instances {4}, prototypes {5}",
             s.Load, s.Kind, instances, prototypes, WmvWorldModels.LiveInstances, WmvWorldModels.LivePrototypes);
     }
@@ -509,7 +530,11 @@ public sealed partial class WmvTerrainSession
         WorldWork w = j.World;
         double at = j.Clock.Elapsed.TotalMilliseconds;
         string id = SendMapRequest(j, role, fileDataID);
-        j.Pending.Add(new Request { Id = id, Role = role, FileDataID = fileDataID, AskedMs = at, World = true, Model = m, Group = group });
+        // A group id this load asked for already (another model's, or listed twice): the host refuses it once read for the
+        // load ("each once per load", modelviewer.cpp decideMapAssetRequest) -- see OnWmoGroup.
+        bool before = role == RoleWmoGroup && !w.GroupIdsAsked.Add((uint)fileDataID);
+        j.Pending.Add(new Request { Id = id, Role = role, FileDataID = fileDataID, AskedMs = at, World = true, Model = m, Group = group,
+                                    AskedBefore = before });
         w.Pending++;
         w.FilesAsked++;
         if (role == RoleWmoGroup) w.GroupFilesAsked++;
@@ -627,7 +652,23 @@ public sealed partial class WmvTerrainSession
         if (why != null)
         {
             if (RefusedForTheLoad(r))
-                m.GroupsRefused++;
+            {
+                uint gid = (uint)q.FileDataID;
+                // A repeat of a group id this load asked for and was not refused: the host's once-per-load rule, which every load
+                // listing both alike meets -- not a gap of this load's budget (counted apart: built without it and shared, as
+                // before). A repeat of one refused for the load is a refusal for the load too (the host never recorded it).
+                if (q.AskedBefore && !w.GroupIdsRefused.Contains(gid))
+                {
+                    m.GroupsRepeated++;
+                    if (j.Stream != null && stream != null)
+                        stream.GroupRepeats++;
+                }
+                else
+                {
+                    m.GroupsRefused++;
+                    w.GroupIdsRefused.Add(gid);
+                }
+            }
             m.GroupErrors[gi] = why;
             GroupLanded(j, m);
             return;
@@ -684,7 +725,7 @@ public sealed partial class WmvTerrainSession
         if (missing == m.Groups.Length)
         {
             string none = "no group file could be read: " + string.Join("; ", reasons.ToArray());
-            if (j.Stream != null && m.GroupsRefused > 0)
+            if (j.Stream != null && (m.GroupsRefused > 0 || m.GroupsRepeated > 0))
                 FailForTheLoad(() => FailModel(j, m, none));
             else
                 FailModel(j, m, none);
@@ -708,9 +749,15 @@ public sealed partial class WmvTerrainSession
                 w.Textures[id] = t;
                 if (w.TexturesAsked + w.TextureQueue.Count >= cap)
                 {
-                    t.Texture.Error = "not requested: this load asks for at most " + cap + " world-model textures (maxWmoTexturesPerLoad)";
-                    t.Done = true;
-                    w.TexturesNotRequested++;
+                    // Streaming: what the session has settled of it (its image, or its file's failure) is taken without asking;
+                    // else it is not requested -- for this load only (ForTheLoad).
+                    if (!TakeSessionWmoImage(j, t))
+                    {
+                        t.Texture.Error = "not requested: this load asks for at most " + cap + " world-model textures (maxWmoTexturesPerLoad)";
+                        t.Done = true;
+                        t.ForTheLoad = j.Stream != null;
+                        w.TexturesNotRequested++;
+                    }
                 }
                 else if (id > int.MaxValue)
                 {
@@ -769,9 +816,13 @@ public sealed partial class WmvTerrainSession
         if (why != null)
         {
             t.Texture.Error = why;
+            // Streaming: refused for this tile's load, or stale -- this load's gap, not the file's: a prototype built without it
+            // is the tile's own (BuildModel, KeepWorldModelForTheTile); the image's fetch is handed on below.
+            if (j.Stream != null && RefusedForTheLoad(r))
+                t.ForTheLoad = true;
             TextureDone(j, t);
             // (A refusal for this tile's load, or a stale answer, hands the fetch on; the file's own failure -- not in storage,
-            // too large, no bytes -- is the session's: every tile takes it without asking.)
+            // over its per-file limit, no bytes -- is the session's: every tile takes it without asking.)
             PublishWmoImage(j, t, null, why, !RefusedForTheLoad(r));
             return;
         }
@@ -1007,12 +1058,19 @@ public sealed partial class WmvTerrainSession
             return;
         }
         var textures = new Dictionary<uint, WmvWmoTexture>();
+        var forTheLoad = new List<string>();     // streaming: what of it this tile's load could not get
         foreach (uint id in m.TextureIds)
         {
             SharedTexture t;
-            if (w.Textures.TryGetValue(id, out t))
-                textures[id] = t.Texture;
+            if (!w.Textures.TryGetValue(id, out t))
+                continue;
+            textures[id] = t.Texture;
+            if (t.ForTheLoad && !t.Texture.Decoded)
+                forTheLoad.Add("texture " + id);
         }
+        if (m.GroupsRefused > 0)                 // (refused or stale; every group missing never gets here: GroupLanded)
+            forTheLoad.Add(m.GroupsRefused + " group file(s)");
+        bool keep = forTheLoad.Count > 0 && m.Shared != null && j.Stream != null && stream != null;
         var clock = Stopwatch.StartNew();
         WmvWorldPrototype proto;
         try { proto = worldView.BuildPrototype(m.FileDataID, m.Root, m.Groups, textures); }
@@ -1037,14 +1095,20 @@ public sealed partial class WmvTerrainSession
         }
         else
         {
-            world.Prototypes[m.FileDataID] = proto;
-            if (m.Shared != null)
-                WorldPrototypeBuilt(m, proto);
-            PlaceAll(j, m, proto);
+            if (keep)
+                KeepWorldModelForTheTile(j, m, proto, "built without " + string.Join(", ", forTheLoad.ToArray()) + ", which tile " +
+                                                      j.Stream.Name + "'s load could not get");
+            else
+            {
+                world.Prototypes[m.FileDataID] = proto;
+                if (m.Shared != null)
+                    WorldPrototypeBuilt(m, proto);
+            }
+            PlaceAll(j, m, proto);              // (kept: its placements register the private record)
             if (m.Shared != null && !m.Unpinned)
             {
                 m.Unpinned = true;
-                Unpin(m.Shared);
+                Unpin(m.Shared);                // (kept: the private record's pin -- nothing places from it after this)
             }
         }
         Log("load {0}: world model {1} built in {2:0.###} ms ({3} group(s), {4} renderer(s), {5} KB geometry, {6} KB textures); {7} placement(s) placed; " +
@@ -1060,8 +1124,10 @@ public sealed partial class WmvTerrainSession
         var clock = Stopwatch.StartNew();
         foreach (PlacementWork pw in m.Placements)
         {
-            // Streaming: a placement another tile of the session placed is found, never placed twice.
-            if (j.Stream != null && stream != null && FindSharedPlacement(j, pw))
+            // Streaming: a placement another tile of the session placed is found, never placed twice -- one placed from a tile's
+            // private prototype is replaced by this one when this one is complete (WmvTerrainSessionStream.cs).
+            PlacementEntry replace = null;
+            if (j.Stream != null && stream != null && FindSharedPlacement(j, pw, !IsPrivate(m.Shared), out replace))
                 continue;
             try
             {
@@ -1072,7 +1138,7 @@ public sealed partial class WmvTerrainSession
                 world.AddBox(pw.P.ExtentsMin, pw.P.ExtentsMax);
                 pw.State = "placed";
                 if (j.Stream != null && stream != null)
-                    RegisterPlacement(j, pw, geometry, m.Shared);
+                    RegisterPlacement(j, pw, geometry, m.Shared, replace);
             }
             catch (Exception e)
             {
@@ -1445,7 +1511,7 @@ public sealed partial class WmvTerrainSession
             if (m.State == ModelState.Built) r.WorldModelsBuilt++;
             else if (m.State == ModelState.Failed) r.WorldModelsFailed++;
             else if (m.State == ModelState.NotRequested) r.WorldModelsNotRequested++;
-            if (m.Built != null && m.Built.Runtime != null)
+            if (m.Built != null && !m.Built.Disposed && m.Built.Runtime != null)
             {
                 r.WorldGpuGeometryBytes += m.Built.Runtime.GpuGeometryBytes;
                 r.WorldGpuTextureBytes += m.Built.Runtime.GpuTextureBytes;

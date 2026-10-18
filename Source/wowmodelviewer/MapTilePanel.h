@@ -83,6 +83,15 @@ public:
   static const int RepaintMs = 100;
   // At most this long drawing pictures into the mosaic in one paint (one 60 Hz frame); the rest at the next repaint.
   static const int MosaicPaintBudgetMs = 16;
+  // A viewer switch's paint (ModelViewer::FinishViewerSwitch, around its PaintNow): the minimap pictures that came while
+  // Maps was left wait for the next repaint (OnPaint).
+  void SetSwitchPaint(bool on) { m_switchPaint = on; }
+  // Pictures that came while the overhead map was away, not yet drawn into the mosaic: a viewer switch in turns draws them
+  // on a turn of its own before its repaint (prepareMosaic: MosaicPaintBudgetMs at most, and the grid's picture drawn
+  // again with them while the grid keeps the size it was drawn at -- the switch's paint, which keeps the picture, then
+  // shows them; sized anew by the switch, its paint draws the grid again, the mosaic already brought up).
+  bool picturesWaiting() const;
+  void prepareMosaic();
 
 private:
   void layoutCells() const;
@@ -121,6 +130,15 @@ private:
   // The paint's buffer, a bitmap of the screen's own format: wx's own buffer is a DIB, which goes to the window through
   // StretchDIBits -- most of a paint's time on a large map.
   wxBitmap m_paintBuffer;
+  // The grid's own picture, and what it showed when drawn (OnPaint): all of it, and all but the minimap pictures in it
+  // (gridKey); the mosaic's changes counted.
+  wxBitmap m_gridPicture;
+  std::vector<long long> m_gridKey;
+  std::vector<long long> m_gridLayoutKey;
+  int m_mosaicVersion = 0;
+  bool m_switchPaint = false;
+  std::vector<long long> gridKey(bool withPictures) const;
+  void paintGrid(wxDC & dc);
   bool m_hoverWorld = false;         // the footprint: the world point under the mouse
   double m_hoverWX = 0.0, m_hoverWY = 0.0;
 };

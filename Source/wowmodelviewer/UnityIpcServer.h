@@ -1007,6 +1007,9 @@ public:
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
   bool sendClearTerrain(const QString & reason);
+  // A viewer switch's turn has just run (ModelViewer): the next poll a whole interval from now -- not at once after that
+  // turn, in the same busy stretch, for a tick that came due during it.
+  void deferNextPoll();
 
   // THE MAPS VIEWER (protocol 14). inspectMapTiles: a map's WDT bytes, as the map asset worker read and checked them
   // against their content key (md5), for the player's parser; answered by mapTilesInspected with the same inspection

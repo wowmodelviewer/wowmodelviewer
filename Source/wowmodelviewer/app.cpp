@@ -3499,27 +3499,53 @@ static GameFile * resolveGameFileArg(const QString & arg)
 // g_pumpBusy, when set, is handed how long each round kept this thread busy: the poll and the wx queue, everything this
 // thread ran between two sleeps.
 static std::function<void(double)> g_pumpBusy;
+// THE BUSY STRETCH, when g_pumpStretch is set: what this thread ran with no sleep between, handed over as one -- the event
+// loop would run it so. A slot's last Yield and the next poll and Yield follow each other with no wait, and a wait for a
+// map result that ends at once (one already made) is no sleep either. g_pumpBusy goes on handing over each round alone
+// (comparable with older runs). g_pumpCarry is the stretch still open, handed over once a sleep ends it.
+static std::function<void(double)> g_pumpStretch;
+static double g_pumpCarry = 0.0;
+static void pumpStretchEnd()
+{
+  if (g_pumpCarry > 0.0 && g_pumpStretch)
+    g_pumpStretch(g_pumpCarry);
+  g_pumpCarry = 0.0;
+}
+static void pumpBusyTook(double ms)
+{
+  if (g_pumpBusy)
+    g_pumpBusy(ms);
+  g_pumpCarry += ms;
+}
+// One poll and one pass of the wx queue, with no sleep after it: where the stretch ends is the caller's (pumpIpc at its next
+// sleep; the maps UI test's modenow at once, the event loop waiting there for the next input).
+static void pumpRound(UnityIpcServer * ipc)
+{
+  wxStopWatch busy;
+  ipc->poll();
+  wxTheApp->Yield(true);
+  pumpBusyTook(busy.TimeInMicro().ToDouble() / 1000.0);
+}
 static void pumpIpc(UnityIpcServer * ipc, int n)
 {
   for (int i = 0; i < n; i++)
   {
-    wxStopWatch busy;
-    ipc->poll();
-    wxTheApp->Yield(true);
-    if (g_pumpBusy)
-      g_pumpBusy(busy.TimeInMicro().ToDouble() / 1000.0);
+    pumpRound(ipc);
     // The 10 ms between polls (n of them last at least n * 10 ms). A map read's result is answered as soon as it is
     // made: its wake, a wxThreadEvent the worker posted, is handled in a Yield, as the viewer's event loop would -- a
     // poll that answers the read --, and the slot goes on.
     wxStopWatch slot;
     for (long left = 10; left > 0; left = 10 - slot.Time())
     {
+      wxStopWatch waited;
       ipc->waitForMapResult((int)left);
+      if (waited.TimeInMicro().ToDouble() >= 500.0)
+        pumpStretchEnd();   // it slept: the stretch before it is over
       wxStopWatch woken;
       wxTheApp->Yield(true);
-      if (g_pumpBusy)
-        g_pumpBusy(woken.TimeInMicro().ToDouble() / 1000.0);
+      pumpBusyTook(woken.TimeInMicro().ToDouble() / 1000.0);
     }
+    // (The slot's last Yield stays in the open stretch: the next poll follows it with no sleep.)
   }
 }
 
@@ -5661,11 +5687,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // entries up to TERRAIN_REPORT_TEXTURES_MAX, retired ids and chunk-state counters up to TERRAIN_REPORT_LIST_MAX, the rest
 // counted) and how the material check judges a texture list, real reads through the host's own handler
 // (ModelViewer::ServeMapAsset) under a made-up load -- a root asked for as a tex0 and a tex0 as a texture fail their kinds,
-// the tex0 and a texture are served with the content key as md5, a texture over what is left of the load's budget is not
-// read, a spent budget and a reported load read nothing --, the map's WDT inspected with a 1000-byte limit (Unreadable, the
-// detail naming its size and the limit, no bytes) and with the map-file limit (read whole), the WDT a load would name as
-// this client's family resolves it (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a
-// failed load while an earlier tile is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
+// the tex0 and a texture are served with the content key as md5, a texture over what is left of the load's budget is
+// refused for the load, unread (over its per-file limit: unreadable), a spent budget and a reported load read nothing --,
+// the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no bytes) and
+// with the map-file limit (read whole), the WDT a load would name as this client's family resolves it
+// (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
+// is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
 // (StartUnityRenderer(true)); one older than protocol 12 ends the run "FAIL player too old". A protocol-12 player draws
 // geometry alone: every textured check is skipped naming why, and each of its built loads must have no material and only
 // its two files served. Otherwise the player's object counts are taken with no terrain (every count reported, the
@@ -6818,6 +6845,71 @@ static void checkMapAssetAccounting(TerrainTestLog & tally)
   }
 }
 
+// The budget refusal of a cut read (ModelViewer::mapAssetBudgetRefusal) on made-up sizes: a read decideMapAssetRequest cut
+// to what was left of its load's budget that finds the file larger than that, but within the role's per-file limit, is
+// the load's refusal (its size, what was left and the load named); a file over the per-file limit, a read not cut, a file
+// that fits, an unknown size, the roles whose read is never cut and a load without that family's limits are not. Nothing
+// is read.
+static void checkMapAssetBudgetRefusals(TerrainTestLog & tally)
+{
+  ModelViewer::TerrainRequest load;
+  load.load = 9;
+  load.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  load.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  load.maxWmoFileBytes = UnityIpcServer::MAX_WMO_FILE_BYTES;
+  load.maxWmoBytesPerLoad = UnityIpcServer::MAX_WMO_BYTES_PER_LOAD;
+  load.maxWmoTextureBytes = UnityIpcServer::MAX_WMO_TEXTURE_BYTES;
+  load.maxWmoTextureBytesPerLoad = UnityIpcServer::MAX_WMO_TEXTURE_BYTES_PER_LOAD;
+  load.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+  load.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+  load.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+  load.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+  ModelViewer::TerrainRequest noDoodads = load;
+  noDoodads.maxM2FileBytes = noDoodads.maxM2TextureBytes = 0;
+  struct Row
+  {
+    const ModelViewer::TerrainRequest * load;
+    const char * role;
+    qint64 size;
+    qint64 limit;
+    bool refused;
+    const char * what;
+  };
+  const Row rows[] = {
+    {&load, "m2Texture", 1399300, 1000, true, "the largest doodad texture"},
+    {&load, "m2Texture", 8388608, 1000, true, "a doodad texture at its per-file limit"},
+    {&load, "m2Texture", 8388608, 8388607, true, "a doodad texture one byte over what is left"},
+    {&load, "m2Texture", 8388609, 1000, false, "a doodad texture over its per-file limit"},
+    {&load, "m2Texture", 9000000, 1000, false, "a doodad texture over its per-file limit"},
+    {&load, "m2Texture", 9000000, 8388608, false, "a doodad texture read not cut"},
+    {&load, "m2Texture", 900, 1000, false, "a doodad texture that fits"},
+    {&load, "m2Texture", -1, 1000, false, "a doodad texture of unknown size"},
+    {&load, "m2Model", 2423632, 1000, true, "the largest doodad model"},
+    {&load, "m2Skin", 214960, 1000, true, "the largest doodad skin"},
+    {&load, "wmoGroup", 2432598, 1000, true, "the largest world-model group read"},
+    {&load, "wmoGroup", 4476010, 1000, false, "Retail 2320850's group 3, over 4 MiB"},
+    {&load, "wmoGroup", 4476010, 4194304, false, "Retail 2320850's group 3, read not cut"},
+    {&load, "wmoRoot", 438824, 1000, true, "the largest world-model root"},
+    {&load, "wmoTexture", 2098324, 1000, true, "the largest world-model texture"},
+    {&load, "texture", 5593604, 1000, true, "the largest terrain texture"},
+    {&load, "wdt", 5000000, 1000, false, "a WDT (never cut)"},
+    {&load, "rootAdt", 5000000, 1000, false, "a root ADT (never cut)"},
+    {&load, "tex0Adt", 5000000, 1000, false, "a tex0 ADT (never cut)"},
+    {&load, "obj0Adt", 5000000, 1000, false, "an obj0 ADT (never cut)"},
+    {&noDoodads, "m2Texture", 1399300, 1000, false, "a doodad texture of a load without doodad limits"},
+  };
+  for (const Row & r : rows)
+  {
+    const QString detail = ModelViewer::mapAssetBudgetRefusal(*r.load, r.role, r.size, r.limit);
+    const bool ok = r.refused ? detail.contains(QString("it is %1 bytes").arg(r.size)) &&
+                                  detail.contains(QString("%1 bytes left").arg(r.limit)) && detail.contains("load 9")
+                              : detail.isEmpty();
+    tally.check(QString("budget refusal: %1 of %2 bytes (%3) with %4 bytes left is %5").arg(r.role).arg(r.size).arg(r.what)
+                  .arg(r.limit).arg(r.refused ? "refused for the load" : "not the load's refusal"),
+                ok, detail.isEmpty() ? QString("no refusal") : detail);
+  }
+}
+
 // The kind check after a read (ModelViewer::mapAssetKindProblem) on made-up bytes: a tex0 head (MVER, MAMP), a root head
 // (MVER, MHDR), a BLP2 head, short and odd files; and the roles it does not apply to.
 static void checkMapAssetKinds(TerrainTestLog & tally)
@@ -7836,8 +7928,9 @@ static void checkStreamLoads(ModelViewer * frame, TerrainTestLog & tally)
 // Real reads through the host's own handler (ModelViewer::ServeMapAsset) with a made-up current load of the loaded client
 // (no player is involved, nothing is sent): a root ADT asked for as a tex0 ADT and a tex0 as a texture fail their kinds
 // ("unreadable", the bytes found named), the tex0 itself and a texture are served with the content key as their MD5 (the
-// test hashes the bytes once to show it), a texture read with only 1000 bytes of the load's budget left is not read
-// (the limit applied named), one with none left is refused unread, and a reported load is stale. The pinned files are
+// test hashes the bytes once to show it), a texture read with only 1000 bytes of the load's budget left is refused for
+// the load, unread (its size, what was left and the limit named); one over its per-file limit is unreadable; the same for
+// a doodad texture; one with none left is refused unread, and a reported load is stale. The pinned files are
 // Azeroth 32_50's (root 778037, tex0 778040, texture 187115, in Retail, Classic Era and Classic Beta): a client that cannot
 // read one skips the checks that need it. The host's terrain request is put back afterwards.
 static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
@@ -7945,13 +8038,70 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     nearly.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
     frame->m_terrainRequest = nearly;
     const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAssetAndWait(ask("texture", textureId));
-    tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is not read: \"unreadable\", "
-                        "the limit applied named").arg(textureId),
-                b.state == "unreadable" &&
+    tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is refused for the load, "
+                        "unread").arg(textureId),
+                b.state == "refused" &&
+                  b.detail.contains(QString("it is %1 bytes, more than the 1000 bytes left").arg(textureSize)) &&
                   b.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(textureSize)) &&
                   b.bytes.isEmpty() && b.bytesRead == 0 && b.readMs >= 0.0 &&
-                  frame->m_terrainRequest.textureBytesRead == nearly.textureBytesRead,
-                describe(b));
+                  frame->m_terrainRequest.textureBytesRead == nearly.textureBytesRead &&
+                  frame->m_terrainRequest.textureBytesReserved == 0,
+                describe(b) + QString("; texture bytes read %1, reserved %2").arg(frame->m_terrainRequest.textureBytesRead)
+                                .arg(frame->m_terrainRequest.textureBytesReserved));
+    // A file over its per-file limit, the load's budget whole: the file's own failure, as before.
+    ModelViewer::TerrainRequest overLimit = withTex0;
+    overLimit.maxTextureBytes = 1000;
+    frame->m_terrainRequest = overLimit;
+    const UnityIpcServer::MapAssetAnswer over = frame->ServeMapAssetAndWait(ask("texture", textureId));
+    tally.check(QString("reads: with a per-file limit of 1000 bytes, texture %1 is \"unreadable\" -- the file's failure, not "
+                        "the load's refusal").arg(textureId),
+                over.state == "unreadable" &&
+                  over.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(textureSize)) &&
+                  !over.detail.contains("not the file's failure") && over.bytesRead == 0 &&
+                  frame->m_terrainRequest.textureBytesReserved == 0,
+                describe(over) + QString("; texture bytes reserved %1").arg(frame->m_terrainRequest.textureBytesReserved));
+    // The same file read as a doodad texture (the host's kind check for m2Texture is BLP2 alone): served; cut to what is
+    // left of the load's doodad texture budget, refused for the load; over a per-file limit of 1000 bytes, unreadable.
+    ModelViewer::TerrainRequest doodads = withTex0;
+    doodads.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+    doodads.maxM2TexturesPerLoad = UnityIpcServer::MAX_M2_TEXTURES_PER_LOAD;
+    doodads.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
+    doodads.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
+    doodads.maxM2TextureBytes = UnityIpcServer::MAX_M2_TEXTURE_BYTES;
+    doodads.maxM2TextureBytesPerLoad = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD;
+    doodads.m2ModelsServed = 1;   // a doodad texture is served only after a model
+    frame->m_terrainRequest = doodads;
+    const UnityIpcServer::MapAssetAnswer m2 = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: texture %1 read as a doodad texture is served whole, its md5 the content key, counted on "
+                        "the load's doodad texture budget").arg(textureId),
+                m2.state == "available" && m2.md5 == md5Of(m2.bytes) &&
+                  frame->m_terrainRequest.m2TextureBytesRead == textureSize && frame->m_terrainRequest.m2TextureIds.size() == 1,
+                describe(m2) + QString("; doodad texture bytes read %1, %2 id(s)").arg(frame->m_terrainRequest.m2TextureBytesRead)
+                                 .arg(frame->m_terrainRequest.m2TextureIds.size()));
+    ModelViewer::TerrainRequest m2Nearly = doodads;
+    m2Nearly.m2TextureBytesRead = UnityIpcServer::MAX_M2_TEXTURE_BYTES_PER_LOAD - 1000;
+    frame->m_terrainRequest = m2Nearly;
+    const UnityIpcServer::MapAssetAnswer m2Cut = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: with 1000 bytes of the load's doodad texture budget left, doodad texture %1 is refused for "
+                        "the load, unread").arg(textureId),
+                m2Cut.state == "refused" && m2Cut.detail.contains("doodad textures") &&
+                  m2Cut.detail.contains(QString("it is %1 bytes").arg(textureSize)) && m2Cut.detail.contains("the limit is 1000)") &&
+                  m2Cut.bytes.isEmpty() && m2Cut.bytesRead == 0 && frame->m_terrainRequest.m2TextureBytesReserved == 0 &&
+                  frame->m_terrainRequest.m2TextureBytesRead == m2Nearly.m2TextureBytesRead &&
+                  frame->m_terrainRequest.m2TextureIds.size() == 1,
+                describe(m2Cut) + QString("; doodad texture bytes read %1, reserved %2, %3 id(s)")
+                                    .arg(frame->m_terrainRequest.m2TextureBytesRead)
+                                    .arg(frame->m_terrainRequest.m2TextureBytesReserved)
+                                    .arg(frame->m_terrainRequest.m2TextureIds.size()));
+    ModelViewer::TerrainRequest m2Small = doodads;
+    m2Small.maxM2TextureBytes = 1000;
+    frame->m_terrainRequest = m2Small;
+    const UnityIpcServer::MapAssetAnswer m2Over = frame->ServeMapAssetAndWait(ask("m2Texture", textureId));
+    tally.check(QString("reads: with a per-file limit of 1000 bytes, doodad texture %1 is \"unreadable\" -- the file's "
+                        "failure, not the load's refusal").arg(textureId),
+                m2Over.state == "unreadable" && m2Over.detail.contains("the limit is 1000") &&
+                  !m2Over.detail.contains("not the file's failure") && frame->m_terrainRequest.m2TextureBytesReserved == 0,
+                describe(m2Over) + QString("; doodad texture bytes reserved %1").arg(frame->m_terrainRequest.m2TextureBytesReserved));
     ModelViewer::TerrainRequest spent = withTex0;
     spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
     frame->m_terrainRequest = spent;
@@ -8020,8 +8170,8 @@ static void checkMapAssetWorkerReads(ModelViewer * frame, TerrainTestLog & tally
                 r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Unreadable &&
                   r.inspection.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)")
                                                  .arg(direct.size())) &&
-                  r.bytes.isEmpty() && r.inspection.readBytes == 0,
-                describe(r));
+                  r.bytes.isEmpty() && r.inspection.readBytes == 0 && r.inspection.tooLargeSize == direct.size(),
+                describe(r) + QString("; its size as handed back %1").arg(r.inspection.tooLargeSize));
   }
   {
     const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, true, false, false);
@@ -8573,11 +8723,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   bool readHoldBeforeOpen = false;       // readswitch ...:start: the worker's read held before its file is opened
   QString currentStep = "start";         // the step running (a long poll's or GUI round's log line names it)
 
-  // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, its read tracker and
-  // record ring, and the size limit of the catalogue's read. (That a refused file is never read is shown where the reads
-  // can be counted: scripts/tests/casc-whole-read, case 9.)
+  // THE IN-PROCESS CHECKS, before any player: the decision, the budget refusal of a cut read, the host's bookkeeping of a
+  // failed load, its read tracker and record ring, and the size limit of the catalogue's read. (That a refused file is
+  // never read is shown where the reads can be counted: scripts/tests/casc-whole-read, case 9.)
   checkMapAssetDecisions(tally);
   checkMapAssetAccounting(tally);
+  checkMapAssetBudgetRefusals(tally);
   checkMapAssetKinds(tally);
   checkMapAssetQueue(tally);
   checkTransportCap(tally);
@@ -8606,12 +8757,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       const wow::WdtInspection tooLarge = startCatalog->inspectFile(entry->wdt, &bytes, 1000);
       const QString expected = QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(size);
       tally.check(tooLargeCheck, tooLarge.state == wow::WdtAvailability::Unreadable &&
-                  tooLarge.detail.contains(expected) && bytes.isEmpty() && tooLarge.bytes < 0,
+                  tooLarge.detail.contains(expected) && bytes.isEmpty() && tooLarge.bytes < 0 && tooLarge.tooLargeSize == size,
                 wow::WorldMapCatalog::availabilityName(tooLarge.state) + ": " + tooLarge.detail +
-                  QString(" (%1 bytes handed back)").arg(bytes.size()));
+                  QString(" (%1 bytes handed back; its size as handed back %2)").arg(bytes.size()).arg(tooLarge.tooLargeSize));
       const wow::WdtInspection whole = startCatalog->inspectFile(entry->wdt, &bytes, UnityIpcServer::MAX_MAP_ASSET_BYTES);
       tally.check("inspectFile at the map-file limit reads the WDT whole", whole.state == wow::WdtAvailability::Available &&
-                  bytes.size() == size, wow::WorldMapCatalog::availabilityName(whole.state) +
+                  bytes.size() == size && whole.tooLargeSize < 0, wow::WorldMapCatalog::availabilityName(whole.state) +
                   QString(", %1 of %2 bytes").arg(bytes.size()).arg(size));
       const wow::WdtInspection unchanged = startCatalog->inspectFile(entry->wdt, &bytes);
       tally.check("inspectFile at its default limit reads the WDT whole", unchanged.state == wow::WdtAvailability::Available &&
@@ -11017,7 +11168,18 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 // at 1920 x 1080 at the desktop's corner -- the rigs run it on a desktop of its own, never the user's -- and the player
 // started as the viewer starts it. Then WMV_MAPSUITEST_SEQUENCE (comma-separated) drives the interface as a user does,
 // through window messages to the controls themselves (never SendInput: nothing reaches another window):
-//   mode:<models|textures|buildings|maps>   a click on that command bar tool (the toolbar's own window)
+//   mode:<models|textures|buildings|maps>   a click on that command bar tool (the toolbar's own window), then until the
+//                                            viewer switch is repainted; its rounds, report and structural film recorded,
+//                                            what it let go of checked (:real after the mode: the press and the release
+//                                            in rounds of their own)
+//   modenow:<mode>[:real] | modefilm:<mode>  the click's first round only, the switch left on its way; as mode, with a
+//                                            picture of the frame after every pump while it is on its way (not repainted)
+//   settle[:<word>]                          until no switch is on its way and no turn after one waits; what it let go
+//                                            of, the films; with a word, what finished the last switch (key, press, ...)
+//   clickframe:<x>:<y>                       a click on the frame's own window (where a click on a frozen panel lands)
+//   closenow                                 the last step: the frame deleted at once, a switch on its way (THE ABORT
+//                                            CHECK, runAbortCheck)
+//   roundmark | roundcheck[:<ms>]            the longest GUI round and busy stretch since the mark, checked
 //   search:<text>                            the text typed into Browse's search box, then Enter
 //   pick:<mapId>                             a click on that map's row in Browse (made visible first)
 //   waitgrid[:<ms>]                          until the map's tile grid is known (or why not)
@@ -11076,8 +11238,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //                                            grid awaited: the census of states, the orientation check of each, the
 //                                            times; nothing loaded
 // Every step's time, the longest single GUI round in it (g_pumpBusy: what one poll and one pass of the wx queue kept this
-// thread), the Maps viewer's timings and the samples go to <out.json>; "[maps-test] PASS|FAIL|SKIP <check>" to the log,
-// then "[maps-test] RESULT".
+// thread) and the longest busy stretch (g_pumpStretch: rounds with no sleep between), the Maps viewer's timings and the
+// samples go to <out.json>; "[maps-test] PASS|FAIL|SKIP <check>" to the log, then "[maps-test] RESULT".
 namespace
 {
   typedef HRESULT(WINAPI * DwmFlushFn)();
@@ -11099,12 +11261,19 @@ namespace
 
   // A picture of a top-level window as it is drawn (PrintWindow with PW_RENDERFULLCONTENT, its children included), cut to
   // what is visible of it (DWMWA_EXTENDED_FRAME_BOUNDS). Never a copy of a screen: nothing of another window can be in it.
-  bool printWindowPng(HWND hwnd, const QString & path, QSize & size, double & viewportMean, const wxRect & viewport)
+  // Without redrawFirst it is not repainted first: what it holds now (a viewer switch's gap filmed; on a hidden desktop that
+  // can come back black, and a picture taken after a forced repaint would show the windows' state, not the screen).
+  bool printWindowPng(HWND hwnd, const QString & path, QSize & size, double & viewportMean, const wxRect & viewport,
+                      bool redrawFirst = true)
   {
-    RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME);
-    dwmFlushNow();
-    Sleep(80);
-    dwmFlushNow();
+    if (redrawFirst)
+    {
+      pumpStretchEnd();   // (the sleep below ends the busy stretch)
+      RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME);
+      dwmFlushNow();
+      Sleep(80);
+      dwmFlushNow();
+    }
     RECT wr;
     if (!GetWindowRect(hwnd, &wr))
       return false;
@@ -11164,6 +11333,89 @@ namespace
     PostMessage(hwnd, WM_MOUSEMOVE, 0, at);
     PostMessage(hwnd, right ? WM_RBUTTONDOWN : WM_LBUTTONDOWN, right ? MK_RBUTTON : MK_LBUTTON, at);
     PostMessage(hwnd, right ? WM_RBUTTONUP : WM_LBUTTONUP, 0, at);
+  }
+
+  QJsonArray jsonArray(const std::vector<double> & values)
+  {
+    QJsonArray a;
+    for (double v : values)
+      a.append(v);
+    return a;
+  }
+
+  QString viewerModeName(ViewerMode m)
+  {
+    return m == ViewerMode::Maps ? "maps" : m == ViewerMode::Buildings ? "buildings" : m == ViewerMode::Textures ? "textures"
+                                                                                                                 : "models";
+  }
+
+  // A viewer switch's report (ModelViewer::FinishViewerSwitch): its turns, what finished it, the click to the repaint.
+  QJsonObject switchReportJson(const ModelViewer::ViewerSwitchReport & r)
+  {
+    QJsonObject o;
+    o["to"] = r.to;
+    o["finishedBy"] = r.finishedBy;
+    o["turns"] = r.turns;
+    o["turnMs"] = jsonArray(r.turnMs);
+    o["clickToRepaintMs"] = (double)r.clickToRepaintMs;
+    o["split"] = r.split;
+    o["layoutInB"] = r.layoutInB;
+    return o;
+  }
+
+  // THE ABORT CHECK of the maps UI test's closenow step: the frame deleted with a viewer switch on its way (the harness's
+  // end deletes the frame, it does not close it; so would a fatal exception) drops the switch without its repaint and lets
+  // go of everything it held (ModelViewer::AbortViewerSwitch). Run by ~ModelViewer through ModelViewer::testShutdownProbe;
+  // its lines go to the log only, ending with "[maps-test] SHUTDOWN RESULT: PASS|FAIL".
+  struct AbortCheck
+  {
+    bool armed = false;
+    int passed = 0;
+    int failed = 0;
+
+    void check(const QString & what, bool ok, const QString & detail)
+    {
+      ok ? passed++ : failed++;
+      const QString line = QString("[maps-test] %1 abort: ").arg(ok ? "PASS" : "FAIL") + what + " -- " + detail;
+      if (ok)
+        LOG_INFO << line;
+      else
+        LOG_ERROR << line;
+    }
+  };
+  AbortCheck g_abortCheck;
+
+  void runAbortCheck(ModelViewer & mv, ModelViewer::ShutdownPoint point)
+  {
+    AbortCheck & c = g_abortCheck;
+    if (!c.armed)
+      return;
+    UnityRendererHost * host = mv.unityRendererHost;
+    const int hold = host ? host->playerHoldCount() : -1;
+    switch (point)
+    {
+      case ModelViewer::ShutdownPoint::Begin:
+        c.check("the frame goes with a viewer switch on its way, the player held", mv.viewerSwitchPending() && hold > 0,
+                QString("switch %1, the player's hold %2, the frame frozen %3").arg(mv.viewerSwitchPhaseName()).arg(hold)
+                  .arg(mv.IsFrozen() ? 1 : 0));
+        break;
+      case ModelViewer::ShutdownPoint::BeforeWorkerStop:
+        // (After AbortViewerSwitch, before the player is shut down.)
+        c.check("the switch was dropped, everything it held let go",
+                !mv.viewerSwitchPending() && !mv.IsFrozen() && mv.m_layoutBatch == 0 && hold == 0 && mv.m_later.empty(),
+                QString("switch %1, the frame frozen %2, the layout batch %3, the player's hold %4, %5 later turn(s) waiting")
+                  .arg(mv.viewerSwitchPhaseName()).arg(mv.IsFrozen() ? 1 : 0).arg(mv.m_layoutBatch).arg(hold)
+                  .arg((int)mv.m_later.size()));
+        break;
+      case ModelViewer::ShutdownPoint::AfterPlayerShutdown:
+        c.check("the player is shut down", host && !host->isRunning(), host ? "" : "no host");
+        LOG_INFO << QString("[maps-test] SHUTDOWN RESULT: %1 (a viewer switch dropped: %2 passed, %3 failed)")
+                      .arg(c.failed == 0 ? "PASS" : "FAIL").arg(c.passed).arg(c.failed);
+        c.armed = false;
+        break;
+      default:
+        break;
+    }
   }
 
   HWND playerWindowOf(UnityRendererHost * host)
@@ -11308,6 +11560,9 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   // poll's parts (stage 08: a round much longer than its poll was the wx queue's -- a paint, a layout, a handler).
   double roundMax = 0.0, stepRoundMax = 0.0;
   long long rounds = 0, roundsOver16 = 0, roundsOver50 = 0;
+  // Every busy stretch (g_pumpStretch: rounds with no sleep between, one), the same way.
+  double stretchMax = 0.0, stepStretchMax = 0.0;
+  long long stretches = 0, stretchesOver50 = 0;
   QString currentLabel = "start";
   UnityIpcServer::PollTiming lastPoll;
   std::function<void(const UnityIpcServer::PollTiming &)> previousPollTiming = ipc->onPollTiming;
@@ -11317,8 +11572,8 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       previousPollTiming(p);
   };
   // STREAMING (protocol 18): the longest round since the last roundmark step (roundcheck checks it), every streamState the
-  // player sent (the run's continuous samples), and the test flight's answer.
-  double markRoundMax = 0.0;
+  // player sent (the run's continuous samples), and the test flight's answer. (And the longest busy stretch since the mark.)
+  double markRoundMax = 0.0, markStretchMax = 0.0;
   QJsonArray streamSamples;
   UnityIpcServer::StreamState lastStream;
   long long streamStatesSeen = 0;
@@ -11380,6 +11635,26 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     CloseHandle(h);
     return b;
   };
+  // THE VIEWER SWITCH (the command bar's, in turns: ModelViewer::BeginViewerSwitch). switchRounds, when set, gets every
+  // round's time (a mode step's, from the click to the repaint). THE STRUCTURAL FILM: from a mode step's click until its
+  // switch is repainted, every round checks that nothing changed before the repaint -- the caption as at the click, the
+  // player's frame on or off screen as at the click, the frame frozen and its own drawing held back -- and is logged with
+  // the switch's phase. filmViolations counts every film's, filmChecked those a mode or settle step has checked.
+  struct SwitchFilm
+  {
+    bool active = false;
+    wxString title;
+    bool player = false;
+    bool caption = true;   // the caption and the player's place checked (known at the click)
+    int rounds = 0;
+    int violations = 0;
+    QString first;
+    QJsonArray log;
+  };
+  SwitchFilm film;
+  int filmViolations = 0, filmChecked = 0;
+  QString filmFirst;   // the first violation not checked yet
+  std::vector<double> * switchRounds = nullptr;
   g_pumpBusy = [&](double ms) {
     rounds++;
     roundMax = std::max(roundMax, ms);
@@ -11394,6 +11669,58 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                << QString("(its last poll %1 ms: receive %2, map serving %3, send %4, %5 map answer(s))").arg(lastPoll.pollMs, 0, 'f', 3)
                     .arg(lastPoll.receiveMs, 0, 'f', 3).arg(lastPoll.serveMs - lastPoll.recordMs, 0, 'f', 3).arg(lastPoll.sendMs, 0, 'f', 3)
                     .arg(lastPoll.mapAnswered);
+    if (switchRounds)
+      switchRounds->push_back(ms);
+    if (film.active)
+    {
+      if (!frame->viewerSwitchPending())
+      {
+        // Over once its switch was seen and is gone (not before it: a real click's press comes a round before the switch).
+        if (film.rounds > 0)
+          film.active = false;
+      }
+      else
+      {
+        QStringList changed;
+        if (film.caption && frame->GetTitle() != film.title)
+          changed << "the caption changed";
+        const bool player = frame->unityRendererHost && frame->unityRendererHost->playerOnScreen();
+        if (film.caption && player != film.player)
+          changed << (film.player ? "the player's frame went off screen" : "the player's frame came on screen");
+        if (!frame->IsFrozen())
+          changed << "the frame is not frozen";
+        if (!frame->viewerSwitchDrawHeld())
+          changed << "the frame's own drawing is not held back";
+        film.rounds++;
+        QJsonObject o;
+        o["phase"] = frame->viewerSwitchPhaseName();
+        o["ms"] = ms;
+        if (!changed.isEmpty())
+        {
+          o["changed"] = changed.join("; ");
+          const QString what = QString("round %1 of the switch (%2, %3 ms) at %4: %5").arg(film.rounds)
+                                 .arg(frame->viewerSwitchPhaseName()).arg(ms, 0, 'f', 1).arg(currentLabel).arg(changed.join("; "));
+          if (film.violations++ == 0)
+            film.first = what;
+          if (filmViolations == filmChecked)
+            filmFirst = what;
+          filmViolations++;
+        }
+        film.log.append(o);
+      }
+    }
+  };
+  g_pumpCarry = 0.0;
+  g_pumpStretch = [&](double ms) {
+    stretches++;
+    stretchMax = std::max(stretchMax, ms);
+    stepStretchMax = std::max(stepStretchMax, ms);
+    markStretchMax = std::max(markStretchMax, ms);
+    if (ms > 50.0)
+    {
+      stretchesOver50++;
+      LOG_INFO << "[maps-test] a GUI busy stretch of" << QString::number(ms, 'f', 3) << "ms at" << currentLabel;
+    }
   };
   const auto pump = [&](long ms) {
     wxStopWatch w;
@@ -11510,6 +11837,54 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     LOG_INFO << "[maps-test] sample" << label << QJsonDocument(o).toJson(QJsonDocument::Compact);
     return o;
   };
+  // THE SWITCH LET EVERYTHING GO: none on its way, the frame thawed, every frozen window of the frame one parkHidden froze
+  // (or inside one), the player's hold and the layout batch back to none, Browse in the viewer's mode.
+  const auto switchLetGo = [&](QString & why) {
+    QStringList bad;
+    if (frame->viewerSwitchPending())
+      bad << QString("a switch is still on its way (%1)").arg(frame->viewerSwitchPhaseName());
+    if (frame->IsFrozen())
+      bad << "the frame is still frozen";
+    int loose = 0;
+    QString firstLoose;
+    std::function<void(wxWindow *, bool)> visit = [&](wxWindow * parent, bool inParked) {
+      for (wxWindow * child : parent->GetChildren())
+      {
+        if (child->IsTopLevel())
+          continue;
+        const bool parked = inParked || frame->m_parked.count(child) > 0;
+        if (child->IsFrozen() && !parked && loose++ == 0)
+          firstLoose = QString::fromWCharArray((wxString(child->GetClassInfo()->GetClassName()) + wxT(" \"") + child->GetName() +
+                                                wxT("\"")).wc_str());
+        visit(child, parked);
+      }
+    };
+    visit(frame, false);
+    if (loose > 0)
+      bad << QString("%1 frozen window(s) not parked (the first: %2)").arg(loose).arg(firstLoose);
+    const int hold = frame->unityRendererHost ? frame->unityRendererHost->playerHoldCount() : 0;
+    if (hold != 0)
+      bad << QString("the player is held (%1)").arg(hold);
+    if (frame->m_layoutBatch != 0)
+      bad << QString("the layout batch is open (%1)").arg(frame->m_layoutBatch);
+    const ViewerMode browse = fc->ShowsMaps() ? ViewerMode::Maps : fc->ShowsTextures() ? ViewerMode::Textures
+                            : fc->ShowsBuildings() ? ViewerMode::Buildings : ViewerMode::Models;
+    if (browse != frame->viewerMode())
+      bad << QString("Browse shows %1, the viewer %2").arg(viewerModeName(browse)).arg(viewerModeName(frame->viewerMode()));
+    why = bad.isEmpty() ? QString("Browse in %1, the player not held, %2 window(s) parked").arg(viewerModeName(browse))
+                            .arg((int)frame->m_parked.size())
+                        : bad.join("; ");
+    return bad.isEmpty();
+  };
+  // The structural films since the last check: no round of them saw anything change before the repaint.
+  const auto checkFilm = [&](const QString & label) {
+    tally.check(label + ": nothing changed before the repaint (structural film)", filmViolations == filmChecked,
+                filmViolations == filmChecked ? QString("the last film %1 round(s)").arg(film.rounds)
+                                              : QString("%1 round(s) changed; the first: %2").arg(filmViolations - filmChecked)
+                                                  .arg(filmFirst));
+    filmChecked = filmViolations;
+  };
+  int filmPictures = 0;   // modefilm's pictures, numbered through the run
 
   // The player, connected.
   if (!pumpUntil([&]() { return ipc->isUnityReady(); }, 60000))
@@ -11524,6 +11899,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     ipc->onStreamState = previousStream;
     ipc->onTestFlightDone = previousFlight;
     g_pumpBusy = nullptr;
+    g_pumpStretch = nullptr;
     return 1;
   }
   tally.check("the player is connected and speaks protocol 14 (the Maps viewer)", ipc->playerInspectsMapTiles(),
@@ -11535,7 +11911,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   const QStringList seq = spec.split(',', QString::SkipEmptyParts);
   LOG_INFO << "[maps-test] client" << frame->mapCatalog()->client().product << frame->mapCatalog()->client().build
            << "sequence:" << spec;
-  bool holdClose = false, closeWorld = false;
+  bool holdClose = false, closeWorld = false, closeNow = false;
   QString holdRole = "rootAdt";
   for (int s = 0; s < seq.size(); s++)
   {
@@ -11547,20 +11923,165 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     currentLabel = label;
     wxStopWatch stepClock;
     stepRoundMax = 0.0;
+    stepStretchMax = 0.0;
     QJsonObject rec;
     rec["step"] = step;
-    if (kind == "mode")
+    if (kind == "mode" || kind == "modenow" || kind == "modefilm")
     {
-      const int id = arg == "maps" ? ID_UI_MAPS : arg == "buildings" ? ID_UI_BUILDINGS : arg == "textures" ? ID_UI_TEXTURES
-                                                                                                           : ID_UI_MODELS;
-      const ViewerMode want = arg == "maps" ? ViewerMode::Maps : arg == "buildings" ? ViewerMode::Buildings
-                            : arg == "textures" ? ViewerMode::Textures : ViewerMode::Models;
+      // mode:<m>[:real] -- the command bar's tool clicked, then until the switch is repainted (its turns, when it is made in
+      // turns of its own): the rounds from the click to the repaint, the switch's report and its structural film recorded,
+      // and what it let go of checked. :real posts the press and the release in rounds of their own, as a hand makes them
+      // (postClick posts both at once).
+      // modenow:<m>[:real] -- the click's first round only, no sleep after it (the next turn's timer, armed at that round's
+      // idle, is not due yet): the switch is left on its way for the steps after it -- a key, a press, a load, another
+      // click finishes it; settle checks what it left.
+      // modefilm:<m> -- as mode, and a picture of the frame after every pump while the switch is on its way, as it holds it
+      // (not repainted first: <out>_film_<n>.png; on a hidden desktop it can come back black, and is then no evidence).
+      const QString m = arg.section(':', 0, 0);
+      const bool real = arg.section(':', 1, 1) == "real";
+      const int id = m == "maps" ? ID_UI_MAPS : m == "buildings" ? ID_UI_BUILDINGS : m == "textures" ? ID_UI_TEXTURES
+                                                                                                     : ID_UI_MODELS;
+      const ViewerMode want = m == "maps" ? ViewerMode::Maps : m == "buildings" ? ViewerMode::Buildings
+                            : m == "textures" ? ViewerMode::Textures : ViewerMode::Models;
       const wxRect r = frame->commandBar->GetToolRect(id);
-      postClick((HWND)frame->commandBar->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
-      const bool switched = pumpUntil([&]() { return frame->viewerMode() == want; }, 5000);
+      const HWND bar = (HWND)frame->commandBar->GetHWND();
+      const wxPoint at(r.x + r.width / 2, r.y + r.height / 2);
+      const QString toolRect = QString("tool rect %1,%2 %3x%4").arg(r.x).arg(r.y).arg(r.width).arg(r.height);
+      rec["from"] = viewerModeName(frame->viewerMode());
+      rec["to"] = viewerModeName(want);
+      film = SwitchFilm();
+      film.active = true;
+      film.title = frame->GetTitle();
+      film.player = frame->unityRendererHost && frame->unityRendererHost->playerOnScreen();
+      // A switch still on its way (a modenow's) is finished by this click's press, in the round its successor begins: the
+      // caption and the player's place are that one's to change, so this film checks only the freeze and the drawing.
+      film.caption = !frame->viewerSwitchPending();
+      std::vector<double> clickRounds;
+      switchRounds = &clickRounds;
+      const long long roundsBefore = rounds;
+      wxStopWatch clickClock;
+      if (real)
+      {
+        const LPARAM lp = MAKELPARAM(at.x, at.y);
+        PostMessage(bar, WM_MOUSEMOVE, 0, lp);
+        PostMessage(bar, WM_LBUTTONDOWN, MK_LBUTTON, lp);
+        pumpIpc(ipc, 1);
+        PostMessage(bar, WM_LBUTTONUP, 0, lp);
+      }
+      else
+        postClick(bar, at);
+      if (kind == "modenow")
+      {
+        pumpRound(ipc);
+        // (The event loop waits here for what comes next -- the key, the press or the click that finishes the switch is a
+        // round of its own after a wait --, so the click's round is a busy stretch of its own, not the next step's.)
+        pumpStretchEnd();
+        rec["pendingAfterClick"] = frame->viewerSwitchPending();
+        rec["phaseAfterClick"] = frame->viewerSwitchPhaseName();
+        // (A switch a modenow before this one left on its way: finished by this click's press.)
+        rec["switchBefore"] = switchReportJson(frame->lastViewerSwitch());
+        tally.check(label + ": the switch is on its way after its first turn",
+                    frame->viewerMode() == want && frame->viewerSwitchPending(),
+                    QString("%1; mode %2, switch %3").arg(toolRect).arg(viewerModeName(frame->viewerMode()))
+                      .arg(frame->viewerSwitchPhaseName()));
+      }
+      else
+      {
+        bool switched = false, settled = false;
+        QJsonArray pictures;
+        if (kind == "modefilm")
+        {
+          wxStopWatch w;
+          while ((frame->viewerMode() != want || frame->viewerSwitchPending()) && w.Time() < 8000)
+          {
+            pumpIpc(ipc, 1);
+            if (!frame->viewerSwitchPending() || outBase.isEmpty() || pictures.size() >= 100)
+              continue;
+            const QString path = outBase + QString("_film_%1.png").arg(++filmPictures);
+            QSize size;
+            double mean = -1.0;
+            const wxRect vp = frame->unityRendererHost->GetScreenRect();
+            const wxRect fr = frame->GetScreenRect();
+            const bool ok = printWindowPng((HWND)frame->GetHWND(), path, size, mean,
+                                           wxRect(vp.x - fr.x, vp.y - fr.y, vp.width, vp.height), false);
+            QJsonObject o;
+            o["path"] = path;
+            o["written"] = ok;
+            o["phase"] = frame->viewerSwitchPhaseName();
+            o["t"] = (double)clickClock.Time();
+            o["viewportMean"] = mean;
+            pictures.append(o);
+          }
+          switched = frame->viewerMode() == want;
+          settled = !frame->viewerSwitchPending();
+          rec["filmPictures"] = pictures;
+        }
+        else
+        {
+          switched = pumpUntil([&]() { return frame->viewerMode() == want; }, 5000);
+          settled = pumpUntil([&]() { return !frame->viewerSwitchPending(); }, 3000);
+        }
+        rec["switchMs"] = (double)clickClock.Time();
+        rec["switchRounds"] = (double)(rounds - roundsBefore);
+        rec["switchRoundsMs"] = jsonArray(clickRounds);
+        switchRounds = nullptr;
+        rec["switch"] = switchReportJson(frame->lastViewerSwitch());
+        rec["switchFilm"] = film.log;
+        film.active = false;   // (a switch in one turn is never seen on its way)
+        pump(300);
+        tally.check(label + ": the command bar's tool switches the viewer", switched, toolRect);
+        QString why;
+        const bool letGo = switchLetGo(why);
+        tally.check(label + ": the switch let everything go", settled && letGo,
+                    settled ? why : "still on its way after 3 s; " + why);
+        checkFilm(label);
+      }
+      switchRounds = nullptr;
+    }
+    else if (kind == "settle")
+    {
+      // settle[:<word>]: until no viewer switch is on its way and no turn after one waits (the item chooser's end, the
+      // minimap reads, the texture decode, Browse's tree freed), at most 3 s; then what the switch let go of, the structural
+      // films since the last check and -- with a word (key, press, command, load, client, closing, turn) -- what finished
+      // the last switch.
+      const bool settled = pumpUntil([&]() { return !frame->viewerSwitchPending() && !frame->laterWorkPending(); }, 3000);
+      const ModelViewer::ViewerSwitchReport last = frame->lastViewerSwitch();
+      rec["switch"] = switchReportJson(last);
+      QString why;
+      const bool letGo = switchLetGo(why);
+      tally.check(label + ": the switch let everything go", settled && letGo,
+                  settled ? why : QString("still on its way or a later turn waiting after 3 s (switch %1); %2")
+                                    .arg(frame->viewerSwitchPhaseName()).arg(why));
+      checkFilm(label);
+      if (!arg.isEmpty())
+        tally.check(label + ": the last switch was finished by " + arg, last.finishedBy.contains(arg, Qt::CaseInsensitive),
+                    QString("finished by \"%1\" (to %2, %3 turn(s))").arg(last.finishedBy).arg(last.to).arg(last.turns));
       pump(300);
-      tally.check(label + ": the command bar's tool switches the viewer", switched,
-                  QString("tool rect %1,%2 %3x%4").arg(r.x).arg(r.y).arg(r.width).arg(r.height));
+    }
+    else if (kind == "clickframe")
+    {
+      // clickframe:<x>:<y>: a left click posted to the frame's own window at that point of its client area -- where a real
+      // click on a frozen panel lands (a frozen window reads hidden to Windows: it is not hit-tested). A switch on its way
+      // is finished by its press.
+      postClick((HWND)frame->GetHWND(), wxPoint(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toInt()));
+      pump(50);
+    }
+    else if (kind == "closenow")
+    {
+      // The last step: the run ends at once, with no round after the step before it -- a switch a modenow left on its way
+      // is still on its way when the frame goes (the harness's end deletes the frame, it does not close it). THE ABORT
+      // CHECK (runAbortCheck) is run by ~ModelViewer; the player is closed by it too.
+      if (s != seq.size() - 1)
+      {
+        tally.check(label, false, "closenow must be the last step");
+        continue;
+      }
+      rec["pending"] = frame->viewerSwitchPending();
+      LOG_INFO << "[maps-test] closenow: the frame goes now; a viewer switch on its way:" << frame->viewerSwitchPhaseName();
+      g_abortCheck = AbortCheck();
+      g_abortCheck.armed = true;
+      ModelViewer::testShutdownProbe = &runAbortCheck;
+      closeNow = true;
     }
     else if (kind == "search")
     {
@@ -11856,12 +12377,16 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       const QString key = arg.section(':', 0, 0).toLower();
       const bool down = arg.section(':', 1, 1).toLower() != "up";
       // ("lshift": the left Shift's own code. A posted generic Shift leaves the system's keyboard state as it is, which the
-      // player's input reads to tell the side; a real Shift updates it.)
+      // player's input reads to tell the side; a real Shift updates it.) The arrows are the extended keys, as the
+      // keyboard's own arrow keys send them (not the number pad's).
       const UINT vk = key == "space" ? VK_SPACE : key == "shift" ? VK_SHIFT : key == "lshift" ? VK_LSHIFT
+                    : key == "up" ? VK_UP : key == "down" ? VK_DOWN : key == "left" ? VK_LEFT : key == "right" ? VK_RIGHT
+                    : key == "return" ? VK_RETURN : key == "escape" ? VK_ESCAPE : key == "tab" ? VK_TAB
                     : key.size() == 1 ? (UINT)key.toUpper()[0].unicode() : 0;
+      const bool extended = vk == VK_UP || vk == VK_DOWN || vk == VK_LEFT || vk == VK_RIGHT;
       const HWND target = kind == "keyplayer" ? frame->unityRendererHost->playerWindow() : ::GetFocus();
       const UINT scan = ::MapVirtualKeyW(vk == VK_SHIFT ? VK_LSHIFT : vk, MAPVK_VK_TO_VSC);
-      const LPARAM lp = (LPARAM)(1u | (scan << 16) | (down ? 0u : (3u << 30)));
+      const LPARAM lp = (LPARAM)(1u | (scan << 16) | (extended ? (1u << 24) : 0u) | (down ? 0u : (3u << 30)));
       const bool posted = vk != 0 && target && ::PostMessageW(target, down ? WM_KEYDOWN : WM_KEYUP, vk, lp);
       rec["target"] = frame->unityRendererHost->describeWindow(target);
       LOG_INFO << "[input] harness posted" << (down ? "WM_KEYDOWN" : "WM_KEYUP") << key << "to" << rec["target"].toString();
@@ -12825,13 +13350,19 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                << (qint64)o["viewerPrivateBytes"].toDouble() << ";" << lastStream.describe();
     }
     else if (kind == "roundmark")
+    {
       markRoundMax = 0.0;
+      markStretchMax = 0.0;
+    }
     else if (kind == "roundcheck")
     {
       const double limit = arg.isEmpty() ? 50.0 : arg.toDouble();
       rec["roundMaxSinceMark"] = markRoundMax;
+      rec["stretchMaxSinceMark"] = markStretchMax;
       tally.check(label + QString(": no GUI round over %1 ms since the mark").arg(limit), markRoundMax <= limit,
                   QString("the longest %1 ms").arg(markRoundMax, 0, 'f', 3));
+      tally.check(label + QString(": no GUI busy stretch over %1 ms since the mark").arg(limit), markStretchMax <= limit,
+                  QString("the longest %1 ms").arg(markStretchMax, 0, 'f', 3));
     }
     else if (kind == "shot" || kind == "shotnow")
     {
@@ -12865,6 +13396,7 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       tally.check(label, false, "unknown step");
     rec["ms"] = (double)stepClock.Time();
     rec["guiRoundMaxMs"] = stepRoundMax;
+    rec["guiStretchMaxMs"] = stepStretchMax;
     rec["timings"] = timingsJson(maps->timings());
     rec["mapPhase"] = mapPhaseName(maps->mapPhase());
     rec["tilePhase"] = tilePhaseName(maps->tilePhase());
@@ -12872,8 +13404,10 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
     rec["minimapsLoaded"] = maps->minimapsLoaded();
     rec["privateBytes"] = (double)privateBytesNow();
     steps.append(rec);
-    LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax << "ms";
+    LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax
+             << "ms, the longest busy stretch" << stepStretchMax << "ms";
   }
+  pumpStretchEnd();   // (the stretch still open: the run's last)
 
   out["steps"] = steps;
   out["shots"] = shots;
@@ -12884,6 +13418,10 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   out["guiRoundMaxMs"] = roundMax;
   out["guiRoundsOver16ms"] = (double)roundsOver16;
   out["guiRoundsOver50ms"] = (double)roundsOver50;
+  out["guiStretches"] = (double)stretches;
+  out["guiStretchMaxMs"] = stretchMax;
+  out["guiStretchesOver50ms"] = (double)stretchesOver50;
+  out["switchFilmViolations"] = filmViolations;
   out["client"] = frame->mapCatalog()->client().product + " " + frame->mapCatalog()->client().build;
   out["passed"] = tally.passed;
   out["failed"] = tally.failed;
@@ -12895,8 +13433,10 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       f.write(QJsonDocument(out).toJson(QJsonDocument::Indented));
   }
   LOG_INFO << QString("[maps-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped); GUI rounds %5, the longest %6 ms, %7 over 16.7 ms, "
-                      "%8 over 50 ms").arg(tally.failed == 0 ? "PASS" : "FAIL").arg(tally.passed).arg(tally.failed)
-                .arg(tally.skipped).arg(rounds).arg(roundMax, 0, 'f', 2).arg(roundsOver16).arg(roundsOver50);
+                      "%8 over 50 ms; busy stretches %9, the longest %10 ms, %11 over 50 ms")
+                .arg(tally.failed == 0 ? "PASS" : "FAIL").arg(tally.passed).arg(tally.failed)
+                .arg(tally.skipped).arg(rounds).arg(roundMax, 0, 'f', 2).arg(roundsOver16).arg(roundsOver50)
+                .arg(stretches).arg(stretchMax, 0, 'f', 2).arg(stretchesOver50);
   std::printf("WMV: maps ui test %s (%d passed, %d failed, %d skipped)\n", tally.failed == 0 ? "PASS" : "FAIL", tally.passed,
               tally.failed, tally.skipped);
   std::fflush(stdout);
@@ -12908,8 +13448,11 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
   ipc->onStreamState = previousStream;
   ipc->onTestFlightDone = previousFlight;
   g_pumpBusy = nullptr;
+  g_pumpStretch = nullptr;
   if (closeWorld)
     return tally.failed;   // the player left running: the frame's destructor closes it with the world load in flight
+  if (closeNow)
+    return tally.failed;   // a viewer switch left on its way: the frame's destructor drops it (THE ABORT CHECK), closes the player
   if (holdClose)
   {
     // A tile requested with its root ADT read held in the worker, then the window closed (the frame's destructor) with

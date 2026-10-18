@@ -53,9 +53,12 @@ public:
 private:
   bool isActive(const wxAuiPaneInfo & pane) const;
   void drawCaptionLine(wxDC & dc, const wxRect & rect, bool active) const;
+  // A pane's close button drawn (DrawPaneButton keeps each look of it: m_closeButtons).
+  void drawCloseButton(wxDC & dc, const wxWindow * scale, int buttonState, const wxRect & rect) const;
 
   const wxWindow * m_frame;
   wxString m_activePane;
+  std::map<wxString, wxBitmap> m_closeButtons;
 };
 
 class UiToolBarArt : public wxAuiGenericToolBarArt
@@ -86,10 +89,13 @@ private:
   UiIcon iconOf(const wxAuiToolBarItem & item) const;
   // A segment's neighbours in its group (adjacent segments).
   bool segmentNeighbour(wxWindow * wnd, const wxAuiToolBarItem & item, int step) const;
+  // A button drawn (DrawButton keeps each look of one it draws: m_buttons).
+  void drawButton(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item, const wxRect & rect);
 
   bool m_bottomLine;
   std::map<int, UiIcon> m_icons;
   std::map<int, Role> m_roles;
+  std::map<wxString, wxBitmap> m_buttons;
 };
 
 #endif // UIART_H

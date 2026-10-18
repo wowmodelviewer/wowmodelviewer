@@ -12,7 +12,11 @@
 // asking; with no pool budget evicted and asked again); a tile closed with its requests out (retired, their answers
 // dropped as late, nothing built); a prototype fetch taken over when the tile fetching it closes (the entry reported
 // "built" once: the session goes on); one streamTile out at a time, closes only too; a refusal for one tile's load handed
-// on to another tile; a texture missing from storage asked for once; a new load over a live session with requests out
+// on to another tile; a texture missing from storage asked for once; a texture or group refused for one tile's load kept
+// for that tile and handed on (complete placements replacing private ones, every tile refusing it, a whichever-tile
+// refusal, the single-tile picture unchanged, a repeated group ask); a load at its count cap (a model whose texture it can
+// neither ask for nor take from the session kept for its tile, never pooled; one the session has settled taken without
+// asking); a new load over a live session with requests out
 // (the old one ended first, its answers late); the entry failing (no session); clearTerrain taking everything away -- and
 // every tally back to 0.
 
@@ -29,6 +33,9 @@ public static partial class WmvLifecycleSelfTest
     const uint StreamWmo = 9900, StreamWmoGroup = 9901, StreamWmoTex = 9902, StreamWmoCorner = 9903;
     const uint StreamM2A = 9910, StreamSkinA = 9911, StreamM2B = 9920, StreamSkinB = 9921, StreamM2C = 9925, StreamSkinC = 9926;
     const uint StreamM2Tex = 9930, StreamTerrainTex = 9940, StreamTerrainTexCorner = 9941;
+    const uint StreamWmoGroupA = 9905, StreamWmoGroupB = 9906, StreamWmoGroupC = 9907;
+    const uint StreamM2TexA = 9931, StreamM2D = 9915, StreamSkinD = 9916, StreamM2E = 9917, StreamSkinE = 9918;
+    const uint StreamM2TexD = 9932, StreamM2TexE = 9933;
 
     static uint StreamRootId(int x, int y) { return (uint)(991000 + y * 64 + x); }
     static uint StreamTex0Id(int x, int y) { return (uint)(996000 + y * 64 + x); }
@@ -51,8 +58,14 @@ public static partial class WmvLifecycleSelfTest
         public readonly HashSet<string> Answered = new HashSet<string>();
         public readonly HashSet<string> WithheldTiles = new HashSet<string>();   // "x_y": their stream requests not answered
         public readonly HashSet<string> WithheldFiles = new HashSet<string>();   // "role:fid": not answered
+        public readonly HashSet<string> WithheldAt = new HashSet<string>();      // "role:fid@x_y": not answered for that tile's load
         public readonly Dictionary<int, string> LoadTile = new Dictionary<int, string>();
         public readonly HashSet<string> Refused = new HashSet<string>();         // "role:fid@x_y": refused for that tile's load
+        public readonly HashSet<string> RefusedAnyTile = new HashSet<string>();  // "role:fid": refused whatever the load (single-tile too)
+        public readonly HashSet<string> RefuseFirst = new HashSet<string>();     // "role:fid": its first request, whichever tile, refused
+        public readonly Dictionary<string, string> RefusedAt = new Dictionary<string, string>();   // ... and the tile it was for
+        public readonly HashSet<string> OncePerLoadRoles = new HashSet<string>(); // roles answered as the host's "each once per load"
+        readonly HashSet<string> onceAsked = new HashSet<string>();
         public bool HoldAnswers;                                                 // streamTile answers kept back
         public int MaxUnanswered;                                                // the most streamTile messages out at once
         public double[] Camera;
@@ -111,14 +124,22 @@ public static partial class WmvLifecycleSelfTest
                     continue;
                 string tile;
                 bool tiled = TileOf.TryGetValue(q[0], out tile);
-                if (tiled && Refused.Contains(q[1] + ":" + q[2] + "@" + tile))
+                string file = q[1] + ":" + q[2];
+                if (RefusedAnyTile.Contains(file) || (tiled && (Refused.Contains(file + "@" + tile) || RefuseFirst.Remove(file))))
                 {
+                    if (tiled && !RefusedAt.ContainsKey(file)) RefusedAt[file] = tile;
                     Answered.Add(q[0]);
                     H.Answer(q[0], null, "refused", "test: refused for the tile's load (its budget)");
                     continue;
                 }
-                if (tiled && WithheldTiles.Contains(tile))
+                if (tiled && (WithheldTiles.Contains(tile) || WithheldAt.Contains(file + "@" + tile)))
                     continue;
+                if (OncePerLoadRoles.Contains(q[1]) && !onceAsked.Add(file + ":" + q[3]))
+                {
+                    Answered.Add(q[0]);
+                    H.Answer(q[0], null, "refused", "test: load " + q[3] + " has asked for " + q[1] + " " + q[2] + " before: each once per load");
+                    continue;
+                }
                 Answer(q);
             }
             H.Pump(1);
@@ -299,6 +320,30 @@ public static partial class WmvLifecycleSelfTest
         return n;
     }
 
+    /// <summary>The tiles whose loads asked for (role, fid), in the order asked.</summary>
+    static List<string> TilesAsked(StreamHost h, string role, uint fid)
+    {
+        var l = new List<string>();
+        foreach (string[] q in h.H.Sent)
+            if (q[1] == role && q[2] == fid.ToString())
+            {
+                string t;
+                l.Add(h.TileOf.TryGetValue(q[0], out t) ? t : "?");
+            }
+        return l;
+    }
+
+    /// <summary>The live doodads drawn from a prototype with no texture (GetTexture returns before the cache for a slot with no
+    /// decoded image: WmvModelBuilder.cs 3404-3408, so TextureRefs stays empty).</summary>
+    static List<WmvDoodadInstance> Untextured(WmvWorldScene s)
+    {
+        var l = new List<WmvDoodadInstance>();
+        if (s != null)
+            foreach (WmvDoodadInstance i in s.Doodads)
+                if (!i.Disposed && i.Prototype != null && i.Prototype.TextureRefs.Count == 0) l.Add(i);
+        return l;
+    }
+
     /// <summary>The exact (bit-equal) vertex positions two tiles' meshes share.</summary>
     static int SharedVertices(TerrainTileMesh a, TerrainTileMesh b)
     {
@@ -373,7 +418,7 @@ public static partial class WmvLifecycleSelfTest
               s.StreamImagesShared + " image(s) shared)", log);
         Check(CountPlacements(scene, 500) == 1 && CountPlacements(scene, 501) == 1 && scene.Instances.Count == 2 && WmvWorldModels.LivePrototypes == 1 &&
               CountDoodads(scene, DoodadSource.Mddf, 600) == 1 && scene.Doodads.Count == 9 + 1 + 2 && WmvWorldDoodads.LivePrototypes == 2 &&
-              s.SceneTerrainTextures == 1,
+              s.SceneTerrainTextures == 1 && s.StreamPrototypesKept == 0 && s.StreamPlacementsReplaced + s.StreamDoodadsReplaced == 0,
               "streaming: placement 500 (listed by two tiles) and 501 placed once each over one prototype; doodad 600 (two tiles) once, a doodad " +
               "per tile, the world models' set doodads -- 12 doodads over 2 prototypes; one terrain texture in the scene (" + state(h) + ")", log);
         bool originsShared = true;
@@ -577,7 +622,7 @@ public static partial class WmvLifecycleSelfTest
         settled = h.Until(() => h.H.For(6) != null && h.Settled() && s.StreamTiles == 9);
         scene = s.World;
         Check(settled && h.Asked(rw, StreamWmo) == 2 && CountPlacements(scene, 500) == 1 && CountPlacements(scene, 501) == 1 &&
-              WmvWorldModels.LivePrototypes == 1,
+              WmvWorldModels.LivePrototypes == 1 && s.StreamPrototypesKept == 0,
               "streaming: the world model refused for the entry's load is fetched under another tile's load and built -- 500 and 501 placed " +
               "(asked " + h.Asked(rw, StreamWmo) + " times; " + state(h) + ")", log);
         s.Clear("test");
@@ -589,10 +634,297 @@ public static partial class WmvLifecycleSelfTest
         s.Load(StreamCommand(11));
         settled = h.Until(() => h.H.For(11) != null && h.Settled() && s.StreamTiles == 9);
         scene = s.World;
-        Check(settled && h.Asked(rmt, StreamM2Tex) == 1 && scene != null && scene.Doodads.Count == 12,
+        Check(settled && h.Asked(rmt, StreamM2Tex) == 1 && scene != null && scene.Doodads.Count == 12 && s.StreamPrototypesKept == 0,
               "streaming: an M2 texture missing from client storage is asked for once in the session -- every tile's models take " +
               "the failure without asking, and their doodads are placed untextured (asked " + h.Asked(rmt, StreamM2Tex) + " time(s); " +
               state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- a world-model texture refused for the entry's load: the entry's world model is its own (kept for its tile), the
+        // fetch handed on; the session's prototype is complete, and the complete placement replaces the entry's private one
+        h = make();
+        s = h.H.Session;
+        string entryName = StreamEntryX + "_" + StreamEntryY, rwg = WmvTerrainSession.RoleWmoGroup;
+        h.Refused.Add(rwt + ":" + StreamWmoTex + "@" + entryName);
+        s.Load(StreamCommand(14));
+        settled = h.Until(() => h.H.For(14) != null && h.Settled() && s.StreamTiles == 9 && WmvWorldModels.LivePrototypes == 1 &&
+                                s.World != null && s.World.PrivatePrototypes.Count == 0, 800);
+        scene = s.World;
+        List<string> wt = TilesAsked(h, rwt, StreamWmoTex);
+        bool allTextured = scene != null && scene.Instances.Count == 2;
+        if (scene != null)
+            foreach (WmvWorldInstance i in scene.Instances)
+                allTextured &= !i.Disposed && i.Prototype != null && !i.Prototype.Disposed && i.Prototype.Runtime.PrimaryTexturesMissing == 0;
+        Check(settled && h.H.For(14).Status == "built" && wt.Count == 2 && wt[0] == entryName && wt[1] != entryName &&
+              h.Asked(rw, StreamWmo) == 2 && h.Asked(rwg, StreamWmoGroup) == 2 && CountPlacements(scene, 500) == 1 &&
+              CountPlacements(scene, 501) == 1 && allTextured && scene.Prototypes.Count == 1 && s.StreamPrototypesKept == 1 &&
+              s.StreamPlacementsReplaced == 1 && s.StreamDoodadsReplaced == 0 && scene.Doodads.Count == 12,
+              "streaming: a world-model texture refused for the entry's load -- the entry's world model kept for its tile, its fetch " +
+              "handed on; the session's prototype complete; 500 (two tiles) placed once from it, the private one replaced and gone (" +
+              state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- an M2 texture refused for the entry's load, its neighbours held back until it reports: the entry draws its doodads
+        // untextured from its own M2s; the neighbours fetch them whole, and their complete doodads replace the entry's shared ones
+        h = make();
+        s = h.H.Session;
+        for (int y = 49; y <= 51; y++)
+            for (int x = 31; x <= 33; x++)
+                if (x != StreamEntryX || y != StreamEntryY) h.WithheldTiles.Add(x + "_" + y);
+        h.Refused.Add(rmt + ":" + StreamM2Tex + "@" + entryName);
+        s.Load(StreamCommand(15));
+        bool alone = h.Until(() => h.H.For(15) != null, 800);
+        int entryUntextured = Untextured(s.World).Count, entryPrivate = s.World != null ? s.World.PrivateDoodadPrototypes.Count : -1;
+        h.WithheldTiles.Clear();
+        settled = h.Until(() => h.Settled() && s.StreamTiles == 9 && WmvWorldDoodads.LivePrototypes == 3, 800);
+        for (int k = 0; k < 20; k++) h.Round();      // (a streamState after the last answer)
+        scene = s.World;
+        WmvIpcClient.StreamStateReport st15 = h.States.Count > 0 ? h.States[h.States.Count - 1] : null;
+        List<string> mt = TilesAsked(h, rmt, StreamM2Tex);
+        List<WmvDoodadInstance> u = Untextured(scene);
+        uint entryOwn = (uint)(700 + StreamEntryY * 64 + StreamEntryX);   // 3932, the entry's M2 B doodad (StreamFiles)
+        Check(alone && h.H.For(15).Status == "built" && entryUntextured == 3 && entryPrivate == 2 && settled &&
+              st15 != null && st15.TilesFailed == 0 && !string.Join(" ", s.StreamTileStates().ToArray()).Contains(":failed") &&
+              mt.Count == 2 && mt[0] == entryName && mt[1] != entryName &&
+              h.Asked(rm, StreamM2A) == 2 && h.Asked(rm, StreamM2B) == 2 && scene.Doodads.Count == 12 &&
+              CountDoodads(scene, DoodadSource.Mddf, 600) == 1 && u.Count == 1 && u[0].Doodad.Source == DoodadSource.Mddf &&
+              u[0].Doodad.UniqueId == entryOwn && scene.PrivateDoodadPrototypes.Count == 1 && s.StreamPrototypesKept == 2 &&
+              s.StreamDoodadsReplaced == 2 && s.StreamPlacementsReplaced == 0,
+              "streaming: an M2 texture refused for the entry's load -- the entry draws its doodads untextured alone, its two M2s " +
+              "kept for it, fetched again under another tile's load; 600 and the set doodad of 500 replaced by complete ones, only " +
+              "the entry's own 3932 untextured (" + state(h) + ")", log);
+        int rmBefore = h.AskedRole(rm), rmtBefore = h.AskedRole(rmt);
+        h.Over(35, 50);
+        bool gone15 = h.Until(() => h.Settled() && s.StreamTiles == 6 && WmvWorldDoodads.LivePrototypes == 2 &&
+                                    s.World.PrivateDoodadPrototypes.Count == 0, 800);
+        h.Over(32, 50);
+        bool back15 = h.Until(() => h.Settled() && s.StreamTiles == 12, 800);
+        scene = s.World;
+        Check(gone15 && back15 && h.AskedRole(rm) == rmBefore && h.AskedRole(rmt) == rmtBefore && Untextured(scene).Count == 0 &&
+              CountDoodads(scene, DoodadSource.Mddf, entryOwn) == 1 && WmvWorldDoodads.LivePrototypes == 2 && s.StreamPrivatePrototypes == 0,
+              "streaming: the entry's tile closed and opened again places 3932 from the session's complete M2 B -- nothing asked, " +
+              "nothing private left (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- one of the world model's two group files refused for the entry's load: the entry's world model is its own, the
+        // session's built with both groups under another tile's load
+        h = make();
+        s = h.H.Session;
+        h.Files.Add(rw, StreamWmo, WmoSynthetic.Concat(WmoSynthetic.SquaresRoot(2, StreamWmoGroupA, StreamWmoTex),
+                                                       WmoSynthetic.Chunk("MODS", ModsRecord("Set_$DefaultGlobal", 0, 1)),
+                                                       WmoSynthetic.Chunk("MODI", WmoSynthetic.U32s(StreamM2A)),
+                                                       WmoSynthetic.Chunk("MODD", ModdRecord(0, 2f, 2f, 0f))));
+        h.Files.Add(rwg, StreamWmoGroupA, WmoSynthetic.SquaresGroup(0));
+        h.Files.Add(rwg, StreamWmoGroupB, WmoSynthetic.SquaresGroup(1));
+        h.Refused.Add(rwg + ":" + StreamWmoGroupB + "@" + entryName);
+        s.Load(StreamCommand(16));
+        settled = h.Until(() => h.H.For(16) != null && h.Settled() && s.StreamTiles == 9 && WmvWorldModels.LivePrototypes == 1 &&
+                                s.World != null && s.World.PrivatePrototypes.Count == 0, 800);
+        scene = s.World;
+        bool whole = scene != null && scene.Instances.Count == 2;
+        if (scene != null)
+            foreach (WmvWorldInstance i in scene.Instances)
+                whole &= i.Prototype.Groups.Length == 2 && Array.IndexOf(i.Prototype.Groups, null) < 0 && i.Prototype.Runtime.GroupsMissing == 0;
+        List<string> gt = TilesAsked(h, rwg, StreamWmoGroupB);
+        Check(settled && gt.Count == 2 && gt[0] == entryName && gt[1] != entryName && h.Asked(rw, StreamWmo) == 2 &&
+              h.Asked(rwg, StreamWmoGroupA) == 2 && h.Asked(rwt, StreamWmoTex) == 1 && whole && CountPlacements(scene, 500) == 1 &&
+              CountPlacements(scene, 501) == 1 && s.StreamPrototypesKept == 1 && s.StreamPlacementsReplaced == 1 &&
+              scene.Doodads.Count == 12,
+              "streaming: a group file refused for the entry's load -- the entry's world model kept for it, the session's built with " +
+              "both groups under another tile's load (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- the world-model texture refused for every tile that lists the world model: nothing complete exists, so nothing is
+        // published or pooled, and each placement keeps one instance (a private finder takes the private instance there)
+        h = make();
+        s = h.H.Session;
+        foreach (string t in new[] { "31_50", "32_50", "33_50" }) h.Refused.Add(rwt + ":" + StreamWmoTex + "@" + t);
+        s.Load(StreamCommand(17));
+        settled = h.Until(() => h.H.For(17) != null && h.Settled() && s.StreamTiles == 9 && WmvWorldModels.LivePrototypes == 2 &&
+                                s.World != null && s.World.PrivatePrototypes.Count == 2, 800);
+        scene = s.World;
+        bool allMissing = scene != null && scene.Instances.Count == 2;
+        if (scene != null)
+            foreach (WmvWorldInstance i in scene.Instances) allMissing &= i.Prototype.Runtime.PrimaryTexturesMissing > 0;
+        Check(settled && h.Asked(rwt, StreamWmoTex) == 3 && h.Asked(rw, StreamWmo) == 3 && CountPlacements(scene, 500) == 1 &&
+              CountPlacements(scene, 501) == 1 && allMissing && scene.Prototypes.Count == 0 && s.StreamPrototypesKept == 3 &&
+              s.StreamPlacementsReplaced == 0 && scene.Doodads.Count == 12,
+              "streaming: a world-model texture refused for every tile that lists the world model -- each load asked once and kept " +
+              "its own; 33_50 took the entry's private 500 (no second instance), its own private placed nothing and went; nothing " +
+              "published (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- the single-tile load keeps Stage 07's picture: a texture refused for it is drawn missing, the prototype its scene's
+        h = make();
+        s = h.H.Session;
+        h.RefusedAnyTile.Add(rwt + ":" + StreamWmoTex);
+        WmvIpcClient.TerrainTileCommand one = StreamCommand(18);
+        one.Streaming = null;
+        s.Load(one);
+        h.Until(() => h.H.For(18) != null, 400);
+        scene = s.World;
+        Check(h.H.For(18) != null && h.H.For(18).Status == "built" && !s.Streaming && h.Asked(rwt, StreamWmoTex) == 1 &&
+              scene != null && CountPlacements(scene, 500) == 1 && scene.Instances.Count == 1 &&
+              scene.Instances[0].Prototype.Runtime.PrimaryTexturesMissing > 0 && scene.Prototypes.Count == 1 &&
+              scene.PrivatePrototypes.Count == 0 && WmvWorldModels.LivePrototypes == 1,
+              "streaming: a world-model texture refused for a single-tile load is drawn missing as at Stage 07 -- built, shared " +
+              "in its scene, nothing private (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- an M2 texture refused for whichever tile asks for it first (any claim order): only that tile's own doodads are
+        // untextured, every M2 it built is kept for it and fetched again; with every tile closed nothing private is left
+        h = make();
+        s = h.H.Session;
+        string m2TexKey = rmt + ":" + StreamM2Tex;
+        h.RefuseFirst.Add(m2TexKey);
+        s.Load(StreamCommand(19));
+        settled = h.Until(() => h.H.For(19) != null && h.Settled() && s.StreamTiles == 9, 800);
+        for (int k = 0; k < 40; k++) h.Round();      // (the sweep, and a streamState)
+        scene = s.World;
+        string refusedTile;
+        bool fired = h.RefusedAt.TryGetValue(m2TexKey, out refusedTile);
+        int refusedLoad = refusedTile == entryName ? 19 : -1;
+        foreach (KeyValuePair<int, string> kv in h.LoadTile) if (kv.Value == refusedTile) refusedLoad = kv.Key;
+        bool askedA = TilesAsked(h, rm, StreamM2A).Contains(refusedTile), askedB = TilesAsked(h, rm, StreamM2B).Contains(refusedTile);
+        int untexturedElsewhere = 0;
+        bool textured600 = false;
+        foreach (WmvDoodadInstance i in scene.Doodads)
+        {
+            if (i.Disposed || i.Prototype == null) continue;
+            bool bare = i.Prototype.TextureRefs.Count == 0;
+            if (bare && i.Load != refusedLoad) untexturedElsewhere++;
+            if (i.Doodad.Source == DoodadSource.Mddf && i.Doodad.UniqueId == 600) textured600 = !bare;
+        }
+        WmvIpcClient.StreamStateReport st19 = h.States.Count > 0 ? h.States[h.States.Count - 1] : null;
+        Check(settled && fired && (askedA || askedB) && h.Asked(rmt, StreamM2Tex) == 2 && h.Asked(rm, StreamM2A) == (askedA ? 2 : 1) &&
+              h.Asked(rm, StreamM2B) == (askedB ? 2 : 1) && s.StreamPrototypesKept == (askedA ? 1 : 0) + (askedB ? 1 : 0) &&
+              untexturedElsewhere == 0 && textured600 && CountDoodads(scene, DoodadSource.Mddf, 600) == 1 && scene.Doodads.Count == 12 &&
+              WmvWorldDoodads.LivePrototypes == 2 + s.StreamPrivatePrototypes && st19 != null && st19.TilesFailed == 0,
+              "streaming: an M2 texture refused for the first tile that asks (" + refusedTile + ") -- only that tile's own doodads " +
+              "untextured, every M2 it built kept and fetched again (" + state(h) + ")", log);
+        h.Over(36, 50);                               // no tile there: all nine close
+        bool away19 = h.Until(() => h.Settled() && s.StreamTiles == 0 && s.StreamPrivatePrototypes == 0, 400);
+        bool keptGone = WmvWorldDoodads.LivePrototypes == 2 && WmvWorldModels.LivePrototypes == 1;
+        int m2Asked19 = h.AskedRole(rm), m2Tex19 = h.AskedRole(rmt);
+        h.Over(StreamEntryX, StreamEntryY);
+        bool back19 = h.Until(() => h.Settled() && s.StreamTiles == 9, 800);
+        scene = s.World;
+        Check(away19 && keptGone && back19 && Untextured(scene).Count == 0 && scene.Doodads.Count == 12 && h.AskedRole(rm) == m2Asked19 &&
+              h.AskedRole(rmt) == m2Tex19 && WmvWorldDoodads.LivePrototypes == 2,
+              "streaming: with every tile closed nothing private is left; back, every doodad placed textured from the pool, nothing " +
+              "asked (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- a repeated group ask within one load is not a gap of the load: two world models of the entry share group 9906,
+        // which the host refuses the second time ("each once per load")
+        h = make();
+        s = h.H.Session;
+        h.OncePerLoadRoles.Add(rwg);
+        h.Files.Add(rw, StreamWmo, WmoSynthetic.Concat(WmoSynthetic.SquaresRoot(2, StreamWmoGroupA, StreamWmoTex),
+                                                       WmoSynthetic.Chunk("MODS", ModsRecord("Set_$DefaultGlobal", 0, 1)),
+                                                       WmoSynthetic.Chunk("MODI", WmoSynthetic.U32s(StreamM2A)),
+                                                       WmoSynthetic.Chunk("MODD", ModdRecord(0, 2f, 2f, 0f))));   // groups 9905, 9906
+        h.Files.Add(rwg, StreamWmoGroupA, WmoSynthetic.SquaresGroup(0));
+        h.Files.Add(rwg, StreamWmoGroupB, WmoSynthetic.SquaresGroup(1));
+        h.Files.Add(rw, StreamWmoCorner, WmoSynthetic.SquaresRoot(2, StreamWmoGroupB, StreamWmoTex));            // groups 9906, 9907
+        h.Files.Add(rwg, StreamWmoGroupC, WmoSynthetic.SquaresGroup(1));
+        int eidx = StreamEntryY * 64 + StreamEntryX;
+        h.Files.Add(WmvTerrainSession.RoleObj0Adt, StreamObj0Id(StreamEntryX, StreamEntryY), AdtSynthetic.Cat(AdtSynthetic.Mver(),
+            AdtSynthetic.Chunk("MDDF", AdtSynthetic.Cat(
+                AdtSynthetic.MddfRecord(StreamM2B, (uint)(700 + eidx), 100f + StreamEntryX, 20f, 300f + StreamEntryY, 0f, 0f, 0f, 1024, 0x40),
+                AdtSynthetic.MddfRecord(StreamM2A, 600, 150f, 20f, 350f, 0f, 30f, 0f, 1024, 0x40))),
+            AdtSynthetic.Chunk("MODF", AdtSynthetic.Cat(ModfWithSet(StreamWmo, 500, 0), ModfWithSet(StreamWmoCorner, 503, 0)))));
+        s.Load(StreamCommand(20));
+        settled = h.Until(() => h.H.For(20) != null && h.Settled() && s.StreamTiles == 9, 800);
+        scene = s.World;
+        Check(settled && s.StreamGroupRepeats == 1 && s.StreamPrototypesKept == 0 && h.Asked(rwg, StreamWmoGroupB) == 2 &&
+              h.Asked(rw, StreamWmo) == 1 && h.Asked(rw, StreamWmoCorner) == 1 && CountPlacements(scene, 500) == 1 &&
+              CountPlacements(scene, 501) == 1 && CountPlacements(scene, 503) == 1 && scene.PrivatePrototypes.Count == 0,
+              "streaming: a group file two world models of the entry share is refused the second time by the host's once-per-load " +
+              "rule -- counted as a repeat, not the load's gap: nothing kept, nothing fetched again (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- a load at its count cap (maxM2TexturesPerLoad 1): the entry places two M2s no other tile lists (D, E), each with a
+        // texture of its own; it asks for one, and the other it can neither ask for nor take from the session -- that M2 is the
+        // entry's gap: drawn without its texture for the entry alone, kept for it, never the session's or pooled (no other tile
+        // wants it, so nothing fetches it whole). Closed, nothing of it is left; back, the complete M2 comes from the pool and the
+        // other is fetched again, whole now that the load's one texture is its own
+        h = make();
+        s = h.H.Session;
+        h.Files.Add(rm, StreamM2D, DoodadM2((int)StreamSkinD, (int)StreamM2TexD));
+        h.Files.Add(WmvTerrainSession.RoleM2Skin, StreamSkinD, M2Synthetic.GeosetSkin(new[] { 0 }));
+        h.Files.Add(rmt, StreamM2TexD, RawBlp(19, 8, 8));
+        h.Files.Add(rm, StreamM2E, DoodadM2((int)StreamSkinE, (int)StreamM2TexE));
+        h.Files.Add(WmvTerrainSession.RoleM2Skin, StreamSkinE, M2Synthetic.GeosetSkin(new[] { 0 }));
+        h.Files.Add(rmt, StreamM2TexE, RawBlp(25, 8, 8));
+        h.Files.Add(WmvTerrainSession.RoleObj0Adt, StreamObj0Id(StreamEntryX, StreamEntryY), AdtSynthetic.Cat(AdtSynthetic.Mver(),
+            AdtSynthetic.Chunk("MDDF", AdtSynthetic.Cat(
+                AdtSynthetic.MddfRecord(StreamM2D, 901, 120f + StreamEntryX, 20f, 310f + StreamEntryY, 0f, 0f, 0f, 1024, 0x40),
+                AdtSynthetic.MddfRecord(StreamM2E, 902, 130f + StreamEntryX, 20f, 320f + StreamEntryY, 0f, 0f, 0f, 1024, 0x40))),
+            AdtSynthetic.Chunk("MODF", new byte[0])));
+        WmvIpcClient.TerrainTileCommand capped = StreamCommand(21);
+        capped.MaxM2TexturesPerLoad = 1;
+        s.Load(capped);
+        settled = h.Until(() => h.H.For(21) != null && h.Settled() && s.StreamTiles == 9, 800);
+        for (int k = 0; k < 40; k++) h.Round();      // (the sweep, and a streamState)
+        scene = s.World;
+        List<string> capD = TilesAsked(h, rmt, StreamM2TexD), capE = TilesAsked(h, rmt, StreamM2TexE);
+        List<WmvDoodadInstance> bareCap = Untextured(scene);
+        bool dAsked = capD.Count == 1;
+        uint gapModel = dAsked ? StreamM2E : StreamM2D, wholeModel = dAsked ? StreamM2D : StreamM2E;
+        uint gapTex = dAsked ? StreamM2TexE : StreamM2TexD, gapDoodad = dAsked ? 902u : 901u;
+        WmvDoodadPrototype gapProto = bareCap.Count == 1 ? bareCap[0].Prototype : null;
+        WmvIpcClient.StreamStateReport st21 = h.States.Count > 0 ? h.States[h.States.Count - 1] : null;
+        Check(settled && st21 != null && st21.TilesFailed == 0 && capD.Count + capE.Count == 1 && (dAsked ? capD[0] : capE[0]) == entryName &&
+              s.StreamPrototypesKept == 1 && s.StreamPrivatePrototypes == 1 && s.StreamDoodadsReplaced == 0 && bareCap.Count == 1 &&
+              bareCap[0].Doodad.UniqueId == gapDoodad && gapProto != null && scene.PrivateDoodadPrototypes.Contains(gapProto) &&
+              !scene.DoodadPrototypes.ContainsValue(gapProto) && h.Asked(rm, StreamM2D) == 1 && h.Asked(rm, StreamM2E) == 1,
+              "streaming: at its count cap the entry can neither ask for nor take one of its two own M2s' textures -- that M2 drawn " +
+              "without it for the entry alone, kept for the entry, not the session's (asked " + string.Join(" ", capD.ToArray()) + " / " +
+              string.Join(" ", capE.ToArray()) + "; untextured " + bareCap.Count + "; " + state(h) + ")", log);
+        h.Over(36, 50);                               // no tile there: all nine close
+        bool away21 = h.Until(() => h.Settled() && s.StreamTiles == 0 && s.StreamPrivatePrototypes == 0, 400);
+        h.Over(StreamEntryX, StreamEntryY);
+        bool back21 = h.Until(() => h.Settled() && s.StreamTiles == 9, 800);
+        for (int k = 0; k < 40; k++) h.Round();
+        scene = s.World;
+        Check(away21 && back21 && Untextured(scene).Count == 0 && h.Asked(rm, wholeModel) == 1 && h.Asked(rm, gapModel) == 2 &&
+              h.Asked(rmt, gapTex) == 1 && s.StreamPrototypesKept == 1 && s.StreamPrivatePrototypes == 0 &&
+              scene.PrivateDoodadPrototypes.Count == 0,
+              "streaming: the entry closed, nothing private of it is left; back, the complete M2 is taken from the pool and the kept " +
+              "one fetched again, whole now -- nothing untextured (" + state(h) + ")", log);
+        s.Clear("test");
+
+        // ---- at its count cap a load takes what the session has settled of a texture, without asking: 33_50 places an M2 C with
+        // A's texture and fetches it while the entry's skin of A is held back; then the entry, at its cap, takes the image
+        h = make();
+        s = h.H.Session;
+        h.Files.Add(rm, StreamM2A, DoodadM2((int)StreamSkinA, (int)StreamM2TexA));
+        h.Files.Add(rm, StreamM2C, DoodadM2((int)StreamSkinC, (int)StreamM2TexA));
+        h.Files.Add(rmt, StreamM2TexA, RawBlp(19, 8, 8));
+        int nidx = StreamEntryY * 64 + StreamEntryX + 1;   // 33_50
+        h.Files.Add(WmvTerrainSession.RoleObj0Adt, StreamObj0Id(StreamEntryX + 1, StreamEntryY), AdtSynthetic.Cat(AdtSynthetic.Mver(),
+            AdtSynthetic.Chunk("MDDF", AdtSynthetic.Cat(
+                AdtSynthetic.MddfRecord(StreamM2B, (uint)(700 + nidx), 100f + StreamEntryX + 1, 20f, 300f + StreamEntryY, 0f, 0f, 0f, 1024, 0x40),
+                AdtSynthetic.MddfRecord(StreamM2C, 801, 160f, 20f, 360f, 0f, 0f, 0f, 1024, 0x40))),
+            AdtSynthetic.Chunk("MODF", ModfWithSet(StreamWmo, 500, 0))));
+        h.WithheldAt.Add(WmvTerrainSession.RoleM2Skin + ":" + StreamSkinA + "@" + entryName);
+        capped = StreamCommand(22);
+        capped.MaxM2TexturesPerLoad = 1;
+        s.Load(capped);
+        bool texReady = h.Until(() => h.Asked(rmt, StreamM2TexA) == 1 && h.Settled() == false &&
+                                      TilesAsked(h, rmt, StreamM2TexA)[0] == (StreamEntryX + 1) + "_" + StreamEntryY &&
+                                      h.Answered.Count > 0 && s.World != null && Untextured(s.World).Count == 0 &&
+                                      CountDoodads(s.World, DoodadSource.Mddf, 801) == 1, 800);
+        h.WithheldAt.Clear();
+        settled = h.Until(() => h.H.For(22) != null && h.Settled() && s.StreamTiles == 9, 800);
+        for (int k = 0; k < 40; k++) h.Round();
+        scene = s.World;
+        Check(texReady && settled && s.StreamPrototypesKept == 0 && s.StreamDoodadsReplaced == 0 && h.Asked(rmt, StreamM2TexA) == 1 &&
+              h.Asked(rm, StreamM2A) == 1 && Untextured(scene).Count == 0 && CountDoodads(scene, DoodadSource.Mddf, 801) == 1 &&
+              scene.Doodads.Count == 13 && scene.PrivateDoodadPrototypes.Count == 0,
+              "streaming: at its count cap the entry takes M2 A's texture from the session (fetched for 33_50's M2 C) without " +
+              "asking -- nothing kept, nothing asked twice, every doodad textured (" + state(h) + ")", log);
         s.Clear("test");
 
         // ---- a new load over a live session with fetches out (a new Enter world): the old session ends first -- its requests

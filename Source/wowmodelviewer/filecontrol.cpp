@@ -1,5 +1,6 @@
 #include "logger/Logger.h"
 
+#include <wx/evtloop.h>
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
 #include <wx/srchctrl.h>
@@ -100,10 +101,20 @@ namespace
   // redraw is turned on while scrolling is on: about 20 us a row on the test computer, so wx's thaw of the 1,187 Retail
   // maps took 44 to 58 ms, two passes of 20 to 30 ms. The redraw turned on first, while scrolling is still off, took
   // 0.01 ms; scrolling on is then the one pass (docs/world-viewer/05-maps-viewer-ui.md, section 13).
+  // And the native control is frozen only once a row is added or taken away while the tree is frozen, the one thing
+  // its freeze is for: a tree frozen with the frame for a viewer-mode switch, its rows left as they were (its parent's
+  // freeze keeps it from being drawn), is not measured again at the thaw -- 12-15 ms of a switch with the Retail maps
+  // (docs/world-viewer/08-streaming.md, section 8.8).
   class BrowseTree : public wxTreeCtrl
   {
   public:
     using wxTreeCtrl::wxTreeCtrl;
+
+    wxTreeItemId AddRoot(const wxString & text, int image = -1, int selectedImage = -1, wxTreeItemData * data = nullptr) override
+    {
+      rowsChanging();
+      return wxTreeCtrl::AddRoot(text, image, selectedImage, data);
+    }
 
     // wxTreeCtrl puts off an EnsureVisible asked while frozen until its own thaw, which this thaw replaces: put off here.
     void EnsureVisible(const wxTreeItemId & item) override
@@ -117,30 +128,69 @@ namespace
     void Delete(const wxTreeItemId & item) override
     {
       m_ensureVisible.clear();
+      rowsChanging();
       wxTreeCtrl::Delete(item);
     }
     void DeleteChildren(const wxTreeItemId & item) override
     {
       m_ensureVisible.clear();
+      rowsChanging();
       wxTreeCtrl::DeleteChildren(item);
     }
     void DeleteAllItems() override
     {
       m_ensureVisible.clear();
+      rowsChanging();
       wxTreeCtrl::DeleteAllItems();
     }
 
-  protected:
-    void DoThaw() override
+    bool rowsUnsettled() const { return m_nativeFrozen; }
+    // The rows measured now, not at the thaw: the redraw back on first, scrolling still off (0.01 ms; nothing is drawn --
+    // the frozen panel the tree is in keeps it off the screen), then scrolling back on: the one pass. The thaw then has
+    // nothing to measure; the panel's own thaw repaints the tree (RDW_ALLCHILDREN).
+    void settleRows()
     {
-      // wxWindow's thaw: the redraw on and the window refreshed (nothing for a hidden window, which its freeze left
-      // alone) -- scrolling still off.
-      wxTreeCtrlBase::DoThaw();
-      // Scrolling back on: the one pass.
+      if (!m_nativeFrozen)
+        return;
+      m_nativeFrozen = false;
       const HWND tree = (HWND)GetHWND();
+      if (m_redrawOff)
+      {
+        m_redrawOff = false;
+        ::SendMessage(tree, WM_SETREDRAW, TRUE, 0);
+        if (!IsShown())
+          ::ShowWindow(tree, SW_HIDE);
+      }
       const LONG_PTR style = ::GetWindowLongPtr(tree, GWL_STYLE);
       if (style & TVS_NOSCROLL)
         ::SetWindowLongPtr(tree, GWL_STYLE, style & ~(LONG_PTR)TVS_NOSCROLL);
+    }
+
+  protected:
+    // Nothing yet: the redraw and scrolling go off with the first row changed (rowsChanging).
+    void DoFreeze() override {}
+    wxTreeItemId DoInsertItem(const wxTreeItemId & parent, size_t pos, const wxString & text, int image, int selectedImage,
+                              wxTreeItemData * data) override
+    {
+      rowsChanging();
+      return wxTreeCtrl::DoInsertItem(parent, pos, text, image, selectedImage, data);
+    }
+    wxTreeItemId DoInsertAfter(const wxTreeItemId & parent, const wxTreeItemId & idPrevious, const wxString & text,
+                               int image = -1, int selImage = -1, wxTreeItemData * data = nullptr) override
+    {
+      rowsChanging();
+      return wxTreeCtrl::DoInsertAfter(parent, idPrevious, text, image, selImage, data);
+    }
+    void DoThaw() override
+    {
+      if (m_nativeFrozen)
+      {
+        // The redraw on first, scrolling still off (it shows a window: one hidden meanwhile is hidden again); scrolling
+        // back on: the one pass (settleRows).
+        settleRows();
+        if (IsShown())
+          Refresh();
+      }
       if (!IsFrozen() && !m_ensureVisible.empty())
       {
         std::vector<wxTreeItemId> items;
@@ -152,6 +202,24 @@ namespace
     }
 
   private:
+    // Rows about to be added or taken away while frozen: scrolling off until the thaw, as wx's freeze turns it off (rows
+    // added meanwhile do not update the scroll bars one by one), and the redraw too while shown (hidden, nothing is drawn).
+    void rowsChanging()
+    {
+      if (!IsFrozen() || m_nativeFrozen)
+        return;
+      m_nativeFrozen = true;
+      const HWND tree = (HWND)GetHWND();
+      m_redrawOff = IsShown();
+      if (m_redrawOff)
+        ::SendMessage(tree, WM_SETREDRAW, FALSE, 0);
+      const LONG_PTR style = ::GetWindowLongPtr(tree, GWL_STYLE);
+      if (!(style & TVS_NOSCROLL))
+        ::SetWindowLongPtr(tree, GWL_STYLE, style | TVS_NOSCROLL);
+    }
+
+    bool m_nativeFrozen = false;
+    bool m_redrawOff = false;
     std::vector<wxTreeItemId> m_ensureVisible;
   };
 }
@@ -182,31 +250,38 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
     searchStatus = UiStyle::secondaryLabel(this, wxEmptyString);
 
     // The tree in the Explorer style (chevrons, hover, the soft selection), on the pane's own colour with
-    // no border of its own (the pane has one), rows a little taller than the native minimum.
-    fileTree = new BrowseTree(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize,
-                              wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_FULL_ROW_HIGHLIGHT |
-                              wxTR_NO_LINES | wxTR_TWIST_BUTTONS | wxBORDER_NONE);
-    fileTree->EnableSystemTheme();
-    fileTree->SetDoubleBuffered(true);
-    fileTree->SetBackgroundColour(UiStyle::palette().panelBackground);
-    fileTree->SetForegroundColour(UiStyle::palette().text);
-    {
-      const HWND tree = (HWND)fileTree->GetHWND();
+    // no border of its own (the pane has one), rows a little taller than the native minimum. Two alike: the main
+    // tree, and the maps' (m_mapTree), in the same place with one shown.
+    const auto makeTree = [this]() {
+      wxTreeCtrl * t = new BrowseTree(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize,
+                                      wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_FULL_ROW_HIGHLIGHT |
+                                      wxTR_NO_LINES | wxTR_TWIST_BUTTONS | wxBORDER_NONE);
+      t->EnableSystemTheme();
+      t->SetDoubleBuffered(true);
+      t->SetBackgroundColour(UiStyle::palette().panelBackground);
+      t->SetForegroundColour(UiStyle::palette().text);
+      const HWND tree = (HWND)t->GetHWND();
       const int row = FromDIP(UiStyle::TreeRowHeight) & ~1;   // an even height: Windows rounds odd ones down
       if (TreeView_GetItemHeight(tree) < row)
         TreeView_SetItemHeight(tree, row);
-    }
-    m_textures = new TextureBrowse(fileTree);
+      // An arrow key held down in the texture tree: the rows it passes wait to be decoded until it is let
+      // go (TextureView::setKeysRepeating). Focus leaving the tree lets go too: the key-up goes elsewhere.
+      t->Bind(wxEVT_KEY_DOWN, [this](wxKeyEvent & e) { KeysRepeating(e.IsAutoRepeat()); e.Skip(); });
+      t->Bind(wxEVT_KEY_UP, [this](wxKeyEvent & e) { KeysRepeating(false); e.Skip(); });
+      t->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { KeysRepeating(false); e.Skip(); });
+      return t;
+    };
+    m_mainTree = makeTree();
+    m_mapTree = makeTree();
+    m_mapTree->Hide();
+    fileTree = m_mainTree;
+    m_textures = new TextureBrowse(m_mainTree);
     m_texturesLoadWatch.Bind(wxEVT_TIMER, [this](wxTimerEvent &) { TexturesClientLoaded(); });
-    // An arrow key held down in the texture tree: the rows it passes wait to be decoded until it is let
-    // go (TextureView::setKeysRepeating). Focus leaving the tree lets go too: the key-up goes elsewhere.
-    fileTree->Bind(wxEVT_KEY_DOWN, [this](wxKeyEvent & e) { KeysRepeating(e.IsAutoRepeat()); e.Skip(); });
-    fileTree->Bind(wxEVT_KEY_UP, [this](wxKeyEvent & e) { KeysRepeating(false); e.Skip(); });
-    fileTree->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { KeysRepeating(false); e.Skip(); });
 
     wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
     top->Add(searchFrame, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
-    top->Add(fileTree, 1, wxEXPAND | wxTOP, sp);
+    top->Add(m_mainTree, 1, wxEXPAND | wxTOP, sp);
+    top->Add(m_mapTree, 1, wxEXPAND | wxTOP, sp);
     top->Add(searchStatus, 0, wxEXPAND | wxALL, sp);
     SetSizer(top);
 
@@ -220,10 +295,11 @@ FileControl::~FileControl()
   m_texturesLoadWatch.Stop();
   delete m_textures;
   m_textures = NULL;
-  if (fileTree) {
-    fileTree->Destroy();
-    fileTree = NULL;
-  }
+  for (wxTreeCtrl * tree : { m_mainTree, m_mapTree })
+    if (tree)
+      tree->Destroy();
+  m_mainTree = m_mapTree = NULL;
+  fileTree = NULL;
   // The search field together with its frame (UiSearchFrame), which refers to it.
   txtContent->GetParent()->Destroy();
   txtContent = NULL;
@@ -297,6 +373,7 @@ namespace
 
 void FileControl::Init(ModelViewer* mv)
 {
+  m_listingDue = false;
   if (modelviewer == NULL)
     modelviewer = mv;
   KeepFocusOffTree keepFocus(fileTree);
@@ -307,6 +384,7 @@ void FileControl::Init(ModelViewer* mv)
 
   if (m_mode == ViewerMode::Textures)
   {
+    m_mainTreeMode = m_mode;
     InitTextures();
     return;
   }
@@ -316,6 +394,7 @@ void FileControl::Init(ModelViewer* mv)
     InitMaps(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
     return;
   }
+  m_mainTreeMode = m_mode;
 
   // No client yet: there is no file index to list.
   if (!core::Game::instance().initDone())
@@ -771,6 +850,9 @@ void FileControl::LookUpBuilding(int fileDataId)
 // to the wxTreeCtrl (idempotent -- appendChildren no-ops once a node is loaded).
 void FileControl::OnTreeItemExpanding(wxTreeEvent &event)
 {
+  // (The tree not shown -- the main tree in Maps, the maps' in the other modes -- has nothing to say.)
+  if (event.GetEventObject() != fileTree)
+    return;
   const wxTreeItemId item = event.GetItem();
   if (!item.IsOk())
     return;
@@ -863,6 +945,9 @@ void FileControl::OnPopupClick(wxCommandEvent &evt)
 
 void FileControl::OnTreeMenu(wxTreeEvent &event)
 {
+  // (The tree not shown -- the main tree in Maps, the maps' in the other modes -- has nothing to say.)
+  if (event.GetEventObject() != fileTree)
+    return;
   wxTreeItemId item = event.GetItem();
 
   if (!item.IsOk() || !modelviewer->canvas) // make sure that a valid Tree Item was actually selected.
@@ -1036,6 +1121,9 @@ void FileControl::UpdateInterface()
 
 void FileControl::OnTreeSelect(wxTreeEvent &event)
 {
+  // (The tree not shown -- the main tree in Maps, the maps' in the other modes -- has nothing to say.)
+  if (event.GetEventObject() != fileTree)
+    return;
   wxTreeItemId item = event.GetItem();
 
   // make sure that a valid Tree Item was actually selected; a row picked again by the tree coming back as
@@ -1275,22 +1363,19 @@ void FileControl::OnSearchTimer(wxTimerEvent &event)
 }
 
 // ------------------------------------------------------------------------------- the viewer mode
-void FileControl::FollowViewerMode(ViewerMode mode)
+bool FileControl::FollowViewerMode(ViewerMode mode, bool listNow)
 {
   if (mode == m_mode)
-    return;
+    return false;
+  // A search typed for the mode left, not run yet, goes with it: its text is that mode's (m_search), not this one's.
+  m_searchTimer.Stop();
   // The tree left is kept for its return: the texture tree's open folders, top row and picked row; the
-  // model or building tree itself (keepTree).
+  // model or building tree itself (keepTree), whose rows also stay in the main tree while Maps shows its own. (The maps'
+  // rows, groups and catalogue stay with the map tree.)
   if (m_mode == ViewerMode::Textures)
     m_textures->rememberOpenFolders();
-  else if (m_mode != ViewerMode::Maps)   // the map list is listed again on the way back (a fraction of a millisecond)
+  else if (m_mode != ViewerMode::Maps)
     keepTree(treeState());
-  else
-  {
-    // The maps' groups go with their rows (the next mode's listing, below, takes the rows), and so does the catalogue.
-    m_mapGroups.clear();
-    m_mapsCatalog.reset();
-  }
   // Each mode's search is what its tree shows, not text typed and not run: that one could be a
   // 1-character search over every model, which takes seconds.
   m_search[slot(m_mode)] = m_applied[slot(m_mode)];
@@ -1298,23 +1383,120 @@ void FileControl::FollowViewerMode(ViewerMode mode)
   m_mode = mode;
   m_keysRepeating = false;
   m_buildingPickPending = false;
+  // The mode's tree in its place.
+  wxTreeCtrl * tree = mode == ViewerMode::Maps ? m_mapTree : m_mainTree;
+  const bool swapped = tree != fileTree;
+  if (swapped)
+  {
+    fileTree->Hide();
+    fileTree = tree;
+    fileTree->Show();
+  }
   // THE MAPS VIEWER's facts and controls, under the list in Maps only (the overhead map is in the viewport's place).
-  if (mode == ViewerMode::Maps && !m_mapPanel && g_modelViewer && g_modelViewer->maps())
-  {
-    // As tall as its controls; the list of maps takes the rest.
-    m_mapPanel = new MapTilePanel(this, g_modelViewer->maps());
-    GetSizer()->Insert(2, m_mapPanel, 0, wxEXPAND);
-  }
+  if (mode == ViewerMode::Maps)
+    addMapPanel();
   if (m_mapPanel)
-  {
     m_mapPanel->Show(mode == ViewerMode::Maps);
+  if (swapped || m_mapPanel)
     Layout();
-    // What changed while another viewer had Browse (a client switch, a load) shows at once.
-    if (mode == ViewerMode::Maps)
-      m_mapPanel->Refresh2();
-  }
+  // What changed while another viewer had Browse (a client switch, a load) shows at once.
+  if (m_mapPanel && mode == ViewerMode::Maps)
+    m_mapPanel->Refresh2();
   UpdateSearchHint();
-  Init();
+  // The tree as it was left, when it still lists what Init would: nothing listed again.
+  const QString content = QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed();
+  if (mode == ViewerMode::Maps && mapTreeCurrent(content))
+  {
+    m_applied[slot(mode)] = txtContent->GetValue();
+    SetSearchStatus(m_mapsStatus);
+    LOG_INFO << "[maps] Browse shows the" << m_mapsListed << "map(s) listed before, nothing listed again";
+  }
+  else if (mode != ViewerMode::Maps && mainTreeCurrent(content))
+  {
+    TreeState & state = treeState();
+    state.kept = false;
+    m_applied[slot(mode)] = txtContent->GetValue();
+    SetSearchStatus(state.rootStatus);
+    // A model or building loaded meanwhile from a menu has no row here (as reuseTree picks its row again).
+    PickedRowFollowsLoad();
+    LOG_INFO << "Initializing File Controls - the tree's rows kept while Maps showed its own, nothing listed again";
+  }
+  else if (!listNow)
+  {
+    m_listingDue = true;
+    return true;
+  }
+  else
+    Init();
+  return false;
+}
+
+void FileControl::ListForViewerMode()
+{
+  if (m_listingDue)
+    Init();
+}
+
+int FileControl::RowsToSettle() const
+{
+  int rows = 0;
+  for (wxTreeCtrl * tree : { m_mainTree, m_mapTree })
+    if (BrowseTree * browse = dynamic_cast<BrowseTree *>(tree))
+      if (browse->rowsUnsettled())
+        rows += (int)browse->GetCount();
+  return rows;
+}
+
+void FileControl::SettleRows()
+{
+  QElapsedTimer clock;
+  clock.start();
+  const int rows = RowsToSettle();
+  for (wxTreeCtrl * tree : { m_mainTree, m_mapTree })
+    if (BrowseTree * browse = dynamic_cast<BrowseTree *>(tree))
+      browse->settleRows();
+  if (rows > 0)
+    LOG_INFO << "Browse: the native tree measured" << rows << "rows in" << clock.nsecsElapsed() / 1e6
+             << "ms, ahead of the viewer switch's repaint";
+}
+
+bool FileControl::mainTreeCurrent(const QString & content)
+{
+  // Models and Buildings: their rows, built from the hierarchy kept (reuseTree's terms). Textures lists its tree again.
+  if ((m_mode != ViewerMode::Models && m_mode != ViewerMode::Buildings) || m_mainTreeMode != m_mode ||
+      !core::Game::instance().initDone() || !m_mainTree->GetRootItem().IsOk())
+    return false;
+  const TreeState & state = treeState();
+  return state.kept && state.root && state.rootValid && state.rootContent == content;
+}
+
+bool FileControl::mapTreeCurrent(const QString & content) const
+{
+  if (!m_mapsCatalog || !g_modelViewer || g_modelViewer->mapCatalog() != m_mapsCatalog ||
+      !UnityAssetAccess::hasActiveClient() || content != m_mapsListedContent || !m_mapTree->GetRootItem().IsOk())
+    return false;
+  // The map picked is still the row picked (or has no row, as when it was listed).
+  MapsViewer * maps = g_modelViewer->maps();
+  const int picked = maps ? maps->mapId() : -1;
+  const wxTreeItemId row = m_mapTree->GetSelection();
+  FileTreeData * data = row.IsOk() ? dynamic_cast<FileTreeData *>(m_mapTree->GetItemData(row)) : nullptr;
+  const int selected = data ? data->mapId : -1;
+  return selected == picked || (selected < 0 && picked == m_mapsListedPicked);
+}
+
+void FileControl::addMapPanel()
+{
+  if (m_mapPanel || !g_modelViewer || !g_modelViewer->maps())
+    return;
+  // As tall as its controls, under the list of maps (which takes the rest); shown in Maps only.
+  m_mapPanel = new MapTilePanel(this, g_modelViewer->maps());
+  m_mapPanel->Hide();
+  GetSizer()->Insert(3, m_mapPanel, 0, wxEXPAND);
+}
+
+void FileControl::PrepareMaps()
+{
+  addMapPanel();
 }
 
 bool FileControl::ShowsMaps() const
@@ -1378,6 +1560,7 @@ void FileControl::InitMaps(const QString & content)
   m_mapsListed = 0;
   m_mapGroups.clear();
   m_mapsCatalog.reset();
+  m_mapsListedContent = content;
   if (!catalog || !UnityAssetAccess::hasActiveClient())
   {
     fileTree->Thaw();
@@ -1434,6 +1617,7 @@ void FileControl::InitMaps(const QString & content)
   wxTreeItemId select;
   MapsViewer * maps = g_modelViewer->maps();
   const int picked = maps ? maps->mapId() : -1;
+  m_mapsListedPicked = picked;
   if (pinned)
   {
     FileTreeData * d = new FileTreeData(nullptr);
@@ -1479,14 +1663,15 @@ void FileControl::InitMaps(const QString & content)
   fileTree->Thaw();
   m_mapsListMs = timer.nsecsElapsed() / 1e6;
   if (content.isEmpty())
-    SetSearchStatus(wxString::Format(_("%d maps: %d tile-grid maps, %d world model maps, %d whose WDT is not in this client's "
-                                       "files, %d without a WDT, %d of an unknown type."),
-                                     m_mapsListed, (int)groups[GroupTerrain].size(), (int)groups[GroupWorldModel].size(),
-                                     (int)groups[GroupMissingWdt].size(), (int)groups[GroupNoWdt].size(),
-                                     (int)groups[GroupUnknown].size()));
+    m_mapsStatus = wxString::Format(_("%d maps: %d tile-grid maps, %d world model maps, %d whose WDT is not in this client's "
+                                      "files, %d without a WDT, %d of an unknown type."),
+                                    m_mapsListed, (int)groups[GroupTerrain].size(), (int)groups[GroupWorldModel].size(),
+                                    (int)groups[GroupMissingWdt].size(), (int)groups[GroupNoWdt].size(),
+                                    (int)groups[GroupUnknown].size());
   else
-    SetSearchStatus(m_mapsListed == 0 && !pinned ? wxString(_("No map matches."))
-                                                 : wxString::Format(_("%d map(s) match."), m_mapsListed));
+    m_mapsStatus = m_mapsListed == 0 && !pinned ? wxString(_("No map matches."))
+                                                : wxString::Format(_("%d map(s) match."), m_mapsListed);
+  SetSearchStatus(m_mapsStatus);
   LOG_INFO << "[maps] Browse listed" << m_mapsListed << "map(s) of" << (int)catalog->maps().size() << "for the search \"" << content
            << "\" in" << m_mapsListMs << "ms";
 }
@@ -1671,7 +1856,7 @@ void FileControl::forgetTrees()
   }
   m_buildings = BuildingIndex();
   // Textures mode's rows point into no hierarchy: nothing needs to wait for the next rebuild of a tree.
-  if (m_mode == ViewerMode::Textures)
+  if (m_mainTreeMode == ViewerMode::Textures)
     freeRetiredLater();
 }
 
@@ -1684,7 +1869,9 @@ void FileControl::retireTree(TreeStackItem * root)
 void FileControl::clearRows()
 {
   fileTree->DeleteAllItems();
-  freeRetiredLater();
+  // (Only the main tree's rows point into hierarchies, and it can still hold them while the map tree is cleared.)
+  if (fileTree == m_mainTree)
+    freeRetiredLater();
 }
 
 void FileControl::freeRetiredLater()
@@ -1695,6 +1882,38 @@ void FileControl::freeRetiredLater()
   // client change while the old rows are still on screen) waits for its own rows to go.
   std::vector<TreeStackItem *> batch;
   batch.swap(m_retired);
+  // ON TURNS OF THEIR OWN, a share of about 10 ms each, once the GUI thread has gone idle (ModelViewer::runOnLaterTurn): a
+  // whole client's hierarchy took 115 ms to free, in the round that listed the tree. Without an event loop (the
+  // -unityipctest run, whose turns never come), after the current event as before.
+  if (g_modelViewer && wxEventLoopBase::GetActive())
+  {
+    auto left = std::make_shared<std::vector<TreeStackItem *>>();
+    for (TreeStackItem * root : batch)
+      if (root != m_modelsTree.root && root != m_buildingsTree.root && root != m_modelsTree.browseRoot &&
+          root != m_buildingsTree.browseRoot)   // freeTrees' defence
+        left->push_back(root);
+    auto freed = std::make_shared<size_t>(0);
+    g_modelViewer->runOnLaterTurn([left, freed]() {
+      QElapsedTimer share;
+      share.start();
+      while (!left->empty())
+      {
+        TreeStackItem * node = left->back();
+        left->pop_back();
+        // Its children taken from it first (replaceChildren: their reference stays, now this list's), so deleting it
+        // deletes only itself (Container's destructor unrefs only the children it still holds).
+        for (TreeStackItem * child : node->replaceChildren({}))
+          left->push_back(child);
+        delete node;
+        if ((++*freed & 255) == 0 && share.elapsed() >= 10)
+          return true;   // more, on the next turn
+      }
+      LOG_INFO << "Browse: freed" << (unsigned int)*freed
+               << "nodes of hierarchies the tree no longer shows, on turns of their own";
+      return false;
+    });
+    return;
+  }
   CallAfter([this, batch]() { freeTrees(batch); });
 }
 
@@ -1839,6 +2058,9 @@ void FileControl::TexturesClientLoaded()
 
 void FileControl::OnTreeActivated(wxTreeEvent &event)
 {
+  // (The tree not shown -- the main tree in Maps, the maps' in the other modes -- has nothing to say.)
+  if (event.GetEventObject() != fileTree)
+    return;
   // Enter or a double-click on a texture row selects it (a click on the row that is already selected is
   // no selection change; the view keeps a texture already selected as it is); on a building row, it loads it
   // (the building already on screen stays as it is).

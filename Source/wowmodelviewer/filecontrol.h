@@ -150,7 +150,16 @@ public:
   // the textures in Textures mode, the world model roots in Buildings mode. Each mode keeps its own search, and
   // its tree comes back as it was left -- the same folders open, the same row at the top, the same row picked --
   // without listing its files again (the model and building trees are kept whole while another is shown).
-  void FollowViewerMode(ViewerMode mode);
+  // listNow false (the command bar's switch in turns): the mode, tree, search and controls follow now, and the rows are
+  // listed by ListForViewerMode on a turn of their own -- true is returned when a listing is due then.
+  bool FollowViewerMode(ViewerMode mode, bool listNow = true);
+  void ListForViewerMode();
+  bool listingDue() const { return m_listingDue; }
+  // Rows added or taken away while a tree was frozen are measured by the native tree at its thaw (BrowseTree: about 20 us a
+  // row). SettleRows measures them now, while the frozen Browse panel keeps the tree off the screen; RowsToSettle counts
+  // the rows that measure would cover.
+  int RowsToSettle() const;
+  void SettleRows();
   // An arrow key repeating in the tree (true), or let go: the texture view waits to decode, and the
   // Buildings tree waits to load the row picked until the key is let go.
   void KeysRepeating(bool repeating);
@@ -165,6 +174,9 @@ public:
   // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the tile grid under the map list, and MapsViewer's state
   // changed (its onChanged): the grid follows.
   MapTilePanel * mapPanel() const { return m_mapPanel; }
+  // The panel made ahead, hidden (the frame's construction): made at the first entry into Maps it took 27-32 ms of
+  // that switch.
+  void PrepareMaps();
   void MapsChanged();
   // STREAMING (protocol 18): the Maps panel's streaming line alone.
   void MapsStreamChanged();
@@ -196,6 +208,7 @@ public:
   };
   const BuildingIndex & buildingIndex() const { return m_buildings; }
 
+  // The tree of the viewer mode: m_mainTree in Models, Buildings and Textures, m_mapTree in Maps.
   wxTreeCtrl *fileTree;
   wxSearchCtrl *txtContent;
   wxStaticText *searchStatus;
@@ -241,6 +254,7 @@ private:
   void freeRetiredLater();
   void freeTrees(const std::vector<TreeStackItem *> & roots);
   std::vector<TreeStackItem *> m_retired;
+  bool m_listingDue = false;   // FollowViewerMode(mode, false) until ListForViewerMode (or another Init)
   // Whether a row's file is what is loaded now (a world model in Buildings, a model in Models).
   bool isLoaded(GameFile * file) const;
   // The search box's hint and tooltip: what the viewer mode's search finds.
@@ -294,8 +308,24 @@ private:
   // An arrow key repeating in the Buildings tree: the rows it passes are not loaded until it is let go.
   bool m_keysRepeating = false;
   bool m_buildingPickPending = false;
-  // THE MAPS VIEWER's tile grid (made the first time Maps is shown), and its listing's cost.
+  // TWO TREES: the maps have their own, so a viewer-mode switch to or from Maps lists nothing again -- neither the maps
+  // (1,187 rows on Retail) nor the model or building tree left for them, which comes back with its rows as they were
+  // (each relisting took 8-21 ms of the switch, and the native tree measured every row again at the thaw). The two are
+  // in the same place, one shown. m_mainTreeMode: the mode whose rows the main tree holds.
+  wxTreeCtrl * m_mainTree = nullptr;
+  wxTreeCtrl * m_mapTree = nullptr;
+  ViewerMode m_mainTreeMode = ViewerMode::Models;
+  // The rows of the main tree's mode still hold what Init would list (Models and Buildings: the kept tree's terms).
+  bool mainTreeCurrent(const QString & content);
+  // The map tree still lists what InitMaps would: the same catalogue, search and map picked.
+  bool mapTreeCurrent(const QString & content) const;
+  void addMapPanel();
+  // THE MAPS VIEWER's tile grid (made ahead: PrepareMaps), and its listing's cost.
   MapTilePanel * m_mapPanel = nullptr;
+  // What the map tree was listed for: the search, the map picked then, and the line under the tree.
+  QString m_mapsListedContent;
+  int m_mapsListedPicked = -1;
+  wxString m_mapsStatus;
   double m_mapsListMs = -1.0;
   int m_mapsListed = 0;
   // The maps listed: each group's, in Browse's order, and the catalogue they belong to (kept with them while Maps shows

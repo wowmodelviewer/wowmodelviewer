@@ -26,8 +26,8 @@ Clients (one installation, as updated on 2026-10-17):
   doodads (MDDF and WMO doodad sets), or one global world model, into one world scene with a double-precision floating
   origin and a free camera (`05`-`07`).
 - The owner's build carries two uncommitted `wow.dll` fixes (bulky-belt tabard, .chr tabard hang) in their own
-  worktrees; every deploy of this stage keeps the owner's `wow.dll`/`core.dll` (0ED07B2C / 8472119A), and nothing of
-  those fixes enters this branch.
+  worktrees; every deploy of this stage keeps the owner's `wow.dll`/`core.dll` (0ED07B2C / 8472119A) -- until the
+  after-stage change of 10.3, which changes `wow.dll` -- and nothing of those fixes enters this branch.
 - The roadmap row 08: tiles around the camera (from 3 x 3), residency and eviction, a prioritised cancellable scheduler,
   block-compressed upload, GPU and memory budgets, loading progress by file count; first the transport-wide send cap
   (`04b` 18.2). The Maps entry cost of `05` 13.1 is done (the lazy Browse list, merged).
@@ -464,13 +464,25 @@ tt_s3b): the queue's room 64/4 during a session and 16/2 after; dispatch order b
 refused with the room named; tile loads open with the next serials and the entry's budgets; the entry tile, a duplicate,
 a tile off the grid and a load that is not the session's are refused with why; a tile load's read is accounted to it;
 a closed tile load's requests are stale; the cap of 24; closing the entry ends it; the session's prerequisites
-session-wide and a tile opened later inherits them; ResetTerrainRequests ends it all. **236 passed, 0 failed, 1
-skipped** (the encrypted-file case, Beta only; tt_s8a on the final host).
+session-wide and a tile opened later inherits them; ResetTerrainRequests ends it all. **237 passed, 0 failed, 1
+skipped** (the encrypted-file case, Beta only; tt_s8d on the final host, section 9); after the stage (10.3) **262
+passed, 0 failed, 1 skipped** (tt_p1, Retail).
 
 After the review (section 10): during a session a request still waiting for a load that has ended (a closed tile's) is
 answered stale at once rather than when it reaches the queue's front -- the player took its credit back at the close --
 and so is everything of the session's when it ends; an entry reported anything but "built" ends the host's session too
 (the player has ended its own).
+
+After the stage (10.3): a read `decideMapAssetRequest` cut to what was left of its load's budget for the role's family
+(the per-file limit or that budget less what was read and reserved, whichever is less) that finds the file larger than
+that, but within the role's per-file limit, is answered `refused` -- the load's refusal, as one decided before the read
+would be -- its detail naming the file's size, what was left and the per-file limit before the catalogue's own
+(`mapAssetBudgetRefusal`, from `WdtInspection::tooLargeSize`, the size the catalogue's read now hands back). A file over
+its per-file limit stays `unreadable`, the file's own failure. Nothing is read either way and the accounting is
+unchanged; `refused` is already an answer state (a full queue, a spent budget), so no message changes. New checks (25):
+`checkMapAssetBudgetRefusals`, a table of 21 cut and uncut reads; a terrain texture over its per-file limit; a doodad
+texture served, cut and over its limit. The check of a terrain texture cut to 1000 bytes now expects `refused`, and the
+worker's and `inspectFile`'s checks now also check the size handed back.
 
 ## 5. The player's streaming session
 
@@ -513,6 +525,11 @@ placement and MODD index. The first tile that places one makes it; every tile th
 with its last holder. Self-test: placement 500 listed by two tiles and doodad 600 listed by two tiles placed once each;
 on Retail's region 25 placements and 12,540 doodads were found shared rather than placed twice.
 
+After the stage (10.3): a placement or doodad placed from a tile's PRIVATE prototype (5.4) is taken only by a tile
+whose own prototype is private too -- one instance per key, whatever the gaps. A tile with the complete prototype places
+its own: its registration takes the key over, every tile that held the private one holds the new one (for a placement,
+a running job's plan re-pointed to it), and the private instance is destroyed.
+
 ### 5.4 Prototypes by FileDataID
 
 A world model or M2 is fetched and built once per session: the first job that needs it owns the fetch; a job that needs
@@ -520,10 +537,21 @@ it meanwhile waits (a near tile takes over a far tile's fetch that has not begun
 first waiting job takes the fetch over under its own tile load; a file that fails for good (not in storage, cannot be
 parsed) fails every waiting model with the same reason, its own state kept (an "unsupported" model stays unsupported);
 a refusal for the owner's tile load (its budgets, the queue's room) or a stale answer is that tile's failure only, and
-the fetch is handed on. (A texture refused or capped for the owner's load is not handed on: the prototype is built
-without it and shared; latent, section 11.) A built prototype stays while it has instances or a job will place from it;
-with neither it is
-POOLED.
+the fetch is handed on. A built prototype stays while it has instances or a job will place from it; with neither
+it is POOLED.
+
+A prototype the owner built without part of it that its own tile's load could not get -- a group file or texture
+refused or stale for that load (a read the host cut to what was left of the load's budget is answered refused, section
+4), or a texture past the load's own count cap that the session did not hold -- is that tile's PRIVATE prototype (after
+the stage, 10.3): drawn as the single-tile load draws it, placed only by that tile (its instances are taken only by
+tiles whose own prototype is private too, 5.3), never given to waiting tiles, never reused by later ones, never pooled.
+The fetch is handed on: the first waiting tile fetches the whole model under its own load; with none waiting, the
+session's record of the fetch goes and the next tile that needs the model fetches it. A private prototype goes once no
+job places from it and no instance shows it (at the next pools' pass, 5.7), or with the scene. A file's own failure (not
+in storage, over its per-file limit, unparsable, undecodable) is still built into the session's prototype: every tile
+would get the same. At its count cap a tile takes what the session already holds of a texture (its image or its failure)
+without asking. A group id asked twice in one load is refused the second time by the host's once-per-load rule; that
+repeat is not the load's gap (section 11).
 
 ### 5.5 Terrain textures
 
@@ -537,10 +565,11 @@ Fetched and decoded once per session for every tile whose prototypes sample them
 scheme as prototypes; the decoded images are kept, least recently used out first, within 96 MiB of managed memory, for
 the prototypes built later -- never one a live tile took without its file's bytes (a later model of that tile may sample
 it again and it has nothing to decode it from). A fetch the host did not serve is handed to the next waiting job; a
-file that came and could not be decoded -- or the file's own failure (not in client storage, too large, no bytes) --
-fails them all, asked for once (a refusal for the tile's load or a stale answer is handed on). Retail region: files
-asked twice 367 -> 43 (the 43: 15 terrain textures two tiles
-fetched before either was committed, 28 images evicted and needed again).
+file that came and could not be decoded -- or the file's own failure (not in client storage, over its per-file limit,
+no bytes) -- fails them all, asked for once (a refusal for the tile's load or a stale answer is handed on). Retail
+region: files asked twice 367 -> 43 (the 43: 15 terrain textures two tiles fetched before either was committed, 28
+images evicted and needed again). After the stage (10.3) a read the host cut to what was left of the load's budget is
+answered refused and handed on, never failed for the session.
 
 ### 5.7 Pools and eviction
 
@@ -557,6 +586,10 @@ built, against everything on the GPU then. Self-test: a corner tile's M2, world 
 while it is closed and serve it again with nothing asked; with no pool budget they are evicted at its close and asked
 again when it returns.
 
+After the stage (10.3): private prototypes (5.4) are never pooled or counted in the pools (their GPU bytes are the
+scene's); each is disposed once it has no instance and no job will place from it -- checked early in the pools' pass
+(after the images' eviction), before its budget test, under the frame budget.
+
 ### 5.8 Closing a tile
 
 Its job ends if it is still running (its requests retired: their answers are dropped as late; a fetch it owned is handed
@@ -564,7 +597,8 @@ on; the entry, if still in flight after its commit, is reported "built" with why
 other tile holds is destroyed); its terrain goes; the host is told (its tile load closed: what it still had queued is
 answered stale at once, what was in flight when it completes). The objects of a closed tile -- its terrain's, its
 doodads' -- are released at once (off every tally; the terrain hidden, each doodad's renderer off) and destroyed over
-the next frames (at least 100 a frame, then until 1.5 ms).
+the next frames (at least 100 a frame, then until 1.5 ms). After the stage (10.3), a private prototype only that tile
+showed goes with its last instance, at the next pools' pass.
 
 ### 5.9 Seams and the origin
 
@@ -602,7 +636,9 @@ only while a view may still upload it).
   the ground once that tile is built.
 - **Logs**: the player's per-tile settle line (files, bytes, placements and doodads placed and shared), every open,
   close, refusal, takeover and eviction, and the session's summary at its end; the host's streamState line once a second
-  and the getMapAsset summary every 2 s.
+  and the getMapAsset summary every 2 s. After the stage (10.3): each prototype kept for its tile (from the third time,
+  "kept N times in this session"), and in the end line the prototypes kept for their tile, the placements and doodads
+  replaced by complete ones and the repeated group asks.
 - **runtimeState** gains the session's numbers and the light mode.
 - The panel's first streaming line (one long line, wrapped) re-wrapped and laid the whole Browse pane out on every
   `streamState`: a 90.5 ms GUI round in the acceptance flight (fl2). Found by the harness's round check; fixed as above
@@ -702,9 +738,13 @@ is one IPC poll and one pass of the wx event queue, paints included.
 
 What each one is, and whether this stage made it:
 
-- **The mode switch and the map pick** (pre-existing): the map pick (Era, once) is the overhead map's first draw.
-  The mode switch: the Maps viewer's first layout and the Browse listing; no streaming code runs in it.
-  The Stage 07 host measured 134.8 ms in the same step (`compat\cmp_oldhost_p18`).
+- **The mode switch and the map pick** (pre-existing; the mode switch fixed after the stage): the map pick (Era, once)
+  is the overhead map's first draw. The mode switch: the Maps viewer's first layout and the Browse listing; no streaming
+  code runs in it. The Stage 07 host measured 134.8 ms in the same step (`compat\cmp_oldhost_p18`). Fixed after the
+  stage (sections 8.8 and 8.9): the switch is now made in turns, and none of its rounds is over 50 ms -- the longest
+  34.6 ms in 74 switches between Models and Maps over the four clients, against 54.0-162.3 ms on the stage's host with
+  the entry-stall fixes in the same session. Measured before the final battery, whose runs will replace this table's
+  'Mode switch to Maps' column.
 - **The round in which the world is shown** (pre-existing, fixed after the stage): about 44 ms of it was the
   synchronous resize of the player's window, which the player's thread answers while it resizes its swap chain. The
   Stage 07 host measured 77.5 ms here. `SWP_ASYNCWINDOWPOS` has no effect between a parent window and a child window of
@@ -732,8 +772,7 @@ What each one is, and whether this stage made it:
   in some earlier runs, none over 50 ms in the final ones. With streaming this happens while the region's other tiles
   load. Progress is now shown once for the messages that come together, and a panel update costs 2-6 ms (section 8.7).
 - **None of the rounds over 50 ms is in the flight**: the acceptance flight's six loops, the far flight with Overview
-  and
-  Fly, and the other clients' loops stay at 16.1-24.5 ms.
+  and Fly, and the other clients' loops stay at 16.1-24.5 ms.
 
 ### 8.4 Pictures
 
@@ -797,6 +836,11 @@ The Stage 07 host (protocol 17) with the new player (`compat\cmpf_oldhost_p18`):
 - The single-tile path ran, and Overview, Fly and Clear worked.
 - The Enter world round was 29.7 ms.
 
+After the stage (10.3) the host answers a read cut to the load's remaining budget `refused` instead of `unreadable`: no
+new state. The Stage 07 player only quotes the state for world-model and doodad roles and stores a terrain texture's as
+given; the new player's single-tile path draws the same picture (the self-test's load 18, 10.3). Neither run above has
+been repeated since this change; the final battery comes later.
+
 ### 8.7 The entry rounds attributed, and their pre-existing parts fixed (after the stage)
 
 Attributed with a wall-clock stack sampler of the GUI thread (a temporary harness probe, not kept: a thread of the
@@ -829,17 +873,19 @@ its own time is 13-14 ms on Retail (43 ms on Beta).
   whole Maps GUI, and an update that changes the progress text's line count lays out the panel and the Browse pane again
   (20-28 ms). `MapsViewer::OnWorldProgress` now shows progress once for what came together (`CallAfter`). One such
   update can still bring a round near 50 ms (51.8 ms once, in a second entry).
-- **The mode switch to Maps** (98-238 ms): not fixed. It is the viewer switch: the keyboard handed to Browse's search
-  box (`ModelViewer::OnCommandBar`) waits for the player's thread when the player had it (18-30 ms: the player's window
-  is sent WM_KILLFOCUS and answers once per frame); the Maps panel is built on the first entry (about 20 ms); Browse's
-  list of maps is listed again on every entry (`FileControl::InitMaps`, 9 ms with no map picked, 26 ms with one -- not
-  the fraction of a millisecond `FollowViewerMode`'s comment says); the native tree re-measures its rows as it thaws
-  (12-27 ms); the other windows thaw and lay out (8-18 ms); the switch paints the new workspace at once (13-25 ms).
-  Entering Maps again, the panel built and the keyboard not in the player, took 177-193 ms. Under 50 ms needs a viewer
-  switch that neither lists Browse again nor repaints the whole frame in one round.
+- **The mode switch to Maps** (98-238 ms): not fixed here (sections 8.8 and 8.9 fix it). It is the viewer switch: the
+  keyboard handed to Browse's search box (`ModelViewer::OnCommandBar`) waits for the player's thread when the player had
+  it (18-30 ms: the player's window is sent WM_KILLFOCUS and answers once per frame); the Maps panel is built on the
+  first entry (about 20 ms); Browse's list of maps is listed again on every entry (`FileControl::InitMaps`, 9 ms with no
+  map picked, 26 ms with one -- not the fraction of a millisecond `FollowViewerMode`'s comment says); the native tree
+  re-measures its rows as it thaws (12-27 ms); the other windows thaw and lay out (8-18 ms); the switch paints the new
+  workspace at once (13-25 ms). Entering Maps again, the panel built and the keyboard not in the player, took 177-193
+  ms. Under 50 ms needs a viewer switch that does not list Browse again (section 8.8 got under 50 ms with the whole
+  frame still repainted in one round, at most 44.3 ms; section 8.9 then made the switch in turns).
 
-First measured on the stage as committed (b9c688d4). The longest GUI round of each step, ms (`F:\wmv-build-fix\stalls`; "before" is the stage's exe, "after" this
-change, the same player p18l; "before" of the acceptance and the three clients is the stage's own runs of section 8):
+First measured on the stage as committed (b9c688d4). The longest GUI round of each step, ms (`F:\wmv-build-fix\stalls`;
+"before" is the stage's exe, "after" this change, the same player p18l; "before" of the acceptance and the three clients
+is the stage's own runs of section 8):
 
 | Run | mode:maps | enter | waitworld | rounds over 50 ms |
 |---|---|---|---|---|
@@ -875,6 +921,302 @@ The acceptance run passes 35 / 0 (the loops' longest round 17.0 ms, the far flig
 three clients 14 / 0 each (flights 9.5-16.8 ms), the back-and-forth 23 / 0 (only its three viewer switches over 50 ms).
 The map pick's round is 14-33 ms.
 
+### 8.8 The viewer-mode switch cut in one turn (after the stage)
+
+Before the change of section 8.9, a switch into the Maps viewer and out of it was one GUI round: the command bar's
+click, with the whole workspace changed while the frame's windows are frozen, laid out once and painted at once
+(`ModelViewer::SetViewerMode`, one change on screen). Section 8.7 measured 98-238 ms. This section cuts the work of that
+round, in two steps; section 8.9 then spreads what is left over turns of its own. Every cut here still applies there,
+and every switch other than the command bar's click is still made in one turn. Measured with the harness (`-mapsuitest`,
+hidden desktop, player p18m) unless said: the mode-switch change in the runtime `F:\wmv-build-fix\w08\run_ui`, against
+the stage's host in `F:\wmv-build-fix\stalls\run_ui` (now `w08\run_base`); the four fixes below in `stalls\run_ui`. That
+runtime, the four fixes' rig `F:\wmv-build-fix\msw` and its logs were removed after that session; their figures here are
+from its hand-over notes, kept as `w08\mst\mode_switch_under_50ms_changes.txt`.
+
+**The mode-switch change** (made before the stage could merge; rig `F:\wmv-build-fix\w08\mst`):
+- Maps has its own Browse tree. A switch lists neither tree again while it still lists what `Init` would.
+- `BrowseTree` freezes the native tree only when rows are added or removed while it is frozen: a tree left as it was is
+  not measured again at the thaw.
+- The Maps panel is built with the frame, and a client's maps are listed into the hidden tree at the end of its load.
+- The keyboard taken from the player after a switch moves on a turn of its own, 50 ms later
+  (`ModelViewer::handKeyboardSoon`): the move waits for the player's thread (17-30 ms).
+- The frame's windows a switch leaves hidden keep a freeze of their own (`parkHidden`).
+- The tile grid keeps its static picture while what it shows is unchanged.
+
+Measured on its own first (`w08\mst\out_f1` against `out_f1base`, the stage's host with the entry-stall fixes; player
+p18m; the cycles of section 8.9 on the four clients, one after the other in one session): the switch's longest round,
+median by client and direction, 35.9-40.4 ms against 47.3-73.4 ms; 3 of 74 switches over 50 ms (53.3, 53.8 and 70.2 ms)
+against 55 of 74. The Stage 05 suite on it (`w08\mst\ui05_new`, one run, against `ui05_base`) had longer rounds too: the
+first Models entry after a client switch, 197.6 ms against 103.0, 115 ms of it the hierarchies Browse no longer shows
+freed in that round (section 8.9 frees them on later turns); the first Textures and Buildings entries, 435-744 ms
+against 346-614 ms; the Retail and Era map picks, 53.8 and 69.5 ms against 17.6 and 19.6 ms (not attributed).
+
+**What was left, attributed and fixed** (rig `F:\wmv-build-fix\msw`, removed since). Three temporary probes, not kept:
+- timers on each phase of the switch;
+- a profiler of the messages sent to the GUI thread's windows (`WH_CALLWNDPROC`/`WH_CALLWNDPROCRET`, exclusive time per
+  window and message; it adds its own cost, so its figures are higher than the timers');
+- the stack sampler of section 8.7.
+
+They found four costs:
+- **Hidden windows inside shown ones.** wx's freeze goes on into a hidden window's own windows. So every switch turned
+  the redraw off and on (`WM_SETREDRAW`) of 134 windows, 190 messages. Among them:
+  - the texture view's 11 controls, hidden in both viewers;
+  - the Maps panel's 23 and the overhead map's 7, hidden in Models;
+  - the Model panel's hidden pages: the character controls alone are 78.
+
+  `parkHidden` now parks a hidden window with windows of its own at any depth, not only the frame's own windows. A
+  hidden window without windows of its own is not parked: there is nothing in it to freeze, and the map tree listed
+  while hidden must not read as frozen.
+- **The overhead map drawn whole on every return.** The minimap pictures still being read as Maps is left (32 of the
+  Eastern Kingdoms', each time) come into the mosaic at the entry's paint. So the grid's kept picture was never valid
+  there, and the grid was drawn again: 8-9 ms. The switch's paint (`MapTileGrid::SetSwitchPaint`) now keeps the picture
+  as Maps left it when only pictures came. They are drawn at the grid's next repaint (`RepaintMs`, 100 ms), as pictures
+  come while a map loads (in one turn; in turns a step draws them into the mosaic before the repaint, section 8.9). The
+  grid's paint in the switch went from 9.1 to 1.1 ms (profiler).
+- **The command bar.** wxAuiToolBar repaints itself whole at once for the hover, the press and the release: five of the
+  seven paints of the harness's click round, which posts the move, the press and the release together. Each of its eight
+  buttons drew through a graphics context of its own, 0.35-0.7 ms a paint. `UiToolBarArt::DrawButton` now keeps each
+  look of a button (its state, size, neighbours, scale and the palette) as a bitmap, and a paint copies it. The bar's
+  paints in a switch round went from 6.5 to 3.3 ms (profiler).
+- **The panes' close buttons.** wxAUI draws the captions straight onto the frame's window, in its paint and in every
+  `wxAuiManager::Update`. The close button's graphics context there read the window's pixels back first: 22 of 31
+  samples in `commitDocksAtTheirSize` were in `wxAuiManager::Repaint`, at `NtGdiStretchBlt`.
+  `UiDockArt::DrawPaneButton` keeps each look as a bitmap too.
+
+The switch's phases, medians in ms (timers; the mode-switch change against these four fixes, the same session, 24 and
+22 switches each way, among them 6 with a world entered):
+
+| Phase | Into Maps | Into Models |
+|---|---|---|
+| Freezing the frame's windows | 8.7 -> 3.0 | 3.5 -> 2.8 |
+| Browse (`FileControl::FollowViewerMode`; of it the kept tree's check) | 2.1 -> 1.6 (0.9 -> 0.8) | 0.8 -> 0.9 (0.3 -> 0.4) |
+| The layout (`wxAuiManager::Update`, `commitDocksAtTheirSize`) | 2.0 -> 1.0 | 5.8 -> 2.6 |
+| The thaw | 3.7 -> 3.5 | 8.7 -> 3.1 |
+| The repaint (`PaintNow`) | 11.9 -> 11.0 | 10.3 -> 8.0 |
+| The rest of `SetViewerMode` | 1.6 -> 1.4 | 1.8 -> 1.8 |
+| `SetViewerMode` | 31.5 -> 21.7 | 31.3 -> 19.6 |
+| The round, before `OnCommandBar` (the bar's own hover and press paints) | 4.7 -> 3.5 | 5.1 -> 3.7 |
+| The round | 39.3 -> 28.7 (max 55.0 -> 43.9) | 39.3 -> 25.6 (max 62.9 -> 32.3) |
+
+Pictures:
+- The command bar, the captions and the panels are pixel-identical to the mode-switch change's in seven window pictures
+  across the four viewers: Models, Maps with and without a map, Textures and Buildings, with hover and checked states
+  (not pixel-checked: the hover and pressed look of a pane's close button). The rest differs only in the status bar's
+  memory figure and in minimap pictures still loading.
+- The character panel, parked hidden and then shown by a character load, is identical too.
+
+The switch rounds without probes, alternating the three hosts in one session (`F:\wmv-build-fix\msw\battery_f1.log`, not
+kept; these figures are from the hand-over notes):
+- "before" is the stage's exe with the entry-stall fixes (0845259D);
+- "change" is the mode-switch change (DED9CD00, 8b97913a with it);
+- "after" adds the four fixes (E430BCDD).
+
+Each switch's longest round, ms:
+
+| Run | Before | Change | After |
+|---|---|---|---|
+| `mode:maps,pick:0,waitgrid,mode:models,mode:maps,mode:models,mode:maps`, Retail, 3 runs each: first entry / models / maps (a map picked) / models / maps | 110-111 / 56-61 / 67-82 / 50-52 / 63-70 | 34-48 / 28-31 / 38-46 / 33-38 / 47-49 | 33-41 / 22-25 / 24-27 / 22-23 / 26-28 |
+| Retail, 8 cycles with a map picked: into Maps / into Models, median (max) | 70.9 (128.1) / 56.8 (70.4) | 41.1 (49.2) / 39.8 (52.7) | 31.3 (44.3) / 27.2 (36.6) |
+| Retail, 3 cycles with a world entered: into Maps / into Models | 75.4 (77.0) / 58.2 (59.6) | 34.6 (38.0) / 38.9 (50.2) | 29.8 (33.5) / 28.9 (34.0) |
+| Classic Era, 8 cycles: into Maps / into Models | 46.3 (87.8) / 46.4 (56.8) | 40.7 (49.8) / 44.8 (50.3) | 31.5 (42.5) / 25.9 (34.4) |
+| Switch rounds over 50 ms | 23 of 23 Retail, 6 of 17 Era | 3 of 46 Retail, 2 of 34 Era | none of 80 |
+
+"Before" ran the cycles once, "change" and "after" twice each. Every run passes: the sequence 8 / 0, the cycles 30 / 0
+(Retail) and 20 / 0 (Era). The Retail entry (`mode:maps,pick:0,waitgrid,target:-8700:400,enter,waitworld,waittile`)
+passes 8 / 0 twice on both "change" and "after", with no step round over 50 ms on either. The back-and-forth of section
+8.7 passes 23 / 0 on both; on "after" none of its rounds is over 50 ms (two on "change", both viewer switches). The
+world shown takes 22.7-24.7 ms on "after" against 23.3-24.9 on "change".
+
+Not changed:
+- The keyboard's move from the player stays on a turn of its own: 27-30 ms after the first entry, while the player had
+  it.
+- In some window pictures after Maps -> Models, the viewport's notice is incomplete: "No model loaded" without its
+  second line, or no text. The stage's exe before the mode-switch change (0845259D) shows the same. It is pre-existing
+  and was not investigated.
+
+### 8.9 The viewer-mode switch in turns (after the stage)
+
+Section 8.8 leaves the command bar's switch one round of 22-44 ms: the click's own toolbar paints, every change, the
+layout, the thaw and the repaint of the whole frame. That switch is now made in turns of their own
+(`ModelViewer::BeginViewerSwitch`, `FinishViewerSwitch`), and the screen still changes once: the old workspace stays
+whole until the last turn's repaint.
+
+**Which switches.** Only the command bar's click, and only when a client is active, an event loop is running, the frame
+takes input (no modal window has the program), no panel the switch changes (Browse, Animation, Model) is floating and
+shown (`floatedPanelChanges`: a floating panel is a window of its own, which the frame's freeze and the filter do not
+hold) and `WMV_SWITCH_TURNS` is not `1` (`OnCommandBar`). Every other switch -- a load from a menu, a texture shown, a
+building picked, the click without a client (before its prompt), the click while such a panel floats -- is made in one
+call, as in section 8.8: `SetViewerMode` finishes a switch on its way, then begins and finishes the new one at once.
+
+**The turns.** Each next turn is a one-shot timer armed at the first idle after the turn before, so the thread has run
+out of work and waits between them (Windows makes the delay at least 10 ms).
+
+| Turn | When | What it does |
+|---|---|---|
+| A (`BeginViewerSwitch`) | The click's round | The mode set; the player held; the frame frozen (`Freeze`: on MSW the top-level window's own freeze does nothing, so wx freezes every window of the frame, one added meanwhile too, and the frame stays visible and hit-testable) and its own drawing held back; the layout batch opened; the selector's tool checked. The Maps viewer left (its `clearTerrain` held for turn B when the player is on screen at the click, sent at once when it is parked, so that its put-back in turn B does not show the world; its panel not refreshed) or entered (its minimap reads kept for after); the texture view entered with its decode held. The item chooser and the background window disabled, still shown. The panels put away or given back, Browse opened when asked; Browse's mode, tree, search and controls (`FollowViewerMode(mode, false)`), its listing left for a step. Laid out now when the player is parked at the click (behind a notice or a content window), then `parkHidden`; with the player on screen the layout waits for turn B. The keyboard moved off a window the switch puts away. A parked player that turn B puts back sized for the new viewport now, off screen, by a thread (`UnityRendererHost::sizeParkedPlayerAhead`). On screen only the selector's checked tool changes. |
+| Steps (only when due) | Timer turns, packed while under 25 ms | Browse listed (`FileControl::ListForViewerMode`; always the first step of its turn, never after another); the rows the native tree would measure at its thaw measured (`SettleRows`, about 20 us a row); the overhead map's pictures that came while it was away drawn into its mosaic and its kept picture (`MapTileGrid::prepareMosaic`, at most 16 ms of pictures). Still frozen. |
+| Size wait (only after a presize) | Timer turns, nothing done | Until the parked player's move is over, at most 250 ms after turn A |
+| B (`FinishViewerSwitch`) | Its own timer turn | Steps still due. The layout when it waited, with what was asked for since turn A, in one `wxAuiManager::Update` (floating panels' windows kept as they are, a docked panel given back moved off the frame before wxAUI shows it). A notice's cover; `parkHidden`; the thaw; the frame's own drawing back and its area invalidated. The keyboard to Browse (from the player: armed for after). A content window over an on-screen player painted first. The player let go: put back sized, parked, or, on screen at another size, sized by a thread and not waited for. A held `clearTerrain` sent. `PaintNow`, the overhead map keeping its picture (8.8). After the repaint, outside the frame's client area: the caption, the floating panels' windows, the background window, the item chooser hidden. |
+| Later turns (`runOnLaterTurn`) | Timer turns after B, about 10 ms of work each | The item chooser destroyed; the Maps viewer's minimap reads (`MapsViewer::PumpAfterEntry`); the texture view's decode (`TextureView::resumeDecode`); hierarchies Browse no longer shows freed a share at a time (`FileControl::freeRetiredLater`: on the mode-switch change of section 8.8 a whole client's took 115 ms, in a 197.6 ms round, on a first Models entry after a client switch, `ui05_new`) |
+| Keyboard from the player | 50 ms after B, again every 50 ms while the player's thread still sizes, at most 250 ms | `handKeyboardSoon` (8.8) |
+
+After every turn of a split switch the IPC poll timer is restarted, so the next poll is a whole interval (20 ms) away
+(`UnityIpcServer::deferNextPoll`) and does not follow the turn in the same busy stretch; the idle-time freeing of a
+client's detached files skips a switch's rounds; the animation list fits its columns at once while frozen, not on a
+`CallAfter` after the repaint.
+
+**The gap.** Between turn A and turn B the old workspace stays on screen whole. The frame's windows are frozen. A filter
+every event passes first (`ViewerSwitchFilter`, installed with the frame and inert without a switch) swallows the
+frame's own paint, wxAUI's drawing (`wxEVT_AUI_RENDER`, offered to the frame first) and the erase of a window of the
+frame. The caption is held, and a floating panel's window (Attachments) keeps its state until after the repaint. The
+player is held (not moved, sized or uncovered); a `clearTerrain` for a player on screen at the click waits for turn B.
+
+**What finishes it early.** What the user does in the gap finishes the switch in that event's round: a press, a
+double-click, the wheel, a context menu, a key, a menu command or a menu opening, a close, the frame resized or its DPI
+changed (the filter). The event then goes on to the new workspace -- except a press over a frozen panel, which Windows
+gives the frame's own window (expected, not tested; section 11). A load sent to the player, a world load, a layout reset
+or loaded, `LayoutNow` (a panel toggled, the export and display settings), the client prompt, a client load, a theme
+change, `OnClose` and another viewer switch finish it too. A turn's timer that fires in another event loop (a modal
+window) finishes it at once; the idle check finishes a switch whose turn has not come 500 ms after its last. The frame
+deleted with a switch on its way (the harness's end; a fatal exception) drops it without its repaint
+(`AbortViewerSwitch`): the freeze, the layout batch and the floating panels' state let go, the player's hold only
+counted down.
+
+**Switches for experiments**, read once: `WMV_SWITCH_TURNS=1` (the switch made in one call, as `SetViewerMode` makes
+every other switch: the A/B arm in one exe, with 8.8's cuts and this section's global changes),
+`WMV_SWITCH_LAYOUT=a|b|grow` (laid out in turn A even with the player on screen; always in turn B; with the player on
+screen, in turn A only when the viewport keeps its top-left corner and does not shrink), `WMV_SWITCH_HOLD_MS=n` (each
+turn armed n ms after the last: the gap long enough to see and film), `WMV_SWITCH_SIZE=wait` (turn B waits for the
+player's resize, as before).
+
+**The harness** (`app.cpp`):
+- each busy stretch -- rounds with no sleep between, which the event loop would run as one -- measured beside each
+  round, and checked by `roundcheck`;
+- `mode` waits until the switch is repainted and records its turns, what finished it, the click to the repaint (timed
+  from the start of turn A, in the click's handler, after the command bar's own paints) and every round of it;
+- the structural film: every round between the click and the repaint checks that the caption and the player's place
+  are as at the click and the frame frozen with its own drawing held back; then the switch must have let everything go
+  (none on its way, the frame thawed, only parked windows frozen, the player's hold and the layout batch at 0, Browse in
+  the viewer's mode);
+- new steps: `mode:<m>:real` (the press and the release in rounds of their own), `modenow` (the click's first round
+  only), `modefilm`, `settle[:<word>]`, `clickframe`, and `closenow` (the abort check, from `~ModelViewer`).
+
+The harness posts the move, the press and the release in one round, so a switch's first round holds the command bar's
+own hover and press paints (3.5-3.7 ms, section 8.8); a hand's press and release come in rounds of their own.
+
+**Results** (measured before the final battery; section 8.10 measures the switch again on the final build). Viewer exe 489D5E8E..., player
+p18o, rig `F:\wmv-build-fix\w08\mst` (`run_abc.ps1 -Rig cycles -Tag s1 -Reps 1 -Arms split,base -Cycles 8`;
+`out_s1_split_1` and `out_s1_base_1`, summarised by `cyc2.py`). The exe was built at 13:12, before three review changes
+now in the code: `clearTerrain` held for turn B only with the player on screen, the one-turn fallback while a panel
+floats (`floatedPanelChanges`), and the switch's timer stopped in turn A, so a later turn's tick on its way is not taken
+for the switch's next turn. No panel floated in these runs; the parked player's `clearTerrain` on leaving Maps, one
+message, went with turn B here and goes in turn A now. "Split" is this change (489D5E8E, `w08\run_ui`); "Base" is the
+stage's host with the entry-stall fixes (0845259D, `w08\run_base`), the same player, the two run one after the other in
+one session, one repetition each (the base's switches are slower than in section 8.8's first measure, 55 of 74 over 50
+ms there with player p18m; not explained, so compare within a session only). Each client: Models -> Maps (the first
+entry) and a map picked, then 8 cycles Models <-> Maps, 600 ms after each switch (1,500 ms once the world is entered);
+Retail then enters the world at Stormwind (-8700, 400) and makes 3 more cycles. No model is loaded: Models shows its
+notice, the player parked. 74 switches a build: 23 on Retail, 17 on each other client. Every switch step is
+`roundmark,mode:<m>,roundcheck:50`.
+
+| | Split, Maps -> Models | Split, Models -> Maps | Base, Maps -> Models | Base, Models -> Maps |
+|---|---|---|---|---|
+| Switches | 35 | 39 | 35 | 39 |
+| **The switch's longest round: median / 95th percentile / max** | **17.3 / 26.8 / 28.6 ms** | **19.9 / 32.8 / 34.6 ms** | 68.8 / 147.3 / 162.3 ms | 76.0 / 142.6 / 161.8 ms |
+| Longest busy stretch: median / max | 17.5 / 28.7 ms | 20.0 / 34.7 ms | -- | -- |
+| Turn A: median / max | 9.3 / 17.9 ms | 10.2 / 25.4 ms | -- | -- |
+| Turn B: median / max | 16.5 / 27.1 ms | 18.4 / 30.2 ms | -- | -- |
+| The click to the repaint: median / max | 43 / 66 ms | 54 / 98 ms | -- | -- |
+| **Switches over 50 ms** | **0** | **0** | 35 | 39 |
+
+| Client | Split: median (max) | Base: median (max) |
+|---|---|---|
+| Retail (23 switches) | 18.4 (30.8) ms | 90.2 (162.3) ms |
+| MoP Classic (17) | 19.5 (28.1) ms | 69.7 (116.2) ms |
+| Classic Beta (17) | 18.9 (34.6) ms | 68.1 (161.8) ms |
+| Classic Era (17) | 18.6 (32.8) ms | 58.6 (112.9) ms |
+
+- Every switch was finished by its own turn. 64 had two turns. 10 into Maps, all in each client's first cycles, had a
+  step between them, the overhead map's pictures that came while it was away (4.7-8.6 ms); the click to the repaint was
+  73-98 ms for those, 36-71 ms for the other switches into Maps and 40-66 ms into Models.
+- The layout waited for turn B once: the first switch after Enter world, the world on screen at the click (turn A
+  7.7 ms, turn B 18.4 ms, its round 19.6 ms). Every other switch was laid out in turn A, the player parked.
+- The rounds of the wait after a switch, its later turns among them: at most 4.6 ms after a switch into Models,
+  15.6 ms after one into Maps.
+- Every split run passes (122 / 0 on Retail, 88 / 0 on each other client); no structural film saw a change before a
+  repaint, and every switch let everything go. Every base run fails only its `roundcheck:50` steps, one per switch.
+- The only rounds over 50 ms in the split runs are three runs' start rounds (98.2, 75.9 and 51.4 ms; Beta's 44.6 ms):
+  before the first step, outside every switch (section 11).
+
+The Stage 05 Maps GUI suite (`w08\mst\ui05_split`: Retail, Era, a client switch, the four viewers) against the base's
+run earlier that day (`ui05_base`, player p18m; not alternated): the same checks fail on both (15, 2, 7 and 0: Stage
+05's expectations of the viewport's notices, of a held read and of tile loads; not looked into here), and every other
+check passes, the switch's own checks among them (68 / 15, 26 / 2, 54 / 7, 38 / 0 against 52 / 15, 20 / 2, 46 / 7, 14 /
+0). Its switches over 50 ms are the first Textures and Buildings entries after the client load: Browse's listing, a turn
+of its own -- the switch's longest round 547.5 / 307.9 ms (Textures / Buildings; listing turns 547.1 / 306.8 ms) in the
+four-viewer run and 605.9 / 367.0 ms in the Retail run, where the base's was 614.0 / 346.5 and 592.8 / 361.4 ms. Its
+other 23 switches are at most 42.1 ms (227.4 ms on the base); the two with the player on screen at the click (Retail:
+Models with a model -> Maps, Buildings -> Maps) were laid out in turn B, 42.1 and 23.7 ms. The first Models entry after
+the client switches of the client-switch run is 29.5 ms (103.0 on the base); the 143,691 nodes of the hierarchies Browse
+no longer showed were freed on later turns. The suite's other rounds over 50 ms are not switches: three runs' start
+rounds (66.6-82.9 ms; none over 50 ms on the base), a search (63.7 ms; 63.9 on the base), client loads (53.1-54.3 ms;
+46.0 and 53.0 on the base), a map pick (54.7 ms; 14.1 on the base), the Era map scan (51.0 and 52.0 ms; 67.4-122.1 ms on
+the base) and a model load right after a switch into Models (68.1 ms; 43.6 on the base; one run each, not attributed).
+Its busy stretches over 50 ms are outside the switches too: the Era map scan (14, 50.1-62.9 ms) and the client loads to
+Era in the client-switch run (17, 56.2-71.3 ms), besides the rounds above.
+
+Not run yet: the one-turn arm in the same session (`WMV_SWITCH_TURNS=1`); the real click (`mode:<m>:real`); the layout
+rules `WMV_SWITCH_LAYOUT=a` and `b`; `run_firstentry.ps1`; `run_hazards.ps1` (input in the gap, a load or a client
+switch finishing a switch, two clicks, the abort); a switch into Models or Buildings with their content shown (the
+presize, and the resize not waited for); the gap made long and looked at (`WMV_SWITCH_HOLD_MS`, on the owner's machine
+only with their go-ahead).
+
+### 8.10 The final build (after the stage)
+
+The tree that merges: this branch with the per-load gaps kept off the session (section 10.3) and the switch in turns
+(section 8.9), merged with develop f58ab27f. Built in `D:\wmv-final\build`: host exe 24FE3DA6..., wow.dll 6BFC5A63...,
+core.dll 9C79B61E...; player p18o (Assembly-CSharp MD5 3D2250E3). Since section 8.9's runs the host no longer lists
+Maps' tree ahead at the end of a client load (`FileControl::PrepareMapList`, removed: it made that round longer, section
+11); the first entry into Maps lists it in a turn of its own. Rig `F:\wmv-build-fix\w08` (`final_battery.ps1 -Phase
+func` 14:28-14:52 and `-Phase timing` 15:04-15:24; results in `w08\fin`, the cycles in `w08\mst\out_fin_split` and
+`out_fin_base`, summarised by `cyc2.py`). The timing phase ran on a quiet machine.
+
+| Run | Result | GUI rounds over 50 ms | Longest round |
+|---|---|---|---|
+| Retail acceptance (Stormwind, six loops of the 3 x 3 flight, far flight, Overview, Fly) | PASS 39 / 0 | 0 of 84,743 | 46.1 ms, the start round (before step 1) |
+| Classic Era, one loop | PASS 17 / 0 | 0 of 15,174 | 47.7 ms, the start round |
+| MoP Classic, one loop | PASS 17 / 0 | 0 of 15,556 | 39.3 ms |
+| Classic Beta, one loop | PASS 17 / 0 | 0 of 15,596 | 44.2 ms |
+| Switch cycles, the four clients (section 8.9's runs) | PASS 122 / 0 (Retail), 88 / 0 each other client | 0 | 40.4 ms (Retail, run-wide) |
+| The same cycles on the stage's host (0845259D, `w08\run_base`) | 30 / 23 (Retail), 20 / 17 each other client: every `roundcheck:50` of a switch fails | 75 | 240.8 ms |
+
+- The Retail acceptance's longest round per step: mode:maps 32.0, pick 40.8, waitgrid 13.4, enter 18.3, waitworld (the
+  round in which the world is shown among them) 29.3, waittile 16.8, the settling, the loops, the far flight, Overview
+  and Fly 14.5,
+  clear 32.5 ms.
+- The 74 switches: Maps -> Models median 18.1, 95th percentile 22.2, max 23.3 ms (turn A median 10.6, turn B 17.6 ms);
+  Models -> Maps median 20.8, 95th percentile 34.2, max 36.6 ms (turn A 10.7, turn B 20.0 ms). Every switch was
+  finished by its own turn, and laid out in turn A but one (the first after Enter world, in turn B). The click to the
+  repaint: medians 44 and 48 ms, at most 50 ms into Models and 122 ms into Maps (14 of the 39 over 50 ms). On the
+  stage's host the switch's round was 87.1 / 156.5 ms (median / max) into Models and 100.0 / 240.8 ms into Maps.
+- Alternated with the stage's host on the same machine, quiet (`D:\wmv-final\probe\ab`): the first entry into Maps
+  26.1-28.8 ms (129.7-134.9 ms on the stage's host); a Retail world entry's round with the world shown 22.3-24.3 ms
+  (24.2-25.2 ms); the round after a client load ('start') 32.5-40.2 ms on MoP Classic (29.7-32.9 ms) and 34.7-40.0 ms on
+  Retail (33.4-39.2 ms; beside the regression battery, both arms).
+- Functional, on the same binaries: the player's lifecycle self-test 965 passed, 0 failed; the host's `-terraintile`
+  checks 262 passed, 0 failed, 1 skipped (the Beta-only encrypted-file case); protocol compatibility (section 8.6)
+  PASS 15 / 0 (the final host with the protocol 17 player) and 13 / 0 (the stage's host with the final player); session
+  endings and cancellation (section 8.5) PASS 70 / 0 (`life08`) and 12 / 0 (`life08b`); the map catalogue sequences
+  PASS 44 / 0 and 27 / 0. The rounds over 50 ms in those runs are in section 11.
+- The Stage 07 battery (section 9) again (`w08\fin\battery`): every set with the outcomes of section 9; the host's
+  in-process checks count the 25 checks of section 10.3 more in each run; `H_B_missingtex0` fails the same check; the
+  98 e2e files and both reg pictures byte-identical.
+- Characters (the three .chr cases, animation pinned) on the owner's deploy build (this tree with the owner's two
+  uncommitted tabard changes): byte-identical to the owner's build before it (`w08\fin\chars_union`,
+  `chars_cur`).
+- The census of section 10.3 on the four clients: no repeated group ids; one tile over a streaming refusal point
+  (Retail 30_48, its M2 textures 113.74 MiB against 104 MiB).
+
 ## 9. Regressions (Stages 03-07, Models, Characters, Buildings)
 
 The Stage 07 battery (`F:\wmv-build-fix\w07\battery`), run again on the final build (`w08\battery_final`, 14:02-14:21)
@@ -905,8 +1247,9 @@ Characters (the three .chr cases of `w07\chars2.ps1`, animation pinned): the pic
 (`w08\chars_f08`). The host's `-terraintile` checks: 237 passed, 0 failed, 1 skipped (tt_s8c, and tt_s8d on the final
 host; the stale-sweep check of
 section 10.2 added). The player's lifecycle self-test: 953 passed, 0 failed (the checks of sections 10.1 and 10.2
-added). Pure tests (`Tests/Runner`, the corpus at `build\world-audit-data`): all suites pass, among them
-`BlpBlockTests`, `BlpBlockCorpusTests` and `StreamSeamTests`. Protocol compatibility both ways: section 8.6.
+added). After the stage (10.3): 262 passed, 0 failed, 1 skipped (tt_p1) and 965 passed, 0 failed (p18o); the battery ran
+again on the final build (section 8.10). Pure tests (`Tests/Runner`, the corpus at `build\world-audit-data`): all suites pass,
+among them `BlpBlockTests`, `BlpBlockCorpusTests` and `StreamSeamTests`. Protocol compatibility both ways: section 8.6.
 
 What changed on purpose: the single-tile world load uses block uploads for world-model and doodad textures too, so
 its pictures differ from Stage 07's where distant alpha-tested foliage samples the files' own mips (measured in
@@ -945,11 +1288,14 @@ and fixed:
 New self-tests (the lifecycle self-test's streaming part): the region staying put when the camera stops flying; one
 streamTile out at a time with a message of closes only, the region coming back after every built tile closed (a tile
 shown again); a world model refused for the entry's load fetched under another tile's load and placed; the entry
-closed with its fetch out reported "built" once.
+closed with its fetch out reported "built" once. After the stage (10.3): a texture or group file refused for one
+tile's load, or past its count cap, kept for that tile.
 
 Not changed: a lost streamTile answer is not timed out (the host always answers; the player exits when its connection
 ends); a world model with only some groups refused for its tile's load is built partial and shared, as the single-tile
-load builds it; the single-tile world load now uses block uploads too (intended, requirement 5).
+load builds it (true only of the owner tile; changed after the stage, 10.3: built partial for that tile alone, its fetch
+handed on -- a group refused as a repeat within one load still builds it partial and shared, section 11); the
+single-tile world load now uses block uploads too (intended, requirement 5).
 
 ### 10.2 The final independent review (of commit b9c688d4)
 
@@ -967,7 +1313,7 @@ back to 0). Confirmed, and fixed:
 |---|---|---|
 | 1 | **The Enter world click's GUI round over 50 ms only with streaming** (55-75 ms on every client; 22-49 ms with `WMV_STREAMING=0`, the Stage 07 host or a protocol-17 player) -- section 8.3 had called it pre-existing. The session's first streamState showed the hidden streaming lines: the panel grew, the Browse pane was laid out again and repainted, and the overhead map repainted, in the same round as the click's own repaint | The streaming lines are always shown at their fixed height (an idle text when no session streams, "Tiles: starting" from Enter world), so a streamState only relabels them; a streamState's UI follows on a 150 ms timer, never in the round it arrived in; the overhead map repaints on a streamState only when a ring or the camera's dot changed. The Enter world round with streaming: 21.5-39.9 ms against 23.0-25.5 ms with streaming off (same build, alternating runs; section 8.3) |
 | 2 | The stale sweep (`answerStaleWaiting`) held a queue iterator across a send: a send that fails (the player gone) drops the client at once and clears the queue -- a use after invalidation, a likely crash | Two passes: the stale entries are taken out of the queue, then answered; a connection lost meanwhile drops the rest. A new in-process check (`-terraintile`): 32 waiting requests made stale, 32 answered stale while waiting, each once |
-| 3 | A texture file's own failure (not in client storage, too large, no bytes) was handed on like a refusal: every waiting tile asked again | Only a refusal for the tile's load or a stale answer is handed on; the file's own failure is the session's. New self-test: a missing M2 texture asked for once across nine tiles |
+| 3 | A texture file's own failure (not in client storage, too large, no bytes) was handed on like a refusal: every waiting tile asked again | Only a refusal for the tile's load or a stale answer is handed on; the file's own failure is the session's (a read cut to the load's remaining budget was "too large" too: answered refused after the stage, 10.3 row 2). New self-test: a missing M2 texture asked for once across nine tiles |
 | 4 | streamState's p95 was always the maximum (95th percentile of ~15 frames) | The 95th percentile of the last 120 frames |
 | 5 | The scene's GPU bytes left out the terrain alpha arrays (4 MiB a tile) and meshes, in streamState and in the scene-budget check | Counted |
 | 6 | The pool bookkeeping ran every frame and allocated a dictionary each time (about 0.9 ms a frame, 2-4 MB/s of garbage) | Run when something may have joined the pools or an eviction is unfinished, and twice a second besides; the dictionary reused |
@@ -984,26 +1330,153 @@ build (1.15); upload timing being the terrain tile build only (8.1); the protoco
 
 Not changed (section 11): the pool budget against the Stormwind loop (a policy choice, measured); an M2 texture fetched
 and decoded again though its upload is still on the GPU (efficiency); a texture refused or capped for the owning tile's
-load built into the shared prototype (latent: one answer of 22,708 was not "available" in the acceptance run); the
-player's inbox counters and the `light` runtimeState, implemented but not reported or asked for.
+load built into the shared prototype (latent: none of the acceptance run's 22,710 answers (8.1) was refused or stale,
+and no texture was capped -- the one not "available" is a per-file failure, 2320850's group 3; fixed after the stage,
+10.3); the player's inbox counters and the `light` runtimeState, implemented but not reported or asked for.
+
+### 10.3 After the stage: per-load gaps kept off the session
+
+The latent finding of 10.2 -- a texture refused or capped for the owning tile's load built into the prototype the whole
+session shares -- was investigated read-only first. That produced three designs: parity (the owner tile keeps a private
+prototype, built as the single-tile load builds it, and hands the fetch on), minimal (the model failed for that load)
+and robust (the same mechanism as parity, with a different test set and helpers). Three judges reviewed them and chose
+parity 2-1. Minimal was rejected because the owner tile would lose whole models where Stage 07 draws them. Every
+must-fix of the three judges was applied.
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | A prototype built without a group file or texture refused, stale or capped for the owner's own load was given to waiting tiles, reused by later ones and pooled (latent: 22,709 of the acceptance run's 22,710 answers (8.1) were "available"; the other is a per-file failure, Retail 2320850's group 3) | Kept for that tile alone, its fetch handed on (5.4); complete placements and doodads replace private ones (5.3); a private prototype is disposed once nothing places from it or shows it (5.7, 5.8) |
+| 2 | A read cut to the load's remaining budget was answered "unreadable", failing the file for the whole session; a failed image is never evicted (new; not found by the reviews) | Answered "refused" when the file is within its per-file limit (section 4) |
+| 3 | At the load's count cap, a texture the session already held was left out as "not requested" | Taken without asking (its image or its failure) |
+| 4 | Not a defect today: a group id asked twice in one load is refused by the host's once-per-load rule; counted as the load's gap, it would keep the model private in every tile listing both | Counted apart (`GroupsRepeated`); today's behaviour kept (section 11) |
+
+Single-tile loads and a protocol-17 player see no change but a cut read's state (8.6): every new branch of the player
+that changes what is built, shared or drawn runs only in a streaming session (the group-repeat bookkeeping is kept in
+every world load and read only in a session). The host change is in `wow.dll` too (`WorldMapCatalog`:
+`WdtInspection::tooLargeSize`), so `wow.dll` and the exe ship together; from here a deploy cannot keep the owner's
+`wow.dll` 0ED07B2C (1.1): its `wow.dll` is built from this branch with the two tabard fixes carried (tt_p1 ran on
+`wow.dll` 7CF13FFF..., built without them).
+
+New self-tests (the lifecycle self-test's streaming part, on its fake host; 12 checks):
+- **Load 14**: a world-model texture refused for the entry's load -- the entry's world model kept for its tile, its
+  fetch handed on; the session's prototype complete, placement 500 (two tiles) placed once from it, the private one
+  replaced and gone.
+- **Load 15**: an M2 texture refused for the entry's load, its neighbours held back until it reports -- the entry draws
+  its doodads untextured alone, from its two kept M2s; the neighbours fetch them whole, and their complete doodads
+  replace the entry's shared ones. The entry's tile closed and opened again places its own doodad from the session's
+  complete M2: nothing asked, nothing private left.
+- **Load 16**: one of a world model's two group files refused for the entry's load -- the entry's world model kept for
+  it, the session's built with both groups under another tile's load.
+- **Load 17**: the texture refused for every tile that lists the world model -- each load asks once and keeps its own; a
+  tile whose own prototype is private takes the private instance already placed (no second instance); nothing published
+  or pooled.
+- **Load 18**: a single-tile load with the texture refused draws it missing as at Stage 07 -- built and shared in its
+  scene, nothing private.
+- **Load 19**: an M2 texture refused for whichever tile asks first (any claim order) -- only that tile's own doodads
+  untextured, every M2 it built kept and fetched again; with every tile closed nothing private is left; back, every
+  doodad placed textured from the pool, nothing asked.
+- **Load 20**: a group file two world models of the entry share, refused the second time by the host's once-per-load
+  rule -- counted as a repeat, not the load's gap: nothing kept, nothing fetched again.
+- **Load 21**: at its count cap (`maxM2TexturesPerLoad` 1) the entry places two M2s only it lists, each with its own
+  texture -- one texture asked, the other neither askable nor in the session, so that M2 is drawn untextured for the
+  entry alone, kept private, not in the session's `DoodadPrototypes`; with all tiles closed nothing private is left;
+  back, the complete M2 comes from the pool and the kept one is fetched again and built whole.
+- **Load 22**: at its cap the entry takes a texture the session already holds (fetched for a neighbour's M2) without
+  asking -- nothing kept.
+
+Loads 21 and 22 were added after the design, for its count-cap rule. Three existing checks gained a
+`StreamPrototypesKept == 0` guard -- the region of nine (with no placement or doodad replaced), a root refused for the
+entry's load, an M2 texture not in storage -- so a refusal or a file's own failure kept wrongly fails them.
+
+New host checks (`-terraintile`, section 4): `checkMapAssetBudgetRefusals` -- 21 cut and uncut reads on made-up sizes,
+nothing read: a file of each streamed family cut to 1000 bytes is the load's refusal; a file over its per-file limit, a
+read not cut, a file that fits, an unknown size, the WDT and the three tile files (never cut) and a load without doodad
+limits are not. Terrain texture 187115 cut to 1000 bytes is refused (the check expected "unreadable" before) and over a
+1000-byte per-file limit unreadable; read as a doodad texture it is served, refused when cut and unreadable over its
+limit. The worker and `inspectFile` hand back the size of a file too large for the read.
+
+**Results.**
+- Player self-test (`-wmvLifecycleTest`, player p18o, Assembly-CSharp MD5 3D2250E3...,
+  `F:\wmv-build-fix\terrain04\selftest_p18o.log`): **965 passed, 0 failed** (953 before).
+- Host (`-terraintile 0 30 49` on Retail, tt_p1, host exe 90303546... with `wow.dll` 7CF13FFF...,
+  `w08\tt\log_tt_p1.txt`): **262 passed, 0 failed, 1 skipped** (237 before; the skip is the Beta-only encrypted-file
+  case).
+- Real data, Retail, one loop of the 3 x 3 flight (`st\early_p18n`, player p18n -- before p18o's count-cap changes and
+  loads 21-22 -- on tt_p1's host): PASS 13 / 0. The session's end line: "0 prototype(s) kept for their tile (0 live, 0
+  disposed), 0 placement(s) and 0 doodad(s) replaced by complete ones, 0 repeated group ask(s)".
+- The protocol-17 compatibility runs (8.6) have not been repeated since this change; the final battery comes later.
 
 ## 11. Unresolved and limitations
 
 Marked **new** (this stage's own) or **pre-existing** (present at develop 8f4e791f, measured the same with streaming
-off,
-the Stage 07 host or a protocol-17 player).
+off, the Stage 07 host or a protocol-17 player).
 
-- **The mode switch to Maps is over 50 ms** (sections 8.3 and 8.7; pre-existing). The roadmap exit's "no GUI-thread
-  stall over 50 ms" holds over the flight and from the Enter world click to the settled region:
-  - pre-existing, not fixed: the mode switch to Maps, 82-110 ms with the entry-stall fixes (92-121 ms in the stage's
-    final runs) -- Browse's list of maps listed again, the tree's thaw, the frame's layout and paint at once, the Maps
-    panel built on the first entry, and the keyboard's move from the player waiting for the player's thread;
+- **GUI rounds over 50 ms** (sections 8.3 and 8.7-8.9). The roadmap exit's "no GUI-thread stall over 50 ms" holds over
+  the flight, from the Enter world click to the settled region and -- measured before the final battery -- over the
+  viewer switches between Models and Maps:
+  - pre-existing, fixed after the stage (sections 8.8 and 8.9): the mode switch to Maps, 82-110 ms with the entry-stall
+    fixes (92-121 ms in the stage's final runs) -- Browse's list of maps listed again, the tree's thaw, the frame's
+    layout and paint at once, the Maps panel built on the first entry, and the keyboard's move from the player waiting
+    for the player's thread. Made in turns, its longest round in 74 switches between Models and Maps over the four
+    clients is 34.6 ms (36.6 ms on the final build, section 8.10);
   - pre-existing, fixed after the stage (section 8.7): the round in which the world is shown (65-81 ms; now 17-23 ms,
     the player's window sized ahead on a thread of its own), and the full Maps panel update per progress message (now
     shown once per batch, 2-6 ms an update);
   - new, and fixed by the final review: the Enter world click's round, which streaming had pushed to 55-75 ms (the
     streaming lines appearing, then a streamState's update, inside the click's repaint round). With streaming it is now
-    23.6-25.5 ms (the final runs), against 23.0-25.5 ms with streaming off.
+    23.6-25.5 ms (the final runs), against 23.0-25.5 ms with streaming off;
+  - pre-existing, not fixed: the first Textures and Buildings entries after a client load list Browse in one turn of
+    their own, 308-606 ms (346-614 ms on the stage's host; section 8.9). Shorter turns would need that listing made
+    ahead or a share at a time;
+  - not attributed (section 8.9, one run each): a model load right after a switch into Models, 68.1 ms (43.6 ms on the
+    stage's host); client loads of 53.1 and 54.3 ms (46.0 and 53.0 ms) and a map pick of 54.7 ms (14.1 ms; section 8.7
+    measured it at 14-33 ms) in the Stage 05 suite.
+- **The viewer switch in turns** (new, after the stage; section 8.9):
+  - the screen changes later than with one turn: 36-98 ms from the click to the repaint in the cycles (medians 43 ms
+    into Models and 54 ms into Maps; on the final build medians 44 and 48 ms, at most 122 ms, section 8.10); 37-105 ms elsewhere in the Stage 05 suite (the 105 ms with a listing step), and
+    374-676 ms at the first Textures and Buildings entries, whose listing has a turn of its own. Each turn waits for its
+    timer (at least 10 ms), a step adds a turn, and a parked player sized for its put-back is waited for until at most
+    250 ms after turn A (none in the runs). Heavy message traffic from the player delays a turn's timer (Windows sends
+    WM_TIMER last); the idle check finishes a switch whose turn has not come 500 ms after its last;
+  - with Browse, Animation or Model floating, the command bar's switch is made in one turn (one round, as in section
+    8.8, where it was 22-44 ms; not measured);
+  - what the user does in the gap finishes the switch in that event's own round, any step still due included: that round
+    can be over 50 ms (not measured). A press on a panel in the gap lands on the frame's own window -- a frozen window
+    reads hidden to Windows and is not hit-tested -- so it finishes the switch and the panel does not get it. The
+    pointer shows the frame's cursor over frozen panels (expected from Windows' hit-testing of a window whose redraw is
+    off; not tested: `run_hazards.ps1` has not run);
+  - not measured: whether a layout of the frozen frame moves or cuts an on-screen player's frame at once (why the layout
+    waits for turn B when the player is on screen; `WMV_SWITCH_LAYOUT=a` is the experiment); whether the player keeps
+    presenting through a long gap; Windows' erase of a panel shown while frozen (swallowed by the filter and moved off
+    the frame, not captured); a player on screen at another size at turn B, sized by a thread and not waited for, which
+    shows its old size for up to one of its frames (none in the runs: the only switches with a player on screen at the
+    click, in the Stage 05 Retail run, went into Maps, whose overhead map covers it);
+  - changed behaviour: the caption, the floating panels' windows (Attachments), the item chooser and the background
+    window change after the repaint, with the workspace, not at the click; the Maps panel is not refreshed as Maps is
+    left; the player's messages wait up to one poll interval (20 ms) after each turn;
+  - the frame deleted with a switch on its way (the harness's end, a fatal exception) shows the half-made workspace
+    for the teardown;
+  - the runs listed as not run yet in section 8.9 are still to come.
+- **The round after a client load** (pre-existing -- once over 50 ms on the stage's host, 55.4 ms in
+  `w08\mst\out_c1base` Era -- and longer and more frequent since the mode-switch change of section 8.8: over 50 ms in 5
+  of 10 cycle runs against 1 of 10, and in 3 of 4 Stage 05 runs against none; not attributed further): the harness's
+  start round -- the first rounds of a run, which handle what is pending once the client is loaded, the window laid out
+  and the player started, the client load's deferred interface update among it -- was 23.6-29.9 ms in the Stage 05 suite
+  on the stage's host with the entry-stall fixes, 29.9-135.2 ms with the mode-switch change and 33.0-82.9 ms with the
+  switch in turns; in the cycle runs (`w08\mst\out_c1*`, `out_f1*`, `out_s1_*`), 23.6-55.4 ms on that host and 27.9-98.2
+  ms with the changes. From the mode-switch change until the final build that deferred update also listed Maps' tree
+  ahead (`FileControl::PrepareMapList`), which made the round longer (50-135 ms where other work ran on the machine);
+  it is removed, and the first entry into Maps lists the tree in a turn of its own (26-29 ms). On the final build,
+  alternated with the stage's host on a quiet machine, the round is 32.5-40.2 ms on MoP Classic (29.7-32.9 ms) and
+  34.7-40.0 ms on Retail (33.4-39.2 ms): still a few ms longer, not attributed further. It is outside every switch.
+- **Rounds over 50 ms in the final build's functional runs** (section 8.10; not alternated with the stage's host, and
+  other work ran on the machine then -- a probe build compiled at 14:32 and ran beside `life08b`): in `life08`, a
+  progress round of a Retail entry, before the world was shown, that held two Maps panel updates (31.5 and 19.7 ms; the
+  round 67.9 ms; the stage's own `life08` had three such rounds, 56.3-86.7 ms), and a model load in Models right after a
+  switch (68.8 ms, in the load's round that serves its first assets; 48.5 ms in the stage's `life08`, 68.1 ms in section
+  8.9's suite); start rounds of 166.0 ms (`life08b`) and 66.2 ms (protocol 17). Not attributed further.
+- **The viewport's notice after Maps -> Models** (pre-existing, not investigated): in some window pictures "No model
+  loaded" is drawn without its second line, or with no text (section 8.8; the stage's host shows the same).
 - **Frames over 50 ms at entry** (pre-existing): the largest world-model prototype of a region is built in one piece --
   48-50 ms on Retail, and frames of 126 and 137 ms at the Era and Beta entries (Stage 07 logged 114-128 ms builds of
   world model 107243 the same way). A tile's Unity objects are built in one piece too (4-29 ms on Retail; new: 1.8
@@ -1013,15 +1486,55 @@ the Stage 07 host or a protocol-17 player).
 - **The pool budget is below the Stormwind loop's revisit set** (new, a policy choice; section 8.1): an estimated 374
   MiB would be needed against 256 MiB, so each loop evicts most of what the next loop needs (least recently used, the
   worst order for a loop) and asks about 2,750 files again; the region settles 2.4-2.7 s after a loop instead of 0.3-0.5
-  s. The
-  budget is one constant (`StreamPoolGpuBudget`).
+  s. The budget is one constant (`StreamPoolGpuBudget`).
 - **An M2 texture is fetched and decoded again even when its upload is still on the GPU** (new, efficiency): the cache's
   uploads are reused only with the decoded image; at least about 110 of the files asked again per Retail loop are such.
-- **A texture refused or capped for the owning tile's load** is left out of the prototype the whole session shares (new,
-  latent: 1 answer of 22,708 in the acceptance run was not "available"); so is a world model's group refused for it (its
-  per-file limit: Retail 2320850, group 3 is 4,476,010 bytes against the 4 MiB per read that existed before this stage
-  --
-  249 of its set doodads are not placed).
+- **Fixed after the stage (10.3)**: a texture or group file refused, stale or capped for the owning tile's load was
+  built into the prototype the whole session shares; and a read the host cut to a load's remaining budget was answered
+  "unreadable", failing the file for the session.
+- **Retail 2320850's group 3 is a per-file failure, correctly shared** (pre-existing): FileDataID 5198158, 4,476,010
+  bytes against the 4 MiB per file, placed by tiles 30_48 and 30_49. Every load answers it unreadable, so the model is
+  built without it in every tile, and 249 of its set doodads are not placed (no group read lists them). This bullet
+  called it "refused for it" before.
+- **The owner tile keeps what its own load got** (new, after the stage, 10.3):
+  - its own-only placements stay private while it is resident, even once another tile has put the complete prototype
+    into the session;
+  - a tile whose own prototype is private takes whatever instance is already placed, so a tile may show another tile's
+    private instance and plan its set doodads from it;
+  - set doodads of groups a private instance lacks (`MarkMissingGroups` also drops MODD doodads no read group lists) are
+    not placed by the owner, and are drawn only while a tile with the complete model holds them.
+- **A texture refused for a load stays missing from that job's later models** (new, after the stage, 10.3): they are
+  kept private too, though the session may hold the image by then (a build each); a transient refusal (a full queue, a
+  client being loaded) likewise builds private and hands the fetch on.
+- **A model no tile's load can have whole** (new, after the stage, 10.3) would be fetched and built by every tile that
+  needs it (each a whole main-thread prototype build), never shared or pooled; from the third keep the log says "kept N
+  times in this session -- no tile's load so far could have it whole". Not seen in any run. The census of the four
+  clients (read-only, at the corpus builds; Azeroth columns 29-35 x rows 47-51, 35 tiles each, every tile owning every
+  model it lists) found one tile over a streaming refusal point: Retail 30_48, whose M2 textures (bound by batches,
+  under the player's rules, `MarkMissingGroups` included) come to 113.74 MiB (833 files from 726 M2s) against the
+  104 MiB point of a 128 MiB budget; the next highest is 30_49 at 89.87 MiB, and no other tile of any client is over a
+  refusal or cut point. On 30_48, with 3 other reads in flight, a read can be refused outright only in the last 9.74 MiB
+  of its M2 texture asks. A read cut to what is left, now also answered refused (section 4), can come earlier: a file of
+  s bytes is cut once read + reserved passes 128 MiB less s, so its largest M2 texture (5,593,604 bytes) can be refused
+  from about 98.67 MiB read, in the last 15.07 MiB. Ask order and timing decide it, and the census does not model them
+  (a tile opened as a neighbour reads less). This replaces the investigation's estimate of about 121-132 MiB, which
+  counted the 249 set doodads `MarkMissingGroups` drops. No tile reaches a count cap.
+- **A group FileDataID asked twice in one load** (two world models of a tile sharing a group file, or a root listing it
+  twice) is refused the second time by the host's once-per-load rule. The model asking second is built without it and
+  shared, as before and as at Stage 07 (pre-existing). The census found none: no root lists a group id twice and no two
+  world models placed by one tile share one (140 tile loads, 12,384 LOD0 group asks); no two M2s of one tile's load
+  share a skin either.
+- **Reads in flight lower a load's effective byte budget** (pre-existing at Stage 07 with 2 reads in flight; a session's
+  4 lower it further: new): a budget counts the reads done plus each read in flight's limit, and a session allows 4
+  reads in flight (Stage 07: 2). The earliest points, when the other reads in flight are the same load's and family's:
+
+  | Family | Refused from (streaming / Stage 07) | Cut below the per-file limit after (streaming / Stage 07) |
+  |---|---|---|
+  | 8 MiB families (WMO textures, M2 files, M2 textures, terrain textures) | 104 / 120 MiB | 96 / 112 MiB |
+  | WMO roots and groups (4 MiB) | 116 / 124 MiB | 112 / 120 MiB |
+
+- **An out-of-memory read** (the worker's `Failed` outcome) is still answered unreadable: the file's failure for the
+  session (pre-existing).
 - **Files asked twice besides evictions**: two tiles fetching the same terrain texture before either is committed both
   ask (15 at the Retail entry), and a reopened tile reads its root, tex0 and obj0 again (the tile files are not pooled,
   only what they name).
@@ -1043,11 +1556,26 @@ Host (`Source/wowmodelviewer`): `UnityIpcServer.h/.cpp` (protocol 18, receive pa
 testFlight, the queue's priorities and the answer summary); `modelviewer.h/.cpp` (the session's tile loads, streamTile,
 the session-wide order prerequisites, stale checks by a request's own load); `MapsViewer.h/.cpp`, `MapTilePanel.h/.cpp`,
 `MapOverview.h/.cpp`, `filecontrol.h/.cpp` (the streaming lines and the overhead map's rings);
-`UnityRendererHost.h/.cpp`
-(the resize timing line, the player's process id for the harness); `app.cpp` (the session's checks, the harness steps).
+`UnityRendererHost.h/.cpp` (the resize timing line, the player's process id for the harness); `app.cpp` (the session's
+checks, the harness steps).
 After the stage (section 8.7): `UnityRendererHost.h/.cpp` (`sizePlayerAhead`, `finishAheadMove`), `modelviewer.cpp`
 (`RequestLoad` sizes the player ahead), `MapTilePanel.h/.cpp` (the grid's paint buffer, `setLabel`'s memory),
-`MapsViewer.h/.cpp` (progress shown once per batch).
+`MapsViewer.h/.cpp` (progress shown once per batch). After the stage (section 10.3):
+`Source/games/wow/WorldMapCatalog.h/.cpp` (`WdtInspection::tooLargeSize`), `modelviewer.h/.cpp`
+(`mapAssetBudgetRefusal`, `CompleteMapAsset`), `app.cpp` (`checkMapAssetBudgetRefusals`, the read checks).
+After the stage (sections 8.8 and 8.9): `filecontrol.h/.cpp` (Maps' own tree, `BrowseTree`'s freeze, the Maps panel made
+ahead, the listing and the rows' measure on turns of their own, hierarchies freed on later turns);
+`modelviewer.h/.cpp` (`parkHidden` at any depth, the keyboard handoff on a turn of its own, `BeginViewerSwitch`,
+`FinishViewerSwitch`, `AbortViewerSwitch`, `ViewerSwitchFilter`, `commitLayoutBatchNow`, `runOnLaterTurn`,
+`floatedPanelChanges`, `LayoutNow` and the calls that finish a switch first, `ClearTerrain` held for turn B only with
+the player on screen); `UnityRendererHost.h/.cpp` (the keyboard released on a timer, `releasePlayer`'s resize on a
+thread, `sizeParkedPlayerAhead`, `dropHold`); `MapTilePanel.h/.cpp` (the grid's kept picture, the switch's paint,
+`prepareMosaic`); `UiArt.h/.cpp` (the command bar's buttons and the panes' close buttons kept as bitmaps);
+`MapsViewer.h/.cpp` (`PumpAfterEntry`); `TextureView.h/.cpp` (`resumeDecode`); `UnityIpcServer.h/.cpp`
+(`deferNextPoll`); `animcontrol.cpp` (columns fitted at once while frozen); `DisplaySettings.cpp` (`LayoutNow`);
+`app.cpp` (busy stretches, the switch report, the structural film, the steps `mode:<m>:real`, `modenow`, `modefilm`,
+`settle`, `clickframe`, `closenow` and its abort check, and the arrow, return, escape and tab keys of `keypost` and
+`keyplayer`).
 
 Player (`Tools/UnityRendererProject/Assets/Scripts`): `WmvTerrainSessionStream.cs` (new: the region, jobs, credit,
 registries, pools, closing, reports); `WmvTerrainSession.cs`, `WmvTerrainSessionWorld.cs`, `WmvTerrainSessionDoodads.cs`
@@ -1056,7 +1584,11 @@ deferred destroy, the test flight, runtimeState); `WmvIpcClient.cs` (protocol 18
 `WmvTerrainBuilder.cs`, `WmvTerrainMaterials.cs`, `WmvModelBuilder.cs`, `WmvWmoBuilder.cs` (pools, later destroy, block
 uploads); `Wow/BlpBlocks.cs` (new) and `Wow/BlpDecoder.cs` (block-compressed levels); self-tests
 `WmvLifecycleSelfTestStreaming.cs` (new), `WmvLifecycleSelfTest.cs`, `WmvLifecycleSelfTestWorldModels.cs`,
-`WmvLifecycleSelfTestDoodads.cs`.
+`WmvLifecycleSelfTestDoodads.cs`. After the stage (section 10.3): `WmvWorldModels.cs` (the scene's private lists),
+`WmvTerrainSession.cs` (`Request.AskedBefore`), `WmvTerrainSessionStream.cs` (keeping a prototype for its tile,
+replacing private instances, disposing unused ones, taking the session's images at the count cap, the counts and logs),
+`WmvTerrainSessionWorld.cs`, `WmvTerrainSessionDoodads.cs`, `WmvMainTerrain.cs` (the counts),
+`WmvLifecycleSelfTestStreaming.cs` (loads 14-22, the fake host's refusal hooks).
 
 Tests: `Tools/UnityRendererProject/Tests/BlpBlockTests.cs` and `StreamSeamTests.cs` (new), the runner's registration.
 Corpus tools: `Tools/world-audit/world08_corpus.py`, `world08_density.py` (new; the census of section 1.3).

@@ -14,6 +14,8 @@
 
 //wxAUI
 #include <wx/aui/aui.h>
+#include <wx/evtloop.h>
+#include <wx/eventfilter.h>
 
 // Our files
 #include "modelcanvas.h"
@@ -28,7 +30,11 @@
 
 #include "glm/glm.hpp"
 
+#include <functional>
 #include <memory>
+#include <set>
+#include <deque>
+#include <vector>
 
 #include <QString>
 #include <QStringList>
@@ -236,7 +242,8 @@ public:
 
   // THE LAYOUT BATCH (a viewer-mode switch). While one is open, CommitLayoutIfChanged and
   // commitDocksAtTheirSize only note that the layout has to be committed; closing the outermost batch
-  // commits it with exactly one wxAuiManager::Update(). See SetViewerMode.
+  // commits it with exactly one wxAuiManager::Update(). See BeginViewerSwitch. The command bar's switch
+  // keeps it open from its first turn to its repaint.
   void beginLayoutBatch();
   void endLayoutBatch();
   int m_layoutBatch = 0;
@@ -247,6 +254,86 @@ public:
   void finishWorkspace();
   // Every shown window of the frame painted now, top to bottom (not the player's: another process).
   void PaintNow();
+  // A window and its own windows painted now, top to bottom (PaintNow is the frame's).
+  static void paintTree(wxWindow * window);
+
+  // THE VIEWER SWITCH IN TURNS (BeginViewerSwitch / FinishViewerSwitch; see the comment above BeginViewerSwitch).
+  struct ViewerSwitch
+  {
+    enum class Phase { Building, Waiting, Stepping, Finishing };   // turn A; between turns; a step's turn; turn B
+    enum class Step { Listing, SettleRows, Mosaic };
+    Phase phase = Phase::Building;
+    ViewerMode previous = ViewerMode::Models;
+    ViewerMode mode = ViewerMode::Models;
+    bool paintNow = false;           // repainted at its end (the click); a load paints after its own work
+    bool split = false;              // in turns of their own (the command bar's click)
+    bool focusBrowse = false;        // OnCommandBar's keyboard to Browse, with the repaint
+    bool frozen = false;             // the frame frozen (Freeze): thawed once, in turn B (or the abort)
+    bool drawHeld = false;           // the frame's own drawing held back (ViewerSwitchFilter) until the thaw
+    bool titleHeld = false;          // the caption changes after the repaint (UpdateTitle)
+    bool held = false;               // the player held: released once in turn B (or counted down by the abort)
+    bool playerWasOnScreen = false;
+    bool layoutInB = false;          // the layout waits for turn B (the player on screen at the click)
+    bool presized = false;           // a parked player sized ahead for its put-back (waited for, at most ViewerSwitchSizeWaitMs)
+    bool timerArmed = false;         // the next turn's timer set (OnViewerSwitchIdle)
+    bool itemDialogAway = false;     // the item chooser disabled now, put away after the repaint
+    bool backgroundAway = false;     // the background window disabled now, hidden after the repaint
+    bool backgroundBack = false;     // the background window shown after the repaint
+    std::vector<std::pair<wxString, bool>> floatingDue;   // floating panels' windows shown (true) or hidden after the repaint
+    QString clearTerrainReason;      // the Maps viewer left, the player on screen at the click: told with the repaint
+    std::deque<Step> steps;          // the turns between turn A and turn B
+    wxEventLoopBase * loop = nullptr;   // the loop the click came in (another one running: finished at once)
+    wxStopWatch sinceClick, sinceTurn, presizeClock;
+    std::vector<double> turnMs;
+  };
+  struct ViewerSwitchReport
+  {
+    QString to, finishedBy;
+    int turns = 0;
+    std::vector<double> turnMs;
+    long clickToRepaintMs = 0;
+    bool split = false, layoutInB = false;
+  };
+  std::unique_ptr<ViewerSwitch> m_switch;
+  ViewerSwitchReport m_lastSwitch;
+  wxTimer m_switchTimer;                         // a switch's next turn; the turns after it (m_later) when none is on its way
+  std::deque<std::function<bool()>> m_later;     // runOnLaterTurn
+  unsigned m_turnSerial = 0;                     // raised by every switch turn and later turn (OnIdleFreeDetached)
+  unsigned m_freeDetachedTurnSeen = 0;
+  class ViewerSwitchFilter;
+  std::unique_ptr<ViewerSwitchFilter> m_switchFilter;
+  static const int ViewerSwitchTurnBudgetMs = 25;    // the steps packed in one turn while under this
+  static const long ViewerSwitchSizeWaitMs = 250;    // turn B waits for a presize at most this long after turn A
+  static const long ViewerSwitchGapLimitMs = 500;    // the idle check finishes a switch whose next turn never came
+  static const long LaterTurnShareMs = 10;           // a later turn's work stops once over this
+  bool BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paintNow, bool split);
+  void FinishViewerSwitch(const char * why);
+  void AbortViewerSwitch();
+  void viewerSwitchTurnDone(double ms);
+  void queueLateViewerSwitchSteps();
+  void runViewerSwitchSteps(bool all);
+  void runViewerSwitchStep(ViewerSwitch::Step step);
+  double viewerSwitchStepEstimateMs(ViewerSwitch::Step step) const;
+  void OnViewerSwitchIdle(wxIdleEvent & event);
+  void OnViewerSwitchTimer(wxTimerEvent & event);
+  void commitLayoutBatchNow();
+  void holdFloatingPanes();
+  void restoreFloatingPanes();
+  void moveGivenBackPanesOff();
+  bool layoutMovesViewport();
+  bool willBeShownOnScreen(wxWindow * window);
+  void focusBrowseFor(ViewerMode mode);
+  bool frameTakesInputNow() const;
+  bool floatedPanelChanges();
+  // Work on a turn of its own, once the GUI thread has gone idle, after any viewer switch on its way; true from `work`:
+  // more of it on the next turn.
+  void runOnLaterTurn(std::function<bool()> work);
+  // The harness.
+  bool viewerSwitchPending() const { return m_switch != nullptr; }
+  bool viewerSwitchDrawHeld() const { return m_switch && m_switch->drawHeld; }
+  const char * viewerSwitchPhaseName() const;
+  const ViewerSwitchReport & lastViewerSwitch() const { return m_lastSwitch; }
+  bool laterWorkPending() const { return !m_later.empty(); }
   void OnActivateFrame(wxActivateEvent & event);
   void UpdateActivePaneCaption(bool frameActive);
   void OnPaneClose(wxAuiManagerEvent &event);
@@ -290,6 +377,8 @@ public:
   // Lay the panes out again ONLY if a pane's shown state changed. See the definition for why
   // an unconditional interfaceManager.Update() is a whole-window blink on Windows.
   bool CommitLayoutIfChanged();
+  // An unbatched layout made now (a command's, a settings page's): a viewer switch on its way finished first.
+  void LayoutNow();
 
   // Start the Unity viewport's player at APP LAUNCH, before any model exists, so that picking the
   // first creature does not also pay for starting a game engine. No-op in batch mode. A missing
@@ -464,6 +553,7 @@ public:
   // Lay the panes out with docks made again at the size their panels' best size says, larger than the
   // 30% of the window a new dock is otherwise capped at (a sash may have made them larger than that).
   void commitDocksAtTheirSize();
+  void commitDocksNow();
   // The layout as the user has it: SavePerspective, with the panels a mode put away given back.
   wxString userPerspective();
   struct WorkspacePaneRecord
@@ -611,6 +701,22 @@ public:
                                 // dropped it for a terrain tile
   wxStopWatch m_modelAwaitedClock;   // since the wait began (monotonic)
   wxTimer m_playerContentPoll;
+  // THE KEYBOARD TAKEN FROM THE PLAYER after a viewer-mode switch, on a turn of its own (handKeyboardSoon): the move
+  // waits on the player's thread for one of its frames (17-30 ms), and the switch's turn is long enough without it.
+  wxTimer m_keyboardHandoff;
+  std::function<void()> m_keyboardHandoffDo;
+  wxStopWatch m_keyboardHandoffClock;               // since handKeyboardSoon
+  static const long KeyboardHandoffWaitMs = 250;    // a handoff waits for the player's thread to finish sizing at most this
+  void handKeyboardSoon(std::function<void()> handoff);
+  // HIDDEN WINDOWS STAY FROZEN (parkHidden): the frame's windows a viewer-mode switch leaves hidden (and hidden ones with
+  // windows of their own inside shown ones), each with a freeze of its own until it is shown again.
+  std::set<wxWindow *> m_parked;
+  std::set<wxWindow *> m_parkWatched;
+  bool m_parkIdleBound = false;
+  std::shared_ptr<bool> m_parkAlive = std::make_shared<bool>(true);   // the handlers' guard: false once the frame goes
+  void parkHidden();
+  void unpark(wxWindow * window);
+  void OnParkedIdle(wxIdleEvent & event);
   wxTimer m_streamUiTimer;      // STREAMING: a streamState's streaming lines and rings, after STREAM_UI_MS (coalesced)
   static const int STREAM_UI_MS = 150;
   static const int POLL_MS = 100;
@@ -764,6 +870,12 @@ public:
   // taken), and after it (bytesRead: what the read read, kind failures included; available: the answer, its kind checked).
   static void noteMapAssetRead(TerrainRequest & current, const QJsonObject & request);
   static void noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available);
+  // A read decideMapAssetRequest cut to what was left of its load's budget for the role's family, which found the file
+  // larger than that (the inspection's TooLarge) but within the role's per-file limit: the load's refusal, not the file's
+  // failure -- another load with room left can read it. The answer's detail then; "" otherwise (a file over the per-file
+  // limit, which no load can read; a read not cut; a file not too large; a role whose read is never cut: wdt, rootAdt,
+  // tex0Adt, obj0Adt; a load without that family's limits).
+  static QString mapAssetBudgetRefusal(const TerrainRequest & load, const QString & role, qint64 fileSize, qint64 readLimit);
   // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; WORLD MODELS: "obj0Adt"
   // MVER then MDDF, "wmoRoot" MVER then MOHD, "wmoGroup" MVER then MOGP, "wmoTexture" BLP2; DOODADS: "m2Model" MD21 then,
   // at 8, MD20, "m2Skin" SKIN, "m2Texture" BLP2; nothing for the other roles): "" when it is that kind, else what was

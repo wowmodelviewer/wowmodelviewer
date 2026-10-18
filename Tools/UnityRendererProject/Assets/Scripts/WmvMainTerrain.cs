@@ -1101,10 +1101,12 @@ public partial class WmvMain
                                  mat != null ? TerrainTileMaterial.TileStateName(mat.State) : "none", WhatTheViewShows(tile),
                                  WmvTerrainDebug.ViewNames[(int)tile.View]) +
                    (terrain.World != null && terrain.World.Instances.Count > 0
-                        ? string.Format("; {0} world model instance(s) of {1} world model(s)", terrain.World.Instances.Count, terrain.World.Prototypes.Count)
+                        ? string.Format("; {0} world model instance(s) of {1} world model(s)", terrain.World.Instances.Count,
+                                        terrain.World.Prototypes.Count + terrain.World.PrivatePrototypes.Count)
                         : "") +
                    (terrain.World != null && terrain.World.Doodads.Count > 0
-                        ? string.Format("; {0} doodad(s) of {1} M2(s)", terrain.World.Doodads.Count, terrain.World.DoodadPrototypes.Count)
+                        ? string.Format("; {0} doodad(s) of {1} M2(s)", terrain.World.Doodads.Count,
+                                        terrain.World.DoodadPrototypes.Count + terrain.World.PrivateDoodadPrototypes.Count)
                         : ""));
         // A tile's world load: its camera now that its world models are settled (owedCameraAtBuilt), before the capture.
         if (settlingLoad == tile.Load)
@@ -1317,8 +1319,9 @@ public partial class WmvMain
         {
             string models = string.Format(inv, "{0} world model instance(s) of {1} world model(s), {2} of {3} group(s) drawn ({4} culled); " +
                                           "{5} doodad(s) of {6} M2(s), {7} drawn ({8} culled) -- {9}",
-                                          scene.Instances.Count, scene.Prototypes.Count, worldModels.GroupsVisible, worldModels.Groups,
-                                          worldModels.GroupsCulled, scene.Doodads.Count, scene.DoodadPrototypes.Count, worldDoodads.Visible,
+                                          scene.Instances.Count, scene.Prototypes.Count + scene.PrivatePrototypes.Count,
+                                          worldModels.GroupsVisible, worldModels.Groups, worldModels.GroupsCulled, scene.Doodads.Count,
+                                          scene.DoodadPrototypes.Count + scene.PrivateDoodadPrototypes.Count, worldDoodads.Visible,
                                           worldDoodads.Culled, WorldModelsLabel);
             what = tile == null ? string.Format(inv, "map {0} world model (load {1}): {2}", scene.MapId, scene.Load, models) : what + "; plus " + models;
         }

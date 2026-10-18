@@ -63,8 +63,12 @@ private:
   void OnSize(wxSizeEvent & event)
   {
     event.Skip();
-    // After the layout has settled: during a resize the list passes through sizes too small to fit.
-    CallAfter([this]() { FitColumns(); });
+    // Laid out by a viewer switch (frozen, one size): fitted now, painted fitted by its one repaint. Otherwise after the
+    // layout has settled: during a resize the list passes through sizes too small to fit.
+    if (IsFrozen())
+      FitColumns();
+    else
+      CallAfter([this]() { FitColumns(); });
   }
 
   AnimControl * m_owner;
