@@ -13,15 +13,19 @@
 //     at 4096 values, exactly where the next layer starts. An uncompressed layer occupies the gap
 //     to the next layer (or to the end of MCAL): 4096 bytes = 8-bit, 2048 = 4-bit, low nibble
 //     first. The bit depth comes from that spacing, never from an MPHD flag.
+//   - MH2O (docs/world-viewer/09-liquids.md 1.2): a 256-entry header table, the instances, then the
+//     attributes, exists bitmaps and vertex data packed in chunk order; a vertex block's size (the gap
+//     to the next structure) gives its format (LiquidFormat).
 //
 // Failure policy. Fatal for the part (WorldParseException, file + chunk + offset): the chunk walk;
 // a missing or short MVER; an MCNK count other than 256 (root, tex0); and the placement records an
 // obj file exists for -- an MDDF/MODF/MLDD that is repeated, not a whole number of records, or holds
 // a non-finite position, rotation or extent. Everything else is non-fatal: a malformed MCNK, MH2O,
 // MLDX, MDID/MHID, a repeated optional chunk (MH2O, MAMP, MTXP, MDID, MHID, MLDX: the first copy is
-// used) is marked Malformed with a WorldIssue and the rest of the part is returned. Never-seen but
-// well-formed data (a non-empty MCSE, flag 0x10000 clear, mixed alpha bit depths) is kept and
-// reported as Unexpected.
+// used) is marked Malformed with a WorldIssue and the rest of the part is returned; inside a usable
+// MH2O, a bad attribute block, bitmap or vertex block costs only that chunk's attributes or that
+// instance. Never-seen but well-formed data (a non-empty MCSE, flag 0x10000 clear, mixed alpha bit
+// depths, a liquid height outside its instance's min/max) is kept and reported as Unexpected.
 
 using System;
 using System.Collections.Generic;
@@ -255,7 +259,7 @@ namespace Wmv.Wow.World
                 return liq;
             }
             liq.Headers = new LiquidChunkHeader[ChunksPerTile];
-            liq.Instances = new LiquidInstanceRaw[ChunksPerTile][];
+            liq.Instances = new LiquidInstance[ChunksPerTile][];
             // Validate every range before allocating anything: in all audited tiles the instance tables
             // lie after the 3,072-byte header table and never overlap, so the instances can never
             // outnumber the bytes that hold them (an overlapping table could otherwise multiply them).
@@ -293,29 +297,426 @@ namespace Wmv.Wow.World
                     liq.Status = WorldDataStatus.Malformed;
                     break;
                 }
+            liq.Attributes = new LiquidAttributes[ChunksPerTile];
             for (int n = 0; n < ChunksPerTile; n++)
             {
                 LiquidChunkHeader hd = liq.Headers[n];
                 if (liq.Status == WorldDataStatus.Malformed || hd.LayerCount == 0)
                 {
-                    liq.Instances[n] = new LiquidInstanceRaw[0];
+                    liq.Instances[n] = new LiquidInstance[0];
                     continue;
                 }
-                var inst = new LiquidInstanceRaw[hd.LayerCount];
+                var inst = new LiquidInstance[hd.LayerCount];
                 for (int k = 0; k < inst.Length; k++)
                 {
                     int o = (int)hd.InstancesOffset + LiquidInstanceSize * k;
-                    inst[k] = new LiquidInstanceRaw
+                    inst[k] = new LiquidInstance
                     {
-                        Word0 = s.U16(o), Word2 = s.U16(o + 2), Float4 = s.F32Raw(o + 4), Float8 = s.F32Raw(o + 8),
-                        Byte12 = s.U8(o + 12), Byte13 = s.U8(o + 13), Byte14 = s.U8(o + 14), Byte15 = s.U8(o + 15),
-                        Word16 = s.U32(o + 16), Word20 = s.U32(o + 20),
+                        LiquidType = s.U16(o), ObjectOrFormat = s.U16(o + 2), MinHeight = s.F32Raw(o + 4), MaxHeight = s.F32Raw(o + 8),
+                        X = s.U8(o + 12), Y = s.U8(o + 13), Width = s.U8(o + 14), Height = s.U8(o + 15),
+                        ExistsOffset = s.U32(o + 16), VertexOffset = s.U32(o + 20),
+                        Chunk = n, Layer = k, Status = WorldDataStatus.Decoded,
                     };
                 }
                 liq.Instances[n] = inst;
             }
+            if (liq.Status != WorldDataStatus.Malformed)
+                DecodeLiquidData(s, liq, ranges, what, issues);
             return liq;
         }
+
+        // ---- MH2O data region (docs/world-viewer/09-liquids.md 1.2, PROVEN_BYTES unless noted). In chunk order,
+        // each chunk's 16-byte attributes, then per layer its exists bitmap and its vertex data, packed with no gaps
+        // and no alignment; every structure ends where the next one starts, the last at the end of MH2O. So a
+        // vertex block's size is the gap to the next structure, and its bytes per vertex (1, 5, 8 or 9 -- all four
+        // distinct) decide its format. Every structure is checked against the header table, the instance tables,
+        // its neighbours, the packing's chunk order and its instance's own format (FindMisplaced: an offset out of
+        // place is its owner's, never a neighbour's re-sizing) and the end of the chunk before it is read; a bad one
+        // is reported for its chunk or instance and costs only that structure (attributes) or that instance's
+        // geometry, never the terrain.
+
+        public const int LiquidAttributesSize = 16;
+        /// <summary>Largest |height| accepted for a liquid vertex (the terrain builder's bound).</summary>
+        public const float LiquidMaxAbsHeight = 65536f;
+
+        static void DecodeLiquidData(WorldSpan s, AdtLiquids liq, List<KeyValuePair<long, long>> tables, string what, List<WorldIssue> issues)
+        {
+            const int headerTable = ChunksPerTile * LiquidHeaderSize;
+            // Every start the header table and the instances name, plus the end of the chunk: a structure ends at
+            // the next larger start. A start named twice is shared, which no client file does.
+            var starts = new List<long> { s.Size };
+            for (int n = 0; n < ChunksPerTile; n++)
+            {
+                if (liq.Headers[n].LayerCount == 0)
+                    continue;
+                starts.Add(liq.Headers[n].InstancesOffset);
+                if (liq.Headers[n].AttributesOffset != 0)
+                    starts.Add(liq.Headers[n].AttributesOffset);
+                foreach (LiquidInstance li in liq.Instances[n])
+                {
+                    if (li.ExistsOffset != 0) starts.Add(li.ExistsOffset);
+                    if (li.VertexOffset != 0) starts.Add(li.VertexOffset);
+                }
+            }
+            starts.Sort();
+            var layout = new LiquidLayout { Starts = starts, Tables = tables, HeaderTable = headerTable, Size = s.Size };
+            FindMisplaced(liq, layout);
+
+            for (int n = 0; n < ChunksPerTile; n++)
+            {
+                LiquidChunkHeader hd = liq.Headers[n];
+                if (hd.LayerCount == 0)
+                    continue;
+                string label = "MH2O chunk " + n;
+                if (hd.AttributesOffset != 0)
+                {
+                    string why = layout.Problem(hd.AttributesOffset, LiquidAttributesSize, "attribute block") ?? layout.MisplacedWhy(hd.AttributesOffset);
+                    if (why != null)
+                    {
+                        issues.Add(new WorldIssue(WorldIssueKind.Malformed, what, label, s.AbsoluteOffset(LiquidHeaderSize * n + 8), why + "; the chunk's attributes are not used"));
+                        liq.MalformedAttributes++;
+                    }
+                    else
+                    {
+                        int o = (int)hd.AttributesOffset;
+                        var a = new LiquidAttributes { Present = true, Fishable = s.U64(o), Deep = s.U64(o + 8) };
+                        liq.Attributes[n] = a;
+                        if ((a.Deep & ~a.Fishable) != 0)
+                            issues.Add(new WorldIssue(WorldIssueKind.Unexpected, what, label, s.AbsoluteOffset(o + 8),
+                                "the second attribute mask is not a subset of the first (it is in every client file)"));
+                    }
+                }
+                foreach (LiquidInstance li in liq.Instances[n])
+                {
+                    long record = s.AbsoluteOffset((int)hd.InstancesOffset + LiquidInstanceSize * li.Layer);
+                    string why = DecodeLiquidInstance(s, li, layout, record, what, issues);
+                    if (why == null)
+                        continue;
+                    li.Status = WorldDataStatus.Malformed;
+                    li.Problem = why;
+                    li.FormatBySize = -1;
+                    li.Exists = null;
+                    li.Heights = null;
+                    li.Depths = null;
+                    li.U = null;
+                    li.V = null;
+                    liq.MalformedInstances++;
+                    issues.Add(new WorldIssue(WorldIssueKind.Malformed, what, label + " layer " + li.Layer, record, why + "; the instance has no geometry"));
+                }
+            }
+        }
+
+        /// <summary>One named structure of the data region, in the order the packing puts it (FindMisplaced).</summary>
+        struct LiquidStructure
+        {
+            public long Start;
+            public string Name;                // "attribute block", "exists bitmap", VertexData
+            public LiquidInstance Instance;    // null: the chunk's attribute block
+        }
+
+        // The packing (09-liquids.md 1.2, PROVEN_BYTES in every client file) decides whose a conflicting offset is, so a bad
+        // offset never re-sizes a well-formed neighbour (a structure's size is the gap to the next start):
+        //   order    the starts increase in chunk order -- per chunk its attribute block, then per layer its bitmap and its
+        //            vertex data. A start that does not is out of place: the structures read so far keep their starts, unless
+        //            the last one kept is the one out of place (it lies past this start and the next structure's, both after
+        //            the one kept before it: it jumped ahead) and goes instead.
+        //   extent   a vertex block whose instance's own rule gives its format (the second word 0, 1 or 2, or the ocean type:
+        //            LiquidFormat.Decide without a catalogue; 6,334,582 of 6,334,582 instances agree with their size) is n
+        //            times that format's bytes; a start inside that extent is out of place.
+        // An out-of-place start is its owner's problem (that chunk's attributes, or that instance's geometry) and leaves the
+        // layout; a vertex block with an own extent whose successor in that order is out of place keeps that extent (the
+        // successor's real bytes follow it). What remains is measured as before.
+        const string VertexData = "vertex data";
+
+        static void FindMisplaced(AdtLiquids liq, LiquidLayout layout)
+        {
+            var order = new List<LiquidStructure>();
+            for (int n = 0; n < ChunksPerTile; n++)
+            {
+                if (liq.Headers[n].LayerCount == 0)
+                    continue;
+                if (liq.Headers[n].AttributesOffset != 0)
+                    order.Add(new LiquidStructure { Start = liq.Headers[n].AttributesOffset, Name = "attribute block" });
+                foreach (LiquidInstance li in liq.Instances[n])
+                {
+                    if (li.ExistsOffset != 0)
+                        order.Add(new LiquidStructure { Start = li.ExistsOffset, Name = "exists bitmap", Instance = li });
+                    if (li.VertexOffset != 0)
+                        order.Add(new LiquidStructure { Start = li.VertexOffset, Name = VertexData, Instance = li });
+                }
+            }
+
+            // Order. (A start shared by two structures is left to the shared-offset rule: both are malformed.)
+            var kept = new List<int>();
+            var outOfOrder = new List<int>();
+            for (int k = 0; k < order.Count; k++)
+            {
+                long start = order[k].Start;
+                if (layout.Shared(start))
+                    continue;
+                int m = kept.Count;
+                long last = m > 0 ? order[kept[m - 1]].Start : -1;
+                if (start > last)
+                {
+                    kept.Add(k);
+                    continue;
+                }
+                long before = m > 1 ? order[kept[m - 2]].Start : -1;
+                long next = k + 1 < order.Count ? order[k + 1].Start : layout.Size;
+                if (start > before && next > start && next < last)
+                {
+                    outOfOrder.Add(kept[m - 1]);
+                    kept[m - 1] = k;
+                }
+                else
+                    outOfOrder.Add(k);
+            }
+            foreach (int k in outOfOrder)
+                layout.Misplace(order[k].Start, string.Format("{0} at +0x{1:X} is out of the chunk order the data region is packed in " +
+                                                              "(it does not lie between the structures before and after it)", order[k].Name, order[k].Start));
+
+            // Extent.
+            var byStart = new Dictionary<long, int>();
+            foreach (int k in kept)
+                if (!layout.IsMisplaced(order[k].Start))
+                    byStart[order[k].Start] = k;
+            foreach (int k in kept)
+            {
+                LiquidStructure v = order[k];
+                LiquidInstance li = v.Instance;
+                if (v.Name != VertexData || layout.IsMisplaced(v.Start) || li.Width < 1 || li.Height < 1 ||
+                    li.X + li.Width > 8 || li.Y + li.Height > 8 || layout.Problem(v.Start, 1, v.Name) != null)
+                    continue;
+                LiquidFormatDecision own = LiquidFormat.Decide(li, null);
+                if (own.Source != LiquidFormatSource.Word && own.Source != LiquidFormatSource.OceanType)
+                    continue;
+                long end = v.Start + (long)li.VertexCount * LiquidFormat.BytesPerVertex(own.Format);
+                for (long next = layout.Next(v.Start); next < end; next = layout.Next(v.Start))
+                {
+                    int inside;
+                    if (!byStart.TryGetValue(next, out inside))
+                        break;                  // a table or the chunk's end: the usual checks report it
+                    byStart.Remove(next);
+                    layout.Misplace(next, string.Format("{0} at +0x{1:X} lies inside the {2} byte(s) of the vertex data at +0x{3:X} of chunk {4} " +
+                                                        "layer {5} (format {6} by its own {7})", order[inside].Name, next, end - v.Start, v.Start,
+                                                        li.Chunk, li.Layer, own.Format, OwnRule(li, own)));
+                }
+                if (k + 1 < order.Count && layout.IsMisplaced(order[k + 1].Start))
+                    layout.ProvenEnds[v.Start] = end;
+            }
+        }
+
+        static string OwnRule(LiquidInstance li, LiquidFormatDecision own)
+        {
+            return own.Source == LiquidFormatSource.Word ? "second word " + li.ObjectOrFormat : "liquid type " + li.LiquidType + " (Ocean)";
+        }
+
+        /// <summary>Where the MH2O structures lie: the sorted starts (the end of the chunk included), the instance
+        /// tables, the header table and the chunk size; the starts out of place (FindMisplaced) and the vertex blocks whose
+        /// end their own rule gives.</summary>
+        sealed class LiquidLayout
+        {
+            public List<long> Starts;
+            public List<KeyValuePair<long, long>> Tables;     // sorted, non-overlapping [start, end)
+            public int HeaderTable;
+            public int Size;
+            readonly Dictionary<long, string> misplaced = new Dictionary<long, string>();
+            public readonly Dictionary<long, long> ProvenEnds = new Dictionary<long, long>();
+
+            /// <summary>The start of a structure out of place: why, and off the layout (it ends no other structure).</summary>
+            public void Misplace(long start, string why)
+            {
+                if (misplaced.ContainsKey(start))
+                    return;
+                misplaced[start] = why;
+                int i = Starts.BinarySearch(start);
+                if (i >= 0)
+                    Starts.RemoveAt(i);
+            }
+
+            public bool IsMisplaced(long start) { return misplaced.ContainsKey(start); }
+
+            public string MisplacedWhy(long start)
+            {
+                string why;
+                return misplaced.TryGetValue(start, out why) ? why : null;
+            }
+
+            /// <summary>Where the structure at `start` ends: the next start, or sooner the end its own rule gives.</summary>
+            public long End(long start)
+            {
+                long end = Next(start), proven;
+                return ProvenEnds.TryGetValue(start, out proven) && proven < end ? proven : end;
+            }
+
+            /// <summary>The first start after `offset` (at most the end of the chunk).</summary>
+            public long Next(long offset)
+            {
+                int lo = 0, hi = Starts.Count;
+                while (lo < hi)
+                {
+                    int mid = (lo + hi) >> 1;
+                    if (Starts[mid] <= offset) lo = mid + 1; else hi = mid;
+                }
+                return lo < Starts.Count ? Starts[lo] : Size;
+            }
+
+            public bool Shared(long offset)
+            {
+                int first = Starts.BinarySearch(offset);
+                if (first < 0)
+                    return false;
+                return (first > 0 && Starts[first - 1] == offset) || (first + 1 < Starts.Count && Starts[first + 1] == offset);
+            }
+
+            /// <summary>Why a structure of `bytes` at `offset` cannot be read, or null: it must lie after the header
+            /// table, outside every instance table, inside the chunk, and end before the next structure starts.</summary>
+            public string Problem(long offset, long bytes, string name)
+            {
+                if (offset < HeaderTable)
+                    return string.Format("{0} at +0x{1:X} is inside the 3072-byte header table", name, offset);
+                int lo = 0, hi = Tables.Count;                      // the last table starting at or before offset
+                while (lo < hi)
+                {
+                    int mid = (lo + hi) >> 1;
+                    if (Tables[mid].Key <= offset) lo = mid + 1; else hi = mid;
+                }
+                if (lo > 0 && offset < Tables[lo - 1].Value)
+                    return string.Format("{0} at +0x{1:X} is inside the instance table [+0x{2:X}, +0x{3:X})", name, offset, Tables[lo - 1].Key, Tables[lo - 1].Value);
+                if (offset + bytes > Size)
+                    return string.Format("{0} ({1} byte(s) at +0x{2:X}) runs past the end of the {3}-byte chunk", name, bytes, offset, Size);
+                long next = Next(offset);
+                if (offset + bytes > next)
+                    return string.Format("{0} ({1} byte(s) at +0x{2:X}) overlaps the structure at +0x{3:X}", name, bytes, offset, next);
+                return null;
+            }
+        }
+
+        /// <summary>Decodes one instance's bitmap and vertex data; returns why it is malformed, or null.</summary>
+        static string DecodeLiquidInstance(WorldSpan s, LiquidInstance li, LiquidLayout layout, long record, string what, List<WorldIssue> issues)
+        {
+            int w = li.Width, h = li.Height;
+            if (w < 1 || h < 1 || li.X + w > 8 || li.Y + h > 8)
+                return string.Format("cells x {0} y {1} width {2} height {3} are not inside the chunk's 8 x 8 cells", li.X, li.Y, w, h);
+            if (!Finite(li.MinHeight) || !Finite(li.MaxHeight) || Math.Abs(li.MinHeight) > LiquidMaxAbsHeight || Math.Abs(li.MaxHeight) > LiquidMaxAbsHeight)
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "min/max height {0:R} / {1:R} is not a usable height", li.MinHeight, li.MaxHeight);
+            string label = "MH2O chunk " + li.Chunk + " layer " + li.Layer;
+            if (li.MinHeight > li.MaxHeight)
+                issues.Add(new WorldIssue(WorldIssueKind.Unexpected, what, label, record, string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    "min height {0:R} is above max height {1:R} (min <= max in every client file)", li.MinHeight, li.MaxHeight)));
+
+            // Exists bitmap: ceil(w h / 8) bytes, quad (r, c) = bit r w + c, least significant first.
+            int quads = w * h;
+            li.Exists = new bool[quads];
+            if (li.ExistsOffset == 0)
+            {
+                for (int q = 0; q < quads; q++)
+                    li.Exists[q] = true;
+            }
+            else
+            {
+                int bytes = (quads + 7) / 8;
+                string why = layout.Problem(li.ExistsOffset, bytes, "exists bitmap");
+                if (why != null)
+                    return why;
+                if (layout.Shared(li.ExistsOffset))
+                    return string.Format("exists bitmap at +0x{0:X} shares its offset with another structure", li.ExistsOffset);
+                if ((why = layout.MisplacedWhy(li.ExistsOffset)) != null)
+                    return why;
+                li.HasExistsBitmap = true;
+                bool any = false;
+                for (int q = 0; q < bytes * 8; q++)
+                {
+                    bool bit = ((s.U8((int)li.ExistsOffset + (q >> 3)) >> (q & 7)) & 1) != 0;
+                    if (q < quads)
+                    {
+                        li.Exists[q] = bit;
+                        any |= bit;
+                    }
+                    else if (bit)
+                        li.ExistsSpareBits = true;
+                }
+                if (!any)
+                    issues.Add(new WorldIssue(WorldIssueKind.Unexpected, what, label, s.AbsoluteOffset((int)li.ExistsOffset),
+                                              "the exists bitmap marks no quad (never in a client file)"));
+            }
+
+            if (li.VertexOffset == 0)
+                return null;
+            int n = li.VertexCount;
+            long start = li.VertexOffset;
+            string where = layout.Problem(start, 1, "vertex data");
+            if (where != null)
+                return where;
+            if (layout.Shared(start))
+                return string.Format("vertex data at +0x{0:X} shares its offset with another structure: its size cannot be measured", start);
+            if ((where = layout.MisplacedWhy(start)) != null)
+                return where;
+            long gap = layout.End(start) - start;
+            li.VertexBlockBytes = (int)gap;
+            int format = gap % n == 0 ? LiquidFormat.FormatOfBytesPerVertex((int)(gap / n)) : -1;
+            if (format < 0)
+                return string.Format("vertex data of {0} byte(s) at +0x{1:X} is not 1, 5, 8 or 9 bytes for each of its {2} vertices", gap, start, n);
+            // The instance's own rule (its word, or the ocean type) gives the format too: a block of another size is malformed
+            // itself (a start inside its extent was taken out above, FindMisplaced), never decoded by the size.
+            LiquidFormatDecision own = LiquidFormat.Decide(li, null);
+            if ((own.Source == LiquidFormatSource.Word || own.Source == LiquidFormatSource.OceanType) && own.Format != format)
+                return string.Format("vertex data of {0} byte(s) at +0x{1:X} is format {2} by its size, but format {3} by its own {4}", gap, start,
+                                     format, own.Format, OwnRule(li, own));
+            li.FormatBySize = format;
+
+            int o = (int)start;
+            if (LiquidFormat.HasHeights(format))
+            {
+                li.Heights = new float[n];
+                for (int k = 0; k < n; k++)
+                    li.Heights[k] = s.F32Raw(o + 4 * k);
+                o += 4 * n;
+            }
+            if (LiquidFormat.HasUv(format))
+            {
+                li.U = new ushort[n];
+                li.V = new ushort[n];
+                for (int k = 0; k < n; k++)
+                {
+                    li.U[k] = s.U16(o + 4 * k);
+                    li.V[k] = s.U16(o + 4 * k + 2);
+                }
+                o += 4 * n;
+            }
+            if (LiquidFormat.HasDepth(format))
+                li.Depths = s.Bytes(o, n);
+
+            // Heights matter only where an existing quad uses them (the others are leftovers): there they must be
+            // usable, and they lie inside [min, max] in every client file.
+            if (li.Heights != null)
+            {
+                int outside = 0;
+                for (int i = 0; i <= h; i++)
+                    for (int j = 0; j <= w; j++)
+                    {
+                        if (!VertexUsed(li, i, j))
+                            continue;
+                        float z = li.Heights[i * (w + 1) + j];
+                        if (!Finite(z) || Math.Abs(z) > LiquidMaxAbsHeight)
+                            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "vertex ({0}, {1}) has height {2:R}", i, j, z);
+                        if (z < li.MinHeight || z > li.MaxHeight)
+                            outside++;
+                    }
+                if (outside > 0)
+                    issues.Add(new WorldIssue(WorldIssueKind.Unexpected, what, label, s.AbsoluteOffset((int)start), string.Format(
+                        "{0} used vertex height(s) outside the instance's [min, max] (inside in every client file)", outside)));
+            }
+            return null;
+        }
+
+        /// <summary>Whether an existing quad of the instance touches vertex (i, j).</summary>
+        static bool VertexUsed(LiquidInstance li, int i, int j)
+        {
+            return li.QuadExists(i - 1, j - 1) || li.QuadExists(i - 1, j) || li.QuadExists(i, j - 1) || li.QuadExists(i, j);
+        }
+
+        static bool Finite(float f) { return !float.IsNaN(f) && !float.IsInfinity(f); }
 
         // ================================================================================== tex0
 

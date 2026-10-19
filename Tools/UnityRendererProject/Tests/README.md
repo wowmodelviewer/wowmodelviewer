@@ -63,6 +63,17 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   `<WMV_WORLD_AUDIT_CORPUS>/world07`): every MDDF doodad's placed M2 box against the client's MLDX box on four clients,
   the plan's counts against the census, the doodad-set and MODR facts, the MODD rotation convention measured against the
   world models' walls (the counts of an independent probe pinned), and reference positions computed independently.
+- `LiquidTests.cs`: the liquid layer of stage 09 (`docs/world-viewer/09-liquids.md`) on hand-built bytes from
+  `AdtSynthetic.Mh2o` and `WmoSynthetic.Mliq`: the MH2O decode (the four vertex formats by the vertex block's size, exists
+  bitmaps with spare bits, partial and multi-layer instances, attributes, every malformed structure reported per chunk or
+  instance, random corruption), the format rule (`LiquidFormat`), the terrain liquid mesh (positions on the terrain's grid,
+  winding, uv0 planar and stored with the u16 wrap, uv1, seams, counters), and MLIQ (the size equation, tiles, the group
+  liquid type rule, the group-frame mesh).
+- `LiquidCorpusTests.cs`: the same on real client bytes: every MH2O instance of the pinned corpus windows, the exit tiles
+  (Retail 29_48, Era 36_49) with exact counts, a byte walkthrough, the terrain grid and the seams; and, when
+  `WMV_LIQUID_EXAMPLES` names the stage 09 investigation's MLIQ examples folder (`manifest.json` plus
+  `<client>/<FileDataID>.bin`, pinned by the manifest's SHA-256), every example group against the investigation's census.
+  It runs when `WMV_WORLD_AUDIT_CORPUS` is set (otherwise SKIPPED); without `WMV_LIQUID_EXAMPLES` the MLIQ part is SKIPPED.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

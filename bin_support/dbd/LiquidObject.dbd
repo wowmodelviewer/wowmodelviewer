@@ -1,0 +1,24 @@
+COLUMNS
+int ID
+float Field_00 // not established (floats from 0 to 359)
+float Field_01 // not established (floats)
+int LiquidTypeID // a LiquidType row: every value is one, in every client (proven from the bytes); 16 bits -- the pallet's upper half is a constant that is not part of the value
+int Field_03 // not established (0 or 1)
+int Field_04 // not established (0 or 1)
+
+COMMENT Written for WoW Model Viewer's liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4). The
+COMMENT layout comes from public table definitions, read as hypotheses: the column read (database.xml, table LiquidObject)
+COMMENT was checked against the four clients' own bytes, and only it carries an established meaning; the others are named
+COMMENT by their field index, their types and widths the hypotheses' (never read). An MH2O instance's second word of 43
+COMMENT or more is a LiquidObject ID, copy rows included (docs/world-viewer/09-liquids.md 1.2). Its hash is the same in
+COMMENT Retail 12.1.5, Classic Era 1.15.9, MoP Classic 5.5.4 and Classic Beta 1.60.1. A layout not listed here is not read.
+
+LAYOUT CB0D39E8
+BUILD 12.1.5.70448, 1.15.9.70003, 5.5.4.70449, 1.60.1.70450
+COMMENT 5 fields in each of the four clients; IDs in the section's ID list, most of them copy rows.
+$noninline,id$ID<32>
+Field_00
+Field_01
+LiquidTypeID<16>
+Field_03<u8>
+Field_04<u8>

@@ -81,6 +81,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "LiquidCatalog.h"
 #include "WorldMapCatalog.h"
 
 #include "logger/Logger.h"
@@ -375,8 +376,9 @@ ModelViewer::ModelViewer()
   m_switchFilter.reset(new ViewerSwitchFilter(this));
   wxEvtHandler::AddFilter(m_switchFilter.get());
   PLUGINMANAGER.init("./plugins");
-  // Until a client loads, the map catalogue says there is none (mapCatalog() is never null).
+  // Until a client loads, the map catalogue says there is none (mapCatalog() is never null); so does the liquid catalogue.
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
+  m_liquidCatalog = wow::LiquidCatalog::noClient("no client is loaded");
   // THE MAP ASSET WORKER: made now, its thread started by its first read (docs/world-viewer/04b-asset-serving.md).
   m_mapAssetWorker = std::make_shared<MapAssetWorker>();
   // THE MAPS VIEWER: what it shows changes the tile grid, the viewport's notice and the title.
@@ -3797,9 +3799,10 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
   const int fileDataID = request.value("fileDataID").toInt(0);
   const bool worldRole = role == "obj0Adt" || role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture";
   const bool doodadRole = role == "m2Model" || role == "m2Skin" || role == "m2Texture";
-  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture" && !worldRole && !doodadRole)
+  const bool liquidRole = role == "liquidTexture";
+  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture" && !worldRole && !doodadRole && !liquidRole)
     return refused("unknown role \"" + role + "\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup, wmoTexture, "
-                   "m2Model, m2Skin or m2Texture)");
+                   "m2Model, m2Skin, m2Texture or liquidTexture)");
   if (fileDataID <= 0)
     return refused(QString("FileDataID %1 names no file").arg(fileDataID));
   // WORLD MODELS (protocol 16): a world load's files only; a WMO-only map's load has no tile.
@@ -3865,6 +3868,26 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
       return refused(QString("load %1 has asked for %2 %3s: at most %4 per load, not %5")
                        .arg(load).arg(ids.size()).arg(what).arg(most).arg(fileDataID));
   }
+  // LIQUIDS (protocol 19): a load that carries a liquids offer only (one sent to an older player carries none), once its
+  // WDT was served (a tile's root and a WMO-only map's world model come after it alike), and only the frames of the liquid
+  // catalogue the load was sent with: the host parses no MH2O and no MLIQ, so it cannot tell which types a tile uses, but
+  // it vouches that the file is a frame of one of the client's liquid types -- and no other file is served under the role.
+  if (liquidRole)
+  {
+    if (current->maxLiquidTexturesPerLoad <= 0)
+      return refused(QString("liquids not offered: load %1 was sent without them, so no liquid texture is served for it").arg(load));
+    if (!current->wdtServed)
+      return refused(QString("load %1's WDT has not been served, so no liquid texture is").arg(load));
+    if (!current->liquidFrames || !std::binary_search(current->liquidFrames->begin(), current->liquidFrames->end(), fileDataID))
+      return refused(QString("FileDataID %1 is not a liquid texture: no liquid type of the catalogue load %2 was sent with "
+                             "names it as a frame").arg(fileDataID).arg(load));
+    const std::vector<int> & ids = current->liquidTextureIds;
+    if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
+      return refused(QString("load %1 has asked for liquid texture %2 before: each once per load").arg(load).arg(fileDataID));
+    if ((int)ids.size() >= current->maxLiquidTexturesPerLoad)
+      return refused(QString("load %1 has asked for %2 liquid textures: at most %3 per load, not %4")
+                       .arg(load).arg(ids.size()).arg(current->maxLiquidTexturesPerLoad).arg(fileDataID));
+  }
   if (role == "wdt" && fileDataID != current->wdtFileDataID)
     return refused(QString("load %1's WDT is FileDataID %2, not %3").arg(load).arg(current->wdtFileDataID).arg(fileDataID));
   if (role == "rootAdt" && !current->wdtServed)
@@ -3893,8 +3916,9 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
   }
   // However the roles add up, a load reads at most its WDT, root and tex0 and one file per texture id; a world load also
   // its obj0 and one file per world-model root, group and texture id; one that carries doodad budgets also one file per
-  // doodad model, skin and texture id. The three are capped apart, so neither the world's allowance nor the doodads' lets
-  // the terrain roles be read again past theirs (a WDT asked for over and over), nor each other's.
+  // doodad model, skin and texture id; one that carries a liquids offer also one file per liquid texture id. The four are
+  // capped apart, so no family's allowance lets the terrain roles be read again past theirs (a WDT asked for over and
+  // over), nor another family's.
   if (worldRole)
   {
     const int worldAllowed = 1 + std::max(0, current->maxWmoModelsPerLoad) + std::max(0, current->maxWmoGroupsPerLoad) +
@@ -3913,9 +3937,16 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
       return refused(QString("load %1 has read %2 doodad files: at most %3 per load (%4 models + %5 skins + %6 textures)")
                        .arg(load).arg(current->doodadReads).arg(doodadAllowed).arg(models).arg(models).arg(textures));
   }
+  else if (liquidRole)
+  {
+    const int liquidAllowed = std::max(0, current->maxLiquidTexturesPerLoad);
+    if (current->liquidReads >= liquidAllowed)
+      return refused(QString("load %1 has read %2 liquid textures: at most %3 per load")
+                       .arg(load).arg(current->liquidReads).arg(liquidAllowed));
+  }
   else
   {
-    const int terrainReads = current->reads - current->worldReads - current->doodadReads;
+    const int terrainReads = current->reads - current->worldReads - current->doodadReads - current->liquidReads;
     const int readsAllowed = 3 + std::max(0, current->maxTexturesPerLoad);
     if (terrainReads >= readsAllowed)
       return refused(QString("load %1 has read %2 files: at most %3 per load (3 + %4 textures)")
@@ -3951,6 +3982,18 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
                                   : QString("load %1 has read %2 bytes of %3: at most %4 per load").arg(load).arg(read).arg(what).arg(budget));
     d.maxBytes = std::min(texture ? current->maxM2TextureBytes : current->maxM2FileBytes, budget - read - reserved);
   }
+  if (liquidRole)
+  {
+    // The load's liquid texture bytes, as its doodads' (above): the reads in flight counted with their limits.
+    const qint64 read = current->liquidTextureBytesRead, reserved = current->liquidTextureBytesReserved;
+    const qint64 budget = current->maxLiquidTextureBytesPerLoad;
+    if (read + reserved >= budget)
+      return refused(reserved > 0 ? QString("load %1 has read %2 bytes of liquid textures and reserved %3 for reads in flight: "
+                                            "at most %4 per load").arg(load).arg(read).arg(reserved).arg(budget)
+                                  : QString("load %1 has read %2 bytes of liquid textures: at most %3 per load")
+                                      .arg(load).arg(read).arg(budget));
+    d.maxBytes = std::min(current->maxLiquidTextureBytes, budget - read - reserved);
+  }
   if (role == "texture")
   {
     // The texture bytes a load may read: refused once they are spent, otherwise a read that cannot overrun them (a file
@@ -3979,6 +4022,8 @@ void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject &
     current.worldReads++;
   else if (role == "m2Model" || role == "m2Skin" || role == "m2Texture")
     current.doodadReads++;
+  else if (role == "liquidTexture")
+    current.liquidReads++;
   // The first root ADT the load asks for is the only one it may have; the tex0 is asked for once, whatever comes of it;
   // a texture id once.
   if (role == "rootAdt")
@@ -4007,6 +4052,8 @@ void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject &
     current.m2SkinIds.push_back(fileDataID);
   else if (role == "m2Texture")
     current.m2TextureIds.push_back(fileDataID);
+  else if (role == "liquidTexture")
+    current.liquidTextureIds.push_back(fileDataID);
 }
 
 void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available)
@@ -4035,6 +4082,8 @@ void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & r
   }
   else if (role == "m2Texture")
     current.m2TextureBytesRead += std::max<qint64>(0, bytesRead);
+  else if (role == "liquidTexture")
+    current.liquidTextureBytesRead += std::max<qint64>(0, bytesRead);
 }
 
 QString ModelViewer::mapAssetBudgetRefusal(const TerrainRequest & load, const QString & role, qint64 fileSize, qint64 readLimit)
@@ -4072,6 +4121,12 @@ QString ModelViewer::mapAssetBudgetRefusal(const TerrainRequest & load, const QS
     perLoad = load.maxM2TextureBytesPerLoad;
     what = "doodad textures";
   }
+  else if (role == "liquidTexture")
+  {
+    perFile = load.maxLiquidTextureBytes;
+    perLoad = load.maxLiquidTextureBytesPerLoad;
+    what = "liquid textures";
+  }
   if (perFile <= 0 || fileSize <= 0 || readLimit < 0 || fileSize <= readLimit || readLimit >= perFile || fileSize > perFile)
     return QString();
   return QString("it is %1 bytes, more than the %2 bytes left of load %3's %4 budget (%5 per load, the reads in flight "
@@ -4106,7 +4161,7 @@ QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray 
       return "not a tex0 ADT: second chunk " + code((int)second) + ", not MAMP (PMAM)";
     return QString();
   }
-  if (role == "texture" || role == "wmoTexture" || role == "m2Texture")
+  if (role == "texture" || role == "wmoTexture" || role == "m2Texture" || role == "liquidTexture")
   {
     if (!bytes.startsWith("BLP2"))
       return "not a BLP2 texture: it starts with " + (bytes.size() < 4 ? QString("%1 bytes only").arg(bytes.size()) : code(0));
@@ -4276,6 +4331,29 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
   command.doodads = world && ipc->playerPlacesDoodads();
   // STREAMING (protocol 18): a tile map's world load to a player that streams, when asked for.
   command.streaming = streaming && world && !noTile && command.doodads && ipc->playerStreams();
+  // LIQUIDS (protocol 19): a player that draws them is offered the client's liquid catalogue and its frames, within the
+  // command's defaults (UnityIpcServer::MAX_LIQUID_*), whether the load is a tile's or a world's; an older player's load is
+  // the protocol-18 one, and no liquid texture is served for it. A catalogue that is not the loaded client's, or could not
+  // be built, goes as "unavailable" with why, and its load serves no frame.
+  std::shared_ptr<const std::vector<int>> liquidFrames;
+  command.liquids = ipc->playerDrawsLiquids();
+  if (command.liquids)
+  {
+    const std::shared_ptr<wow::LiquidCatalog> liquids = m_liquidCatalog;
+    if (liquids && liquids->status() == wow::LiquidCatalog::Status::Ready && liquids->belongsToActiveClient())
+    {
+      command.liquidCatalog = liquids->toJson();
+      liquidFrames = liquids->frameIds();
+    }
+    else
+      command.liquidCatalog = wow::LiquidCatalog::unavailableJson(
+        command.product, command.build,
+        !liquids ? QString("there is no liquid catalogue")
+                 : liquids->status() != wow::LiquidCatalog::Status::Ready ? liquids->statusDetail()
+                                                                          : QString("the liquid catalogue is not the loaded client's"));
+    if (!liquidFrames)
+      liquidFrames = std::make_shared<const std::vector<int>>();
+  }
   // What it loads goes into the viewport, which the overhead map covers until then: the player's window sized for it now,
   // without waiting for the player (so the overhead map's going does not wait for it either).
   unityRendererHost->sizePlayerAhead();
@@ -4318,6 +4396,13 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
     request.maxM2TexturesPerLoad = command.maxM2TexturesPerLoad;
     request.maxDoodadInstancesPerLoad = command.maxDoodadInstancesPerLoad;
   }
+  if (command.liquids)
+  {
+    request.maxLiquidTexturesPerLoad = command.maxLiquidTexturesPerLoad;
+    request.maxLiquidTextureBytes = command.maxLiquidTextureBytes;
+    request.maxLiquidTextureBytesPerLoad = command.maxLiquidTextureBytesPerLoad;
+    request.liquidFrames = liquidFrames;
+  }
   ResetTerrainRequests();
   m_terrainRequest = request;
   m_streamSession = command.streaming;
@@ -4354,7 +4439,10 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
                                 .arg(entry ? entry->inspection.milliseconds : -1.0))
            << (command.streaming ? QString("; a streaming session: the tiles within %1 of the camera's (protocol 18)")
                                      .arg(UnityIpcServer::STREAM_RADIUS)
-                                 : QString());
+                                 : QString())
+           << (command.liquids ? QString("; liquids offered (protocol 19): %1 frame(s) of the catalogue servable")
+                                   .arg(liquidFrames ? liquidFrames->size() : 0)
+                               : QString("; no liquids (a protocol %1 player)").arg(ipc->playerProtocolVersion()));
   UpdateUnityViewportState();
   return command.load;
 }
@@ -4505,6 +4593,10 @@ QJsonObject ModelViewer::OnStreamTile(const QJsonObject & msg)
     t.maxM2ModelsPerLoad = e.maxM2ModelsPerLoad;
     t.maxM2TexturesPerLoad = e.maxM2TexturesPerLoad;
     t.maxDoodadInstancesPerLoad = e.maxDoodadInstancesPerLoad;
+    t.maxLiquidTexturesPerLoad = e.maxLiquidTexturesPerLoad;
+    t.maxLiquidTextureBytes = e.maxLiquidTextureBytes;
+    t.maxLiquidTextureBytesPerLoad = e.maxLiquidTextureBytesPerLoad;
+    t.liquidFrames = e.liquidFrames;
     t.sessionObj0Served = e.sessionObj0Served;
     t.sessionWmoRootsServed = e.sessionWmoRootsServed;
     t.sessionM2ModelsServed = e.sessionM2ModelsServed;
@@ -4656,6 +4748,8 @@ UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject
     owner.m2BytesReserved += decision.maxBytes;
   else if (role == "m2Texture")
     owner.m2TextureBytesReserved += decision.maxBytes;
+  else if (role == "liquidTexture")
+    owner.liquidTextureBytesReserved += decision.maxBytes;
   d.read = true;
   d.fileDataID = request.value("fileDataID").toInt(0);
   d.maxBytes = decision.maxBytes;
@@ -4758,6 +4852,8 @@ UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject &
     own->m2BytesReserved = std::max<qint64>(0, own->m2BytesReserved - result.maxBytes);
   else if (currentLoad && role == "m2Texture")
     own->m2TextureBytesReserved = std::max<qint64>(0, own->m2TextureBytesReserved - result.maxBytes);
+  else if (currentLoad && role == "liquidTexture")
+    own->liquidTextureBytesReserved = std::max<qint64>(0, own->liquidTextureBytesReserved - result.maxBytes);
   const bool wasRead = result.outcome == MapAssetWorker::Result::Outcome::Read;
   const wow::WdtInspection & inspection = result.inspection;
   if (wasRead)
@@ -4924,13 +5020,21 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
     }
   }
   const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
+  // Protocol 19: the liquids' outcome, when the load offered them (a protocol-18 player reports none: no liquids drawn).
+  const bool liquids = report.hasLiquids && report.liquidsOffered;
+  const QString liquidPart = liquids ? QString("liquids: %1 quad(s) of %2 instance(s), %3 type(s), %4 of %5 texture(s) loaded")
+                                         .arg(report.liquidQuads).arg(report.liquidInstances).arg(report.liquidTypesSent)
+                                         .arg(report.liquidTexturesLoaded).arg(report.liquidTexturesRequested)
+                                     : QString();
   // Protocol 17: the doodads' outcome, when the load offered them (the player's state name appended, never through arg()).
   const bool doodads = report.hasDoodads && report.doodadState != "notOffered";
   const QString doodadPart = doodads ? "; doodads " + report.doodadState +
-                                         QString(": %1 of %2 placed, %3 of %4 model(s) built; no liquids or lighting")
+                                         QString(": %1 of %2 placed, %3 of %4 model(s) built")
                                            .arg(report.doodadPlaced).arg(report.doodadInstances)
-                                           .arg(report.doodadModelsBuilt).arg(report.doodadModels)
-                                     : QString("; no doodads, liquids or lighting");
+                                           .arg(report.doodadModelsBuilt).arg(report.doodadModels) +
+                                         (liquids ? "; " + liquidPart + "; no lighting" : QString("; no liquids or lighting"))
+                                     : liquids ? "; no doodads; " + liquidPart + "; no lighting"
+                                               : QString("; no doodads, liquids or lighting");
   if (report.status == "built")
   {
     if (report.hasWorld && report.worldKind == "globalWmo")
@@ -4949,7 +5053,8 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
                                        .arg(report.worldState).arg(report.worldPlaced).arg(report.worldPlacements)
                                        .arg(report.worldFailed).arg(report.worldUnsupported).arg(report.worldNotRequested) +
                                        doodadPart
-                                   : QString("-- no liquids, doodads or buildings"));
+                                   : liquids ? "-- " + liquidPart + "; no doodads or buildings"
+                                             : QString("-- no liquids, doodads or buildings"));
     m_playerContent = PlayerContent::Terrain;
     UpdateUnityViewportState();
   }
@@ -5567,8 +5672,10 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
-  // A legacy client has no Map.db2 this viewer reads: its catalogue says so (Unsupported) rather than being absent.
+  // A legacy client has no Map.db2 this viewer reads: its catalogue says so (Unsupported) rather than being absent; its
+  // liquid catalogue likewise (Unavailable).
   m_mapCatalog = wow::WorldMapCatalog::build();
+  m_liquidCatalog = wow::LiquidCatalog::build();
   ComputeClientCapabilities();
   if (m_maps)
     m_maps->ClientLoaded();
@@ -5718,6 +5825,7 @@ void ModelViewer::ResetClientState()
   // then no longer belongs to the loaded client and refuses to read its storage). Until the load builds the next one,
   // the viewer's says a client is being loaded.
   m_mapCatalog = wow::WorldMapCatalog::noClient("a client is being loaded");
+  m_liquidCatalog = wow::LiquidCatalog::noClient("a client is being loaded");
   // The Maps viewer forgets the old client's map, tiles and terrain (its read cancelled above with the server's).
   if (m_maps)
     m_maps->ClientReplaced();
@@ -6057,6 +6165,14 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   m_mapCatalog = wow::WorldMapCatalog::build();
   timeline.end("map catalogue", QString("%1 maps, %2").arg(m_mapCatalog->maps().size())
                                   .arg(wow::WorldMapCatalog::statusName(m_mapCatalog->status())));
+  // The client's liquid types and their frames (docs/world-viewer/09-liquids.md 1.6): a few queries of its liquid tables
+  // and, where the client has no LiquidTypeXTexture rows, its storage root's names -- no file opened. Built once here, the
+  // same catalogue goes with every load of this client to a player that draws liquids.
+  timeline.begin("liquid catalogue");
+  m_liquidCatalog = wow::LiquidCatalog::build();
+  timeline.end("liquid catalogue", QString("%1 types, %2 frames, %3")
+                                     .arg(m_liquidCatalog->types().size()).arg(m_liquidCatalog->frameCount())
+                                     .arg(wow::LiquidCatalog::statusName(m_liquidCatalog->status())));
 
   if (progress)
     progress->stage(_("Almost ready..."));

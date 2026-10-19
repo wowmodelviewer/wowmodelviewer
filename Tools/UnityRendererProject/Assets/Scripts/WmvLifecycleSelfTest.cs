@@ -4187,6 +4187,7 @@ public static partial class WmvLifecycleSelfTest
         TerrainWorldModelTests(log);
         TerrainDoodadTests(log);
         TerrainStreamingTests(log);
+        TerrainLiquidTests(log);
         int meshesAfter = Resources.FindObjectsOfTypeAll<Mesh>().Length;
         int materialsAfter = Resources.FindObjectsOfTypeAll<Material>().Length;
         int texturesAfter = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
@@ -5497,8 +5498,8 @@ public static partial class WmvLifecycleSelfTest
             ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
-            Check(WmvIpcClient.ProtocolVersion == 18, "terrain ipc: the player speaks protocol 18 (13 added terrain textures, 14 the Maps viewer, " +
-                  "15 its overhead map and free camera, 16 world models in the world, 17 doodads, 18 streaming)", log);
+            Check(WmvIpcClient.ProtocolVersion == 19, "terrain ipc: the player speaks protocol 19 (13 added terrain textures, 14 the Maps viewer, " +
+                  "15 its overhead map and free camera, 16 world models in the world, 17 doodads, 18 streaming, 19 liquids)", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +

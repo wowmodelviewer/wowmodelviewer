@@ -293,19 +293,22 @@ namespace Wmv.Wow.Tests
             AdtRoot mm = AdtParser.ParseRoot(Root(30, 47, i => i == 4 ? mismatched : null), 30, 47);
             Check(mm.Issues.Exists(i => i.Kind == WorldIssueKind.Unexpected && i.Reason.Contains("flag 0x40")), "root: flag 0x40 without MCCV is flagged");
 
-            // MH2O: header table + one instance in chunk 3; then counts that run past the chunk.
+            // MH2O: header table + one instance in chunk 3 (the whole chunk, no bitmap, no vertex data); then counts
+            // that run past the chunk. The decode itself is LiquidTests.cs.
             var mh2o = new byte[256 * 12 + 24];
             PutU32(mh2o, 3 * 12, 256 * 12);
             PutU32(mh2o, 3 * 12 + 4, 1);
             PutU16(mh2o, 256 * 12, 5);
             PutU16(mh2o, 256 * 12 + 2, 42);
             PutF32(mh2o, 256 * 12 + 4, 1.5f);
+            PutF32(mh2o, 256 * 12 + 8, 1.5f);
             mh2o[256 * 12 + 14] = 8;
+            mh2o[256 * 12 + 15] = 8;
             AdtRoot liq = AdtParser.ParseRoot(Root(30, 47, null, Chunk("MH2O", mh2o)), 30, 47);
             Check(liq.Liquids != null && liq.Liquids.Status == WorldDataStatus.PartiallyDecoded && liq.Liquids.Instances[3].Length == 1 &&
-                  liq.Liquids.Instances[3][0].Word0 == 5 && liq.Liquids.Instances[3][0].Word2 == 42 && liq.Liquids.Instances[3][0].Float4 == 1.5f &&
-                  liq.Liquids.Instances[3][0].Byte14 == 8 && liq.Liquids.Instances[0].Length == 0,
-                  "liquids: MH2O header table and instance kept raw, partially decoded");
+                  liq.Liquids.Instances[3][0].LiquidType == 5 && liq.Liquids.Instances[3][0].ObjectOrFormat == 42 && liq.Liquids.Instances[3][0].MinHeight == 1.5f &&
+                  liq.Liquids.Instances[3][0].Width == 8 && liq.Liquids.Instances[3][0].Status == WorldDataStatus.Decoded && liq.Liquids.Instances[0].Length == 0,
+                  "liquids: MH2O header table and instance record read, the instance decoded");
             var bad = (byte[])mh2o.Clone();
             PutU32(bad, 3 * 12 + 4, 0xFFFFFFFF);
             AdtRoot badLiq = AdtParser.ParseRoot(Root(30, 47, null, Chunk("MH2O", bad)), 30, 47);

@@ -36,6 +36,9 @@
 //                       the tile as before. Answered worldCameraApplied. A loadTerrainTile may carry the same camera: it
 //                       is placed when that load's tile goes on screen, after its framing, in the same frame, so the
 //                       overview is never seen first.
+//   "liquids"        -> (protocol 19) a loadTerrainTile's or loadWorld's liquid offer: the tile's MH2O and its world models'
+//                       MLIQ drawn (WmvTerrainSessionLiquids, WmvLiquids), their frames shown on one liquid clock -- the
+//                       frame time added each Update, pinned by -wmvAnimTime as every model clock is
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -882,12 +885,21 @@ public partial class WmvMain
         }
     }
 
+    // Stage 09: the liquids' clock (seconds) -- one for the world view, advanced by the frame time, pinned by -wmvAnimTime as
+    // every model clock is (so a capture's water shows the same frame every run).
+    double liquidClock;
+
     void PumpTerrain()
     {
         PumpLaterDestroy(false);
         PumpTestFlight();
         if (terrain != null)
+        {
             terrain.Pump(WmvIpcClient.NowSeconds * 1000.0);
+            float pinned = WmvModelBuilder.Debug_.AnimTime;
+            liquidClock = pinned >= 0f ? pinned / 1000.0 : liquidClock + Time.deltaTime;
+            terrain.TickLiquids(liquidClock);
+        }
         PumpGroundOwed();
         // The world view's frame times (the view off: none kept, the next entry starts over).
         if (TerrainViewActive)
@@ -1063,12 +1075,26 @@ public partial class WmvMain
 
     void ApplyTerrainTopDown(WmvRuntimeTerrainTile tile)
     {
-        float lo = tile.HasBounds ? tile.Bounds.min.y : 0f, hi = tile.HasBounds ? tile.Bounds.max.y : 0f;
+        float lo, hi;
+        TopDownRange(tile, out lo, out hi);
         terrainViewMode.ApplyTopDown(lo, hi);
         Camera cam = Camera.main;
         if (cam != null && Mathf.Abs(cam.aspect - 1f) > 1e-3f)
             Debug.LogWarning(string.Format("WMV: [terrain] -wmvTerrainTopDown: the viewport is {0}x{1}, not square -- the capture is " +
                                            "not the tile alone (set WMV_VIEWPORT_SIZE with WMV_VIEWPORT_SHOT)", Screen.width, Screen.height));
+    }
+
+    /// <summary>The heights the top-down capture's clip range spans: the terrain's and (stage 09) its drawn liquid's, which
+    /// can lie above the terrain's top (an ocean over its seabed). The tile's Bounds (the framing, the log) stay the
+    /// terrain's.</summary>
+    public static void TopDownRange(WmvRuntimeTerrainTile tile, out float lo, out float hi)
+    {
+        lo = tile.HasBounds ? tile.Bounds.min.y : 0f;
+        hi = tile.HasBounds ? tile.Bounds.max.y : 0f;
+        if (!tile.HasLiquidBounds)
+            return;
+        lo = tile.HasBounds ? Mathf.Min(lo, tile.LiquidBounds.min.y) : tile.LiquidBounds.min.y;
+        hi = tile.HasBounds ? Mathf.Max(hi, tile.LiquidBounds.max.y) : tile.LiquidBounds.max.y;
     }
 
     /// <summary>RefitLastFramed in the terrain view: the TILE is framed again for the new aspect, never the hidden model.</summary>
@@ -1292,6 +1318,13 @@ public partial class WmvMain
             r.StreamFilesAskedAgain = terrain.StreamFilesAskedAgain;
             r.StreamImagesShared = terrain.StreamImagesShared;
         }
+        // Protocol 19: the liquids' own tallies (their objects, meshes, materials, frame arrays, and the GPU bytes of the
+        // arrays and the liquid geometry).
+        r.LiquidObjects = WmvLiquidMeshes.LiveObjects;
+        r.LiquidMeshes = WmvLiquidMeshes.LiveMeshes;
+        r.LiquidMaterials = WmvLiquidRegistry.LiveMaterials;
+        r.LiquidArrays = WmvLiquidRegistry.LiveArrays;
+        r.LiquidGpuBytes = WmvLiquidRegistry.LiveArrayBytes + WmvLiquidMeshes.LiveGeometryBytes;
         r.LiveMeshes = r.MeshObjects;
         r.LiveMaterials = r.MaterialObjects;
         r.WorldFrames = worldFrames;
@@ -1324,6 +1357,16 @@ public partial class WmvMain
                                           scene.DoodadPrototypes.Count + scene.PrivateDoodadPrototypes.Count, worldDoodads.Visible,
                                           worldDoodads.Culled, WorldModelsLabel);
             what = tile == null ? string.Format(inv, "map {0} world model (load {1}): {2}", scene.MapId, scene.Load, models) : what + "; plus " + models;
+        }
+        // Stage 09: the liquids drawn, and what they are.
+        WmvLiquidRegistry liquids = terrain != null ? terrain.SceneLiquids : null;
+        if (liquids != null && WmvLiquidMeshes.LiveObjects > 0)
+        {
+            int animated = 0;
+            foreach (WmvLiquidType t in liquids.Types)
+                if (t.Animated) animated++;
+            what += string.Format(inv, "; plus {0} liquid object(s) of {1} liquid type(s), {2} animated (frame clock {3:0.###} s) -- {4}",
+                                  WmvLiquidMeshes.LiveObjects, liquids.TypeCount, animated, liquidClock, LiquidsLabel);
         }
         Debug.Log(string.Format(inv,
             "WMV: viewport shot {0} #{1} -- {2}x{3}: {15}, terrain {4}, view {5}{6}; " +
@@ -1570,7 +1613,12 @@ public partial class WmvMain
     /// <summary>What a picture of placed world models and doodads is (the status line and the capture's log line).</summary>
     public const string WorldModelsLabel = "WORLD MODELS AND DOODADS (the Buildings renderer's WMO materials and the Models renderer's M2 materials " +
                                            "under its preview key and fill, without shadow maps; doodads static in their rest pose, no particles; " +
-                                           "no WoW lighting, liquids, sky or fog)";
+                                           "no WoW lighting, sky or fog)";
+
+    /// <summary>What a picture's liquids are (stage 09, docs/world-viewer/09-liquids.md 1.5).</summary>
+    public const string LiquidsLabel = "LIQUIDS (an APPROXIMATION: each type's minimap colour, water and ocean blended by depth with the frames' " +
+                                       "alpha as highlight, magma and slime opaque in their frames' colour; unlit, no reflection, refraction, " +
+                                       "fog or foam)";
 }
 
 /// <summary>

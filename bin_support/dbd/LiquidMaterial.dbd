@@ -1,0 +1,16 @@
+COLUMNS
+int ID
+int Flags // 1 on water and fel, 0 on magma and slime, 3 on fog: the values are proven from the bytes; their meaning (0x1 a transparent liquid) is inferred, not proven
+int LVF // the vertex format of MH2O liquid of this material: 0 height and depth, 1 height and texture coordinates, 3 all three (2, depth alone, is never a material's): proven from the bytes (docs/world-viewer/09-liquids.md 1.2)
+
+COMMENT Written for WoW Model Viewer's liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4). The
+COMMENT layout comes from public table definitions, read as hypotheses: both of its columns were checked against the four
+COMMENT clients' own bytes. Its hash is the same in Retail 12.1.5, Classic Era 1.15.9, MoP Classic 5.5.4 and Classic Beta
+COMMENT 1.60.1. A layout not listed here is not read.
+
+LAYOUT 98E5D7AA
+BUILD 12.1.5.70448, 1.15.9.70003, 5.5.4.70449, 1.60.1.70450
+COMMENT 2 fields in each of the four clients; IDs in the section's ID list (copy rows in Retail, MoP and Beta).
+$noninline,id$ID<32>
+Flags<32>
+LVF<8>

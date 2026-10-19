@@ -319,6 +319,60 @@ public sealed class WmvTerrainTexture
         return tex;
     }
 
+    /// <summary>Stage 09 (a liquid's frames, WmvLiquidRegistry): the prepared data as element `element` of `array`, which the
+    /// caller made with this texture's size, graphics format and mip count -- every stored mip set as stored (rows not
+    /// flipped, as Upload). The prepared data stay (the caller releases them once every array that needs them has them).</summary>
+    public void UploadSlice(Texture2DArray array, int element)
+    {
+        if (!Ready)
+            throw new InvalidOperationException("texture " + FileDataID + " has nothing to upload (" + State + ")");
+        for (int m = 0; m < Mips; m++)
+        {
+            if (source != null)
+                array.SetPixelData(source, m, element, mipOffsets[m]);
+            else
+                array.SetPixelData(decoded[m], m, element, 0);
+        }
+    }
+
+    /// <summary>Stage 09 (a liquid's frame list whose frames differ in format or mip count, WmvLiquidRegistry): the prepared
+    /// data as RGBA32 (R8G8B8A8_UNorm) with the first `mips` stored levels -- a block-compressed file decoded per level with
+    /// BlpDecoder's exact block mode, as Prepare's own fallback decodes it, an RGBA32 one cut to those levels -- so the list's
+    /// frames go up as one array. False, nothing changed, when it holds no data, has fewer levels, or a level cannot be
+    /// decoded.</summary>
+    public bool ConvertToRgba(int mips)
+    {
+        if (!Ready || mips < 1 || mips > Mips)
+            return false;
+        if (source == null && decoded.Length == mips)
+            return true;
+        var d = new byte[mips][];
+        long rgba = 0;
+        for (int m = 0; m < mips; m++)
+        {
+            if (source != null)
+            {
+                try { d[m] = BlpDecoder.Decode(source, m, true).Rgba; }
+                catch (WowParseException) { return false; }
+            }
+            else
+                d[m] = decoded[m];
+            rgba += d[m].Length;
+        }
+        bool wasBlocks = source != null;
+        source = null;
+        mipOffsets = null;
+        mipBytes = null;
+        decoded = d;
+        Mips = mips;
+        graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
+        Format = graphicsFormat.ToString();
+        GpuBytes = rgba;
+        Detail = (Detail.Length > 0 ? Detail + "; " : "") + (wasBlocks ? "decoded to RGBA32" + ExactBlocksNote : "cut to " + mips + " level(s)") +
+                 " to share an array with frames of another format or mip count";
+        return true;
+    }
+
     /// <summary>The prepared RGBA32 of mip m (palettized / raw only; the self-test reads it), or null.</summary>
     public byte[] DecodedMip(int m) { return decoded != null && m >= 0 && m < decoded.Length ? decoded[m] : null; }
 
@@ -352,6 +406,11 @@ public sealed class WmvTerrainTileContent
     public string Build = "";
     /// <summary>MD5 (lower-case hex) of the WDT, root and tex0 bytes the load parsed; "" for a file it did not have.</summary>
     public string WdtMd5 = "", RootMd5 = "", Tex0Md5 = "";
+    /// <summary>Stage 09: the tile's liquid as the worker built it (null: none, or liquids not offered) and the scene's liquid
+    /// registry the tile draws its types from (null: liquids not offered). Kept with the content, so a rebuild in another
+    /// view draws the liquid again from them.</summary>
+    public TerrainLiquidTile LiquidTile;
+    public WmvLiquidRegistry Liquids;
 
     /// <summary>The roles `id` has in the tile's material: "diffuse" (a layer texture of the drawable or plain-diagnostic
     /// chunks: TextureIds, PlainOnlyTextureIds) and/or "height" (HeightTextureIds: an MPHD 0x80 map's MHID textures of

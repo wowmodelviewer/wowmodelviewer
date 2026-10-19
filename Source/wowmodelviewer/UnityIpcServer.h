@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v17). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v19). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -360,6 +360,33 @@
  * doodad field) and every doodad role is refused for its load; a protocol-17 player sent no doodad budgets (a protocol-16
  * host) loads the world as before and reports its doodads "notOffered".
  *
+ * LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md). The player parses a tile's MH2O and its world models' MLIQ
+ * itself; what it cannot read -- the liquid tables -- the host sends it, built once per client load (wow::LiquidCatalog).
+ * To a player that announced protocol 19, loadTerrainTile and loadWorld add
+ *                  "liquids":{ "maxTexturesPerLoad":256, "maxTextureBytes":8388608, "maxTextureBytesPerLoad":67108864,
+ *                    "catalog":{ "product", "build", "state":"ok"|"unavailable", "detail", "types":[{ "id", "name",
+ *                    "kind" (LiquidType.SoundBank: 0 water, 1 ocean, 2 magma, 3 slime), "material", "materialFlags",
+ *                    "lvf" (the material's; both -1 without its row), "minimapColor" (0xAARRGGBB as stored), "float0",
+ *                    "float1", "frames" (slot 0's frames as FileDataIDs, in frame order), "framesWanted" }] } }
+ * (MAX_LIQUID_* below; the same catalogue object with every load of the client epoch; "unavailable" with why and no types
+ * when the client's liquid tables could not be read). getMapAsset adds the role "liquidTexture", decided as the other
+ * roles: refused for a load that carries no liquids offer ("liquids not offered": a load to an older player), before the
+ * load's WDT was served (a streaming session's tile loads count it served), for an id that is not one of the catalogue's
+ * frames ("not a liquid texture": the host vouches for the catalogue's files and no other), for an id asked for before in
+ * the load, past maxTexturesPerLoad ids, and once maxTextureBytesPerLoad bytes were read (the reads in flight reserved);
+ * otherwise read with the smaller of maxTextureBytes and what is left (a read cut so that finds the file larger is
+ * "refused" for the load, a file over maxTextureBytes "unreadable", the Stage 08 rule). The liquid role's reads are a
+ * family of their own, capped at maxTexturesPerLoad apart from the terrain's, the world models' and the doodads'. The KIND
+ * check: a liquid texture starts "BLP2". A streaming session's tile loads take the entry's liquid budgets and catalogue.
+ *   player -> WMV  terrainTileLoaded adds "liquids":{ "offered", "catalog" ("ok", "unavailable", "absent"), "instances",
+ *                    "layers", "chunks", "quads", "vertices", "meshes", "types":[ids], "texturesRequested",
+ *                    "texturesLoaded", "texturesFailed", "missingTypes", "formatBySize", "formatDisagreements",
+ *                    "malformed", "wmoGroups", "wmoQuads", "geometryBytes", "textureBytes" }
+ *                  streamState adds "liquidTiles", "liquidTypes", "liquidTextures", "liquidBytes" (resident)
+ * runtimeState adds liquidObjects, liquidMeshes, liquidMaterials, liquidArrays, liquidGpuBytes. A number not sent reads -1.
+ * A protocol-18 player is sent both commands exactly as before, every liquidTexture request of its loads is refused, and
+ * it reports no liquids: the viewer says liquids were not offered.
+ *
  * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
  * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
  * a read). A request is decided and accounted only when it is served, so one whose load ended while it waited is
@@ -467,7 +494,7 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 18;
+  static const int PROTOCOL_VERSION = 19;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -509,6 +536,14 @@ public:
   static const int MAX_M2_MODELS_PER_LOAD = 1024;
   static const int MAX_M2_TEXTURES_PER_LOAD = 2048;
   static const int MAX_DOODAD_INSTANCES_PER_LOAD = 16384;
+  // LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md 1.6 and 1.9): the budgets of the liquid textures a load offers a
+  // player that draws liquids, and the host enforces: one frame file at most 8 MiB, a load at most 256 frame ids and 64 MiB
+  // of their bytes read. A water or ocean type's 30 frames are 30 x 88,580 bytes (lake_a, ocean_h; a lava frame 44,876):
+  // 256 ids hold 8 such types' frames, 64 MiB the bytes of about 25. The document's 1.9 offer, to be measured on real
+  // tiles.
+  static const int MAX_LIQUID_TEXTURE_BYTES = 8 * 1024 * 1024;
+  static const int MAX_LIQUID_TEXTURE_BYTES_PER_LOAD = 64 * 1024 * 1024;
+  static const int MAX_LIQUID_TEXTURES_PER_LOAD = 256;
   // THE MAP ASSET QUEUE: requests waiting at most; the bytes a poll reads before it stops serving; the size over which a
   // file read ends its poll's serving; the polls whose timing is kept.
   static const int MAP_ASSET_QUEUE_MAX = 16;
@@ -646,6 +681,10 @@ public:
   // asks for it (loadWorld "streaming"), opening and closing tile loads of its own (streamTile) and reporting the region
   // (streamState). An older player gets the single-tile loadWorld, as before.
   bool playerStreams() const { return m_client && m_unityReady && m_playerProtocol >= 18; }
+  // Protocol 19 (LIQUIDS above): the player draws a tile's MH2O and its world models' MLIQ: loadTerrainTile and loadWorld
+  // carry the liquid budgets and the client's liquid catalogue, it asks for the frames (getMapAsset "liquidTexture") and
+  // reports its liquids. An older player gets both commands as before.
+  bool playerDrawsLiquids() const { return m_client && m_unityReady && m_playerProtocol >= 19; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -886,6 +925,10 @@ public:
     long long streamPrototypesEvicted = -1, streamTexturesEvicted = -1, streamFilesAskedAgain = -1, streamImagesShared = -1;
     int doodadVisible = -1;                // doodad instances drawn and culled last frame
     int doodadCulled = -1;
+    // Protocol 19 (LIQUIDS above): the liquids' own tallies -- their objects, meshes, materials and frame arrays alive, and
+    // the GPU size of their geometry and arrays, as the player estimates it.
+    int liquidObjects = -1, liquidMeshes = -1, liquidMaterials = -1, liquidArrays = -1;
+    long long liquidGpuBytes = -1;
     int liveGameObjects = -1;
     int liveTexture2D = -1;
     int liveMeshes = -1;
@@ -998,12 +1041,23 @@ public:
     int maxM2ModelsPerLoad = MAX_M2_MODELS_PER_LOAD;
     int maxM2TexturesPerLoad = MAX_M2_TEXTURES_PER_LOAD;
     int maxDoodadInstancesPerLoad = MAX_DOODAD_INSTANCES_PER_LOAD;
+    // Protocol 19 (LIQUIDS above): the load offers liquids -- sent ("liquids": these budgets and the catalogue) with
+    // loadTerrainTile and loadWorld only when it is set and the player draws liquids; otherwise the load is the
+    // protocol-18 one. liquidCatalog: the client's catalogue (wow::LiquidCatalog::toJson), or one "unavailable" with why.
+    bool liquids = false;
+    int maxLiquidTexturesPerLoad = MAX_LIQUID_TEXTURES_PER_LOAD;
+    int maxLiquidTextureBytes = MAX_LIQUID_TEXTURE_BYTES;
+    int maxLiquidTextureBytesPerLoad = MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
+    QJsonObject liquidCatalog;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command (protocol 16): a world load (WORLD MODELS IN THE WORLD above). False (nothing sent) without a
   // protocol-16 player, a load serial or command.world; the caller raises its terrain load serial only when it returns true.
   // The doodad budgets (protocol 17, DOODADS above) go with it only when command.doodads and the player places doodads.
   bool sendLoadWorld(const TerrainTileCommand & command);
+  // LIQUIDS (protocol 19): the "liquids" object both commands carry for a load that offers liquids to a player that draws
+  // them -- the command's budgets and catalogue (LIQUIDS above), as sent; the harness checks it without a player.
+  static QJsonObject liquidOffer(const TerrainTileCommand & command);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
   bool sendClearTerrain(const QString & reason);
@@ -1188,6 +1242,9 @@ public:
     double frameMsMax = -1.0, frameMsP95 = -1.0, uploadMsMax = -1.0, workMsMax = -1.0;
     int framesOver33 = -1, framesOver50 = -1;
     long long managedHeapBytes = -1;
+    // Protocol 19 (LIQUIDS above): the resident tiles with liquid, the liquid types and frame arrays held, their bytes.
+    int liquidTiles = -1, liquidTypes = -1, liquidTextures = -1;
+    long long liquidBytes = -1;
     QJsonObject raw;                 // the message as received (the harness keeps it)
     QString describe() const;
   };
@@ -1632,11 +1689,28 @@ public:
     };
     std::vector<DoodadModel> doodadList; // at most TERRAIN_REPORT_DOODAD_MODELS_MAX kept
     int doodadListSent = -1;
+    // Protocol 19 (LIQUIDS above): the liquids' outcome, when the report carries "liquids" (a protocol-18 player's never
+    // does).
+    bool hasLiquids = false;
+    bool liquidsOffered = false;   // the load offered liquids (the player found its "liquids")
+    QString liquidCatalog;         // the catalogue as the player found it: "ok" / "unavailable" / "absent"
+    int liquidInstances = -1, liquidLayers = -1, liquidChunks = -1, liquidQuads = -1;
+    long long liquidVertices = -1;
+    int liquidMeshes = -1;
+    std::vector<int> liquidTypes;  // the liquid type ids drawn, at most TERRAIN_REPORT_LIQUID_TYPES_MAX kept
+    int liquidTypesSent = -1;      // the ids the message's list held (-1: no list)
+    int liquidTexturesRequested = -1, liquidTexturesLoaded = -1, liquidTexturesFailed = -1;
+    int liquidMissingTypes = -1;   // types not in the catalogue
+    int liquidFormatBySize = -1, liquidFormatDisagreements = -1, liquidMalformed = -1;
+    int liquidWmoGroups = -1, liquidWmoQuads = -1;
+    long long liquidGeometryBytes = -1, liquidTextureBytes = -1;
     QString describe() const;
     // The world's outcome in one line (empty without "world"), its doodads in brief.
     QString describeWorld() const;
     // The doodads' outcome in one line, every count and timing (empty without "doodads").
     QString describeDoodads() const;
+    // The liquids' outcome in one line, every count (empty without "liquids").
+    QString describeLiquids() const;
   };
   // What a report is read into at most; the rest is counted, not kept. The retired ids and the chunk-state counters:
   // TERRAIN_REPORT_LIST_MAX (a protocol-13 player retires at most its outstanding limit of ids, and sends about a dozen
@@ -1656,6 +1730,9 @@ public:
   static const int TERRAIN_REPORT_DOODAD_SETS_MAX = 64;
   static const int TERRAIN_REPORT_DOODAD_MODELS_MAX = 128;
   static const int TERRAIN_REPORT_DOODAD_LOG_MAX = 32;
+  // The liquid type ids a report is read into at most (protocol 19): a tile's liquid types and its world models' (Retail
+  // lists 201 types in all).
+  static const int TERRAIN_REPORT_LIQUID_TYPES_MAX = 256;
   // Raised on the GUI thread for every terrainTileLoaded.
   std::function<void(const TerrainTileReport &)> onTerrainTileLoaded;
 
@@ -1782,6 +1859,10 @@ private:
   void handleWorldModelInspected(const QJsonObject & msg);
   // loadTerrainTile's fields (shared by loadWorld); false when the camera was not put (no protocol-15 player, no mode).
   bool putTerrainCommand(QJsonObject & msg, const TerrainTileCommand & command, bool & textures) const;
+  // LIQUIDS (protocol 19): the command's "liquids" (its budgets and catalogue), to a player that draws liquids and only when
+  // the load offers them; whether it was put.
+  bool putLiquids(QJsonObject & msg, const TerrainTileCommand & command) const;
+  static QString describeLiquidOffer(const TerrainTileCommand & command);
   static void putCamera(QJsonObject & msg, const WorldCamera & camera);
   static QString describeCamera(const WorldCamera & camera);
   void queueLine(const QByteArray & line);

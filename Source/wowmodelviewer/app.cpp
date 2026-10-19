@@ -48,6 +48,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "WorldMapCatalog.h"
+#include "LiquidCatalog.h"
 #include "CascLib.h"
 #include <QCryptographicHash>
 #include "animcontrol.h"
@@ -5694,7 +5695,11 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no bytes) and
 // with the map-file limit (read whole), the WDT a load would name as this client's family resolves it
 // (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
-// is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
+// is alive (ModelViewer::OnTerrainTileLoaded), and LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md): the
+// liquidTexture decision on made-up requests (offer, order, catalogue membership, once-only, id, read and byte caps, the
+// budget refusal of a cut read) and the loaded client's liquid catalogue (wow::LiquidCatalog: its tables' layouts and
+// rows, the exit tiles' types, their frames, the catalogue as sent, frames read through the host's own handler). Then the
+// player is started
 // (StartUnityRenderer(true)); one older than protocol 12 ends the run "FAIL player too old". A protocol-12 player draws
 // geometry alone: every textured check is skipped naming why, and each of its built loads must have no material and only
 // its two files served. Otherwise the player's object counts are taken with no terrain (every count reported, the
@@ -6324,8 +6329,8 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
     {"the current load's WDT goes on to the read, at most the map-file limit", request(5, 7, "wdt", 775971), &current, true,
      false, "", "", mapLimit},
     {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused",
-     "unknown role \"x\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup, wmoTexture, m2Model, m2Skin or "
-     "m2Texture)"},
+     "unknown role \"x\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup, wmoTexture, m2Model, m2Skin, "
+     "m2Texture or liquidTexture)"},
     {"another WDT is refused", request(5, 7, "wdt", 775972), &current, true, false, "refused",
      "WDT is FileDataID 775971, not 775972"},
     {"FileDataID 0 is refused", request(5, 7, "wdt", 0), &current, true, false, "refused", "FileDataID 0 names no file"},
@@ -6979,6 +6984,10 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
     {"two bytes are not a doodad skin", "m2Skin", QByteArray("SK"), "not an M2 skin: it starts with 2 bytes only, not SKIN"},
     {"a BLP2 head passes as a doodad texture", "m2Texture", blp, ""},
     {"an M2 is not a BLP2 doodad texture", "m2Texture", m2, "not a BLP2 texture: it starts with MD21 (hex 4d 44 32 31)"},
+    // LIQUIDS (protocol 19): a liquid texture is a BLP2 file.
+    {"a BLP2 head passes as a liquid texture", "liquidTexture", blp, ""},
+    {"a tex0 is not a BLP2 liquid texture", "liquidTexture", tex0, "not a BLP2 texture: it starts with REVM (hex 52 45 56 4d)"},
+    {"two bytes are not a BLP2 liquid texture", "liquidTexture", QByteArray("BL"), "it starts with 2 bytes only"},
   };
   for (const Case & c : cases)
   {
@@ -7746,6 +7755,10 @@ static void checkStreamLoads(ModelViewer * frame, TerrainTestLog & tally)
   entry.maxM2FileBytes = UnityIpcServer::MAX_M2_FILE_BYTES;
   entry.maxM2BytesPerLoad = UnityIpcServer::MAX_M2_BYTES_PER_LOAD;
   entry.maxM2ModelsPerLoad = UnityIpcServer::MAX_M2_MODELS_PER_LOAD;
+  entry.maxLiquidTexturesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
+  entry.maxLiquidTextureBytes = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES;
+  entry.maxLiquidTextureBytesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
+  entry.liquidFrames = std::make_shared<const std::vector<int>>(std::vector<int>{219901, 219902});
   frame->m_terrainRequest = entry;
   frame->m_streamLoads.clear();
   frame->m_streamSession = true;
@@ -7780,6 +7793,31 @@ static void checkStreamLoads(ModelViewer * frame, TerrainTestLog & tally)
   tally.check("stream loads: two tiles open as loads of their own (the next serials, the entry's map, WDT and budgets, nothing "
               "had); the entry tile is refused as the entry's",
               aOk, QString(QJsonDocument(a).toJson(QJsonDocument::Compact)));
+  // LIQUIDS (protocol 19): the tile load's liquid budgets and frames are the entry's (a field OnStreamTile did not copy
+  // would read 0 and serve nothing), and a frame of its catalogue goes on to the read under it.
+  {
+    QJsonObject frameAsk;
+    frameAsk["type"] = "getMapAsset";
+    frameAsk["requestId"] = "stream-liquid";
+    frameAsk["load"] = loadA;
+    frameAsk["assetEpoch"] = entry.epoch;
+    frameAsk["role"] = "liquidTexture";
+    frameAsk["fileDataID"] = 219902;
+    const ModelViewer::MapAssetDecision liquid =
+      ra ? ModelViewer::decideMapAssetRequest(frameAsk, ra, entry.epoch, true, false) : ModelViewer::MapAssetDecision();
+    const bool copied = ra && ra->maxLiquidTexturesPerLoad == entry.maxLiquidTexturesPerLoad &&
+                        ra->maxLiquidTextureBytes == entry.maxLiquidTextureBytes &&
+                        ra->maxLiquidTextureBytesPerLoad == entry.maxLiquidTextureBytesPerLoad &&
+                        ra->liquidFrames == entry.liquidFrames && ra->liquidReads == 0 && ra->liquidTextureIds.empty();
+    tally.check("stream loads: a tile load takes the entry's liquid budgets and catalogue frames, nothing had; a frame goes on "
+                "to the read under it",
+                copied && ra && liquid.state.isEmpty() && liquid.maxBytes == UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES,
+                ra ? QString("budgets %1/%2/%3, frames %4, decision \"%5\" \"%6\" maxBytes %7")
+                       .arg(ra->maxLiquidTexturesPerLoad).arg(ra->maxLiquidTextureBytes).arg(ra->maxLiquidTextureBytesPerLoad)
+                       .arg(ra->liquidFrames == entry.liquidFrames ? "the entry's" : "NOT the entry's").arg(liquid.state)
+                       .arg(liquid.detail).arg(liquid.maxBytes)
+                   : QString("no tile load %1").arg(loadA));
+  }
   // 2. Refused: a tile open already, a tile off the grid, a load that is not the session.
   const QJsonObject b = streamTile(entry.load, QJsonArray{tileOf(30, 47), tileOf(64, 2)}, QJsonArray());
   const QJsonObject c = streamTile(entry.load + 1000, QJsonArray{tileOf(29, 47)}, QJsonArray());
@@ -8625,6 +8663,491 @@ static void checkTerrainReportLists(TerrainTestLog & tally)
                   .arg(older ? "as before" : "WRONG") +
                   r.describeDoodads());
   }
+  // LIQUIDS (protocol 19): a report's liquids, each count its own number, the type list read up to its cap; a report
+  // without liquids (a protocol-18 player's) has none, every count -1.
+  {
+    QJsonObject liquids;
+    const char * counts[] = {"instances", "layers", "chunks", "quads", "vertices", "meshes", "texturesRequested",
+                             "texturesLoaded", "texturesFailed", "missingTypes", "formatBySize", "formatDisagreements",
+                             "malformed", "wmoGroups", "wmoQuads", "geometryBytes"};
+    for (int i = 0; i < (int)(sizeof(counts) / sizeof(counts[0])); i++)
+      liquids[QString::fromLatin1(counts[i])] = 200 + i;
+    liquids["textureBytes"] = 3000000000.0;
+    liquids["offered"] = true;
+    liquids["catalog"] = "ok";
+    QJsonArray types;
+    for (int i = 0; i < UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX + 4; i++)
+      types.append(i + 1);
+    liquids["types"] = types;
+    QJsonObject m;
+    m["type"] = "terrainTileLoaded";
+    m["load"] = 3;
+    m["status"] = "built";
+    m["liquids"] = liquids;
+    got = UnityIpcServer::TerrainTileReport();
+    int before = handed;
+    server.testReceiveTerrainTileLoaded(m);
+    const UnityIpcServer::TerrainTileReport r = got;
+    const bool fed = handed == before + 1;
+    const bool fields = r.hasLiquids && r.liquidsOffered && r.liquidCatalog == "ok" && r.liquidInstances == 200 &&
+                        r.liquidLayers == 201 && r.liquidChunks == 202 && r.liquidQuads == 203 && r.liquidVertices == 204 &&
+                        r.liquidMeshes == 205 && r.liquidTexturesRequested == 206 && r.liquidTexturesLoaded == 207 &&
+                        r.liquidTexturesFailed == 208 && r.liquidMissingTypes == 209 && r.liquidFormatBySize == 210 &&
+                        r.liquidFormatDisagreements == 211 && r.liquidMalformed == 212 && r.liquidWmoGroups == 213 &&
+                        r.liquidWmoQuads == 214 && r.liquidGeometryBytes == 215 && r.liquidTextureBytes == 3000000000LL;
+    const bool list = r.liquidTypesSent == UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX + 4 &&
+                      (int)r.liquidTypes.size() == UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX &&
+                      r.liquidTypes.front() == 1 && r.liquidTypes.back() == UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX;
+    m.remove("liquids");
+    got = UnityIpcServer::TerrainTileReport();
+    before = handed;
+    server.testReceiveTerrainTileLoaded(m);
+    const bool older = handed == before + 1 && !got.hasLiquids && !got.liquidsOffered && got.liquidTypes.empty() &&
+                       got.liquidTypesSent == -1 && got.liquidQuads == -1 && got.liquidTextureBytes == -1 &&
+                       got.describeLiquids().isEmpty();
+    tally.check(QString("report lists: a load's liquids are read by their wire names; %1 types sent, the first %2 kept; a "
+                        "report without liquids has none")
+                  .arg(UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX + 4).arg(UnityIpcServer::TERRAIN_REPORT_LIQUID_TYPES_MAX),
+                fed && fields && list && older,
+                QString("handed %1, fields %2, list %3 (%4 of %5), a report without liquids %6; ")
+                  .arg(fed ? "yes" : "no").arg(fields ? "read" : "WRONG").arg(list ? "kept" : "WRONG")
+                  .arg(r.liquidTypes.size()).arg(r.liquidTypesSent).arg(older ? "as before" : "WRONG") +
+                  r.describeLiquids());
+  }
+}
+
+// LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md 1.6): the liquidTexture decision on made-up requests -- a load
+// without a liquids offer, before its WDT was served, an id that is no frame of its catalogue (and every id under a
+// catalogue with no frames), each frame once, at most 256 ids, the liquid read family capped apart from the terrain's,
+// the liquid bytes (the reads in flight reserved), a reported load, another load and another epoch -- then the budget
+// refusal of a cut read (refused for the load; a file over the per-file limit stays unreadable) and the accounting driven
+// through the decision. Nothing is read and no player is involved.
+static void checkLiquidTextureDecisions(TerrainTestLog & tally)
+{
+  const std::shared_ptr<const std::vector<int>> frames =
+    std::make_shared<const std::vector<int>>(std::vector<int>{219855, 219866, 219901, 219902});   // sorted
+  ModelViewer::TerrainRequest current;
+  current.load = 5;
+  current.epoch = 7;
+  current.mapId = 0;
+  current.tileX = 29;
+  current.tileY = 48;
+  current.wdtFileDataID = 775971;
+  current.catalogueGeneration = 1;
+  ModelViewer::TerrainRequest offered = current;   // a load sent with liquids, its WDT not served yet
+  offered.maxLiquidTexturesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
+  offered.maxLiquidTextureBytes = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES;
+  offered.maxLiquidTextureBytesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
+  offered.liquidFrames = frames;
+  ModelViewer::TerrainRequest notOffered = current; // a load to an older player: its WDT served, no liquids offer
+  notOffered.wdtServed = true;
+  notOffered.reads = 1;
+  ModelViewer::TerrainRequest served = offered;     // ... its WDT served
+  served.wdtServed = true;
+  served.reads = 1;
+  ModelViewer::TerrainRequest noFrames = served;    // sent with a catalogue "unavailable": no frame
+  noFrames.liquidFrames = std::make_shared<const std::vector<int>>();
+  ModelViewer::TerrainRequest oneFrame = served;    // one frame read
+  oneFrame.liquidTextureIds = {219901};
+  oneFrame.liquidReads = 1;
+  oneFrame.liquidTextureBytesRead = 88580;
+  oneFrame.reads = 2;
+  ModelViewer::TerrainRequest ids256 = served;      // 256 frame ids asked for
+  for (int i = 0; i < UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD; i++)
+    ids256.liquidTextureIds.push_back(3000000 + i);
+  ids256.liquidReads = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
+  ids256.reads = 1 + ids256.liquidReads;
+  ModelViewer::TerrainRequest liquidReads = served; // few ids, but every liquid read a load may make made
+  liquidReads.liquidTextureIds = {219855};
+  liquidReads.liquidReads = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
+  liquidReads.reads = 1 + liquidReads.liquidReads;
+  ModelViewer::TerrainRequest terrainReads = served; // its terrain roles at their cap (3 + 128 reads), no liquid read
+  terrainReads.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  terrainReads.reads = 3 + UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  ModelViewer::TerrainRequest spent = oneFrame, nearlySpent = oneFrame, reservedSpent = oneFrame, reservedNear = oneFrame;
+  spent.liquidTextureBytesRead = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
+  nearlySpent.liquidTextureBytesRead = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD - 1000;
+  reservedSpent.liquidTextureBytesRead = 60 * 1024 * 1024;
+  reservedSpent.liquidTextureBytesReserved = 4 * 1024 * 1024;
+  reservedNear.liquidTextureBytesRead = 56 * 1024 * 1024;
+  reservedNear.liquidTextureBytesReserved = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES - 1000;
+  ModelViewer::TerrainRequest ended = oneFrame;     // the player reported the load
+  ended.ended = true;
+  ended.endedStatus = "built";
+  const int epochNow = 7;
+  const auto request = [](int load, int epoch, const QString & role, int fileDataID) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "l1";
+    r["load"] = load;
+    r["assetEpoch"] = epoch;
+    r["role"] = role;
+    r["fileDataID"] = fileDataID;
+    return r;
+  };
+  struct Case
+  {
+    const char * name;
+    QJsonObject request;
+    const ModelViewer::TerrainRequest * current;
+    const char * state;
+    QString detail;         // a part the decision's detail must contain
+    qint64 maxBytes = -1;   // the read's limit a request that goes on to the read must have (-1: not checked)
+  };
+  const qint64 liquidLimit = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES, mapLimit = UnityIpcServer::MAX_MAP_ASSET_BYTES;
+  const QString perLoad = QString::number(UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD);
+  const Case cases[] = {
+    {"a liquid texture of a load sent without liquids is refused (offer missing)", request(5, 7, "liquidTexture", 219901),
+     &notOffered, "refused", "liquids not offered: load 5 was sent without them"},
+    {"a liquid texture before the load's WDT was served is refused (order)", request(5, 7, "liquidTexture", 219901), &offered,
+     "refused", "load 5's WDT has not been served, so no liquid texture is"},
+    {"a file that is no frame of the load's catalogue is refused", request(5, 7, "liquidTexture", 778037), &served, "refused",
+     "FileDataID 778037 is not a liquid texture"},
+    {"under a catalogue with no frames (\"unavailable\") every id is refused", request(5, 7, "liquidTexture", 219901),
+     &noFrames, "refused", "FileDataID 219901 is not a liquid texture"},
+    {"a frame goes on to the read, at most its per-file limit", request(5, 7, "liquidTexture", 219901), &served, "", "",
+     liquidLimit},
+    {"a frame asked for before is refused (served once per load)", request(5, 7, "liquidTexture", 219901), &oneFrame,
+     "refused", "load 5 has asked for liquid texture 219901 before: each once per load"},
+    {"another frame of the load goes on to the read", request(5, 7, "liquidTexture", 219902), &oneFrame, "", "", liquidLimit},
+    {"the 257th liquid texture id is refused", request(5, 7, "liquidTexture", 219902), &ids256, "refused",
+     "load 5 has asked for 256 liquid textures: at most 256 per load, not 219902"},
+    {"a load's liquid reads stop at 256", request(5, 7, "liquidTexture", 219902), &liquidReads, "refused",
+     "load 5 has read 256 liquid textures: at most 256 per load"},
+    {"... and its terrain reads go on apart: a WDT goes on to the read", request(5, 7, "wdt", 775971), &liquidReads, "", "",
+     mapLimit},
+    {"a load's terrain reads at their cap leave its liquid reads alone", request(5, 7, "liquidTexture", 219901), &terrainReads,
+     "", "", liquidLimit},
+    {"... and its terrain reads stay capped: a WDT is refused", request(5, 7, "wdt", 775971), &terrainReads, "refused",
+     "load 5 has read 131 files: at most 131 per load (3 + 128 textures)"},
+    {"with the load's liquid bytes spent, a frame is refused before any read", request(5, 7, "liquidTexture", 219902), &spent,
+     "refused", "load 5 has read " + perLoad + " bytes of liquid textures: at most " + perLoad + " per load"},
+    {"with 1000 bytes of them left, a frame is read with what is left", request(5, 7, "liquidTexture", 219902),
+     &nearlySpent, "", "", 1000},
+    {"liquid reads in flight: 60 MiB read and 4 MiB reserved leave nothing", request(5, 7, "liquidTexture", 219902),
+     &reservedSpent, "refused", "and reserved 4194304 for reads in flight: at most " + perLoad + " per load"},
+    {"liquid reads in flight: 56 MiB read and 8 MiB - 1000 reserved leave 1000", request(5, 7, "liquidTexture", 219902),
+     &reservedNear, "", "", 1000},
+    {"a frame of a load the player has reported is stale", request(5, 7, "liquidTexture", 219902), &ended, "stale",
+     "load 5 was reported built"},
+    {"a frame of another load is stale", request(4, 7, "liquidTexture", 219902), &served, "stale",
+     "request load 4, current 5"},
+    {"a frame under another client epoch is stale", request(5, 6, "liquidTexture", 219902), &served, "stale",
+     "request epoch 6, current 7"},
+  };
+  for (const Case & c : cases)
+  {
+    const ModelViewer::MapAssetDecision d = ModelViewer::decideMapAssetRequest(c.request, c.current, epochNow, true, false);
+    const bool ok = d.state == QLatin1String(c.state) && d.detail.contains(c.detail) &&
+                    (c.maxBytes < 0 || (d.state.isEmpty() && d.maxBytes == c.maxBytes));
+    tally.check(QString("liquid decision: ") + c.name, ok,
+                "state \"" + d.state + "\" detail \"" + d.detail + QString("\" maxBytes %1; expected \"").arg(d.maxBytes) +
+                  c.state + "\" with \"" + c.detail + "\"" +
+                  (c.maxBytes < 0 ? QString() : QString(", maxBytes %1").arg(c.maxBytes)));
+  }
+
+  // A read cut to what was left of the load's liquid budget that finds the file larger: refused for the load (another load
+  // can read it); a file over the per-file limit, or a read not cut: no refusal, the file's own "unreadable".
+  struct Row
+  {
+    const ModelViewer::TerrainRequest * load;
+    qint64 size;
+    qint64 limit;
+    bool refused;
+    const char * what;
+  };
+  const Row rows[] = {
+    {&served, 88580, 1000, true, "a water frame with 1000 bytes left (budget cut: refused for the load)"},
+    {&served, 8388608, 1000, true, "a frame at its per-file limit with 1000 bytes left"},
+    {&served, 8388609, 1000, false, "a frame over its per-file limit (oversize: unreadable)"},
+    {&served, 9000000, 8388608, false, "a frame over its per-file limit, its read not cut (unreadable)"},
+    {&served, 900, 1000, false, "a frame that fits"},
+    {&notOffered, 88580, 1000, false, "a frame of a load without liquid limits"},
+  };
+  for (const Row & r : rows)
+  {
+    const QString detail = ModelViewer::mapAssetBudgetRefusal(*r.load, "liquidTexture", r.size, r.limit);
+    const bool ok = r.refused ? detail.contains(QString("it is %1 bytes").arg(r.size)) &&
+                                  detail.contains(QString("%1 bytes left").arg(r.limit)) && detail.contains("liquid textures")
+                              : detail.isEmpty();
+    tally.check(QString("liquid budget refusal: %1 bytes (%2) with %3 bytes left is %4").arg(r.size).arg(r.what).arg(r.limit)
+                  .arg(r.refused ? "refused for the load" : "not the load's refusal"),
+                ok, detail.isEmpty() ? QString("no refusal") : detail);
+  }
+
+  // The accounting, driven through the decision: a frame read is counted on the liquid family and the liquid bytes, not
+  // the terrain's; asked again it is refused; the load's WDT can still be read (the terrain family untouched).
+  {
+    ModelViewer::TerrainRequest t = served;
+    const QJsonObject ask = request(5, 7, "liquidTexture", 219901);
+    const ModelViewer::MapAssetDecision first = ModelViewer::decideMapAssetRequest(ask, &t, epochNow, true, false);
+    if (first.state.isEmpty())
+    {
+      ModelViewer::noteMapAssetRead(t, ask);
+      ModelViewer::noteMapAssetResult(t, "liquidTexture", 88580, true);
+    }
+    const ModelViewer::MapAssetDecision again = ModelViewer::decideMapAssetRequest(ask, &t, epochNow, true, false);
+    const ModelViewer::MapAssetDecision wdt =
+      ModelViewer::decideMapAssetRequest(request(5, 7, "wdt", 775971), &t, epochNow, true, false);
+    tally.check("liquid accounting: a frame read counts once on the liquid family and its bytes, the terrain's untouched; "
+                "asked again it is refused",
+                first.state.isEmpty() && t.reads == 2 && t.liquidReads == 1 && t.liquidTextureIds.size() == 1 &&
+                  t.liquidTextureBytesRead == 88580 && t.textureBytesRead == 0 && t.textureIds.empty() &&
+                  again.state == "refused" && again.detail.contains("before") && wdt.state.isEmpty(),
+                QString("first \"%1\", reads %2, liquid reads %3, ids %4, liquid bytes %5, terrain texture bytes %6; again \"%7\" "
+                        "\"%8\"; WDT \"%9\"")
+                  .arg(first.state).arg(t.reads).arg(t.liquidReads).arg(t.liquidTextureIds.size()).arg(t.liquidTextureBytesRead)
+                  .arg(t.textureBytesRead).arg(again.state).arg(again.detail).arg(wdt.state));
+  }
+}
+
+// LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md 1.4 and 1.6): the liquid catalogue of the loaded client
+// (wow::LiquidCatalog, built as it loaded). Its four tables read from their verified layouts; their rows as counted on
+// 2026-10-18 for the four audited builds (another build: skipped, naming it); the exit tiles' types (2, kind 1; 5, kind
+// 0) present; the frames of types 1, 2 and 5 found, 30 each, and every frame of every type found (Classic Era's by their
+// names in its storage root); the table's frames agreeing with their names where the root names files; every
+// LiquidObject naming a LiquidType (its 16 bits masked); the catalogue as the player is sent it. Then frames read through
+// the host's own handler under a made-up load: one served whole, a BLP2 with its content key as md5, counted on the
+// liquid budget; asked again, refused; a file that is no frame, refused unread; over what is left of the load's liquid
+// budget, refused for the load, unread; over a per-file limit of 1000 bytes, unreadable.
+static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const std::shared_ptr<wow::LiquidCatalog> c = frame->liquidCatalog();
+  if (!c || c->status() != wow::LiquidCatalog::Status::Ready || !c->belongsToActiveClient())
+  {
+    tally.check("liquids: the loaded client's liquid catalogue is ready", false,
+                c ? wow::LiquidCatalog::statusName(c->status()) + ": " + c->statusDetail() +
+                      (c->belongsToActiveClient() ? QString() : QString(" (not the loaded client's)"))
+                  : QString("there is none"));
+    return;
+  }
+  const QString client = c->clientProduct() + " " + c->clientBuild();
+  // 1. The tables, each from its verified layout.
+  struct Layout
+  {
+    const char * table;
+    const char * layout;
+  };
+  const Layout layouts[] = {{"LiquidType", "D1ECEEC9"}, {"LiquidMaterial", "98E5D7AA"}, {"LiquidObject", "CB0D39E8"},
+                            {"LiquidTypeXTexture", "7BEECC7F"}};
+  QStringList tables;
+  bool verified = true;
+  for (const Layout & l : layouts)
+  {
+    const wow::LiquidCatalog::Table * t = c->table(QString::fromLatin1(l.table));
+    verified = verified && t && t->read && t->layout == QLatin1String(l.layout) && t->rows >= 0;
+    tables << (t ? QString("%1 %2 (%3) %4 rows").arg(t->name, t->layout, t->state).arg(t->rows) : QString(l.table) + " missing");
+  }
+  tally.check("liquids: the four liquid tables are read from their verified layouts (" + client + ")", verified,
+              tables.join("; "));
+  // 2. Their rows, copy rows included, as counted for the audited builds (docs/world-viewer/09-liquids.md 1.4).
+  struct Rows
+  {
+    const char * product;
+    const char * build;
+    qint64 types, materials, objects, textures;
+  };
+  const Rows counted[] = {{"wow", "12.1.5.70448", 201, 11, 8098, 4289},
+                          {"wow_classic_era", "1.15.9.70003", 19, 2, 904, 0},
+                          {"wow_classic", "5.5.4.70449", 61, 7, 1574, 1247},
+                          {"wow_classic_beta", "1.60.1.70450", 57, 5, 1270, 1139}};
+  const Rows * expected = nullptr;
+  for (const Rows & r : counted)
+    if (c->clientProduct() == QLatin1String(r.product) && c->clientBuild() == QLatin1String(r.build))
+      expected = &r;
+  const auto rowsOf = [&c](const char * name) {
+    const wow::LiquidCatalog::Table * t = c->table(QString::fromLatin1(name));
+    return t ? t->rows : -1;
+  };
+  if (!expected)
+    tally.skip("liquids: the tables' rows are those counted for the audited builds",
+               client + " is not one of the four audited builds (docs/world-viewer/09-liquids.md 1.4)");
+  else
+    tally.check("liquids: the tables' rows are those counted for " + client,
+                rowsOf("LiquidType") == expected->types && rowsOf("LiquidMaterial") == expected->materials &&
+                  rowsOf("LiquidObject") == expected->objects && rowsOf("LiquidTypeXTexture") == expected->textures,
+                QString("LiquidType %1 (%2), LiquidMaterial %3 (%4), LiquidObject %5 (%6), LiquidTypeXTexture %7 (%8): found "
+                        "(expected)")
+                  .arg(rowsOf("LiquidType")).arg(expected->types).arg(rowsOf("LiquidMaterial")).arg(expected->materials)
+                  .arg(rowsOf("LiquidObject")).arg(expected->objects).arg(rowsOf("LiquidTypeXTexture")).arg(expected->textures));
+  tally.check("liquids: every liquid type is in the catalogue (one entry per LiquidType row)",
+              (qint64)c->types().size() == rowsOf("LiquidType") && !c->types().empty(),
+              QString("%1 types, %2 rows").arg(c->types().size()).arg(rowsOf("LiquidType")));
+  // 3. The exit tiles' types (Retail 29_48: 2 "Ocean"; Classic Era 36_49: 5 "Slow Water"), by their kinds.
+  const wow::LiquidTypeEntry * ocean = c->find(2);
+  const wow::LiquidTypeEntry * slow = c->find(5);
+  tally.check("liquids: types 2 and 5 are present, of kind 1 (ocean) and 0 (water)",
+              ocean && slow && ocean->kind == 1 && slow->kind == 0,
+              QString("2: %1, 5: %2").arg(ocean ? QString("\"%1\" kind %2").arg(ocean->name).arg(ocean->kind) : QString("absent"))
+                .arg(slow ? QString("\"%1\" kind %2").arg(slow->name).arg(slow->kind) : QString("absent")));
+  // 4. Their frames, and type 1's: 30 each, found, distinct.
+  QStringList frameLines;
+  bool thirty = true;
+  for (int id : {1, 2, 5})
+  {
+    const wow::LiquidTypeEntry * e = c->find(id);
+    std::vector<int> f = e ? e->frames : std::vector<int>();
+    std::sort(f.begin(), f.end());
+    const bool distinct = std::adjacent_find(f.begin(), f.end()) == f.end() && (f.empty() || f.front() > 0);
+    thirty = thirty && e && e->framesWanted == 30 && e->frames.size() == 30 && e->framesUnresolved == 0 && distinct;
+    frameLines << (e ? QString("%1 \"%2\": %3 of %4 frames (%5 ... %6)%7").arg(id).arg(e->name).arg(e->frames.size())
+                         .arg(e->framesWanted).arg(e->frames.empty() ? 0 : e->frames.front())
+                         .arg(e->frames.empty() ? 0 : e->frames.back()).arg(e->framesByName ? " by name" : "")
+                     : QString("%1 absent").arg(id));
+  }
+  tally.check("liquids: types 1, 2 and 5 have their 30 frames each, found and distinct", thirty, frameLines.join("; "));
+  // 5. Every frame of every type found: from LiquidTypeXTexture's rows, or (a client without rows) by name.
+  QStringList unresolved;
+  for (const wow::LiquidTypeEntry & e : c->types())
+    if (e.framesUnresolved > 0 && unresolved.size() < 8)
+      unresolved << QString("%1 \"%2\" %3 of %4").arg(e.id).arg(e.name).arg(e.framesUnresolved).arg(e.framesWanted);
+  const bool byNames = rowsOf("LiquidTypeXTexture") == 0;
+  tally.check(QString("liquids: every frame of every type is found (%1)")
+                .arg(byNames ? "by its name in the storage root: the client has no LiquidTypeXTexture rows"
+                             : "from LiquidTypeXTexture's rows"),
+              c->unresolvedFrames() == 0 && c->frameCount() > 0 &&
+                (byNames ? c->typesFromNames() > 0 && c->typesFromTable() == 0 : c->typesFromTable() > 0 && c->typesFromNames() == 0),
+              QString("%1 frames, %2 unresolved; types from the table %3, by name %4%5").arg(c->frameCount())
+                .arg(c->unresolvedFrames()).arg(c->typesFromTable()).arg(c->typesFromNames())
+                .arg(unresolved.isEmpty() ? QString() : "; unresolved: " + unresolved.join(", ")));
+  // 6. The table's frames against their names, where the storage root names files (MoP Classic).
+  if (c->framesCheckedByName() == 0 && c->framesDisagreeing() == 0)
+    tally.skip("liquids: LiquidTypeXTexture's frames agree with their templates' names in the storage root",
+               byNames ? QString("the client has no LiquidTypeXTexture rows")
+                       : QString("the storage root names none of the frames (it lists files by FileDataID only)"));
+  else
+    tally.check("liquids: LiquidTypeXTexture's frames agree with their templates' names in the storage root",
+                c->framesDisagreeing() == 0,
+                QString("%1 agree, %2 disagree").arg(c->framesCheckedByName()).arg(c->framesDisagreeing()));
+  // 7. LiquidObject's LiquidTypeID, masked to its 16 bits.
+  tally.check("liquids: every LiquidObject names a LiquidType (its pallet value masked to 16 bits)",
+              c->objectsWithoutType() == 0, QString("%1 rows name none").arg(c->objectsWithoutType()));
+  // 8. The catalogue as the player is sent it, and the frames the role may serve.
+  {
+    const QJsonObject j = c->toJson();
+    const QJsonArray types = j.value("types").toArray();
+    QJsonObject five;
+    for (const QJsonValue & v : types)
+      if (v.toObject().value("id").toInt() == 5)
+        five = v.toObject();
+    const QJsonArray fiveFrames = five.value("frames").toArray();
+    const bool shape = j.value("state").toString() == "ok" && j.value("product").toString() == c->clientProduct() &&
+                       j.value("build").toString() == c->clientBuild() && types.size() == (int)c->types().size() && slow &&
+                       five.value("kind").toInt(-1) == 0 && five.value("framesWanted").toInt(-1) == 30 &&
+                       fiveFrames.size() == 30 && !slow->frames.empty() && fiveFrames.at(0).toInt() == slow->frames.front() &&
+                       (quint32)five.value("minimapColor").toDouble() == slow->minimapColor &&
+                       five.value("material").toInt(-1) == slow->material && five.value("lvf").toInt(-9) == slow->lvf &&
+                       five.value("materialFlags").toInt(-9) == slow->materialFlags && five.contains("float0") &&
+                       five.contains("float1") && five.value("name").toString() == slow->name;
+    const std::shared_ptr<const std::vector<int>> ids = c->frameIds();
+    const bool set = ids && std::is_sorted(ids->begin(), ids->end()) &&
+                     std::adjacent_find(ids->begin(), ids->end()) == ids->end() && slow && !slow->frames.empty() &&
+                     c->isFrame(slow->frames.front()) && !c->isFrame(0) && ids->size() <= c->frameCount();
+    const QByteArray bytes = QJsonDocument(j).toJson(QJsonDocument::Compact);
+    tally.check("liquids: the catalogue as the player is sent it (state ok, the client, every type; type 5's kind, frames, "
+                "colour and material), and its frames sorted, each once",
+                shape && set,
+                QString("%1 bytes as sent; type 5 ").arg(bytes.size()) +
+                  QString::fromUtf8(QJsonDocument(five).toJson(QJsonDocument::Compact)).left(400) +
+                  QString("; %1 distinct frames").arg(ids ? ids->size() : 0));
+    // The "liquids" object a load carries to a protocol-19 player: the budgets of the document's 1.9 and this catalogue.
+    UnityIpcServer::TerrainTileCommand command;
+    command.liquids = true;
+    command.liquidCatalog = j;
+    const QJsonObject offer = UnityIpcServer::liquidOffer(command);
+    tally.check("liquids: a load's \"liquids\" carries 256 textures, 8 MiB a file and 64 MiB a load, and the catalogue",
+                offer.size() == 4 && offer.value("maxTexturesPerLoad").toInt() == 256 &&
+                  offer.value("maxTextureBytes").toInt() == 8 * 1024 * 1024 &&
+                  offer.value("maxTextureBytesPerLoad").toInt() == 64 * 1024 * 1024 && offer.value("catalog").toObject() == j,
+                QString("keys %1; %2 bytes as sent").arg(offer.keys().join(", "))
+                  .arg(QJsonDocument(offer).toJson(QJsonDocument::Compact).size()));
+  }
+
+  // 9. Frames read through the host's own handler, under a made-up load (no player: nothing sent).
+  const std::shared_ptr<wow::WorldMapCatalog> maps = frame->mapCatalog();
+  if (!slow || slow->frames.empty() || !maps || maps->status() != wow::WorldMapCatalog::Status::Ready)
+  {
+    tally.skip("liquids: frames read through the host's own handler", "no frame of type 5, or the map catalogue is not ready");
+    return;
+  }
+  const int frameId = slow->frames.front(), otherId = slow->frames.back();
+  const ModelViewer::TerrainRequest saved = frame->m_terrainRequest;
+  ModelViewer::TerrainRequest base;
+  base.load = 999998;   // no load the player is ever sent (none is sent before these checks)
+  base.epoch = UnityAssetAccess::clientEpoch();
+  base.mapId = 0;
+  base.tileX = 30;
+  base.tileY = 49;
+  base.wdtFileDataID = 775971;
+  base.wdtServed = true;
+  base.reads = 1;
+  base.catalogueGeneration = maps->client().storageGeneration;
+  base.maxLiquidTexturesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
+  base.maxLiquidTextureBytes = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES;
+  base.maxLiquidTextureBytesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
+  base.liquidFrames = c->frameIds();
+  const auto ask = [&base](int id) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "liquid0";
+    r["load"] = base.load;
+    r["assetEpoch"] = base.epoch;
+    r["role"] = "liquidTexture";
+    r["fileDataID"] = id;
+    return r;
+  };
+  const auto describe = [](const UnityIpcServer::MapAssetAnswer & a) {
+    return QString("\"%1\" \"%2\", %3 bytes served, %4 read, md5 %5").arg(a.state).arg(a.detail).arg(a.bytes.size())
+             .arg(a.bytesRead).arg(a.md5.isEmpty() ? QString("-") : a.md5);
+  };
+  frame->m_terrainRequest = base;
+  const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAssetAndWait(ask(frameId));
+  const ModelViewer::TerrainRequest & t = frame->m_terrainRequest;
+  const qint64 size = a.bytes.size();
+  tally.check(QString("liquids: frame %1 of type 5 is served whole, a BLP2, its md5 the content key, counted on the load's "
+                      "liquid budget").arg(frameId),
+              a.state == "available" && size > 0 && a.bytes.startsWith("BLP2") && a.bytesRead == size &&
+                a.md5 == QString::fromLatin1(QCryptographicHash::hash(a.bytes, QCryptographicHash::Md5).toHex()) &&
+                t.liquidTextureBytesRead == size && t.liquidTextureIds.size() == 1 && t.liquidReads == 1 &&
+                t.liquidTextureBytesReserved == 0 && t.textureBytesRead == 0,
+              describe(a) + QString("; liquid bytes read %1, reserved %2, %3 id(s)").arg(t.liquidTextureBytesRead)
+                              .arg(t.liquidTextureBytesReserved).arg(t.liquidTextureIds.size()));
+  const UnityIpcServer::MapAssetAnswer again = frame->ServeMapAssetAndWait(ask(frameId));
+  tally.check(QString("liquids: frame %1 asked again under the same load is refused, unread").arg(frameId),
+              again.state == "refused" && again.detail.contains("before") && again.readMs < 0.0 && again.bytesRead == 0,
+              describe(again));
+  const UnityIpcServer::MapAssetAnswer notFrame = frame->ServeMapAssetAndWait(ask(base.wdtFileDataID));
+  tally.check(QString("liquids: FileDataID %1 (a WDT) asked for as a liquid texture is refused, unread").arg(base.wdtFileDataID),
+              notFrame.state == "refused" && notFrame.detail.contains("is not a liquid texture") && notFrame.readMs < 0.0,
+              describe(notFrame));
+  if (size > 1000)
+  {
+    ModelViewer::TerrainRequest nearly = base;
+    nearly.liquidTextureBytesRead = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD - 1000;
+    frame->m_terrainRequest = nearly;
+    const UnityIpcServer::MapAssetAnswer cut = frame->ServeMapAssetAndWait(ask(otherId));
+    tally.check(QString("liquids: with 1000 bytes of the load's liquid budget left, frame %1 is refused for the load, unread")
+                  .arg(otherId),
+                cut.state == "refused" && cut.detail.contains("liquid textures") && cut.detail.contains("bytes left") &&
+                  cut.detail.contains("the limit is 1000)") && cut.bytes.isEmpty() && cut.bytesRead == 0 &&
+                  frame->m_terrainRequest.liquidTextureBytesReserved == 0 &&
+                  frame->m_terrainRequest.liquidTextureBytesRead == nearly.liquidTextureBytesRead,
+                describe(cut));
+    ModelViewer::TerrainRequest smallLimit = base;
+    smallLimit.maxLiquidTextureBytes = 1000;
+    frame->m_terrainRequest = smallLimit;
+    const UnityIpcServer::MapAssetAnswer over = frame->ServeMapAssetAndWait(ask(otherId));
+    tally.check(QString("liquids: with a per-file limit of 1000 bytes, frame %1 is \"unreadable\" -- the file's failure, not "
+                        "the load's refusal").arg(otherId),
+                over.state == "unreadable" && over.detail.contains("the limit is 1000") &&
+                  !over.detail.contains("not the file's failure") && over.bytesRead == 0 &&
+                  frame->m_terrainRequest.liquidTextureBytesReserved == 0,
+                describe(over));
+  }
+  else
+    tally.skip("liquids: a frame over what is left of the liquid budget, and over a per-file limit",
+               QString("frame %1 is %2 bytes").arg(frameId).arg(size));
+  frame->m_terrainRequest = saved;
 }
 
 static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
@@ -8742,6 +9265,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   checkMapAssetWorkerReads(frame, tally);
   checkStreamQueue(tally);
   checkStreamLoads(frame, tally);
+  checkLiquidTextureDecisions(tally);
+  checkLiquidCatalog(frame, tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -11830,6 +12355,12 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       o["doodadGpuTextureBytes"] = (double)lastState.doodadGpuTextureBytes;
       o["doodadVisible"] = lastState.doodadVisible;
       o["doodadCulled"] = lastState.doodadCulled;
+      // Protocol 19: the liquids' tallies (-1 from an older player).
+      o["liquidObjects"] = lastState.liquidObjects;
+      o["liquidMeshes"] = lastState.liquidMeshes;
+      o["liquidMaterials"] = lastState.liquidMaterials;
+      o["liquidArrays"] = lastState.liquidArrays;
+      o["liquidGpuBytes"] = (double)lastState.liquidGpuBytes;
       o["liveGameObjects"] = lastState.liveGameObjects;
       o["liveTexture2D"] = lastState.liveTexture2D;
       o["liveMeshes"] = lastState.liveMeshes;

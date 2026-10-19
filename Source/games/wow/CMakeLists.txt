@@ -18,6 +18,7 @@ set(src animated.cpp
       ddslib.cpp
       globalvars.cpp
       HardDriveFile.cpp
+      LiquidCatalog.cpp
       Listfile.cpp
       ModelAttachment.cpp
       ModelCamera.cpp
@@ -73,6 +74,7 @@ set(headers animated.h
       FileTreeItem.h
       globalvars.h
       HardDriveFile.h
+      LiquidCatalog.h
       Listfile.h
       manager.h
       ModelAttachment.h

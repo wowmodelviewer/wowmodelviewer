@@ -1,0 +1,22 @@
+COLUMNS
+int ID
+int FileDataID // a texture of the liquid type, by FileDataID (0 on the rows that stand for a procedural texture): proven from the bytes and by reading the files
+int OrderIndex // the row's place among its liquid type's rows, 0 to n-1: proven from the bytes
+int Field_02 // -1, or 0 to 2 on the rows whose FileDataID is 0 (which procedural texture each stands for is inferred from the type's own templates): not read
+int LiquidTypeID // the liquid type the row belongs to, from the section's relationship map: proven from the bytes
+
+COMMENT Written for WoW Model Viewer's liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4). The
+COMMENT layout comes from public table definitions, read as hypotheses: every column the catalogue reads (database.xml,
+COMMENT table LiquidTypeXTexture) was checked against the clients' own bytes. A type's rows in OrderIndex order are its
+COMMENT LiquidType.Texture templates expanded (a %d template frames 1 to FrameCountTexture, a plain path one row, an empty
+COMMENT slot none). Classic Era's table has no rows (and no section). Its hash is the same in Retail 12.1.5, Classic Era
+COMMENT 1.15.9, MoP Classic 5.5.4 and Classic Beta 1.60.1. A layout not listed here is not read.
+
+LAYOUT 7BEECC7F
+BUILD 12.1.5.70448, 1.15.9.70003, 5.5.4.70449, 1.60.1.70450
+COMMENT 3 fields in each of the four clients; IDs in the section's ID list, the liquid type in its relationship map.
+$noninline,id$ID<32>
+FileDataID<32>
+OrderIndex<32>
+Field_02<8>
+$noninline,relation$LiquidTypeID<32>

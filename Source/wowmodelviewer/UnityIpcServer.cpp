@@ -852,6 +852,8 @@ QString UnityIpcServer::RuntimeState::describe() const
                  " doodadGpuGeometryBytes=%6 doodadGpuTextureBytes=%7 doodadVisible=%8 doodadCulled=%9")
            .arg(doodadInstances).arg(doodadPrototypes).arg(doodadMeshes).arg(doodadMaterials).arg(doodadTextures)
            .arg(doodadGpuGeometryBytes).arg(doodadGpuTextureBytes).arg(doodadVisible).arg(doodadCulled) +
+         QString(" liquidObjects=%1 liquidMeshes=%2 liquidMaterials=%3 liquidArrays=%4 liquidGpuBytes=%5")
+           .arg(liquidObjects).arg(liquidMeshes).arg(liquidMaterials).arg(liquidArrays).arg(liquidGpuBytes) +
          QString(" liveGameObjects=%1 liveTexture2D=%2 liveMeshes=%3 liveMaterials=%4")
            .arg(liveGameObjects).arg(liveTexture2D).arg(liveMeshes).arg(liveMaterials);
 }
@@ -975,6 +977,12 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.doodadGpuTextureBytes = count64("doodadGpuTextureBytes");
   s.doodadVisible = count("doodadVisible");
   s.doodadCulled = count("doodadCulled");
+  // Protocol 19 (LIQUIDS).
+  s.liquidObjects = count("liquidObjects");
+  s.liquidMeshes = count("liquidMeshes");
+  s.liquidMaterials = count("liquidMaterials");
+  s.liquidArrays = count("liquidArrays");
+  s.liquidGpuBytes = count64("liquidGpuBytes");
   s.liveGameObjects = count("liveGameObjects");
   s.liveTexture2D = count("liveTexture2D");
   s.liveMeshes = count("liveMeshes");
@@ -1435,8 +1443,9 @@ void UnityIpcServer::handleLine(const std::string & line)
                      " stays the player's own default, a character's model generation (below v8) is not switched,"
                      " every load (below v9) fetches its files again, files travel as base64 text (below v10), an NPC on its"
                      " own model is shown without its weapons (below v11), no terrain tile is drawn (below v12), a"
-                     " terrain tile is drawn without its textures (below v13), and no world model is placed in the world"
-                     " (below v16)";
+                     " terrain tile is drawn without its textures (below v13), no world model is placed in the world"
+                     " (below v16), no doodad is placed (below v17), a world is not streamed (below v18), and no liquid"
+                     " is drawn (below v19)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1694,6 +1703,39 @@ bool UnityIpcServer::putTerrainCommand(QJsonObject & msg, const TerrainTileComma
   return camera;
 }
 
+bool UnityIpcServer::putLiquids(QJsonObject & msg, const TerrainTileCommand & c) const
+{
+  // LIQUIDS (protocol 19): only to a player that draws them, and only when the load offers them; an older player is sent
+  // exactly the protocol-18 message.
+  if (!c.liquids || !playerDrawsLiquids())
+    return false;
+  msg["liquids"] = liquidOffer(c);
+  return true;
+}
+
+QJsonObject UnityIpcServer::liquidOffer(const TerrainTileCommand & c)
+{
+  QJsonObject l;
+  l["maxTexturesPerLoad"] = c.maxLiquidTexturesPerLoad;
+  l["maxTextureBytes"] = c.maxLiquidTextureBytes;
+  l["maxTextureBytesPerLoad"] = c.maxLiquidTextureBytesPerLoad;
+  l["catalog"] = c.liquidCatalog;
+  return l;
+}
+
+QString UnityIpcServer::describeLiquidOffer(const TerrainTileCommand & c)
+{
+  // The catalogue in brief (its detail appended, never passed through arg()).
+  const QJsonArray types = c.liquidCatalog.value("types").toArray();
+  int frames = 0;
+  for (const QJsonValue & t : types)
+    frames += t.toObject().value("frames").toArray().size();
+  return QString("liquids: maxTexturesPerLoad=%1 maxTextureBytes=%2 maxTextureBytesPerLoad=%3, catalogue ")
+           .arg(c.maxLiquidTexturesPerLoad).arg(c.maxLiquidTextureBytes).arg(c.maxLiquidTextureBytesPerLoad) +
+         c.liquidCatalog.value("state").toString() + QString(" (%1 types, %2 frames)").arg(types.size()).arg(frames) +
+         (c.liquidCatalog.value("detail").toString().isEmpty() ? QString() : ": " + c.liquidCatalog.value("detail").toString());
+}
+
 bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
 {
   if (!playerDrawsTerrain() || c.load <= 0)
@@ -1702,6 +1744,7 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
   msg["type"] = "loadTerrainTile";
   bool textures = false;
   const bool camera = putTerrainCommand(msg, c, textures);
+  const bool liquids = putLiquids(msg, c);
   m_stats.terrainLoads++;
   LOG_INFO << "[unityipc] -> loadTerrainTile load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId
            << c.mapDirectory << "tile" << QString("%1_%2").arg(c.tileX).arg(c.tileY) << "wdtFileDataID=" << c.wdtFileDataID
@@ -1711,6 +1754,9 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
                             .arg(c.maxTextureBytes).arg(c.maxTextureBytesPerLoad).arg(c.maxTexturesPerLoad)
                         : playerDrawsTerrainTextures() ? QString("no textures offered")
                                                        : QString("no textures (a protocol %1 player)").arg(m_playerProtocol))
+           << (liquids ? describeLiquidOffer(c)
+                       : playerDrawsLiquids() ? QString("no liquids offered")
+                                              : QString("no liquids (a protocol %1 player)").arg(m_playerProtocol))
            << (camera ? "camera: " + describeCamera(c.camera) : QString());
   queueJson(msg);
   return true;
@@ -1762,6 +1808,8 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
     s["maxTileLoads"] = STREAM_MAX_TILE_LOADS;
     msg["streaming"] = s;
   }
+  // LIQUIDS (protocol 19): the budgets and the catalogue, to a player that draws liquids.
+  const bool liquids = putLiquids(msg, c);
   m_stats.terrainLoads++;
   m_stats.worldLoads++;
   LOG_INFO << "[unityipc] -> loadWorld load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId << c.mapDirectory
@@ -1782,6 +1830,9 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
                            .arg(c.maxM2ModelsPerLoad).arg(c.maxM2TexturesPerLoad).arg(c.maxDoodadInstancesPerLoad)
                        : playerPlacesDoodads() ? QString("no doodads offered")
                                                : QString("no doodads (a protocol %1 player)").arg(m_playerProtocol))
+           << (liquids ? describeLiquidOffer(c)
+                       : playerDrawsLiquids() ? QString("no liquids offered")
+                                              : QString("no liquids (a protocol %1 player)").arg(m_playerProtocol))
            << (camera ? "camera: " + describeCamera(c.camera) : QString())
            << (streams ? QString("streaming: radius %1, kept within %2, at most %3 resident, %4 requests out")
                            .arg(STREAM_RADIUS).arg(STREAM_KEEP_RADIUS).arg(STREAM_MAX_RESIDENT_TILES).arg(STREAM_REQUEST_CREDIT)
@@ -1949,6 +2000,11 @@ void UnityIpcServer::handleStreamState(const QJsonObject & msg)
   s.framesOver33 = i("framesOver33");
   s.framesOver50 = i("framesOver50");
   s.managedHeapBytes = l("managedHeapBytes");
+  // Protocol 19 (LIQUIDS).
+  s.liquidTiles = i("liquidTiles");
+  s.liquidTypes = i("liquidTypes");
+  s.liquidTextures = i("liquidTextures");
+  s.liquidBytes = l("liquidBytes");
   s.raw = msg;
   m_lastStreamState = s;
   m_streamStatesReceived++;
@@ -1980,6 +2036,8 @@ QString UnityIpcServer::StreamState::describe() const
          QString(" gpuGeom=%1 pool=%2 evicted=%3/%4 frameMax=%5 p95=%6 over33=%7 over50=%8 uploadMax=%9")
            .arg(gpuGeometryBytes).arg(poolBytes).arg(prototypesEvicted).arg(texturesEvicted).arg(frameMsMax, 0, 'f', 1)
            .arg(frameMsP95, 0, 'f', 1).arg(framesOver33).arg(framesOver50).arg(uploadMsMax, 0, 'f', 1) +
+         QString(" liquidTiles=%1 liquidTypes=%2 liquidTextures=%3 liquidBytes=%4")
+           .arg(liquidTiles).arg(liquidTypes).arg(liquidTextures).arg(liquidBytes) +
          " tiles " + t.join(" ");
 }
 
@@ -3297,6 +3355,27 @@ QString UnityIpcServer::TerrainTileReport::describeDoodads() const
          " reason=\"" + doodadReason + "\"";
 }
 
+QString UnityIpcServer::TerrainTileReport::describeLiquids() const
+{
+  if (!hasLiquids)
+    return QString();
+  QStringList ids;
+  for (int id : liquidTypes)
+    ids << QString::number(id);
+  // The player's catalogue state is appended, never passed through arg().
+  return QString("liquids offered=%1 catalog=").arg(liquidsOffered ? "true" : "false") +
+         (liquidCatalog.isEmpty() ? QString("-") : liquidCatalog) +
+         QString(" instances=%1 layers=%2 chunks=%3 quads=%4 vertices=%5 meshes=%6")
+           .arg(liquidInstances).arg(liquidLayers).arg(liquidChunks).arg(liquidQuads).arg(liquidVertices).arg(liquidMeshes) +
+         QString(" types=%1 [%2] texturesRequested=%3 texturesLoaded=%4 texturesFailed=%5 missingTypes=%6")
+           .arg(liquidTypesSent).arg(ids.join(",")).arg(liquidTexturesRequested).arg(liquidTexturesLoaded)
+           .arg(liquidTexturesFailed).arg(liquidMissingTypes) +
+         QString(" formatBySize=%1 formatDisagreements=%2 malformed=%3 wmoGroups=%4 wmoQuads=%5 geometryBytes=%6"
+                 " textureBytes=%7")
+           .arg(liquidFormatBySize).arg(liquidFormatDisagreements).arg(liquidMalformed).arg(liquidWmoGroups)
+           .arg(liquidWmoQuads).arg(liquidGeometryBytes).arg(liquidTextureBytes);
+}
+
 int UnityIpcServer::TerrainTileReport::chunkState(const QString & name) const
 {
   for (const auto & c : chunkStates)
@@ -3671,6 +3750,48 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
     }
     m_stats.worldReports++;
   }
+  // Protocol 19 (LIQUIDS): the liquids' outcome, the type list read up to TERRAIN_REPORT_LIQUID_TYPES_MAX.
+  const QJsonValue liquidsValue = msg.value("liquids");
+  if (liquidsValue.isObject())
+  {
+    const QJsonObject l = liquidsValue.toObject();
+    const auto lcount = [&l](const char * key) {
+      const QJsonValue v = l.value(QLatin1String(key));
+      return v.isDouble() ? (int)v.toDouble() : -1;
+    };
+    const auto lcount64 = [&l](const char * key) {
+      const QJsonValue v = l.value(QLatin1String(key));
+      return v.isDouble() ? (long long)v.toDouble() : -1LL;
+    };
+    r.hasLiquids = true;
+    r.liquidsOffered = l.value("offered").toBool(false);
+    r.liquidCatalog = l.value("catalog").toString();
+    r.liquidInstances = lcount("instances");
+    r.liquidLayers = lcount("layers");
+    r.liquidChunks = lcount("chunks");
+    r.liquidQuads = lcount("quads");
+    r.liquidVertices = lcount64("vertices");
+    r.liquidMeshes = lcount("meshes");
+    const QJsonValue typesValue = l.value("types");
+    if (typesValue.isArray())
+    {
+      const QJsonArray types = typesValue.toArray();
+      r.liquidTypesSent = types.size();
+      for (int i = 0; i < types.size() && i < TERRAIN_REPORT_LIQUID_TYPES_MAX; i++)
+        r.liquidTypes.push_back(types.at(i).toInt(-1));
+    }
+    r.liquidTexturesRequested = lcount("texturesRequested");
+    r.liquidTexturesLoaded = lcount("texturesLoaded");
+    r.liquidTexturesFailed = lcount("texturesFailed");
+    r.liquidMissingTypes = lcount("missingTypes");
+    r.liquidFormatBySize = lcount("formatBySize");
+    r.liquidFormatDisagreements = lcount("formatDisagreements");
+    r.liquidMalformed = lcount("malformed");
+    r.liquidWmoGroups = lcount("wmoGroups");
+    r.liquidWmoQuads = lcount("wmoQuads");
+    r.liquidGeometryBytes = lcount64("geometryBytes");
+    r.liquidTextureBytes = lcount64("textureBytes");
+  }
 
   m_stats.terrainReports++;
   if (r.status == "built")
@@ -3766,6 +3887,9 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
                   << "doodad models in the load," << (int)r.doodadSets.size() << "and" << (int)r.doodadList.size() << "listed (at most"
                   << TERRAIN_REPORT_DOODAD_SETS_MAX << "and" << TERRAIN_REPORT_DOODAD_MODELS_MAX << ")";
   }
+  // Protocol 19: the liquids on one line.
+  if (r.hasLiquids)
+    LOG_INFO << "[unityipc]    load" << r.load << r.describeLiquids();
   if (onTerrainTileLoaded)
     onTerrainTileLoaded(r);
 }
