@@ -1195,4 +1195,29 @@ possible).
 | `D:\wmv-10\design\_results` | the completeness critique, the three proposals, the merged plan and its adversarial review |
 | `D:\wmv-10\design\fidelity` | the first shader extraction and disassembly |
 | `D:\wmv-10\verify-bytecode\{identity,shapes}` | the two independent shader checks (own container reader, disassembly, a numerical interpreter of the terrain programs; README per folder) |
+| `D:\wmv-10\step1\{mocv,lightmode,mapping,refnav}` and `...-verify` | step 1: exterior MOCV, the engine branches and `linear`, the measured sky and terrain mapping, the helper addon v3.1 (with `CAPTURE.md`) |
+| `D:\wmv-10\baseline` | step 2: the light-off baseline (manifest of 258 items, `compare.py`, the rig) |
+| `D:\wmv-10\step3`, `D:\wmv-10\step45` | steps 3-5: specs, implementer reports, reviews, fixes, test logs |
+| `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs |
+
+## 13. Progress (2026-10-21)
+
+| Step | State | Evidence |
+|---|---|---|
+| 1 Mappings and shader interpretation | done: exterior MOCV partly established and kept out (2.2); the references' engine path settled (4.0); the terrain light and the upper sky measured on the Stage 09 shots (4.3, 4.5); helper addon v3.1 with a 20-minute capture page | `D:\wmv-10\step1` |
+| 2 Light-off baseline | done: develop 678071f0 rebuilt (host and a player from the project copy), every Stage 09 set and guard re-run twice: identical to Stage 09's outputs (one MoP magma picture has two one-pixel variants from run to run of the same build; the free-clock water flight varies as before) | `D:\wmv-10\baseline` |
+| 3 Time of day and the outdoor light state | host committed (063943e0: schema 23, the store, protocol 20, 14 new checks, 0 failures on five clients, Stage 09's dumps byte-identical); player written and runner-tested (byte parity with the host's day evaluation on five clients), not yet run in a player | `D:\wmv-10\step3` |
+| 4 The first sky | written, reviewed (the pixel program matches the client's operation for operation), runner-tested; not yet run | `D:\wmv-10\step45` |
+| 5 Lit terrain with MCNR normals | written, reviewed (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg), runner-tested; not yet run | `D:\wmv-10\step45` |
+| Checkpoint | blocked: the Unity licence lapsed at 20:12 on 2026-10-21, so no player can be built until the owner signs in to Unity Hub. The one-command rig (`run_checkpoint.ps1`: build, self-test, the baseline compare with the light off and on, the Southfury renders, side-by-sides, metrics) ran end to end with the develop player: the committed host with the light off is identical to the baseline on all 258 must-match items | `D:\wmv-10\checkpoint` |
+
+**Offline prediction, meanwhile (not a viewer render).** The Stage 09 light-off renders at the seven fitted Southfury
+cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
+normals, the dome with table A, the host's light state at each shot's recorded time), against the PTR references
+(`linear 0`: Retail's shader path, the CPU side unverified): median terrain difference 1-3 sRGB steps per channel against
+63-106 for Stage 09; sky 0.1-4.8 dE00 in the clean 10-18 deg bands against 57-84 for Stage 09 (two shots' bands include a
+far hill the viewer does not draw). Light-facing terrain at noon is left 3-7 % dark at N . L 0.3-0.7 (the specular term,
+held at 0). At dawn and dusk the remaining difference lies on terrain the game puts in cast shadow: removing the direct
+light there would remove 57 % and 62 % of the squared difference, so those shots read "differs: cast shadows not drawn"
+(6.15). Pictures and numbers: `D:\wmv-10\checkpoint\predicted` (`metrics.md`).
 
