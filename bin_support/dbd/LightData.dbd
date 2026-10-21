@@ -2,51 +2,51 @@ COLUMNS
 int ID
 int LightParamID // the LightParams row (copy IDs included) whose day this key belongs to: every value is one (proven from the bytes); it is also in the section's relationship map, with the same value on every row
 int Time // the key's time of day in half-minutes, 0 to 2870 (< 2880): proven from the bytes; in layout 360DA016 its pallet words carry bit 16 (0x10000), which is not part of the value -- read it as 16 bits
-int Field_02 // not established (colour)
-int Field_03 // not established (colour)
-int Field_04 // not established (colour)
-int Field_05 // not established (colour)
-int SkyBand1Color // a colour, 0xRRGGBB in the low 24 bits, stored as OceanCloseColor (mask with 0xFFFFFF): the colour the viewer gives a water reflection that finds no scene (no sky is drawn before Stage 12). That it is the sky's first band is the public definitions' name, not proven; it was chosen by measurement among the six sky columns they name (fields 4-9): at 12:00 Durotar's LightParams 5985 holds (246,178,88), the nearest of the six to the sky just above the far hills in two noon captures of the game, (249,193,116) and (215,147,81) -- 31.9 and 44.4 away, the next nearest 67.9 and 52.9
-int Field_07 // not established (colour)
-int Field_08 // not established (colour)
-int Field_09 // not established (colour)
-int Field_10 // not established (colour)
-int Field_11 // not established (colour)
-int Field_12 // not established (colour)
-int Field_13 // not established (colour)
-int Field_14 // not established (colour)
+int DirectColor // a colour, 0xRRGGBB in the low 24 bits, stored as OceanCloseColor (mask with 0xFFFFFF): the colour's shape is proven from the bytes in every layout below (non-zero on 98 to 100 % of keys); that it is the outdoor light's direct colour is the public definitions' name, not proven (docs/world-viewer/10-light-sky-fog.md 3.2, 4.5)
+int AmbientColor // as DirectColor: the outdoor light's ambient colour (name not proven)
+int SkyTopColor // as DirectColor: the sky's colour at the zenith (name not proven; 74 to 91 % of keys)
+int SkyMiddleColor // as DirectColor: the sky's next band down (name not proven): at 12:00 Durotar's LightParams 5985 holds (255,226,175)
+int SkyBand1Color // a colour, 0xRRGGBB in the low 24 bits, stored as OceanCloseColor (mask with 0xFFFFFF): the colour the viewer gives a water reflection that finds no scene (Stage 09; the sky Stage 10 draws takes its six sky colours). That it is the sky's first band is the public definitions' name, not proven; it was chosen by measurement among the six sky columns they name (fields 4-9): at 12:00 Durotar's LightParams 5985 holds (246,178,88), the nearest of the six to the sky just above the far hills in two noon captures of the game, (249,193,116) and (215,147,81) -- 31.9 and 44.4 away, the next nearest 67.9 and 52.9
+int SkyBand2Color // as DirectColor: the sky's next band down (name not proven)
+int SkySmogColor // as DirectColor: the sky's band near the horizon (name not proven)
+int SkyFogColor // as DirectColor: the sky at and below the horizon (name not proven; darker than the bands above it on most noon keys)
+int SunColor // as DirectColor: the sun's colour (name not proven)
+int CloudSunColor // as DirectColor: a cloud colour (name not proven)
+int CloudEmissiveColor // as DirectColor: a cloud colour (name not proven; 0 on most keys)
+int CloudLayer1AmbientColor // as DirectColor: a cloud colour (name not proven)
+int CloudLayer2AmbientColor // as DirectColor: a cloud colour (name not proven)
 int OceanCloseColor // a colour, 0xRRGGBB in the low 24 bits (signed 25-bit storage: a few rows read back with the upper byte 0xFF, so mask with 0xFFFFFF): the colour and its byte order are proven from the bytes; that it is the near ocean colour is the public definitions' name, not proven
 int OceanFarColor // as OceanCloseColor: the far ocean colour (name not proven)
 int RiverCloseColor // as OceanCloseColor: the near river/lake colour (name supported by the Durotar reference fit, Southfury River)
 int RiverFarColor // as OceanCloseColor: the far river/lake colour (name supported by the Durotar reference fit)
-int Field_19 // not established (a grey)
-float Field_20 // not established
-float Field_21 // not established
-float Field_22 // not established
-float Field_23 // not established
-float Field_24 // not established
-float Field_25 // not established
-float Field_26 // not established
-float Field_27 // not established
-float Field_28 // not established
-float Field_29 // not established
-float Field_30 // not established
-int Field_31 // not established
-int Field_32 // not established
-int Field_33 // not established (colour)
-int Field_34 // not established (colour)
-int Field_35 // not established (colour)
-float Field_36 // not established
-float Field_37 // not established
-int Field_38 // not established (colour)
-float Field_39 // not established
-int Field_40 // not established (colour)
-int Field_41 // not established (colour)
-int Field_42 // not established
-float Field_43 // not established
-float Field_44 // not established (four floats)
-float Field_45 // not established (four floats)
-float Field_46 // not established (four floats)
+int ShadowOpacity // as DirectColor, mostly a grey (R = G = B): the name is the public definitions'; its use is not established
+float FogEnd // a float, as every column to SunFogStrength not named a colour or a FileDataID (the shapes proven from the bytes; the names the public definitions', not proven): a fog distance whose unit is not established (Classic Era: non-zero on 99 % of keys, round thousands)
+float FogScaler // a fraction of the fog distance (negative on some keys; name not proven)
+float FogDensity // the fog's density (Retail and PTR: non-zero on 99 % of keys; MoP Classic: 0 on every key; name not proven)
+float FogHeight // height fog (name not proven), as the four columns to MainFogEndDist
+float FogHeightScaler
+float FogHeightDensity
+float FogZScalar
+float MainFogStartDist
+float MainFogEndDist
+float SunFogAngle
+float CloudDensity // a cloud amount from 0 to 1 in Retail (name not proven)
+int ColorGradingFileDataID // 0, or a FileDataID: every one read is a 1024 x 32 texture (a 32^3 colour-grading table, inferred); the name is the public definitions'
+int DarkerColorGradingFileDataID // as ColorGradingFileDataID
+int HorizonAmbientColor // as DirectColor: the ambient light at the horizon (name not proven; Retail and PTR: 46 % of keys, Classic Era 1 %, MoP Classic none)
+int GroundAmbientColor // as DirectColor: the ambient light from below (name not proven; as HorizonAmbientColor)
+int EndFogColor // as DirectColor: the fog's far colour (name not proven)
+float EndFogColorDistance // a distance (name not proven)
+float FogStartOffset // a distance (name not proven)
+int SunFogColor // as DirectColor: the fog's colour towards the sun (name not proven)
+float SunFogStrength // name not proven
+int FogHeightColor // as DirectColor (name not proven)
+int EndFogHeightColor // as DirectColor (name not proven)
+int Field_42 // not established (an integer from 0 to 6)
+float Field_43 // not established (Retail, PTR and Classic Beta only; 1.0 on most keys)
+float FogHeightCoefficients // four floats (name not proven; 0 on every Classic Era and MoP Classic key)
+float MainFogCoefficients // four floats (name not proven; non-zero on 34 Retail keys)
+float HeightDensityFogCoeff // four floats (name not proven; non-zero on 24 Retail keys)
 int Added_45 // not established (PTR 12.1.7 and Classic Beta only)
 int Added_46 // not established (PTR 12.1.7 and Classic Beta only)
 int Added_47 // not established (PTR 12.1.7 and Classic Beta only)
@@ -62,41 +62,24 @@ int Added_56 // not established (PTR 12.1.7 and Classic Beta only)
 int Added_57 // not established (PTR 12.1.7 and Classic Beta only)
 float Added_58 // not established (PTR 12.1.7 and Classic Beta only)
 float Added_59 // not established (PTR 12.1.7 and Classic Beta only)
-int EraMoPField22 // not established (Classic Era and MoP Classic only, as the fields to EraMoPField45)
-int EraMoPField23
-int EraMoPField24
-int EraMoPField25
-int EraMoPField26
-int EraMoPField27
-int EraMoPField28
-int EraMoPField29
-int EraMoPField30
-int EraMoPField31
-int EraMoPField32
-int EraMoPField33
-int EraMoPField34
-int EraMoPField35
-int EraMoPField36
-int EraMoPField37
-int EraMoPField38
-int EraMoPField39
-int EraMoPField40
-int EraMoPField41
-int EraMoPField42
-int EraMoPField43 // not established (four values)
-int EraMoPField44 // not established (four values)
-int EraMoPField45 // not established (four values)
 
 COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
-COMMENT docs/world-viewer/09-liquids.md). The layouts come from public table definitions, read as hypotheses: every column
-COMMENT the catalogue reads (database.xml, table LightData) was checked against the clients' own bytes. A neutral name that
-COMMENT two layouts share is the same column: Retail 12.1.5 (6ABF2921) and PTR 12.1.7 (360DA016) agree on every column 0-19
-COMMENT of all 19881 rows they share, read at one field later in 360DA016; Classic Era and MoP Classic (70C6CD80) keep
+COMMENT docs/world-viewer/09-liquids.md, and the outdoor light, docs/world-viewer/10-light-sky-fog.md). The layouts come
+COMMENT from public table definitions, read as hypotheses: every column the catalogue reads (database.xml, table LightData)
+COMMENT was checked against the clients' own bytes. A name that two layouts share is the same column: Retail 12.1.5
+COMMENT (6ABF2921) and PTR 12.1.7 (360DA016) agree on every column 0-46 of all 19881 rows they share, read at one field
+COMMENT later in 360DA016 (Retail's arrays, fields 44-46, at PTR's 60-62); Classic Era and MoP Classic (70C6CD80) keep
 COMMENT fields 0-19 in Retail's order (each water colour equals Retail's same column on 562 to 595 of 638 Classic Era keys
 COMMENT and 3334 to 3356 of 3371 MoP Classic keys that Retail shares with four distinct water colours, another column on
 COMMENT at most 10; SkyBand1Color equals Retail's on 1222 of 1321 Classic Era keys, 4350 of 4491 MoP Classic keys and
 COMMENT 1228 of 1327 Classic Beta keys that Retail shares where Retail's value differs from its other colour columns,
-COMMENT another column on at most 3). Every field is listed in file order, so the positions are right for the layouts
+COMMENT another column on at most 3). Stage 10 names the other columns by the public definitions' names, still as
+COMMENT hypotheses, where every layout's bytes have the column's shape (a colour in the low 24 bits, a float, a FileDataID):
+COMMENT 70C6CD80 keeps Retail's fields 20-42 in Retail's order too -- its fields 22-45 are floats, colours and FileDataIDs,
+COMMENT which an earlier version of this file typed as integers -- and lacks Retail's field 43, so its three arrays are
+COMMENT fields 43-45 (0 on every Classic Era and MoP Classic key: their place is the public layout's); MoP Classic's
+COMMENT colours equal Retail's on 93 to 99.8 % of the 5443 keys the two share (ID, LightParams and time), FogEnd on 4766
+COMMENT and FogScaler on 3563 of them. Every field is listed in file order, so the positions are right for the layouts
 COMMENT below. Classic Beta's water colours are 0 on most of its rows, among them every map default and zone light of
 COMMENT Eastern Kingdoms and Kalimdor: a key whose four water colours are all 0 carries no water colour. A layout not
 COMMENT listed here is not read.
@@ -107,99 +90,100 @@ COMMENT Retail: 47 fields; IDs in the section's ID list; LightParamID is field 0
 $noninline,id$ID<32>
 $relation$LightParamID<u16>
 Time<u16>
-Field_02<32>
-Field_03<32>
-Field_04<32>
-Field_05<32>
+DirectColor<32>
+AmbientColor<32>
+SkyTopColor<32>
+SkyMiddleColor<32>
 SkyBand1Color<32>
-Field_07<32>
-Field_08<32>
-Field_09<32>
-Field_10<32>
-Field_11<32>
-Field_12<32>
-Field_13<32>
-Field_14<32>
+SkyBand2Color<32>
+SkySmogColor<32>
+SkyFogColor<32>
+SunColor<32>
+CloudSunColor<32>
+CloudEmissiveColor<32>
+CloudLayer1AmbientColor<32>
+CloudLayer2AmbientColor<32>
 OceanCloseColor<32>
 OceanFarColor<32>
 RiverCloseColor<32>
 RiverFarColor<32>
-Field_19<32>
-Field_20
-Field_21
-Field_22
-Field_23
-Field_24
-Field_25
-Field_26
-Field_27
-Field_28
-Field_29
-Field_30
-Field_31<u32>
-Field_32<u32>
-Field_33<32>
-Field_34<32>
-Field_35<32>
-Field_36
-Field_37
-Field_38<32>
-Field_39
-Field_40<32>
-Field_41<32>
+ShadowOpacity<32>
+FogEnd
+FogScaler
+FogDensity
+FogHeight
+FogHeightScaler
+FogHeightDensity
+FogZScalar
+MainFogStartDist
+MainFogEndDist
+SunFogAngle
+CloudDensity
+ColorGradingFileDataID<u32>
+DarkerColorGradingFileDataID<u32>
+HorizonAmbientColor<32>
+GroundAmbientColor<32>
+EndFogColor<32>
+EndFogColorDistance
+FogStartOffset
+SunFogColor<32>
+SunFogStrength
+FogHeightColor<32>
+EndFogHeightColor<32>
 Field_42<32>
 Field_43
-Field_44[4]
-Field_45[4]
-Field_46[4]
+FogHeightCoefficients[4]
+MainFogCoefficients[4]
+HeightDensityFogCoeff[4]
 
 LAYOUT 360DA016
 BUILD 12.1.7.70424, 1.60.1.70450
 COMMENT PTR 12.1.7 and Classic Beta: 63 fields; no ID list -- the ID is field 0 (18-bit signed, header id_index 0), so every
-COMMENT column is one field later than in 6ABF2921; fifteen columns are added before the three arrays.
+COMMENT column is one field later than in 6ABF2921; fifteen columns are added before the three arrays. Time's pallet words
+COMMENT carry bit 16: it is read at 16 bits (Time<u16>; database.xml declares it uint16), which keeps the value alone.
 $id$ID<32>
 $relation$LightParamID<u16>
 Time<u16>
-Field_02<32>
-Field_03<32>
-Field_04<32>
-Field_05<32>
+DirectColor<32>
+AmbientColor<32>
+SkyTopColor<32>
+SkyMiddleColor<32>
 SkyBand1Color<32>
-Field_07<32>
-Field_08<32>
-Field_09<32>
-Field_10<32>
-Field_11<32>
-Field_12<32>
-Field_13<32>
-Field_14<32>
+SkyBand2Color<32>
+SkySmogColor<32>
+SkyFogColor<32>
+SunColor<32>
+CloudSunColor<32>
+CloudEmissiveColor<32>
+CloudLayer1AmbientColor<32>
+CloudLayer2AmbientColor<32>
 OceanCloseColor<32>
 OceanFarColor<32>
 RiverCloseColor<32>
 RiverFarColor<32>
-Field_19<32>
-Field_20
-Field_21
-Field_22
-Field_23
-Field_24
-Field_25
-Field_26
-Field_27
-Field_28
-Field_29
-Field_30
-Field_31<u32>
-Field_32<u32>
-Field_33<32>
-Field_34<32>
-Field_35<32>
-Field_36
-Field_37
-Field_38<32>
-Field_39
-Field_40<32>
-Field_41<32>
+ShadowOpacity<32>
+FogEnd
+FogScaler
+FogDensity
+FogHeight
+FogHeightScaler
+FogHeightDensity
+FogZScalar
+MainFogStartDist
+MainFogEndDist
+SunFogAngle
+CloudDensity
+ColorGradingFileDataID<u32>
+DarkerColorGradingFileDataID<u32>
+HorizonAmbientColor<32>
+GroundAmbientColor<32>
+EndFogColor<32>
+EndFogColorDistance
+FogStartOffset
+SunFogColor<32>
+SunFogStrength
+FogHeightColor<32>
+EndFogHeightColor<32>
 Field_42<32>
 Field_43
 Added_45<32>
@@ -217,58 +201,60 @@ Added_56<32>
 Added_57<32>
 Added_58
 Added_59
-Field_44[4]
-Field_45[4]
-Field_46[4]
+FogHeightCoefficients[4]
+MainFogCoefficients[4]
+HeightDensityFogCoeff[4]
 
 LAYOUT 70C6CD80
-BUILD 1.15.9.70003, 5.5.4.70268
+BUILD 1.15.9.70003, 5.5.4.70268, 5.5.4.70531
 COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4: 46 fields; IDs in the section's ID list; LightParamID is field 0 and is
-COMMENT also in the section's relationship map (equal on every row). Time's pallet words are the plain values.
+COMMENT also in the section's relationship map (equal on every row). Time's pallet words are the plain values. Retail's
+COMMENT fields 0-42 in Retail's order (fields 22-42 are floats, colours and FileDataIDs, as Retail's), then the three
+COMMENT arrays: Retail's field 43 is not in this layout. (MoP Classic 5.5.4.70531's file is byte for byte 5.5.4.70268's.)
 $noninline,id$ID<32>
 $relation$LightParamID<u16>
 Time<u16>
-Field_02<32>
-Field_03<32>
-Field_04<32>
-Field_05<32>
+DirectColor<32>
+AmbientColor<32>
+SkyTopColor<32>
+SkyMiddleColor<32>
 SkyBand1Color<32>
-Field_07<32>
-Field_08<32>
-Field_09<32>
-Field_10<32>
-Field_11<32>
-Field_12<32>
-Field_13<32>
-Field_14<32>
+SkyBand2Color<32>
+SkySmogColor<32>
+SkyFogColor<32>
+SunColor<32>
+CloudSunColor<32>
+CloudEmissiveColor<32>
+CloudLayer1AmbientColor<32>
+CloudLayer2AmbientColor<32>
 OceanCloseColor<32>
 OceanFarColor<32>
 RiverCloseColor<32>
 RiverFarColor<32>
-Field_19<32>
-Field_20
-Field_21
-EraMoPField22<32>
-EraMoPField23<32>
-EraMoPField24<32>
-EraMoPField25<32>
-EraMoPField26<32>
-EraMoPField27<32>
-EraMoPField28<32>
-EraMoPField29<32>
-EraMoPField30<32>
-EraMoPField31<32>
-EraMoPField32<32>
-EraMoPField33<32>
-EraMoPField34<32>
-EraMoPField35<32>
-EraMoPField36<32>
-EraMoPField37<32>
-EraMoPField38<32>
-EraMoPField39<32>
-EraMoPField40<32>
-EraMoPField41<32>
-EraMoPField42<32>
-EraMoPField43<32>[4]
-EraMoPField44<32>[4]
-EraMoPField45<32>[4]
+ShadowOpacity<32>
+FogEnd
+FogScaler
+FogDensity
+FogHeight
+FogHeightScaler
+FogHeightDensity
+FogZScalar
+MainFogStartDist
+MainFogEndDist
+SunFogAngle
+CloudDensity
+ColorGradingFileDataID<u32>
+DarkerColorGradingFileDataID<u32>
+HorizonAmbientColor<32>
+GroundAmbientColor<32>
+EndFogColor<32>
+EndFogColorDistance
+FogStartOffset
+SunFogColor<32>
+SunFogStrength
+FogHeightColor<32>
+EndFogHeightColor<32>
+Field_42<32>
+FogHeightCoefficients[4]
+MainFogCoefficients[4]
+HeightDensityFogCoeff[4]

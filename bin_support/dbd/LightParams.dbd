@@ -1,19 +1,19 @@
 COLUMNS
 int ID
 float Field_00 // not established (three floats)
-float Field_01 // not established (three floats)
-int Field_02 // not established
-int Field_03 // not established
-int Field_04 // not established
-float Field_05 // not established (floats from 0 to 1; the same values in Retail and Classic on the rows they share)
+float OverrideSunPosition // three floats, non-zero on 3 % of Retail rows (115 of 3745) and none in Classic Era or MoP Classic; the name (a position the sun is drawn at) is the public definitions', not proven
+int HighlightSky // 0 or 1 on every row of every client (proven from the bytes); the name is the public definitions', its effect not established
+int LightSkyboxID // 0, or a LightSkybox row (copy rows included) on every row of every client: proven from the bytes; the name is the public definitions'
+int Field_04 // not established (0 on every row of every client)
+float Glow // floats from 0 to 1 (the same values in Retail and Classic on the rows they share); the name (the glow's amount) is the public definitions', not proven
 float WaterShallowAlpha // the opacity of shallow river/lake water: a float from 0 to 1 on every row (proven from the bytes); which of the four floats is which is the public definitions' order, consistent with the bytes (shallow <= deep on 95 % of Retail rows; the same values in Retail and Classic on the rows they share) and with the Durotar reference fit (0.40 / 0.80), not proven
 float WaterDeepAlpha // the opacity of deep river/lake water: as WaterShallowAlpha (Classic Era: by MoP Classic's layout and by elimination, inferred)
 float OceanShallowAlpha // the opacity of shallow ocean: as WaterShallowAlpha (no ocean reference measured yet)
 float OceanDeepAlpha // the opacity of deep ocean: as WaterShallowAlpha
-int Field_10 // not established (flags)
+int Flags // flags (Retail: 0x100 on 86 rows, 76 of them with OverrideSunPosition set (115 set overall); 0x200 on 41 rows, all with SunPolar and SunAzimuth set (69 set overall): proven from the bytes); the name is the public definitions', the meaning of each bit not established
 int Field_11 // not established
-float Field_12 // not established
-float Field_13 // not established
+float SunPolar // an angle in degrees, set on 69 Retail rows, all 41 flagged 0x200 among them (name and meaning the public definitions', not proven)
+float SunAzimuth // as SunPolar
 float Field_14 // not established
 float Field_15 // not established
 float Field_16 // not established
@@ -30,43 +30,46 @@ float Field_26 // not established
 int Field_27 // not established
 float Field_28 // not established
 float Field_29 // not established
-float Field_30 // not established
-float Field_31 // not established
-float Field_32 // not established (PTR 12.1.7 and Classic Beta only)
-float Field_33 // not established (PTR 12.1.7 and Classic Beta only)
-float Field_34 // not established (PTR 12.1.7 and Classic Beta only)
-int Field_35 // not established (PTR 12.1.7 and Classic Beta only)
-float Field_36 // not established (PTR 12.1.7 and Classic Beta only)
-float Field_37 // not established (PTR 12.1.7 and Classic Beta only)
-float Field_38 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_30 // not established (Retail's field 30; PTR's and Classic Beta's 36)
+float Field_31 // not established (Retail's field 31; PTR's and Classic Beta's 37)
+float Added_30 // not established (PTR 12.1.7 and Classic Beta only, as the fields to Added_38)
+float Added_31
+float Added_32
+float Added_33
+float Added_34
+int Added_35
+float Added_38
 
 COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
-COMMENT docs/world-viewer/09-liquids.md). The layouts come from public table definitions, read as hypotheses: the four
-COMMENT alphas the catalogue reads (database.xml, table LightParams) were checked against the clients' own bytes; the other
-COMMENT columns are named by their field index, their types and widths the hypotheses' (never read). A neutral name that
-COMMENT two layouts share is the same slot in the column order (after Classic's inline ID), not an established equal
-COMMENT meaning. Fields 0-31 are the same columns in CAE394E7 and A7F31923 (the four alphas agree on all 3745 rows Retail and
-COMMENT PTR share). Every field is listed in file order. Most Retail rows are copy rows: LightData and Light refer to copy
-COMMENT IDs directly. A layout not listed here is not read.
+COMMENT docs/world-viewer/09-liquids.md, and the outdoor light, docs/world-viewer/10-light-sky-fog.md). The layouts come
+COMMENT from public table definitions, read as hypotheses: the columns the catalogue reads (database.xml, table LightParams)
+COMMENT were checked against the clients' own bytes (the four alphas in Stage 09; the shapes of the columns named in Stage
+COMMENT 10); the other columns are named by their field index, their types and widths the hypotheses' (never read). A
+COMMENT neutral name that two layouts share is the same slot in the column order (after Classic's inline ID), not an
+COMMENT established equal meaning. Fields 0-29 are the same columns in CAE394E7 and A7F31923 (on all 3745 rows Retail and
+COMMENT PTR share); A7F31923 inserts six fields at 30-35 (Added_30 to Added_35), so Retail's fields 30 and 31 are its 36
+COMMENT and 37 -- equal on all 3745 shared rows, the next best column on 3739 and 136 (an earlier version of this file
+COMMENT said fields 0-31 were the same: they are not). Every field is listed in file order. Most Retail rows are copy
+COMMENT rows: LightData and Light refer to copy IDs directly. A layout not listed here is not read.
 
 LAYOUT CAE394E7
 BUILD 12.1.5.70448
 COMMENT Retail: 32 fields; IDs in the section's ID list, 2069 copy rows.
 $noninline,id$ID<32>
 Field_00[3]
-Field_01[3]
-Field_02<u8>
-Field_03<u16>
+OverrideSunPosition[3]
+HighlightSky<u8>
+LightSkyboxID<u16>
 Field_04<u8>
-Field_05
+Glow
 WaterShallowAlpha
 WaterDeepAlpha
 OceanShallowAlpha
 OceanDeepAlpha
-Field_10<32>
+Flags<32>
 Field_11<32>
-Field_12
-Field_13
+SunPolar
+SunAzimuth
 Field_14
 Field_15
 Field_16
@@ -88,23 +91,23 @@ Field_31
 
 LAYOUT A7F31923
 BUILD 12.1.7.70424, 1.60.1.70450
-COMMENT PTR 12.1.7 and Classic Beta: 39 fields, seven more at the end; IDs in the section's ID list (copy rows: PTR 2078,
-COMMENT Classic Beta 478).
+COMMENT PTR 12.1.7 and Classic Beta: 39 fields, seven more than CAE394E7: six inserted at 30-35 and one at the end (38);
+COMMENT Retail's fields 30 and 31 are 36 and 37 here. IDs in the section's ID list (copy rows: PTR 2078, Classic Beta 478).
 $noninline,id$ID<32>
 Field_00[3]
-Field_01[3]
-Field_02<u8>
-Field_03<u16>
+OverrideSunPosition[3]
+HighlightSky<u8>
+LightSkyboxID<u16>
 Field_04<u8>
-Field_05
+Glow
 WaterShallowAlpha
 WaterDeepAlpha
 OceanShallowAlpha
 OceanDeepAlpha
-Field_10<32>
+Flags<32>
 Field_11<32>
-Field_12
-Field_13
+SunPolar
+SunAzimuth
 Field_14
 Field_15
 Field_16
@@ -121,35 +124,35 @@ Field_26
 Field_27<32>
 Field_28
 Field_29
+Added_30
+Added_31
+Added_32
+Added_33
+Added_34
+Added_35<32>
 Field_30
 Field_31
-Field_32
-Field_33
-Field_34
-Field_35<32>
-Field_36
-Field_37
-Field_38
+Added_38
 
 LAYOUT 51C96BAD
-BUILD 1.15.9.70003, 5.5.4.70268
+BUILD 1.15.9.70003, 5.5.4.70268, 5.5.4.70531
 COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4: 17 fields; no ID list -- the ID is field 2 (the header's id_index,
 COMMENT signed bitpacked), so every later column is one field after CAE394E7's; no copy rows. Several alphas sit in the
-COMMENT common data (defaults 0.5 / 1.0 / 0.75 / 1.0).
+COMMENT common data (defaults 0.5 / 1.0 / 0.75 / 1.0). (MoP Classic 5.5.4.70531's file is byte for byte 5.5.4.70268's.)
 Field_00[3]
-Field_01[3]
+OverrideSunPosition[3]
 $id$ID<32>
-Field_02<u8>
-Field_03<u16>
+HighlightSky<u8>
+LightSkyboxID<u16>
 Field_04<u8>
-Field_05
+Glow
 WaterShallowAlpha
 WaterDeepAlpha
 OceanShallowAlpha
 OceanDeepAlpha
-Field_10<8>
+Flags<8>
 Field_11<32>
-Field_12
-Field_13
+SunPolar
+SunAzimuth
 Field_14
 Field_15

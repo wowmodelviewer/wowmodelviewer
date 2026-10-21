@@ -9,7 +9,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <tuple>
+#include <unordered_map>
 
 #include <QElapsedTimer>
 #include <QJsonArray>
@@ -116,6 +120,105 @@ namespace
     p.append(b);
     return p;
   }
+
+  // THE OUTDOOR LIGHT's columns: each name sent (the public names, dbd/LightData.dbd) and the database column it is read
+  // from (an array's elements are numbered from 1 there, from 0 in the names sent).
+  struct Column
+  {
+    const char * name;
+    const char * sql;
+  };
+  const Column kColourColumns[] = {
+    {"DirectColor", "DirectColor"}, {"AmbientColor", "AmbientColor"}, {"SkyTopColor", "SkyTopColor"},
+    {"SkyMiddleColor", "SkyMiddleColor"}, {"SkyBand1Color", "SkyBand1Color"}, {"SkyBand2Color", "SkyBand2Color"},
+    {"SkySmogColor", "SkySmogColor"}, {"SkyFogColor", "SkyFogColor"}, {"SunColor", "SunColor"},
+    {"CloudSunColor", "CloudSunColor"}, {"CloudEmissiveColor", "CloudEmissiveColor"},
+    {"CloudLayer1AmbientColor", "CloudLayer1AmbientColor"}, {"CloudLayer2AmbientColor", "CloudLayer2AmbientColor"},
+    {"OceanCloseColor", "OceanCloseColor"}, {"OceanFarColor", "OceanFarColor"}, {"RiverCloseColor", "RiverCloseColor"},
+    {"RiverFarColor", "RiverFarColor"}, {"ShadowOpacity", "ShadowOpacity"}, {"HorizonAmbientColor", "HorizonAmbientColor"},
+    {"GroundAmbientColor", "GroundAmbientColor"}, {"EndFogColor", "EndFogColor"}, {"SunFogColor", "SunFogColor"},
+    {"FogHeightColor", "FogHeightColor"}, {"EndFogHeightColor", "EndFogHeightColor"},
+  };
+  const Column kFloatColumns[] = {
+    {"FogEnd", "FogEnd"}, {"FogScaler", "FogScaler"}, {"FogDensity", "FogDensity"}, {"FogHeight", "FogHeight"},
+    {"FogHeightScaler", "FogHeightScaler"}, {"FogHeightDensity", "FogHeightDensity"}, {"FogZScalar", "FogZScalar"},
+    {"MainFogStartDist", "MainFogStartDist"}, {"MainFogEndDist", "MainFogEndDist"}, {"SunFogAngle", "SunFogAngle"},
+    {"CloudDensity", "CloudDensity"}, {"EndFogColorDistance", "EndFogColorDistance"}, {"FogStartOffset", "FogStartOffset"},
+    {"SunFogStrength", "SunFogStrength"},
+    {"FogHeightCoefficients0", "FogHeightCoefficients1"}, {"FogHeightCoefficients1", "FogHeightCoefficients2"},
+    {"FogHeightCoefficients2", "FogHeightCoefficients3"}, {"FogHeightCoefficients3", "FogHeightCoefficients4"},
+    {"MainFogCoefficients0", "MainFogCoefficients1"}, {"MainFogCoefficients1", "MainFogCoefficients2"},
+    {"MainFogCoefficients2", "MainFogCoefficients3"}, {"MainFogCoefficients3", "MainFogCoefficients4"},
+    {"HeightDensityFogCoeff0", "HeightDensityFogCoeff1"}, {"HeightDensityFogCoeff1", "HeightDensityFogCoeff2"},
+    {"HeightDensityFogCoeff2", "HeightDensityFogCoeff3"}, {"HeightDensityFogCoeff3", "HeightDensityFogCoeff4"},
+  };
+  const Column kIntColumns[] = {
+    {"ColorGradingFileDataID", "ColorGradingFileDataID"}, {"DarkerColorGradingFileDataID", "DarkerColorGradingFileDataID"},
+  };
+  const int kColours = (int)(sizeof(kColourColumns) / sizeof(kColourColumns[0]));
+  const int kFloats = (int)(sizeof(kFloatColumns) / sizeof(kFloatColumns[0]));
+  const int kInts = (int)(sizeof(kIntColumns) / sizeof(kIntColumns[0]));
+  const char * const kMapTable = "Map";
+
+  QStringList columnNames(const Column * columns, int n)
+  {
+    QStringList names;
+    for (int k = 0; k < n; k++)
+      names << QString::fromLatin1(columns[k].name);
+    return names;
+  }
+
+  // The database column a name is read from, as database.xml declares it (an array by its own name).
+  QString fieldOf(const Column & c)
+  {
+    QString f = QString::fromLatin1(c.sql);
+    if (f.contains("Coeff"))   // the three arrays: FogHeightCoefficients1 -> FogHeightCoefficients
+      f.chop(1);
+    return f;
+  }
+
+  float floatOfBits(quint32 bits)
+  {
+    float f;
+    std::memcpy(&f, &bits, sizeof(f));
+    return f;
+  }
+
+  // A float as the player is sent it: the shortest decimal that reads back as the same float (at most 9 significant
+  // digits), as a double -- QJsonDocument writes a double's shortest form, so the text sent is that decimal and the player
+  // reads exactly the float the client stores. A value that is not finite goes as 0 (counted). Memoised by the bits.
+  double floatForJson(float f, std::unordered_map<quint32, double> & memo, int & notFinite)
+  {
+    if (!std::isfinite(f))
+    {
+      notFinite++;
+      return 0.0;
+    }
+    // (A whole number below 2^24 is its own shortest form. A negative zero compares equal to 0 and goes as 0, its sign
+    // lost: none of the five audited clients' light floats is one (probed in their databases, 2026-10-21); a column whose
+    // sign of zero mattered would need a case of its own.)
+    if (f == 0.0f)
+      return 0.0;
+    if (std::fabs(f) < 16777216.0f && f == std::floor(f))
+      return (double)f;
+    quint32 bits;
+    std::memcpy(&bits, &f, sizeof(bits));
+    const auto kept = memo.find(bits);
+    if (kept != memo.end())
+      return kept->second;
+    double d = (double)f;
+    char text[40];
+    for (int digits = 1; digits <= 9; digits++)
+    {
+      std::snprintf(text, sizeof(text), "%.*g", digits, (double)f);
+      d = std::strtod(text, nullptr);
+      if ((float)d == f)
+        break;
+    }
+    memo[bits] = d;
+    return d;
+  }
+
 }
 
 QString wow::LightCatalog::statusName(Status s)
@@ -466,45 +569,29 @@ QJsonObject wow::LightCatalog::mapJson(int mapId) const
   return o;
 }
 
-QJsonObject wow::LightCatalog::makeMapJson(int mapId) const
+wow::LightCatalog::Selection wow::LightCatalog::select(int mapId) const
 {
-  std::set<int> used;
+  Selection s;
   // ZONES: the map's polygons in the order the player tries them (the first that holds the camera wins): those without a
   // player condition first, then the conditional ones; within each, the smallest area first, so a polygon nested in
   // another ("Durotar Org" in "Durotar") comes before it; ties by ID. INFERRED: which polygon the client picks is not
   // established. A zone's light is never filtered by its ContinentID (76 Retail polygons use another map's Light row).
-  std::vector<const Zone *> order;
   for (const Zone & z : m_zones)
     if (z.map == mapId)
-      order.push_back(&z);
-  std::sort(order.begin(), order.end(), [](const Zone * a, const Zone * b) {
+      s.zones.push_back(&z);
+  std::sort(s.zones.begin(), s.zones.end(), [](const Zone * a, const Zone * b) {
     if (a->conditional != b->conditional)
       return !a->conditional;
     if (a->area != b->area)
       return a->area < b->area;
     return a->id < b->id;
   });
-  QJsonArray zoneArray;
-  for (const Zone * z : order)
-  {
-    QJsonObject o;
-    o["zone"] = z->id;
-    o["light"] = z->light;
-    o["zmin"] = z->zmin;
-    o["zmax"] = z->zmax;
-    o["conditional"] = z->conditional ? 1 : 0;
-    QJsonArray poly;
-    for (double v : z->poly)
-      poly.append(v);
-    o["poly"] = poly;
-    zoneArray.append(o);
-    used.insert(z->light);
-  }
+  for (const Zone * z : s.zones)
+    s.used.insert(z->light);
   // POINTS: the map's lights away from the origin that no ZoneLight row of the client names (a zone light's own position
   // is not used as a point light: UNKNOWN in the client), by ID. THE DEFAULT: the map's rows at the origin, one whose
   // falloff end is 0 first, else the lowest ID; a map with none takes Light 1 (INFERRED: the client's own default for such
   // a map is not established).
-  QJsonArray pointArray;
   int end0 = 0, origin = 0;
   bool haveEnd0 = false, haveOrigin = false;
   for (const auto & it : m_lights)
@@ -528,35 +615,68 @@ QJsonObject wow::LightCatalog::makeMapJson(int mapId) const
     }
     if (m_zoneLights.find(it.first) != m_zoneLights.end())
       continue;
-    QJsonObject p;
-    p["light"] = it.first;
-    p["x"] = l.x;
-    p["y"] = l.y;
-    p["z"] = l.z;
-    p["start"] = l.start;
-    p["end"] = l.end;
-    pointArray.append(p);
-    used.insert(it.first);
+    s.points.push_back(it.first);
+    s.used.insert(it.first);
   }
-  int defaultLight = 0;
-  QString defaultFrom = "none";
   if (haveEnd0)
   {
-    defaultLight = end0;
-    defaultFrom = "end0";
+    s.defaultLight = end0;
+    s.defaultFrom = "end0";
   }
   else if (haveOrigin)
   {
-    defaultLight = origin;
-    defaultFrom = "origin";
+    s.defaultLight = origin;
+    s.defaultFrom = "origin";
   }
   else if (m_lights.find(1) != m_lights.end())
   {
-    defaultLight = 1;
-    defaultFrom = "light1";
+    s.defaultLight = 1;
+    s.defaultFrom = "light1";
   }
-  if (defaultLight != 0)
-    used.insert(defaultLight);
+  if (s.defaultLight != 0)
+    s.used.insert(s.defaultLight);
+  return s;
+}
+
+QJsonObject wow::LightCatalog::zoneJson(const Zone & z) const
+{
+  QJsonObject o;
+  o["zone"] = z.id;
+  o["light"] = z.light;
+  o["zmin"] = z.zmin;
+  o["zmax"] = z.zmax;
+  o["conditional"] = z.conditional ? 1 : 0;
+  QJsonArray poly;
+  for (double v : z.poly)
+    poly.append(v);
+  o["poly"] = poly;
+  return o;
+}
+
+QJsonObject wow::LightCatalog::pointJson(int id, const Light & l) const
+{
+  QJsonObject p;
+  p["light"] = id;
+  p["x"] = l.x;
+  p["y"] = l.y;
+  p["z"] = l.z;
+  p["start"] = l.start;
+  p["end"] = l.end;
+  return p;
+}
+
+QJsonObject wow::LightCatalog::makeMapJson(int mapId) const
+{
+  const Selection s = select(mapId);
+  const std::set<int> & used = s.used;
+  QJsonArray zoneArray;
+  for (const Zone * z : s.zones)
+    zoneArray.append(zoneJson(*z));
+  QJsonArray pointArray;
+  for (int id : s.points)
+    pointArray.append(pointJson(id, m_lights.at(id)));
+  const int defaultLight = s.defaultLight;
+  const QString defaultFrom = s.defaultFrom;
   // VALUES: each light's slot-0 LightParams at TIME -- its LightData keys, else its copy source's -- with the sky colour the
   // player gives a water reflection that finds no scene ("sky": SkyBand1Color, the column measured nearest the game's sky
   // above the horizon at one spot, dbd/LightData.dbd: MEASURED there, INFERRED elsewhere). A light whose four water colours
@@ -615,4 +735,479 @@ QJsonObject wow::LightCatalog::makeMapJson(int mapId) const
   o["points"] = pointArray;
   o["values"] = valueArray;
   return o;
+}
+
+// ---------------------------------------------------------------- THE OUTDOOR LIGHT (Stage 10)
+
+const QStringList & wow::LightCatalog::worldLightColourColumns()
+{
+  static const QStringList names = columnNames(kColourColumns, kColours);
+  return names;
+}
+
+const QStringList & wow::LightCatalog::worldLightFloatColumns()
+{
+  static const QStringList names = columnNames(kFloatColumns, kFloats);
+  return names;
+}
+
+const QStringList & wow::LightCatalog::worldLightIntColumns()
+{
+  static const QStringList names = columnNames(kIntColumns, kInts);
+  return names;
+}
+
+QString wow::LightCatalog::branchOf(const QString & product, const QString & build)
+{
+  // PROVEN_BYTES for the five audited clients (docs/world-viewer/10-light-sky-fog.md 4.0: the core shader containers are
+  // byte-identical in Retail 12.1.5, Classic Era 1.15.9 and MoP Classic 5.5.4, and another set in the PTR 12.1.7 and
+  // Classic Beta 1.60.1); INFERRED for any other build, by its product and version.
+  if (product == "wowt" || product == "wow_classic_beta")
+    return "ptr";
+  const QStringList v = build.split('.');
+  const int major = v.value(0).toInt(), minor = v.value(1).toInt(), patch = v.value(2).toInt();
+  if (major > 12 || (major == 12 && (minor > 1 || (minor == 1 && patch >= 7))) || (major == 1 && minor >= 60))
+    return "ptr";
+  return "retail";
+}
+
+void wow::LightCatalog::buildWorldLight()
+{
+  QElapsedTimer total;
+  total.start();
+  m_worldReady = false;
+  m_worldCounts = WorldCounts();
+  m_days.clear();
+  m_params.clear();
+  m_slots.clear();
+  m_zonePriority.clear();
+  m_mapLights.clear();
+  m_absentColumns.clear();
+  m_worldMaps.clear();
+  m_worldMapMs.clear();
+  if (m_status != Status::Ready)
+  {
+    // (build() has said why.)
+    m_worldDetail = "the light catalogue is not ready (" + statusName(m_status) + ")" +
+                    (m_statusDetail.isEmpty() ? QString() : ": " + m_statusDetail);
+    m_worldBuildMs = total.nsecsElapsed() / 1e6;
+    return;
+  }
+  const auto fail = [this, &total](const QString & why) {
+    m_worldDetail = why;
+    m_days.clear();
+    m_worldBuildMs = total.nsecsElapsed() / 1e6;
+    LOG_WARNING << "[lights] outdoor light:" << m_product.toUtf8().constData() << m_build.toUtf8().constData()
+                << "unavailable --" << why.toUtf8().constData();
+  };
+  WorldCounts & n = m_worldCounts;
+  const Table * data = table(QString::fromLatin1(kDataTable));
+  m_lightDataLayout = data ? data->layout : QString();
+
+  // The named columns this client's layout lacks (each read as 0: database.xml, dbd/LightData.dbd).
+  const QStringList absent = data ? data->absentFields : QStringList();
+  const auto noteAbsent = [this, &absent](const Column * columns, int count) {
+    for (int k = 0; k < count; k++)
+      if (absent.contains(fieldOf(columns[k])))
+        m_absentColumns << QString::fromLatin1(columns[k].name);
+  };
+  noteAbsent(kColourColumns, kColours);
+  noteAbsent(kFloatColumns, kFloats);
+  noteAbsent(kIntColumns, kInts);
+
+  // Every key's LightParams, time, ID and named columns, read as integers (no text: 55 columns of some 20,000 keys), in
+  // the table's order (sorted below: the database's own sort of such rows costs more). The colours masked to 24 bits as
+  // build() masks them; the floats are their 32-bit patterns (database.xml declares them uint32), read back below as the
+  // floats stored.
+  QElapsedTimer step;
+  step.start();
+  QStringList exprs, colours;
+  exprs << "LightParamID & 65535"
+        << "Time & 65535"
+        << "ID";
+  for (int k = 0; k < kColours; k++)
+  {
+    exprs << QString("%1 & 16777215").arg(kColourColumns[k].sql);
+    colours << QString::fromLatin1(kColourColumns[k].sql);
+  }
+  for (int k = 0; k < kFloats; k++)
+    exprs << QString::fromLatin1(kFloatColumns[k].sql);
+  for (int k = 0; k < kInts; k++)
+    exprs << QString::fromLatin1(kIntColumns[k].sql);
+  const int columns = (int)exprs.size();
+  std::vector<quint32> values;
+  // (Room for every row the table holds: build() counted them.)
+  values.reserve((size_t)columns * (size_t)std::max<qint64>(data ? data->rows : 0, 0));
+  bool shape = true;
+  const bool keysRead = GAMEDATABASE.sqlQueryIntegers(QString("SELECT %1 FROM %2").arg(exprs.join(", ")).arg(kDataTable),
+                                                      [&values, &shape, columns](const qint64 * v, int count) {
+                                                        shape = shape && count == columns;
+                                                        for (int k = 0; k < count && k < columns; k++)
+                                                          values.push_back((quint32)v[k]);
+                                                      });
+  QStringList slotColumns;
+  for (int k = 1; k <= SLOTS; k++)
+    slotColumns << QString("LightParamsID%1 & 65535").arg(k);
+  const sqlResult slotRows = GAMEDATABASE.sqlQuery(QString("SELECT ID, %1 FROM %2").arg(slotColumns.join(", ")).arg(kLightTable));
+  const sqlResult params = GAMEDATABASE.sqlQuery(
+    QString("SELECT ID, Glow, LightSkyboxID, Flags, HighlightSky, OverrideSunPosition1, OverrideSunPosition2, "
+            "OverrideSunPosition3, SunPolar, SunAzimuth FROM %1").arg(kParamsTable));
+  const sqlResult zones = GAMEDATABASE.sqlQuery(QString("SELECT ID, TransitionType FROM %1").arg(kZoneTable));
+  // (Map is the world map catalogue's table too; a client whose Map could not be read gives no row: every map then has
+  // no override and no flags.)
+  const sqlResult maps = GAMEDATABASE.sqlQuery(QString("SELECT ID, TimeOfDayOverride, Flags1, Flags2, Flags3 FROM %1")
+                                                 .arg(kMapTable));
+  if (!keysRead || !shape || !slotRows.valid || !params.valid || !zones.valid || !maps.valid)
+    return fail("the outdoor light's columns could not be queried");
+  const sqlResult masked = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1 WHERE ((%2) & -16777216) != 0")
+                                                   .arg(kDataTable).arg(colours.join(" | ")));
+  if (masked.valid && !masked.values.empty() && !masked.values[0].empty())
+    n.coloursMasked = masked.values[0][0].toLongLong();
+
+  // The keys, sorted by LightParams, time and ID (build()'s order): a time repeated within a day keeps its first key by
+  // ID (build()'s rule).
+  std::vector<size_t> order(values.size() / columns);
+  for (size_t k = 0; k < order.size(); k++)
+    order[k] = k;
+  std::sort(order.begin(), order.end(), [&values, columns](size_t a, size_t b) {
+    const quint32 * x = &values[a * columns];
+    const quint32 * y = &values[b * columns];
+    return std::make_tuple(x[0], x[1], x[2]) < std::make_tuple(y[0], y[1], y[2]);
+  });
+  for (size_t k : order)
+  {
+    const quint32 * v = &values[k * columns];
+    const int time = (int)v[1];
+    if (time < 0 || time >= DAY)
+    {
+      n.keysOutsideDay++;
+      continue;
+    }
+    Day & d = m_days[(int)v[0]];
+    if (!d.times.empty() && d.times.back() == time)
+    {
+      n.keysRepeated++;
+      continue;
+    }
+    const quint32 * named = v + 3;
+    d.times.push_back(time);
+    d.colours.insert(d.colours.end(), named, named + kColours);
+    for (int j = 0; j < kFloats; j++)
+      d.floats.push_back(floatOfBits(named[kColours + j]));
+    d.ints.insert(d.ints.end(), named + kColours + kFloats, named + kColours + kFloats + kInts);
+    n.keys++;
+  }
+  n.days = (int)m_days.size();
+  for (const std::vector<QString> & r : slotRows.values)
+  {
+    if (r.size() < 1 + SLOTS)
+      continue;
+    std::vector<int> s(SLOTS);
+    for (int k = 0; k < SLOTS; k++)
+    {
+      s[k] = r[1 + k].toInt();
+      if (s[k] != 0)
+        n.lightsWithSlot[k]++;
+    }
+    m_slots[r[0].toInt()] = s;
+  }
+  for (const std::vector<QString> & r : params.values)
+  {
+    if (r.size() < 10)
+      continue;
+    Params p;
+    p.glow = floatOfBits((quint32)r[1].toLongLong());
+    p.skybox = r[2].toInt();
+    p.flags = (quint32)r[3].toLongLong();
+    p.highlightSky = r[4].toInt();
+    for (int k = 0; k < 3; k++)
+      p.overrideSun[k] = floatOfBits((quint32)r[5 + k].toLongLong());
+    p.sunPolar = floatOfBits((quint32)r[8].toLongLong());
+    p.sunAzimuth = floatOfBits((quint32)r[9].toLongLong());
+    m_params[r[0].toInt()] = p;
+  }
+  n.params = (int)m_params.size();
+  for (const std::vector<QString> & r : zones.values)
+  {
+    if (r.size() < 2)
+      continue;
+    const int priority = r[1].toInt();
+    m_zonePriority[r[0].toInt()] = priority;
+    n.zonesByPriority[priority]++;
+  }
+  for (const std::vector<QString> & r : maps.values)
+  {
+    if (r.size() < 5)
+      continue;
+    MapLight m;
+    m.timeOverride = r[1].toInt();
+    for (int k = 0; k < 3; k++)
+      m.flags[k] = (quint32)r[2 + k].toLongLong();
+    m_mapLights[r[0].toInt()] = m;
+    n.maps++;
+    if (m.timeOverride != -1)
+    {
+      n.mapsOverridden++;
+      n.overrideMax = std::max(n.overrideMax, m.timeOverride);
+    }
+    if (m.flags[2] & 0x2)
+      n.mapsFlag2Bit1++;
+  }
+  // The lights whose slot-0 / slot-1 LightParams has no keys of its own nor its copy source's.
+  for (const auto & it : m_slots)
+    for (int k = 0; k < DAY_SLOTS; k++)
+    {
+      const int p = it.second[k];
+      if (p == 0 || m_days.count(p))
+        continue;
+      const auto source = m_copySource.find(p);
+      if (source == m_copySource.end() || !m_days.count(source->second))
+        n.lightsWithoutDay[k]++;
+    }
+  n.readMs = step.nsecsElapsed() / 1e6;
+
+  // THE FRAGMENTS: each day as it is sent, made once here so that a map's object is only put together from them.
+  step.restart();
+  std::unordered_map<quint32, double> memo;
+  for (auto & it : m_days)
+  {
+    Day & d = it.second;
+    QJsonArray times, c, f, i;
+    for (int t : d.times)
+      times.append(t);
+    for (quint32 v : d.colours)
+      c.append((double)v);
+    for (float v : d.floats)
+      f.append(floatForJson(v, memo, n.floatsNotFinite));
+    for (quint32 v : d.ints)
+      i.append((double)v);
+    QJsonObject o;
+    o["times"] = times;
+    o["c"] = c;
+    o["f"] = f;
+    o["i"] = i;
+    d.fragment = o;
+    // (Only the fragment is read from here on: the day's vectors released, some 4 MB on Retail.)
+    std::vector<int>().swap(d.times);
+    std::vector<quint32>().swap(d.colours);
+    std::vector<float>().swap(d.floats);
+    std::vector<quint32>().swap(d.ints);
+  }
+  n.fragmentMs = step.nsecsElapsed() / 1e6;
+
+  m_worldReady = true;
+  m_worldDetail.clear();
+  m_worldBuildMs = total.nsecsElapsed() / 1e6;
+  QStringList priorities;
+  for (const auto & p : n.zonesByPriority)
+    priorities << QString("%1: %2").arg(p.first).arg(p.second);
+  LOG_INFO << "[lights] outdoor light:" << m_product.toUtf8().constData() << m_build.toUtf8().constData() << ":"
+           << n.days << "days of" << (int)n.keys << "keys (LightData layout" << m_lightDataLayout.toUtf8().constData()
+           << ", absent columns" << (m_absentColumns.isEmpty() ? QString("none") : m_absentColumns.join(" ")).toUtf8().constData()
+           << "); keys outside the day" << n.keysOutsideDay << ", repeated" << n.keysRepeated << ", colours masked"
+           << (int)n.coloursMasked << ", floats not finite" << n.floatsNotFinite << ";" << (int)m_slots.size()
+           << "lights, slots set" << n.lightsWithSlot[0] << n.lightsWithSlot[1] << n.lightsWithSlot[2] << n.lightsWithSlot[3]
+           << n.lightsWithSlot[4] << n.lightsWithSlot[5] << n.lightsWithSlot[6] << n.lightsWithSlot[7]
+           << ", no day for slot 0 on" << n.lightsWithoutDay[0] << "and slot 1 on" << n.lightsWithoutDay[1] << ";" << n.params
+           << "LightParams; zones by TransitionType" << priorities.join(", ").toUtf8().constData() << ";" << n.maps
+           << "maps," << n.mapsOverridden << "with a time override (largest" << n.overrideMax << ")," << n.mapsFlag2Bit1
+           << "with flag word 2 bit 0x2; read in" << n.readMs << "ms, fragments in" << n.fragmentMs << "ms, total"
+           << m_worldBuildMs << "ms";
+}
+
+QJsonObject wow::LightCatalog::worldLightJson(int mapId) const
+{
+  if (m_status != Status::Ready || !m_worldReady)
+    return worldLightUnavailableJson(m_product, m_build, mapId, m_status != Status::Ready ? m_statusDetail : m_worldDetail);
+  const auto kept = m_worldMaps.find(mapId);
+  if (kept != m_worldMaps.end())
+    return kept->second;
+  QElapsedTimer t;
+  t.start();
+  const QJsonObject o = makeWorldLightJson(mapId);
+  const double ms = t.nsecsElapsed() / 1e6;
+  m_worldMaps[mapId] = o;
+  m_worldMapMs[mapId] = ms;
+  LOG_INFO << "[lights]" << describeWorldLight(o).toUtf8().constData() << "assembled in" << ms << "ms";
+  return o;
+}
+
+double wow::LightCatalog::worldLightAssemblyMilliseconds(int mapId) const
+{
+  const auto kept = m_worldMapMs.find(mapId);
+  return kept != m_worldMapMs.end() ? kept->second : -1.0;
+}
+
+QJsonObject wow::LightCatalog::assembleWorldLightJson(int mapId, double * ms) const
+{
+  if (ms)
+    *ms = -1.0;
+  if (m_status != Status::Ready || !m_worldReady)
+    return worldLightUnavailableJson(m_product, m_build, mapId, m_status != Status::Ready ? m_statusDetail : m_worldDetail);
+  QElapsedTimer t;
+  t.start();
+  const QJsonObject o = makeWorldLightJson(mapId);
+  if (ms)
+    *ms = t.nsecsElapsed() / 1e6;
+  return o;
+}
+
+QJsonObject wow::LightCatalog::makeWorldLightJson(int mapId) const
+{
+  // ZONES, POINTS and THE DEFAULT: Stage 09's (select(): its order, geometry and rules), each zone with its TransitionType
+  // ("priority": the public name's reading, INFERRED; 0 where the layout has none).
+  const Selection s = select(mapId);
+  QJsonArray zoneArray;
+  for (const Zone * z : s.zones)
+  {
+    QJsonObject o = zoneJson(*z);
+    const auto priority = m_zonePriority.find(z->id);
+    o["priority"] = priority != m_zonePriority.end() ? priority->second : 0;
+    zoneArray.append(o);
+  }
+  QJsonArray pointArray;
+  for (int id : s.points)
+    pointArray.append(pointJson(id, m_lights.at(id)));
+  // LIGHTS: every light those name, with its eight LightParams as the Light row stores them (copy rows by their own ID,
+  // which the database keeps as rows of their own; 0: none). A light without a Light row (one in a section this computer
+  // cannot read) has none.
+  QJsonArray lightArray;
+  std::set<int> paramIds;
+  for (int id : s.used)
+  {
+    const auto row = m_slots.find(id);
+    QJsonArray slotIds;
+    for (int k = 0; k < SLOTS; k++)
+    {
+      const int p = row != m_slots.end() ? row->second[k] : 0;
+      slotIds.append(p);
+      if (k < DAY_SLOTS && p != 0)
+        paramIds.insert(p);
+    }
+    QJsonObject l;
+    l["light"] = id;
+    l["slots"] = slotIds;
+    lightArray.append(l);
+  }
+  // PARAMS and DAYS: each LightParams of slots 0 and 1 that has a row, by ID, with its day -- its own keys, else its copy
+  // source's (Stage 09's rule), else none (-1) -- each day sent once, in the order first named.
+  std::map<int, int> dayIndex;
+  QJsonArray paramArray, dayArray;
+  std::unordered_map<quint32, double> memo;
+  int notFinite = 0;
+  for (int id : paramIds)
+  {
+    const auto row = m_params.find(id);
+    if (row == m_params.end())
+      continue;
+    auto day = m_days.find(id);
+    if (day == m_days.end())
+    {
+      const auto source = m_copySource.find(id);
+      if (source != m_copySource.end())
+        day = m_days.find(source->second);
+    }
+    int index = -1;
+    if (day != m_days.end())
+    {
+      const auto known = dayIndex.find(day->first);
+      if (known != dayIndex.end())
+        index = known->second;
+      else
+      {
+        index = dayArray.size();
+        dayIndex[day->first] = index;
+        dayArray.append(day->second.fragment);
+      }
+    }
+    const Params & p = row->second;
+    QJsonObject o;
+    o["id"] = id;
+    o["day"] = index;
+    o["glow"] = floatForJson(p.glow, memo, notFinite);
+    o["skybox"] = p.skybox;
+    o["flags"] = (double)p.flags;
+    o["highlightSky"] = p.highlightSky;
+    QJsonArray sun;
+    for (int k = 0; k < 3; k++)
+      sun.append(floatForJson(p.overrideSun[k], memo, notFinite));
+    o["overrideSun"] = sun;
+    o["sunPolar"] = floatForJson(p.sunPolar, memo, notFinite);
+    o["sunAzimuth"] = floatForJson(p.sunAzimuth, memo, notFinite);
+    paramArray.append(o);
+  }
+  // THE MAP: its time override (-1 none; the unit, minutes, INFERRED) and its three flag words, as read.
+  const auto map = m_mapLights.find(mapId);
+  QJsonArray mapFlags;
+  for (int k = 0; k < 3; k++)
+    mapFlags.append(map != m_mapLights.end() ? (double)map->second.flags[k] : 0.0);
+  QJsonObject o;
+  o["state"] = "ok";
+  o["detail"] = QString();
+  o["product"] = m_product;
+  o["build"] = m_build;
+  o["map"] = mapId;
+  o["branch"] = branchOf(m_product, m_build);
+  o["lightDataLayout"] = m_lightDataLayout;
+  o["timeOverride"] = map != m_mapLights.end() ? map->second.timeOverride : -1;
+  o["mapFlags"] = mapFlags;
+  o["defaultLight"] = s.defaultLight;
+  o["defaultFrom"] = s.defaultFrom;
+  o["zones"] = zoneArray;
+  o["points"] = pointArray;
+  o["lights"] = lightArray;
+  o["params"] = paramArray;
+  o["colorColumns"] = QJsonArray::fromStringList(worldLightColourColumns());
+  o["floatColumns"] = QJsonArray::fromStringList(worldLightFloatColumns());
+  o["intColumns"] = QJsonArray::fromStringList(worldLightIntColumns());
+  o["absentColumns"] = QJsonArray::fromStringList(m_absentColumns);
+  o["days"] = dayArray;
+  return o;
+}
+
+QJsonObject wow::LightCatalog::worldLightUnavailableJson(const QString & product, const QString & build, int mapId,
+                                                         const QString & why)
+{
+  QJsonObject o;
+  o["state"] = "unavailable";
+  o["detail"] = why;
+  o["product"] = product;
+  o["build"] = build;
+  o["map"] = mapId;
+  o["branch"] = branchOf(product, build);
+  o["lightDataLayout"] = QString();
+  o["timeOverride"] = -1;
+  QJsonArray mapFlags;
+  for (int k = 0; k < 3; k++)
+    mapFlags.append(0);
+  o["mapFlags"] = mapFlags;
+  o["defaultLight"] = 0;
+  o["defaultFrom"] = "none";
+  o["zones"] = QJsonArray();
+  o["points"] = QJsonArray();
+  o["lights"] = QJsonArray();
+  o["params"] = QJsonArray();
+  o["colorColumns"] = QJsonArray::fromStringList(worldLightColourColumns());
+  o["floatColumns"] = QJsonArray::fromStringList(worldLightFloatColumns());
+  o["intColumns"] = QJsonArray::fromStringList(worldLightIntColumns());
+  o["absentColumns"] = QJsonArray();
+  o["days"] = QJsonArray();
+  return o;
+}
+
+QString wow::LightCatalog::describeWorldLight(const QJsonObject & w)
+{
+  // (The detail appended, never passed through arg().)
+  if (w.value("state").toString() != "ok")
+    return "outdoor light " + w.value("state").toString() + ": " + w.value("detail").toString();
+  const QJsonArray days = w.value("days").toArray();
+  int keys = 0;
+  for (const QJsonValue & d : days)
+    keys += d.toObject().value("times").toArray().size();
+  return QString("outdoor light ok (map %1, branch %2: %3 zones, %4 points, %5 lights, %6 LightParams, %7 days of %8 keys, "
+                 "default light %9 %10, time override %11)")
+    .arg(w.value("map").toInt()).arg(w.value("branch").toString()).arg(w.value("zones").toArray().size())
+    .arg(w.value("points").toArray().size()).arg(w.value("lights").toArray().size()).arg(w.value("params").toArray().size())
+    .arg(days.size()).arg(keys).arg(w.value("defaultLight").toInt()).arg(w.value("defaultFrom").toString())
+    .arg(w.value("timeOverride").toInt());
 }

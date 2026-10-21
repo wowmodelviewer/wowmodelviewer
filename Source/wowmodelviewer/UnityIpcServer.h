@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v19). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v20). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -383,7 +383,8 @@
  * its camera (unconditional first, then the smallest), positions in yards in the game frame (X north, Y west, Z up),
  * the point lights (falloff start and end in yards) and each light's water at 12:00, slot 0 -- none for a light whose
  * four water colours are all 0 there (Classic Beta) -- with "sky" (optional likewise), the colour a water reflection
- * that finds no scene shows until Stage 12 draws a sky (LightData.SkyBand1Color at 12:00); "unavailable" with why and
+ * that finds no scene shows until Stage 10 draws the sky (LightData.SkyBand1Color at 12:00; the sky comes from the
+ * OUTDOOR LIGHT below, "lights" stays the water's); "unavailable" with why and
  * empty lists when the client's light tables could not be read. A player that finds no "lights", or one not "ok", draws
  * the liquid catalogue's colours. The largest "lights" of an audited client (Retail map 0) is under 256 KiB, far within
  * a line the player reads (WmvStreamReader.MaxLineBytes, 192 MiB).
@@ -405,6 +406,40 @@
  * runtimeState adds liquidObjects, liquidMeshes, liquidMaterials, liquidArrays, liquidGpuBytes. A number not sent reads -1.
  * A protocol-18 player is sent both commands exactly as before, every liquidTexture request of its loads is refused, and
  * it reports no liquids: the viewer says liquids were not offered.
+ *
+ * OUTDOOR LIGHT (protocol 20, docs/world-viewer/10-light-sky-fog.md 6.3). The light, sky and fog of the outdoor world come
+ * from the client's light tables, which the host reads (wow::LightCatalog::buildWorldLight, once per client load) and
+ * sends whole: the player selects the light at its camera, keeps the clock, evaluates the day and eases. To a player that
+ * announced protocol 20, loadTerrainTile and loadWorld add a top-level key (never inside "liquids", whose "lights" stays
+ * the water's, unchanged):
+ *                  "worldLight":{ "state":"ok"|"unavailable", "detail", "product", "build", "map", "branch" ("retail" or
+ *                    "ptr": the client's shader branch, LightCatalog::branchOf), "lightDataLayout" (LightData's layout
+ *                    hash), "timeOverride" (Map.TimeOfDayOverride: -1 none, else minutes, INFERRED), "mapFlags":[f0,f1,f2]
+ *                    (Map.Flags as read, 0 if absent), "defaultLight", "defaultFrom" ("end0", "origin", "light1", "none"),
+ *                    "zones":[{ "zone", "light", "priority" (ZoneLight.TransitionType, 0 where the layout has none),
+ *                    "zmin", "zmax", "conditional", "poly":[x0,y0, ...] }], "points":[{ "light", "x", "y", "z", "start",
+ *                    "end" }] (the zones, points and default exactly as "lights" sends them: Stage 09's order, geometry
+ *                    and rules), "lights":[{ "light", "slots":[p0..p7] }] (every light the zones, points and default name:
+ *                    its eight LightParams IDs as the Light row stores them, 0 none), "params":[{ "id", "day" (an index
+ *                    into "days": its own keys', else its copy source's; -1 none), "glow", "skybox", "flags",
+ *                    "highlightSky", "overrideSun":[x,y,z], "sunPolar", "sunAzimuth" }] (every LightParams of slots 0
+ *                    and 1 of those lights that has a row), "colorColumns", "floatColumns", "intColumns" (the column
+ *                    names, in the order of every day), "absentColumns" (the columns this client's layout lacks, sent as
+ *                    0), "days":[{ "times":[t0, ...] (half-minutes in [0, 2880), sorted, each once), "c":[...] (keys x
+ *                    colorColumns, row-major, 0xRRGGBB masked to 24 bits), "f":[...] (keys x floatColumns: each the
+ *                    shortest decimal that reads back as the float the client stores), "i":[...] (keys x intColumns) }] }
+ * (made on the map's first load and kept; "unavailable" with why, the same keys and empty lists when the light catalogue
+ * could not be read; at most MAX_WORLD_LIGHT_BYTES as sent -- a bound the host does not enforce as it sends: the terrain
+ * test checks it on every Map row of the client loaded -- far within a line the player reads). A streaming session's tile
+ * loads take the entry's object, as they take its liquids. Validity is the player's, per group of columns ("the day has
+ * keys"), never the water's rule.
+ *   WMV -> player  { "type":"setWorldLight", "on":0|1, "clock":"pinned"|"running", "time":"HH:MM:SS", "farclip":N }
+ *                    (each field optional: one absent leaves that setting as it is; "farclip" the game far clip in
+ *                    yards the fog takes, above 0, the player's -wmvGameFarclip)
+ *   player -> WMV  runtimeState adds "lightOn" (0/1), "lightTime" ("HH:MM:SS"), "lightTimeSource" ("pinned", "running",
+ *                    "map"), "lightZone", "lightId", "lightParams" (the zone, light and LightParams the camera's light
+ *                    is), "lightValid" (0/1), "gameFarclip", "skyOn" (0/1); a number not available reads -1.
+ * A protocol-19 player is sent exactly the protocol-19 messages: no "worldLight" key anywhere and no setWorldLight.
  *
  * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
  * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
@@ -513,7 +548,13 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 19;
+  static const int PROTOCOL_VERSION = 20;
+  // OUTDOOR LIGHT (above): the bound a load's "worldLight" keeps as sent, 1 MiB -- the plan's budget (docs/world-viewer/
+  // 10-light-sky-fog.md 8.3, D21), not a client value. Over every Map row of the five audited clients the largest object
+  // is Retail map 0's, 384,487 bytes (PTR map 0 384,485; Classic Beta, MoP Classic and Classic Era map 1: 263,838,
+  // 199,750 and 126,309): PROVEN_BYTES, counted offline over every map and by the terrain test, which measures every
+  // map of the client loaded against this bound and pins each client's largest to the byte.
+  static const int MAX_WORLD_LIGHT_BYTES = 1024 * 1024;
   // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
   // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
   // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
@@ -704,6 +745,9 @@ public:
   // carry the liquid budgets and the client's liquid catalogue, it asks for the frames (getMapAsset "liquidTexture") and
   // reports its liquids. An older player gets both commands as before.
   bool playerDrawsLiquids() const { return m_client && m_unityReady && m_playerProtocol >= 19; }
+  // Protocol 20 (OUTDOOR LIGHT above): the player keeps the outdoor light state: loadTerrainTile and loadWorld carry the
+  // map's "worldLight", setWorldLight sets it, and runtimeState reports it. An older player gets every message as before.
+  bool playerDrawsWorldLight() const { return m_client && m_unityReady && m_playerProtocol >= 20; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -948,6 +992,15 @@ public:
     // the GPU size of their geometry and arrays, as the player estimates it.
     int liquidObjects = -1, liquidMeshes = -1, liquidMaterials = -1, liquidArrays = -1;
     long long liquidGpuBytes = -1;
+    // Protocol 20 (OUTDOOR LIGHT above): the light state at the player's camera -- on (0/1), its time and the time's source
+    // ("" when not sent), the zone, light and LightParams it is, whether it is valid (0/1), the game far clip, the sky on
+    // (0/1); -1 from an older player.
+    int lightOn = -1;
+    QString lightTime;
+    QString lightTimeSource;
+    int lightZone = -1, lightId = -1, lightParams = -1, lightValid = -1;
+    double gameFarclip = -1.0;
+    int skyOn = -1;
     int liveGameObjects = -1;
     int liveTexture2D = -1;
     int liveMeshes = -1;
@@ -969,6 +1022,16 @@ public:
   // Runtime command: the Models viewport's background, as the sRGB bytes it is to display as (VIEWPORT BACKGROUND
   // above). False (nothing sent) when the player is not connected and ready, or speaks a protocol older than 7.
   bool sendViewportBackground(int r, int g, int b);
+
+  // Runtime command (OUTDOOR LIGHT above): setWorldLight with the fields given -- on 0 or 1 (-1: not sent), clock "pinned" or
+  // "running" ("": not sent), time "HH:MM:SS" ("": not sent), farclip in yards above 0 (< 0: not sent). False (nothing
+  // sent) when the player is not connected and ready, speaks a protocol older than 20, or a field given is not one of
+  // those values.
+  bool sendSetWorldLight(int on, const QString & clock, const QString & time, double farclip);
+  // The setWorldLight message for those fields, as sent, or an empty object when a field given is not one of its values
+  // (why says which). Static so the harness checks it without a player.
+  static QJsonObject setWorldLightMessage(int on, const QString & clock, const QString & time, double farclip,
+                                          QString * why = nullptr);
 
   // Runtime command: the models the player is likely to load next (the other model generation of the character on
   // screen), to fetch into its asset cache while nothing waits for them (protocol 9 prefetchAssets). False (nothing
@@ -1071,6 +1134,10 @@ public:
     int maxLiquidTextureBytesPerLoad = MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
     QJsonObject liquidCatalog;
     QJsonObject liquidLights;
+    // Protocol 20 (OUTDOOR LIGHT above): the load's map's "worldLight" (wow::LightCatalog::worldLightJson, or its
+    // worldLightUnavailableJson), sent as a top-level key of loadTerrainTile and loadWorld only when set and the player
+    // draws the outdoor light; otherwise the load is the protocol-19 one.
+    QJsonObject worldLight;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command (protocol 16): a world load (WORLD MODELS IN THE WORLD above). False (nothing sent) without a
@@ -1080,6 +1147,10 @@ public:
   // LIQUIDS (protocol 19): the "liquids" object both commands carry for a load that offers liquids to a player that draws
   // them -- the command's budgets and catalogue (LIQUIDS above), as sent; the harness checks it without a player.
   static QJsonObject liquidOffer(const TerrainTileCommand & command);
+  // OUTDOOR LIGHT (protocol 20): puts the command's "worldLight" into a load's message when toPlayer (the player draws the
+  // outdoor light) and the command has one; true when it did. An older player's message is left exactly as it was. Static
+  // so the harness checks it without a player.
+  static bool putWorldLight(QJsonObject & msg, const TerrainTileCommand & command, bool toPlayer);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
   bool sendClearTerrain(const QString & reason);
@@ -1506,6 +1577,8 @@ public:
   // had arrived (held, queued, or refused for a full queue), one poll's serving, and the queue dropped as when a
   // connection ends. Answers go nowhere without a client; their records are kept as any.
   void testReceiveMapAsset(const QJsonObject & request) { handleGetMapAsset(request); }
+  // A runtimeState answer handled as if the player had sent it (the harness's check of the protocol-20 fields).
+  void testReceiveRuntimeState(const QJsonObject & msg) { handleRuntimeState(msg); }
   int testServeMapAssetQueue() { return serveMapAssetQueue(); }   // returns how many were answered
   void testDropMapAssetQueue() { dropHeldMapAssets("the test dropped them"); }
   // TEST HOOKS of the worker's reads: the next read dispatched of role (any when empty) is held in the worker with its

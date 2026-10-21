@@ -103,6 +103,10 @@ namespace core
     bool initFromXML(const QString & file);
 
     sqlResult sqlQuery(const QString &query);
+    // Runs query and hands each row to row as 64-bit integers (each column's value as SQLite converts it to an integer),
+    // with no text made: for the few reads of many numbers (the light catalogue's outdoor light reads every key's 55
+    // columns). False when the query cannot be run.
+    bool sqlQueryIntegers(const QString & query, const std::function<void(const qint64 * values, int count)> & row);
 
     void setFastMode() { m_fastMode = true; }
     // Closes the database (the application is ending): a database kept for this session only is deleted with it.

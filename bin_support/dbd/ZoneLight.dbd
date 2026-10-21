@@ -6,19 +6,21 @@ int LightID // the Light row whose LightParams the polygon applies: a Light row 
 int Field_03 // not established (0, 1 or 2 in Retail; 0 in Classic Beta and MoP Classic)
 float Zmin // the lowest height in yards the polygon applies at (-64000: no limit): proven from the bytes as a height range (Zmin < Zmax on every row); applying it to the camera's height is inferred
 float Zmax // the highest height in yards (64000: no limit): as Zmin
-int Field_06 // not established (0 to 3 in Retail; 0 in Classic Beta)
+int TransitionType // 0 to 3 in Retail (0 on 686 of 735 rows, 1 on 43, 2 on 4, 3 on 2), 0 on every Classic Beta row: proven from the bytes; of the 352 Retail polygon pairs where one lies wholly inside the other (the strict test: every vertex of the smaller inside the larger, on the same map, and no edges crossing), the inner one's is higher on 56, lower on 1 and equal on 295 (a priority, inferred). The name is the public definitions', not proven; Classic Era's and MoP Classic's layout has no such column (it reads as 0)
 int PlayerConditionID // 0, or a player condition (Retail: 39 rows, 33 of them on Eastern Kingdoms): the values are proven from the bytes; that a polygon with a condition applies only in a phase is the public definitions' name, not proven
 int EraMoPField06 // not established (Classic Era and MoP Classic only: signed 2 bits, 0 on every MoP Classic row)
 int EraMoPField07 // not established (Classic Era and MoP Classic only: 1 bit, 0 on every MoP Classic row)
 
 COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
-COMMENT docs/world-viewer/09-liquids.md). The layouts come from public table definitions, read as hypotheses: every column
-COMMENT the catalogue reads (database.xml, table ZoneLight) was checked against the clients' own bytes; the others are named
-COMMENT by their field index, their types and widths the hypotheses' (never read). A neutral name that two layouts share is
-COMMENT the same slot in the column order, not an established equal meaning; BA8274F0 has no PlayerConditionID (it reads
-COMMENT as 0). A polygon's points are ZoneLightPoint rows. Polygons nest (Retail: 357 pairs on one map lie wholly inside
-COMMENT another), so a position can lie in several. Classic Beta keeps one row in an encrypted section it has no key for; it
-COMMENT reads as zeros and is skipped. A layout not listed here is not read.
+COMMENT docs/world-viewer/09-liquids.md, and the outdoor light, docs/world-viewer/10-light-sky-fog.md). The layouts come
+COMMENT from public table definitions, read as hypotheses: every column the catalogue reads (database.xml, table ZoneLight)
+COMMENT was checked against the clients' own bytes; the others are named by their field index, their types and widths the
+COMMENT hypotheses' (never read). A neutral name that two layouts share is the same slot in the column order, not an
+COMMENT established equal meaning; BA8274F0 has no PlayerConditionID and no TransitionType (each reads as 0). A polygon's
+COMMENT points are ZoneLightPoint rows. Polygons nest (Retail: 357 pairs on one map lie wholly inside another by their
+COMMENT vertices -- every vertex of the smaller inside the larger --, 352 of them with no edges crossing either), so a
+COMMENT position can lie in several. Classic Beta keeps one row in an encrypted section it has no key for; it reads as
+COMMENT zeros and is skipped. A layout not listed here is not read.
 
 LAYOUT 94CE95E0
 BUILD 12.1.5.70448, 12.1.7.70424, 1.60.1.70450
@@ -30,11 +32,11 @@ LightID<32>
 Field_03<u8>
 Zmin
 Zmax
-Field_06<32>
+TransitionType<32>
 PlayerConditionID<32>
 
 LAYOUT BA8274F0
-BUILD 1.15.9.70003, 5.5.4.70268
+BUILD 1.15.9.70003, 5.5.4.70268, 5.5.4.70531
 COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4: 8 fields; IDs in the section's ID list; MapID and LightID 16 bits wide.
 COMMENT Classic Era's table has no rows (and no section): Era has no zone polygons. MoP Classic 5.5.4.70268: 80 rows.
 $noninline,id$ID<32>

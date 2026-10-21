@@ -9622,7 +9622,7 @@ static void checkLightCatalog(ModelViewer * frame, TerrainTestLog & tally)
                                        points.size() == expected->maps[map][2] && values.size() == expected->maps[map][3] &&
                                        lights.value("defaultLight").toInt() == expected->defaults[map] &&
                                        lights.value("defaultFrom").toString() == "end0");
-    const qint64 bound = 256 * 1024;   // Retail map 0, the largest of an audited client: 129669 bytes
+    const qint64 bound = 256 * 1024;   // Retail map 0, the largest of an audited client: 134753 bytes
     tally.check(QString("lights: map %1 as sent (%2)%3: zones unconditional then smallest first, no zone's light among the "
                         "points, colours 0..255 and alphas in [0, 1], the same object again, at most %4 bytes")
                   .arg(map).arg(client).arg(expected ? QString(", as counted offline") : QString()).arg(bound),
@@ -9691,8 +9691,776 @@ static void checkLightCatalog(ModelViewer * frame, TerrainTestLog & tally)
   }
 }
 
+// The machine's processor load since this was made (GetSystemTimes: every process, every logical processor), for the
+// detail of a timing check: the conditions it was measured under on a machine that may be busy with other work.
+namespace
+{
+  class MachineLoad
+  {
+  public:
+    MachineLoad()
+    {
+      m_ok = sample(m_idle, m_total);
+      m_wall.start();
+    }
+    QString since() const
+    {
+      // (The system's times advance in ticks of about 16 ms: a shorter stretch says nothing.)
+      quint64 idle = 0, total = 0;
+      if (m_wall.elapsed() < 50)
+        return QString("the machine's load not measured over %1 ms").arg(m_wall.elapsed());
+      if (!m_ok || !sample(idle, total) || total <= m_total)
+        return QString("the machine's load not measured");
+      const double busy = 100.0 * (1.0 - (double)(idle - m_idle) / (double)(total - m_total));
+      return QString("the machine's processors %1 % busy over the last %2 ms (%3 logical)")
+        .arg(busy, 0, 'f', 0).arg(m_wall.elapsed()).arg((int)::GetActiveProcessorCount(ALL_PROCESSOR_GROUPS));
+    }
+
+  private:
+    static bool sample(quint64 & idle, quint64 & total)
+    {
+      FILETIME i, k, u;
+      if (!::GetSystemTimes(&i, &k, &u))
+        return false;
+      const auto q = [](const FILETIME & f) { return ((quint64)f.dwHighDateTime << 32) | f.dwLowDateTime; };
+      idle = q(i);
+      total = q(k) + q(u);   // (the kernel time includes the idle time)
+      return true;
+    }
+    quint64 m_idle = 0, m_total = 0;
+    bool m_ok = false;
+    QElapsedTimer m_wall;
+  };
+}
+
+// THE OUTDOOR LIGHT (docs/world-viewer/10-light-sky-fog.md 6.2-6.3, Stage 10): the light catalogue's outdoor light
+// (wow::LightCatalog::buildWorldLight, a client-load stage of its own) and the "worldLight" a protocol-20 load carries at
+// its top level, never inside the liquids offer, whose "lights" and every check above stay as they are. For the audited
+// builds (MoP Classic 5.5.4.70531 among them), every number below was counted offline on 2026-10-21 from the clients' own
+// tables by a reader of their own, with the same rules (another build: those checks skipped, naming it): what the store
+// holds (days, keys, masked colours, the eight slots, LightParams, TransitionTypes, the maps' overrides and flags); maps
+// 0 and 1 as sent, to the byte; the largest object of all the Map rows (map 0 or 1 on every audited client, none near
+// the bound) and the map with the largest time override; and the 12:00 key of the Southfury River's LightParams, from
+// the database by its row
+// (Retail and PTR: LightData row 62960, LightParams 5985, SkyMiddleColor (255,226,175)) and from the object. On every
+// client: the object's keys and shape, its zones, points and default those of "lights" for the same map, every day well
+// formed, the water's noon colours sampled from the new store equal to every value of "lights", the unavailable shape,
+// what a protocol-20 and a protocol-19 load are sent, the branch, every Map row's object within MAX_WORLD_LIGHT_BYTES with
+// its row's time override and flags (the largest object pinned to the byte for the audited builds), the map with the
+// largest time override as a protocol-20 load sends it (pinned likewise), and the time budgets (the store at most 250 ms,
+// a map's object at most 50 ms: docs/world-viewer/10-light-sky-fog.md 8.3), each the better of two measurements -- the
+// first as the viewer made it, one more made here -- with the machine's load named, since another program can slow one.
+// WMV_LIGHTS_DUMP=<folder> also writes the outdoor light of maps 0 and 1 there, as worldlight_<product>_map<N>.json.
+// (load: the machine's load since the test began, named in the timing checks.)
+static void checkWorldLight(ModelViewer * frame, TerrainTestLog & tally, const MachineLoad & load)
+{
+  const std::shared_ptr<wow::LightCatalog> c = frame->lightCatalog();
+  if (!c || c->status() != wow::LightCatalog::Status::Ready || !c->belongsToActiveClient())
+  {
+    tally.check("outdoor light: the loaded client's light catalogue is ready", false,
+                c ? wow::LightCatalog::statusName(c->status()) + ": " + c->statusDetail() : QString("there is none"));
+    return;
+  }
+  const QString client = c->clientProduct() + " " + c->clientBuild();
+  struct Audited
+  {
+    const char * product;
+    const char * build;
+    const char * branch;
+    const char * layout;           // LightData's
+    int days;
+    qint64 keys, coloursMasked;
+    int slotsSet[8];               // Light rows whose slot is set
+    int withoutDay[2];             // ... whose slot 0 / 1 LightParams has no day (nor its copy source)
+    int params;
+    int priorities[4];             // ZoneLight rows of TransitionType 0..3
+    int maps, overridden, overrideMax, flag2Bit1;
+    int sent[2][6];                // maps 0 and 1 as sent: zones, points, lights, params, days, keys
+    qint64 bytes[2];               // ... their size as sent
+    double mapFlags[3];            // maps 0 and 1's Flags (the same three words on both maps)
+    double map0Flag2;              // map 0's third word where it differs (Retail, PTR), else -1
+    int noonRow;                   // the LightData row of the Southfury LightParams' 12:00 key
+    int noonLight, noonParams;     // the light whose slot 0 it is (map 1) and the LightParams
+    int largestMap;                // the Map row whose object is the largest as sent (counted offline over every Map row)
+    qint64 largestBytes;           // ... its size
+    int overrideMap, overrideValue;   // the Map row with the largest TimeOfDayOverride (the lowest ID of a tie), and that
+  };
+  const Audited audited[] = {
+    {"wow", "12.1.5.70448", "retail", "6ABF2921", 3719, 19881, 1039, {5360, 5361, 3828, 3036, 5361, 133, 2, 2}, {1, 3}, 3745,
+     {686, 43, 4, 2}, 1187, 106, 1350, 0, {{82, 206, 274, 160, 160, 997}, {25, 111, 137, 111, 111, 680}}, {384487, 217373},
+     {159399517, 134479888, 140}, 16524, 62960, 204, 5985, 0, 384487, 999, 1350},
+    {"wowt", "12.1.7.70424", "ptr", "360DA016", 3734, 19932, 1039, {5375, 5376, 3840, 3048, 5376, 134, 3, 3}, {1, 3}, 3760,
+     {688, 43, 4, 2}, 1201, 108, 1350, 0, {{82, 206, 274, 160, 160, 997}, {25, 111, 137, 111, 111, 680}}, {384485, 217371},
+     {159399517, 134479888, 140}, 16524, 62960, 204, 5985, 0, 384485, 999, 1350},
+    {"wow_classic_era", "1.15.9.70003", "retail", "70C6CD80", 443, 1795, 2, {512, 512, 510, 509, 512, 0, 0, 0}, {0, 24}, 452,
+     {0, 0, 0, 0}, 59, 3, 0, 49, {{0, 80, 81, 70, 70, 268}, {0, 126, 127, 104, 104, 445}}, {77438, 126309},
+     {16858641, 1310720, 130}, -1, 43257, 204, 212, 1, 126309, 2807, 0},
+    {"wow_classic", "5.5.4.70531", "retail", "70C6CD80", 1208, 5690, 787, {1504, 1504, 1493, 1469, 1498, 18, 0, 1}, {0, 20}, 1215,
+     {80, 0, 0, 0}, 285, 22, 1350, 75, {{12, 251, 264, 113, 113, 447}, {15, 173, 189, 132, 132, 677}}, {153417, 199750},
+     {16793181, 135528448, 128}, -1, 21609, 204, 212, 1, 199750, 999, 1350},
+    {"wow_classic_beta", "1.60.1.70450", "ptr", "360DA016", 861, 5910, 2, {621, 621, 616, 610, 621, 48, 46, 10}, {0, 3}, 873,
+     {24, 0, 0, 0}, 73, 8, 1380, 49, {{9, 75, 85, 69, 69, 769}, {9, 122, 132, 109, 109, 1217}}, {170311, 263838},
+     {159399517, 135528464, 2277510}, -1, 73720, 191, 7636, 1, 263838, 2959, 1380},
+  };
+  const Audited * expected = nullptr;
+  for (const Audited & a : audited)
+    if (c->clientProduct() == QLatin1String(a.product) && c->clientBuild() == QLatin1String(a.build))
+      expected = &a;
+  const QString notAudited = client + " is not one of the builds the outdoor light was counted for "
+                                      "(docs/world-viewer/10-light-sky-fog.md)";
+  const wow::LightCatalog::WorldCounts & n = c->worldCounts();
+  const wow::LightCatalog::Table * data = c->table("LightData");
+
+  // 1. The store: read, from the layout counted, with every named column in it.
+  {
+    const QJsonObject probe = c->worldLightJson(1);
+    const QJsonArray absent = probe.value("absentColumns").toArray();
+    tally.check("outdoor light: the store is read" + (expected ? QString(" from LightData layout %1, every named column in it")
+                                                                   .arg(expected->layout)
+                                                               : QString(" (%1)").arg(client)),
+                c->worldLightReady() && (!expected || (data && data->layout == QLatin1String(expected->layout) &&
+                                                       absent.isEmpty())),
+                c->worldLightReady() ? QString("layout %1, absent columns: %2; %3 ms (read %4, fragments %5)")
+                                         .arg(data ? data->layout : QString("-"))
+                                         .arg(absent.isEmpty() ? QString("none")
+                                                               : QString::fromUtf8(QJsonDocument(absent).toJson(QJsonDocument::Compact)))
+                                         .arg(c->worldLightBuildMilliseconds(), 0, 'f', 1).arg(n.readMs, 0, 'f', 1)
+                                         .arg(n.fragmentMs, 0, 'f', 1)
+                                     : c->worldLightDetail());
+    if (!c->worldLightReady())
+      return;
+  }
+
+  // 2. What it holds, and that it agrees with the Stage 09 store (the same keys left out and repeated, the same lights
+  // without a slot-0 day). Floats that are not finite: none in an audited build (pinned, 0); in another build counted
+  // and named, not failed -- the store sends such a value as 0 and counts it, and the column positions are those of a
+  // verified layout (an unknown layout is not read at all), so a count there is the client's data, not a misplaced
+  // column.
+  {
+    QStringList prio;
+    for (const auto & p : n.zonesByPriority)
+      prio << QString("%1: %2").arg(p.first).arg(p.second);
+    const QString found = QString("%1 days, %2 keys (outside the day %3, repeated %4), colours masked %5, floats not finite "
+                                  "%6; slots set %7 %8 %9 %10 %11 %12 %13 %14; no day for slot 0 on %15, slot 1 on %16; "
+                                  "%17 LightParams; TransitionType %18; %19 maps, %20 with a time override (largest %21), "
+                                  "%22 with flag word 2 bit 0x2")
+                            .arg(n.days).arg(n.keys).arg(n.keysOutsideDay).arg(n.keysRepeated).arg(n.coloursMasked)
+                            .arg(n.floatsNotFinite).arg(n.lightsWithSlot[0]).arg(n.lightsWithSlot[1]).arg(n.lightsWithSlot[2])
+                            .arg(n.lightsWithSlot[3]).arg(n.lightsWithSlot[4]).arg(n.lightsWithSlot[5]).arg(n.lightsWithSlot[6])
+                            .arg(n.lightsWithSlot[7]).arg(n.lightsWithoutDay[0]).arg(n.lightsWithoutDay[1]).arg(n.params)
+                            .arg(prio.isEmpty() ? QString("no rows") : prio.join(", ")).arg(n.maps).arg(n.mapsOverridden)
+                            .arg(n.overrideMax).arg(n.mapsFlag2Bit1);
+    const wow::LightCatalog::Counts & old = c->counts();
+    const bool agrees = n.keysOutsideDay == old.keysOutsideDay && n.keysRepeated == old.keysRepeated &&
+                        n.lightsWithoutDay[0] == old.lightsWithoutKeys + old.lightsWithoutParams;
+    if (!expected)
+      tally.check("outdoor light: the store agrees with the water's (keys left out and repeated, slot-0 lights without a "
+                  "day); floats not finite counted (" + client + ")", agrees, found);
+    else
+    {
+      bool counted = n.days == expected->days && n.keys == expected->keys && n.coloursMasked == expected->coloursMasked &&
+                     n.floatsNotFinite == 0 &&
+                     n.lightsWithoutDay[0] == expected->withoutDay[0] && n.lightsWithoutDay[1] == expected->withoutDay[1] &&
+                     n.params == expected->params && n.maps == expected->maps && n.mapsOverridden == expected->overridden &&
+                     n.overrideMax == expected->overrideMax && n.mapsFlag2Bit1 == expected->flag2Bit1;
+      for (int k = 0; k < 8; k++)
+        counted = counted && n.lightsWithSlot[k] == expected->slotsSet[k];
+      int zoneRows = 0;
+      for (int k = 0; k < 4; k++)
+      {
+        const auto it = n.zonesByPriority.find(k);
+        counted = counted && (it != n.zonesByPriority.end() ? it->second : 0) == expected->priorities[k];
+        zoneRows += expected->priorities[k];
+      }
+      int stored = 0;
+      for (const auto & p : n.zonesByPriority)
+        stored += p.second;
+      counted = counted && stored == zoneRows;
+      tally.check("outdoor light: the store holds what was counted for " + client + " and agrees with the water's",
+                  counted && agrees, found);
+    }
+  }
+
+  // The day of a LightParams in a map's object (empty without one), and one column of its key at a time.
+  const auto dayOf = [](const QJsonObject & w, int params) {
+    for (const QJsonValue & v : w.value("params").toArray())
+      if (v.toObject().value("id").toInt() == params)
+      {
+        const int day = v.toObject().value("day").toInt(-1);
+        return day >= 0 ? w.value("days").toArray().at(day).toObject() : QJsonObject();
+      }
+    return QJsonObject();
+  };
+  const auto slotsOf = [](const QJsonObject & w, int light) {
+    for (const QJsonValue & v : w.value("lights").toArray())
+      if (v.toObject().value("light").toInt() == light)
+        return v.toObject().value("slots").toArray();
+    return QJsonArray();
+  };
+
+  // 3. The Southfury River's LightParams at 12:00 (audited builds): the row by its ID in the database, and the same key in
+  // map 1's object -- the light's slot 0, its day, the key at half-minute 1440, its named columns (the floats to the bit).
+  if (!expected)
+    tally.skip("outdoor light: the Southfury River's LightParams at 12:00, by its row and in map 1's object", notAudited);
+  else
+  {
+    struct Rgb
+    {
+      const char * column;
+      int r, g, b;
+    };
+    struct Bits
+    {
+      const char * column;
+      quint32 bits;
+    };
+    std::vector<Rgb> rgb;
+    std::vector<Bits> bits;
+    int grading = 0;
+    const QString product = c->clientProduct();
+    if (product == "wow" || product == "wowt")
+    {
+      rgb = {{"DirectColor", 94, 50, 0}, {"AmbientColor", 183, 165, 184}, {"SkyTopColor", 160, 99, 148},
+             {"SkyMiddleColor", 255, 226, 175}, {"SkyBand1Color", 246, 178, 88}, {"SkyFogColor", 120, 75, 58},
+             {"SunColor", 255, 247, 222}, {"EndFogColor", 149, 91, 78}, {"HorizonAmbientColor", 156, 138, 157}};
+      bits = {{"FogEnd", 0x0}, {"FogScaler", 0x3E19999A}, {"FogDensity", 0x40400000}, {"EndFogColorDistance", 0x44610000},
+              {"FogStartOffset", 0x45034000}, {"SunFogStrength", 0x3E99999A}, {"FogHeightCoefficients2", 0x3F807A00}};
+    }
+    else if (product == "wow_classic_era" || product == "wow_classic")
+    {
+      const bool era = product == "wow_classic_era";
+      rgb = {{"DirectColor", era ? 255 : 94, era ? 204 : 50, era ? 148 : 0},
+             {"AmbientColor", era ? 140 : 183, era ? 111 : 165, era ? 142 : 184}, {"SkyTopColor", 160, 99, 148},
+             {"SkyMiddleColor", 255, 226, 175}, {"SkyBand1Color", 246, 178, 88}, {"SkyFogColor", era ? 132 : 103, 61, 63},
+             {"SunColor", 255, 247, 222}, {"EndFogColor", 0, 0, 0}};
+      bits = {{"FogEnd", 0x46FA0000}, {"FogScaler", 0x3F4CCCCD}, {"FogDensity", 0x0}, {"SunFogStrength", 0x3F800000}};
+    }
+    else
+    {
+      rgb = {{"DirectColor", 235, 207, 142}, {"AmbientColor", 104, 130, 154}, {"SkyTopColor", 0, 38, 95},
+             {"SkyMiddleColor", 69, 196, 255}, {"SkyBand1Color", 153, 227, 255}, {"SkyFogColor", 101, 158, 187},
+             {"SunColor", 255, 255, 255}};
+      bits = {{"FogEnd", 0x468CA000}, {"FogScaler", 0x3E800000}, {"FogDensity", 0x0}};
+      grading = 8286665;
+    }
+    // By its row: LightParams, time and SkyMiddleColor as the database holds them, the floats' 32-bit patterns.
+    QStringList sql;
+    for (const Bits & b : bits)
+      sql << QString::fromLatin1(b.column);
+    const sqlResult row = GAMEDATABASE.sqlQuery(QString("SELECT LightParamID & 65535, Time & 65535, SkyMiddleColor & 16777215, "
+                                                        "ColorGradingFileDataID, %1 FROM LightData WHERE ID = %2")
+                                                  .arg(sql.join(", ")).arg(expected->noonRow));
+    bool byRow = row.valid && row.values.size() == 1 && (int)row.values[0].size() == 4 + (int)bits.size();
+    QStringList rowText;
+    if (byRow)
+    {
+      const std::vector<QString> & r = row.values[0];
+      const quint32 middle = (quint32)r[2].toLongLong();
+      const Rgb * m = nullptr;
+      for (const Rgb & x : rgb)
+        if (QLatin1String(x.column) == QLatin1String("SkyMiddleColor"))
+          m = &x;
+      byRow = r[0].toInt() == expected->noonParams && r[1].toInt() == 1440 && m &&
+              middle == ((quint32)m->r << 16 | (quint32)m->g << 8 | (quint32)m->b) && r[3].toInt() == grading;
+      for (size_t k = 0; k < bits.size(); k++)
+        byRow = byRow && (quint32)r[4 + k].toLongLong() == bits[k].bits;
+      for (const QString & v : r)
+        rowText << v;
+    }
+    // In map 1's object.
+    const QJsonObject w = c->worldLightJson(1);
+    const QJsonArray slotIds = slotsOf(w, expected->noonLight);
+    const QJsonObject day = dayOf(w, expected->noonParams);
+    const QJsonArray times = day.value("times").toArray();
+    int key = -1;
+    for (int k = 0; k < times.size(); k++)
+      if (times[k].toInt() == 1440)
+        key = k;
+    const QJsonArray colourNames = w.value("colorColumns").toArray(), floatNames = w.value("floatColumns").toArray();
+    const QJsonArray cs = day.value("c").toArray(), fs = day.value("f").toArray(), is = day.value("i").toArray();
+    bool inObject = slotIds.size() == 8 && slotIds[0].toInt() == expected->noonParams && key >= 0;
+    QStringList seen;
+    if (inObject)
+    {
+      for (const Rgb & x : rgb)
+      {
+        int at = -1;
+        for (int k = 0; k < colourNames.size(); k++)
+          if (colourNames[k].toString() == QLatin1String(x.column))
+            at = k;
+        const quint32 v = at >= 0 ? (quint32)cs.at(key * colourNames.size() + at).toDouble() : 0xFFFFFFFFu;
+        const bool same = v == ((quint32)x.r << 16 | (quint32)x.g << 8 | (quint32)x.b);
+        inObject = inObject && same;
+        seen << QString("%1 (%2,%3,%4)").arg(x.column).arg((v >> 16) & 255).arg((v >> 8) & 255).arg(v & 255);
+      }
+      for (const Bits & b : bits)
+      {
+        // (Its name as sent: an array's element numbered from 0, from 1 in the database.)
+        QString name = QString::fromLatin1(b.column);
+        if (name == "FogHeightCoefficients2")
+          name = "FogHeightCoefficients1";
+        int at = -1;
+        for (int k = 0; k < floatNames.size(); k++)
+          if (floatNames[k].toString() == name)
+            at = k;
+        const float f = at >= 0 ? (float)fs.at(key * floatNames.size() + at).toDouble() : -1.0f;
+        quint32 fb = 0;
+        std::memcpy(&fb, &f, sizeof(fb));
+        inObject = inObject && fb == b.bits;
+        seen << QString("%1 %2 (0x%3)").arg(name).arg(f).arg(fb, 8, 16, QChar('0'));
+      }
+      inObject = inObject && is.at(key * 2).toInt() == grading;
+    }
+    tally.check(QString("outdoor light: LightParams %1 at 12:00 (%2): LightData row %3 by its ID, and light %4's slot 0 in map 1's "
+                        "object, the key at 1440 with its named colours and floats")
+                  .arg(expected->noonParams).arg(client).arg(expected->noonRow).arg(expected->noonLight),
+                byRow && inObject,
+                QString("row: %1; slots %2; key %3 of %4; ").arg(rowText.join(" "))
+                  .arg(QString::fromUtf8(QJsonDocument(slotIds).toJson(QJsonDocument::Compact))).arg(key).arg(times.size()) +
+                  seen.join(", "));
+  }
+
+  // 4. Maps 0 and 1 as sent: the keys; its zones, points and default those of "lights" (each zone with its
+  // TransitionType); every light those name once, with eight slots; every LightParams of slots 0 and 1 that has a row,
+  // once, its day an index into "days" or -1; every day well formed (times sorted, each once, in the day; columns x keys
+  // values; colours within 24 bits); the column lists; the same object again; the counts and the size counted offline;
+  // at most MAX_WORLD_LIGHT_BYTES; assembled within 50 ms -- the better of the first assembly (kept) and one more made
+  // afresh here (the same object), the machine's load named.
+  const QString dumpDir = qEnvironmentVariable("WMV_LIGHTS_DUMP").trimmed();
+  const QStringList keySet = QStringList() << "absentColumns" << "branch" << "build" << "colorColumns" << "days"
+                                           << "defaultFrom" << "defaultLight" << "detail" << "floatColumns" << "intColumns"
+                                           << "lightDataLayout" << "lights" << "map" << "mapFlags" << "params" << "points"
+                                           << "product" << "state" << "timeOverride" << "zones";
+  for (int map = 0; map <= 1; map++)
+  {
+    const QJsonObject w = c->worldLightJson(map);
+    QElapsedTimer serial;
+    serial.start();
+    const QByteArray bytes = QJsonDocument(w).toJson(QJsonDocument::Compact);
+    const double serialMs = serial.nsecsElapsed() / 1e6;
+    if (!dumpDir.isEmpty())
+    {
+      QDir().mkpath(dumpDir);
+      QFile f(QDir(dumpDir).filePath(QString("worldlight_%1_map%2.json").arg(c->clientProduct()).arg(map)));
+      if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        f.write(bytes);
+    }
+    const QJsonObject lights = c->mapJson(map);
+    // Zones, points, default: the water's, each zone with its priority.
+    const QJsonArray zones = w.value("zones").toArray(), oldZones = lights.value("zones").toArray();
+    bool sameSelection = zones.size() == oldZones.size() && w.value("points").toArray() == lights.value("points").toArray() &&
+                         w.value("defaultLight").toInt() == lights.value("defaultLight").toInt() &&
+                         w.value("defaultFrom").toString() == lights.value("defaultFrom").toString();
+    for (int k = 0; sameSelection && k < zones.size(); k++)
+    {
+      QJsonObject z = zones[k].toObject();
+      sameSelection = z.contains("priority") && z.value("priority").toInt(-1) >= 0;
+      z.remove("priority");
+      sameSelection = sameSelection && z == oldZones[k].toObject();
+    }
+    // Lights: the zones', the points' and the default, each once, eight slots each.
+    std::set<int> named;
+    for (const QJsonValue & z : zones)
+      named.insert(z.toObject().value("light").toInt());
+    for (const QJsonValue & p : w.value("points").toArray())
+      named.insert(p.toObject().value("light").toInt());
+    if (w.value("defaultLight").toInt() != 0)
+      named.insert(w.value("defaultLight").toInt());
+    std::set<int> listed, wanted;
+    bool lightsOk = true;
+    for (const QJsonValue & v : w.value("lights").toArray())
+    {
+      const QJsonObject l = v.toObject();
+      const QJsonArray s = l.value("slots").toArray();
+      lightsOk = lightsOk && s.size() == 8 && listed.insert(l.value("light").toInt()).second;
+      for (int k = 0; k < 2 && k < s.size(); k++)
+        if (s[k].toInt() != 0)
+          wanted.insert(s[k].toInt());
+    }
+    lightsOk = lightsOk && listed == named;
+    // Params and days.
+    const QJsonArray days = w.value("days").toArray();
+    std::set<int> params;
+    bool paramsOk = true;
+    for (const QJsonValue & v : w.value("params").toArray())
+    {
+      const QJsonObject p = v.toObject();
+      const int day = p.value("day").toInt(-2);
+      paramsOk = paramsOk && params.insert(p.value("id").toInt()).second && wanted.count(p.value("id").toInt()) &&
+                 day >= -1 && day < days.size() && p.value("overrideSun").toArray().size() == 3 && p.contains("glow") &&
+                 p.contains("skybox") && p.contains("flags") && p.contains("highlightSky") && p.contains("sunPolar") &&
+                 p.contains("sunAzimuth");
+    }
+    const int nc = w.value("colorColumns").toArray().size(), nf = w.value("floatColumns").toArray().size(),
+              ni = w.value("intColumns").toArray().size();
+    bool daysOk = true;
+    int keys = 0;
+    for (const QJsonValue & v : days)
+    {
+      const QJsonObject d = v.toObject();
+      const QJsonArray t = d.value("times").toArray(), cc = d.value("c").toArray();
+      const int k = t.size();
+      keys += k;
+      daysOk = daysOk && k > 0 && cc.size() == k * nc && d.value("f").toArray().size() == k * nf &&
+               d.value("i").toArray().size() == k * ni;
+      for (int j = 0; j < k; j++)
+        daysOk = daysOk && t[j].toInt(-1) >= 0 && t[j].toInt() < wow::LightCatalog::DAY && (j == 0 || t[j].toInt() > t[j - 1].toInt());
+      for (const QJsonValue & x : cc)
+        daysOk = daysOk && x.toDouble(-1) >= 0.0 && x.toDouble() <= 16777215.0;
+    }
+    const bool columns = QJsonArray::fromStringList(wow::LightCatalog::worldLightColourColumns()) == w.value("colorColumns").toArray() &&
+                         QJsonArray::fromStringList(wow::LightCatalog::worldLightFloatColumns()) == w.value("floatColumns").toArray() &&
+                         QJsonArray::fromStringList(wow::LightCatalog::worldLightIntColumns()) == w.value("intColumns").toArray() &&
+                         nc == 24 && nf == 26 && ni == 2;
+    const QJsonArray flags = w.value("mapFlags").toArray();
+    const bool shape = w.keys() == keySet && w.value("state").toString() == "ok" && w.value("map").toInt(-1) == map &&
+                       w.value("product").toString() == c->clientProduct() && w.value("build").toString() == c->clientBuild() &&
+                       w.value("branch").toString() == wow::LightCatalog::branchOf(c->clientProduct(), c->clientBuild()) &&
+                       w.value("lightDataLayout").toString() == (data ? data->layout : QString()) && flags.size() == 3 &&
+                       c->worldLightJson(map) == w;
+    bool counted = true;
+    if (expected)
+    {
+      counted = zones.size() == expected->sent[map][0] && w.value("points").toArray().size() == expected->sent[map][1] &&
+                (int)listed.size() == expected->sent[map][2] && (int)params.size() == expected->sent[map][3] &&
+                days.size() == expected->sent[map][4] && keys == expected->sent[map][5] && bytes.size() == expected->bytes[map] &&
+                w.value("timeOverride").toInt(0) == -1 && w.value("branch").toString() == QLatin1String(expected->branch) &&
+                flags.at(0).toDouble() == expected->mapFlags[0] && flags.at(1).toDouble() == expected->mapFlags[1] &&
+                flags.at(2).toDouble() == (map == 0 && expected->map0Flag2 >= 0 ? expected->map0Flag2 : expected->mapFlags[2]);
+    }
+    const double ms = c->worldLightAssemblyMilliseconds(map);
+    double again = -1.0;
+    const bool sameAgain = c->assembleWorldLightJson(map, &again) == w;
+    const double best = ms < 0.0 ? again : again < 0.0 ? ms : std::min(ms, again);
+    const qint64 bound = UnityIpcServer::MAX_WORLD_LIGHT_BYTES;
+    tally.check(QString("outdoor light: map %1 as sent (%2)%3: its keys, Stage 09's zones (with their TransitionType), points "
+                        "and default, every light they name with eight slots, slots 0 and 1's LightParams with their days, "
+                        "every day well formed, at most %4 bytes, assembled within 50 ms")
+                  .arg(map).arg(client).arg(expected ? QString(", as counted offline to the byte") : QString()).arg(bound),
+                shape && sameSelection && lightsOk && paramsOk && daysOk && columns && counted && bytes.size() <= bound &&
+                  sameAgain && best >= 0.0 && best <= 50.0,
+                QString("%1 zones, %2 points, %3 lights, %4 LightParams, %5 days of %6 keys; %7 bytes; time override %8, "
+                        "flags %9; assembled in %10 ms (again %11 ms, the same object: %18; %19), written in %12 ms; keys "
+                        "%13, selection %14, lights %15, params %16, days %17")
+                  .arg(zones.size()).arg(w.value("points").toArray().size()).arg(listed.size()).arg(params.size())
+                  .arg(days.size()).arg(keys).arg(bytes.size()).arg(w.value("timeOverride").toInt())
+                  .arg(QString::fromUtf8(QJsonDocument(flags).toJson(QJsonDocument::Compact))).arg(ms, 0, 'f', 2)
+                  .arg(again, 0, 'f', 2).arg(serialMs, 0, 'f', 2).arg(shape ? "ok" : "no").arg(sameSelection ? "ok" : "no")
+                  .arg(lightsOk ? "ok" : "no").arg(paramsOk ? "ok" : "no").arg(daysOk ? "ok" : "no")
+                  .arg(sameAgain ? "yes" : "no").arg(load.since()) +
+                  QString("; columns %1").arg(columns ? "ok" : "no") +
+                  (expected ? QString("; expected %1 / %2 / %3 / %4 / %5 / %6, %7 bytes").arg(expected->sent[map][0])
+                                .arg(expected->sent[map][1]).arg(expected->sent[map][2]).arg(expected->sent[map][3])
+                                .arg(expected->sent[map][4]).arg(expected->sent[map][5]).arg(expected->bytes[map])
+                            : QString()));
+
+    // 5. The water's noon colours from the new store: for every value "lights" sends, its LightParams' day sampled at
+    // 12:00 with the water's own sampler gives the same four water colours and sky.
+    const QJsonArray names = w.value("colorColumns").toArray();
+    int river = -1, riverFar = -1, ocean = -1, oceanFar = -1, sky = -1;
+    for (int k = 0; k < names.size(); k++)
+    {
+      const QString nm = names[k].toString();
+      river = nm == "RiverCloseColor" ? k : river;
+      riverFar = nm == "RiverFarColor" ? k : riverFar;
+      ocean = nm == "OceanCloseColor" ? k : ocean;
+      oceanFar = nm == "OceanFarColor" ? k : oceanFar;
+      sky = nm == "SkyBand1Color" ? k : sky;
+    }
+    int matched = 0, values = 0;
+    QStringList mismatches;
+    for (const QJsonValue & vv : lights.value("values").toArray())
+    {
+      const QJsonObject v = vv.toObject();
+      values++;
+      const QJsonObject d = dayOf(w, v.value("lightParams").toInt());
+      const QJsonArray t = d.value("times").toArray(), cc = d.value("c").toArray();
+      std::vector<wow::LightCatalog::Key> keyList;
+      for (int k = 0; k < t.size(); k++)
+      {
+        wow::LightCatalog::Key key;
+        key.time = t[k].toInt();
+        const auto at = [&cc, &names, k](int col) { return (quint32)cc.at(k * names.size() + col).toDouble(); };
+        key.riverClose = at(river);
+        key.riverFar = at(riverFar);
+        key.oceanClose = at(ocean);
+        key.oceanFar = at(oceanFar);
+        key.sky = at(sky);
+        keyList.push_back(key);
+      }
+      wow::LightCatalog::Water water;
+      bool same = river >= 0 && riverFar >= 0 && ocean >= 0 && oceanFar >= 0 && sky >= 0 &&
+                  wow::LightCatalog::sample(keyList, wow::LightCatalog::TIME, water);
+      const char * const keysOf[5] = {"riverClose", "riverFar", "oceanClose", "oceanFar", "sky"};
+      for (int k = 0; same && k < 5; k++)
+      {
+        const QJsonArray a = v.value(keysOf[k]).toArray();
+        same = a.size() == 3 && a[0].toInt() == water.colour[k][0] && a[1].toInt() == water.colour[k][1] &&
+               a[2].toInt() == water.colour[k][2];
+      }
+      if (same)
+        matched++;
+      else if (mismatches.size() < 4)
+        mismatches << QString("light %1 LightParams %2").arg(v.value("light").toInt()).arg(v.value("lightParams").toInt());
+    }
+    tally.check(QString("outdoor light: map %1's water at 12:00 from the new store equals \"lights\" on every value (%2)")
+                  .arg(map).arg(client),
+                values > 0 ? matched == values : true,
+                QString("%1 of %2 values").arg(matched).arg(values) +
+                  (mismatches.isEmpty() ? QString() : "; not: " + mismatches.join(", ")));
+  }
+
+  // 6. A map with no lights, and the unavailable shape: the same keys, empty lists.
+  {
+    const QJsonObject none = c->worldLightJson(99999);
+    const QJsonObject unavailable = wow::LightCatalog::worldLightUnavailableJson("wow", "1.2.3.4", 7, "a reason");
+    const bool emptyMap = none.value("state").toString() == "ok" && none.value("zones").toArray().isEmpty() &&
+                          none.value("points").toArray().isEmpty() && none.value("timeOverride").toInt(0) == -1 &&
+                          none.value("mapFlags").toArray().size() == 3;
+    const bool unavailableShape = unavailable.keys() == keySet && none.keys() == keySet &&
+                                  unavailable.value("state").toString() == "unavailable" &&
+                                  unavailable.value("detail").toString() == "a reason" && unavailable.value("map").toInt() == 7 &&
+                                  unavailable.value("branch").toString() == "retail" &&
+                                  unavailable.value("zones").toArray().isEmpty() && unavailable.value("lights").toArray().isEmpty() &&
+                                  unavailable.value("params").toArray().isEmpty() && unavailable.value("days").toArray().isEmpty();
+    tally.check("outdoor light: a map with no lights has no zone or point, no override; the unavailable shape has the same "
+                "keys and empty lists",
+                emptyMap && unavailableShape,
+                QString::fromUtf8(QJsonDocument(none).toJson(QJsonDocument::Compact)).left(400) + "; " +
+                  QString::fromUtf8(QJsonDocument(unavailable).toJson(QJsonDocument::Compact)).left(400));
+  }
+
+  // 7. What a load is sent: to a protocol-20 player, "worldLight" a key of the message's own, the object as made; to an
+  // older one, the message unchanged; the liquids offer never carries it.
+  {
+    UnityIpcServer::TerrainTileCommand command;
+    command.liquids = true;
+    command.liquidCatalog = frame->liquidCatalog() ? frame->liquidCatalog()->toJson() : QJsonObject();
+    command.liquidLights = c->mapJson(1);
+    command.worldLight = c->worldLightJson(1);
+    QJsonObject base;
+    base["type"] = "loadWorld";
+    base["liquids"] = UnityIpcServer::liquidOffer(command);
+    QJsonObject to20 = base, to19 = base;
+    const bool put20 = UnityIpcServer::putWorldLight(to20, command, true);
+    const bool put19 = UnityIpcServer::putWorldLight(to19, command, false);
+    UnityIpcServer::TerrainTileCommand without = command;
+    without.worldLight = QJsonObject();
+    QJsonObject none = base;
+    const bool putNone = UnityIpcServer::putWorldLight(none, without, true);
+    const QJsonObject offer = UnityIpcServer::liquidOffer(command);
+    tally.check("outdoor light: a protocol-20 load carries \"worldLight\" at its top level as made, a protocol-19 load is sent "
+                "unchanged, and the liquids offer keeps its five keys",
+                put20 && to20.size() == base.size() + 1 && to20.value("worldLight").toObject() == c->worldLightJson(1) &&
+                  !put19 && to19 == base && !putNone && none == base && offer.size() == 5 && !offer.contains("worldLight") &&
+                  offer.value("lights").toObject() == c->mapJson(1),
+                QString("protocol 20: keys %1; protocol 19: keys %2; the offer: %3")
+                  .arg(to20.keys().join(", ")).arg(to19.keys().join(", ")).arg(offer.keys().join(", ")));
+  }
+
+  // 8. The branch: the audited clients' (PROVEN_BYTES, docs/world-viewer/10-light-sky-fog.md 4.0) and the rule for others.
+  {
+    struct Case
+    {
+      const char * product;
+      const char * build;
+      const char * branch;
+    };
+    const Case cases[] = {{"wow", "12.1.5.70448", "retail"}, {"wowt", "12.1.7.70424", "ptr"},
+                          {"wow_classic_era", "1.15.9.70003", "retail"}, {"wow_classic", "5.5.4.70531", "retail"},
+                          {"wow_classic_beta", "1.60.1.70450", "ptr"}, {"wow", "12.1.7.70600", "ptr"},
+                          {"wow", "12.2.0.71000", "ptr"}, {"wow_classic_era", "1.15.10.71000", "retail"}};
+    bool all = true;
+    QStringList lines;
+    for (const Case & k : cases)
+    {
+      const QString b = wow::LightCatalog::branchOf(QString::fromLatin1(k.product), QString::fromLatin1(k.build));
+      all = all && b == QLatin1String(k.branch);
+      lines << QString("%1 %2 %3").arg(k.product).arg(k.build).arg(b);
+    }
+    tally.check("outdoor light: the shader branch of the audited clients, and of later builds by their version", all,
+                lines.join("; "));
+  }
+
+  // 9. setWorldLight as sent (each field only when given; a value outside its set refuses the whole message), and the
+  // light state a protocol-20 runtimeState reports (-1 and "" where a field is absent), through a server of its own.
+  {
+    QString why;
+    const QJsonObject all = UnityIpcServer::setWorldLightMessage(1, "pinned", "06:30:15", 7000.0);
+    const QJsonObject none = UnityIpcServer::setWorldLightMessage(-1, QString(), QString(), -1.0);
+    const QJsonObject time = UnityIpcServer::setWorldLightMessage(-1, QString(), "23:59:59", -1.0);
+    const bool refused = UnityIpcServer::setWorldLightMessage(2, QString(), QString(), -1.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, "noon", QString(), -1.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), "24:00:00", -1.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), " 1:00:00", -1.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), "+1:00:00", -1.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), QString(), 0.0).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), QString(), std::nan("")).isEmpty() &&
+                         UnityIpcServer::setWorldLightMessage(-1, QString(), "6:30", -1.0, &why).isEmpty() && !why.isEmpty();
+    const bool messages = all.size() == 5 && all.value("type").toString() == "setWorldLight" && all.value("on").toInt() == 1 &&
+                          all.value("clock").toString() == "pinned" && all.value("time").toString() == "06:30:15" &&
+                          all.value("farclip").toDouble() == 7000.0 && none.size() == 1 &&
+                          none.value("type").toString() == "setWorldLight" && time.size() == 2 &&
+                          time.value("time").toString() == "23:59:59";
+    UnityIpcServer s;
+    std::vector<UnityIpcServer::RuntimeState> seen;
+    s.onRuntimeState = [&seen](const UnityIpcServer::RuntimeState & r) { seen.push_back(r); };
+    QJsonObject state;
+    state["type"] = "runtimeState";
+    state["query"] = 7;
+    state["lightOn"] = 1;
+    state["lightTime"] = "12:00:00";
+    state["lightTimeSource"] = "pinned";
+    state["lightZone"] = 139;
+    state["lightId"] = 204;
+    state["lightParams"] = 5985;
+    state["lightValid"] = 1;
+    state["gameFarclip"] = 7000;
+    state["skyOn"] = 0;
+    s.testReceiveRuntimeState(state);
+    QJsonObject older;
+    older["type"] = "runtimeState";
+    older["query"] = 8;
+    s.testReceiveRuntimeState(older);
+    const bool parsed = seen.size() == 2 && seen[0].lightOn == 1 && seen[0].lightTime == "12:00:00" &&
+                        seen[0].lightTimeSource == "pinned" && seen[0].lightZone == 139 && seen[0].lightId == 204 &&
+                        seen[0].lightParams == 5985 && seen[0].lightValid == 1 && seen[0].gameFarclip == 7000.0 &&
+                        seen[0].skyOn == 0 && seen[1].lightOn == -1 && seen[1].lightTime.isEmpty() &&
+                        seen[1].lightTimeSource.isEmpty() && seen[1].lightZone == -1 && seen[1].lightId == -1 &&
+                        seen[1].lightParams == -1 && seen[1].lightValid == -1 && seen[1].gameFarclip == -1.0 && seen[1].skyOn == -1;
+    tally.check("outdoor light: setWorldLight as sent (each field when given, a value outside its set refused), and the light "
+                "state a protocol-20 runtimeState reports (-1 where absent)",
+                messages && refused && parsed,
+                QString::fromUtf8(QJsonDocument(all).toJson(QJsonDocument::Compact)) + "; " +
+                  QString::fromUtf8(QJsonDocument(none).toJson(QJsonDocument::Compact)) + "; refused: " + why + "; " +
+                  (seen.empty() ? QString("no state") : seen[0].describe().mid(seen[0].describe().indexOf(" lightOn="), 140)));
+  }
+
+  // 10. Every Map row's object (MAX_WORLD_LIGHT_BYTES is a bound the host does not enforce as it sends): each made afresh
+  // (not kept) and measured as sent, within the bound, its time override and flags those of its row in the database; the
+  // largest named (audited builds: the map and its size counted offline over every Map row, to the byte).
+  {
+    const sqlResult rows = GAMEDATABASE.sqlQuery("SELECT ID, TimeOfDayOverride, Flags1, Flags2, Flags3 FROM Map ORDER BY ID");
+    const qint64 bound = UnityIpcServer::MAX_WORLD_LIGHT_BYTES;
+    QElapsedTimer t;
+    t.start();
+    int maps = 0, over = 0, notOk = 0, rowMismatch = 0, largest = -1, overridden = 0;
+    qint64 largestBytes = -1, total = 0;
+    QByteArray largestText;
+    QStringList overNamed, mismatchNamed;
+    for (const std::vector<QString> & r : rows.values)
+    {
+      if (r.size() < 5)
+        continue;
+      const int id = r[0].toInt();
+      const QJsonObject w = c->assembleWorldLightJson(id);
+      const QByteArray bytes = QJsonDocument(w).toJson(QJsonDocument::Compact);
+      maps++;
+      total += bytes.size();
+      if (w.value("state").toString() != "ok")
+        notOk++;
+      if (bytes.size() > bound)
+      {
+        over++;
+        if (overNamed.size() < 4)
+          overNamed << QString("map %1 (%2 bytes)").arg(id).arg(bytes.size());
+      }
+      if (bytes.size() > largestBytes)
+      {
+        largestBytes = bytes.size();
+        largest = id;
+        largestText = bytes;
+      }
+      const QJsonArray flags = w.value("mapFlags").toArray();
+      const int timeOverride = r[1].toInt();
+      overridden += timeOverride != -1 ? 1 : 0;
+      bool same = w.value("timeOverride").toInt(-2) == timeOverride && flags.size() == 3;
+      for (int k = 0; same && k < 3; k++)
+        same = flags.at(k).toDouble(-1.0) == (double)(quint32)r[2 + k].toLongLong();
+      if (!same)
+      {
+        rowMismatch++;
+        if (mismatchNamed.size() < 4)
+          mismatchNamed << QString("map %1").arg(id);
+      }
+    }
+    const double censusMs = t.nsecsElapsed() / 1e6;
+    const bool pinned = !expected || (maps == expected->maps && overridden == expected->overridden &&
+                                      largest == expected->largestMap && largestBytes == expected->largestBytes);
+    tally.check(QString("outdoor light: every Map row's object within %1 bytes as sent, its time override and flags those of "
+                        "its row%2 (%3)")
+                  .arg(bound).arg(expected ? QString("; the largest as counted offline over every map, to the byte") : QString())
+                  .arg(client),
+                rows.valid && maps > 0 && over == 0 && notOk == 0 && rowMismatch == 0 && pinned,
+                QString("%1 maps (%2 with a time override), %3 bytes in all in %4 ms; the largest map %5, %6 bytes (SHA-256 %7)"
+                        "; over the bound: %8; not \"ok\": %9; unlike its row: %10")
+                  .arg(maps).arg(overridden).arg(total).arg(censusMs, 0, 'f', 0).arg(largest).arg(largestBytes)
+                  .arg(QString::fromLatin1(QCryptographicHash::hash(largestText, QCryptographicHash::Sha256).toHex().left(16)))
+                  .arg(over ? QString::number(over) + " (" + overNamed.join(", ") + ")" : QString("none")).arg(notOk)
+                  .arg(rowMismatch ? QString::number(rowMismatch) + " (" + mismatchNamed.join(", ") + ")" : QString("none")) +
+                  (expected ? QString("; expected %1 maps (%2 with an override), the largest map %3, %4 bytes")
+                                .arg(expected->maps).arg(expected->overridden).arg(expected->largestMap).arg(expected->largestBytes)
+                            : QString()) +
+                  (rows.valid ? QString() : QString("; the Map rows could not be queried")));
+  }
+
+  // 11. A map with a time override as a protocol-20 load sends it: the Map row with the largest TimeOfDayOverride (the
+  // lowest ID of a tie; audited builds: the map and value counted offline), its object as kept and put into a load's
+  // message, the "timeOverride" sent equal to the row's, read from the database by its ID.
+  {
+    const sqlResult top = GAMEDATABASE.sqlQuery("SELECT ID, TimeOfDayOverride FROM Map WHERE TimeOfDayOverride != -1 "
+                                                "ORDER BY TimeOfDayOverride DESC, ID ASC LIMIT 1");
+    const bool found = top.valid && top.values.size() == 1 && top.values[0].size() == 2;
+    const int map = found ? top.values[0][0].toInt() : -1;
+    const sqlResult row = GAMEDATABASE.sqlQuery(QString("SELECT TimeOfDayOverride FROM Map WHERE ID = %1").arg(map));
+    const bool byId = found && row.valid && row.values.size() == 1 && !row.values[0].empty();
+    const int value = byId ? row.values[0][0].toInt() : -2;
+    UnityIpcServer::TerrainTileCommand command;
+    command.mapId = map;
+    command.worldLight = c->worldLightJson(map);
+    QJsonObject msg;
+    msg["type"] = "loadWorld";
+    const bool put = UnityIpcServer::putWorldLight(msg, command, true);
+    const QJsonObject sent = msg.value("worldLight").toObject();
+    const int sentOverride = sent.value("timeOverride").toInt(-2);
+    const bool pinned = !expected || (map == expected->overrideMap && value == expected->overrideValue);
+    tally.check(QString("outdoor light: the map with the largest time override, as a protocol-20 load sends it: its "
+                        "\"timeOverride\" its Map row's%1 (%2)")
+                  .arg(expected ? QString(", the map and value counted offline") : QString()).arg(client),
+                found && byId && put && sent.value("state").toString() == "ok" && sent.value("map").toInt(-1) == map &&
+                  value != -1 && sentOverride == value && pinned,
+                QString("map %1: the row's TimeOfDayOverride %2, sent %3 (state %4)")
+                  .arg(map).arg(value).arg(sentOverride).arg(sent.value("state").toString()) +
+                  (expected ? QString("; expected map %1, %2").arg(expected->overrideMap).arg(expected->overrideValue) : QString()) +
+                  (found ? QString() : QString("; no Map row has a time override")));
+  }
+
+  // 12. The time budgets (docs/world-viewer/10-light-sky-fog.md 8.3): the store, a client-load stage, at most 250 ms -- the
+  // better of the stage as the client load ran it and the store built once more here (the same object of map 1 after it),
+  // the machine's load named.
+  {
+    const double first = c->worldLightBuildMilliseconds();
+    const wow::LightCatalog::WorldCounts firstCounts = n;
+    const QJsonObject before = c->worldLightJson(1);
+    const MachineLoad during;
+    c->buildWorldLight();
+    const QString duringLoad = during.since();
+    const double second = c->worldLightBuildMilliseconds();
+    const bool same = c->worldLightReady() && c->worldLightJson(1) == before;
+    const double best = std::min(first, second);
+    tally.check(QString("outdoor light: the store's client-load stage within 250 ms (%1)").arg(client),
+                same && best <= 250.0,
+                QString("at the client load %1 ms (read %2, fragments %3); built again here %4 ms (read %5, fragments %6; %7), "
+                        "map 1's object the same: %8; %9")
+                  .arg(first, 0, 'f', 1).arg(firstCounts.readMs, 0, 'f', 1).arg(firstCounts.fragmentMs, 0, 'f', 1)
+                  .arg(second, 0, 'f', 1).arg(c->worldCounts().readMs, 0, 'f', 1).arg(c->worldCounts().fragmentMs, 0, 'f', 1)
+                  .arg(duringLoad).arg(same ? "yes" : "no").arg(load.since()));
+  }
+}
+
 static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
 {
+  const MachineLoad machineLoad;   // the machine's load from here on (the outdoor light's timing checks name it)
   TerrainTestLog tally;
   QJsonObject out;
   const QString sequenceSpec = qEnvironmentVariable("WMV_TERRAINTEST_SEQUENCE").trimmed();
@@ -9809,6 +10577,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   checkLiquidTextureDecisions(tally);
   checkLiquidCatalog(frame, tally);
   checkLightCatalog(frame, tally);
+  checkWorldLight(frame, tally, machineLoad);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -12295,6 +13064,13 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
 //                                            "failed", "ended", "notOffered"), at least min doodads placed; the player's
 //                                            doodad instances (runtimeState doodadInstances == n); the last report's whole
 //                                            world assembly ("complete", "partial", "none", "failed", "ended")
+//   time:<HH:MM[:SS]> | light:<on|off> | farclip:<yards> | clock:<pinned|running>
+//                                            (protocol 20) setWorldLight with that one field: the game time (two digits
+//                                            each; the clock's mode left as it is), the outdoor light on or off, the game
+//                                            far clip the fog takes (above 0), or the clock's mode (pinned to its time,
+//                                            or running); skipped for an older player
+//   expect:light:<id>                        (protocol 20) the player's runtimeState lightId: the Light its camera's
+//                                            light state is; skipped for an older player
 //   expect:<what>[:<args>]                   map:<phase> | grid:<x>:<y>:<state> | tile:<phase> | mode:<mode> |
 //                                            notice:<words> | terrain:<0|1> | listed:<n> | shownview:<view>
 //   wait:<ms> | shot:<name> | state          pump; a picture of the window (PrintWindow, <out>_<name>.png); the
@@ -12903,6 +13679,16 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       o["liquidMaterials"] = lastState.liquidMaterials;
       o["liquidArrays"] = lastState.liquidArrays;
       o["liquidGpuBytes"] = (double)lastState.liquidGpuBytes;
+      // Protocol 20: the outdoor light state (-1 and "" from an older player).
+      o["lightOn"] = lastState.lightOn;
+      o["lightTime"] = lastState.lightTime;
+      o["lightTimeSource"] = lastState.lightTimeSource;
+      o["lightZone"] = lastState.lightZone;
+      o["lightId"] = lastState.lightId;
+      o["lightParams"] = lastState.lightParams;
+      o["lightValid"] = lastState.lightValid;
+      o["gameFarclip"] = lastState.gameFarclip;
+      o["skyOn"] = lastState.skyOn;
       o["liveGameObjects"] = lastState.liveGameObjects;
       o["liveTexture2D"] = lastState.liveTexture2D;
       o["liveMeshes"] = lastState.liveMeshes;
@@ -14172,6 +14958,19 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
                       .arg(o.value("doodadTextures").toInt(-1)).arg(o.value("doodadVisible").toInt(-1))
                       .arg(o.value("doodadCulled").toInt(-1)));
       }
+      // OUTDOOR LIGHT (protocol 20; skipped for an older player, which reports no light state).
+      else if (what == "light" && !ipc->playerDrawsWorldLight())
+        tally.skip(label, QString("the player speaks protocol %1; its light state needs protocol 20").arg(ipc->playerProtocolVersion()));
+      else if (what == "light")
+      {
+        const QJsonObject o = sample(label);
+        tally.check(label, o.value("lightId").toInt(-1) == a1.toInt(),
+                    QString("light %1 (zone %2, LightParams %3, valid %4), on %5, time %6 (%7), far clip %8, sky %9")
+                      .arg(o.value("lightId").toInt(-1)).arg(o.value("lightZone").toInt(-1)).arg(o.value("lightParams").toInt(-1))
+                      .arg(o.value("lightValid").toInt(-1)).arg(o.value("lightOn").toInt(-1)).arg(o.value("lightTime").toString())
+                      .arg(o.value("lightTimeSource").toString()).arg(o.value("gameFarclip").toDouble(-1))
+                      .arg(o.value("skyOn").toInt(-1)));
+      }
       else if (what == "assembly")
         tally.check(label, haveReport && lastReport.worldAssembly == a1,
                     haveReport ? "assembly \"" + lastReport.worldAssembly + "\"; " + lastReport.describeWorld() : QString("no report"));
@@ -14361,6 +15160,51 @@ static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
       pump(arg.toLong());
     else if (kind == "state")
       sample(arg.isEmpty() ? label : arg);
+    else if (kind == "time" || kind == "light" || kind == "farclip" || kind == "clock")
+    {
+      // OUTDOOR LIGHT (protocol 20): setWorldLight with one field -- time:HH:MM[:SS] (two ASCII digits each; the clock's
+      // mode left as it is), light:on|off, farclip:<yards above 0>, clock:pinned|running. A player before protocol 20 is
+      // sent nothing (the step skipped).
+      if (!ipc->playerDrawsWorldLight())
+        tally.skip(label, QString("the player speaks protocol %1; setWorldLight needs protocol 20").arg(ipc->playerProtocolVersion()));
+      else
+      {
+        QString time, clock;
+        int on = -1;
+        double farclip = -1.0;
+        bool valid = true;
+        if (kind == "time")
+        {
+          const QStringList hms = arg.split(':');
+          valid = hms.size() == 2 || hms.size() == 3;
+          for (const QString & part : hms)
+            valid = valid && part.size() == 2 && part[0] >= QLatin1Char('0') && part[0] <= QLatin1Char('9') &&
+                    part[1] >= QLatin1Char('0') && part[1] <= QLatin1Char('9');
+          time = valid ? hms.value(0) + ":" + hms.value(1) + ":" + (hms.size() == 3 ? hms[2] : QString("00")) : QString();
+        }
+        else if (kind == "light")
+        {
+          valid = arg == "on" || arg == "off";
+          on = arg == "on" ? 1 : 0;
+        }
+        else if (kind == "clock")
+        {
+          valid = arg == "pinned" || arg == "running";
+          clock = arg;
+        }
+        else
+        {
+          farclip = arg.toDouble(&valid);
+          valid = valid && std::isfinite(farclip) && farclip > 0.0;
+        }
+        const bool sent = valid && ipc->sendSetWorldLight(on, clock, time, farclip);
+        rec["sent"] = sent;
+        pump(300);
+        tally.check(label + ": setWorldLight sent", sent,
+                    !valid ? QString("\"%1\" is not a value of %2").arg(arg).arg(kind)
+                           : sent ? QString("sent") : QString("refused (see the log)"));
+      }
+    }
     else if (kind == "flight")
     {
       // flight:<speed>:<pitch>:<x>/<y>/<z>/<x>/<y>/<z>... (protocol 18): the player's free camera flies the path itself (a test
