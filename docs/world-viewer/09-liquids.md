@@ -2,8 +2,8 @@
 
 Branch `world/09-liquids`, from `develop` 3e11ee52 (Stage 08, PRs #125 and #126). This document is written in the order
 the work was done: the investigation and the architecture first (section 1, written before any code), then the
-implementation, its tests and measurements, and last the tuning against the in-game references (section 11) and the High
-look (section 12).
+implementation, its tests and measurements, the tuning against the in-game references (section 11) and the High look
+(section 12), and last the acceptance that closed the stage (section 13).
 
 Evidence grades: **PROVEN_BYTES** (decided by the client's own files), **PROVEN_RUNTIME** (observed in the running viewer
 or player on real client data), **PROVEN_SOURCE** (read in this repository's source), **INFERRED** (follows from proven
@@ -560,7 +560,8 @@ Horde, and took them on a sandbox server. Section 11 compares them and tunes the
 planar uv; the stored-uv scale stays untested. The roadmap's exit tiles (Retail 29_48 Stormwind Harbor, Era 36_49 Lake
 Everstill) are still NOT compared with references, so its exit test, water tiles against references on Retail and Era,
 is open: one Retail spot is compared, no Era spot. The final merge-readiness pass (12.11) leaves it open and says what
-would close it.
+would close it. On 2026-10-21 the owner approved revised acceptance criteria that supersede that test (section 13): it
+is not passed, and the stage is closed without it.
 
 ## 7. Regressions
 
@@ -686,10 +687,13 @@ Marked **new** (this stage's own) or **pre-existing**.
   look at the Durotar spot, Lake Everstill and the sloped river with no defect seen. There is no Era in-game reference:
   the warm terracotta water at Durotar (point light 204) and the teal lake with an olive rim (map 0's default light 1)
   are the tables' colours drawn by the Retail-tuned model (INFERRED), and whether the game draws them so is UNKNOWN.
+  Its visual parity stays UNVERIFIED: accepted on 2026-10-21 as an explicit limitation, kept for a future comparison
+  (section 13).
 - **MoP Classic without a reference** (new): its storage did not open until a Battle.net update on 2026-10-20; in the
   final pass (12.11) it passed on the deployed pair (`-terraintile` 315 / 0 on 5.5.4.70469 and 5.5.4.70531; on 70531
   `acc_mop` 41 / 0, its light catalogue against the offline reference, and the High look at the Durotar spot with no
-  defect seen), but there is no MoP in-game reference to compare with.
+  defect seen), but there is no MoP in-game reference to compare with: its visual parity is UNVERIFIED too (accepted,
+  section 13).
 - **Stored texture coordinates** (new): slime and terrain magma show staircase bands and world-model lava a radial
   pinch at 1/256 per unit (section 5.1); the scale of MH2O's u/v and MLIQ's s/t is UNKNOWN.
 - **Texture slots 1-5 are not drawn** (new), but for the ripple map: the High look draws the first file of slots 1-5
@@ -767,7 +771,7 @@ The final pass (12.11) added no file and changed none outside these lists: its f
 `Resources/WmvLiquid.shader`, `Scripts/Wow/World/LiquidHigh.cs`, `Scripts/WmvLiquids.cs`,
 `Scripts/WmvLifecycleSelfTestLiquids.cs`, `Tests/LiquidHighTests.cs` and `Tests/README.md`.
 
-Documents: this file; `roadmap.md` (row 09).
+Documents: this file; `roadmap.md` (the Liquids row of section 3 and milestone 09 of section 5).
 
 ## 11. Tuning against the in-game references (2026-10-20)
 
@@ -1607,7 +1611,147 @@ described above, but whether it looks like the game's is UNKNOWN. What would clo
 screenshots at Liquid Detail High and at Low at a stated spot (Lake Everstill 36_49, or a spot the owner names, with the
 position and facing the game prints); the owner has no Era sandbox, so they must come from playing the live client (Era
 had never been launched on this computer, `inv_41d36803.md`); and for Retail a Stormwind Harbor reference or the owner's
-acceptance of the Southfury spot in its place; or any alternative the owner explicitly approves.
+acceptance of the Southfury spot in its place; or any alternative the owner explicitly approves. **Superseded on
+2026-10-21:** the owner approved such an alternative, the revised acceptance of section 13, which closes the stage
+without this exit test; the test is not passed.
 
-**Commit state.** The zone-light and High work is committed locally on world/09-liquids as a40d1bf7 (code, data and
-tests) on top of be19066b; this document is committed separately.
+## 13. Acceptance and completion (2026-10-21)
+
+**The decision.** On 2026-10-21 the owner approved revised acceptance criteria for this stage: the visual comparison with
+the in-game references at the Retail Southfury River spot (sections 11 and 12), together with the functional validation
+on Retail, Classic Era, MoP Classic and Classic Beta (12.11, and again on the committed source, 13.2), closes Stage 09.
+The roadmap's original exit test, water tiles against references on Retail and Era (`roadmap.md` 5; the exit tiles
+Retail 29_48 Stormwind Harbor and Era 36_49 Lake Everstill, section 6), is SUPERSEDED by that approval, NOT passed: both
+tiles are rendered and regression-tested, and neither is compared with a reference. Stage 09 is complete under the
+revised criteria. Nothing here claims that the viewer's water looks like the game's: the one comparison made is at one
+Retail spot (one type, Slow Water; one zone light; noon), with the differences of 12.10 and 12.11.
+
+**Classic Era's visual parity is UNVERIFIED: an accepted limitation.** Classic Era runs (12.11, 13.2), but its water has
+never been compared with the game: the warm terracotta water at the Durotar spot and the teal lake with an olive rim at
+Lake Everstill (12.11) are its tables' colours drawn by the Retail-tuned model (INFERRED), and whether the game draws
+them so is UNKNOWN. The owner accepted this explicitly on 2026-10-21 and keeps it for a future comparison; it is not a
+passed check. The plan for that comparison is outside the repository (`D:\wmv-09\refs\REFERENCE_PLAN.md`): the same spot
+as the Retail references, the Durotar bank of the Southfury River about 450 yd west of Orgrimmar's front gate (the
+helper addon's `/wmvref dur`: X 1261, Y -3948, map 1), first person at the facing the addon confirms, a Low pass (ACROSS,
+NEAR, WATERLINE, LANDMARK) and a High pass (ACROSS, NEAR, WATERLINE), at about noon game time (the viewer reads the light
+at a fixed 12:00, 11.4; the Retail shots were taken at 11:53-11:57, 11.1). The owner has no Era sandbox, so the shots
+must come from the live client (12.11), where the plan's teleport line does not apply. MoP Classic's visual parity is
+UNVERIFIED as well: it runs with the High look at the Durotar spot with no defect seen (12.11), and there is no MoP
+reference.
+
+### 13.1 Completed functionality
+
+What the stage delivers, run on all four clients unless said (sections 5, 12.11 and 13.2):
+
+- **Liquid geometry.** MH2O on terrain (every instance and layer, the exists bitmaps, heights, depths and stored uv in
+  the four vertex layouts; malformed data marks its instance or chunk and never fails the terrain) and MLIQ in placed
+  world models (both vertex kinds, the group's liquid type), parsed in the player (section 2) and drawn on the streamed
+  tiles and in the placed world models of the world path, world-model-only maps included (Dire Maul on Retail and
+  Classic Era, section 5). The Buildings viewer draws no liquid (section 9).
+- **The liquid tables per client.** LiquidType, LiquidMaterial, LiquidObject and LiquidTypeXTexture with their layouts
+  settled per client from the bytes (U14; 1.4, section 3); the host's liquid catalogue, protocol 19's `liquids` offer
+  and the role `liquidTexture` under the Stage 08 budgets (section 3).
+- **Frames and lifecycle.** A type's frames in one shared array, animated on the liquid clock; magma and slime in their
+  frames' colour; the liquid objects owned by their tiles and world-model prototypes, streamed, pooled and evicted with
+  them, every liquid tally 0 after every Clear (sections 4 and 5.2).
+- **The zone-light colours** (section 11). The light tables (Light, LightParams, LightData, ZoneLight, ZoneLightPoint)
+  per client, the host's light catalogue and the offer's `lights`; water and ocean coloured by the zone light at the
+  camera (slot 0 at a fixed 12:00; the selection rules INFERRED, 11.4); without one, the old look.
+- **The High look** (section 12), drawn by default: the viewer's approximation of the game's Liquid Detail High (clear
+  water over the bed, ripples from the type's ripple map, screen-space reflection with the zone light's sky), its values
+  MEASURED at the one Retail spot and applied elsewhere as INFERRED. `WMV_WATER=low` turns it off and keeps the Low look
+  of section 11 (pixel-identical to the zone-light build: 12.8, 12.11, 13.2); `-wmvWaterTune` in `WMV_DEBUG` overrides
+  any of its 26 tunable values at run time (12.4).
+
+### 13.2 Tested behaviour: the committed source, built clean (2026-10-21)
+
+The validation of 12.11 ran on the owner's deployed pair, whose host carries the owner's two uncommitted tabard patches
+and whose player carries an unmerged screenshot change of another branch (12.11, provenance). So the committed source was
+built again on its own and validated on 2026-10-21; the outputs are outside the repository, in `D:\wmv-09\tune\final09`
+(the host's `cbuild09_*.log` and `run_clean09_manifest.txt`; the player's `unity_build_p21c.log`, `manifest_p21c.tsv`,
+`il` and `selftest`; the runs in `tests`). The deployed build, the owner's checkouts and the Unity project were not
+changed (the clean worktree adds only its own entry to the repository's worktree list); the viewer and the player ran
+on hidden desktops only.
+
+- **Source.** fed928c3 in a detached worktree (`D:\wmv-09\clean09`): 4,223 tracked files, none modified, each
+  byte-identical to the branch's. Neither tabard patch is in it: the deployed host's source differs from it in 7 of the
+  4,223 files, the five the patches touch (applying the two patches to the clean files gives the deployed ones byte for
+  byte) and older copies of this document and `roadmap.md`. The closing documentation commit changes only these two
+  documents, so the branch's code at its merge is the code verified here.
+- **Host.** Configured as the deployed build (its CMake cache identical once the paths are normalised), built Release:
+  0 errors, all 10 targets (the FBX exporter included; FBX export was not run). 77 distinct warning lines, those of the
+  deployed build with line numbers left out, none in a file Stage 09 touched. SHA256: `wowmodelviewer.exe`
+  1C36DB44..., `wow.dll` B39CA85A..., `core.dll` 61072CF7.... Against the deployed binaries (a PE comparison that
+  ignores build stamps): the deployed `wow.dll` exports two more names (`TabardDetails::clearDesign` and `hasDesign`)
+  and its exe imports `clearDesign`; no other export or import differs, and the other libraries' code is the same but
+  for the paths and import hints those changes shift.
+- **Player p21c.** Built from a copy of the Unity project with its scripts and resources set to fed928c3's 83 files
+  (only `WmvScreenshot.cs` differed in content; the extra `WmvScreenshotMatte.shader` removed): 0 errors and p20e's 4
+  warnings (CS0618). Assembly-CSharp SHA256 DDF84D21..., MD5 A2D6FD44..., 1,640,448 bytes. Against p20e, 181 of 187
+  files are identical, the engine binaries among them; the two assemblies, decompiled, differ only in the members
+  `WmvScreenshot.cs` declares and in the project path the compiler embeds; the other five files differ by the matte
+  shader's absence, the build GUID, a link timestamp or the project path.
+
+The results on the clean pair (host 1C36DB44 with p21c; `-terraintile` also with the protocol-18 player p18o), against
+the deployed pair's of 12.11:
+
+| Check | Result |
+|---|---|
+| Pure runner, netstandard build | 2,199 passed, 0 failed (`LiquidCorpusTests` 83, `WorldCorpusValidation` 74, `TerrainCorpusTests` 80, `TerrainMaterialCorpusTests` 226), its PASS lines those of 12.11 with timings aside; 0 warnings, 0 errors |
+| Player self-test (p21c) | 1,055 passed, 0 failed, the one old SKIP: p20e's check lines but for two values that vary between runs |
+| `-terraintile 0 30 49` (p18o and p21c) | Retail 12.1.5.70448 PASS 325 / 0, 2 SKIP; Classic Era 1.15.9.70003 PASS 322 / 0, 4 SKIP; MoP Classic 5.5.4.70531 PASS 315 / 0, 9 SKIP; Classic Beta 1.60.1.70450 PASS 323 / 0, 2 SKIP: 12.11's counts, the check lines the same but for per-run timings and counts; the light dumps byte-identical to earlier ones; host ERROR lines the checks' 45 unknown-message and 2 deliberate ones (Beta also its two Section Layout lines), and DB2 read errors only in the run that built a client's database cache (Retail 47, MoP 8, Beta 19, Era 0 lines), as in the deployed logs |
+| Acceptance and streaming | `acc_wow` 79 / 0, `acc_era` 79 / 0, `acc_mop` 41 / 0, `acc_beta` 51 / 0, `dm_wow` and `dm_era` 20 / 0, `harbor` 17 / 0, `border` 56 / 0, `far3_wow` 20 / 0, `wateru_wow` 23 / 0 twice; the peaks, the light sequences and the liquid geometry lines those of the deployed pair |
+| Lifecycle | `life08` 70 / 0 (its Era tail included), `life08b` 12 / 0 (its geometry lines vary as before); every liquid tally 0 after every Clear (six in `life08`) |
+| Logs (the acceptance, streaming and lifecycle runs) | 0 player exception or error lines, 0 liquid lines with a bad count, 0 `liquidTexture` refusals; host ERROR lines only the known ones (Beta's two Section Layout lines, `life08`'s two about the bear); the ripple-map line in every High run, strength factor 1.0004, mean slope (-0.0105, -0.0423) |
+| GUI rounds over 50 ms | two, neither repeated: `far3_wow` 56.50 ms in its 200 yd/s flight (its repeat at most 34.05 ms) and `life08` 50.77 ms at step 17, serving one map answer (read in 0.76 ms, served in 50.68 ms; its repeat at most 45.48 ms); not liquid steps, machine or IPC timing (INFERRED) |
+| Pictures, High | the regression viewports 48 of 49 pixel-identical to the deployed pair's (`far3_wow`'s, its clock not pinned, differs only inside the water, as two runs of one build do there); the camera views (the High cameras, the depth poses, Beta, MoP and Era) 47 of 47; the High cameras' scores 12.6's p20e column |
+| Pictures, `WMV_WATER=low` | 48 of 48 and 39 of 39 pixel-identical to the deployed pair's; the regression viewports 48 of 48 and the camera views 31 of 31 pixel-identical to the zone-light build's |
+| Other viewers | Buildings (Retail 108238 and 4235933, Beta 7962574, Era 107243, 111185 and 108238) and Models (wmo108631, the bear) equal to the deployed pair's. Characters differ, explained by a host-by-player run: the host's tabard patches decide `fmt_details` (the clean host with p20e gives 0B3BD1A5, 12.8's value without the patches), the player's screenshot script the rest (p21c against the earlier players: at most 1 RGB step on about 41,000-44,000 px, and 53 alpha px) |
+| Ocean flights, uncapped | mean frame 1.721 / 1.745 ms (the deployed pair's 1.947 / 1.953), the longest frame 15.1 / 17.3 ms |
+
+Frame time, GPU cost and memory were measured on the deployed pair (12.11: the High look about 0.14 ms of GPU a frame
+over Low uncapped and 35 MB of GPU memory, the capped frame rate unchanged, the same tallies in each of five Clear /
+enter cycles) and not again: the clean pair differs from it only in the tabard and screenshot code, which leaves them
+unchanged (INFERRED; the ocean flights above show no slowdown).
+
+### 13.3 Accepted approximations and limitations
+
+The stage closes with these, each documented where named; none is claimed to match the game.
+
+- **Visual parity on Classic Era and MoP Classic: UNVERIFIED** (above; section 9). On Retail the comparison is one spot;
+  the High and Low looks' values are MEASURED there and INFERRED for every other type and place (section 9, 12.5).
+- **Under the water, and the depth write** (12.11 F2, 12.10, section 9). From a camera under the surface the Low paths
+  draw the water, and while the High look is installed the water writes depth, so blended objects above the water are
+  hidden (under Stormwind Harbor's water its waterfall and a ship's mast are missing); blended objects under the opaque
+  High water are hidden too (12.7, H8). Kept: a fix would split the draw into two materials and double the vertex work.
+- **Sloped water** (12.11 F1, section 9). Drawn by the HIGH path on its upper side since p20e, but shaded with the
+  world's up, so the rising part of a sloped sheet reads as a pale haze; how the game shades it is UNKNOWN.
+- **The remaining reflection, refraction and colour differences** (12.10 and 12.11's table). Class B, the scene's (the
+  near bed's hue, the pebbles, the far and mid water's excess green, blue and brightness, sky and haze), waits for Stage
+  12; class C, the water's own, has mechanisms UNKNOWN (the game's downward bed shift, not drawn; the water's own
+  warmth, short of red; the far water's pale extra term and the far waterline's light line; the reflection's fall-off
+  below the far waterline; the ripple ovals' tint). The reflection is screen-space only, up to 128 yd (by design).
+- **Lighting, sky and fog are Stage 12's** (`roadmap.md` 5). The light is read at a fixed 12:00 in the clear-weather
+  slot only; the viewer draws no sky (the reflections take the zone light's `SkyBand1Color`) and no fog; the terrain's
+  light is not the game's (12.11: the own bank's game / viewer ratio 1.01 / 0.64 / 0.58); world-model water takes the
+  light at the camera (UNKNOWN in the game).
+- **Classic Beta's water is another system** (12.10, section 9). Its PBR types (foam, rim and depth masks, FFT tiles, no
+  ripple map) are approximated, not matched: drawn flat with Retail's transmission and MinimapStaticCol x 0.3125
+  (`noZoneGain`, MEASURED at one Beta spot); the FFT tables are not read. At the Southfury spot that water is too dark,
+  teal-grey and too opaque near the camera against the game's clear water.
+- **MoP Classic 5.5.4.70531's build-pinned checks** (12.11). `-terraintile` skips 9 checks pinned to the audited builds
+  (neither MoP build is audited): 6 of them would pass on 70531 by the logged values, 3 do not apply.
+- **The rest of section 9 stands**: the stored texture coordinates' scale, the texture slots not drawn, the lights
+  without water colour, MLIQ uv in the group's frame, the groups and attributes not drawn, the report timing, the Low
+  look's glint sector and bed contrast, the grab's cost (about 0.14 ms of GPU and 35 MB while any liquid object is
+  alive), and the pre-existing items (Era's grey terrain chunks, the Characters' tabard variance on develop).
+
+What would settle more of them, from 12.11: the Era comparison above (and one for MoP Classic); Stage 12's light,
+terrain and sky, after which class B is to be measured again; and for class C a High shot facing east from the Southfury
+stand and one at another time of day.
+
+**Commit state.** Stage 09 is the commits be19066b (the liquids, with this document's first version), a40d1bf7 (the
+zone-light colours and the High look: code, data and tests), fed928c3 (this document's sections 11 and 12, with their
+updates to the earlier sections, and `roadmap.md`) and the closing documentation commit (this section, its notes in
+sections 6, 9, 10 and 12.11, and `roadmap.md`), on top of develop 3e11ee52; world/09-liquids is merged into develop by
+pull request.
