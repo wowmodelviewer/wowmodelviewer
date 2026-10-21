@@ -133,13 +133,22 @@ Consequences:
 - **Clearly Stage 12:** MOCV in either kind of group, the A-range (blend) batches, MOHD and MAVG/MAVD ambient, MOLT,
   MOLR, MNLD, MFOG and the group fog ids, MODD colours, F_EXTLIGHT, F_SIDN, F_WINDOW, the camera inside a model (portals,
   BSP), and the map's placed lights in `_lgt.wdt` (3.7).
-- **What the swap moves rather than removes.** Exterior groups carry MOCV whose use is unresolved in the viewer (the
-  repository calls it "exe-gated"). The client's world-model programs are now located (4.0: `material3_wmo_ps/vs`,
-  listed by all five clients): they multiply the albedo by the first vertex colour and read the same scene-light block as
-  terrain and doodads, so how exterior MOCV enters the shading can be read from the client's own bytes (work package 2).
-  If it enters as light, the exterior look of Stage 10 changes again in Stage 12 unless it is brought forward (D3). The
-  validation therefore picks town buildings without exterior MOCV (9.5: the Crossroads; Razor Hill's burrow and Ratchet's
-  warehouse carry it on the PTR, Beta and MoP, and Ratchet's inn has lights).
+- **Exterior MOCV: investigated 2026-10-21 (step 1), verdict "partly established"; not in Stage 10.** The client's
+  world-model programs (`material3_wmo` 5446718/5446713 and `uber` 2977272/2977862, both engine branches, every program
+  disassembled and executed on 14,976 input cases, then re-checked independently) fix how MOCV can enter the shading
+  (PROVEN_BYTES): the vertex program passes 2 x MOCV.rgb and 1 - MOCV.a; the pixel program adds E = 2 x MOCV x k to the
+  three hemisphere colours before the wrap when a per-batch lighting mode is 2, and multiplies the albedo by MOCV x 2 only
+  when a CPU gate is on (otherwise by the neutral 0.5 x 2). Exterior MOCV alpha is 255 on 99.993 % of vertices. The
+  census figure "mean about 30" included 77,019 never-drawn vertices filled with (127, 127, 127); drawn exterior MOCV
+  averages (10, 11, 9) and 52.8 % of it is black, which rules out the tint path for exterior batches (INFERRED). What
+  cannot be read: the per-batch mode, the gate, which program draws ordinary batches, and the scale k (1 only in
+  `material3`; in `uber` a constant times, on Retail, a per-instance factor; on the PTR/Beta branch a further factor).
+  So including it would need a constant not taken from bytes: **exterior MOCV stays out of Stage 10, as the owner's rule
+  requires**, recorded as a known difference (small: the median drawn exterior MOCV is 0; it shows as a faint warm
+  glow near lanterns). One measurement could settle k for one client branch: the Ratchet warehouse's lantern wall
+  (group 107919, MOCV up to (71, 32, 0)) at 12:00 and 00:00 on live Retail or MoP Classic (a PTR measurement does not
+  carry over). The validation keeps to MOCV-free exteriors (the Crossroads) and classes MOCV-carrying exteriors (Razor
+  Hill's burrow, Ratchet's warehouse) as B. Evidence: `D:\wmv-10\step1\mocv`, `...\mocv-verify`.
 - **The interim look.** Until Stage 12, a building's outside takes the game's outdoor light while its inside keeps the
   preview rig; a doorway can show the step. The capture log and the Maps panel say so.
 
@@ -403,11 +412,22 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
   programs: their different look lies in their data and the CPU path.
 - **The PTR and Beta differ from Retail.** Their programs (sky, clouds, all 316 terrain programs, M2, world models, water,
   particles) carry a constant-gated linear-light path: textures, vertex and constant colours decoded with a 2.2 power,
-  and the ambient wrap constants switched to 1.1^2.2 and 0.7^2.2. Even with the gate off they combine light differently
-  from Retail where local lights contribute (a 2.2-power sum instead of Retail's square-root sum). Retail, Era and MoP have
-  no such path. Whether the PTR's "Lighting Mode" setting (2 in both sandbox sessions) opens the gate is INFERRED. **PTR
-  references therefore do not stand for Retail 12.1.5 until a mode A/B pair and a live Retail pair show they do** (9.4,
-  D15, D19).
+  and the ambient wrap constants switched to 1.1^2.2 and 0.7^2.2. Even with the gate off they combine local light
+  differently (a 2.2-power sum instead of Retail's square-root sum), add a secondary-lighting buffer Retail lacks, and
+  scale the light attenuation where Retail only switches it. Retail, Era and MoP have none of this.
+- **Which path the references used (step 1, 2026-10-21; checked independently).** The PTR's "Lighting Mode" setting is
+  the quality of secondary lighting (GI grid and samples), not the gate. The gate follows a start-up setting, `linear`
+  ("0- disabled (live), 1- linear"; INFERRED from the executable's strings and the UI code), which the client writes to
+  `Logs\General.log` at every start. The PTR session that took all 12 Stage 09 PTR shots logged `Linear: 0`; the Beta
+  session logged `Linear: 1` (PROVEN_BYTES). On the gate-off path with no local light, the PTR's terrain and sky programs
+  give Retail's output exactly (0 sRGB steps, executed), and a pixel test on five fitted PTR shots fits that path with no
+  free parameter (MEASURED). So **the PTR references stand for Retail's terrain and sky shader path at the Southfury
+  stand**; the PTR's CPU side (light selection, tables, fog constants) is another build, so full Retail equivalence stays
+  UNKNOWN until one live Retail shot at the same stand (9.8). The Beta shots do not stand for Retail. Every capture
+  records the `Linear:` line; a PTR session not at `linear 0` is a retake for Retail targets.
+- **Shader family.** On DX12 the clients bind the Shader Model 6 family (`dx_6_0`; Retail's log says so, the PTR's and
+  Beta's say "SM6"). The `dx_5_0` programs executed here have the same entry-to-program partition, constant rows and gates
+  as their `dx_6_0` counterparts (checked for terrain and sky); they stand for them by structure (INFERRED).
 - **The outdoor light** (terrain and M2, one scene-light block of up to 11 vectors). Two variants exist, and which one
   the client binds is UNKNOWN:
   - *hemisphere* (176 of 316 terrain programs, half the lit M2 programs): H = N . up >= 0 ? mix(horizon, up colour, N . up)
@@ -480,10 +500,14 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
   SkyFog (last ring and below), interpolated along the faces. Modern modifiers: the lowest ring leans to EndFogColor by
   far clip / EndFogColorDistance; a cubic tint towards SunFogColor around the sun; an older client also brightens rings
   1-4 at dawn and dusk where HighlightSky is set.
-- **Measured** against the PTR noon references with Stage 09's camera fits: the dome model fits within 2-10 sRGB steps
-  only at 19-26 deg elevation; below 18 deg it errs by 39-105 and over all bins of one shot it is worse than a simple
-  ring model; Beta fails both models (MEASURED, `verify-research`). The existing shots never show the upper sky. **The
-  sky model is therefore not established**; new sky captures settle it (T1, 9.4).
+- **Measured** (step 1, 2026-10-21, `D:\wmv-10\step1\mapping`): fed with the bytes at each shot's recorded time and
+  not tuned, the shared dome (pole and rings 1-3) fits clean sky within 0.3-3.6 sRGB steps at 10-19 deg elevation in
+  five PTR shots at 06:49, noon and 18:46; a 1-deg shift of ring 1 would move about 12 steps, so rings 1-2 sit within
+  about 0.3 deg (MEASURED). The earlier report of 39-105 steps below 18 deg came from a sunlit hill counted as sky, and
+  deviations above about 18 deg are clouds. The two public ring tables differ only below 2.16 deg, and the lowest sky in
+  any fitted shot is at 10 deg, so the lowest two rings (and whether the last ring leans to the end-fog colour) stay open:
+  one level horizon view settles them (T1). The sky program's horizon ramp works in the dome's own object units over z
+  in [0, 0.02], so the viewer builds the dome in the public table's units (table A, the modern renderer's, by default).
 - **Band order** (PROVEN_BYTES): the sky usually brightens from the zenith towards the horizon bands, and SkyFog (below
   the horizon) is darker; a strictly monotone order holds on only 27 % of noon days.
 
@@ -510,6 +534,16 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
   client's programs do not. Public documentation adds MOCV x 2 as precomputed light in world models and MOCV alpha as the
   interior/exterior blend (Stage 12; readable now from `material3_wmo_ps`). The older engine used clamp(Ambient +
   Diffuse N . L) x MCCV x texture x 2 and MCSH as baked shadow.
+- **Measured on the Stage 09 PTR shots** (step 1, 2026-10-21; Southfury, LightParams 5985, about 110,000 terrain pixels
+  per shot, the game against the viewer's unlit render at the fitted cameras): the **hemisphere** variant, not the flat
+  one (fit error 0.023 against 0.10-0.12); the wrap **unsaturated** as in the bytes (measured 0.710 / 0.907 / 1.104 at
+  N . L = -1 / 0 / 1 against 0.7 / 0.9 / 1.1); AmbientColor as the up colour, HorizonAmbientColor as the horizon,
+  DirectColor as the direct light (GroundAmbient untested: no terrain faces down); colours used as byte / 255 with an
+  overall scale of 0.990-1.009 at three times of day, so **no conversion constant**; the terrain specular has
+  DirectColor's hue (its scale is open); the **light direction follows the public table** (azimuth 44.5-46.3 deg,
+  elevation 38-39 deg at noon against the table's 36.8, 23.7 at 06:49 against 22.3, 20.9 at 18:46 against 22.2), not the
+  sun. Terrain cast shadows remove the direct light at 06:49 and 18:46 along that direction, but none appear at noon
+  (mechanism UNKNOWN; cast shadows are the follow-up of D10). Evidence: `D:\wmv-10\step1\mapping`.
 - **Data:** DirectColor is the warmer colour (R > B on 61-65 % of noon keys in every client, against 24-36 % for
   Ambient). Retail lowered the direct share relative to Era (3.2). HorizonAmbient and GroundAmbient exist only in modern
   data. ShadowOpacity's use is UNKNOWN.
@@ -844,7 +878,7 @@ and moons.
 | Item | Where | Why |
 |---|---|---|
 | Interior lighting: interior MOCV, blend batches, MOHD/MAVG, MOLT/MOLR/MNLD, MFOG, F_EXTLIGHT/F_SIDN/F_WINDOW, the camera inside a model | Stage 12 | the owner's constraint; Stage 10 gives only the context |
-| Exterior MOCV | Stage 10 if its behaviour is reliably established from the client's programs (section 0; result in 2.2), otherwise Stage 12 | no guessed multipliers |
+| Exterior MOCV | Stage 12 (or a later Stage 10 increment if a live Retail/MoP measurement settles its scale) | investigated 2026-10-21: partly established; its scale and per-batch mode are CPU-side, so including it now would need a guessed constant (2.2) |
 | `_lgt.wdt` placed lights | Stage 12 (D4) | local lights, the same problem as MOLT |
 | `_fogs.wdt` fog volumes, the volume-fog programs | Stage 12 or later (D4) | local; Retail and PTR spots are clear of them |
 | Beta's volume-fog table and its added columns | a later investigation | 28 unnamed fields; class C |
@@ -961,7 +995,7 @@ harness on a hidden desktop with the clock pinned.
 | T10 LUT | Classic Beta Southfury, 08:00 (no LUT) and 12:00 (LUT 8286665), contrast at its default | whether a global tone shift equal to the LUT applies (4.7) |
 
 | T11 where the light is evaluated | the ZB border: the character on one side, the camera zoomed out across it | camera or character position (the transect's tolerance depends on it) |
-| T12 lighting mode and engine branch | Southfury noon: the PTR at Lighting Mode 0 and 2; one live Retail pair at the same pose and settings | whether the PTR's linear path (4.0) is on at mode 2, and whether PTR shots at the matched mode stand for Retail 12.1.5 |
+| T12 engine branch | one live Retail screenshot at the Southfury stand at realm noon, same pose and settings as a Stage 09 PTR shot; optionally the PTR at `linear 1` (one restart) | whether the PTR's CPU side matches Retail at this stand (the shader path is settled, 4.0); the optional shot confirms that `linear` is the gate |
 | T13 uncontrolled effects | Southfury noon pairs: shadows off/on, SSAO off/on, sun shafts off/on, glow off/on (a stand with Glow > 0) | the share of each effect the viewer does not draw; the fit-set shots are then taken with them off |
 | T14 sun path | the sun disc at 08:00 and 17:00, and the sky's tint at 16:00 and 21:20 | the sun vector that feeds the sky's and the fog's tint (a core input) |
 
@@ -1062,10 +1096,15 @@ until it is settled.
 **The minimal first set** (Southfury on the PTR sandbox, about 10-12 screenshots, under 20 minutes; the helper addon v3
 records every setting and the game time by itself, one page of instructions, `CAPTURE.md`):
 
-1. at 12:00, the Stage 09 water pose and a sky view facing 210 deg pitched up about 15-20 deg, once at Lighting Mode 0 and
-   once at Lighting Mode 2 (settles which mode matches Retail's programs);
-2. the same two views at 18:45, at the matched mode;
-3. one shadows-off / shadows-on pair at noon (the missing-shadow difference, 6.15).
+1. at 12:00, the Stage 09 water pose, a level view facing 210 deg with the horizon low in the frame (the lowest sky
+   rings, T1) and a sky view facing 210 deg pitched up about 15-20 deg;
+2. the same three views at 18:45;
+3. one shadows-off / shadows-on pair at noon (the missing-shadow difference, 6.15);
+4. optional but valuable: one live Retail screenshot at the same stand at realm noon (T12; about 10 minutes from
+   Orgrimmar), which settles whether the PTR stands for Retail at this stand.
+
+The Lighting Mode pair first planned here is dropped: that setting is secondary-lighting quality, not the shader gate
+(4.0). The session must run at `linear 0`, which the client's log shows.
 
 Every other capture below is introduced only when a step needs it, and asked for then, with its own short page:
 
