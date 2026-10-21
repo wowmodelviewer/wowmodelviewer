@@ -56,7 +56,7 @@ builder, the orbit camera, and the IPC asset path.
 | World models placed on terrain (MODF) | done in 06 (the loaded tile's) | 06 |
 | Doodads (MDDF, WMO doodad sets) | done in 07 (the loaded tile's MDDF and the placed world models' sets; static, in their rest pose) | 07 |
 | Several tiles, streaming around the camera | done in 08 (3 x 3 around the camera, kept within 2 tiles, at most 16 resident; Stormwind flown through on four clients) | 08 |
-| Liquids (MH2O, WMO MLIQ) | done in 09 on four clients: MH2O on the streamed tiles and MLIQ in placed world models, from the liquid tables' layouts settled per client (U14); drawn as a documented approximation of the look, not yet compared with the game (`09-liquids.md` 6, 9) | 09 |
+| Liquids (MH2O, WMO MLIQ) | done in 09: MH2O on the streamed tiles and MLIQ in placed world models on four clients, from the liquid tables' layouts settled per client (U14); water and ocean coloured by the zone light at the camera and drawn in an approximation of the game's High look (clear water over the bed, ripples from the client's ripple map, screen-space reflection; `WMV_WATER=low` keeps the Low look), validated functionally on all four clients, compared with in-game references on Retail only (one spot, the Southfury River); the exit test (the exit tiles against references on Retail and Era) is still open (`09-liquids.md` 6, 9, 11, 12) | 09 |
 | World-model interior lighting (vertex colours, lights) | no | 10 |
 | Animated doodads and particle effects in the world | no | 11 |
 | Sky, fog, outdoor light | no | 12 |
