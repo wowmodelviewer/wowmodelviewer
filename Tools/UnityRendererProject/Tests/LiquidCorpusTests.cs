@@ -227,11 +227,14 @@ namespace Wmv.Wow.Tests
                                   string.Join(", ", bySize.Select(kv => (kv.Key < 0 ? "none" : LiquidFormat.BytesPerVertex(kv.Key) + " B") + " " + kv.Value))));
             Verdict(outside == 0, client + ": every height an existing quad uses lies in its instance's [min, max]", usedHeights + " used vertices, " + outside + " outside");
             Verdict(meshProblems == 0, client + ": each tile's liquid mesh = the existing quads and the vertices they use, every triangle up, finite", quadsAll + " quads");
-            // Without a catalogue every stored u/v is uv0, and planar uv0 spans 1/8 per quad: the largest extent inside a triangle is
-            // the largest stored step a triangle joins (taken the short way round the u16 wrap) x 1/256, or 1/8.
-            double wantExtent = Math.Max(maxQuadStep * (double)LiquidFormat.StoredUvScale, 1.0 / 8);
-            Verdict(Math.Abs(maxUvExtent - wantExtent) < 1e-3, client + ": uv0's largest extent inside a triangle = the largest stored u/v step a triangle joins x 1/256 " +
-                    "(the u16 wrap joined), or the planar 1/8",
+            // Without a catalogue every stored u/v is uv0, and planar uv0 spans 2/8 per quad (twice DefaultRepeatsPerChunk over a
+            // chunk's 8 quads): the largest extent inside a triangle is the largest stored step a triangle joins (taken the short way
+            // round the u16 wrap) x 1/256, or 1/4.
+            double planarExtent = TerrainLiquidMesh.PlanarRepeatFactor * TerrainLiquidMesh.DefaultRepeatsPerChunk / 8;
+            double wantExtent = Math.Max(maxQuadStep * (double)LiquidFormat.StoredUvScale, planarExtent);
+            Verdict(Math.Abs(maxUvExtent - wantExtent) < 1e-3 && planarExtent == 0.25,
+                    client + ": uv0's largest extent inside a triangle = the largest stored u/v step a triangle joins x 1/256 " +
+                    "(the u16 wrap joined), or the planar 1/4",
                     string.Format(CultureInfo.InvariantCulture, "extent {0:0.####}; largest step {1} at {2}; {3} instance(s) with stored u/v, {4} crossing the u16 wrap; " +
                                   "largest distance from an instance's reference vertex {5} (the join needs below 32,768)",
                                   maxUvExtent, maxQuadStep, maxQuadStepAt, uvInstances, uvWraps, maxRefStep));

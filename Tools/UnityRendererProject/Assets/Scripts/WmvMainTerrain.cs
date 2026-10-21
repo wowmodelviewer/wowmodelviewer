@@ -38,7 +38,12 @@
 //                       overview is never seen first.
 //   "liquids"        -> (protocol 19) a loadTerrainTile's or loadWorld's liquid offer: the tile's MH2O and its world models'
 //                       MLIQ drawn (WmvTerrainSessionLiquids, WmvLiquids), their frames shown on one liquid clock -- the
-//                       frame time added each Update, pinned by -wmvAnimTime as every model clock is
+//                       frame time added each Update, pinned by -wmvAnimTime as every model clock is, and given to the
+//                       shader as _WmvLiquidTime (the High look's ripples); its "lights", the water colours' zone light at
+//                       the main camera once a rendered frame (LiquidLightFrame, WmvLiquidLight). The High look's grab pass
+//                       (WmvWaterGrabPass) is installed with the terrain session, unless WMV_WATER=low, and removed with it
+//                       by this WmvMain only (it owns it); once a rendered frame the ripple map's offset for the floating
+//                       origin (_WmvRippleOrigin, RippleOriginFrame) follows the scene
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -142,6 +147,11 @@ public partial class WmvMain
                 terrain.OnStreamTileAnswer(a);
         };
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering += CullWorldModels;
+        // Stage 09: the liquids' zone light, off until a scene with zone lights is on screen (LiquidLightFrame); the High
+        // look's grab pass for the main camera's world view, and the water tune said once.
+        WmvLiquidLight.Log = s => Debug.Log("WMV: [liquids] " + s);
+        WmvLiquidLight.Off();
+        WmvWaterGrabPass.Configure(this, s => Debug.Log("WMV: [liquids] " + s));
         WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
             Debug.LogWarning("WMV: [terrain] " + note);
@@ -646,9 +656,15 @@ public partial class WmvMain
         return state + "|" + where + string.Format(ci, " yaw {0:0.0} pitch {1:0.0}", fly.Current.Yaw, fly.Current.Pitch);
     }
 
-    /// <summary>The free camera's position in the game's world frame: the inverse of WorldToUnity on the shown tile's mesh
-    /// origin, relative to its root ((ux, uy, uz) = (-(y - o.Y), z - o.Z, x - o.X)).</summary>
+    /// <summary>The free camera's position in the game's world frame (CameraWorldPosition).</summary>
     bool FlyWorldPosition(out double x, out double y, out double z)
+    {
+        return CameraWorldPosition(fly.transform.position, out x, out y, out z);
+    }
+
+    /// <summary>A Unity position `p` in the game's world frame: the inverse of WorldToUnity on the shown tile's mesh origin,
+    /// relative to its root ((ux, uy, uz) = (-(y - o.Y), z - o.Z, x - o.X)); false when no scene gives an origin.</summary>
+    bool CameraWorldPosition(Vector3 p, out double x, out double y, out double z)
     {
         x = y = z = 0.0;
         WmvRuntimeTerrainTile tile = terrain != null ? terrain.ShownTile : null;
@@ -660,7 +676,7 @@ public partial class WmvMain
             (scene != null && terrain.Streaming))
         {
             // A scene with no tile: relative to the scene root, with the scene's origin.
-            Vector3 v = fly.transform.position - TerrainSceneRoot().position;
+            Vector3 v = p - TerrainSceneRoot().position;
             x = v.z + scene.Origin.X;
             y = scene.Origin.Y - v.x;
             z = v.y + scene.Origin.Z;
@@ -668,7 +684,7 @@ public partial class WmvMain
         }
         if (tile == null || tile.Root == null || mesh == null)
             return false;
-        Vector3 u = fly.transform.position - tile.Root.transform.position;
+        Vector3 u = p - tile.Root.transform.position;
         x = u.z + mesh.Origin.X;
         y = mesh.Origin.Y - u.x;
         z = u.y + mesh.Origin.Z;
@@ -899,6 +915,7 @@ public partial class WmvMain
             float pinned = WmvModelBuilder.Debug_.AnimTime;
             liquidClock = pinned >= 0f ? pinned / 1000.0 : liquidClock + Time.deltaTime;
             terrain.TickLiquids(liquidClock);
+            Shader.SetGlobalFloat(WmvLiquidMaterials.LiquidTimeId, (float)liquidClock);
         }
         PumpGroundOwed();
         // The world view's frame times (the view off: none kept, the next entry starts over).
@@ -935,15 +952,55 @@ public partial class WmvMain
     }
 
     /// <summary>The world models' group culling and the doodads' instance culling, for the main camera as it renders (after
-    /// every camera of the frame has moved, and for a capture's own aspect): WmvWorldModels.Cull, WmvWorldDoodads.Cull.</summary>
+    /// every camera of the frame has moved, and for a capture's own aspect): WmvWorldModels.Cull, WmvWorldDoodads.Cull. First
+    /// the liquids' zone light at that camera (LiquidLightFrame) and the ripple map's origin offset (RippleOriginFrame), in
+    /// every view.</summary>
     void CullWorldModels(UnityEngine.Rendering.ScriptableRenderContext context, Camera cam)
     {
-        if (cam == null || cam != Camera.main || !TerrainViewActive)
+        if (cam == null || cam != Camera.main)
+            return;
+        LiquidLightFrame(cam);
+        RippleOriginFrame();
+        if (!TerrainViewActive)
             return;
         if (worldModels != null && worldModels.InstanceCount > 0)
             worldModels.Cull(cam);
         if (worldDoodads != null && worldDoodads.InstanceCount > 0)
             worldDoodads.Cull(cam);
+    }
+
+    /// <summary>Stage 09: the liquids' zone light at the main camera, once per rendered frame (WmvLiquidLight.Frame): the
+    /// scene's zone lights -- a single tile's, a world's or a streaming session's, in the terrain view only -- at the camera's
+    /// game position (CameraWorldPosition, the free camera's own conversion; the orbit camera is the same camera), eased by
+    /// the frame time and snapped while the liquid clock is pinned (-wmvAnimTime). Otherwise the zone light is off.</summary>
+    /// <summary>Stage 09 (the High look): the ripple map's offset for the floating origin, once a rendered frame --
+    /// _WmvRippleOrigin = (x, z mod tile A, x, z mod tile B) of the game position Unity's (0, 0, 0) stands for
+    /// (CameraWorldPosition of the origin: the shown tile's or the scene's origin and root), in the scene's axis sense
+    /// (LiquidHighMath.RippleOffset, in double). The shader adds it to the water's world xz, so a ripple lies at the same
+    /// game position however the scene was entered (a single tile, a streaming session entered from a neighbour). No scene:
+    /// 0. The tiles are the tune's (every liquid material carries them).</summary>
+    void RippleOriginFrame()
+    {
+        double x = 0.0, y = 0.0, z = 0.0;
+        Vector4 offset = Vector4.zero;
+        if (terrain != null && CameraWorldPosition(Vector3.zero, out x, out y, out z))
+        {
+            Wmv.Wow.World.LiquidHighTune tune = WmvLiquidMaterials.Tune;
+            double ax, az, bx, bz;
+            Wmv.Wow.World.LiquidHighMath.RippleOffset(x, y, tune[Wmv.Wow.World.LiquidHighTune.BumpTileA], out ax, out az);
+            Wmv.Wow.World.LiquidHighMath.RippleOffset(x, y, tune[Wmv.Wow.World.LiquidHighTune.BumpTileB], out bx, out bz);
+            offset = new Vector4((float)ax, (float)az, (float)bx, (float)bz);
+        }
+        Shader.SetGlobalVector(WmvLiquidMaterials.RippleOriginId, offset);
+    }
+
+    void LiquidLightFrame(Camera cam)
+    {
+        LiquidLights lights = TerrainViewActive && terrain != null ? terrain.SceneLights : null;
+        double x = 0.0, y = 0.0, z = 0.0;
+        if (lights != null && !CameraWorldPosition(cam.transform.position, out x, out y, out z))
+            lights = null;
+        WmvLiquidLight.Frame(Time.frameCount, Time.deltaTime, lights, x, y, z, WmvModelBuilder.Debug_.AnimTime >= 0f);
     }
 
     /// <summary>A tile world load's world models are settled (protocol 17: before its doodads): its camera now -- it stands on
@@ -958,6 +1015,7 @@ public partial class WmvMain
     void DisposeTerrain()
     {
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= CullWorldModels;
+        WmvWaterGrabPass.Release(this);                  // only when this WmvMain installed it (Configure)
         if (terrain != null)
             terrain.Dispose();
         PumpLaterDestroy(true);

@@ -16,12 +16,16 @@
 // instances or chunks: seams follow the data (same-type liquid matches at 99.6-100% of seams within 0.01 yd).
 //
 // Texture coordinates (uv0; 09-liquids.md 1.5, an approximation):
-//   - water and ocean kinds: world-planar. In the game's world frame, east = -y and north = +x; (east, north) / C
-//     (C = 1600/3/16 yd, a chunk) times the type's Float0 ("texture tiles per block", INFERRED), turned by Float1
-//     degrees ("rotation", INFERRED; counter-clockwise from east to north is a choice). Computed in double from the
-//     world position, then the floor of the instance's reference vertex (the first corner of its first existing
-//     quad) is subtracted from every vertex of the instance, so the floats stay small and the floating origin never
-//     moves the pattern (a whole-number shift is invisible to a repeating texture).
+//   - water and ocean kinds: world-planar, on the game's own axes. (u, v) = (X, Y) x 2 r / C in the game's world frame
+//     (X north, Y west; C = 1600/3/16 yd, a chunk; r = the type's Float0, "texture tiles per block", INFERRED): twice
+//     the type's repeats (PlanarRepeatFactor). The factor and the axes are MEASURED at one spot for type 5 (Southfury
+//     River: the ripple density, blob size and autocorrelation fit x2, the streaks' orientation fits these axes; the 180
+//     degree sense is UNKNOWN), and the factor matches an editor's rule in public format documentation (one repeat per
+//     4 liquid vertices); for every other type both are INFERRED. Turned by Float1 degrees ("rotation", INFERRED; from
+//     u towards v, counter-clockwise seen from above, is a choice). Computed in double from the world position, then
+//     the floor of the instance's reference vertex (the first corner of its first existing quad) is subtracted from
+//     every vertex of the instance, so the floats stay small and the floating origin never moves the pattern (a
+//     whole-number shift is invisible to a repeating texture).
 //   - other kinds whose vertex data stores u/v (formats 1 and 3): the stored u16 values times
 //     LiquidFormat.StoredUvScale (scale UNKNOWN). The u16 values wrap at 65536: each vertex is taken as its signed
 //     16-bit step from the reference vertex, which joins a wrap inside an instance (the corpus's largest distance from
@@ -30,7 +34,9 @@
 //   - other kinds without stored u/v: world-planar, as water.
 //   - a type the catalogue lacks: stored u/v when the data has them, else world-planar with DefaultRepeatsPerChunk
 //     and no rotation (a non-finite Float0 or Float1 is replaced the same way).
-// uv1 = (depth / 255, 1) at a vertex with a stored depth byte (formats 0, 2, 3), else (1, 0).
+// uv1 = (depth byte / 255, depth in yards) at a vertex with a stored depth byte (formats 0, 2, 3), else (1, -1): the
+// yards decoded on the scale the instance's second word picks (LiquidFormat.DepthYards: 2 or 42 the O scale, any other
+// the W scale; PROVEN_BYTES). The shader's fallback reads x (unchanged), its zone-light path y.
 //
 // Formats: the arrays come from the parser, which reads each vertex block by its size (the bytes). The format rule
 // (LiquidFormat.Decide) is evaluated per instance with vertex data; a decision taken from the size (no catalogue row)
@@ -68,6 +74,9 @@ namespace Wmv.Wow.World
     {
         /// <summary>Texture repeats per chunk for a type the catalogue lacks (a documented default, no rotation).</summary>
         public const double DefaultRepeatsPerChunk = 1.0;
+        /// <summary>Planar uv repeats this many times the type's Float0 per chunk: MEASURED at one spot for type 5 (Slow Water;
+        /// x1.75 fits too sparse, x2.25 too dense), INFERRED for every other type (see the file header).</summary>
+        public const double PlanarRepeatFactor = 2.0;
 
         /// <summary>Builds the tile's liquid surfaces. `liquids` may be null (no MH2O) or Malformed (no instances);
         /// `catalog` may be null (every type is then missing). Positions are relative to `origin`, like the
@@ -231,11 +240,11 @@ namespace Wmv.Wow.World
             WorldToUnity.Position(x, y, li.HeightAt(i, j), origin, out ux, out uy, out uz);
             double u, v;
             at.Uv(x, y, k, out u, out v);
-            float d1 = 1f, d2 = 0f;
+            float d1 = 1f, d2 = -1f;
             if (li.Depths != null)
             {
                 d1 = li.Depths[k] / 255f;
-                d2 = 1f;
+                d2 = (float)LiquidFormat.DepthYards(li.Depths[k], li.ObjectOrFormat);
             }
             index[k] = b.AddVertex(ux, uy, uz, (float)(u - at.ShiftU), (float)(v - at.ShiftV), d1, d2);
             return index[k];
@@ -248,16 +257,16 @@ namespace Wmv.Wow.World
             return reference + (double)unchecked((short)(ushort)(value - reference));
         }
 
-        /// <summary>World-planar texture coordinates of the game-frame point (x, y): (east, north) = (-y, x), in
-        /// chunks, times `repeatsPerChunk`, turned by `degrees` (counter-clockwise from east towards north).</summary>
+        /// <summary>World-planar texture coordinates of the game-frame point (x north, y west): (x, y) in chunks, times
+        /// PlanarRepeatFactor x `repeatsPerChunk`, turned by `degrees` (from u towards v: counter-clockwise seen from above).</summary>
         public static void PlanarUv(double x, double y, double repeatsPerChunk, double degrees, out double u, out double v)
         {
-            double e = -y / TerrainCoordinates.ChunkSize * repeatsPerChunk;
-            double nn = x / TerrainCoordinates.ChunkSize * repeatsPerChunk;
+            double s = PlanarRepeatFactor * repeatsPerChunk / TerrainCoordinates.ChunkSize;
+            double u0 = x * s, v0 = y * s;
             double a = degrees * (Math.PI / 180.0);
             double cs = Math.Cos(a), sn = Math.Sin(a);
-            u = e * cs - nn * sn;
-            v = e * sn + nn * cs;
+            u = u0 * cs - v0 * sn;
+            v = u0 * sn + v0 * cs;
         }
 
         static bool Finite(float f) { return !float.IsNaN(f) && !float.IsInfinity(f); }

@@ -385,10 +385,35 @@ namespace Wmv.Wow.Tests
                     continue;
                 onGrid++;
                 if (s.Positions[3 * v + 1] == hf(rc / 9, rc % 9)) heightOk++;
-                if (s.Uv1[2 * v] == (rc / 9) * 30 / 255f && s.Uv1[2 * v + 1] == 1f) depthOk++;
+                byte db = (byte)((rc / 9) * 30);
+                if (s.Uv1[2 * v] == db / 255f && s.Uv1[2 * v + 1] == (float)LiquidFormat.DepthYardsO(db)) depthOk++;
             }
             Check(onGrid == 81 && heightOk == 81, "positions: x and z bit-equal to the terrain's outer vertex (row y + i, column x + j); y = the stored height");
-            Check(depthOk == 81, "uv1 = (depth / 255, 1) where the vertex stores a depth");
+            Check(depthOk == 81, "uv1 = (depth byte / 255, depth in yards) where the vertex stores a depth: second word 42, the O scale");
+            // The scale follows the instance's second word: 0 (and a LiquidObject id) the W scale, 2 (depth-only) the O scale,
+            // 1 (no depth byte) none.
+            Func<ushort, int, LiquidSurface> worded = (word, format) => TerrainLiquidMesh.Build(
+                Parse(n => n == 0 ? LiquidChunkSpec.Of(new LiquidInstanceSpec { ObjectOrFormat = word, Format = format, HeightAt = (i, j) => 1f,
+                                                                                DepthAt = (i, j) => (byte)(i * 30 + j) }) : null).Liquids,
+                TX, TY, o, null).Surfaces[0];
+            Func<LiquidSurface, Func<byte, double>, bool> depthsAre = (ws, decode) =>
+            {
+                bool all = ws.VertexCount == 81;
+                for (int i = 0; i <= 8; i++)
+                    for (int j = 0; j <= 8; j++)
+                    {
+                        int v = VertexAt(ws, i, j, o);
+                        byte b = (byte)(i * 30 + j);
+                        all &= v >= 0 && ws.Uv1[2 * v] == b / 255f && ws.Uv1[2 * v + 1] == (float)decode(b);
+                    }
+                return all;
+            };
+            Check(depthsAre(worded(0, 0), LiquidFormat.DepthYardsW) && depthsAre(worded(600, 0), LiquidFormat.DepthYardsW) &&
+                  depthsAre(worded(2, 2), LiquidFormat.DepthYardsO) && depthsAre(worded(42, 3), LiquidFormat.DepthYardsO),
+                  "uv1's depth follows the second word: 0 and a LiquidObject id (600) the W scale, (b + 0.5) / 9; 2 and 42 the O scale, (b - 0.5) x 7/12");
+            LiquidSurface noDepth = worded(1, 1);
+            Check(noDepth.Uv1.Where((x, i) => i % 2 == 0).All(x => x == 1f) && noDepth.Uv1.Where((x, i) => i % 2 == 1).All(x => x == -1f),
+                  "uv1 = (1, -1) where no depth byte is stored (word 1, format 1)");
             Check(MinCrossY(s) > 0 && Math.Abs(MinCrossY(s) - U * U) < 1e-3, "winding: every triangle's Cross.y is U^2 > 0 (front faces up, as the terrain's)");
             Check(s.BoundsMin[1] == 60f && s.BoundsMax[1] == 61f && Math.Abs(s.BoundsMin[0] - (float)C) < 1e-3 && Math.Abs(s.BoundsMax[0] - (float)(2 * C)) < 1e-3,
                   "bounds over the vertices (chunk 17 spans ux C..2C)");
@@ -397,9 +422,9 @@ namespace Wmv.Wow.Tests
             AdtRoot pr = Parse(n => n == 0 ? LiquidChunkSpec.Of(new LiquidInstanceSpec { X = 2, Y = 3, Width = 3, Height = 2, Exists = (q, c) => (q + c) % 2 == 0, MinHeight = 7f, MaxHeight = 7f }) : null);
             TerrainLiquidTile pt = TerrainLiquidMesh.Build(pr.Liquids, TX, TY, o, null);
             LiquidSurface ps = pt.Surfaces[0];
-            Check(ps.QuadCount == 3 && ps.VertexCount == 10 && ps.Uv1.Where((x, i) => i % 2 == 0).All(x => x == 1f) && ps.Uv1.Where((x, i) => i % 2 == 1).All(x => x == 0f) &&
+            Check(ps.QuadCount == 3 && ps.VertexCount == 10 && ps.Uv1.Where((x, i) => i % 2 == 0).All(x => x == 1f) && ps.Uv1.Where((x, i) => i % 2 == 1).All(x => x == -1f) &&
                   ps.Positions.Where((x, i) => i % 3 == 1).All(y => y == 7f),
-                  "partial instance, quads (0,0) (0,2) (1,1): 3 quads, the 10 vertices they use; no data = flat at min, uv1 (1, 0)");
+                  "partial instance, quads (0,0) (0,2) (1,1): 3 quads, the 10 vertices they use; no data = flat at min, uv1 (1, -1)");
             double x0, y0;
             TerrainMeshBuilder.VertexWorldXY(TX, TY, 0, 0, TerrainVertexLayout.Outer(3, 2), out x0, out y0);
             float ex, ey, ez;
@@ -416,23 +441,27 @@ namespace Wmv.Wow.Tests
                   mt.Types.SequenceEqual(new[] { 5, 7 }) && mt.Surfaces[0].Type != null,
                   "layers: two types in one chunk make two surfaces; a type in two chunks shares one surface, vertices not shared across instances");
 
-            // Planar uv0 (water): Float0 repeats per chunk east (u) and north (v), Float1 turns them; shifted to [0, 1) at the reference.
+            // Planar uv0 (water): twice Float0 repeats per chunk on the game's axes, u along X (north) and v along Y (west), Float1
+            // turns them; shifted to [0, 1) at the reference. A column east is Y - C, a row south X - C.
             AdtRoot wr = Parse(n => n == 0 ? LiquidChunkSpec.Of(new LiquidInstanceSpec { Format = 3, HeightAt = (i, j) => 1f, UAt = (i, j) => 999 }) : null);
             LiquidSurface w2 = TerrainLiquidMesh.Build(wr.Liquids, TX, TY, o, Catalog(Type(5, LiquidKind.Water, 3, 2f, 0f))).Surfaces[0];
             float[] v00 = UvAt(w2, 0, 0, o), v08 = UvAt(w2, 0, 8, o), v80 = UvAt(w2, 8, 0, o);
             double pu, pv;
             TerrainLiquidMesh.PlanarUv(TerrainCoordinates.XOfRow(128 * TY), TerrainCoordinates.YOfColumn(128 * TX), 2, 0, out pu, out pv);
-            Check(w2.PlanarUvInstances == 1 && w2.StoredUvInstances == 0 && Math.Abs(v08[0] - v00[0] - 2) < 1e-4 && Math.Abs(v08[1] - v00[1]) < 1e-4 &&
-                  Math.Abs(v80[1] - v00[1] + 2) < 1e-4 && Math.Abs(v80[0] - v00[0]) < 1e-4 && v00[0] >= 0 && v00[0] <= 1 &&
+            Check(w2.PlanarUvInstances == 1 && w2.StoredUvInstances == 0 && Math.Abs(v08[1] - v00[1] + 4) < 1e-4 && Math.Abs(v08[0] - v00[0]) < 1e-4 &&
+                  Math.Abs(v80[0] - v00[0] + 4) < 1e-4 && Math.Abs(v80[1] - v00[1]) < 1e-4 && v00[0] >= 0 && v00[0] <= 1 &&
                   Math.Abs(v00[0] - (pu - Math.Floor(pu))) < 1e-6 && Math.Abs(v00[1] - (pv - Math.Floor(pv))) < 1e-6,
-                  "planar uv0 (water, even with stored u/v): Float0 = 2 repeats per chunk, u east, v north, world-frame value shifted by a whole number");
+                  "planar uv0 (water, even with stored u/v): Float0 = 2 gives 4 repeats per chunk, u along X (north), v along Y (west): a chunk " +
+                  "east dv = -4, a chunk south du = -4; world-frame value shifted by a whole number");
             LiquidSurface w90 = TerrainLiquidMesh.Build(wr.Liquids, TX, TY, o, Catalog(Type(5, LiquidKind.Ocean, 3, 2f, 90f))).Surfaces[0];
             float[] r00 = UvAt(w90, 0, 0, o), r08 = UvAt(w90, 0, 8, o), r80 = UvAt(w90, 8, 0, o);
-            Check(Math.Abs(r80[0] - r00[0] - 2) < 1e-4 && Math.Abs(r08[1] - r00[1] - 2) < 1e-4 && Math.Abs(r08[0] - r00[0]) < 1e-4,
-                  "planar uv0: Float1 = 90 degrees turns east into v and north into -u");
+            Check(Math.Abs(r08[0] - r00[0] - 4) < 1e-4 && Math.Abs(r08[1] - r00[1]) < 1e-4 && Math.Abs(r80[1] - r00[1] + 4) < 1e-4 &&
+                  Math.Abs(r80[0] - r00[0]) < 1e-4,
+                  "planar uv0: Float1 = 90 degrees turns u (north) into v and v (west) into -u: a chunk east du = +4, a chunk south dv = -4");
             LiquidSurface wd = TerrainLiquidMesh.Build(Parse(n => n == 0 ? LiquidChunkSpec.Of(new LiquidInstanceSpec()) : null).Liquids, TX, TY, o, null).Surfaces[0];
-            Check(Math.Abs(UvAt(wd, 0, 8, o)[0] - UvAt(wd, 0, 0, o)[0] - (float)TerrainLiquidMesh.DefaultRepeatsPerChunk) < 1e-4,
-                  "planar uv0 for a type the catalogue lacks: DefaultRepeatsPerChunk");
+            Check(Math.Abs(UvAt(wd, 0, 8, o)[1] - UvAt(wd, 0, 0, o)[1] + (float)(TerrainLiquidMesh.PlanarRepeatFactor * TerrainLiquidMesh.DefaultRepeatsPerChunk)) < 1e-4 &&
+                  TerrainLiquidMesh.PlanarRepeatFactor == 2.0,
+                  "planar uv0 for a type the catalogue lacks: twice DefaultRepeatsPerChunk (a chunk east dv = -2)");
             // Planar uv0 does not depend on the origin (only positions do).
             WorldOrigin far = new WorldOrigin(o.X - 3 * TerrainCoordinates.TileSize, o.Y + 5 * TerrainCoordinates.TileSize, 17);
             LiquidSurface wf = TerrainLiquidMesh.Build(wr.Liquids, TX, TY, far, Catalog(Type(5, LiquidKind.Water, 3, 2f, 0f))).Surfaces[0];
@@ -497,14 +526,21 @@ namespace Wmv.Wow.Tests
         /// <summary>uv0 of the surface vertex over chunk 0's outer grid point (row i, column j).</summary>
         static float[] UvAt(LiquidSurface s, int i, int j, WorldOrigin o)
         {
+            int v = VertexAt(s, i, j, o);
+            return v >= 0 ? new[] { s.Uv0[2 * v], s.Uv0[2 * v + 1] } : new[] { float.NaN, float.NaN };
+        }
+
+        /// <summary>The surface vertex over chunk 0's outer grid point (row i, column j), -1 when there is none.</summary>
+        static int VertexAt(LiquidSurface s, int i, int j, WorldOrigin o)
+        {
             double x, y;
             TerrainMeshBuilder.VertexWorldXY(TX, TY, 0, 0, TerrainVertexLayout.Outer(i, j), out x, out y);
             float ux, uy, uz;
             WorldToUnity.Position(x, y, 0, o, out ux, out uy, out uz);
             for (int v = 0; v < s.VertexCount; v++)
                 if (s.Positions[3 * v] == ux && s.Positions[3 * v + 2] == uz)
-                    return new[] { s.Uv0[2 * v], s.Uv0[2 * v + 1] };
-            return new[] { float.NaN, float.NaN };
+                    return v;
+            return -1;
         }
 
         // ================================================================================== MLIQ
@@ -624,7 +660,7 @@ namespace Wmv.Wow.Tests
                 float ux, uy, uz;
                 WowCoordinateConverter.ConvertPosition(new WowVec3((float)(10.0 + i * S), (float)(20.0 + j * S), l.Height(i, j)), out ux, out uy, out uz);
                 if (ux == s.Positions[3 * v] && uy == s.Positions[3 * v + 1] && uz == s.Positions[3 * v + 2] &&
-                    s.Uv1[2 * v] == l.Depth(i, j) / 255f && s.Uv1[2 * v + 1] == 1f && used.Add(j * 4 + i))
+                    s.Uv1[2 * v] == l.Depth(i, j) / 255f && s.Uv1[2 * v + 1] == (float)LiquidFormat.DepthYardsW(l.Depth(i, j)) && used.Add(j * 4 + i))
                     ok++;
             }
             int expectUsed = 0;
@@ -632,7 +668,8 @@ namespace Wmv.Wow.Tests
                 for (int i = 0; i < 4; i++)
                     if (l.VertexUsed(i, j)) expectUsed++;
             Check(s.QuadCount == 4 && s.VertexCount == expectUsed && ok == expectUsed && s.Instances == 1 && s.PlanarUvInstances == 1 && s.LiquidType == 13,
-                  "MLIQ mesh: present tiles only; vertex (i, j) = corner + (i S, j S, height) through WowCoordinateConverter; uv1 = (depth / 255, 1)");
+                  "MLIQ mesh: present tiles only; vertex (i, j) = corner + (i S, j S, height) through WowCoordinateConverter; uv1 = (depth byte / 255, " +
+                  "(b + 0.5) / 9 yd: the W scale)");
             Check(MinCrossY(s) > 0 && Math.Abs(MinCrossY(s) - S * S) < 1e-3, "MLIQ mesh winding: Cross.y = S^2 > 0, front faces up");
             Check(s.BoundsMin[1] == -5f && Math.Abs(s.BoundsMax[1] - (-5f + 0.75f + 1f)) < 1e-6, "MLIQ mesh bounds from the liquid's own vertices");
 
@@ -642,25 +679,31 @@ namespace Wmv.Wow.Tests
             for (int v = 0; v < ss.VertexCount; v++)
             {
                 int i = (int)Math.Round(ss.Positions[3 * v + 2] / S), j = (int)Math.Round(-ss.Positions[3 * v] / S);
-                stOk &= Math.Abs(ss.Uv0[2 * v] - i / 4.0) < 1e-6 && Math.Abs(ss.Uv0[2 * v + 1] - (-j / 4.0)) < 1e-6 && ss.Uv1[2 * v] == 1f && ss.Uv1[2 * v + 1] == 0f;
+                stOk &= Math.Abs(ss.Uv0[2 * v] - i / 4.0) < 1e-6 && Math.Abs(ss.Uv0[2 * v + 1] - (-j / 4.0)) < 1e-6 && ss.Uv1[2 * v] == 1f && ss.Uv1[2 * v + 1] == -1f;
             }
-            Check(stOk, "MLIQ mesh, LVF 1 (magma): uv0 = (s, t) x 1/256 shifted by a whole number, uv1 = (1, 0)");
+            Check(stOk, "MLIQ mesh, LVF 1 (magma): uv0 = (s, t) x 1/256 shifted by a whole number, uv1 = (1, -1)");
             Check(WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Magma, 3)) && WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Water, 1)) &&
                   !WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Magma, 0)) && !WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Slime, 2)) &&
                   WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Slime, -1)) && !WmoLiquidMesh.CarriesSt(Type(1, LiquidKind.Ocean, -1)) &&
                   !WmoLiquidMesh.CarriesSt(new LiquidTypeView { Id = 1 }) && !WmoLiquidMesh.CarriesSt(null),
                   "MLIQ payload: LVF 1 or 3 = s/t, LVF 0 or 2 = depth; without an LVF the kind (magma, slime = s/t); without either, depth");
             LiquidSurface missing = WmoLiquidMesh.Build(l, 13, null);
-            Check(missing.Type == null && missing.QuadCount == 4 && missing.Uv1[1] == 1f, "MLIQ mesh without a catalogue row: the depth reading");
+            Check(missing.Type == null && missing.QuadCount == 4 && missing.Uv1[1] == (float)LiquidFormat.DepthYardsW(l.Depth(0, 0)),
+                  "MLIQ mesh without a catalogue row: the depth reading");
             WmoLiquid absent = ParseMliq(WmoSynthetic.Mliq(new WmoSynthetic.LiquidSpec { Tile = (i, j) => 0x0F }), out problem);
             LiquidSurface empty = WmoLiquidMesh.Build(absent, 13, null);
             Check(empty.VertexCount == 0 && empty.QuadCount == 0 && empty.BoundsMin == null && empty.Instances == 0, "MLIQ without present tiles: an empty surface");
             WmoLiquid planar = ParseMliq(WmoSynthetic.Mliq(new WmoSynthetic.LiquidSpec { VerticesX = 9, VerticesY = 2 }), out problem);
             LiquidSurface ps = WmoLiquidMesh.Build(planar, 13, Catalog(Type(13, LiquidKind.Water, 0, 3f, 0f)));
-            float umin = float.PositiveInfinity, umax = float.NegativeInfinity;
+            float umin = float.PositiveInfinity, umax = float.NegativeInfinity, vmin = float.PositiveInfinity, vmax = float.NegativeInfinity;
             for (int v = 0; v < ps.VertexCount; v++)
-                if (ps.Positions[3 * v] == 0f) { umin = Math.Min(umin, ps.Uv0[2 * v + 1]); umax = Math.Max(umax, ps.Uv0[2 * v + 1]); }
-            Check(Math.Abs(umax - umin - 3f) < 1e-4, "MLIQ mesh, depth reading: planar uv0 in the group frame, Float0 = 3 repeats over 8 tiles (a chunk) north");
+                if (ps.Positions[3 * v] == 0f)
+                {
+                    umin = Math.Min(umin, ps.Uv0[2 * v]); umax = Math.Max(umax, ps.Uv0[2 * v]);
+                    vmin = Math.Min(vmin, ps.Uv0[2 * v + 1]); vmax = Math.Max(vmax, ps.Uv0[2 * v + 1]);
+                }
+            Check(Math.Abs(umax - umin - 6f) < 1e-4 && Math.Abs(vmax - vmin) < 1e-6,
+                  "MLIQ mesh, depth reading: planar uv0 in the group frame, Float0 = 3 gives 6 repeats in u over 8 tiles (a chunk) along x, v constant");
         }
 
         public static int RunAll(Action<string> output = null)

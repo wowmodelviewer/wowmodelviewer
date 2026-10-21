@@ -1,0 +1,19 @@
+COLUMNS
+int ID
+float Pos // a polygon corner in yards, (game X, game Y): proven from the bytes (the polygons named after cities hold those cities' TaxiNodes; read as (Y, X) they would not)
+int PointOrder // the corner's place in its polygon, 1 to n with no gap: proven from the bytes (every polygon of Retail, PTR, Classic Beta and MoP Classic)
+int ZoneLightID // the ZoneLight row the corner belongs to, from the section's relationship map: proven from the bytes (every readable ZoneLight row has its points; Classic Beta has one group of 4 whose ZoneLight row it cannot decrypt)
+
+COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
+COMMENT docs/world-viewer/09-liquids.md). The layout comes from public table definitions, read as hypotheses: every column
+COMMENT was checked against the clients' own bytes. Its hash is the same in Retail 12.1.5, PTR 12.1.7, Classic Beta 1.60.1,
+COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4; Classic Era's table has no rows (and no section). A layout not listed here
+COMMENT is not read.
+
+LAYOUT DE2377FB
+BUILD 12.1.5.70448, 12.1.7.70424, 1.60.1.70450, 1.15.9.70003, 5.5.4.70268
+COMMENT 2 fields; IDs in the section's ID list, the zone light in its relationship map.
+$noninline,id$ID<32>
+Pos[2]
+PointOrder<u8>
+$noninline,relation$ZoneLightID<32>

@@ -2,16 +2,18 @@
  * LiquidCatalog.h
  *
  * THE LIQUID CATALOGUE: the liquid types of the loaded client as its own liquid tables describe them -- each type's name,
- * its kind, its material, its colour and two of its parameters, and the FileDataIDs of its animated frames -- built once
- * as the client loads, from the database (LiquidType, LiquidMaterial, LiquidObject and LiquidTypeXTexture: database.xml
- * and dbd/Liquid*.dbd, each read only from a verified layout). Evidence for every column and rule:
- * docs/world-viewer/09-liquids.md 1.4 and 1.6.
+ * its kind, its material, its colour and two of its parameters, and the FileDataIDs of its animated frames and of its
+ * ripple normal map (its "bump") -- built once as the client loads, from the database (LiquidType, LiquidMaterial,
+ * LiquidObject and LiquidTypeXTexture: database.xml and dbd/Liquid*.dbd, each read only from a verified layout). Evidence
+ * for every column and rule: docs/world-viewer/09-liquids.md 1.4 and 1.6.
  *
  * The Unity player parses MH2O and MLIQ itself and reads no table: the host sends it this catalogue with a terrain or world
- * load (protocol 19, UnityIpcServer.h LIQUIDS) and serves the frames it names, and no other file, under getMapAsset's role
- * "liquidTexture". The catalogue opens no file: a type's frames are LiquidTypeXTexture's rows of it where the client has
- * some (Retail, MoP Classic, Classic Beta), else its slot-0 template expanded and each name looked up in the storage's
- * root (Classic Era, whose table has no rows): a name the root does not list is left out and counted, never guessed.
+ * load (protocol 19, UnityIpcServer.h LIQUIDS) and serves the frames and bumps it names, and no other file, under
+ * getMapAsset's role "liquidTexture". The catalogue opens no file: a type's frames are LiquidTypeXTexture's rows of it
+ * where the client has some (Retail, MoP Classic, Classic Beta), else its slot-0 template expanded and each name looked
+ * up in the storage's root (Classic Era, whose table has no rows): a name the root does not list is left out and counted,
+ * never guessed. Its bump is the first file of slots 1-5 whose name contains "bump": the rows after slot 0's frames, each
+ * named by the listfile, else the slot templates' names looked up in the root the same way.
  *
  * One catalogue belongs to one loaded client, like the map catalogue (WorldMapCatalog): the viewer builds it as a client
  * loads and drops it when another client loads; one kept past that finds belongsToActiveClient() false. GUI thread only.
@@ -58,6 +60,8 @@ namespace wow
     std::vector<int> frames;      // those frames as FileDataIDs, in frame order (1..N), the ones not found left out
     int framesUnresolved = 0;     // framesWanted less the frames found
     bool framesByName = false;    // found through the storage root's names (the client has no rows of the type)
+    int bump = 0;                 // the ripple normal map: the first texture of slots 1-5 whose file name contains "bump"
+                                  // (any case), as a FileDataID; 0 for none (the names PROVEN_BYTES, the rule INFERRED)
   };
 
   class _LIQUIDCATALOG_API_ LiquidCatalog
@@ -95,10 +99,13 @@ namespace wow
 
     const std::vector<LiquidTypeEntry> & types() const { return m_types; }
     const LiquidTypeEntry * find(int id) const;
-    // Every frame of every type, sorted, each once: the files getMapAsset's role "liquidTexture" may serve under a load
-    // sent with this catalogue. Never null.
+    // Every frame of every type, sorted, each once. Never null.
     std::shared_ptr<const std::vector<int>> frameIds() const { return m_frameIds; }
     bool isFrame(int fileDataID) const;
+    // Every frame and every bump of every type, sorted, each once: the files getMapAsset's role "liquidTexture" may serve
+    // under a load sent with this catalogue. Never null.
+    std::shared_ptr<const std::vector<int>> textureIds() const { return m_textureIds; }
+    bool isTexture(int fileDataID) const;
 
     const std::vector<Table> & tables() const { return m_tables; }
     const Table * table(const QString & name) const;
@@ -112,6 +119,11 @@ namespace wow
     // names files (MoP Classic): the FileDataID the root gives agreed with the row's, or not (the row's is kept).
     int framesCheckedByName() const { return m_checkedByName; }
     int framesDisagreeing() const { return m_disagreeing; }
+    // The bumps: the types that have one, the distinct files, and the slot names with "bump" the storage root did not
+    // list (a client without LiquidTypeXTexture rows).
+    int typesWithBump() const { return m_typesWithBump; }
+    size_t bumpCount() const { return m_bumpCount; }
+    int unresolvedBumps() const { return m_unresolvedBumps; }
     // LiquidObject rows whose LiquidTypeID (masked to its 16 bits) is no LiquidType ID (-1: not counted).
     qint64 objectsWithoutType() const { return m_objectsWithoutType; }
     double buildMilliseconds() const { return m_buildMs; }
@@ -125,7 +137,7 @@ namespace wow
     static QString statusName(Status s);
 
   private:
-    LiquidCatalog() : m_frameIds(std::make_shared<std::vector<int>>()) {}
+    LiquidCatalog() : m_frameIds(std::make_shared<std::vector<int>>()), m_textureIds(std::make_shared<std::vector<int>>()) {}
     void makeJson();
 
     Status m_status = Status::NoClient;
@@ -136,6 +148,7 @@ namespace wow
     quint64 m_storageGeneration = 0;
     std::vector<LiquidTypeEntry> m_types;
     std::shared_ptr<const std::vector<int>> m_frameIds;
+    std::shared_ptr<const std::vector<int>> m_textureIds;
     std::vector<Table> m_tables;
     size_t m_frameCount = 0;
     int m_unresolved = 0;
@@ -143,6 +156,9 @@ namespace wow
     int m_typesFromNames = 0;
     int m_checkedByName = 0;
     int m_disagreeing = 0;
+    int m_typesWithBump = 0;
+    size_t m_bumpCount = 0;
+    int m_unresolvedBumps = 0;
     qint64 m_objectsWithoutType = -1;
     double m_buildMs = 0.0;
     QJsonObject m_json;

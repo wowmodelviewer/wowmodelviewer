@@ -267,9 +267,12 @@ namespace Wmv.Wow
     /// A type without an LVF falls back to its kind (magma and slime: s, t); without either, depth.
     ///   uv0: (s, t) as stored (i16, not unwrapped: neighbouring steps stay far from the wrap) times
     ///        LiquidFormat.StoredUvScale, or for the depth reading planar in the group frame as for MH2O
-    ///        (TerrainLiquidMesh.PlanarUv on the group-frame x, y, the type's Float0 and Float1); shifted by the floor
-    ///        of the first used vertex's value;
-    ///   uv1: (depth / 255, 1) for the depth reading, (1, 0) for s, t.
+    ///        (TerrainLiquidMesh.PlanarUv on the group-frame x, y -- twice the type's Float0 repeats, turned by its Float1;
+    ///        whether the game uses the world or the group frame here is UNKNOWN); shifted by the floor of the first used
+    ///        vertex's value;
+    ///   uv1: (depth byte / 255, depth in yards) for the depth reading -- the W scale, (b + 0.5) / 9 yd
+    ///        (LiquidFormat.DepthYardsW; floor(9 x the depth to the group's floor) on 98.5% of Era and 89% of Retail
+    ///        vertices with a floor below, PROVEN_BYTES) --, (1, -1) for s, t.
     /// </summary>
     public static class WmoLiquidMesh
     {
@@ -367,11 +370,11 @@ namespace Wmv.Wow
             WowCoordinateConverter.ConvertPosition(new WowVec3((float)x, (float)y, liquid.Heights[k]), out ux, out uy, out uz);
             double u, v;
             RawUv(liquid, i, j, st, repeats, degrees, out u, out v);
-            float d1 = 1f, d2 = 0f;
+            float d1 = 1f, d2 = -1f;
             if (!st)
             {
                 d1 = liquid.Depth(i, j) / 255f;
-                d2 = 1f;
+                d2 = (float)LiquidFormat.DepthYardsW(liquid.Depth(i, j));
             }
             index[k] = b.AddVertex(ux, uy, uz, (float)(u - shiftU), (float)(v - shiftV), d1, d2);
             return index[k];

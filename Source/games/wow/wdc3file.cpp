@@ -372,6 +372,9 @@ bool WDC3File::open()
     curPtr += (m_sectionHeader[0].copy_table_count * sizeof(copy_table_entry));
     delete[] vals;
   }
+  m_copyRows.clear();
+  for (const copy_table_entry & c : copyTable)
+    m_copyRows.push_back(std::make_pair(c.newRowId, c.copiedRowId));
 
   // 5. offset map
 #pragma pack(2)
@@ -769,6 +772,8 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
           // record's own location: no record pointer is compared with another section's buffer, and no pointer is
           // formed until the string is known to start inside its block, and that block inside its section's buffer.
           // A string ends at the first NUL in its block; one without is not read (empty), like any unreadable text.
+          // An array's element counts from its own place in the field (readFieldValue's element stride): LiquidType's
+          // six Texture templates.
           std::string text;
           const RecordLocation loc = recordIndex < m_recordLocations.size() ? m_recordLocations[recordIndex]
                                                                             : RecordLocation{NO_SECTION, 0};
@@ -778,7 +783,9 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
             unsigned long long before = 0;
             for (uint32 s = 0; s < loc.section; s++)
               before += m_sectionHeader[s].record_count;
-            const unsigned long long pos = (before + loc.index) * rs + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val;
+            const field_storage_info & info = m_fieldStorageInfo[field->pos];
+            const unsigned long long element = field->arraySize > 1 ? (info.field_size_bits / 8 / field->arraySize) * i : 0;
+            const unsigned long long pos = (before + loc.index) * rs + info.field_offset_bits / 8 + element + val;
             const unsigned long long recordsEnd = static_cast<unsigned long long>(m_header.record_count) * rs;
             if (pos >= recordsEnd) // else it points back into the records: not a string
             {

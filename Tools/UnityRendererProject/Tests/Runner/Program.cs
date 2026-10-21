@@ -99,6 +99,12 @@ static class Program
         else
             failures += LiquidCorpusTests.Run(corpus, Environment.GetEnvironmentVariable("WMV_LIQUID_EXAMPLES"), Console.WriteLine);
 
+        // Stage 09 tuning: the zone light the water colours follow, its ease, and the depth and planar uv the shader reads.
+        Console.WriteLine("== LiquidLightTests (zone lights: selection, point lights, ease, sky; depth in yards, planar uv)");
+        failures += LiquidLightTests.RunAll(Console.WriteLine);
+        Console.WriteLine("== LiquidHighTests (the High water look: formulas, the water tune, the ripple map's check)");
+        failures += LiquidHighTests.RunAll(Console.WriteLine);
+
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))
         {

@@ -49,6 +49,7 @@
 #include "WoWFolder.h"
 #include "WorldMapCatalog.h"
 #include "LiquidCatalog.h"
+#include "LightCatalog.h"
 #include "CascLib.h"
 #include <QCryptographicHash>
 #include "animcontrol.h"
@@ -8906,10 +8907,14 @@ static void checkLiquidTextureDecisions(TerrainTestLog & tally)
 // 2026-10-18 for the four audited builds (another build: skipped, naming it); the exit tiles' types (2, kind 1; 5, kind
 // 0) present; the frames of types 1, 2 and 5 found, 30 each, and every frame of every type found (Classic Era's by their
 // names in its storage root); the table's frames agreeing with their names where the root names files; every
-// LiquidObject naming a LiquidType (its 16 bits masked); the catalogue as the player is sent it. Then frames read through
-// the host's own handler under a made-up load: one served whole, a BLP2 with its content key as md5, counted on the
-// liquid budget; asked again, refused; a file that is no frame, refused unread; over what is left of the load's liquid
-// budget, refused for the load, unread; over a per-file limit of 1000 bytes, unreadable.
+// LiquidObject naming a LiquidType (its 16 bits masked); for the audited builds (another build: skipped, naming it) type
+// 5's six texture templates as stored (each string of the array from its own place), the bumps -- types 1, 2, 5, 13 and
+// 14 newoceanbump.blp (463849) -- and the types with one and the distinct files as counted offline on 2026-10-20 with the
+// same rule; the catalogue as the player is sent it, and the files the role may serve (the frames and the bumps). Then
+// frames read through the host's own handler under a made-up load: one served whole, a BLP2 with its content key as md5,
+// counted on the liquid budget; asked again, refused; type 5's bump served the same way (an audited build: it must have
+// one; another: when it has one); a file that is neither, refused unread; over what is left of the load's liquid budget,
+// refused for the load, unread; over a per-file limit of 1000 bytes, unreadable.
 static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
 {
   const std::shared_ptr<wow::LiquidCatalog> c = frame->liquidCatalog();
@@ -8955,6 +8960,9 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
   for (const Rows & r : counted)
     if (c->clientProduct() == QLatin1String(r.product) && c->clientBuild() == QLatin1String(r.build))
       expected = &r;
+  // The pinned checks below (counts, type 5's templates and bump) hold for these four builds only.
+  const bool audited = expected != nullptr;
+  const QString notAudited = client + " is not one of the four audited builds (docs/world-viewer/09-liquids.md 1.4)";
   const auto rowsOf = [&c](const char * name) {
     const wow::LiquidCatalog::Table * t = c->table(QString::fromLatin1(name));
     return t ? t->rows : -1;
@@ -9022,7 +9030,69 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
   // 7. LiquidObject's LiquidTypeID, masked to its 16 bits.
   tally.check("liquids: every LiquidObject names a LiquidType (its pallet value masked to 16 bits)",
               c->objectsWithoutType() == 0, QString("%1 rows name none").arg(c->objectsWithoutType()));
-  // 8. The catalogue as the player is sent it, and the frames the role may serve.
+  // 7b. LiquidType's six templates, an array of strings: each element's offset counts from its own place (the same six on
+  // the four audited clients; another build: skipped).
+  if (!audited)
+    tally.skip("liquids: type 5's six texture templates read as stored (each string of the array from its own place)", notAudited);
+  else
+  {
+    const QStringList stored = QStringList() << "XTextures\\river\\lake_a.%d.blp" << "proceduralRiverDepthTex"
+                                             << "XTextures\\ocean\\newoceanbump.blp" << "XTextures\\foam\\waterchop7bw.blp"
+                                             << "" << "";
+    const sqlResult t = GAMEDATABASE.sqlQuery(
+      "SELECT Texture1, Texture2, Texture3, Texture4, Texture5, Texture6 FROM LiquidType WHERE ID = 5");
+    QStringList read;
+    if (t.valid && !t.values.empty())
+      for (const QString & s : t.values[0])
+        read << s;
+    tally.check("liquids: type 5's six texture templates read as stored (each string of the array from its own place)",
+                read == stored, "\"" + read.join("\", \"") + "\"");
+  }
+  // 7c. The bumps: the first texture of slots 1-5 whose file name contains "bump" -- newoceanbump.blp for the water and
+  // ocean types 1, 2, 5, 13 and 14 -- and, for the audited builds, the types with one and the distinct files as counted
+  // offline with the same rule (the rows after slot 0's frames named by the listfile; Classic Era: the templates' names
+  // in its storage root).
+  {
+    QStringList lines;
+    bool newOcean = true;
+    for (int id : {1, 2, 5, 13, 14})
+    {
+      const wow::LiquidTypeEntry * e = c->find(id);
+      newOcean = newOcean && e && e->bump == 463849;
+      lines << QString("%1: %2").arg(id).arg(e ? e->bump : -1);
+    }
+    if (!audited)
+      tally.skip("liquids: types 1, 2, 5, 13 and 14 have newoceanbump.blp (463849) as their bump",
+                 notAudited + "; " + lines.join(", "));
+    else
+      tally.check("liquids: types 1, 2, 5, 13 and 14 have newoceanbump.blp (463849) as their bump", newOcean, lines.join(", "));
+    struct Bumps
+    {
+      const char * product;
+      const char * build;
+      int types;
+      size_t distinct;
+    };
+    const Bumps bumpsCounted[] = {{"wow", "12.1.5.70448", 116, 4},
+                                  {"wow_classic_era", "1.15.9.70003", 9, 1},
+                                  {"wow_classic", "5.5.4.70449", 42, 3},
+                                  {"wow_classic_beta", "1.60.1.70450", 10, 1}};
+    const Bumps * bumpsExpected = nullptr;
+    for (const Bumps & b : bumpsCounted)
+      if (c->clientProduct() == QLatin1String(b.product) && c->clientBuild() == QLatin1String(b.build))
+        bumpsExpected = &b;
+    const QString found = QString("bumps on %1 types, %2 distinct, %3 names unresolved").arg(c->typesWithBump())
+                            .arg(c->bumpCount()).arg(c->unresolvedBumps());
+    if (!bumpsExpected)
+      tally.skip("liquids: the types with a bump and the distinct bumps are those counted for the audited builds",
+                 client + " is not one of the four audited builds; " + found);
+    else
+      tally.check("liquids: the types with a bump and the distinct bumps are those counted for " + client,
+                  c->typesWithBump() == bumpsExpected->types && c->bumpCount() == bumpsExpected->distinct &&
+                    c->unresolvedBumps() == 0,
+                  found + QString(" (expected %1, %2, 0)").arg(bumpsExpected->types).arg(bumpsExpected->distinct));
+  }
+  // 8. The catalogue as the player is sent it, and the frames and bumps the role may serve.
   {
     const QJsonObject j = c->toJson();
     const QJsonArray types = j.value("types").toArray();
@@ -9038,18 +9108,33 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
                        (quint32)five.value("minimapColor").toDouble() == slow->minimapColor &&
                        five.value("material").toInt(-1) == slow->material && five.value("lvf").toInt(-9) == slow->lvf &&
                        five.value("materialFlags").toInt(-9) == slow->materialFlags && five.contains("float0") &&
-                       five.contains("float1") && five.value("name").toString() == slow->name;
+                       five.contains("float1") && five.value("name").toString() == slow->name &&
+                       five.value("bump").toInt(-1) == slow->bump;
     const std::shared_ptr<const std::vector<int>> ids = c->frameIds();
     const bool set = ids && std::is_sorted(ids->begin(), ids->end()) &&
                      std::adjacent_find(ids->begin(), ids->end()) == ids->end() && slow && !slow->frames.empty() &&
                      c->isFrame(slow->frames.front()) && !c->isFrame(0) && ids->size() <= c->frameCount();
+    // The files the role may serve: the frames and the bumps, sorted, each once, and nothing else.
+    const std::shared_ptr<const std::vector<int>> servable = c->textureIds();
+    std::vector<int> framesAndBumps(ids ? *ids : std::vector<int>());
+    for (const wow::LiquidTypeEntry & e : c->types())
+      if (e.bump > 0)
+        framesAndBumps.push_back(e.bump);
+    std::sort(framesAndBumps.begin(), framesAndBumps.end());
+    framesAndBumps.erase(std::unique(framesAndBumps.begin(), framesAndBumps.end()), framesAndBumps.end());
+    // (Type 5's bump is pinned for the audited builds; another build's type 5 may have none.)
+    const bool servableSet = servable && *servable == framesAndBumps && slow &&
+                             (slow->bump > 0 ? c->isTexture(slow->bump) && !c->isFrame(slow->bump) : !audited) &&
+                             !slow->frames.empty() && c->isTexture(slow->frames.front()) && !c->isTexture(0);
     const QByteArray bytes = QJsonDocument(j).toJson(QJsonDocument::Compact);
     tally.check("liquids: the catalogue as the player is sent it (state ok, the client, every type; type 5's kind, frames, "
-                "colour and material), and its frames sorted, each once",
-                shape && set,
+                "colour, material and bump), its frames sorted, each once, and the files the role may serve its frames and "
+                "bumps",
+                shape && set && servableSet,
                 QString("%1 bytes as sent; type 5 ").arg(bytes.size()) +
                   QString::fromUtf8(QJsonDocument(five).toJson(QJsonDocument::Compact)).left(400) +
-                  QString("; %1 distinct frames").arg(ids ? ids->size() : 0));
+                  QString("; %1 distinct frames, %2 servable (%3 bumps)").arg(ids ? ids->size() : 0)
+                    .arg(servable ? servable->size() : 0).arg(c->bumpCount()));
     // The "liquids" object a load carries to a protocol-19 player: the budgets of the document's 1.9 and this catalogue.
     UnityIpcServer::TerrainTileCommand command;
     command.liquids = true;
@@ -9085,7 +9170,7 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
   base.maxLiquidTexturesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURES_PER_LOAD;
   base.maxLiquidTextureBytes = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES;
   base.maxLiquidTextureBytesPerLoad = UnityIpcServer::MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
-  base.liquidFrames = c->frameIds();
+  base.liquidFrames = c->textureIds();   // what RequestLoad gives a load: the frames and the bumps
   const auto ask = [&base](int id) {
     QJsonObject r;
     r["type"] = "getMapAsset";
@@ -9116,6 +9201,24 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
   tally.check(QString("liquids: frame %1 asked again under the same load is refused, unread").arg(frameId),
               again.state == "refused" && again.detail.contains("before") && again.readMs < 0.0 && again.bytesRead == 0,
               describe(again));
+  // Type 5's bump, under the same load: served as a frame is (whole, a BLP2, on the liquid budget), the load's second id.
+  if (slow->bump > 0)
+  {
+    const qint64 before = frame->m_terrainRequest.liquidTextureBytesRead;
+    const UnityIpcServer::MapAssetAnswer bump = frame->ServeMapAssetAndWait(ask(slow->bump));
+    const ModelViewer::TerrainRequest & tb = frame->m_terrainRequest;
+    tally.check(QString("liquids: type 5's bump %1 is served whole, a BLP2, counted on the load's liquid budget")
+                  .arg(slow->bump),
+                bump.state == "available" && !bump.bytes.isEmpty() && bump.bytes.startsWith("BLP2") &&
+                  bump.bytesRead == bump.bytes.size() && tb.liquidTextureBytesRead == before + bump.bytes.size() &&
+                  tb.liquidTextureIds.size() == 2 && tb.liquidReads == 2 && tb.liquidTextureBytesReserved == 0,
+                describe(bump) + QString("; liquid bytes read %1, %2 id(s)").arg(tb.liquidTextureBytesRead)
+                                   .arg(tb.liquidTextureIds.size()));
+  }
+  else if (!audited)
+    tally.skip("liquids: type 5's bump is served through the host's own handler", notAudited + "; its type 5 has no bump");
+  else
+    tally.check("liquids: type 5's bump is served through the host's own handler", false, "type 5 has no bump");
   const UnityIpcServer::MapAssetAnswer notFrame = frame->ServeMapAssetAndWait(ask(base.wdtFileDataID));
   tally.check(QString("liquids: FileDataID %1 (a WDT) asked for as a liquid texture is refused, unread").arg(base.wdtFileDataID),
               notFrame.state == "refused" && notFrame.detail.contains("is not a liquid texture") && notFrame.readMs < 0.0,
@@ -9148,6 +9251,444 @@ static void checkLiquidCatalog(ModelViewer * frame, TerrainTestLog & tally)
     tally.skip("liquids: a frame over what is left of the liquid budget, and over a per-file limit",
                QString("frame %1 is %2 bytes").arg(frameId).arg(size));
   frame->m_terrainRequest = saved;
+}
+
+// THE ZONE LIGHT (docs/world-viewer/09-liquids.md): the light catalogue of the loaded client (wow::LightCatalog, built as
+// it loaded) and the "lights" a load's liquids offer carries. For the audited builds, every number below was counted
+// offline from the client's own tables with the same rules, on 2026-10-20 (another build: those checks skipped, naming
+// it): the five tables' layouts and rows; what the build found in them (keys, alphas, polygons and their relationships,
+// the slot-0 LightParams of every light, the copy rows); maps 0 and 1 as sent; the spots -- Retail: Durotar's river in zone
+// 139 -> Light 204 -> LightParams 5985 and Stormwind Harbor's in zone 1859; Classic Era: no polygon (no ZoneLight rows), the
+// map default with point Light 204 at full weight; Classic Beta: no polygon at Durotar and a default with no water colour
+// -- and the maps' defaults, each with its water and its sky (SkyBand1Color: Durotar's (246,178,88) at 12:00, the column
+// measured nearest the game's sky there, dbd/LightData.dbd). On every client: the key sampler on made-up days (five
+// colours); the polygon order and no zone light among the points; a size bound; a map with no lights and the unavailable
+// shape; the offer's five keys with lights.
+// WMV_LIGHTS_DUMP=<folder> also writes the lights of maps 0 and 1 there, as lights_<product>_map<N>.json (to compare with
+// an offline reference; nothing reads them back).
+static void checkLightCatalog(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const std::shared_ptr<wow::LightCatalog> c = frame->lightCatalog();
+  if (!c || c->status() != wow::LightCatalog::Status::Ready || !c->belongsToActiveClient())
+  {
+    tally.check("lights: the loaded client's light catalogue is ready", false,
+                c ? wow::LightCatalog::statusName(c->status()) + ": " + c->statusDetail() +
+                      (c->belongsToActiveClient() ? QString() : QString(" (not the loaded client's)"))
+                  : QString("there is none"));
+    return;
+  }
+  const QString client = c->clientProduct() + " " + c->clientBuild();
+  const char * const names[5] = {"Light", "LightParams", "LightData", "ZoneLight", "ZoneLightPoint"};
+  struct Audited
+  {
+    const char * product;
+    const char * build;
+    const char * layouts[5];   // as names[]
+    qint64 rows[5];
+    qint64 coloursMasked;
+    int pointsWithoutZone, zonesWithoutLight, lightsWithoutSlot, lightsWithoutKeys, lightsByCopySource, copyRows;
+    int maps[2][4];            // maps 0 and 1 as sent: zones, their corners, points, values
+    int defaults[2];           // ... their default lights (from an origin row with falloff end 0)
+  };
+  const Audited audited[] = {
+    {"wow", "12.1.5.70448", {"5F16BC84", "CAE394E7", "6ABF2921", "94CE95E0", "DE2377FB"}, {5361, 3745, 19881, 735, 16440},
+     69, 0, 0, 1, 1, 2, 2069, {{82, 3608, 206, 266}, {25, 833, 111, 137}}, {1, 191}},
+    {"wowt", "12.1.7.70424", {"5F16BC84", "A7F31923", "360DA016", "94CE95E0", "DE2377FB"}, {5376, 3760, 19932, 737, 16448},
+     69, 0, 0, 1, 1, 2, 2078, {{82, 3608, 206, 266}, {25, 833, 111, 137}}, {1, 191}},
+    {"wow_classic_era", "1.15.9.70003", {"5F16BC84", "51C96BAD", "70C6CD80", "BA8274F0", "DE2377FB"}, {512, 452, 1795, 0, 0},
+     0, 0, 0, 0, 0, 0, 0, {{0, 0, 80, 56}, {0, 0, 126, 122}}, {1, 191}},
+    {"wow_classic", "5.5.4.70268", {"5F16BC84", "51C96BAD", "70C6CD80", "BA8274F0", "DE2377FB"}, {1504, 1215, 5690, 80, 2692},
+     71, 0, 0, 0, 0, 0, 0, {{12, 260, 251, 242}, {15, 372, 173, 189}}, {1, 191}},
+    {"wow_classic_beta", "1.60.1.70450", {"5F16BC84", "A7F31923", "360DA016", "94CE95E0", "DE2377FB"}, {621, 873, 5910, 24, 649},
+     0, 4, 1, 0, 0, 0, 478, {{9, 315, 75, 6}, {9, 294, 122, 1}}, {1, 191}},
+  };
+  const Audited * expected = nullptr;
+  for (const Audited & a : audited)
+    if (c->clientProduct() == QLatin1String(a.product) && c->clientBuild() == QLatin1String(a.build))
+      expected = &a;
+  const QString notAudited = client + " is not one of the audited builds (docs/world-viewer/09-liquids.md)";
+
+  // 1. The tables, each from a verified layout (the audited builds: the one counted), and their rows.
+  QStringList tables;
+  bool verified = true, layoutsAsCounted = true, rowsAsCounted = true;
+  for (int i = 0; i < 5; i++)
+  {
+    const wow::LightCatalog::Table * t = c->table(QString::fromLatin1(names[i]));
+    verified = verified && t && t->read && t->rows >= 0;
+    layoutsAsCounted = layoutsAsCounted && t && expected && t->layout == QLatin1String(expected->layouts[i]);
+    rowsAsCounted = rowsAsCounted && t && expected && t->rows == expected->rows[i];
+    tables << (t ? QString("%1 %2 (%3) %4 rows%5%6").arg(t->name, t->layout, t->state).arg(t->rows)
+                     .arg(t->lockedRows > 0 ? QString(", %1 locked").arg(t->lockedRows) : QString())
+                     .arg(t->absentFields.isEmpty() ? QString() : ", absent: " + t->absentFields.join(" "))
+                 : QString(names[i]) + " missing");
+  }
+  tally.check("lights: the five light tables are read from verified layouts" +
+                (expected ? QString(", the ones counted for ") + client : " (" + client + ")"),
+              verified && (!expected || layoutsAsCounted), tables.join("; "));
+  if (!expected)
+    tally.skip("lights: the tables' rows are those counted for the audited builds", notAudited);
+  else
+    tally.check("lights: the tables' rows are those counted for " + client, rowsAsCounted,
+                QString("expected %1 / %2 / %3 / %4 / %5").arg(expected->rows[0]).arg(expected->rows[1]).arg(expected->rows[2])
+                  .arg(expected->rows[3]).arg(expected->rows[4]));
+
+  // 2. What the build found: every key within the day and each time once a day, every alpha in [0, 1], every polygon's
+  // corners 1..n and 3 or more; the corners without a zone and the zones without a light only where the rows they name
+  // are in sections this computer cannot read (Classic Beta); the slot-0 LightParams of every light and the copy rows as
+  // counted (Retail: Light 12616 has none, Light 8048's has no keys, Lights 6103 and 10435 take their copy source's).
+  const wow::LightCatalog::Counts & n = c->counts();
+  const wow::LightCatalog::Table * zoneTable = c->table("ZoneLight");
+  const wow::LightCatalog::Table * lightTable = c->table("Light");
+  const QString found = QString("keys outside the day %1, repeated %2; alphas outside [0, 1] %3; polygons out of order %4, "
+                                "zones with fewer than 3 points %5; points without a zone %6 (ZoneLight locked %7), zones "
+                                "without a light %8 (Light locked %9)")
+                          .arg(n.keysOutsideDay).arg(n.keysRepeated).arg(n.alphasOutsideRange).arg(n.polygonsOutOfOrder)
+                          .arg(n.zonesWithoutPoints).arg(n.pointsWithoutZone).arg(zoneTable ? zoneTable->lockedRows : -1)
+                          .arg(n.zonesWithoutLight).arg(lightTable ? lightTable->lockedRows : -1);
+  const bool sound = n.keysOutsideDay == 0 && n.keysRepeated == 0 && n.alphasOutsideRange == 0 && n.polygonsOutOfOrder == 0 &&
+                     n.zonesWithoutPoints == 0;
+  const bool orphans = expected ? n.pointsWithoutZone == expected->pointsWithoutZone &&
+                                    n.zonesWithoutLight == expected->zonesWithoutLight
+                                : (n.pointsWithoutZone == 0 || (zoneTable && zoneTable->lockedRows > 0)) &&
+                                    (n.zonesWithoutLight == 0 || (lightTable && lightTable->lockedRows > 0));
+  tally.check("lights: every key within the day, once a time; every alpha in [0, 1]; every polygon's corners 1..n; a "
+              "corner without a zone or a zone without a light only for rows this computer cannot read", sound && orphans,
+              found);
+  const QString slotText = QString("slot 0 of no LightParams on %1 light(s), no LightParams row on %2, no keys on %3, its copy "
+                                "source's keys on %4; LightParams copy rows %5; keys with a colour masked to 24 bits %6")
+                          .arg(n.lightsWithoutSlot).arg(n.lightsWithoutParams).arg(n.lightsWithoutKeys)
+                          .arg(n.lightsByCopySource).arg(n.copyRows).arg(n.coloursMasked);
+  if (!expected)
+    tally.check("lights: every light's slot-0 LightParams is a LightParams row, the copy rows read (" + client + ")",
+                n.lightsWithoutParams == 0 && n.copyRows >= 0 && n.coloursMasked >= 0, slotText);
+  else
+    tally.check("lights: the lights' slot-0 LightParams, the copy rows and the masked colours are those counted for " + client,
+                n.lightsWithoutParams == 0 && n.lightsWithoutSlot == expected->lightsWithoutSlot &&
+                  n.lightsWithoutKeys == expected->lightsWithoutKeys && n.lightsByCopySource == expected->lightsByCopySource &&
+                  n.copyRows == expected->copyRows && n.coloursMasked == expected->coloursMasked,
+                slotText + QString(" (expected %1, 0, %2, %3; %4; %5)").arg(expected->lightsWithoutSlot)
+                          .arg(expected->lightsWithoutKeys).arg(expected->lightsByCopySource).arg(expected->copyRows)
+                          .arg(expected->coloursMasked));
+
+  // 3. The sampler on made-up days (the five colours of a key alike): the key at the time; between two keys (0.6 of the
+  // way); before the first key, from the last one across midnight; after the last, to the first across midnight; one key
+  // all day; no key.
+  {
+    const auto key = [](int time, quint32 rgb) {
+      wow::LightCatalog::Key k;
+      k.time = time;
+      k.riverClose = k.riverFar = k.oceanClose = k.oceanFar = k.sky = rgb;
+      return k;
+    };
+    struct Case
+    {
+      const char * what;
+      std::vector<wow::LightCatalog::Key> keys;
+      int r, g, b;
+    };
+    const Case cases[] = {
+      {"at a key", {key(0, 0xFFFFFF), key(1440, 0x102030), key(2000, 0)}, 16, 32, 48},
+      {"between keys", {key(600, 0x000000), key(2000, 0x8C461C)}, 84, 42, 17},
+      {"across midnight from the last key", {key(1500, 0x000000), key(2500, 0xC8C8C8)}, 6, 6, 6},
+      {"across midnight to the first key", {key(100, 0x646464), key(1000, 0x000000)}, 22, 22, 22},
+      {"one key", {key(300, 0x0A141E)}, 10, 20, 30},
+    };
+    QStringList lines;
+    bool all = true;
+    for (const Case & k : cases)
+    {
+      wow::LightCatalog::Water w;
+      const bool ok = wow::LightCatalog::sample(k.keys, wow::LightCatalog::TIME, w);
+      bool same = ok;
+      for (int i = 0; i < 5; i++)
+        same = same && w.colour[i][0] == k.r && w.colour[i][1] == k.g && w.colour[i][2] == k.b;
+      all = all && same;
+      lines << QString("%1: (%2,%3,%4)").arg(k.what).arg(w.colour[0][0]).arg(w.colour[0][1]).arg(w.colour[0][2]);
+    }
+    wow::LightCatalog::Water none;
+    const bool empty = !wow::LightCatalog::sample(std::vector<wow::LightCatalog::Key>(), wow::LightCatalog::TIME, none);
+    tally.check("lights: the key sampler at 12:00 on made-up days (at a key, between keys, across midnight both ways, one "
+                "key, none)", all && empty, lines.join("; ") + (empty ? "; none: no water" : "; none: water?"));
+  }
+
+  // The object of a map as sent, read the way the player reads it.
+  const auto valueOf = [](const QJsonObject & lights, int light) {
+    for (const QJsonValue & v : lights.value("values").toArray())
+      if (v.toObject().value("light").toInt() == light)
+        return v.toObject();
+    return QJsonObject();
+  };
+  // The base light at (x, y, z): the first zone in the order sent whose height range holds z and whose polygon holds
+  // (x, y) (even-odd), else the default light.
+  const auto baseAt = [](const QJsonObject & lights, double x, double y, double z, int & zone) {
+    zone = 0;
+    for (const QJsonValue & v : lights.value("zones").toArray())
+    {
+      const QJsonObject o = v.toObject();
+      if (z < o.value("zmin").toDouble() || z > o.value("zmax").toDouble())
+        continue;
+      const QJsonArray p = o.value("poly").toArray();
+      const int corners = p.size() / 2;
+      bool inside = false;
+      for (int i = 0, j = corners - 1; i < corners; j = i++)
+      {
+        const double xi = p[2 * i].toDouble(), yi = p[2 * i + 1].toDouble();
+        const double xj = p[2 * j].toDouble(), yj = p[2 * j + 1].toDouble();
+        if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+          inside = !inside;
+      }
+      if (inside)
+      {
+        zone = o.value("zone").toInt();
+        return o.value("light").toInt();
+      }
+    }
+    return lights.value("defaultLight").toInt();
+  };
+  const auto colourText = [](const QJsonObject & v) {
+    return v.isEmpty() ? QString("no values")
+                       : QString::fromUtf8(QJsonDocument(v).toJson(QJsonDocument::Compact));
+  };
+  struct SpotWater
+  {
+    int params;          // the light's slot-0 LightParams; 0: the light has no values (no water colour at 12:00)
+    int colour[4][3];    // river close, river far, ocean close, ocean far
+    double alpha[4];     // water shallow, deep; ocean shallow, deep
+    int sky[3];          // the sky (SkyBand1Color)
+  };
+  const auto waterIs = [](const QJsonObject & v, const SpotWater & e) {
+    if (e.params == 0)
+      return v.isEmpty();
+    const char * const keys[4] = {"riverClose", "riverFar", "oceanClose", "oceanFar"};
+    bool same = v.value("lightParams").toInt() == e.params;
+    for (int k = 0; k < 4; k++)
+    {
+      const QJsonArray a = v.value(keys[k]).toArray();
+      same = same && a.size() == 3 && a[0].toInt(-1) == e.colour[k][0] && a[1].toInt(-1) == e.colour[k][1] &&
+             a[2].toInt(-1) == e.colour[k][2];
+    }
+    const QJsonArray sky = v.value("sky").toArray();
+    same = same && sky.size() == 3 && sky[0].toInt(-1) == e.sky[0] && sky[1].toInt(-1) == e.sky[1] &&
+           sky[2].toInt(-1) == e.sky[2];
+    const QJsonArray w = v.value("waterAlpha").toArray(), o = v.value("oceanAlpha").toArray();
+    return same && w.size() == 2 && o.size() == 2 && std::fabs(w[0].toDouble(-9) - e.alpha[0]) < 1e-4 &&
+           std::fabs(w[1].toDouble(-9) - e.alpha[1]) < 1e-4 && std::fabs(o[0].toDouble(-9) - e.alpha[2]) < 1e-4 &&
+           std::fabs(o[1].toDouble(-9) - e.alpha[3]) < 1e-4;
+  };
+
+  // 4. The spots and the maps' defaults, as counted for the audited builds.
+  struct Spot
+  {
+    const char * product;
+    const char * build;
+    const char * name;
+    int map;
+    bool position;       // false: the map's default light, no position
+    double x, y, z;
+    int zone;            // the polygon that holds the spot (0: none)
+    int base;            // the base light there
+    int point;           // a point light over it at full weight (0: none); the water is its, else the base light's
+    SpotWater water;
+  };
+  const Spot spots[] = {
+    {"wow", "12.1.5.70448", "Durotar, Southfury River", 1, true, 1261, -3948, 20, 139, 204, 0,
+     {5985, {{64, 62, 35}, {62, 54, 47}, {82, 90, 94}, {55, 61, 69}}, {0.40, 0.80, 0.75, 1.00}, {246, 178, 88}}},
+    {"wow", "12.1.5.70448", "Stormwind Harbor", 0, true, -8651, 1121, 6, 1859, 9651, 0,
+     {6080, {{6, 63, 71}, {18, 63, 75}, {17, 75, 89}, {0, 29, 41}}, {0.50, 0.80, 0.65, 1.00}, {129, 193, 217}}},
+    {"wow", "12.1.5.70448", "map 0's default", 0, false, 0, 0, 0, 0, 1, 0,
+     {12, {{41, 76, 81}, {26, 46, 51}, {17, 75, 89}, {0, 29, 41}}, {0.50, 1.00, 0.65, 1.00}, {153, 220, 245}}},
+    {"wow", "12.1.5.70448", "map 1's default", 1, false, 0, 0, 0, 0, 191, 0,
+     {192, {{88, 84, 69}, {43, 67, 81}, {16, 65, 77}, {0, 29, 41}}, {0.50, 1.00, 0.75, 1.00}, {153, 220, 245}}},
+    {"wow_classic_era", "1.15.9.70003", "Durotar, Southfury River", 1, true, 1261, -3948, 20, 0, 191, 204,
+     {212, {{158, 97, 71}, {113, 82, 63}, {114, 92, 79}, {86, 56, 97}}, {0.50, 1.00, 0.75, 1.00}, {246, 178, 88}}},
+    {"wow_classic_era", "1.15.9.70003", "map 0's default", 0, false, 0, 0, 0, 0, 1, 0,
+     {12, {{79, 93, 20}, {51, 82, 85}, {17, 75, 89}, {0, 29, 41}}, {0.50, 1.00, 0.75, 1.00}, {153, 220, 245}}},
+    {"wow_classic_era", "1.15.9.70003", "map 1's default", 1, false, 0, 0, 0, 0, 191, 0,
+     {192, {{88, 84, 69}, {43, 67, 81}, {17, 75, 89}, {0, 29, 41}}, {0.50, 1.00, 0.75, 1.00}, {153, 220, 245}}},
+    {"wow_classic", "5.5.4.70268", "Durotar, Southfury River", 1, true, 1261, -3948, 20, 139, 204, 0,
+     {212, {{64, 62, 35}, {50, 59, 66}, {44, 93, 123}, {29, 63, 105}}, {0.50, 1.00, 0.75, 1.00}, {246, 178, 88}}},
+    {"wow_classic_beta", "1.60.1.70450", "Durotar, Southfury River", 1, true, 1261, -3948, 20, 0, 191, 0, {0, {}, {}, {}}},
+    {"wow_classic_beta", "1.60.1.70450", "Stormwind Harbor", 0, true, -8651, 1121, 6, 3175, 17186, 0, {0, {}, {}, {}}},
+  };
+  int spotsRun = 0;
+  for (const Spot & s : spots)
+  {
+    if (c->clientProduct() != QLatin1String(s.product) || c->clientBuild() != QLatin1String(s.build))
+      continue;
+    spotsRun++;
+    const QJsonObject lights = c->mapJson(s.map);
+    int zone = 0;
+    const int base = s.position ? baseAt(lights, s.x, s.y, s.z, zone) : lights.value("defaultLight").toInt();
+    bool ok = base == s.base && zone == s.zone;
+    QString detail = s.position ? QString("at (%1, %2, %3): zone %4, base light %5").arg(s.x).arg(s.y).arg(s.z).arg(zone).arg(base)
+                                : QString("default light %1 (%2)").arg(base).arg(lights.value("defaultFrom").toString());
+    int weighted = s.base;
+    if (s.point != 0)
+    {
+      // The point light: sent, and the spot within its falloff start (weight 1).
+      weighted = s.point;
+      QJsonObject point;
+      for (const QJsonValue & v : lights.value("points").toArray())
+        if (v.toObject().value("light").toInt() == s.point)
+          point = v.toObject();
+      const double d = std::sqrt(std::pow(s.x - point.value("x").toDouble(), 2) + std::pow(s.y - point.value("y").toDouble(), 2) +
+                                 std::pow(s.z - point.value("z").toDouble(), 2));
+      ok = ok && !point.isEmpty() && d <= point.value("start").toDouble();
+      detail += QString("; point light %1 %2 yd away, falloff %3 to %4").arg(s.point).arg(d, 0, 'f', 1)
+                  .arg(point.value("start").toDouble(), 0, 'f', 1).arg(point.value("end").toDouble(), 0, 'f', 1);
+    }
+    const QJsonObject v = valueOf(lights, weighted);
+    ok = ok && waterIs(v, s.water);
+    tally.check(QString("lights: %1 (%2, map %3): zone %4, base light %5%6, %7").arg(s.name).arg(client).arg(s.map)
+                  .arg(s.zone).arg(s.base).arg(s.point ? QString(" under point light %1").arg(s.point) : QString())
+                  .arg(s.water.params ? QString("LightParams %1 at 12:00, sky (%2,%3,%4)").arg(s.water.params)
+                                          .arg(s.water.sky[0]).arg(s.water.sky[1]).arg(s.water.sky[2])
+                                      : QString("no water colour at 12:00 (all four 0)")),
+                ok, detail + "; " + colourText(v));
+  }
+  if (spotsRun == 0)
+    tally.skip("lights: the spots and the maps' defaults counted for the audited builds", notAudited);
+
+  // 5. Maps 0 and 1 as sent: the counts made offline (audited builds); the zones in the order the player tries them --
+  // unconditional first, then the smallest area (a polygon nested in another before it); no point light that a zone of the
+  // map names; every value's colours in 0..255 and alphas in [0, 1]; the same object when asked again; and a size bound.
+  const QString dumpDir = qEnvironmentVariable("WMV_LIGHTS_DUMP").trimmed();
+  for (int map = 0; map <= 1; map++)
+  {
+    const QJsonObject lights = c->mapJson(map);
+    const QByteArray bytes = QJsonDocument(lights).toJson(QJsonDocument::Compact);
+    if (!dumpDir.isEmpty())
+    {
+      QDir().mkpath(dumpDir);
+      QFile f(QDir(dumpDir).filePath(QString("lights_%1_map%2.json").arg(c->clientProduct()).arg(map)));
+      if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        f.write(bytes);
+    }
+    const QJsonArray zones = lights.value("zones").toArray(), points = lights.value("points").toArray(),
+                     values = lights.value("values").toArray();
+    int corners = 0;
+    bool ordered = true;
+    double lastArea = -1.0;
+    int lastConditional = 0;
+    std::set<int> zoneLights;
+    for (const QJsonValue & zv : zones)
+    {
+      const QJsonObject z = zv.toObject();
+      const QJsonArray p = z.value("poly").toArray();
+      corners += p.size() / 2;
+      double twice = 0.0;
+      for (int i = 0, k = p.size() / 2; i < k; i++)
+      {
+        const int j = (i + 1) % k;
+        twice += p[2 * i].toDouble() * p[2 * j + 1].toDouble() - p[2 * j].toDouble() * p[2 * i + 1].toDouble();
+      }
+      const double area = std::fabs(twice) / 2.0;
+      const int conditional = z.value("conditional").toInt();
+      if (conditional < lastConditional || (conditional == lastConditional && area < lastArea))
+        ordered = false;
+      if (conditional != lastConditional)
+        lastArea = -1.0;
+      lastConditional = conditional;
+      lastArea = std::max(lastArea, area);
+      ordered = ordered && p.size() >= 6 && p.size() % 2 == 0;
+      zoneLights.insert(z.value("light").toInt());
+    }
+    bool pointsApart = true;
+    for (const QJsonValue & pv : points)
+      pointsApart = pointsApart && zoneLights.find(pv.toObject().value("light").toInt()) == zoneLights.end();
+    bool inRange = true;
+    for (const QJsonValue & vv : values)
+    {
+      const QJsonObject v = vv.toObject();
+      for (const char * key : {"riverClose", "riverFar", "oceanClose", "oceanFar", "sky"})
+      {
+        const QJsonArray a = v.value(key).toArray();
+        inRange = inRange && a.size() == 3;
+        for (const QJsonValue & ch : a)
+          inRange = inRange && ch.toInt(-1) >= 0 && ch.toInt(-1) <= 255;
+      }
+      for (const char * key : {"waterAlpha", "oceanAlpha"})
+      {
+        const QJsonArray a = v.value(key).toArray();
+        inRange = inRange && a.size() == 2 && a[0].toDouble(-1) >= 0.0 && a[0].toDouble(-1) <= 1.0 &&
+                  a[1].toDouble(-1) >= 0.0 && a[1].toDouble(-1) <= 1.0;
+      }
+    }
+    const bool shape = lights.value("state").toString() == "ok" && lights.value("map").toInt(-1) == map &&
+                       lights.value("time").toInt() == 1440 && lights.value("slot").toInt(-1) == 0 &&
+                       lights.value("product").toString() == c->clientProduct() &&
+                       lights.value("build").toString() == c->clientBuild() && c->mapJson(map) == lights;
+    const bool counted = !expected || (zones.size() == expected->maps[map][0] && corners == expected->maps[map][1] &&
+                                       points.size() == expected->maps[map][2] && values.size() == expected->maps[map][3] &&
+                                       lights.value("defaultLight").toInt() == expected->defaults[map] &&
+                                       lights.value("defaultFrom").toString() == "end0");
+    const qint64 bound = 256 * 1024;   // Retail map 0, the largest of an audited client: 129669 bytes
+    tally.check(QString("lights: map %1 as sent (%2)%3: zones unconditional then smallest first, no zone's light among the "
+                        "points, colours 0..255 and alphas in [0, 1], the same object again, at most %4 bytes")
+                  .arg(map).arg(client).arg(expected ? QString(", as counted offline") : QString()).arg(bound),
+                shape && counted && ordered && pointsApart && inRange && bytes.size() <= bound,
+                QString("%1 zones (%2 corners), %3 points, %4 values, default light %5 %6; %7 bytes; ordered %8, points apart "
+                        "%9, in range %10")
+                  .arg(zones.size()).arg(corners).arg(points.size()).arg(values.size())
+                  .arg(lights.value("defaultLight").toInt()).arg(lights.value("defaultFrom").toString()).arg(bytes.size())
+                  .arg(ordered ? "yes" : "no").arg(pointsApart ? "yes" : "no").arg(inRange ? "yes" : "no") +
+                  (expected ? QString("; expected %1 (%2), %3, %4, default %5 end0").arg(expected->maps[map][0])
+                                .arg(expected->maps[map][1]).arg(expected->maps[map][2]).arg(expected->maps[map][3])
+                                .arg(expected->defaults[map])
+                            : QString()));
+  }
+
+  // 6. A light whose slot-0 LightParams has no keys of its own takes its copy source's (Retail: Light 6103 of map 1458,
+  // LightParams 2108, a copy of 1726).
+  if (c->clientProduct() == QLatin1String("wow") && c->clientBuild() == QLatin1String("12.1.5.70448"))
+  {
+    const QJsonObject v = valueOf(c->mapJson(1458), 6103);
+    const SpotWater copy = {2108, {{0, 66, 63}, {133, 153, 98}, {38, 38, 38}, {0, 0, 0}}, {0.10, 0.00, 0.00, 0.00},
+                            {189, 123, 85}};
+    tally.check("lights: Light 6103 (map 1458), whose LightParams 2108 has no keys, has its copy source 1726's water",
+                waterIs(v, copy), colourText(v));
+  }
+  else
+    tally.skip("lights: a LightParams with no keys of its own takes its copy source's", "counted for Retail 12.1.5.70448 only");
+
+  // 7. A map with no lights (no Light or ZoneLight row names map 99999): no zone or point, Light 1 as its default where the
+  // client has it; and the shape of a load's lights when the catalogue is not the loaded client's.
+  {
+    const QJsonObject none = c->mapJson(99999);
+    const QJsonObject unavailable = wow::LightCatalog::unavailableJson("wow", "1.2.3.4", 7, "a reason");
+    const bool emptyMap = none.value("state").toString() == "ok" && none.value("zones").toArray().isEmpty() &&
+                          none.value("points").toArray().isEmpty() &&
+                          ((none.value("defaultLight").toInt() == 1 && none.value("defaultFrom").toString() == "light1") ||
+                           (none.value("defaultLight").toInt() == 0 && none.value("defaultFrom").toString() == "none"));
+    const QStringList keys = QStringList() << "build" << "defaultFrom" << "defaultLight" << "detail" << "map" << "points"
+                                           << "product" << "slot" << "state" << "time" << "values" << "zones";
+    const bool unavailableShape = unavailable.keys() == keys && none.keys() == keys &&
+                                  unavailable.value("state").toString() == "unavailable" &&
+                                  unavailable.value("detail").toString() == "a reason" && unavailable.value("map").toInt() == 7 &&
+                                  unavailable.value("zones").toArray().isEmpty() && unavailable.value("values").toArray().isEmpty();
+    tally.check("lights: a map with no lights has Light 1 (or none) as its default and no zone or point; the unavailable "
+                "shape has the same keys and empty lists",
+                emptyMap && unavailableShape,
+                QString::fromUtf8(QJsonDocument(none).toJson(QJsonDocument::Compact)).left(300) + "; " +
+                  QString::fromUtf8(QJsonDocument(unavailable).toJson(QJsonDocument::Compact)));
+  }
+
+  // 8. The liquids offer a load carries to a protocol-19 player: "lights" its fifth key when the load has them, as made.
+  {
+    UnityIpcServer::TerrainTileCommand command;
+    command.liquids = true;
+    command.liquidCatalog = frame->liquidCatalog() ? frame->liquidCatalog()->toJson() : QJsonObject();
+    command.liquidLights = c->mapJson(1);
+    const QJsonObject offer = UnityIpcServer::liquidOffer(command);
+    command.liquidLights = QJsonObject();
+    const QJsonObject without = UnityIpcServer::liquidOffer(command);
+    tally.check("lights: a load's \"liquids\" carries \"lights\" as its fifth key when the load has them, and four keys "
+                "without",
+                offer.size() == 5 && offer.value("lights").toObject() == c->mapJson(1) && without.size() == 4 &&
+                  !without.contains("lights"),
+                QString("keys %1; %2 bytes as sent; without: %3").arg(offer.keys().join(", "))
+                  .arg(QJsonDocument(offer).toJson(QJsonDocument::Compact).size()).arg(without.keys().join(", ")));
+  }
 }
 
 static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
@@ -9267,6 +9808,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   checkStreamLoads(frame, tally);
   checkLiquidTextureDecisions(tally);
   checkLiquidCatalog(frame, tally);
+  checkLightCatalog(frame, tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;

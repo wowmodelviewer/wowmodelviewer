@@ -65,6 +65,10 @@ public:
 
   std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
+  // Section 0's copy table as open() read it: (the copy row's ID, the ID of the row it copies), in file order. A copy row
+  // reads as its source's record under its own ID, so this is the one place the link between the two is kept.
+  const std::vector<std::pair<uint32, uint32>> & copyRows() const { return m_copyRows; }
+
 private:
   enum FIELD_COMPRESSION
   {
@@ -127,6 +131,7 @@ private:
   std::map<uint32, uint32> m_palletBlockOffsets;
   std::map<uint32, std::map<uint32, uint32> > m_commonData;
   std::map<uint32, std::string> m_relationShipData;
+  std::vector<std::pair<uint32, uint32>> m_copyRows; // copyRows()
 
   unsigned char * m_sectionData;
   size_t m_sectionDataSize;

@@ -18,8 +18,12 @@
 //     why that type is special is UNKNOWN); otherwise the LVF of the type's LiquidMaterial.
 //   - Kind: LiquidType.SoundBank, a 2-bit class: 0 water, 1 ocean, 2 magma, 3 slime (PROVEN_BYTES as a class;
 //     the MLIQ vertex payload follows it).
-//   - What a depth byte or a stored u/v measures, and on what scale, is UNKNOWN (09-liquids.md 1.2): they are
-//     passed through, scaled by the documented constants below.
+//   - The depth byte is a quantised depth -- the liquid vertex's height above the terrain's outer vertex under it --
+//     on one of two scales, picked by the instance's second word, not by the liquid type (PROVEN_BYTES: a census of
+//     15,384 Retail, 839 Era and 2,022 Beta roots, 99.5% of vertices and more): word 2 or 42, the O scale, byte =
+//     clamp(ceil(12/7 D), 0, 255); any other word (0, or a LiquidObject id), the W scale, byte = clamp(floor(9 D), 0,
+//     255). MLIQ's byte is the W scale. DepthYards decodes a byte to the middle of its step (or 0). What a stored
+//     u/v measures, and on what scale, is UNKNOWN (09-liquids.md 1.2): passed through, scaled by StoredUvScale.
 
 using System;
 using System.Collections.Generic;
@@ -49,6 +53,8 @@ namespace Wmv.Wow.World
         public float Float1;                      // LiquidType.Float[1]: texture rotation in degrees (INFERRED name)
         public uint[] Frames = new uint[0];       // texture slot 0's frames as FileDataIDs, in frame order
         public int FramesWanted;                  // frames slot 0 names (0 when empty or procedural)
+        public uint Bump;                         // the ripple map: the first texture of slots 1-5 named "bump" (the host's
+                                                  // rule, INFERRED), as a FileDataID; 0 = none (the High look's flat normals)
 
         public bool IsWaterOrOcean { get { return Kind == (int)LiquidKind.Water || Kind == (int)LiquidKind.Ocean; } }
     }
@@ -149,6 +155,20 @@ namespace Wmv.Wow.World
 
         public static bool HasDepth(int format) { return format == HeightDepth || format == DepthOnly || format == HeightUvDepth; }
 
+        /// <summary>Whether an MH2O instance's depth bytes are on the O scale: its second word is 2 or 42 (PROVEN_BYTES, see
+        /// the file header); every other word is the W scale.</summary>
+        public static bool DepthScaleO(ushort objectOrFormat) { return objectOrFormat == 2 || objectOrFormat == 42; }
+
+        /// <summary>W scale (byte = clamp(floor(9 D), 0, 255)): the middle of the byte's step, (b + 0.5) / 9 yards.</summary>
+        public static double DepthYardsW(byte b) { return (b + 0.5) / 9.0; }
+
+        /// <summary>O scale (byte = clamp(ceil(12/7 D), 0, 255)): 0 for byte 0, else the middle of its step, (b - 0.5) x 7/12
+        /// yards.</summary>
+        public static double DepthYardsO(byte b) { return b == 0 ? 0.0 : (b - 0.5) * 7.0 / 12.0; }
+
+        /// <summary>An MH2O depth byte in yards, on the scale its instance's second word picks.</summary>
+        public static double DepthYards(byte b, ushort objectOrFormat) { return DepthScaleO(objectOrFormat) ? DepthYardsO(b) : DepthYardsW(b); }
+
         /// <summary>The format rule (09-liquids.md 1.2) for an MH2O instance: the second word if it is 0, 1 or 2;
         /// else 2 for liquid type 2; else the catalogue's LVF for the type; else (no catalogue row, or no material)
         /// the instance's FormatBySize. Disagrees is set when the rule and the size both give a format and they
@@ -196,7 +216,8 @@ namespace Wmv.Wow.World
     /// vertex attributes:
     ///   uv0 = texture coordinates: world-planar for water and ocean, or the stored u/v (s/t) scaled by
     ///         LiquidFormat.StoredUvScale (see the builders);
-    ///   uv1 = (depth / 255, 1) where the vertex has a stored depth byte, else (1, 0).
+    ///   uv1 = (depth byte / 255, depth in yards: LiquidFormat.DepthYards) where the vertex has a stored depth byte, else
+    ///         (1, -1). The shader's fallback reads x, its zone-light path y (Resources/WmvLiquid.shader).
     /// Vertices are shared inside one MH2O instance (or one MLIQ), never across instances or chunks.
     /// </summary>
     public sealed class LiquidSurface

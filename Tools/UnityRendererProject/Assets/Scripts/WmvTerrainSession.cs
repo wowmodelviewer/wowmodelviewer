@@ -1357,8 +1357,9 @@ public sealed partial class WmvTerrainSession
             tiles[KeyOf(cmd.MapId, cmd.TileX, cmd.TileY)] = tile;
             shown = tile;
             shownLoad = cmd.Load;
-            // Protocol 19: the load's liquid registry is the scene's (DisposeTiles took the last scene's).
+            // Protocol 19: the load's liquid registry and zone lights are the scene's (DisposeTiles took the last scene's).
             sceneLiquids = j.Liquid != null ? j.Liquid.Registry : null;
+            CommitSceneLights(j);
             int fromEpoch = sceneEpoch, fromMap = sceneMapId;
             sceneEpoch = cmd.AssetEpoch;
             sceneMapId = cmd.MapId;
@@ -1707,6 +1708,7 @@ public sealed partial class WmvTerrainSession
         DisposeWorldScene();
         DisposeTerrainTextures();
         DisposeSceneLiquids(keep);
+        DropSceneLights();
         return n;
     }
 

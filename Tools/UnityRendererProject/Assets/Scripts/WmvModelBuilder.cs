@@ -425,6 +425,16 @@ public static class WmvModelBuilder
     ///   -wmvWmoOnlyMaterials=a:b:c
     ///                    world models only, diagnostic: draw only these MOMT indices; every other
     ///                    material is discarded in every camera.
+    ///   -wmvWaterTune=key:value,key:value
+    ///                    the water's High look: override its TUNABLE values (Wow/World/LiquidHigh.cs,
+    ///                    LiquidHighTune: refract, tFastA, tFastL, tSlowA, tSlowL, waterGain, reflBroad,
+    ///                    reflDetail, bumpTileA, bumpTileB, bumpScroll, bumpWeightA, bumpStrength, skyR, skyG,
+    ///                    skyB and the others it lists) on every liquid material as it is made, so a tuning
+    ///                    render needs no rebuild; logged once ("[liquids] water tune: ..."), an unknown key
+    ///                    or a bad value ignored and said. WMV_DEBUG is split on commas, so there the pairs
+    ///                    arrive as tokens of their own: every token after -wmvWaterTune= that does not start
+    ///                    with '-' is one more pair. Given twice, the pairs add up (a key's last value wins).
+    ///                    The rule is Wow/World/LiquidHigh.cs's LiquidHighTune.TuneTokens (tested there).
     /// </summary>
     public static class Debug_
     {
@@ -456,18 +466,24 @@ public static class WmvModelBuilder
         static int mountCheckFrames;                     // -wmvMountCheck: 0 off
         static bool mountCheckMountFirst;
         static int frameRate = -1;                       // -wmvFrameRate: -1 = the display's refresh rate
+        static string waterTune;                         // -wmvWaterTune: its pairs, null = not passed
 
         static void Parse()
         {
             if (parsed) return;
             parsed = true;
             var args = new List<string>(System.Environment.GetCommandLineArgs());
+            int envFirst = args.Count;                   // where WMV_DEBUG's tokens begin
             string fromEnv = System.Environment.GetEnvironmentVariable("WMV_DEBUG");
             if (!string.IsNullOrEmpty(fromEnv))
                 args.AddRange(fromEnv.Split(new[] { ' ', '\t', ',', ';' },
                                             StringSplitOptions.RemoveEmptyEntries));
-            foreach (var a in args)
+            // -wmvWaterTune= and the tokens after it that are its pairs (none of them starts with '-', so no switch below
+            // reads them).
+            waterTune = Wmv.Wow.World.LiquidHighTune.TuneTokens(args, envFirst);
+            for (int ai = 0; ai < args.Count; ai++)
             {
+                string a = args[ai];
                 if (a == "-wmvFlipV") flipV = true;
                 else if (a == "-wmvForceOpaque") forceOpaque = true;
                 else if (a == "-wmvForceSolid") forceSolid = true;
@@ -630,6 +646,9 @@ public static class WmvModelBuilder
 
         /// <summary>The submeshes -wmvOnlySubmesh named, or null when it was not passed.</summary>
         public static int[] OnlySubmeshes { get { Parse(); return onlySubmeshes; } }
+
+        /// <summary>-wmvWaterTune's pairs as one string ("key:value,key:value"), or null when it was not passed.</summary>
+        public static string WaterTune { get { Parse(); return waterTune; } }
 
         /// <summary>Where the Mod_Add lobe is drawn: -wmvModAddLobe, or the shipped scope.</summary>
         public static M2ShaderTable.ModAddLobeScope ModAddLobe

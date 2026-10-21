@@ -37,6 +37,8 @@
     <Compile Include="..\StreamSeamTests.cs" />
     <Compile Include="..\LiquidTests.cs" />
     <Compile Include="..\LiquidCorpusTests.cs" />
+    <Compile Include="..\LiquidLightTests.cs" />
+    <Compile Include="..\LiquidHighTests.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>

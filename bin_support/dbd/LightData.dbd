@@ -1,0 +1,274 @@
+COLUMNS
+int ID
+int LightParamID // the LightParams row (copy IDs included) whose day this key belongs to: every value is one (proven from the bytes); it is also in the section's relationship map, with the same value on every row
+int Time // the key's time of day in half-minutes, 0 to 2870 (< 2880): proven from the bytes; in layout 360DA016 its pallet words carry bit 16 (0x10000), which is not part of the value -- read it as 16 bits
+int Field_02 // not established (colour)
+int Field_03 // not established (colour)
+int Field_04 // not established (colour)
+int Field_05 // not established (colour)
+int SkyBand1Color // a colour, 0xRRGGBB in the low 24 bits, stored as OceanCloseColor (mask with 0xFFFFFF): the colour the viewer gives a water reflection that finds no scene (no sky is drawn before Stage 12). That it is the sky's first band is the public definitions' name, not proven; it was chosen by measurement among the six sky columns they name (fields 4-9): at 12:00 Durotar's LightParams 5985 holds (246,178,88), the nearest of the six to the sky just above the far hills in two noon captures of the game, (249,193,116) and (215,147,81) -- 31.9 and 44.4 away, the next nearest 67.9 and 52.9
+int Field_07 // not established (colour)
+int Field_08 // not established (colour)
+int Field_09 // not established (colour)
+int Field_10 // not established (colour)
+int Field_11 // not established (colour)
+int Field_12 // not established (colour)
+int Field_13 // not established (colour)
+int Field_14 // not established (colour)
+int OceanCloseColor // a colour, 0xRRGGBB in the low 24 bits (signed 25-bit storage: a few rows read back with the upper byte 0xFF, so mask with 0xFFFFFF): the colour and its byte order are proven from the bytes; that it is the near ocean colour is the public definitions' name, not proven
+int OceanFarColor // as OceanCloseColor: the far ocean colour (name not proven)
+int RiverCloseColor // as OceanCloseColor: the near river/lake colour (name supported by the Durotar reference fit, Southfury River)
+int RiverFarColor // as OceanCloseColor: the far river/lake colour (name supported by the Durotar reference fit)
+int Field_19 // not established (a grey)
+float Field_20 // not established
+float Field_21 // not established
+float Field_22 // not established
+float Field_23 // not established
+float Field_24 // not established
+float Field_25 // not established
+float Field_26 // not established
+float Field_27 // not established
+float Field_28 // not established
+float Field_29 // not established
+float Field_30 // not established
+int Field_31 // not established
+int Field_32 // not established
+int Field_33 // not established (colour)
+int Field_34 // not established (colour)
+int Field_35 // not established (colour)
+float Field_36 // not established
+float Field_37 // not established
+int Field_38 // not established (colour)
+float Field_39 // not established
+int Field_40 // not established (colour)
+int Field_41 // not established (colour)
+int Field_42 // not established
+float Field_43 // not established
+float Field_44 // not established (four floats)
+float Field_45 // not established (four floats)
+float Field_46 // not established (four floats)
+int Added_45 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_46 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_47 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_48 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_49 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_50 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_51 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_52 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_53 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_54 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_55 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_56 // not established (PTR 12.1.7 and Classic Beta only)
+int Added_57 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_58 // not established (PTR 12.1.7 and Classic Beta only)
+float Added_59 // not established (PTR 12.1.7 and Classic Beta only)
+int EraMoPField22 // not established (Classic Era and MoP Classic only, as the fields to EraMoPField45)
+int EraMoPField23
+int EraMoPField24
+int EraMoPField25
+int EraMoPField26
+int EraMoPField27
+int EraMoPField28
+int EraMoPField29
+int EraMoPField30
+int EraMoPField31
+int EraMoPField32
+int EraMoPField33
+int EraMoPField34
+int EraMoPField35
+int EraMoPField36
+int EraMoPField37
+int EraMoPField38
+int EraMoPField39
+int EraMoPField40
+int EraMoPField41
+int EraMoPField42
+int EraMoPField43 // not established (four values)
+int EraMoPField44 // not established (four values)
+int EraMoPField45 // not established (four values)
+
+COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
+COMMENT docs/world-viewer/09-liquids.md). The layouts come from public table definitions, read as hypotheses: every column
+COMMENT the catalogue reads (database.xml, table LightData) was checked against the clients' own bytes. A neutral name that
+COMMENT two layouts share is the same column: Retail 12.1.5 (6ABF2921) and PTR 12.1.7 (360DA016) agree on every column 0-19
+COMMENT of all 19881 rows they share, read at one field later in 360DA016; Classic Era and MoP Classic (70C6CD80) keep
+COMMENT fields 0-19 in Retail's order (each water colour equals Retail's same column on 562 to 595 of 638 Classic Era keys
+COMMENT and 3334 to 3356 of 3371 MoP Classic keys that Retail shares with four distinct water colours, another column on
+COMMENT at most 10; SkyBand1Color equals Retail's on 1222 of 1321 Classic Era keys, 4350 of 4491 MoP Classic keys and
+COMMENT 1228 of 1327 Classic Beta keys that Retail shares where Retail's value differs from its other colour columns,
+COMMENT another column on at most 3). Every field is listed in file order, so the positions are right for the layouts
+COMMENT below. Classic Beta's water colours are 0 on most of its rows, among them every map default and zone light of
+COMMENT Eastern Kingdoms and Kalimdor: a key whose four water colours are all 0 carries no water colour. A layout not
+COMMENT listed here is not read.
+
+LAYOUT 6ABF2921
+BUILD 12.1.5.70448
+COMMENT Retail: 47 fields; IDs in the section's ID list; LightParamID is field 0 (and in the relationship map).
+$noninline,id$ID<32>
+$relation$LightParamID<u16>
+Time<u16>
+Field_02<32>
+Field_03<32>
+Field_04<32>
+Field_05<32>
+SkyBand1Color<32>
+Field_07<32>
+Field_08<32>
+Field_09<32>
+Field_10<32>
+Field_11<32>
+Field_12<32>
+Field_13<32>
+Field_14<32>
+OceanCloseColor<32>
+OceanFarColor<32>
+RiverCloseColor<32>
+RiverFarColor<32>
+Field_19<32>
+Field_20
+Field_21
+Field_22
+Field_23
+Field_24
+Field_25
+Field_26
+Field_27
+Field_28
+Field_29
+Field_30
+Field_31<u32>
+Field_32<u32>
+Field_33<32>
+Field_34<32>
+Field_35<32>
+Field_36
+Field_37
+Field_38<32>
+Field_39
+Field_40<32>
+Field_41<32>
+Field_42<32>
+Field_43
+Field_44[4]
+Field_45[4]
+Field_46[4]
+
+LAYOUT 360DA016
+BUILD 12.1.7.70424, 1.60.1.70450
+COMMENT PTR 12.1.7 and Classic Beta: 63 fields; no ID list -- the ID is field 0 (18-bit signed, header id_index 0), so every
+COMMENT column is one field later than in 6ABF2921; fifteen columns are added before the three arrays.
+$id$ID<32>
+$relation$LightParamID<u16>
+Time<u16>
+Field_02<32>
+Field_03<32>
+Field_04<32>
+Field_05<32>
+SkyBand1Color<32>
+Field_07<32>
+Field_08<32>
+Field_09<32>
+Field_10<32>
+Field_11<32>
+Field_12<32>
+Field_13<32>
+Field_14<32>
+OceanCloseColor<32>
+OceanFarColor<32>
+RiverCloseColor<32>
+RiverFarColor<32>
+Field_19<32>
+Field_20
+Field_21
+Field_22
+Field_23
+Field_24
+Field_25
+Field_26
+Field_27
+Field_28
+Field_29
+Field_30
+Field_31<u32>
+Field_32<u32>
+Field_33<32>
+Field_34<32>
+Field_35<32>
+Field_36
+Field_37
+Field_38<32>
+Field_39
+Field_40<32>
+Field_41<32>
+Field_42<32>
+Field_43
+Added_45<32>
+Added_46<32>
+Added_47<32>
+Added_48
+Added_49
+Added_50
+Added_51
+Added_52
+Added_53
+Added_54<32>
+Added_55<32>
+Added_56<32>
+Added_57<32>
+Added_58
+Added_59
+Field_44[4]
+Field_45[4]
+Field_46[4]
+
+LAYOUT 70C6CD80
+BUILD 1.15.9.70003, 5.5.4.70268
+COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4: 46 fields; IDs in the section's ID list; LightParamID is field 0 and is
+COMMENT also in the section's relationship map (equal on every row). Time's pallet words are the plain values.
+$noninline,id$ID<32>
+$relation$LightParamID<u16>
+Time<u16>
+Field_02<32>
+Field_03<32>
+Field_04<32>
+Field_05<32>
+SkyBand1Color<32>
+Field_07<32>
+Field_08<32>
+Field_09<32>
+Field_10<32>
+Field_11<32>
+Field_12<32>
+Field_13<32>
+Field_14<32>
+OceanCloseColor<32>
+OceanFarColor<32>
+RiverCloseColor<32>
+RiverFarColor<32>
+Field_19<32>
+Field_20
+Field_21
+EraMoPField22<32>
+EraMoPField23<32>
+EraMoPField24<32>
+EraMoPField25<32>
+EraMoPField26<32>
+EraMoPField27<32>
+EraMoPField28<32>
+EraMoPField29<32>
+EraMoPField30<32>
+EraMoPField31<32>
+EraMoPField32<32>
+EraMoPField33<32>
+EraMoPField34<32>
+EraMoPField35<32>
+EraMoPField36<32>
+EraMoPField37<32>
+EraMoPField38<32>
+EraMoPField39<32>
+EraMoPField40<32>
+EraMoPField41<32>
+EraMoPField42<32>
+EraMoPField43<32>[4]
+EraMoPField44<32>[4]
+EraMoPField45<32>[4]

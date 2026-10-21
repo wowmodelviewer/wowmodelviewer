@@ -1190,8 +1190,9 @@ public sealed partial class WmvTerrainSession
         ForgetShownInputs();
         world = scene;
         world.Prototypes[m.FileDataID] = proto;
-        // Protocol 19: the load's liquid registry (its world model's liquid types) is the scene's.
+        // Protocol 19: the load's liquid registry (its world model's liquid types) and zone lights are the scene's.
         sceneLiquids = j.Liquid != null ? j.Liquid.Registry : null;
+        CommitSceneLights(j);
         for (int k = 0; k < m.Placements.Count; k++)
         {
             PlacementWork pw = m.Placements[k];

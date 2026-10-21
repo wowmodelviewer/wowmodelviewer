@@ -27,9 +27,9 @@
 // worldProgress's doodad fields, terrainTileLoaded's world assembly and doodads, and runtimeState's doodad fields -- see
 // WmvTerrainSessionDoodads and WmvWorldDoodads; 18 added streaming -- loadWorld's "streaming", streamTile /
 // streamTileAnswer, streamState, testFlight / testFlightDone and runtimeState's "light" and stream fields -- see
-// WmvTerrainSessionStream; 19 added liquids -- loadTerrainTile's and loadWorld's "liquids", getMapAsset's role
-// "liquidTexture", terrainTileLoaded's liquids, and streamState's and runtimeState's liquid fields -- see
-// WmvTerrainSessionLiquids and WmvLiquids).
+// WmvTerrainSessionStream; 19 added liquids -- loadTerrainTile's and loadWorld's "liquids" (with its optional "lights",
+// the zone lights of the water colours), getMapAsset's role "liquidTexture", terrainTileLoaded's liquids, and
+// streamState's and runtimeState's liquid fields -- see WmvTerrainSessionLiquids, WmvLiquids and WmvLiquidLight).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -264,11 +264,20 @@
 //     world's outcome when every placement is settled
 //   loadTerrainTile / loadWorld (protocol 19 adds) { liquids:{ maxTexturesPerLoad, maxTextureBytes, maxTextureBytesPerLoad,
 //                     catalog:{ product, build, state:"ok"|"unavailable", detail, types:[{ id, name, kind, material,
-//                     materialFlags, lvf, minimapColor, float0, float1, frames:[...], framesWanted }] } } }
+//                     materialFlags, lvf, minimapColor, float0, float1, frames:[...], framesWanted, bump }] } } }
 //     the load offers liquids (docs/world-viewer/09-liquids.md 1.6): the liquid frames' budgets and the host's catalogue of
 //     the client's liquid types (LiquidOffer; the player reads no table). Sent only to a player that announced 19 and only
 //     for a load that offers them; without it (an older host) no liquid is drawn and the report says "offered": false. A
-//     streaming session's tiles take the entry's
+//     streaming session's tiles take the entry's. "bump" (optional, additive): the type's ripple map's FileDataID (0 or
+//     absent: none), fetched like the frames (role "liquidTexture") for the High water look
+//   liquids.lights (optional, inside "liquids") { state:"ok"|"unavailable", detail, product, build, map, time, slot,
+//                     defaultLight, defaultFrom, zones:[{ zone, light, zmin, zmax, conditional, poly:[x0,y0,...] }],
+//                     points:[{ light, x, y, z, start, end }], values:[{ light, lightParams, riverClose:[r,g,b], riverFar,
+//                     oceanClose, oceanFar, waterAlpha:[s,d], oceanAlpha:[s,d], sky:[r,g,b] }] }
+//     the zone lights of the load's map at a fixed noon, clear-weather slot 0 (Wow/World/LiquidLights.cs): the water and
+//     ocean colours and alphas follow the light at the camera (WmvLiquidLight). Absent (an older host) or not "ok": the
+//     liquids keep their type colours. An additive key of protocol 19: a player without it ignores it. "sky" (optional,
+//     additive): the light's sky colour at the same noon, which the High look's reflection misses take
 //   inspectWorldModel { inspection, mapId, wmoFileDataID, assetEpoch, md5, wmoPosition, wmoRotation, wmoExtentsMin,
 //                       wmoExtentsMax, wmoFlags, wmoScale, wmoUniqueId, encoding:"binary", payloadBytes }
 //                     <payloadBytes raw WMO root bytes><newline>                     (protocol 16)
@@ -662,20 +671,32 @@ public class WmvIpcClient : MonoBehaviour
     /// the liquid frames (role "liquidTexture": ids a load may ask for, one file's bytes, a load's bytes -- the host enforces
     /// them) and the host's catalogue of the client's liquid types, read once per client load from its tables ("ok"; or
     /// "unavailable", with why, and no types). The catalogue is the player's view of those tables (Wow/World/LiquidFormat.cs:
-    /// LiquidTypeView per LiquidType id), one per load command, replaced by the next.</summary>
+    /// LiquidTypeView per LiquidType id), one per load command, replaced by the next. With it, the map's zone lights
+    /// ("lights", LightsFrom): Lights only when their state is "ok"; a streaming session's tile loads share the entry's
+    /// offer object, so its lights travel with it.</summary>
     public class LiquidOffer
     {
         public int MaxTexturesPerLoad, MaxTextureBytes, MaxTextureBytesPerLoad;
         public string CatalogState = "", CatalogDetail = "", CatalogProduct = "", CatalogBuild = "";
         public readonly Wmv.Wow.World.LiquidCatalog Catalog = new Wmv.Wow.World.LiquidCatalog();
         public int FrameIds;                    // the frame ids the catalogue lists, over every type
+        public int BumpIds;                     // the types that name a ripple map
+        // The zone lights: their state as sent ("" when the offer carried none, "ok", "unavailable") and why, and the lights
+        // themselves (null unless "ok": the liquids keep their type colours).
+        public string LightsState = "", LightsDetail = "";
+        public Wmv.Wow.World.LiquidLights Lights;
 
         public override string ToString()
         {
             return string.Format("liquids: maxTexturesPerLoad {0} maxTextureBytes {1} maxTextureBytesPerLoad {2}, catalogue {3} ({4} {5}: {6} " +
-                                 "type(s), {7} frame id(s)){8}", MaxTexturesPerLoad, MaxTextureBytes, MaxTextureBytesPerLoad, CatalogState,
+                                 "type(s), {7} frame id(s){10}){8}; {9}", MaxTexturesPerLoad, MaxTextureBytes, MaxTextureBytesPerLoad, CatalogState,
                                  CatalogProduct, CatalogBuild, Catalog.Count, FrameIds,
-                                 string.IsNullOrEmpty(CatalogDetail) ? "" : ": " + CatalogDetail);
+                                 string.IsNullOrEmpty(CatalogDetail) ? "" : ": " + CatalogDetail,
+                                 Lights != null ? "lights ok, " + Lights.Summary()
+                                                : string.IsNullOrEmpty(LightsState) ? "no lights"
+                                                                                    : "lights " + LightsState +
+                                                                                      (string.IsNullOrEmpty(LightsDetail) ? "" : ": " + LightsDetail),
+                                 BumpIds > 0 ? ", " + BumpIds + " type(s) with a ripple map" : "");
         }
     }
 
@@ -1237,6 +1258,7 @@ public class WmvIpcClient : MonoBehaviour
         public float float0, float1;
         public int[] frames;
         public int framesWanted;
+        public long bump;             // the ripple map's FileDataID (absent: 0)
     }
 
     [Serializable] class MsgLiquidCatalog
@@ -1245,10 +1267,41 @@ public class WmvIpcClient : MonoBehaviour
         public MsgLiquidType[] types;
     }
 
+    // The zone lights inside "liquids" (LightsFrom): flat arrays and no dictionaries, as JsonUtility reads them.
+    [Serializable] class MsgLightZone
+    {
+        public int zone, light, conditional;
+        public double zmin, zmax;
+        public double[] poly;
+    }
+
+    [Serializable] class MsgLightPoint
+    {
+        public int light;
+        public double x, y, z, start, end;
+    }
+
+    [Serializable] class MsgLightValues
+    {
+        public int light, lightParams;
+        public float[] riverClose, riverFar, oceanClose, oceanFar, waterAlpha, oceanAlpha;
+        public float[] sky;           // optional (absent: empty)
+    }
+
+    [Serializable] class MsgLights
+    {
+        public string state, detail, product, build, defaultFrom;
+        public int map, time, slot, defaultLight;
+        public MsgLightZone[] zones;
+        public MsgLightPoint[] points;
+        public MsgLightValues[] values;
+    }
+
     [Serializable] class MsgLiquids
     {
         public int maxTexturesPerLoad, maxTextureBytes, maxTextureBytesPerLoad;
         public MsgLiquidCatalog catalog;
+        public MsgLights lights;
     }
 
     /// <summary>The load's liquid offer (protocol 19), null when the line carries none: a nested object always parses, so its
@@ -1277,9 +1330,49 @@ public class WmvIpcClient : MonoBehaviour
                 {
                     Id = t.id, Name = t.name ?? "", Kind = t.kind, Material = t.material, MaterialFlags = t.materialFlags, Lvf = t.lvf,
                     MinimapColor = (uint)t.minimapColor, Float0 = t.float0, Float1 = t.float1, Frames = frames, FramesWanted = t.framesWanted,
+                    Bump = t.bump > 0 && t.bump <= uint.MaxValue ? (uint)t.bump : 0u,
                 });
+                if (t.bump > 0 && t.bump <= uint.MaxValue)
+                    o.BumpIds++;
             }
+        MsgLights lights = l.lights;
+        o.LightsState = lights != null && lights.state != null ? lights.state : "";
+        o.LightsDetail = lights != null && lights.detail != null ? lights.detail : "";
+        o.Lights = LightsFrom(lights);
         return o;
+    }
+
+    /// <summary>The offer's zone lights (LiquidLights), null unless their state is "ok" (absent: the nested object parses
+    /// with an empty state). Zones with fewer than 3 points or an odd coordinate count, points that are not finite and
+    /// value rows with short arrays are dropped and counted (LiquidLights' Add methods).</summary>
+    static Wmv.Wow.World.LiquidLights LightsFrom(MsgLights m)
+    {
+        if (m == null || m.state != "ok")
+            return null;
+        var lights = new Wmv.Wow.World.LiquidLights
+        {
+            Product = m.product ?? "", Build = m.build ?? "", Map = m.map, Time = m.time, Slot = m.slot, DefaultLight = m.defaultLight,
+            DefaultFrom = m.defaultFrom ?? "",
+        };
+        if (m.zones != null)
+            foreach (MsgLightZone z in m.zones)
+                if (z != null)
+                    lights.AddZone(z.zone, z.light, z.zmin, z.zmax, z.conditional, z.poly);
+                else
+                    lights.DroppedZones++;
+        if (m.points != null)
+            foreach (MsgLightPoint p in m.points)
+                if (p != null)
+                    lights.AddPoint(p.light, p.x, p.y, p.z, p.start, p.end);
+                else
+                    lights.DroppedPoints++;
+        if (m.values != null)
+            foreach (MsgLightValues v in m.values)
+                if (v != null)
+                    lights.AddValues(v.light, v.lightParams, v.riverClose, v.riverFar, v.oceanClose, v.oceanFar, v.waterAlpha, v.oceanAlpha, v.sky);
+                else
+                    lights.DroppedValues++;
+        return lights;
     }
 
     /// <summary>loadWorld's streaming offer (protocol 18), null when it carries none (a nested object always parses: its

@@ -19,7 +19,8 @@
 //                 the group's frame (WmoLiquidMesh.Build) as a child of the group's object, drawn with the type's shared
 //                 material; the prototype holds its types until it is disposed (pooled and private prototypes alike).
 //   frames        role "liquidTexture", by FileDataID, under the load whose tile or world model needs them (a session's
-//                 tile load): at most MaxLiquidOutstanding out at once per load (apart from the tile's K, the world
+//                 tile load) -- a type's ripple map ("bump", the High look) the same way, one more file of the type: at
+//                 most MaxLiquidOutstanding out at once per load (apart from the tile's K, the world
 //                 models' and the doodads' own), each id at most once per load, within the offer's maxTexturesPerLoad ids
 //                 and maxTextureBytesPerLoad bytes, a frame the scene holds or another load fetches never asked. Answers
 //                 are routed and checked as every map answer (request id and load); a late one is dropped. Prepared on the
@@ -31,6 +32,11 @@
 //                 failure, and in a single load every one, settles the type in its base colour.
 //   the report    terrainTileLoaded's "liquids" (WmvIpcClient.TerrainLiquidReport) and one "[liquids]" log line per tile
 //                 and per world model with liquid; streamState and runtimeState count what is resident.
+//   zone lights   the offer's "lights" (Wow/World/LiquidLights.cs), the scene's beside its liquids: set at the commit (a
+//                 lights object of another map than the load's is ignored, and said), dropped with the scene
+//                 (DisposeTiles), which also turns the shader's zone light off at once (WmvLiquidLight.Off). A streaming
+//                 session's tile loads change nothing: the scene keeps its entry's. The player reads them at the camera
+//                 once a rendered frame (WmvMain.LiquidLightFrame).
 
 using System;
 using System.Collections.Generic;
@@ -67,9 +73,46 @@ public sealed partial class WmvTerrainSession
     }
 
     WmvLiquidRegistry sceneLiquids;
+    LiquidLights sceneLights;
 
     /// <summary>The scene's liquid registry (the shown tile's, a session's), null when it has none.</summary>
     public WmvLiquidRegistry SceneLiquids { get { return sceneLiquids != null && !sceneLiquids.Disposed ? sceneLiquids : null; } }
+    /// <summary>The scene's zone lights (its load's offer's, when "ok" and of the load's map), null when it has none.</summary>
+    public LiquidLights SceneLights { get { return sceneLights; } }
+
+    /// <summary>The commit: the load's zone lights become the scene's -- none when its offer carried none (or not "ok"), or
+    /// when they are another map's (ignored, and said).</summary>
+    void CommitSceneLights(Job j)
+    {
+        WmvIpcClient.LiquidOffer offer = j.Cmd.Liquids;
+        LiquidLights l = offer != null ? offer.Lights : null;
+        sceneLights = null;
+        if (offer == null)
+            return;
+        if (l == null)
+        {
+            if (!string.IsNullOrEmpty(offer.LightsState))
+                LiquidLog("load {0}: zone lights {1}{2}: the liquids keep their type colours", j.Cmd.Load, offer.LightsState,
+                          !string.IsNullOrEmpty(offer.LightsDetail) ? " (" + offer.LightsDetail + ")" : "");
+            return;
+        }
+        if (l.Map != j.Cmd.MapId)
+        {
+            LiquidLog("load {0}: the zone lights are map {1}'s, not the load's map {2}: ignored, the liquids keep their type colours",
+                      j.Cmd.Load, l.Map, j.Cmd.MapId);
+            return;
+        }
+        sceneLights = l;
+        LiquidLog("load {0}: zone lights {1}", j.Cmd.Load, l.Summary());
+    }
+
+    /// <summary>DisposeTiles: the scene's zone lights go with it, and the shader's zone light is off at once.</summary>
+    void DropSceneLights()
+    {
+        sceneLights = null;
+        WmvLiquidLight.Off();
+    }
+
     /// <summary>The liquid frame requests the load in flight has out (the self-test's).</summary>
     public int LiquidRequestsOut { get { return current != null && current.Liquid != null ? current.Liquid.Pending : 0; } }
 
@@ -292,10 +335,16 @@ public sealed partial class WmvTerrainSession
         return null;
     }
 
-    /// <summary>The frames of the load's liquid types the scene neither holds nor fetches, asked for while fewer than
-    /// MaxLiquidOutstanding are out (and, in a session, the credit allows). A frame this load cannot ask for (asked already,
-    /// past a budget): in a single load it is settled as failed (no other load of the scene can get it), in a session it
-    /// stays wanted for another tile.</summary>
+    /// <summary>A type's lists the loads fetch for: 0 its frames, 1 its ripple map (null when it names none).</summary>
+    static WmvLiquidFrames ListOfType(WmvLiquidType t, int which)
+    {
+        return which == 0 ? t.Frames : t.Bump;
+    }
+
+    /// <summary>The frames (and ripple maps) of the load's liquid types the scene neither holds nor fetches, asked for while
+    /// fewer than MaxLiquidOutstanding are out (and, in a session, the credit allows). A frame this load cannot ask for
+    /// (asked already, past a budget): in a single load it is settled as failed (no other load of the scene can get it), in
+    /// a session it stays wanted for another tile.</summary>
     void AskLiquidFrames(Job j)
     {
         LiquidWork w = j.Liquid;
@@ -305,38 +354,42 @@ public sealed partial class WmvTerrainSession
         foreach (int id in new List<int>(w.Types))
         {
             WmvLiquidType t = w.Registry.Get(id);
-            if (t == null || t.Frames == null || t.Frames.State != WmvLiquidFrames.StateFetching)
-                continue;
-            foreach (uint fid in t.Frames.Fids)
+            for (int which = 0; t != null && which < 2; which++)
             {
-                WmvLiquidFrame f = w.Registry.Frame(fid);
-                if (f == null || f.State != WmvLiquidFrame.StateWanted || w.Asked.Contains(fid))
-                    continue;                   // (asked under this load already: its answer was counted)
-                string why = CannotAskLiquid(j, fid);
-                if (why != null)
-                {
-                    if (w.NotRequested.Add(fid))
-                    {
-                        w.Failed++;
-                        LiquidLog("load {0}: liquid texture {1} (type {2}) not asked for: {3}", j.Cmd.Load, fid, id, why);
-                    }
-                    if (!session)
-                        w.Registry.FrameFailed(fid, WmvTerrainTexture.StateNotRequested, why, false);
+                WmvLiquidFrames list = ListOfType(t, which);
+                if (list == null || list.State != WmvLiquidFrames.StateFetching)
                     continue;
+                foreach (uint fid in list.Fids)
+                {
+                    WmvLiquidFrame f = w.Registry.Frame(fid);
+                    if (f == null || f.State != WmvLiquidFrame.StateWanted || w.Asked.Contains(fid))
+                        continue;                   // (asked under this load already: its answer was counted)
+                    string why = CannotAskLiquid(j, fid);
+                    if (why != null)
+                    {
+                        if (w.NotRequested.Add(fid))
+                        {
+                            w.Failed++;
+                            LiquidLog("load {0}: liquid texture {1} (type {2}) not asked for: {3}", j.Cmd.Load, fid, id, why);
+                        }
+                        if (!session)
+                            w.Registry.FrameFailed(fid, WmvTerrainTexture.StateNotRequested, why, false);
+                        continue;
+                    }
+                    if (w.Out >= MaxLiquidOutstanding || !StreamCredit(j))
+                        return;
+                    double at = j.Clock.Elapsed.TotalMilliseconds;
+                    string rid = SendMapRequest(j, RoleLiquidTexture, (int)fid);
+                    j.Pending.Add(new Request { Id = rid, Role = RoleLiquidTexture, FileDataID = (int)fid, AskedMs = at, Liquid = true });
+                    w.Registry.Asking(fid, j);
+                    w.Asked.Add(fid);
+                    w.Pending++;
+                    w.Requested++;
+                    w.ProgressAtMs = double.NaN;
+                    OutstandingPeak = Math.Max(Outstanding, OutstandingPeak);
+                    if (w.Registry.Disposed || j.Dead)
+                        return;
                 }
-                if (w.Out >= MaxLiquidOutstanding || !StreamCredit(j))
-                    return;
-                double at = j.Clock.Elapsed.TotalMilliseconds;
-                string rid = SendMapRequest(j, RoleLiquidTexture, (int)fid);
-                j.Pending.Add(new Request { Id = rid, Role = RoleLiquidTexture, FileDataID = (int)fid, AskedMs = at, Liquid = true });
-                w.Registry.Asking(fid, j);
-                w.Asked.Add(fid);
-                w.Pending++;
-                w.Requested++;
-                w.ProgressAtMs = double.NaN;
-                OutstandingPeak = Math.Max(Outstanding, OutstandingPeak);
-                if (w.Registry.Disposed || j.Dead)
-                    return;
             }
         }
     }
@@ -412,8 +465,9 @@ public sealed partial class WmvTerrainSession
         AskLiquidFrames(j);
     }
 
-    /// <summary>The load's liquid frames are settled: none of its own out, and every frame of its types ready, failed, or
-    /// one it cannot ask for (asked already, past a budget) -- a frame another load of the session fetches is waited for.</summary>
+    /// <summary>The load's liquid frames are settled: none of its own out, and every frame (and ripple map) of its types
+    /// ready, failed, or one it cannot ask for (asked already, past a budget) -- a frame another load of the session fetches
+    /// is waited for.</summary>
     bool LiquidsSettled(Job j)
     {
         LiquidWork w = j.Liquid;
@@ -424,15 +478,19 @@ public sealed partial class WmvTerrainSession
         foreach (int id in w.Types)
         {
             WmvLiquidType t = w.Registry.Get(id);
-            if (t == null || t.Frames == null || t.Frames.State != WmvLiquidFrames.StateFetching)
-                continue;
-            foreach (uint fid in t.Frames.Fids)
+            for (int which = 0; t != null && which < 2; which++)
             {
-                WmvLiquidFrame f = w.Registry.Frame(fid);
-                if (f == null || f.State == WmvLiquidFrame.StateReady || f.State == WmvLiquidFrame.StateFailed)
+                WmvLiquidFrames list = ListOfType(t, which);
+                if (list == null || list.State != WmvLiquidFrames.StateFetching)
                     continue;
-                if (f.State == WmvLiquidFrame.StateAsking || CannotAskLiquid(j, fid) == null)
-                    return false;
+                foreach (uint fid in list.Fids)
+                {
+                    WmvLiquidFrame f = w.Registry.Frame(fid);
+                    if (f == null || f.State == WmvLiquidFrame.StateReady || f.State == WmvLiquidFrame.StateFailed)
+                        continue;
+                    if (f.State == WmvLiquidFrame.StateAsking || CannotAskLiquid(j, fid) == null)
+                        return false;
+                }
             }
         }
         return true;
@@ -560,15 +618,19 @@ public sealed partial class WmvTerrainSession
         r.TexturesRequested = w.Requested;
         r.TexturesLoaded = w.Loaded;
         r.TexturesFailed = w.Failed;
-        // The frames of its types resident now (each array once).
+        // The frames and ripple maps of its types resident now (each array once).
         if (!w.Registry.Disposed)
         {
             var seen = new HashSet<WmvLiquidFrames>();
             foreach (int id in w.Met)
             {
                 WmvLiquidType lt = w.Registry.Get(id);
-                if (lt != null && lt.Frames != null && lt.Frames.Array != null && seen.Add(lt.Frames))
-                    r.TextureBytes += lt.Frames.GpuBytes;
+                for (int which = 0; lt != null && which < 2; which++)
+                {
+                    WmvLiquidFrames list = ListOfType(lt, which);
+                    if (list != null && list.Resident && seen.Add(list))
+                        r.TextureBytes += list.GpuBytes;
+                }
             }
         }
         return r;

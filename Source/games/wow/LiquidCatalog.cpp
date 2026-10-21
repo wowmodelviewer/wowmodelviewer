@@ -92,6 +92,14 @@ namespace
       names << withExtension(t);
     return names;
   }
+
+  // Does a texture's file name (its path's last part) contain "bump", in any case? The only sign of a ripple normal map
+  // the tables give (INFERRED: Retail's water types name XTextures\ocean\newoceanbump.blp in slot 2, a unit normal map).
+  bool namesBump(const QString & path)
+  {
+    const int slash = std::max(path.lastIndexOf('\\'), path.lastIndexOf('/'));
+    return path.mid(slash + 1).contains("bump", Qt::CaseInsensitive);
+  }
 }
 
 QString wow::LiquidCatalog::statusName(Status s)
@@ -168,12 +176,15 @@ std::shared_ptr<wow::LiquidCatalog> wow::LiquidCatalog::build()
   if (!materials.read || materials.rows < 0)
     return finish(Status::Unavailable, "LiquidMaterial.db2 is " + (materials.read ? QString("not queryable") : materials.state));
 
-  // The types and their materials. Every value is masked to its column's width, as database.xml declares it (the
-  // database keeps those bytes alone already): a pallet word's constant upper bits are not part of the value.
+  // The types and their materials, and slots 1-5's templates and frame counts (columns 12-16 and 17-21). Every value is
+  // masked to its column's width, as database.xml declares it (the database keeps those bytes alone already): a pallet
+  // word's constant upper bits are not part of the value.
   const sqlResult rows = GAMEDATABASE.sqlQuery(
-    QString("SELECT t.ID, t.Name, t.Texture, t.SoundBank & 255, t.MaterialID & 255, t.MinimapStaticCol, "
-            "t.FrameCountTexture1 & 255, t.Float1, t.Float2, m.ID, m.Flags, m.LVF "
-            "FROM %1 t LEFT JOIN %2 m ON m.ID = (t.MaterialID & 255) ORDER BY t.ID")
+    QString("SELECT t.ID, t.Name, t.Texture1, t.SoundBank & 255, t.MaterialID & 255, t.MinimapStaticCol, "
+            "t.FrameCountTexture1 & 255, t.Float1, t.Float2, m.ID, m.Flags, m.LVF, "
+            "t.Texture2, t.Texture3, t.Texture4, t.Texture5, t.Texture6, t.FrameCountTexture2 & 255, "
+            "t.FrameCountTexture3 & 255, t.FrameCountTexture4 & 255, t.FrameCountTexture5 & 255, "
+            "t.FrameCountTexture6 & 255 FROM %1 t LEFT JOIN %2 m ON m.ID = (t.MaterialID & 255) ORDER BY t.ID")
       .arg(kTypeTable, kMaterialTable));
   if (!rows.valid)
     return finish(Status::Unavailable, "LiquidType.db2's table could not be queried");
@@ -205,11 +216,11 @@ std::shared_ptr<wow::LiquidCatalog> wow::LiquidCatalog::build()
     return e.listed && e.fileDataId > 0 ? e.fileDataId : 0;
   };
 
-  std::vector<int> all;
+  std::vector<int> all, bumps;
   c->m_types.reserve(rows.values.size());
   for (const std::vector<QString> & r : rows.values)
   {
-    if (r.size() < 12)
+    if (r.size() < 22)
       continue;
     LiquidTypeEntry e;
     e.id = r[0].toInt();
@@ -276,11 +287,52 @@ std::shared_ptr<wow::LiquidCatalog> wow::LiquidCatalog::build()
     c->m_unresolved += e.framesUnresolved;
     c->m_frameCount += e.frames.size();
     all.insert(all.end(), e.frames.begin(), e.frames.end());
+    // THE BUMP: the first file of slots 1-5 whose name contains "bump". With rows of the type, the rows after slot 0's
+    // frames are slots 1-5's in slot order, each named by the listfile (a procedural slot's row is no file); without, each
+    // slot's template expanded as slot 0's and looked up in the storage's root, a name it does not list counted.
+    if (own != rowsByType.end())
+    {
+      const std::vector<std::pair<int, int>> & list = own->second;
+      for (size_t k = (size_t)e.framesWanted; k < list.size() && e.bump == 0; k++)
+        if (list[k].first > 0 && namesBump(folder->fileName(list[k].first)))
+          e.bump = list[k].first;
+    }
+    else
+    {
+      for (int slot = 1; slot <= 5 && e.bump == 0; slot++)
+      {
+        if (!namesBump(r[11 + slot]))
+          continue;
+        for (const QString & name : expandTemplate(r[11 + slot], r[16 + slot].toInt() & 0xFF))
+        {
+          const int fdid = rootNames ? byName(name) : 0;
+          if (fdid > 0)
+          {
+            e.bump = fdid;
+            break;
+          }
+          c->m_unresolvedBumps++;
+        }
+      }
+    }
+    if (e.bump > 0)
+    {
+      c->m_typesWithBump++;
+      bumps.push_back(e.bump);
+    }
     c->m_types.push_back(std::move(e));
   }
   std::sort(all.begin(), all.end());
   all.erase(std::unique(all.begin(), all.end()), all.end());
+  std::sort(bumps.begin(), bumps.end());
+  bumps.erase(std::unique(bumps.begin(), bumps.end()), bumps.end());
+  c->m_bumpCount = bumps.size();
+  std::vector<int> servable(all);
+  servable.insert(servable.end(), bumps.begin(), bumps.end());
+  std::sort(servable.begin(), servable.end());
+  servable.erase(std::unique(servable.begin(), servable.end()), servable.end());
   c->m_frameIds = std::make_shared<const std::vector<int>>(std::move(all));
+  c->m_textureIds = std::make_shared<const std::vector<int>>(std::move(servable));
 
   // LiquidObject's LiquidTypeID, masked to its 16 bits: every one a LiquidType ID in the four audited clients.
   if (c->m_tables[2].read)
@@ -298,6 +350,9 @@ std::shared_ptr<wow::LiquidCatalog> wow::LiquidCatalog::build()
   if (c->m_unresolved > 0)
     notes += (notes.isEmpty() ? QString() : QString("; ")) +
              QString("%1 frame(s) could not be found in the client's storage").arg(c->m_unresolved);
+  if (c->m_unresolvedBumps > 0)
+    notes += (notes.isEmpty() ? QString() : QString("; ")) +
+             QString("%1 bump name(s) could not be found in the client's storage").arg(c->m_unresolvedBumps);
   finish(Status::Ready, notes);
 
   QStringList tableLines;
@@ -308,7 +363,9 @@ std::shared_ptr<wow::LiquidCatalog> wow::LiquidCatalog::build()
            << (unsigned int)c->m_types.size() << "types," << (unsigned int)c->m_frameCount << "frames," << c->m_unresolved
            << "unresolved," << c->m_buildMs << "ms; frames from LiquidTypeXTexture for" << c->m_typesFromTable
            << "type(s), by name for" << c->m_typesFromNames << "; checked by name" << c->m_checkedByName << ", disagreeing"
-           << c->m_disagreeing << "; LiquidObject rows without a liquid type" << (int)c->m_objectsWithoutType << "; tables"
+           << c->m_disagreeing << "; bumps for" << c->m_typesWithBump << "type(s)," << (unsigned int)c->m_bumpCount
+           << "distinct," << c->m_unresolvedBumps << "unresolved; LiquidObject rows without a liquid type"
+           << (int)c->m_objectsWithoutType << "; tables"
            << tableLines.join(", ").toUtf8().constData();
   return c;
 }
@@ -334,6 +391,11 @@ const wow::LiquidTypeEntry * wow::LiquidCatalog::find(int id) const
 bool wow::LiquidCatalog::isFrame(int fileDataID) const
 {
   return std::binary_search(m_frameIds->begin(), m_frameIds->end(), fileDataID);
+}
+
+bool wow::LiquidCatalog::isTexture(int fileDataID) const
+{
+  return std::binary_search(m_textureIds->begin(), m_textureIds->end(), fileDataID);
 }
 
 const wow::LiquidCatalog::Table * wow::LiquidCatalog::table(const QString & name) const
@@ -380,6 +442,7 @@ void wow::LiquidCatalog::makeJson()
       frames.append(f);
     t["frames"] = frames;
     t["framesWanted"] = e.framesWanted;
+    t["bump"] = e.bump;
     types.append(t);
   }
   QJsonObject o;

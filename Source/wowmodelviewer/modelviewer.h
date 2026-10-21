@@ -48,7 +48,7 @@ class UnityRendererHost;
 class TextureView;
 class BackgroundColorDialog;
 namespace ModelIdLookup { struct Resolved; }
-namespace wow { class WorldMapCatalog; class LiquidCatalog; }
+namespace wow { class WorldMapCatalog; class LiquidCatalog; class LightCatalog; }
 struct TextureEntry;
 class CharInfos;
 
@@ -830,10 +830,11 @@ public:
     int sessionWmoRootsServed = 0;
     int sessionM2ModelsServed = 0;
     // LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md 1.6): a load to a player that draws liquids -- the animated
-    // frames of the liquid catalogue's types, asked for by FileDataID (getMapAsset "liquidTexture"). The budgets it was
-    // sent with (0: none -- a load to an older player, which is served no liquid texture: the load "carries a liquids
-    // offer" when maxLiquidTexturesPerLoad > 0), the frames of the catalogue it was sent with (sorted; the only files the
-    // role serves), and what it has had. A streaming session's tile loads take the entry's (OnStreamTile).
+    // frames and the bumps of the liquid catalogue's types, asked for by FileDataID (getMapAsset "liquidTexture"). The
+    // budgets it was sent with (0: none -- a load to an older player, which is served no liquid texture: the load "carries
+    // a liquids offer" when maxLiquidTexturesPerLoad > 0), the frames and bumps of the catalogue it was sent with
+    // (LiquidCatalog::textureIds: sorted; the only files the role serves), and what it has had. A streaming session's tile
+    // loads take the entry's (OnStreamTile).
     int maxLiquidTexturesPerLoad = 0;
     qint64 maxLiquidTextureBytes = 0;
     qint64 maxLiquidTextureBytesPerLoad = 0;
@@ -1146,6 +1147,12 @@ public:
   // while one loads it is a catalogue of no client. Every load to a player that draws liquids carries its toJson().
   std::shared_ptr<wow::LiquidCatalog> liquidCatalog() const { return m_liquidCatalog; }
   std::shared_ptr<wow::LiquidCatalog> m_liquidCatalog;
+  // The loaded client's light catalogue (its light tables' zone polygons, lights and water colours at 12:00,
+  // docs/world-viewer/09-liquids.md): built and dropped with the liquid catalogue. Never null: before a client is loaded
+  // and while one loads it is a catalogue of no client. Every load to a player that draws liquids carries its mapJson() of
+  // the load's map in the liquids offer ("lights").
+  std::shared_ptr<wow::LightCatalog> lightCatalog() const { return m_lightCatalog; }
+  std::shared_ptr<wow::LightCatalog> m_lightCatalog;
   // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the fourth viewer mode's state, made with the viewer.
   std::unique_ptr<MapsViewer> m_maps;
   MapsViewer * maps() const { return m_maps.get(); }

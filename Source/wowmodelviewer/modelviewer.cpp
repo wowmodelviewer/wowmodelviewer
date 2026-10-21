@@ -81,6 +81,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "LightCatalog.h"
 #include "LiquidCatalog.h"
 #include "WorldMapCatalog.h"
 
@@ -376,9 +377,11 @@ ModelViewer::ModelViewer()
   m_switchFilter.reset(new ViewerSwitchFilter(this));
   wxEvtHandler::AddFilter(m_switchFilter.get());
   PLUGINMANAGER.init("./plugins");
-  // Until a client loads, the map catalogue says there is none (mapCatalog() is never null); so does the liquid catalogue.
+  // Until a client loads, the map catalogue says there is none (mapCatalog() is never null); so do the liquid and light
+  // catalogues.
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
   m_liquidCatalog = wow::LiquidCatalog::noClient("no client is loaded");
+  m_lightCatalog = wow::LightCatalog::noClient("no client is loaded");
   // THE MAP ASSET WORKER: made now, its thread started by its first read (docs/world-viewer/04b-asset-serving.md).
   m_mapAssetWorker = std::make_shared<MapAssetWorker>();
   // THE MAPS VIEWER: what it shows changes the tile grid, the viewport's notice and the title.
@@ -3869,9 +3872,10 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
                        .arg(load).arg(ids.size()).arg(what).arg(most).arg(fileDataID));
   }
   // LIQUIDS (protocol 19): a load that carries a liquids offer only (one sent to an older player carries none), once its
-  // WDT was served (a tile's root and a WMO-only map's world model come after it alike), and only the frames of the liquid
-  // catalogue the load was sent with: the host parses no MH2O and no MLIQ, so it cannot tell which types a tile uses, but
-  // it vouches that the file is a frame of one of the client's liquid types -- and no other file is served under the role.
+  // WDT was served (a tile's root and a WMO-only map's world model come after it alike), and only the frames and bumps
+  // of the liquid catalogue the load was sent with: the host parses no MH2O and no MLIQ, so it cannot tell which types a
+  // tile uses, but it vouches that the file is a frame or the bump of one of the client's liquid types -- and no other
+  // file is served under the role.
   if (liquidRole)
   {
     if (current->maxLiquidTexturesPerLoad <= 0)
@@ -3880,7 +3884,7 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
       return refused(QString("load %1's WDT has not been served, so no liquid texture is").arg(load));
     if (!current->liquidFrames || !std::binary_search(current->liquidFrames->begin(), current->liquidFrames->end(), fileDataID))
       return refused(QString("FileDataID %1 is not a liquid texture: no liquid type of the catalogue load %2 was sent with "
-                             "names it as a frame").arg(fileDataID).arg(load));
+                             "names it as a frame or its bump").arg(fileDataID).arg(load));
     const std::vector<int> & ids = current->liquidTextureIds;
     if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
       return refused(QString("load %1 has asked for liquid texture %2 before: each once per load").arg(load).arg(fileDataID));
@@ -4331,10 +4335,10 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
   command.doodads = world && ipc->playerPlacesDoodads();
   // STREAMING (protocol 18): a tile map's world load to a player that streams, when asked for.
   command.streaming = streaming && world && !noTile && command.doodads && ipc->playerStreams();
-  // LIQUIDS (protocol 19): a player that draws them is offered the client's liquid catalogue and its frames, within the
-  // command's defaults (UnityIpcServer::MAX_LIQUID_*), whether the load is a tile's or a world's; an older player's load is
-  // the protocol-18 one, and no liquid texture is served for it. A catalogue that is not the loaded client's, or could not
-  // be built, goes as "unavailable" with why, and its load serves no frame.
+  // LIQUIDS (protocol 19): a player that draws them is offered the client's liquid catalogue, its frames and bumps, within
+  // the command's defaults (UnityIpcServer::MAX_LIQUID_*), whether the load is a tile's or a world's; an older player's
+  // load is the protocol-18 one, and no liquid texture is served for it. A catalogue that is not the loaded client's, or
+  // could not be built, goes as "unavailable" with why, and its load serves no frame.
   std::shared_ptr<const std::vector<int>> liquidFrames;
   command.liquids = ipc->playerDrawsLiquids();
   if (command.liquids)
@@ -4343,7 +4347,7 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
     if (liquids && liquids->status() == wow::LiquidCatalog::Status::Ready && liquids->belongsToActiveClient())
     {
       command.liquidCatalog = liquids->toJson();
-      liquidFrames = liquids->frameIds();
+      liquidFrames = liquids->textureIds();
     }
     else
       command.liquidCatalog = wow::LiquidCatalog::unavailableJson(
@@ -4353,6 +4357,18 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
                                                                           : QString("the liquid catalogue is not the loaded client's"));
     if (!liquidFrames)
       liquidFrames = std::make_shared<const std::vector<int>>();
+    // THE ZONE LIGHT (inside the same offer, "lights"): the load's map's lights from the client's light catalogue, made on
+    // the map's first load; a catalogue that is not the loaded client's, or could not be built, goes as "unavailable" with
+    // why (the player then draws the liquid catalogue's colours).
+    const std::shared_ptr<wow::LightCatalog> lights = m_lightCatalog;
+    if (lights && lights->status() == wow::LightCatalog::Status::Ready && lights->belongsToActiveClient())
+      command.liquidLights = lights->mapJson(mapId);
+    else
+      command.liquidLights = wow::LightCatalog::unavailableJson(
+        command.product, command.build, mapId,
+        !lights ? QString("there is no light catalogue")
+                : lights->status() != wow::LightCatalog::Status::Ready ? lights->statusDetail()
+                                                                       : QString("the light catalogue is not the loaded client's"));
   }
   // What it loads goes into the viewport, which the overhead map covers until then: the player's window sized for it now,
   // without waiting for the player (so the overhead map's going does not wait for it either).
@@ -4440,8 +4456,9 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
            << (command.streaming ? QString("; a streaming session: the tiles within %1 of the camera's (protocol 18)")
                                      .arg(UnityIpcServer::STREAM_RADIUS)
                                  : QString())
-           << (command.liquids ? QString("; liquids offered (protocol 19): %1 frame(s) of the catalogue servable")
-                                   .arg(liquidFrames ? liquidFrames->size() : 0)
+           << (command.liquids ? QString("; liquids offered (protocol 19): %1 frame(s) and bump(s) of the catalogue "
+                                         "servable; ").arg(liquidFrames ? liquidFrames->size() : 0) +
+                                   wow::LightCatalog::describe(command.liquidLights)
                                : QString("; no liquids (a protocol %1 player)").arg(ipc->playerProtocolVersion()));
   UpdateUnityViewportState();
   return command.load;
@@ -5673,9 +5690,10 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
   // A legacy client has no Map.db2 this viewer reads: its catalogue says so (Unsupported) rather than being absent; its
-  // liquid catalogue likewise (Unavailable).
+  // liquid and light catalogues likewise (Unavailable).
   m_mapCatalog = wow::WorldMapCatalog::build();
   m_liquidCatalog = wow::LiquidCatalog::build();
+  m_lightCatalog = wow::LightCatalog::build();
   ComputeClientCapabilities();
   if (m_maps)
     m_maps->ClientLoaded();
@@ -5826,6 +5844,7 @@ void ModelViewer::ResetClientState()
   // the viewer's says a client is being loaded.
   m_mapCatalog = wow::WorldMapCatalog::noClient("a client is being loaded");
   m_liquidCatalog = wow::LiquidCatalog::noClient("a client is being loaded");
+  m_lightCatalog = wow::LightCatalog::noClient("a client is being loaded");
   // The Maps viewer forgets the old client's map, tiles and terrain (its read cancelled above with the server's).
   if (m_maps)
     m_maps->ClientReplaced();
@@ -6173,6 +6192,11 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.end("liquid catalogue", QString("%1 types, %2 frames, %3")
                                      .arg(m_liquidCatalog->types().size()).arg(m_liquidCatalog->frameCount())
                                      .arg(wow::LiquidCatalog::statusName(m_liquidCatalog->status())));
+  // The client's lights, for the zone light's water colours (docs/world-viewer/09-liquids.md): its five light tables read
+  // whole and LightParams.db2's copy table. Built once here; a map's lights object is made on the map's first load.
+  timeline.begin("light catalogue");
+  m_lightCatalog = wow::LightCatalog::build();
+  timeline.end("light catalogue", wow::LightCatalog::statusName(m_lightCatalog->status()));
 
   if (progress)
     progress->stage(_("Almost ready..."));

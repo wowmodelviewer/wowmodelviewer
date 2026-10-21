@@ -5499,7 +5499,8 @@ public static partial class WmvLifecycleSelfTest
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
             Check(WmvIpcClient.ProtocolVersion == 19, "terrain ipc: the player speaks protocol 19 (13 added terrain textures, 14 the Maps viewer, " +
-                  "15 its overhead map and free camera, 16 world models in the world, 17 doodads, 18 streaming, 19 liquids)", log);
+                  "15 its overhead map and free camera, 16 world models in the world, 17 doodads, 18 streaming, 19 liquids -- the zone lights " +
+                  "inside the liquid offer are an additive key of 19)", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +
@@ -6358,6 +6359,8 @@ public static partial class WmvLifecycleSelfTest
         const int modelFile = 990401, skinFile = 990402, wmoFile = 990501;
         const uint wmoFirstGroup = 990510, wmoTexture = 990520;
         int modelsLive = WmvRuntimeModel.Live, tilesLive = WmvRuntimeTerrainTile.Live, wmosLive = WmvRuntimeMapObject.Live;
+        bool grabBefore = WmvWaterGrabPass.Active;
+        object grabOwner = WmvWaterGrabPass.Owner;
         byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
         byte[] root = AdtSynthetic.FlatRoot(tx, ty);
         byte[] m2 = M2Synthetic.InFileSkeletonModel(skinFile);
@@ -6530,6 +6533,9 @@ public static partial class WmvLifecycleSelfTest
               TerrainTallies() == "0/0/0",
               "terrain late answers: every runtime these tests made is released (models " + WmvRuntimeModel.Live + ", tiles " +
               WmvRuntimeTerrainTile.Live + ", world models " + WmvRuntimeMapObject.Live + ")", log);
+        Check(WmvWaterGrabPass.Active == grabBefore && WmvWaterGrabPass.Owner == grabOwner,
+              "terrain late answers: disposing the test's own WmvMain's terrain leaves the player's grab pass as it was (installed " +
+              grabBefore + " -> " + WmvWaterGrabPass.Active + "; only the WmvMain that installed it removes it)", log);
     }
 
     /// <summary>
@@ -6560,6 +6566,8 @@ public static partial class WmvLifecycleSelfTest
         int tx = TerrainTestTileX, ty = TerrainTestTileY;
         const int skinId = 990201, itemId = 990202, otherItemId = 990203, mountId = 990210;
         int modelsLive = WmvRuntimeModel.Live, tilesLive = WmvRuntimeTerrainTile.Live;
+        bool grabBefore = WmvWaterGrabPass.Active;
+        object grabOwner = WmvWaterGrabPass.Owner;
         byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
         byte[] root = AdtSynthetic.FlatRoot(tx, ty);
         var objects = new List<GameObject>();
@@ -6743,6 +6751,9 @@ public static partial class WmvLifecycleSelfTest
         Check(WmvRuntimeModel.Live == modelsLive && WmvRuntimeTerrainTile.Live == tilesLive && TerrainTallies() == "0/0/0",
               "terrain hidden model: every model runtime and terrain tile these tests made is released (models " + WmvRuntimeModel.Live +
               ", tiles " + WmvRuntimeTerrainTile.Live + ", tallies " + TerrainTallies() + ")", log);
+        Check(WmvWaterGrabPass.Active == grabBefore && WmvWaterGrabPass.Owner == grabOwner,
+              "terrain hidden model: disposing the test's own WmvMain's terrain leaves the player's grab pass as it was (installed " +
+              grabBefore + " -> " + WmvWaterGrabPass.Active + ")", log);
     }
 
     /// <summary>runtimeState's request bookkeeping with nothing pending or retired, ever.</summary>

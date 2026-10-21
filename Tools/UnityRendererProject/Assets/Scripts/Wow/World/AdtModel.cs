@@ -108,7 +108,7 @@ namespace Wmv.Wow.World
         public bool HasExistsBitmap;
         public bool ExistsSpareBits;              // the stored bitmap set bits past Width * Height (masked off)
         public float[] Heights;                   // formats 0, 1, 3: absolute heights per vertex, else null
-        public byte[] Depths;                     // formats 0, 2, 3: one byte per vertex (scale UNKNOWN), else null
+        public byte[] Depths;                     // formats 0, 2, 3: one byte per vertex (LiquidFormat.DepthYards), else null
         public ushort[] U, V;                     // formats 1, 3: the stored texture coordinates (scale UNKNOWN), else null
 
         public int VertexCount { get { return (Width + 1) * (Height + 1); } }

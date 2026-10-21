@@ -23,6 +23,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include "LightCatalog.h"
 #include "UnityAssetAccess.h"
 
 #include "logger/Logger.h"
@@ -1720,6 +1721,9 @@ QJsonObject UnityIpcServer::liquidOffer(const TerrainTileCommand & c)
   l["maxTextureBytes"] = c.maxLiquidTextureBytes;
   l["maxTextureBytesPerLoad"] = c.maxLiquidTextureBytesPerLoad;
   l["catalog"] = c.liquidCatalog;
+  // The zone light (LIQUIDS above, "lights"): only when the load has the map's lights, ok or unavailable.
+  if (!c.liquidLights.isEmpty())
+    l["lights"] = c.liquidLights;
   return l;
 }
 
@@ -1727,13 +1731,18 @@ QString UnityIpcServer::describeLiquidOffer(const TerrainTileCommand & c)
 {
   // The catalogue in brief (its detail appended, never passed through arg()).
   const QJsonArray types = c.liquidCatalog.value("types").toArray();
-  int frames = 0;
+  int frames = 0, bumps = 0;
   for (const QJsonValue & t : types)
+  {
     frames += t.toObject().value("frames").toArray().size();
+    bumps += t.toObject().value("bump").toInt() > 0 ? 1 : 0;
+  }
   return QString("liquids: maxTexturesPerLoad=%1 maxTextureBytes=%2 maxTextureBytesPerLoad=%3, catalogue ")
            .arg(c.maxLiquidTexturesPerLoad).arg(c.maxLiquidTextureBytes).arg(c.maxLiquidTextureBytesPerLoad) +
-         c.liquidCatalog.value("state").toString() + QString(" (%1 types, %2 frames)").arg(types.size()).arg(frames) +
-         (c.liquidCatalog.value("detail").toString().isEmpty() ? QString() : ": " + c.liquidCatalog.value("detail").toString());
+         c.liquidCatalog.value("state").toString() +
+         QString(" (%1 types, %2 frames, a bump on %3 types)").arg(types.size()).arg(frames).arg(bumps) +
+         (c.liquidCatalog.value("detail").toString().isEmpty() ? QString() : ": " + c.liquidCatalog.value("detail").toString()) +
+         (c.liquidLights.isEmpty() ? QString() : ", " + wow::LightCatalog::describe(c.liquidLights));
 }
 
 bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)

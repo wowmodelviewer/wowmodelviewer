@@ -367,17 +367,36 @@
  *                    "catalog":{ "product", "build", "state":"ok"|"unavailable", "detail", "types":[{ "id", "name",
  *                    "kind" (LiquidType.SoundBank: 0 water, 1 ocean, 2 magma, 3 slime), "material", "materialFlags",
  *                    "lvf" (the material's; both -1 without its row), "minimapColor" (0xAARRGGBB as stored), "float0",
- *                    "float1", "frames" (slot 0's frames as FileDataIDs, in frame order), "framesWanted" }] } }
- * (MAX_LIQUID_* below; the same catalogue object with every load of the client epoch; "unavailable" with why and no types
- * when the client's liquid tables could not be read). getMapAsset adds the role "liquidTexture", decided as the other
- * roles: refused for a load that carries no liquids offer ("liquids not offered": a load to an older player), before the
- * load's WDT was served (a streaming session's tile loads count it served), for an id that is not one of the catalogue's
- * frames ("not a liquid texture": the host vouches for the catalogue's files and no other), for an id asked for before in
- * the load, past maxTexturesPerLoad ids, and once maxTextureBytesPerLoad bytes were read (the reads in flight reserved);
- * otherwise read with the smaller of maxTextureBytes and what is left (a read cut so that finds the file larger is
- * "refused" for the load, a file over maxTextureBytes "unreadable", the Stage 08 rule). The liquid role's reads are a
- * family of their own, capped at maxTexturesPerLoad apart from the terrain's, the world models' and the doodads'. The KIND
- * check: a liquid texture starts "BLP2". A streaming session's tile loads take the entry's liquid budgets and catalogue.
+ *                    "float1", "frames" (slot 0's frames as FileDataIDs, in frame order), "framesWanted", "bump" (the
+ *                    ripple normal map's FileDataID, 0 none) }] },
+ *                    "lights":{ "state":"ok"|"unavailable", "detail", "product", "build", "map", "time":1440, "slot":0,
+ *                    "defaultLight" (a Light ID, 0 none), "defaultFrom" ("end0", "origin", "light1", "none"),
+ *                    "zones":[{ "zone", "light", "zmin", "zmax", "conditional" (0/1), "poly":[x0,y0, x1,y1, ...] }],
+ *                    "points":[{ "light", "x", "y", "z", "start", "end" }], "values":[{ "light", "lightParams",
+ *                    "riverClose", "riverFar", "oceanClose", "oceanFar", "sky" ([r,g,b] 0..255), "waterAlpha",
+ *                    "oceanAlpha" ([shallow, deep]) }] } }
+ * (MAX_LIQUID_* below; the same catalogue object with every load of the client epoch; "unavailable" with why and no
+ * types when the client's liquid tables could not be read). "bump" (an optional key, still protocol 19: a player
+ * without it ignores it) is the first texture of the type's slots 1-5 whose file name contains "bump"
+ * (wow::LiquidCatalog). "lights" (optional likewise) is the load's map's lights from the client's light catalogue
+ * (wow::LightCatalog::mapJson, made on the map's first load): the zone polygons in the order the player tries them at
+ * its camera (unconditional first, then the smallest), positions in yards in the game frame (X north, Y west, Z up),
+ * the point lights (falloff start and end in yards) and each light's water at 12:00, slot 0 -- none for a light whose
+ * four water colours are all 0 there (Classic Beta) -- with "sky" (optional likewise), the colour a water reflection
+ * that finds no scene shows until Stage 12 draws a sky (LightData.SkyBand1Color at 12:00); "unavailable" with why and
+ * empty lists when the client's light tables could not be read. A player that finds no "lights", or one not "ok", draws
+ * the liquid catalogue's colours. The largest "lights" of an audited client (Retail map 0) is under 256 KiB, far within
+ * a line the player reads (WmvStreamReader.MaxLineBytes, 192 MiB).
+ * getMapAsset adds the role "liquidTexture", decided as the other
+ * roles: refused for a load that carries no liquids offer ("liquids not offered": a load to an older player), before
+ * the load's WDT was served (a streaming session's tile loads count it served), for an id that is not one of the
+ * catalogue's frames or bumps ("not a liquid texture": the host vouches for the catalogue's files alone), for an id
+ * asked for before in the load, past maxTexturesPerLoad ids, and once maxTextureBytesPerLoad bytes were read (the reads
+ * in flight reserved); otherwise read with the smaller of maxTextureBytes and what is left (a read cut so that finds
+ * the file larger is "refused" for the load, a file over maxTextureBytes "unreadable", the Stage 08 rule). The liquid
+ * role's reads are a family of their own, capped at maxTexturesPerLoad apart from the terrain's, the world models' and
+ * the doodads'. The KIND check: a liquid texture starts "BLP2". A streaming session's tile loads take the entry's
+ * liquid budgets, catalogue and lights.
  *   player -> WMV  terrainTileLoaded adds "liquids":{ "offered", "catalog" ("ok", "unavailable", "absent"), "instances",
  *                    "layers", "chunks", "quads", "vertices", "meshes", "types":[ids], "texturesRequested",
  *                    "texturesLoaded", "texturesFailed", "missingTypes", "formatBySize", "formatDisagreements",
@@ -1044,11 +1063,14 @@ public:
     // Protocol 19 (LIQUIDS above): the load offers liquids -- sent ("liquids": these budgets and the catalogue) with
     // loadTerrainTile and loadWorld only when it is set and the player draws liquids; otherwise the load is the
     // protocol-18 one. liquidCatalog: the client's catalogue (wow::LiquidCatalog::toJson), or one "unavailable" with why.
+    // liquidLights: the load's map's lights (wow::LightCatalog::mapJson, or its unavailableJson), sent as the offer's
+    // "lights" only when set.
     bool liquids = false;
     int maxLiquidTexturesPerLoad = MAX_LIQUID_TEXTURES_PER_LOAD;
     int maxLiquidTextureBytes = MAX_LIQUID_TEXTURE_BYTES;
     int maxLiquidTextureBytesPerLoad = MAX_LIQUID_TEXTURE_BYTES_PER_LOAD;
     QJsonObject liquidCatalog;
+    QJsonObject liquidLights;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command (protocol 16): a world load (WORLD MODELS IN THE WORLD above). False (nothing sent) without a

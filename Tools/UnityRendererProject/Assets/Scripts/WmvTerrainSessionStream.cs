@@ -919,7 +919,7 @@ public sealed partial class WmvTerrainSession
             MaxM2BytesPerLoad = e.MaxM2BytesPerLoad, MaxM2TextureBytes = e.MaxM2TextureBytes, MaxM2TextureBytesPerLoad = e.MaxM2TextureBytesPerLoad,
             MaxM2ModelsPerLoad = e.MaxM2ModelsPerLoad, MaxM2TexturesPerLoad = e.MaxM2TexturesPerLoad,
             MaxDoodadInstancesPerLoad = e.MaxDoodadInstancesPerLoad,
-            // Protocol 19: the entry's liquid offer -- budgets and catalogue -- as the host gives the tile load the entry's.
+            // Protocol 19: the entry's liquid offer -- budgets, catalogue and zone lights -- as the host gives the tile load the entry's.
             Liquids = e.Liquids,
         };
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes, Stream = st, Support = s.Support };

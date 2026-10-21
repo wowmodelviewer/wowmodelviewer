@@ -18,8 +18,23 @@
 //                       size otherwise, every frame as RGBA32 with the levels they all have; another size, not drawn
 //                       animated. Until then, and for good when a frame cannot be had, the type is drawn in its base colour
 //                       alone (09-liquids.md 1.5).
+//   ripple maps         the High look's (Stage 09 tuning): a type's "bump" (the catalogue's ripple map, one file) is a list
+//                       of its own -- held only while the High look is installed (WmvWaterGrabPass.Active: never with
+//                       WMV_WATER=low) and only for a transparent water or ocean type, the ones the HIGH path draws
+//                       (WmvLiquidMaterials.HighLook) -- fetched like the frames, shared by every type that names the same
+//                       file, checked as a unit normal map on its top mip (LiquidBump: else flat normals, said), its slope
+//                       spread measured there (the strength factor that brings it to the tuned map's, _HiBumpNorm, said)
+//                       with its mean slope (the map's constant tilt, taken out of every sample's slope: _HiBumpMean, said)
+//                       and uploaded as a linear Texture2D (the file's format and mips, Repeat, trilinear), bound as the
+//                       material's _BumpMap. It counts in the arrays' tallies and bytes (an "array" below is a frame array
+//                       or a ripple map) and goes with its types like the frames.
 //   the clock           Tick sets each animated type's frame once a frame on its shared material: frame = floor(t x
 //                       FramesPerSecond) mod frames (WmvLiquidMaterials.FramesPerSecond, a documented choice).
+//   the zone light      not here: the scene's zone light at the camera reaches every material as shader globals
+//                       (WmvLiquidLight.cs); the material holds only its kind and the zone path's constants.
+//   the High look       the HIGH path's TUNABLE values are material properties (WmvLiquidMaterials.ApplyHigh: the start
+//                       values of Wow/World/LiquidHigh.cs, overridden by -wmvWaterTune); what it reads of the scene comes
+//                       from WmvWaterGrabPass as globals.
 //   WmvLiquidMeshes     a LiquidSurface as a Unity Mesh, a tile's liquid objects (WmvTerrainBuilder.Build), and the tallies
 //                       of every liquid object and mesh alive (runtimeState's liquidObjects, liquidMeshes).
 //
@@ -28,28 +43,45 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using Wmv.Wow.World;
 
 /// <summary>
 /// The liquid material (Resources/WmvLiquid.shader, "Wmv/Liquid") and the approximation's constants (09-liquids.md 1.5:
-/// every one a documented choice, none the game's; the colours and opacities to be tuned against the in-game references).
+/// every one a documented choice). The zone path's (water and ocean under a zone light, WmvLiquidLight) were MEASURED at
+/// one spot against the in-game references; the fallback's are the provisional type-colour look, kept as it was.
 /// </summary>
 public static class WmvLiquidMaterials
 {
     public const string ShaderResource = "WmvLiquid";
     public const string ShaderName = "Wmv/Liquid";
 
-    /// <summary>APPROXIMATION: water and ocean colour = base colour + the frame's alpha x HighlightScale (the frames carry
-    /// their ripples and sparkles in alpha, near-black colour: 09-liquids.md 1.5). Provisional until the references.</summary>
+    /// <summary>APPROXIMATION, the fallback: water and ocean colour = base colour + the frame's alpha x HighlightScale (the
+    /// frames carry their ripples and sparkles in alpha, near-black colour: 09-liquids.md 1.5).</summary>
     public const float HighlightScale = 0.5f;
-    /// <summary>APPROXIMATION: water and ocean opacity at depth byte 0 (and at a vertex with no stored depth: DeepAlpha). The
-    /// depth byte's scale is UNKNOWN; opacity = lerp(ShallowAlpha, DeepAlpha, depth / 255). Provisional until the references.</summary>
+    /// <summary>APPROXIMATION, the fallback: water and ocean opacity at depth byte 0 (and at a vertex with no stored depth:
+    /// DeepAlpha); opacity = lerp(ShallowAlpha, DeepAlpha, depth byte / 255).</summary>
     public const float ShallowAlpha = 0.45f;
-    /// <summary>APPROXIMATION: water and ocean opacity at depth byte 255, and where no depth is stored (ocean data-less
-    /// instances). Provisional until the references.</summary>
+    /// <summary>APPROXIMATION, the fallback: water and ocean opacity at depth byte 255, and where no depth is stored (ocean
+    /// data-less instances).</summary>
     public const float DeepAlpha = 0.8f;
+    /// <summary>The zone path: the depth (yards) at which the colour reaches "far" and the opacity "deep" (k = depth /
+    /// DepthFull). MEASURED at one spot (Southfury River, Durotar, type 5 Slow Water, Retail PTR Low, noon: the colour fit,
+    /// 2.5-3.75 yd with the eye-height uncertainty); INFERRED for every other water and ocean type.</summary>
+    public const float DepthFull = 3.25f;
+    /// <summary>The zone path: the highlight's gain, h = ZoneHighlight x saturate((frame alpha - floor) / (1 - floor)), a
+    /// neutral add after the blend, independent of the depth. MEASURED at the same one spot (the highlight coverage, tails
+    /// and contrast, fitted with the floor and the bed factor); INFERRED for every other type.</summary>
+    public const float ZoneHighlight = 0.34f;
+    /// <summary>The zone path: the frame alpha below which no highlight is added. MEASURED at the same one spot; INFERRED
+    /// for every other type.</summary>
+    public const float ZoneHighlightFloor = 0.13f;
+    /// <summary>The zone path: the scene behind the water (the bed) is kept at BedFactor x (1 - alpha), not (1 - alpha):
+    /// out = alpha W + h + BedFactor (1 - alpha) dst. MEASURED at the same one spot (0.68-0.80 fit; the mechanism is
+    /// UNKNOWN); INFERRED for every other type.</summary>
+    public const float BedFactor = 0.75f;
     /// <summary>APPROXIMATION: the animation rate. No column of the liquid tables is proven to hold it (UNKNOWN, 09-liquids.md
     /// 1.5); 15 frames a second plays a 30-frame water loop in 2 s.</summary>
     public const double FramesPerSecond = 15.0;
@@ -69,9 +101,122 @@ public static class WmvLiquidMaterials
                                ShallowAlphaId = Shader.PropertyToID("_ShallowAlpha"), DeepAlphaId = Shader.PropertyToID("_DeepAlpha"),
                                LinearOutId = Shader.PropertyToID("_WmvLinearOut"), SrcBlendId = Shader.PropertyToID("_SrcBlend"),
                                DstBlendId = Shader.PropertyToID("_DstBlend"), ZWriteId = Shader.PropertyToID("_ZWrite"),
-                               CullId = Shader.PropertyToID("_Cull"), ColourFromFrameId = Shader.PropertyToID("_ColourFromFrame");
+                               CullId = Shader.PropertyToID("_Cull"), ColourFromFrameId = Shader.PropertyToID("_ColourFromFrame"),
+                               KindId = Shader.PropertyToID("_LiquidKind"), DepthFullId = Shader.PropertyToID("_DepthFull"),
+                               ZoneHighlightId = Shader.PropertyToID("_ZoneHighlight"),
+                               ZoneHighlightFloorId = Shader.PropertyToID("_ZoneHighlightFloor"), BedFactorId = Shader.PropertyToID("_BedFactor"),
+                               SrcBlendAlphaId = Shader.PropertyToID("_SrcBlendA"), DstBlendAlphaId = Shader.PropertyToID("_DstBlendA");
+    /// <summary>The High look's material properties (the TUNABLE values, ApplyHigh) and its ripple map.</summary>
+    public static readonly int HiRefractId = Shader.PropertyToID("_HiRefract"), HiRefractRampId = Shader.PropertyToID("_HiRefractRamp"),
+                               HiTFastId = Shader.PropertyToID("_HiTFast"), HiTSlowId = Shader.PropertyToID("_HiTSlow"),
+                               HiWaterGainId = Shader.PropertyToID("_HiWaterGain"), HiReflBroadId = Shader.PropertyToID("_HiReflBroad"),
+                               HiReflDetailId = Shader.PropertyToID("_HiReflDetail"), HiF0Id = Shader.PropertyToID("_HiF0"),
+                               HiReflBumpId = Shader.PropertyToID("_HiReflBump"), HiReflMarchId = Shader.PropertyToID("_HiReflMarch"),
+                               HiBumpTileId = Shader.PropertyToID("_HiBumpTile"), HiBumpScrollId = Shader.PropertyToID("_HiBumpScroll"),
+                               HiBumpWeightAId = Shader.PropertyToID("_HiBumpWeightA"), HiBumpStrengthId = Shader.PropertyToID("_HiBumpStrength"),
+                               BumpMapId = Shader.PropertyToID("_BumpMap"), HasBumpId = Shader.PropertyToID("_HasBump"),
+                               HiNoZoneGainId = Shader.PropertyToID("_HiNoZoneGain"), HiBumpNormId = Shader.PropertyToID("_HiBumpNorm"),
+                               HiBumpMeanId = Shader.PropertyToID("_HiBumpMean");
+    /// <summary>The High look's globals set outside the grab pass: the liquid clock (seconds; WmvMain, pinned by -wmvAnimTime),
+    /// the sky a reflection that misses takes (WmvLiquidLight: the zone light's, else NeutralSky) and the ripple map's
+    /// offset for the floating origin (WmvMain.RippleOriginFrame: per scale, modulo its tile).</summary>
+    public static readonly int LiquidTimeId = Shader.PropertyToID("_WmvLiquidTime"), ReflectSkyId = Shader.PropertyToID("_WmvReflectSky"),
+                               RippleOriginId = Shader.PropertyToID("_WmvRippleOrigin");
     /// <summary>_LiquidMode: alpha-blended over the scene (the material's flag 0x1), or opaque.</summary>
     public const float ModeTransparent = 0f, ModeOpaque = 1f;
+
+    static LiquidHighTune tune;
+
+    /// <summary>
+    /// The High look's TUNABLE values (Wow/World/LiquidHigh.cs, LiquidHighTune): their start values -- the defaults below --
+    /// overridden by -wmvWaterTune (WmvModelBuilder.Debug_.WaterTune), read once. Each default was MEASURED at one spot
+    /// (Southfury River, type 5 Slow Water, the PTR at Liquid Detail High, noon: the measurements, then a tuning that rendered
+    /// the four High shots there and scored them against their measured targets) or is a documented choice; every one is
+    /// applied to every other water and ocean type as INFERRED.
+    ///   transmission  tFastA 1.09 / tFastL 0.154 yd and tSlowL 24.9 yd: MEASURED (a fit of the bed-contrast share against
+    ///                 the straight path Ls, RMS 0.026). tSlowA 0.38 (the fit's 0.34): MEASURED by the tuning -- the ripples
+    ///                 lower the bed's share, 0.38 brings it back to 0.12-0.13 at 4-6 yd; more turns the bed's own bright
+    ///                 pebble tops into sparkles.
+    ///   colour        waterGain 1.35, on the zone light's colours only: MEASURED by the tuning where the bed adds least
+    ///                 (16-48 yd): L* 38.6-40.8 against the High colours' 36.8-41.6 there. noZoneGain, on the type's
+    ///                 MinimapStaticCol where no zone light gives colours (W saturated: never past 1 -- Classic Beta's PBR
+    ///                 water stores (182, 244, 245), which the zone gain clipped to white): 0.3125, MEASURED at the same
+    ///                 spot in Classic Beta 1.60.1 (type 1240, (182, 244, 245); no zone light reaches it there) -- a least-squares
+    ///                 fit on linear luminance of W against the median colour of the far water (16-33 yd below the far
+    ///                 waterline) in the four Beta ACROSS and WATERLINE shots: luminance 0.066, per shot 0.310-0.315, the
+    ///                 darker 40 % gives 0.283; INFERRED for every other type and place. A scalar keeps the type's hue: the
+    ///                 game's far water there is warm brown (the bank mirrored), the viewer's teal-grey.
+    ///   reflection    reflBroad 0.2 and reflDetail 0.02 (the measured 0.495 / 0.168 drew it 2-3 times too strong): MEASURED
+    ///                 by the tuning -- broad r on target 10-55 px below the far waterline, detail r 0.12-0.15 near it.
+    ///                 reflBump 0.25: MEASURED by the tuning (the far bank's reflection a soft dark smear, not a speckled
+    ///                 copy). reflEdge 0.2 of the screen: MEASURED by the tuning (the near shot's top water; a faded hit
+    ///                 falls back to the sky).
+    ///   ripples       bumpStrength 2 with refract 0.02 (an offset of 0.04 per unit of tilt at that strength) and
+    ///                 bumpWeightA 0.4: MEASURED by the tuning (pattern L* RMS 0.9-1.1 at 8-24 yd against 0.8-1.4; the bed's
+    ///                 wobble 1.9-2.3 px at 2560 px wide against 1.6-2.8). bumpTileA 6 / bumpTileB 20 yd: MEASURED (the
+    ///                 wobble and oval scales; kept by the tuning). bumpScroll 0.05 yd/s: a documented choice (the
+    ///                 measured shots are stills). bumpMean 1: the share of the ripple map's mean slope (its constant tilt,
+    ///                 LiquidBump; newoceanbump.blp's about (-0.010, -0.041)) taken out of every sample before the strength
+    ///                 scale (_HiBumpMean) -- a documented choice: a tiled map's constant tilt is no ripple; 0 draws the map
+    ///                 as stored.
+    ///   choices       f0 0.02 (water's), refractRamp 0.3 yd, the march's reflMaxDist 128 yd, reflThick 0.3 yd +
+    ///                 reflThickPct 2 % of the scene point's distance, grabBlur 1 (3 looked the same and scored no better),
+    ///                 the neutral sky skyR/G/B 0.5, 0.6, 0.7 (not measured: the spot has a zone light).
+    /// Known gaps at the spot: the bed's constant shift. The viewer's +1.2..+2.3 px (p20d, 2560 px wide; positive: the bed
+    /// drawn higher than in air) was the ripple map's own mean tilt carried into the refraction offset (MEASURED: predicted
+    /// -0.68, +1.55 px against -0.57..-0.62, +1.68..+1.85 measured), taken out since (bumpMean); the game's own shift
+    /// (-0.09..-4.08 px: the bed drawn lower) is not drawn, its mechanism UNKNOWN. And the reflection does not fade below
+    /// the far waterline as the picture's does. The ripple strength is the tuned map's (newoceanbump.blp) for every map:
+    /// another map's is scaled by its slope spread (LiquidBump.StrengthFactor, INFERRED: the same spread looks the same).
+    /// </summary>
+    public static LiquidHighTune Tune
+    {
+        get
+        {
+            if (tune == null)
+                tune = LiquidHighTune.Parse(WmvModelBuilder.Debug_.WaterTune);
+            return tune;
+        }
+    }
+
+    /// <summary>The sky a reflection that misses takes where no zone light gives one (authored rgb, TUNABLE skyR/G/B).</summary>
+    public static Vector4 NeutralSky
+    {
+        get
+        {
+            LiquidHighTune t = Tune;
+            return new Vector4((float)t[LiquidHighTune.SkyR], (float)t[LiquidHighTune.SkyG], (float)t[LiquidHighTune.SkyB], 1f);
+        }
+    }
+
+    /// <summary>The _HiBumpMean a ripple map of mean slope (meanX, meanY) is drawn with: the mean times the tune's bumpMean
+    /// share (1: its constant tilt taken out whole; 0: the map as stored).</summary>
+    public static Vector4 BumpMean(double meanX, double meanY)
+    {
+        double share = Tune[LiquidHighTune.BumpMean];
+        return new Vector4((float)(meanX * share), (float)(meanY * share), 0f, 0f);
+    }
+
+    /// <summary>The High look's TUNABLE values of `t` on material `m` (CreateMaterial; the self-test's own values).</summary>
+    public static void ApplyHigh(Material m, LiquidHighTune t)
+    {
+        m.SetFloat(HiRefractId, (float)t[LiquidHighTune.Refract]);
+        m.SetFloat(HiRefractRampId, (float)t[LiquidHighTune.RefractRamp]);
+        m.SetVector(HiTFastId, new Vector4((float)t[LiquidHighTune.TFastA], (float)t[LiquidHighTune.TFastL], 0f, 0f));
+        m.SetVector(HiTSlowId, new Vector4((float)t[LiquidHighTune.TSlowA], (float)t[LiquidHighTune.TSlowL], 0f, 0f));
+        m.SetFloat(HiWaterGainId, (float)t[LiquidHighTune.WaterGain]);
+        m.SetFloat(HiNoZoneGainId, (float)t[LiquidHighTune.NoZoneGain]);
+        m.SetFloat(HiReflBroadId, (float)t[LiquidHighTune.ReflBroad]);
+        m.SetFloat(HiReflDetailId, (float)t[LiquidHighTune.ReflDetail]);
+        m.SetFloat(HiF0Id, (float)t[LiquidHighTune.F0]);
+        m.SetFloat(HiReflBumpId, (float)t[LiquidHighTune.ReflBump]);
+        m.SetVector(HiReflMarchId, new Vector4((float)t[LiquidHighTune.ReflMaxDist], (float)t[LiquidHighTune.ReflThick],
+                                               (float)t[LiquidHighTune.ReflThickPct], (float)t[LiquidHighTune.ReflEdge]));
+        m.SetVector(HiBumpTileId, new Vector4((float)t[LiquidHighTune.BumpTileA], (float)t[LiquidHighTune.BumpTileB], 0f, 0f));
+        m.SetFloat(HiBumpScrollId, (float)t[LiquidHighTune.BumpScroll]);
+        m.SetFloat(HiBumpWeightAId, (float)t[LiquidHighTune.BumpWeightA]);
+        m.SetFloat(HiBumpStrengthId, (float)t[LiquidHighTune.BumpStrength]);
+    }
 
     static Shader shader;
     static bool shaderResolved;
@@ -109,6 +254,26 @@ public static class WmvLiquidMaterials
         return t.IsWaterOrOcean;
     }
 
+    /// <summary>Does the HIGH path draw the type: the High look installed (WmvWaterGrabPass.Active -- never with WMV_WATER=low,
+    /// nor in a player built without the grab shaders) and the type transparent water or ocean? Only such a type holds its
+    /// ripple map (the other paths never sample it: no fetch, no upload, the zone-light build's traffic and budgets) and
+    /// writes depth (HighDepthWrite).</summary>
+    public static bool HighLook(LiquidTypeView t)
+    {
+        return t != null && WmvWaterGrabPass.Active && Transparent(t) && t.IsWaterOrOcean;
+    }
+
+    /// <summary>Does the type's material write depth? Opaque types always; a transparent water or ocean type while the High
+    /// look is installed (HighLook: its HIGH output is opaque, so a blended doodad or particle under the water -- drawn after
+    /// it, queue 3000 and up -- is hidden by it as the opaque bed beside it is faded). The zone and fallback paths of the
+    /// SAME material then write depth too: a camera BELOW the surface sees the water through those blended paths, and a
+    /// blended object behind it (above the water) is depth-rejected there -- a known gap. With WMV_WATER=low, and for every
+    /// other transparent type: no depth write, as before.</summary>
+    public static bool HighDepthWrite(LiquidTypeView t)
+    {
+        return t != null && (!Transparent(t) || HighLook(t));
+    }
+
     /// <summary>Does the type take its colour from its frames? By its kind, never by the transparency flag (09-liquids.md 1.5:
     /// the category is the SoundBank kind): magma and slime frames are coloured -- the frame's colour; water and ocean frames
     /// are near-black with the ripples in alpha -- the base colour plus that alpha as a highlight. Retail's "10FX" lava, fel
@@ -128,10 +293,13 @@ public static class WmvLiquidMaterials
         return new Vector4(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, ((argb >> 24) & 0xFF) / 255f);
     }
 
-    /// <summary>A type's material: its base colour, its colour source (ColourFromFrame: by kind), its mode and the render
-    /// state that goes with it (by the flag -- transparent: blended, no depth write, TransparentQueue; opaque: no blend, depth
-    /// write, OpaqueQueue), culling off (a liquid is one sheet, seen from above and below), no frames yet (the base colour
-    /// alone until its array is bound).</summary>
+    /// <summary>A type's material: its base colour, its colour source (ColourFromFrame: by kind), its kind (the zone path
+    /// takes water and ocean), its mode and the render state that goes with it (by the flag -- transparent: premultiplied
+    /// colour One / OneMinusSrcAlpha and the alpha channel SrcAlpha / OneMinusSrcAlpha, no depth write -- but a water or
+    /// ocean type while the High look is installed writes depth, HighDepthWrite -- TransparentQueue; opaque: One / Zero
+    /// for both, depth write, OpaqueQueue), the zone path's constants, the High look's TUNABLE values (ApplyHigh, Tune),
+    /// culling off (a liquid is one sheet, seen from above and below), no frames yet (the base colour alone until its
+    /// array is bound) and no ripple map yet (flat normals, strength factor 1, no mean tilt).</summary>
     public static Material CreateMaterial(Shader s, LiquidTypeView t)
     {
         bool transparent = Transparent(t);
@@ -139,18 +307,29 @@ public static class WmvLiquidMaterials
         m.SetVector(BaseColorId, BaseColour(t.MinimapColor));
         m.SetFloat(ModeId, transparent ? ModeTransparent : ModeOpaque);
         m.SetFloat(ColourFromFrameId, ColourFromFrame(t) ? 1f : 0f);
+        m.SetFloat(KindId, t.Kind >= 0 && t.Kind <= (int)LiquidKind.Slime ? t.Kind : -1f);
         m.SetFloat(HighlightId, HighlightScale);
         m.SetFloat(ShallowAlphaId, ShallowAlpha);
         m.SetFloat(DeepAlphaId, DeepAlpha);
+        m.SetFloat(DepthFullId, DepthFull);
+        m.SetFloat(ZoneHighlightId, ZoneHighlight);
+        m.SetFloat(ZoneHighlightFloorId, ZoneHighlightFloor);
+        m.SetFloat(BedFactorId, BedFactor);
+        ApplyHigh(m, Tune);
+        m.SetFloat(HasBumpId, 0f);
+        m.SetFloat(HiBumpNormId, 1f);
+        m.SetVector(HiBumpMeanId, Vector4.zero);
         m.SetFloat(FrameCountId, 0f);
         m.SetFloat(FrameId, 0f);
         m.SetFloat(LinearOutId, WmvModelBuilder.AuthoredTextureDomain ? 0f : 1f);
         m.SetFloat(CullId, (float)UnityEngine.Rendering.CullMode.Off);
         if (transparent)
         {
-            m.SetFloat(SrcBlendId, (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            m.SetFloat(SrcBlendId, (float)UnityEngine.Rendering.BlendMode.One);
             m.SetFloat(DstBlendId, (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            m.SetFloat(ZWriteId, 0f);
+            m.SetFloat(SrcBlendAlphaId, (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            m.SetFloat(DstBlendAlphaId, (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.SetFloat(ZWriteId, HighDepthWrite(t) ? 1f : 0f);
             m.SetOverrideTag("RenderType", "Transparent");
             m.renderQueue = TransparentQueue;
         }
@@ -158,6 +337,8 @@ public static class WmvLiquidMaterials
         {
             m.SetFloat(SrcBlendId, (float)UnityEngine.Rendering.BlendMode.One);
             m.SetFloat(DstBlendId, (float)UnityEngine.Rendering.BlendMode.Zero);
+            m.SetFloat(SrcBlendAlphaId, (float)UnityEngine.Rendering.BlendMode.One);
+            m.SetFloat(DstBlendAlphaId, (float)UnityEngine.Rendering.BlendMode.Zero);
             m.SetFloat(ZWriteId, 1f);
             m.SetOverrideTag("RenderType", "Opaque");
             m.renderQueue = OpaqueQueue;
@@ -167,13 +348,15 @@ public static class WmvLiquidMaterials
 }
 
 /// <summary>One liquid type of a scene: its catalogue row, its material (null: the type is not drawn -- the catalogue lacks
-/// it, or the shader is missing), its frames (null: slot 0 names none) and who holds it.</summary>
+/// it, or the shader is missing), its frames (null: slot 0 names none), its ripple map (null: it names none) and who holds
+/// it.</summary>
 public sealed class WmvLiquidType
 {
     public int Id;
     public LiquidTypeView View;
     public Material Material;
     public WmvLiquidFrames Frames;
+    public WmvLiquidFrames Bump;
     public readonly HashSet<object> Holders = new HashSet<object>();
     public long LastUse;
     public int ShownFrame = -1;          // the frame its material holds now (Tick)
@@ -181,9 +364,13 @@ public sealed class WmvLiquidType
 
     public bool Pooled { get { return Holders.Count == 0; } }
     public bool Animated { get { return Frames != null && Frames.Array != null && Frames.Count > 0; } }
+    /// <summary>Its ripple map is bound (the High look's normals; else flat).</summary>
+    public bool HasBump { get { return Bump != null && Bump.BumpMap != null; } }
 }
 
-/// <summary>One distinct frame list (texture slot 0 of one or more types): its array once every frame has settled.</summary>
+/// <summary>One distinct frame list (texture slot 0 of one or more types): its array once every frame has settled. Or a
+/// ripple map's list (IsBump: one file, the "bump" of one or more types): its Texture2D once the file has settled and passed
+/// the unit-normal check.</summary>
 public sealed class WmvLiquidFrames
 {
     public const string StateFetching = "fetching", StateReady = "ready", StateFailed = "failed";
@@ -193,10 +380,20 @@ public sealed class WmvLiquidFrames
     public string State = StateFetching;
     public string Detail = "";
     public Texture2DArray Array;
-    public int Count;                    // slices in Array
+    public int Count;                    // slices in Array (a ripple map: 1)
     public long GpuBytes;
     public double UploadMs = -1;
     public int Refs;                     // types that list it
+    public bool IsBump;
+    public Texture2D BumpMap;
+    public double UnitShare = -1;        // a ripple map's unit-normal share (LiquidBump) and the texels it sampled
+    public int Sampled;
+    public double SlopeSpread = -1;      // a ripple map's slope spread and the strength factor it is drawn with (LiquidBump)
+    public double StrengthFactor = 1.0;
+    public double SlopeMeanX, SlopeMeanY; // its mean slope (the map's constant tilt, taken out in the shader: _HiBumpMean)
+
+    /// <summary>Its texture exists (the frame array or the ripple map).</summary>
+    public bool Resident { get { return Array != null || BumpMap != null; } }
 }
 
 /// <summary>One frame file of the registry, by FileDataID.</summary>
@@ -215,7 +412,8 @@ public sealed class WmvLiquidFrame
 /// <summary>A scene's liquid types (see the file header).</summary>
 public sealed class WmvLiquidRegistry
 {
-    // Across the player: the registries' materials and arrays alive, and the arrays' GPU bytes (runtimeState).
+    // Across the player: the registries' materials and arrays alive (frame arrays and ripple maps), and their GPU bytes
+    // (runtimeState).
     public static int LiveMaterials, LiveArrays;
     public static long LiveArrayBytes;
 
@@ -251,13 +449,13 @@ public sealed class WmvLiquidRegistry
     public int TypeCount { get { return types.Count; } }
     public IEnumerable<WmvLiquidType> Types { get { return types.Values; } }
 
-    /// <summary>The arrays built (lists with an array) and their GPU bytes.</summary>
+    /// <summary>The arrays built (lists with an array, or a ripple map) and their GPU bytes.</summary>
     public int ArrayCount
     {
         get
         {
             int n = 0;
-            foreach (WmvLiquidFrames l in lists.Values) if (l.Array != null) n++;
+            foreach (WmvLiquidFrames l in lists.Values) if (l.Resident) n++;
             return n;
         }
     }
@@ -267,7 +465,7 @@ public sealed class WmvLiquidRegistry
         get
         {
             long n = 0;
-            foreach (WmvLiquidFrames l in lists.Values) if (l.Array != null) n += l.GpuBytes;
+            foreach (WmvLiquidFrames l in lists.Values) if (l.Resident) n += l.GpuBytes;
             return n;
         }
     }
@@ -289,7 +487,7 @@ public sealed class WmvLiquidRegistry
     {
         long n = 0;
         foreach (WmvLiquidFrames l in lists.Values)
-            if (l.Array != null && !Held(l, pooledHolder))
+            if (l.Resident && !Held(l, pooledHolder))
                 n += l.GpuBytes;
         return n;
     }
@@ -297,7 +495,7 @@ public sealed class WmvLiquidRegistry
     bool Held(WmvLiquidFrames l, Func<object, bool> pooledHolder)
     {
         foreach (WmvLiquidType t in types.Values)
-            if (t.Frames == l)
+            if (t.Frames == l || t.Bump == l)
                 foreach (object h in t.Holders)
                     if (pooledHolder == null || !pooledHolder(h))
                         return true;
@@ -339,9 +537,14 @@ public sealed class WmvLiquidRegistry
                 LiveMaterials++;
             }
             if (view.Frames != null && view.Frames.Length > 0)
-                t.Frames = ListOf(view.Frames);
+                t.Frames = ListOf(view.Frames, false);
             if (t.Frames != null && t.Material != null && t.Frames.Array != null)
                 Bind(t);
+            // The ripple map only for a type the HIGH path draws, while the High look is installed (WmvLiquidMaterials.HighLook).
+            if (view.Bump != 0 && WmvLiquidMaterials.HighLook(view))
+                t.Bump = ListOf(new[] { view.Bump }, true);
+            if (t.Bump != null && t.Material != null && t.Bump.BumpMap != null)
+                BindBump(t);
         }
         if (t.Holders.Add(holder))
         {
@@ -389,17 +592,18 @@ public sealed class WmvLiquidRegistry
         return pooled;
     }
 
-    /// <summary>The frame list of `fids` (one per distinct list, shared), its frames registered.</summary>
-    WmvLiquidFrames ListOf(uint[] fids)
+    /// <summary>The frame list of `fids` (one per distinct list, shared), its frames registered; `bump`: a ripple map's list
+    /// (one file, keyed apart from any frame list).</summary>
+    WmvLiquidFrames ListOf(uint[] fids, bool bump)
     {
-        string key = string.Join(",", Array.ConvertAll(fids, x => x.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+        string key = (bump ? "bump:" : "") + string.Join(",", Array.ConvertAll(fids, x => x.ToString(CultureInfo.InvariantCulture)));
         WmvLiquidFrames l;
         if (lists.TryGetValue(key, out l))
         {
             l.Refs++;
             return l;
         }
-        l = new WmvLiquidFrames { Key = key, Fids = (uint[])fids.Clone(), Refs = 1 };
+        l = new WmvLiquidFrames { Key = key, Fids = (uint[])fids.Clone(), Refs = 1, IsBump = bump };
         lists[key] = l;
         foreach (uint fid in l.Fids)
         {
@@ -521,6 +725,11 @@ public sealed class WmvLiquidRegistry
             }
             prepared[k] = f.Prepared;
         }
+        if (l.IsBump)
+        {
+            CompleteBump(l, prepared[0]);
+            return;
+        }
         WmvTerrainTexture first = prepared[0];
         bool uniform = true;
         int levels = first.Mips;
@@ -593,17 +802,92 @@ public sealed class WmvLiquidRegistry
         Settled(l);
     }
 
+    /// <summary>A ripple map's list whose file has settled (Complete): checked as a unit normal map on its top mip
+    /// (LiquidBump: else the list fails and its types keep flat normals, said), its slope spread, strength factor and mean
+    /// slope measured there (LiquidBump.StrengthFactor: the tuned map's spread over this one's; the mean: the map's constant
+    /// tilt, taken out in the shader), uploaded as a linear Texture2D --
+    /// the file's own format and mips, Repeat, trilinear (WmvTerrainTexture.Upload, the prepared data kept for any other
+    /// list) -- counted in the arrays' tallies the moment it exists, and bound on every type that names it.</summary>
+    void CompleteBump(WmvLiquidFrames l, WmvTerrainTexture p)
+    {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        byte[] top = p.TopMipRgba();
+        double share;
+        int sampled;
+        bool unit = LiquidBump.IsUnitNormalMap(top, p.Width, p.Height, out share, out sampled);
+        l.UnitShare = share;
+        l.Sampled = sampled;
+        if (unit)
+        {
+            int used;
+            double meanX, meanY;
+            l.SlopeSpread = LiquidBump.SlopeSpread(top, p.Width, p.Height, out used, out meanX, out meanY);
+            l.SlopeMeanX = meanX;
+            l.SlopeMeanY = meanY;
+            l.StrengthFactor = LiquidBump.StrengthFactor(l.SlopeSpread);
+        }
+        if (!unit)
+        {
+            l.State = WmvLiquidFrames.StateFailed;
+            l.Detail = top == null
+                ? "FileDataID " + p.FileDataID + ": its top mip could not be decoded to check it"
+                : string.Format(CultureInfo.InvariantCulture, "FileDataID {0} is not a unit normal map: {1:0.0} % of {2} sampled texels have a " +
+                                "normal of length {3}..{4} ({5:0} % needed)", p.FileDataID, share * 100.0, sampled, LiquidBump.MinLength,
+                                LiquidBump.MaxLength, LiquidBump.MinShare * 100.0);
+            Settled(l);
+            return;
+        }
+        try
+        {
+            // Counted the moment it exists, so an upload that throws still destroys it with the list.
+            p.Upload(tex =>
+            {
+                l.BumpMap = tex;
+                l.GpuBytes = p.GpuBytes;
+                LiveArrays++;
+                LiveArrayBytes += p.GpuBytes;
+            }, true, "WmvLiquid ripple map " + p.FileDataID);
+        }
+        catch (Exception e)
+        {
+            DestroyArray(l);
+            l.State = WmvLiquidFrames.StateFailed;
+            l.Detail = "upload failed: " + e.GetType().Name + ": " + e.Message;
+            Settled(l);
+            return;
+        }
+        l.Count = 1;
+        l.State = WmvLiquidFrames.StateReady;
+        l.UploadMs = clock.Elapsed.TotalMilliseconds;
+        ArraysBuilt++;
+        foreach (WmvLiquidType t in types.Values)
+            if (t.Bump == l)
+                BindBump(t);
+        Settled(l);
+    }
+
     /// <summary>The prepared data of `l`'s frames dropped where no list still fetching needs them.</summary>
     void Settled(WmvLiquidFrames l)
     {
         string types = "";
         foreach (WmvLiquidType t in this.types.Values)
-            if (t.Frames == l)
+            if (t.Frames == l || t.Bump == l)
                 types += (types.Length > 0 ? ", " : "") + t.Id;
-        log(l.State == WmvLiquidFrames.StateReady
-            ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "frames of type(s) {0}: {1} frame(s) uploaded as one array, {2}x{3} {4}, " +
-                            "{5} GPU bytes, {6:0.###} ms", types, l.Count, l.Array.width, l.Array.height, l.Array.graphicsFormat, l.GpuBytes, l.UploadMs)
-            : "frames of type(s) " + types + ": not animated, drawn in the base colour -- " + l.Detail);
+        if (l.IsBump)
+            log(l.State == WmvLiquidFrames.StateReady
+                ? string.Format(CultureInfo.InvariantCulture, "ripple map of type(s) {0}: FileDataID {1}, {2}x{3} {4}, {5} level(s), {6} GPU bytes, " +
+                                "a unit normal map ({7:0.0} % of {8} sampled texels), slope spread {9:0.0000} -> strength factor {10:0.0000} " +
+                                "(the tuned map's {11}), mean slope ({13:0.0000}, {14:0.0000}) taken out x {15}, {12:0.###} ms", types,
+                                l.Fids[0], l.BumpMap.width, l.BumpMap.height, l.BumpMap.graphicsFormat, l.BumpMap.mipmapCount, l.GpuBytes,
+                                l.UnitShare * 100.0, l.Sampled, l.SlopeSpread, l.StrengthFactor,
+                                LiquidBump.TunedSlopeSpread.ToString("0.0000", CultureInfo.InvariantCulture), l.UploadMs, l.SlopeMeanX,
+                                l.SlopeMeanY, WmvLiquidMaterials.Tune[LiquidHighTune.BumpMean])
+                : "ripple map of type(s) " + types + ": flat normals -- " + l.Detail);
+        else
+            log(l.State == WmvLiquidFrames.StateReady
+                ? string.Format(CultureInfo.InvariantCulture, "frames of type(s) {0}: {1} frame(s) uploaded as one array, {2}x{3} {4}, " +
+                                "{5} GPU bytes, {6:0.###} ms", types, l.Count, l.Array.width, l.Array.height, l.Array.graphicsFormat, l.GpuBytes, l.UploadMs)
+                : "frames of type(s) " + types + ": not animated, drawn in the base colour -- " + l.Detail);
         foreach (uint fid in l.Fids)
         {
             WmvLiquidFrame f;
@@ -619,6 +903,19 @@ public sealed class WmvLiquidRegistry
         t.Material.SetTexture(WmvLiquidMaterials.FramesId, t.Frames.Array);
         t.Material.SetFloat(WmvLiquidMaterials.FrameCountId, t.Frames.Count);
         t.ShownFrame = -1;
+    }
+
+    /// <summary>The type's ripple map on its material: _BumpMap, _HasBump 1 (the High look's normals), the map's strength
+    /// factor (_HiBumpNorm) and its mean slope times the tune's bumpMean share (_HiBumpMean: the constant tilt taken out,
+    /// WmvLiquidMaterials.BumpMean).</summary>
+    void BindBump(WmvLiquidType t)
+    {
+        if (t.Material == null || t.Bump == null || t.Bump.BumpMap == null)
+            return;
+        t.Material.SetTexture(WmvLiquidMaterials.BumpMapId, t.Bump.BumpMap);
+        t.Material.SetFloat(WmvLiquidMaterials.HasBumpId, 1f);
+        t.Material.SetFloat(WmvLiquidMaterials.HiBumpNormId, (float)t.Bump.StrengthFactor);
+        t.Material.SetVector(WmvLiquidMaterials.HiBumpMeanId, WmvLiquidMaterials.BumpMean(t.Bump.SlopeMeanX, t.Bump.SlopeMeanY));
     }
 
     /// <summary>The clock (seconds, the liquid clock of the world view): each animated type's material shows frame
@@ -651,8 +948,8 @@ public sealed class WmvLiquidRegistry
         return l;
     }
 
-    /// <summary>A pooled type evicted: its material and, when no other type lists them, its frames go; returns the GPU bytes
-    /// freed (0 when it is held, or its array is another type's too).</summary>
+    /// <summary>A pooled type evicted: its material and, when no other type lists them, its frames and its ripple map go;
+    /// returns the GPU bytes freed (0 when it is held, or its array is another type's too).</summary>
     public long Evict(WmvLiquidType t)
     {
         if (t == null || !t.Pooled || t.Disposed)
@@ -675,8 +972,16 @@ public sealed class WmvLiquidRegistry
             LiveMaterials--;
             t.Material = null;
         }
-        WmvLiquidFrames l = t.Frames;
+        WmvLiquidFrames frameList = t.Frames, bump = t.Bump;
         t.Frames = null;
+        t.Bump = null;
+        ReleaseList(frameList);
+        ReleaseList(bump);
+    }
+
+    /// <summary>A type gave list `l` back: when no other type lists it, its array or ripple map goes, and its files leave it.</summary>
+    void ReleaseList(WmvLiquidFrames l)
+    {
         if (l == null || --l.Refs > 0)
             return;
         lists.Remove(l.Key);
@@ -701,16 +1006,18 @@ public sealed class WmvLiquidRegistry
 
     void DestroyArray(WmvLiquidFrames l)
     {
-        if (l.Array == null)
+        Texture tex = l.Array != null ? (Texture)l.Array : l.BumpMap;
+        if (tex == null)
             return;
-        destroy()(l.Array);
+        destroy()(tex);
         LiveArrays--;
         LiveArrayBytes -= l.GpuBytes;
         l.Array = null;
+        l.BumpMap = null;
         l.Count = 0;
     }
 
-    /// <summary>Every type, material and array goes (the scene goes, or a load that never became the scene's ended).</summary>
+    /// <summary>Every type, material, array and ripple map goes (the scene goes, or a load that never became the scene's ended).</summary>
     public void Dispose()
     {
         if (disposed)
@@ -753,7 +1060,7 @@ public static class WmvLiquidMeshes
     public static int LiveObjects, LiveMeshes;
     public static long LiveGeometryBytes;
 
-    /// <summary>`s` as a Unity Mesh: positions, uv0 (texture coordinates), uv1 (depth, has-depth), its triangles (16-bit
+    /// <summary>`s` as a Unity Mesh: positions, uv0 (texture coordinates), uv1 (depth byte / 255, depth in yards), its triangles (16-bit
     /// indices up to 65,535 vertices, 32-bit above), the surface's own bounds; the CPU copy released unless `keepReadable`.</summary>
     public static Mesh Create(LiquidSurface s, string name, bool keepReadable)
     {

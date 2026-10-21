@@ -292,16 +292,17 @@ public sealed class WmvTerrainTexture
     /// flipped), Repeat, trilinear, anisoLevel WmvTerrainMaterials.LayerAnisoLevel, then Apply(false, true): the CPU copy
     /// goes and the prepared data are dropped. track is called with the texture as soon as it exists, before any pixel
     /// data is set, so a texture whose upload throws is still the tile's and is destroyed with it (nothing is created
-    /// when it throws before the constructor).
+    /// when it throws before the constructor). Stage 09 (a liquid's ripple map, WmvLiquidRegistry): `keepData` keeps the
+    /// prepared data (the registry releases them once no list needs them), `name` names the texture.
     /// </summary>
-    public Texture2D Upload(Action<Texture2D> track)
+    public Texture2D Upload(Action<Texture2D> track, bool keepData = false, string name = null)
     {
         if (!Ready)
             throw new InvalidOperationException("texture " + FileDataID + " has nothing to upload (" + State + ")");
         var sw = Stopwatch.StartNew();
         int n = Mips;
         var flags = TextureCreationFlags.DontInitializePixels | (n > 1 ? TextureCreationFlags.MipChain : TextureCreationFlags.None);
-        var tex = new Texture2D(Width, Height, graphicsFormat, n, flags) { name = "WmvTerrain texture " + FileDataID };
+        var tex = new Texture2D(Width, Height, graphicsFormat, n, flags) { name = name ?? "WmvTerrain texture " + FileDataID };
         track(tex);
         for (int m = 0; m < n; m++)
         {
@@ -314,9 +315,23 @@ public sealed class WmvTerrainTexture
         tex.filterMode = FilterMode.Trilinear;
         tex.anisoLevel = WmvTerrainMaterials.LayerAnisoLevel;
         tex.Apply(false, true);
-        ReleaseUploadData();
+        if (!keepData)
+            ReleaseUploadData();
         UploadMs = sw.Elapsed.TotalMilliseconds;
         return tex;
+    }
+
+    /// <summary>Stage 09 (a liquid's ripple map, WmvLiquidRegistry): the top mip as RGBA32 for the unit-normal check -- the
+    /// prepared level, or the stored blocks decoded with BlpDecoder's exact block mode; null when nothing is held or the level
+    /// cannot be decoded.</summary>
+    public byte[] TopMipRgba()
+    {
+        if (!Ready)
+            return null;
+        if (decoded != null)
+            return decoded[0];
+        try { return BlpDecoder.Decode(source, 0, true).Rgba; }
+        catch (WowParseException) { return null; }
     }
 
     /// <summary>Stage 09 (a liquid's frames, WmvLiquidRegistry): the prepared data as element `element` of `array`, which the
