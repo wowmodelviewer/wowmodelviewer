@@ -506,7 +506,7 @@ namespace Wmv.Wow.Tests
                         for (int n = 0; n < 256; n++)
                         {
                             if (r.Liquids.Headers[n].LayerCount > 0) withLiquid++;
-                            foreach (LiquidInstanceRaw li in r.Liquids.Instances[n]) { inst++; Inc(lt, li.Word0.ToString()); Inc(lo, li.Word2.ToString()); }
+                            foreach (LiquidInstance li in r.Liquids.Instances[n]) { inst++; Inc(lt, li.LiquidType.ToString()); Inc(lo, li.ObjectOrFormat.ToString()); }
                         }
                         ro["mh2o"] = new Dictionary<string, object> { { "size", r.Liquids.Size }, { "chunks_with_liquid", withLiquid }, { "instances", inst },
                                                                       { "liquid_types", lt }, { "object_or_lvf", lo }, { "status", r.Liquids.Status.ToString() } };
@@ -1122,15 +1122,15 @@ namespace Wmv.Wow.Tests
                 tiles++;
                 Inc(statuses, r.Liquids.Status.ToString());
                 if (r.Liquids.Instances == null) continue;
-                foreach (LiquidInstanceRaw[] list in r.Liquids.Instances)
-                    foreach (LiquidInstanceRaw i in list)
+                foreach (LiquidInstance[] list in r.Liquids.Instances)
+                    foreach (LiquidInstance i in list)
                     {
                         instances++;
-                        if (i.Byte12 + i.Byte14 <= 8 && i.Byte13 + i.Byte15 <= 8) fitsGrid++;
-                        if (!float.IsNaN(i.Float4) && !float.IsInfinity(i.Float4) && !float.IsNaN(i.Float8) && !float.IsInfinity(i.Float8))
+                        if (i.X + i.Width <= 8 && i.Y + i.Height <= 8) fitsGrid++;
+                        if (!float.IsNaN(i.MinHeight) && !float.IsInfinity(i.MinHeight) && !float.IsNaN(i.MaxHeight) && !float.IsInfinity(i.MaxHeight))
                         {
                             finite++;
-                            if (i.Float4 <= i.Float8) minLeMax++;
+                            if (i.MinHeight <= i.MaxHeight) minLeMax++;
                         }
                     }
             }

@@ -355,6 +355,8 @@ private:
   QString progressLine(const UnityIpcServer::WorldProgress & p) const;
   // Protocol 17: the doodads' line of a world load's report (global: a WMO-only map's world model, no tile).
   QString doodadLine(const UnityIpcServer::TerrainTileReport & r, bool global) const;
+  // Protocol 19: the liquids' line of a load's report; with a player before protocol 19, that it draws none.
+  QString liquidLine(const UnityIpcServer::TerrainTileReport & r) const;
 
   ModelViewer * m_viewer;
   bool m_active = false;

@@ -466,6 +466,94 @@
     <field type="int32" name="WdtFileDataID" pos="21" />
   </table>
 
+  <!-- The liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4 and 1.6). Each table is read only
+       from a verified layout (dbd/LiquidType.dbd, LiquidMaterial.dbd, LiquidObject.dbd, LiquidTypeXTexture.dbd: one
+       layout each, the same in the four audited clients); a layout they do not list is not read. Only the columns the
+       catalogue reads are named; the positions below are those layouts' and are never used on their own. A value kept in
+       a pallet carries constant upper bits that are not part of it (FrameCountTexture, LiquidObject.LiquidTypeID): each
+       column is declared at its own width, which keeps the value's bytes alone; the catalogue's queries mask them again. -->
+  <table name="LiquidType" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <!-- The six texture templates (Texture1 is slot 0, the animated frames; the catalogue looks for the ripple map in
+         slots 1-5 by name where the client has no LiquidTypeXTexture rows): the DB2 reader counts each element's
+         string offset from the element's own place. -->
+    <field type="text" name="Texture" arraySize="6" pos="1" />
+    <field type="uint8" name="SoundBank" pos="3" />
+    <field type="uint8" name="MaterialID" pos="14" />
+    <field type="uint32" name="MinimapStaticCol" pos="15" />
+    <field type="uint8" name="FrameCountTexture" arraySize="6" pos="16" />
+    <field type="float" name="Float" arraySize="38" pos="18" />
+  </table>
+  <table name="LiquidMaterial" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="Flags" pos="0" />
+    <field type="int8" name="LVF" pos="1" />
+  </table>
+  <table name="LiquidObject" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int16" name="LiquidTypeID" pos="2" />
+  </table>
+  <table name="LiquidTypeXTexture" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="FileDataID" pos="0" />
+    <field type="int32" name="OrderIndex" pos="1" />
+    <field type="int32" name="LiquidTypeID" relationshipData="yes" />
+  </table>
+
+  <!-- The light catalogue (wow::LightCatalog: the zone light's water colours, docs/world-viewer/09-liquids.md). Each
+       table is read only from a verified layout (dbd/Light.dbd, LightParams.dbd, LightData.dbd, ZoneLight.dbd,
+       ZoneLightPoint.dbd: Retail 12.1.5, PTR 12.1.7, Classic Beta 1.60.1, Classic Era 1.15.9 and MoP Classic 5.5.4
+       checked); a layout they do not list is not read. Only the columns the catalogue reads are named. Their positions
+       below are Retail 12.1.5's and are never used on their own: the matching LAYOUT block places each column by name
+       (LightParams' alphas sit one field later in 51C96BAD, after its inline ID; LightData's columns one field later in
+       360DA016, whose ID is inline), and a column a layout lacks reads as 0 (ZoneLight.PlayerConditionID in BA8274F0).
+       A type here is only how the value read is kept: the reader takes each value at the file's own width (a 16-bit
+       ZoneLight.MapID / LightID in BA8274F0, 32 bits in 94CE95E0, both read whole as int32). Time is declared at 16 bits,
+       which drops the constant bit 16 its pallet words carry in 360DA016; the colours are signed 25-bit values, so a few
+       read back with the upper byte 0xFF: the catalogue's queries mask them with 0xFFFFFF. A LightParams copy row is a
+       row of its own ID (LightData keys most of them by the copy ID). -->
+  <table name="Light" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="float" name="GameCoords" arraySize="3" pos="0" />
+    <field type="float" name="GameFalloffStart" pos="1" />
+    <field type="float" name="GameFalloffEnd" pos="2" />
+    <field type="int16" name="ContinentID" pos="3" />
+    <field type="uint16" name="LightParamsID" arraySize="8" pos="4" />
+  </table>
+  <table name="LightParams" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="float" name="WaterShallowAlpha" pos="6" />
+    <field type="float" name="WaterDeepAlpha" pos="7" />
+    <field type="float" name="OceanShallowAlpha" pos="8" />
+    <field type="float" name="OceanDeepAlpha" pos="9" />
+  </table>
+  <table name="LightData" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="uint16" name="LightParamID" pos="0" />
+    <field type="uint16" name="Time" pos="1" />
+    <field type="uint32" name="SkyBand1Color" pos="6" />
+    <field type="uint32" name="OceanCloseColor" pos="15" />
+    <field type="uint32" name="OceanFarColor" pos="16" />
+    <field type="uint32" name="RiverCloseColor" pos="17" />
+    <field type="uint32" name="RiverFarColor" pos="18" />
+  </table>
+  <table name="ZoneLight" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="int32" name="MapID" pos="1" />
+    <field type="int32" name="LightID" pos="2" />
+    <field type="float" name="Zmin" pos="4" />
+    <field type="float" name="Zmax" pos="5" />
+    <field type="int32" name="PlayerConditionID" pos="7" />
+  </table>
+  <table name="ZoneLightPoint" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="float" name="Pos" arraySize="2" pos="0" />
+    <field type="uint8" name="PointOrder" pos="1" />
+    <field type="int32" name="ZoneLightID" relationshipData="yes" />
+  </table>
+
   <!-- BEBUG PURPOSE -->
   <!--
   <table name="FileNames" dbfile="filenames.csv">

@@ -1468,6 +1468,9 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
   // The doodads' outcome (protocol 17), on a line of its own; a protocol-16 player's says why there are none.
   m_doodadDetail = r.hasWorld ? doodadLine(r, global) : QString();
   const bool doodadsOffered = r.hasDoodads && r.doodadState != "notOffered";
+  // The liquids' outcome (protocol 19), on a line of its own, a tile's or a world model's.
+  const QString liquids = liquidLine(r);
+  const bool liquidsOffered = r.hasLiquids && r.liquidsOffered;
   if (r.status == "built" && global)
   {
     m_tilePhase = TilePhase::Loaded;
@@ -1476,8 +1479,10 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
     m_shownMap = r.mapId;
     m_shownView = r.view;
     m_tileDetail = "The world model loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + m_worldDetail +
-                   (doodadsOffered ? " No liquids or lighting." : " No doodads, liquids or lighting.") +
-                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail);
+                   (liquidsOffered ? (doodadsOffered ? " No lighting." : " No doodads or lighting.")
+                                   : (doodadsOffered ? " No liquids or lighting." : " No doodads, liquids or lighting.")) +
+                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail) +
+                   (liquids.isEmpty() ? QString() : "\n" + liquids);
   }
   else if (r.status == "built")
   {
@@ -1509,7 +1514,8 @@ void MapsViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & r
       geometry += QString(" %1 hole cell(s).").arg(r.holeCells);
     m_tileDetail = "Tile " + t + " loaded in " + QString::number(m_timings.loadMs / 1000.0, 'f', 2) + " s. " + material + geometry +
                    (r.hasWorld ? " " + m_worldDetail : QString()) +
-                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail);
+                   (m_doodadDetail.isEmpty() ? QString() : "\n" + m_doodadDetail) +
+                   (liquids.isEmpty() ? QString() : "\n" + liquids);
   }
   else if (r.status == "failed")
   {
@@ -1649,6 +1655,31 @@ QString MapsViewer::doodadLine(const UnityIpcServer::TerrainTileReport & r, bool
          (r.doodadEnded > 0 ? QString(" %1 ended with the load.").arg(r.doodadEnded) : QString()) +
          (r.doodadModelsPartial > 0 ? QString(" %1 model(s) drawn without some texture.").arg(r.doodadModelsPartial) : QString()) +
          (r.doodadState != "complete" && !r.doodadReason.isEmpty() ? " " + r.doodadReason : QString());
+}
+
+QString MapsViewer::liquidLine(const UnityIpcServer::TerrainTileReport & r) const
+{
+  // A player before protocol 19 draws none and reports none: said with why.
+  if (!r.hasLiquids)
+  {
+    UnityIpcServer * s = ipc();
+    const int protocol = s ? s->playerProtocolVersion() : 0;
+    return protocol > 0 && protocol < 19
+             ? QString("Liquids: not drawn by this Unity renderer build (protocol %1; liquids need 19).").arg(protocol)
+             : QString();
+  }
+  if (!r.liquidsOffered)
+    return "Liquids: not offered for this load.";
+  if (r.liquidQuads <= 0 && r.liquidWmoQuads <= 0)
+    return "Liquids: none here.";
+  // The player's catalogue state appended, never passed through arg().
+  return QString("Liquids: %1 quad(s) of %2 type(s) drawn; %3 of %4 texture(s) loaded")
+           .arg(std::max(0, r.liquidQuads) + std::max(0, r.liquidWmoQuads)).arg(r.liquidTypesSent)
+           .arg(r.liquidTexturesLoaded).arg(r.liquidTexturesRequested) +
+         (r.liquidTexturesFailed > 0 ? QString(", %1 failed (drawn in their base colour)").arg(r.liquidTexturesFailed)
+                                     : QString()) +
+         (r.liquidMissingTypes > 0 ? QString("; %1 type(s) not in the catalogue").arg(r.liquidMissingTypes) : QString()) +
+         (r.liquidCatalog != "ok" ? "; catalogue " + r.liquidCatalog : QString()) + ".";
 }
 
 void MapsViewer::OnWorldProgress(const UnityIpcServer::WorldProgress & p)

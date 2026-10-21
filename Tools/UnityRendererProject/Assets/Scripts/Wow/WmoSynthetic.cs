@@ -199,6 +199,60 @@ namespace Wmv.Wow
             PutF32(b, o + 8, v.Z);
         }
 
+        // ------------------------------------------------------------------ MLIQ (WmoLiquid.cs)
+
+        /// <summary>What Mliq writes: the 30-byte header (X, Y, A, B, corner, material), X * Y 8-byte vertices
+        /// (x fastest: the u32 at +0, the height at +4), then A * B tile bytes, then ExtraBytes zero bytes.</summary>
+        public sealed class LiquidSpec
+        {
+            public int VerticesX = 3, VerticesY = 3;
+            /// <summary>Header A / B; null = VerticesX - 1 / VerticesY - 1. The tile bytes written are A * B (none
+            /// when either is negative).</summary>
+            public int? TilesX, TilesY;
+            public WowVec3 Corner;
+            public ushort Material;
+            /// <summary>Vertex (i, j) -> height; null = Corner.Z.</summary>
+            public Func<int, int, float> Height;
+            /// <summary>Vertex (i, j) -> the u32 at +0 (LiquidDepthWord / LiquidStWord); null = 0.</summary>
+            public Func<int, int, uint> Word;
+            /// <summary>Tile (i, j) -> tile byte; null = 0 (liquid, nibble 0).</summary>
+            public Func<int, int, byte> Tile;
+            public int ExtraBytes;
+        }
+
+        /// <summary>An MLIQ payload as `s` describes it (wrap it with Chunk("MLIQ", ...)).</summary>
+        public static byte[] Mliq(LiquidSpec s)
+        {
+            int x = s.VerticesX, y = s.VerticesY;
+            int a = s.TilesX ?? x - 1, b = s.TilesY ?? y - 1;
+            int tiles = a > 0 && b > 0 ? a * b : 0;
+            int vertices = x > 0 && y > 0 ? x * y : 0;
+            var p = new byte[30 + 8 * vertices + tiles + Math.Max(0, s.ExtraBytes)];
+            PutU32(p, 0, (uint)x);
+            PutU32(p, 4, (uint)y);
+            PutU32(p, 8, (uint)a);
+            PutU32(p, 12, (uint)b);
+            PutVec3(p, 16, s.Corner);
+            PutU16(p, 28, s.Material);
+            for (int j = 0; j < y; j++)
+                for (int i = 0; i < x; i++)
+                {
+                    int o = 30 + 8 * (j * x + i);
+                    PutU32(p, o, s.Word != null ? s.Word(i, j) : 0u);
+                    PutF32(p, o + 4, s.Height != null ? s.Height(i, j) : s.Corner.Z);
+                }
+            for (int j = 0; j < b && tiles > 0; j++)
+                for (int i = 0; i < a; i++)
+                    p[30 + 8 * vertices + j * a + i] = s.Tile != null ? s.Tile(i, j) : (byte)0;
+            return p;
+        }
+
+        /// <summary>The +0 word of a water/ocean MLIQ vertex: the depth byte, then three zero bytes.</summary>
+        public static uint LiquidDepthWord(byte depth) { return depth; }
+
+        /// <summary>The +0 word of a magma/slime MLIQ vertex: i16 s, then i16 t.</summary>
+        public static uint LiquidStWord(short s, short t) { return (ushort)s | ((uint)(ushort)t << 16); }
+
         // ------------------------------------------------------------------ whole files
 
         /// <summary>What BuildRoot writes. Arrays left null are written empty.</summary>

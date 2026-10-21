@@ -83,6 +83,10 @@
 //
 // DOODADS (protocol 17, stage 07): a loadWorld with the doodad budgets places the tile's MDDF doodads and the placed world
 // models' doodad sets once the world models are settled (WmvTerrainSessionDoodads.cs); the report waits for them too.
+//
+// LIQUIDS (protocol 19, stage 09): a load whose command carries "liquids" draws its tile's MH2O (built on the worker beside
+// the terrain mesh) and its world models' MLIQ, and fetches their frames (role "liquidTexture", WmvTerrainSessionLiquids.cs);
+// the tile is adopted without waiting for them, its report waits for them.
 
 using System;
 using System.Collections.Generic;
@@ -149,6 +153,8 @@ public sealed partial class WmvTerrainSession
         // A world load's doodad request (protocol 17: counted against MaxDoodadOutstanding), and its model.
         public bool Doodad;
         public DoodadModel DModel;
+        // A liquid frame (protocol 19: counted against MaxLiquidOutstanding, never against the tile's K).
+        public bool Liquid;
     }
 
     sealed class Job
@@ -201,6 +207,8 @@ public sealed partial class WmvTerrainSession
         public StreamTile Stream;
         public readonly List<uint> ResidentTextures = new List<uint>();
         public bool AdoptReady;
+        // Protocol 19: the load's liquids (null: its command carried no "liquids"; WmvTerrainSessionLiquids.cs).
+        public LiquidWork Liquid;
 
         public string Tile2 { get { return Cmd.GlobalWmo ? "(no tile: a world model)" : Cmd.TileX + "_" + Cmd.TileY; } }
     }
@@ -331,8 +339,9 @@ public sealed partial class WmvTerrainSession
             Supersede(current, "superseded by terrain load " + cmd.Load);
         EndStream("superseded by terrain load " + cmd.Load);
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes };
-        // The GPU's block formats: the tile's textures, and (stage 08) the world models' and doodads' block uploads.
-        if (cmd.TexturesOffered || cmd.World)
+        // The GPU's block formats: the tile's textures, (stage 08) the world models' and doodads' block uploads, and (stage 09)
+        // the liquid frames.
+        if (cmd.TexturesOffered || cmd.World || cmd.Liquids != null)
             j.Support = WmvTerrainFormatSupport.Query();
         if (cmd.World)
             j.World = new WorldWork
@@ -352,6 +361,8 @@ public sealed partial class WmvTerrainSession
         // Protocol 18: a loadWorld with "streaming" is a session's entry (WmvTerrainSessionStream.cs).
         if (StreamOffered(cmd))
             BeginStream(j);
+        // Protocol 19: its liquids' registry -- the load's own, or (a session's entry) the session's.
+        BeginLiquids(j);
         j.Phase = Phase.Wdt;
         Ask(j, RoleWdt, cmd.WdtFileDataID);
     }
@@ -599,6 +610,7 @@ public sealed partial class WmvTerrainSession
                 case RoleM2Model: OnM2Model(j, r, q); break;
                 case RoleM2Skin: OnM2Skin(j, r, q); break;
                 case RoleM2Texture: OnM2Texture(j, r, q); break;
+                case RoleLiquidTexture: OnLiquidTexture(j, r, q); break;
                 case RoleTexture: OnTexture(j, r, q); break;
                 // Every request is the session's own, so a role it never asks for is an internal error, never a terrain
                 // texture by default.
@@ -661,6 +673,8 @@ public sealed partial class WmvTerrainSession
             if (nowMs - j.StartedAtMs > timeoutMs)
                 Fail(j, "timed out after " + (timeoutMs / 1000.0).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
                         " s waiting for " + WaitingFor(j));
+            else
+                AskLiquidFrames(j);            // (protocol 19: the tile does not wait for them)
             return;
         }
         // A world load's world models: one prototype built a frame, the world's own timeout, its progress (the report
@@ -669,15 +683,19 @@ public sealed partial class WmvTerrainSession
             return;
         if (j != current)
             return;
+        // Protocol 19: the load's liquid frames (asked, their timeout); the report waits for them.
+        bool liquids = PumpLiquids(j, nowMs);
+        if (j != current)
+            return;
         if (j.Phase == Phase.World)
         {
             // A WMO-only map's world model (and its doodads): reported once its scene has been on screen two frames after the
             // last of them.
-            if (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)
+            if (liquids && WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)
                 FinishWorld(j);
             return;
         }
-        if (frame >= j.AdoptFrame + 2 && (j.World == null || (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)))
+        if (liquids && frame >= j.AdoptFrame + 2 && (j.World == null || (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)))
             FinishBuilt(j);
     }
 
@@ -695,6 +713,7 @@ public sealed partial class WmvTerrainSession
             case RoleM2Model: return "doodad model";
             case RoleM2Skin: return "doodad skin";
             case RoleM2Texture: return "doodad texture";
+            case RoleLiquidTexture: return "liquid texture";
             default: return "texture";
         }
     }
@@ -737,12 +756,13 @@ public sealed partial class WmvTerrainSession
     }
 
     /// <summary>The tile's requests out (its K): pending tile requests and textures being prepared -- a world load's
-    /// world-model requests are counted apart (MaxWorldOutstanding).</summary>
+    /// world-model requests are counted apart (MaxWorldOutstanding), and its liquid frames (MaxLiquidOutstanding: the tile
+    /// never waits for them).</summary>
     static int TileOut(Job j)
     {
         int n = j.Preparing;
         foreach (Request q in j.Pending)
-            if (!q.World)
+            if (!q.World && !q.Liquid)
                 n++;
         return n;
     }
@@ -911,6 +931,9 @@ public sealed partial class WmvTerrainSession
         // Streaming: every tile of the session against the scene's origin (the entry tile's north-west corner).
         WorldOrigin origin = j.Stream != null && stream != null ? stream.Origin : WorldToUnity.TileOrigin(x, y);
         string what = string.Format("root ADT {0} ({1}_{2})", j.RootFileDataID, x, y);
+        // Protocol 19: the tile's liquid against the same origin, with the offer's catalogue (immutable from here on).
+        ILiquidCatalog catalog = j.Liquid != null ? j.Liquid.Registry.Catalog : null;
+        bool liquids = j.Liquid != null;
         RunWorker(j, () =>
         {
             string md5 = Md5Hex(bytes);
@@ -932,8 +955,27 @@ public sealed partial class WmvTerrainSession
                 catch (Exception e) { error = "terrain mesh build failed: " + e.GetType().Name + ": " + e.Message; }
                 buildMs = sw.Elapsed.TotalMilliseconds;
             }
+            TerrainLiquidTile liquid = null;
+            string liquidError = null;
+            double liquidMs = -1;
+            if (error == null && liquids)
+            {
+                sw.Reset();
+                sw.Start();
+                // A liquid that cannot be built never fails the terrain.
+                try { liquid = TerrainLiquidMesh.Build(root.Liquids, x, y, origin, catalog); }
+                catch (Exception e) { liquidError = e.GetType().Name + ": " + e.Message; }
+                liquidMs = sw.Elapsed.TotalMilliseconds;
+            }
             int issues = root != null ? root.Issues.Count : 0;
-            return () => OnBuilt(j, md5, hostMd5, root, mesh, parseMs, buildMs, error, issues);
+            bool sound = error == null && (string.IsNullOrEmpty(hostMd5) || string.Equals(hostMd5, md5, StringComparison.OrdinalIgnoreCase));
+            return () =>
+            {
+                // The liquid first: OnBuilt's Advance may adopt the tile at once, and the tile draws its liquid from it.
+                if (sound && liquids)
+                    LiquidsParsed(j, liquid, liquidMs, liquidError);
+                OnBuilt(j, md5, hostMd5, root, mesh, parseMs, buildMs, error, issues);
+            };
         });
     }
 
@@ -1297,6 +1339,7 @@ public sealed partial class WmvTerrainSession
             Material = j.Material ?? TerrainTileMaterial.Unavailable(j.MaterialUnavailable ?? "no material", j.MphdFlags),
             Textures = j.Textures, Tex0FileDataID = j.Tex0FileDataID, MapTextureFileDataID = j.MapTextureFileDataID, MphdFlags = j.MphdFlags,
             Build = cmd.Build ?? "", WdtMd5 = j.WdtMd5 ?? "", RootMd5 = j.RootMd5 ?? "", Tex0Md5 = j.Tex0Md5 ?? "",
+            LiquidTile = j.Liquid != null ? j.Liquid.Tile : null, Liquids = j.Liquid != null ? j.Liquid.Registry : null,
         };
         SettleTextures(j.Content, Log, cmd.Load);
         var tile = new WmvRuntimeTerrainTile(cmd.MapId, cmd.TileX, cmd.TileY, cmd.Load);
@@ -1314,6 +1357,9 @@ public sealed partial class WmvTerrainSession
             tiles[KeyOf(cmd.MapId, cmd.TileX, cmd.TileY)] = tile;
             shown = tile;
             shownLoad = cmd.Load;
+            // Protocol 19: the load's liquid registry and zone lights are the scene's (DisposeTiles took the last scene's).
+            sceneLiquids = j.Liquid != null ? j.Liquid.Registry : null;
+            CommitSceneLights(j);
             int fromEpoch = sceneEpoch, fromMap = sceneMapId;
             sceneEpoch = cmd.AssetEpoch;
             sceneMapId = cmd.MapId;
@@ -1355,9 +1401,10 @@ public sealed partial class WmvTerrainSession
         }
         finally
         {
-            // The load takes no answer or worker result any more -- but a world load's world models still do, until its
-            // report (their requests are its own, and every one is retired when it ends).
-            if (j.World == null || !committed)
+            // The load takes no answer or worker result any more -- but a world load's world models, and (protocol 19) a
+            // load's liquid frames, still do, until its report (their requests are its own, and every one is retired when it
+            // ends).
+            if ((j.World == null && j.Liquid == null) || !committed)
                 j.Dead = true;
         }
         // The textures the build uploaded dropped their prepared data as they went up (WmvTerrainTexture.Upload); the
@@ -1497,6 +1544,8 @@ public sealed partial class WmvTerrainSession
             r.Material = MaterialReport(j);
         if (j.World != null)
             FillWorldReport(j, r, status);
+        // Protocol 19: the load's liquids (offered false when its command carried none).
+        r.Liquids = LiquidReport(j);
         try { view.Sample(r); }
         catch (Exception e) { Log("load {0}: sampling the counters failed: {1}", cmd.Load, e.Message); }
         ReportsSent++;
@@ -1608,6 +1657,8 @@ public sealed partial class WmvTerrainSession
         j.ToAsk.Clear();
         if (j.World != null)
             EndWorld(j, ended);
+        // Protocol 19: what it held of the liquids given back, its fetches wanted again (WmvTerrainSessionLiquids.cs).
+        EndLiquids(j, ended);
     }
 
     /// <summary>One unanswered request into the retired ring (the caller takes it off the load's pending list).</summary>
@@ -1656,6 +1707,8 @@ public sealed partial class WmvTerrainSession
         tiles.Clear();
         DisposeWorldScene();
         DisposeTerrainTextures();
+        DisposeSceneLiquids(keep);
+        DropSceneLights();
         return n;
     }
 

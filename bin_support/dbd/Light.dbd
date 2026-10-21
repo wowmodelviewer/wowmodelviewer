@@ -1,0 +1,25 @@
+COLUMNS
+int ID
+float GameCoords // the light's centre in yards, in the game's own frame (X north, Y west, Z up) -- the frame of the ADT terrain and of ZoneLightPoint: proven from the bytes (lights sit on the terrain under them far more often than chance; Classic Era's lights lie inside the zone polygons MoP Classic and Retail give the same Light ID); (0, 0, 0) is a map's default row
+float GameFalloffStart // inner radius in yards: the light is whole inside it (the weighting is inferred, not proven); start <= end on 5354 of 5361 Retail rows and every Classic Beta row
+float GameFalloffEnd // outer radius in yards: the light has no weight beyond it (inferred); 0 on most maps' default row
+int ContinentID // the Map row the light belongs to: proven from the bytes (the same map on every Light ID Retail and Classic Beta share)
+int LightParamsID // eight LightParams rows, one per condition; slot 0 is the clear-weather one (the slot meanings are the public definitions', not proven) and is set on every row but one (Retail Light 12616: 0): every non-zero value is a LightParams row, copy rows included (proven from the bytes)
+
+COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
+COMMENT docs/world-viewer/09-liquids.md). The layout comes from public table definitions, read as hypotheses: every column
+COMMENT the catalogue reads (database.xml, table Light) was checked against the clients' own bytes. Every field is listed in
+COMMENT file order, so the positions are right for the layout below. Its hash is the same in Retail 12.1.5, PTR 12.1.7,
+COMMENT Classic Beta 1.60.1, Classic Era 1.15.9 and MoP Classic 5.5.4. Classic Beta keeps 15 rows in two encrypted sections
+COMMENT it has no key for; they read as zeros and are skipped. Classic Era has no zone polygons: it lights its zones with
+COMMENT point lights of falloff ends up to 2,647 yd. A layout not listed here is not read.
+
+LAYOUT 5F16BC84
+BUILD 12.1.5.70448, 12.1.7.70424, 1.60.1.70450, 1.15.9.70003, 5.5.4.70268
+COMMENT 5 fields in each client; IDs in the section's ID list (copy rows: Retail and PTR 12, Classic Beta and MoP Classic 1).
+$noninline,id$ID<32>
+GameCoords[3]
+GameFalloffStart
+GameFalloffEnd
+ContinentID<16>
+LightParamsID<u16>[8]

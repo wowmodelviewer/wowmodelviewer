@@ -164,7 +164,8 @@ public class WmvRuntimeMapObject
     /// <summary>One per LOD0 group, in GFID order; a group with no render geometry has an object and no
     /// renderer, a group whose file could not be read has null.</summary>
     public GameObject[] GroupObjects = new GameObject[0];
-    public Mesh[] Meshes = new Mesh[0];                 // parallel to GroupObjects; null without geometry
+    public Mesh[] Meshes = new Mesh[0];                 // parallel to GroupObjects; null without geometry (a world prototype
+                                                        // appends its groups' liquid meshes after them: WmvWorldModels.AddLiquids)
     /// <summary>Per group, per submesh: the triangle list as uploaded (winding already flipped).</summary>
     public int[][][] SubmeshTriangles = new int[0][][];
     /// <summary>Per group, per submesh: the MOBA batch index and the resolved MOMT material id.</summary>

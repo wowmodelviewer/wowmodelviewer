@@ -247,6 +247,9 @@ public sealed partial class WmvTerrainSession
         public readonly Stopwatch WorkClock = new Stopwatch();
         public bool WorkedThisFrame;
         public readonly Stopwatch Clock = Stopwatch.StartNew();
+        // Protocol 19: the session's liquid registry (its entry's: every tile and world model of the session draws from it,
+        // unheld types pooled; WmvTerrainSessionLiquids.cs), null when the entry carried no "liquids".
+        public WmvLiquidRegistry Liquids;
         public int Credit { get { return Offer.RequestCredit > 0 ? Offer.RequestCredit : 24; } }
     }
 
@@ -443,6 +446,10 @@ public sealed partial class WmvTerrainSession
         s.Jobs.Clear();
         s.PendingById.Clear();
         s.RequestsOut = 0;
+        // Protocol 19: the session's liquids go with it unless they are the scene's (its tiles stay on screen until the next
+        // commit or the clear, which takes them).
+        if (s.Liquids != null && s.Liquids != sceneLiquids && !s.Liquids.Disposed)
+            s.Liquids.Dispose();
         stream = null;
     }
 
@@ -652,6 +659,7 @@ public sealed partial class WmvTerrainSession
             {
                 Advance(j);
                 AskTextures(j);
+                AskLiquidFrames(j);             // (protocol 19: the tile does not wait for them)
             }
             return;
         }
@@ -659,7 +667,11 @@ public sealed partial class WmvTerrainSession
             return;
         if (!Live(j))
             return;
-        if (frame >= j.AdoptFrame + 2 && (j.World == null || (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)))
+        // Protocol 19: the tile's liquid frames; it settles once they have.
+        bool liquids = PumpLiquids(j, nowMs);
+        if (!Live(j))
+            return;
+        if (liquids && frame >= j.AdoptFrame + 2 && (j.World == null || (WorldSettled(j.World) && frame >= WorldLastFrame(j.World) + 2)))
         {
             if (j == current)
             {
@@ -907,6 +919,8 @@ public sealed partial class WmvTerrainSession
             MaxM2BytesPerLoad = e.MaxM2BytesPerLoad, MaxM2TextureBytes = e.MaxM2TextureBytes, MaxM2TextureBytesPerLoad = e.MaxM2TextureBytesPerLoad,
             MaxM2ModelsPerLoad = e.MaxM2ModelsPerLoad, MaxM2TexturesPerLoad = e.MaxM2TexturesPerLoad,
             MaxDoodadInstancesPerLoad = e.MaxDoodadInstancesPerLoad,
+            // Protocol 19: the entry's liquid offer -- budgets, catalogue and zone lights -- as the host gives the tile load the entry's.
+            Liquids = e.Liquids,
         };
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes, Stream = st, Support = s.Support };
         j.World = new WorldWork { Global = false, Frame = PlacementFrame.Tile, Doodads = new DoodadsWork { Offered = cmd.DoodadsOffered } };
@@ -919,6 +933,7 @@ public sealed partial class WmvTerrainSession
         st.Job = j;
         st.State = StreamLoading;
         s.Jobs[cmd.Load] = j;
+        BeginLiquids(j);                        // (the session's registry)
         Log("load {0}: tile {1} starts as load {2} (ring {3}); {4} request(s) out", s.EntryLoad, st.Name, cmd.Load, st.Ring, s.RequestsOut);
         StartTileFiles(j, s.Wdt);
     }
@@ -1030,6 +1045,7 @@ public sealed partial class WmvTerrainSession
             Material = j.Material ?? TerrainTileMaterial.Unavailable(j.MaterialUnavailable ?? "no material", j.MphdFlags),
             Textures = j.Textures, Tex0FileDataID = j.Tex0FileDataID, MapTextureFileDataID = j.MapTextureFileDataID, MphdFlags = j.MphdFlags,
             Build = cmd.Build ?? "", WdtMd5 = j.WdtMd5 ?? "", RootMd5 = j.RootMd5 ?? "", Tex0Md5 = j.Tex0Md5 ?? "",
+            LiquidTile = j.Liquid != null ? j.Liquid.Tile : null, Liquids = j.Liquid != null ? j.Liquid.Registry : null,
         };
         SettleTextures(j.Content, Log, cmd.Load);
         var tile = new WmvRuntimeTerrainTile(cmd.MapId, cmd.TileX, cmd.TileY, cmd.Load);
@@ -2394,9 +2410,15 @@ public sealed partial class WmvTerrainSession
         foreach (ProtoEntry e in stream.Wmos.Values) if (e.Pooled && e.Wmo != null) order.Add(e);
         foreach (ProtoEntry e in stream.M2s.Values) if (e.Pooled && e.M2 != null) order.Add(e);
         foreach (TerrainTexEntry t in terrainTextures.Values) if (t.Refs <= 0) order.Add(t);
+        // Protocol 19: the liquid types no tile or prototype holds (their material, and their frames when no held type lists
+        // them).
+        WmvLiquidRegistry liquids = StreamLiquids;
+        if (liquids != null)
+            foreach (WmvLiquidType t in liquids.PooledTypes()) order.Add(t);
         order.Sort((a, b) => LastUseOf(a).CompareTo(LastUseOf(b)));
-        foreach (object o in order)
+        for (int oi = 0; oi < order.Count; oi++)
         {
+            object o = order[oi];
             bool overGpu = gpu > StreamPoolGpuBudget;
             if (!overGpu && managed <= StreamPoolManagedBudget)
                 break;
@@ -2419,6 +2441,17 @@ public sealed partial class WmvTerrainSession
                     managed -= e.ManagedBytes;
                     stream.Wmos.Remove(e.FileDataID);
                     world.Prototypes.Remove(e.FileDataID);
+                    // Protocol 19: its liquid types given back as last used when it was (never as the newest use); those it
+                    // alone held are pooled now and join this pass in their place, least recently used first -- their frames
+                    // were counted in the pool already when only pooled prototypes held them (PooledGpuBytes).
+                    if (liquids != null && e.Wmo.Liquids == liquids)
+                        foreach (WmvLiquidType released in liquids.Release(e.Wmo, e.LastUse))
+                        {
+                            int at = oi + 1;
+                            while (at < order.Count && LastUseOf(order[at]) <= released.LastUse)
+                                at++;
+                            order.Insert(at, released);
+                        }
                     try { worldView.DisposePrototype(e.Wmo); }
                     catch (Exception ex) { Log("evicting world model {0} failed: {1}", e.FileDataID, ex.Message); }
                     e.Wmo = null;
@@ -2446,6 +2479,14 @@ public sealed partial class WmvTerrainSession
                 prototypes++;
                 continue;
             }
+            var lt = o as WmvLiquidType;
+            if (lt != null)
+            {
+                gpu -= liquids.Evict(lt);
+                stream.TexturesEvicted++;
+                textures++;
+                continue;
+            }
             var t = (TerrainTexEntry)o;
             gpu -= t.GpuBytes;
             terrainTextures.Remove(t.Id);
@@ -2464,12 +2505,15 @@ public sealed partial class WmvTerrainSession
     static long LastUseOf(object o)
     {
         var e = o as ProtoEntry;
-        return e != null ? e.LastUse : ((TerrainTexEntry)o).LastUse;
+        if (e != null)
+            return e.LastUse;
+        var l = o as WmvLiquidType;
+        return l != null ? l.LastUse : ((TerrainTexEntry)o).LastUse;
     }
 
     /// <summary>What the pools hold on the GPU: pooled world-model prototypes (with their textures), pooled M2 prototypes'
     /// geometry, the M2 texture uploads no live prototype holds (every reference on them a pooled prototype's, or none),
-    /// unreferenced terrain textures.</summary>
+    /// unreferenced terrain textures, and (protocol 19) the liquid frame arrays no live holder needs (LiquidPoolBytes).</summary>
     long PooledGpuBytes()
     {
         long gpu = 0;
@@ -2497,7 +2541,35 @@ public sealed partial class WmvTerrainSession
             gpu += cache.PooledBytes;
         }
         foreach (TerrainTexEntry t in terrainTextures.Values) if (t.Refs <= 0) gpu += t.GpuBytes;
+        // Protocol 19: the liquid frame arrays no live holder needs.
+        gpu += LiquidPoolBytes;
         return gpu;
+    }
+
+    /// <summary>Protocol 19: the pool's share of the session's liquid frame arrays -- an array every type listing it is pooled
+    /// or held only by pooled world-model prototypes (the rule of the M2 texture uploads above: a prototype's array is the
+    /// pool's while the prototype is).</summary>
+    public long LiquidPoolBytes
+    {
+        get
+        {
+            WmvLiquidRegistry liquids = StreamLiquids;
+            if (liquids == null || stream == null)
+                return 0;
+            if (pooledPrototype == null)
+                pooledPrototype = IsPooledPrototype;   // (made once: no garbage a call)
+            return liquids.PooledGpuBytes(pooledPrototype);
+        }
+    }
+
+    Func<object, bool> pooledPrototype;
+
+    /// <summary>Is `holder` a world-model prototype of the session's pools (built, no pin, no instance)?</summary>
+    bool IsPooledPrototype(object holder)
+    {
+        var p = holder as WmvWorldPrototype;
+        ProtoEntry e;
+        return p != null && stream != null && stream.Wmos.TryGetValue(p.FileDataID, out e) && e.Wmo == p && e.Pooled;
     }
 
     /// <summary>The scene's GPU bytes now (streaming): terrain (tiles' own and the scene's textures, alpha arrays), world models
@@ -2508,14 +2580,19 @@ public sealed partial class WmvTerrainSession
         foreach (TerrainTexEntry t in terrainTextures.Values)
             textures += t.GpuBytes;
         geometry = WmvWorldModels.LiveGpuGeometryBytes + WmvWorldDoodads.LiveGpuGeometryBytes;
-        // The resident tiles' alpha arrays (texture memory, never in LiveTextureBytes) and their meshes and material vertices.
+        // The resident tiles' alpha arrays (texture memory, never in LiveTextureBytes) and their meshes and material vertices --
+        // and (protocol 19) their liquid geometry; the session's liquid frame arrays (a world model's liquid geometry is in
+        // its prototype's, above).
         if (stream != null)
             foreach (StreamTile st in stream.Tiles.Values)
                 if (st.Tile != null && !st.Tile.Disposed)
                 {
                     textures += st.Tile.AlphaGpuBytes;
-                    geometry += (st.Mesh != null ? st.Mesh.MeshBytes : 0) + st.Tile.MaterialVertexBytes;
+                    geometry += (st.Mesh != null ? st.Mesh.MeshBytes : 0) + st.Tile.MaterialVertexBytes + st.Tile.LiquidGeometryBytes;
                 }
+        WmvLiquidRegistry liquids = StreamLiquids;
+        if (liquids != null)
+            textures += liquids.ArrayBytes;
     }
 
     // ---------------------------------------------------------------- streamState
@@ -2590,6 +2667,7 @@ public sealed partial class WmvTerrainSession
         }
         r.UploadMsMax = s.UploadMsMax;
         r.WorkMsMax = s.WorkMsMax;
+        FillLiquidStreamState(r);
         s.FrameMs.Clear();
         s.UploadMsMax = 0;
         s.WorkMsMax = 0;

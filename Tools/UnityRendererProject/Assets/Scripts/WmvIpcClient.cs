@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 17 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 19 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
@@ -25,7 +25,11 @@
 // inspectWorldModel / worldModelInspected, and runtimeState's world fields -- see WmvTerrainSession and WmvWorldModels;
 // 17 added doodads -- loadWorld's doodad budgets, getMapAsset's roles "m2Model", "m2Skin" and "m2Texture",
 // worldProgress's doodad fields, terrainTileLoaded's world assembly and doodads, and runtimeState's doodad fields -- see
-// WmvTerrainSessionDoodads and WmvWorldDoodads).
+// WmvTerrainSessionDoodads and WmvWorldDoodads; 18 added streaming -- loadWorld's "streaming", streamTile /
+// streamTileAnswer, streamState, testFlight / testFlightDone and runtimeState's "light" and stream fields -- see
+// WmvTerrainSessionStream; 19 added liquids -- loadTerrainTile's and loadWorld's "liquids" (with its optional "lights",
+// the zone lights of the water colours), getMapAsset's role "liquidTexture", terrainTileLoaded's liquids, and
+// streamState's and runtimeState's liquid fields -- see WmvTerrainSessionLiquids, WmvLiquids and WmvLiquidLight).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -168,6 +172,28 @@
 //     loads' requests remembered at most RetiredCapacity, 128) and adds terrainTextures (the layer textures the terrain
 //     tiles hold), terrainTextureBytes (their GPU size, estimated from the formats and mips uploaded) and
 //     terrainAlphaArrays (the tiles' alpha arrays)
+//   getMapAsset           { ..., role:"liquidTexture", fileDataID }                               (protocol 19)
+//     a frame of a liquid type's animation (texture slot 0, as the catalogue of loadTerrainTile's / loadWorld's "liquids"
+//     lists it), for the liquid types the load's tile and world models draw; each id at most once per load, at most
+//     WmvTerrainSession.MaxLiquidOutstanding of them out at once, within the offer's maxTexturesPerLoad ids and
+//     maxTextureBytesPerLoad bytes; never asked when the load carries no "liquids"
+//   terrainTileLoaded (protocol 19 adds) { liquids:{ offered, catalog:"ok"|"unavailable"|"absent", instances, layers,
+//                           chunks, quads, vertices, meshes, types:[ids], texturesRequested, texturesLoaded, texturesFailed,
+//                           missingTypes, formatBySize, formatDisagreements, malformed, wmoGroups, wmoQuads,
+//                           geometryBytes, textureBytes } }
+//     the load's liquids (WmvTerrainSessionLiquids): offered false and catalog "absent" when the load carried no
+//     "liquids" (nothing drawn); the tile's MH2O -- instances (every layer), layers (the most in one chunk), chunks with
+//     liquid, the quads and vertices of its meshes --, the Unity meshes made (the tile's and its world models'), every
+//     liquid type id met (tile and world models), the frames this load asked for, got and could not get (refused, failed,
+//     or not asked: past a budget), the types the catalogue lacks (not drawn), the MH2O instances whose format came from
+//     their vertex block's size or whose rule and size disagree, the MH2O instances and MLIQ chunks not drawn as
+//     malformed, the world-model groups with liquid and their quads, and the GPU bytes of the liquid geometry and frames
+//   streamState (protocol 19 adds) { liquidTiles, liquidTypes, liquidTextures, liquidBytes }
+//     the resident tiles that draw liquid, the scene's liquid types (pooled included), their frame arrays, and the GPU
+//     bytes of those arrays and of the resident tiles' liquid geometry
+//   runtimeState (protocol 19 adds) { liquidObjects, liquidMeshes, liquidMaterials, liquidArrays, liquidGpuBytes }
+//     the liquid objects and meshes alive (tiles' and world-model prototypes'), the liquid materials and frame arrays
+//     alive, and their GPU bytes (frames and geometry)
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
@@ -236,6 +262,22 @@
 //     after the WDT), "wmoRoot", "wmoGroup" and "wmoTexture" within the budgets; answers worldShown when the scene first
 //     has something on screen, worldProgress as its world models come, and exactly one terrainTileLoaded with the
 //     world's outcome when every placement is settled
+//   loadTerrainTile / loadWorld (protocol 19 adds) { liquids:{ maxTexturesPerLoad, maxTextureBytes, maxTextureBytesPerLoad,
+//                     catalog:{ product, build, state:"ok"|"unavailable", detail, types:[{ id, name, kind, material,
+//                     materialFlags, lvf, minimapColor, float0, float1, frames:[...], framesWanted, bump }] } } }
+//     the load offers liquids (docs/world-viewer/09-liquids.md 1.6): the liquid frames' budgets and the host's catalogue of
+//     the client's liquid types (LiquidOffer; the player reads no table). Sent only to a player that announced 19 and only
+//     for a load that offers them; without it (an older host) no liquid is drawn and the report says "offered": false. A
+//     streaming session's tiles take the entry's. "bump" (optional, additive): the type's ripple map's FileDataID (0 or
+//     absent: none), fetched like the frames (role "liquidTexture") for the High water look
+//   liquids.lights (optional, inside "liquids") { state:"ok"|"unavailable", detail, product, build, map, time, slot,
+//                     defaultLight, defaultFrom, zones:[{ zone, light, zmin, zmax, conditional, poly:[x0,y0,...] }],
+//                     points:[{ light, x, y, z, start, end }], values:[{ light, lightParams, riverClose:[r,g,b], riverFar,
+//                     oceanClose, oceanFar, waterAlpha:[s,d], oceanAlpha:[s,d], sky:[r,g,b] }] }
+//     the zone lights of the load's map at a fixed noon, clear-weather slot 0 (Wow/World/LiquidLights.cs): the water and
+//     ocean colours and alphas follow the light at the camera (WmvLiquidLight). Absent (an older host) or not "ok": the
+//     liquids keep their type colours. An additive key of protocol 19: a player without it ignores it. "sky" (optional,
+//     additive): the light's sky colour at the same noon, which the High look's reflection misses take
 //   inspectWorldModel { inspection, mapId, wmoFileDataID, assetEpoch, md5, wmoPosition, wmoRotation, wmoExtentsMin,
 //                       wmoExtentsMax, wmoFlags, wmoScale, wmoUniqueId, encoding:"binary", payloadBytes }
 //                     <payloadBytes raw WMO root bytes><newline>                     (protocol 16)
@@ -301,7 +343,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 18;
+    public const int ProtocolVersion = 19;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -586,6 +628,9 @@ public class WmvIpcClient : MonoBehaviour
         // Protocol 18 (docs/world-viewer/08-streaming.md): the load is a streaming session's entry -- the player keeps the tiles
         // around its camera loaded, each a tile load of its own the host opens (streamTile). Null: the single-tile load.
         public StreamingOffer Streaming;
+        // Protocol 19 (docs/world-viewer/09-liquids.md 1.6): the load offers liquids -- the frames' budgets and the host's
+        // catalogue of the client's liquid types. Null: not offered (an older host), and no liquid is drawn.
+        public LiquidOffer Liquids;
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
@@ -617,7 +662,41 @@ public class WmvIpcClient : MonoBehaviour
                                                             MaxM2TextureBytesPerLoad, MaxM2ModelsPerLoad, MaxM2TexturesPerLoad, MaxDoodadInstancesPerLoad) +
                                                    (Streaming != null ? "; " + Streaming : "")
                                             : "; no doodads offered")
-                                     : World ? "; world models asked for, but no budget stated" : "");
+                                     : World ? "; world models asked for, but no budget stated" : "") +
+                   (Liquids != null ? "; " + Liquids : "; no liquids offered");
+        }
+    }
+
+    /// <summary>loadTerrainTile's and loadWorld's "liquids" (protocol 19, docs/world-viewer/09-liquids.md 1.6): the budgets of
+    /// the liquid frames (role "liquidTexture": ids a load may ask for, one file's bytes, a load's bytes -- the host enforces
+    /// them) and the host's catalogue of the client's liquid types, read once per client load from its tables ("ok"; or
+    /// "unavailable", with why, and no types). The catalogue is the player's view of those tables (Wow/World/LiquidFormat.cs:
+    /// LiquidTypeView per LiquidType id), one per load command, replaced by the next. With it, the map's zone lights
+    /// ("lights", LightsFrom): Lights only when their state is "ok"; a streaming session's tile loads share the entry's
+    /// offer object, so its lights travel with it.</summary>
+    public class LiquidOffer
+    {
+        public int MaxTexturesPerLoad, MaxTextureBytes, MaxTextureBytesPerLoad;
+        public string CatalogState = "", CatalogDetail = "", CatalogProduct = "", CatalogBuild = "";
+        public readonly Wmv.Wow.World.LiquidCatalog Catalog = new Wmv.Wow.World.LiquidCatalog();
+        public int FrameIds;                    // the frame ids the catalogue lists, over every type
+        public int BumpIds;                     // the types that name a ripple map
+        // The zone lights: their state as sent ("" when the offer carried none, "ok", "unavailable") and why, and the lights
+        // themselves (null unless "ok": the liquids keep their type colours).
+        public string LightsState = "", LightsDetail = "";
+        public Wmv.Wow.World.LiquidLights Lights;
+
+        public override string ToString()
+        {
+            return string.Format("liquids: maxTexturesPerLoad {0} maxTextureBytes {1} maxTextureBytesPerLoad {2}, catalogue {3} ({4} {5}: {6} " +
+                                 "type(s), {7} frame id(s){10}){8}; {9}", MaxTexturesPerLoad, MaxTextureBytes, MaxTextureBytesPerLoad, CatalogState,
+                                 CatalogProduct, CatalogBuild, Catalog.Count, FrameIds,
+                                 string.IsNullOrEmpty(CatalogDetail) ? "" : ": " + CatalogDetail,
+                                 Lights != null ? "lights ok, " + Lights.Summary()
+                                                : string.IsNullOrEmpty(LightsState) ? "no lights"
+                                                                                    : "lights " + LightsState +
+                                                                                      (string.IsNullOrEmpty(LightsDetail) ? "" : ": " + LightsDetail),
+                                 BumpIds > 0 ? ", " + BumpIds + " type(s) with a ripple map" : "");
         }
     }
 
@@ -771,6 +850,10 @@ public class WmvIpcClient : MonoBehaviour
         public double FrameMsMax, FrameMsP95, UploadMsMax, WorkMsMax;
         public int FramesOver33, FramesOver50;
         public long ManagedHeapBytes;
+        // Protocol 19: the resident tiles that draw liquid, the scene's liquid types (pooled included), their frame arrays, and
+        // the GPU bytes of those arrays and of the resident tiles' liquid geometry.
+        public int LiquidTiles, LiquidTypes, LiquidTextures;
+        public long LiquidBytes;
     }
 
     public class StreamStateTile
@@ -844,6 +927,8 @@ public class WmvIpcClient : MonoBehaviour
           .Append(",\"workMsMax\":").Append(r.WorkMsMax.ToString("0.###", inv))
           .Append(",\"framesOver33\":").Append(r.FramesOver33).Append(",\"framesOver50\":").Append(r.FramesOver50)
           .Append(",\"managedHeapBytes\":").Append(r.ManagedHeapBytes)
+          .Append(",\"liquidTiles\":").Append(r.LiquidTiles).Append(",\"liquidTypes\":").Append(r.LiquidTypes)
+          .Append(",\"liquidTextures\":").Append(r.LiquidTextures).Append(",\"liquidBytes\":").Append(r.LiquidBytes)
           .Append('}');
         return sb.ToString();
     }
@@ -1163,6 +1248,133 @@ public class WmvIpcClient : MonoBehaviour
         public string refused;
     }
 
+    // Protocol 19: loadTerrainTile's / loadWorld's "liquids" and its catalogue (LiquidsFrom).
+    [Serializable] class MsgLiquidType
+    {
+        public int id;
+        public string name;
+        public int kind, material, materialFlags, lvf;
+        public long minimapColor;     // u32 0xAARRGGBB as stored: past an int's range
+        public float float0, float1;
+        public int[] frames;
+        public int framesWanted;
+        public long bump;             // the ripple map's FileDataID (absent: 0)
+    }
+
+    [Serializable] class MsgLiquidCatalog
+    {
+        public string product, build, state, detail;
+        public MsgLiquidType[] types;
+    }
+
+    // The zone lights inside "liquids" (LightsFrom): flat arrays and no dictionaries, as JsonUtility reads them.
+    [Serializable] class MsgLightZone
+    {
+        public int zone, light, conditional;
+        public double zmin, zmax;
+        public double[] poly;
+    }
+
+    [Serializable] class MsgLightPoint
+    {
+        public int light;
+        public double x, y, z, start, end;
+    }
+
+    [Serializable] class MsgLightValues
+    {
+        public int light, lightParams;
+        public float[] riverClose, riverFar, oceanClose, oceanFar, waterAlpha, oceanAlpha;
+        public float[] sky;           // optional (absent: empty)
+    }
+
+    [Serializable] class MsgLights
+    {
+        public string state, detail, product, build, defaultFrom;
+        public int map, time, slot, defaultLight;
+        public MsgLightZone[] zones;
+        public MsgLightPoint[] points;
+        public MsgLightValues[] values;
+    }
+
+    [Serializable] class MsgLiquids
+    {
+        public int maxTexturesPerLoad, maxTextureBytes, maxTextureBytesPerLoad;
+        public MsgLiquidCatalog catalog;
+        public MsgLights lights;
+    }
+
+    /// <summary>The load's liquid offer (protocol 19), null when the line carries none: a nested object always parses, so its
+    /// catalogue's state says whether "liquids" was sent. Each type becomes a LiquidTypeView of the load's catalogue.</summary>
+    static LiquidOffer LiquidsFrom(Msg msg)
+    {
+        MsgLiquids l = msg.liquids;
+        if (l == null || l.catalog == null || string.IsNullOrEmpty(l.catalog.state))
+            return null;
+        var o = new LiquidOffer
+        {
+            MaxTexturesPerLoad = l.maxTexturesPerLoad, MaxTextureBytes = l.maxTextureBytes, MaxTextureBytesPerLoad = l.maxTextureBytesPerLoad,
+            CatalogState = l.catalog.state, CatalogDetail = l.catalog.detail ?? "", CatalogProduct = l.catalog.product ?? "",
+            CatalogBuild = l.catalog.build ?? "",
+        };
+        if (l.catalog.types != null)
+            foreach (MsgLiquidType t in l.catalog.types)
+            {
+                if (t == null)
+                    continue;
+                var frames = new uint[t.frames != null ? t.frames.Length : 0];
+                for (int i = 0; i < frames.Length; i++)
+                    frames[i] = (uint)t.frames[i];
+                o.FrameIds += frames.Length;
+                o.Catalog.Add(new Wmv.Wow.World.LiquidTypeView
+                {
+                    Id = t.id, Name = t.name ?? "", Kind = t.kind, Material = t.material, MaterialFlags = t.materialFlags, Lvf = t.lvf,
+                    MinimapColor = (uint)t.minimapColor, Float0 = t.float0, Float1 = t.float1, Frames = frames, FramesWanted = t.framesWanted,
+                    Bump = t.bump > 0 && t.bump <= uint.MaxValue ? (uint)t.bump : 0u,
+                });
+                if (t.bump > 0 && t.bump <= uint.MaxValue)
+                    o.BumpIds++;
+            }
+        MsgLights lights = l.lights;
+        o.LightsState = lights != null && lights.state != null ? lights.state : "";
+        o.LightsDetail = lights != null && lights.detail != null ? lights.detail : "";
+        o.Lights = LightsFrom(lights);
+        return o;
+    }
+
+    /// <summary>The offer's zone lights (LiquidLights), null unless their state is "ok" (absent: the nested object parses
+    /// with an empty state). Zones with fewer than 3 points or an odd coordinate count, points that are not finite and
+    /// value rows with short arrays are dropped and counted (LiquidLights' Add methods).</summary>
+    static Wmv.Wow.World.LiquidLights LightsFrom(MsgLights m)
+    {
+        if (m == null || m.state != "ok")
+            return null;
+        var lights = new Wmv.Wow.World.LiquidLights
+        {
+            Product = m.product ?? "", Build = m.build ?? "", Map = m.map, Time = m.time, Slot = m.slot, DefaultLight = m.defaultLight,
+            DefaultFrom = m.defaultFrom ?? "",
+        };
+        if (m.zones != null)
+            foreach (MsgLightZone z in m.zones)
+                if (z != null)
+                    lights.AddZone(z.zone, z.light, z.zmin, z.zmax, z.conditional, z.poly);
+                else
+                    lights.DroppedZones++;
+        if (m.points != null)
+            foreach (MsgLightPoint p in m.points)
+                if (p != null)
+                    lights.AddPoint(p.light, p.x, p.y, p.z, p.start, p.end);
+                else
+                    lights.DroppedPoints++;
+        if (m.values != null)
+            foreach (MsgLightValues v in m.values)
+                if (v != null)
+                    lights.AddValues(v.light, v.lightParams, v.riverClose, v.riverFar, v.oceanClose, v.oceanFar, v.waterAlpha, v.oceanAlpha, v.sky);
+                else
+                    lights.DroppedValues++;
+        return lights;
+    }
+
     /// <summary>loadWorld's streaming offer (protocol 18), null when it carries none (a nested object always parses: its
     /// radius says whether it was sent).</summary>
     static StreamingOffer StreamingFrom(Msg msg)
@@ -1288,6 +1500,8 @@ public class WmvIpcClient : MonoBehaviour
         public MsgStreamTile[] opened;
         public MsgStreamTile[] refused;
         public int[] closed;
+        // protocol 19: loadTerrainTile's / loadWorld's liquid offer and catalogue
+        public MsgLiquids liquids;
         public string detail;
         public double readMs;
         public string md5;
@@ -1806,7 +2020,7 @@ public class WmvIpcClient : MonoBehaviour
                     WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.tileX, TileY = msg.tileY,
                     MaxAssetBytes = msg.maxAssetBytes, MaxTextureBytes = msg.maxTextureBytes,
                     MaxTextureBytesPerLoad = msg.maxTextureBytesPerLoad, MaxTexturesPerLoad = msg.maxTexturesPerLoad,
-                    Camera = CameraFrom(msg),
+                    Camera = CameraFrom(msg), Liquids = LiquidsFrom(msg),
                 });
                 break;
 
@@ -1829,7 +2043,7 @@ public class WmvIpcClient : MonoBehaviour
                     Doodads = msg.doodads, MaxM2FileBytes = msg.maxM2FileBytes, MaxM2BytesPerLoad = msg.maxM2BytesPerLoad,
                     MaxM2TextureBytes = msg.maxM2TextureBytes, MaxM2TextureBytesPerLoad = msg.maxM2TextureBytesPerLoad,
                     MaxM2ModelsPerLoad = msg.doodads ? msg.maxM2ModelsPerLoad : 0, MaxM2TexturesPerLoad = msg.maxM2TexturesPerLoad,
-                    MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad, Streaming = StreamingFrom(msg),
+                    MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad, Streaming = StreamingFrom(msg), Liquids = LiquidsFrom(msg),
                 });
                 break;
 
@@ -2340,6 +2554,20 @@ public class WmvIpcClient : MonoBehaviour
                       DoodadBuildMs = -1, DoodadBuildMaxMs = -1, DoodadPlaceMs = -1, DoodadPlaceMaxMs = -1, DoodadReadyMs = -1;
         public List<DoodadModelReport> DoodadList = new List<DoodadModelReport>();
         public int DoodadListTotal;
+        // Protocol 19: the load's liquids (null: not written -- a report made before protocol 19, or by a test).
+        public TerrainLiquidReport Liquids;
+    }
+
+    /// <summary>terrainTileLoaded's "liquids" (protocol 19; WmvTerrainSessionLiquids fills it): see the header.</summary>
+    public class TerrainLiquidReport
+    {
+        public bool Offered;
+        public string Catalog = "absent";               // "ok" | "unavailable" | "absent" (not offered)
+        public int Instances, Layers, Chunks, Quads, Vertices, Meshes;
+        public List<int> Types = new List<int>();
+        public int TexturesRequested, TexturesLoaded, TexturesFailed, MissingTypes;
+        public int FormatBySize, FormatDisagreements, Malformed, WmoGroups, WmoQuads;
+        public long GeometryBytes, TextureBytes;
     }
 
     /// <summary>A placed world model's doodad sets in terrainTileLoaded (at most WmvTerrainSession.ReportDoodadSetsMax): the
@@ -2626,8 +2854,40 @@ public class WmvIpcClient : MonoBehaviour
         // Protocol 16.
         if (r.World)
             AppendWorld(sb, r);
+        // Protocol 19.
+        if (r.Liquids != null)
+            AppendLiquids(sb, r.Liquids);
         sb.Append('}');
         return sb.ToString();
+    }
+
+    /// <summary>Protocol 19: the load's liquids, inside terrainTileLoaded.</summary>
+    static void AppendLiquids(StringBuilder sb, TerrainLiquidReport l)
+    {
+        sb.Append(",\"liquids\":{\"offered\":").Append(l.Offered ? "true" : "false")
+          .Append(",\"catalog\":\"").Append(Escape(l.Catalog ?? "")).Append('"')
+          .Append(",\"instances\":").Append(l.Instances)
+          .Append(",\"layers\":").Append(l.Layers)
+          .Append(",\"chunks\":").Append(l.Chunks)
+          .Append(",\"quads\":").Append(l.Quads)
+          .Append(",\"vertices\":").Append(l.Vertices)
+          .Append(",\"meshes\":").Append(l.Meshes)
+          .Append(",\"types\":[");
+        for (int i = 0; l.Types != null && i < l.Types.Count; i++)
+            sb.Append(i > 0 ? "," : "").Append(l.Types[i]);
+        sb.Append(']')
+          .Append(",\"texturesRequested\":").Append(l.TexturesRequested)
+          .Append(",\"texturesLoaded\":").Append(l.TexturesLoaded)
+          .Append(",\"texturesFailed\":").Append(l.TexturesFailed)
+          .Append(",\"missingTypes\":").Append(l.MissingTypes)
+          .Append(",\"formatBySize\":").Append(l.FormatBySize)
+          .Append(",\"formatDisagreements\":").Append(l.FormatDisagreements)
+          .Append(",\"malformed\":").Append(l.Malformed)
+          .Append(",\"wmoGroups\":").Append(l.WmoGroups)
+          .Append(",\"wmoQuads\":").Append(l.WmoQuads)
+          .Append(",\"geometryBytes\":").Append(l.GeometryBytes)
+          .Append(",\"textureBytes\":").Append(l.TextureBytes)
+          .Append('}');
     }
 
     static void AppendWorld(StringBuilder sb, TerrainTileReport r)
@@ -2891,6 +3151,11 @@ public class WmvIpcClient : MonoBehaviour
         public bool Streaming, Light;
         public int StreamTiles, StreamJobs, StreamRequestsOut, StreamPlacements, StreamDoodads, SceneTerrainTextures;
         public long StreamPrototypesEvicted, StreamTexturesEvicted, StreamFilesAskedAgain, StreamImagesShared;
+        // Protocol 19 (docs/world-viewer/09-liquids.md): the liquid objects and meshes alive (WmvLiquidMeshes' tallies: tiles'
+        // and world-model prototypes'), the liquid materials and frame arrays alive (WmvLiquidRegistry's), and the GPU bytes
+        // of those arrays and of the liquid geometry.
+        public int LiquidObjects, LiquidMeshes, LiquidMaterials, LiquidArrays;
+        public long LiquidGpuBytes;
     }
 
     /// <summary>
@@ -2991,7 +3256,12 @@ public class WmvIpcClient : MonoBehaviour
              ",\"streamPrototypesEvicted\":" + r.StreamPrototypesEvicted +
              ",\"streamTexturesEvicted\":" + r.StreamTexturesEvicted +
              ",\"streamFilesAskedAgain\":" + r.StreamFilesAskedAgain +
-             ",\"streamImagesShared\":" + r.StreamImagesShared + "}");
+             ",\"streamImagesShared\":" + r.StreamImagesShared +
+             ",\"liquidObjects\":" + r.LiquidObjects +
+             ",\"liquidMeshes\":" + r.LiquidMeshes +
+             ",\"liquidMaterials\":" + r.LiquidMaterials +
+             ",\"liquidArrays\":" + r.LiquidArrays +
+             ",\"liquidGpuBytes\":" + r.LiquidGpuBytes + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

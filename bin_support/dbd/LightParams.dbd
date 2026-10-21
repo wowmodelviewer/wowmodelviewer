@@ -1,0 +1,155 @@
+COLUMNS
+int ID
+float Field_00 // not established (three floats)
+float Field_01 // not established (three floats)
+int Field_02 // not established
+int Field_03 // not established
+int Field_04 // not established
+float Field_05 // not established (floats from 0 to 1; the same values in Retail and Classic on the rows they share)
+float WaterShallowAlpha // the opacity of shallow river/lake water: a float from 0 to 1 on every row (proven from the bytes); which of the four floats is which is the public definitions' order, consistent with the bytes (shallow <= deep on 95 % of Retail rows; the same values in Retail and Classic on the rows they share) and with the Durotar reference fit (0.40 / 0.80), not proven
+float WaterDeepAlpha // the opacity of deep river/lake water: as WaterShallowAlpha (Classic Era: by MoP Classic's layout and by elimination, inferred)
+float OceanShallowAlpha // the opacity of shallow ocean: as WaterShallowAlpha (no ocean reference measured yet)
+float OceanDeepAlpha // the opacity of deep ocean: as WaterShallowAlpha
+int Field_10 // not established (flags)
+int Field_11 // not established
+float Field_12 // not established
+float Field_13 // not established
+float Field_14 // not established
+float Field_15 // not established
+float Field_16 // not established
+float Field_17 // not established
+float Field_18 // not established
+float Field_19 // not established
+float Field_20 // not established
+float Field_21 // not established
+float Field_22 // not established
+float Field_23 // not established
+float Field_24 // not established
+float Field_25 // not established
+float Field_26 // not established
+int Field_27 // not established
+float Field_28 // not established
+float Field_29 // not established
+float Field_30 // not established
+float Field_31 // not established
+float Field_32 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_33 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_34 // not established (PTR 12.1.7 and Classic Beta only)
+int Field_35 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_36 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_37 // not established (PTR 12.1.7 and Classic Beta only)
+float Field_38 // not established (PTR 12.1.7 and Classic Beta only)
+
+COMMENT Written for WoW Model Viewer's light catalogue (wow::LightCatalog: the zone light's water colours,
+COMMENT docs/world-viewer/09-liquids.md). The layouts come from public table definitions, read as hypotheses: the four
+COMMENT alphas the catalogue reads (database.xml, table LightParams) were checked against the clients' own bytes; the other
+COMMENT columns are named by their field index, their types and widths the hypotheses' (never read). A neutral name that
+COMMENT two layouts share is the same slot in the column order (after Classic's inline ID), not an established equal
+COMMENT meaning. Fields 0-31 are the same columns in CAE394E7 and A7F31923 (the four alphas agree on all 3745 rows Retail and
+COMMENT PTR share). Every field is listed in file order. Most Retail rows are copy rows: LightData and Light refer to copy
+COMMENT IDs directly. A layout not listed here is not read.
+
+LAYOUT CAE394E7
+BUILD 12.1.5.70448
+COMMENT Retail: 32 fields; IDs in the section's ID list, 2069 copy rows.
+$noninline,id$ID<32>
+Field_00[3]
+Field_01[3]
+Field_02<u8>
+Field_03<u16>
+Field_04<u8>
+Field_05
+WaterShallowAlpha
+WaterDeepAlpha
+OceanShallowAlpha
+OceanDeepAlpha
+Field_10<32>
+Field_11<32>
+Field_12
+Field_13
+Field_14
+Field_15
+Field_16
+Field_17
+Field_18
+Field_19
+Field_20
+Field_21
+Field_22
+Field_23
+Field_24
+Field_25
+Field_26
+Field_27<32>
+Field_28
+Field_29
+Field_30
+Field_31
+
+LAYOUT A7F31923
+BUILD 12.1.7.70424, 1.60.1.70450
+COMMENT PTR 12.1.7 and Classic Beta: 39 fields, seven more at the end; IDs in the section's ID list (copy rows: PTR 2078,
+COMMENT Classic Beta 478).
+$noninline,id$ID<32>
+Field_00[3]
+Field_01[3]
+Field_02<u8>
+Field_03<u16>
+Field_04<u8>
+Field_05
+WaterShallowAlpha
+WaterDeepAlpha
+OceanShallowAlpha
+OceanDeepAlpha
+Field_10<32>
+Field_11<32>
+Field_12
+Field_13
+Field_14
+Field_15
+Field_16
+Field_17
+Field_18
+Field_19
+Field_20
+Field_21
+Field_22
+Field_23
+Field_24
+Field_25
+Field_26
+Field_27<32>
+Field_28
+Field_29
+Field_30
+Field_31
+Field_32
+Field_33
+Field_34
+Field_35<32>
+Field_36
+Field_37
+Field_38
+
+LAYOUT 51C96BAD
+BUILD 1.15.9.70003, 5.5.4.70268
+COMMENT Classic Era 1.15.9 and MoP Classic 5.5.4: 17 fields; no ID list -- the ID is field 2 (the header's id_index,
+COMMENT signed bitpacked), so every later column is one field after CAE394E7's; no copy rows. Several alphas sit in the
+COMMENT common data (defaults 0.5 / 1.0 / 0.75 / 1.0).
+Field_00[3]
+Field_01[3]
+$id$ID<32>
+Field_02<u8>
+Field_03<u16>
+Field_04<u8>
+Field_05
+WaterShallowAlpha
+WaterDeepAlpha
+OceanShallowAlpha
+OceanDeepAlpha
+Field_10<8>
+Field_11<32>
+Field_12
+Field_13
+Field_14
+Field_15

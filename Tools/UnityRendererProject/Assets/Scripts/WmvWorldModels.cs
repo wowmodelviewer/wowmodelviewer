@@ -6,7 +6,9 @@
 //   a PROTOTYPE   one per unique WMO FileDataID of a load: WmvWmoBuilder.Build, the Buildings renderer unchanged (its
 //                 parser's output, its decode policy, its materials and its shader), built INACTIVE and never shown, kept
 //                 under an inactive holder. It leaves WmvRuntimeMapObject.Live at once (LeaveLiveCount): Buildings' own
-//                 count stays its own, and this file keeps the world's tallies.
+//                 count stays its own, and this file keeps the world's tallies. Stage 09: its groups' liquid (MLIQ) is added
+//                 after the build, on this path only (AddLiquids: a child of the group's object, drawn with the scene's
+//                 shared liquid material), so the Buildings viewer's pictures do not change.
 //   an INSTANCE   one per placement: a clone of the prototype's object tree (Object.Instantiate keeps every renderer's
 //                 sharedMesh and sharedMaterials), so the meshes, materials and textures are the prototype's, never copied;
 //                 on layer 30 (the world view's only layer) with its whole hierarchy; under the scene root, at the
@@ -21,7 +23,9 @@
 //                 camera frustum, then each group renderer's box; a renderer outside is disabled, one inside enabled. The
 //                 boxes are the groups' own drawn-vertex bounds placed (static), so the test is exact for what is drawn and
 //                 never hides a wall that is on screen. No portal, BSP or indoor/outdoor rule is applied (none is
-//                 established here). Counted for runtimeState.
+//                 established here). Counted for runtimeState. A group's liquid (stage 09) is culled the same way, by its
+//                 own renderer's box, but it is not a group: the counts (and the placement report's groupsDrawn) leave it
+//                 out, so they mean what they meant before liquids.
 //
 // The prototype's root data (WmoRoot, WmoGroup[]) stay with it: the session's floor and start-point queries read them.
 
@@ -38,6 +42,16 @@ public sealed class WmvWorldPrototype
     public int Instances;                 // live instances made from it
     public double BuildMs;
     public bool Disposed;
+    // Stage 09 (AddLiquids): its groups' liquid (MLIQ) -- one child object per group under the group's object, its mesh
+    // appended to Runtime.Meshes (disposed with the prototype, counted in the tallies and GpuGeometryBytes) -- and the
+    // registry whose liquid types it holds until it is disposed.
+    public int LiquidObjects, LiquidMeshes, LiquidQuads;
+    public long LiquidGeometryBytes;
+    public WmvLiquidRegistry Liquids;
+    public readonly List<int> LiquidTypes = new List<int>();
+    /// <summary>Per renderer of its object tree, in GetComponentsInChildren order (an instance's clone lists its renderers in
+    /// the same order): true for a liquid's (AddLiquids); null without liquid.</summary>
+    public bool[] LiquidRendererMask;
 
     public WmoRoot Root { get { return Runtime != null ? Runtime.RootData : null; } }
     public WmoGroup[] Groups { get { return Runtime != null ? Runtime.Groups : new WmoGroup[0]; } }
@@ -52,6 +66,10 @@ public sealed class WmvWorldInstance
     public GameObject Root;
     public Renderer[] Renderers = new Renderer[0];
     public Bounds[] RendererBounds = new Bounds[0];   // Unity world space, as placed (static)
+    /// <summary>Which of Renderers draw a group's liquid (the prototype's LiquidRendererMask; null: none): culled by their
+    /// own boxes like the groups, never counted as groups.</summary>
+    public bool[] LiquidRenderers;
+    public int GroupRenderers;                         // Renderers that draw a group (not a liquid)
     public bool HasBounds;
     public Bounds Bounds;                              // the union of RendererBounds
     public bool Culled;                                // the whole instance was outside the frustum last frame
@@ -161,6 +179,47 @@ public sealed class WmvWorldModels
         return p;
     }
 
+    /// <summary>
+    /// Stage 09 (WmvTerrainSessionLiquids.cs): the liquid of a prototype's groups, built after the prototype on the world
+    /// path only (the Buildings viewer never gets here) -- `meshes` the liquid meshes made (their objects are already under
+    /// the groups' objects, so they are destroyed with the root), `objects` how many, `bytes` their geometry. The meshes join
+    /// Runtime.Meshes after the groups' (disposed with the prototype) and the world's tallies; GpuGeometryBytes counts them
+    /// (the pools). Instances made from the prototype afterwards clone the objects and share the meshes and materials, and
+    /// cull each liquid by its own renderer's bounds; `renderers` (the liquids' own) mark which of an instance's renderers are
+    /// not groups (LiquidRendererMask).
+    /// </summary>
+    public static void AddLiquids(WmvWorldPrototype p, List<Mesh> meshes, int objects, long bytes, List<Renderer> renderers)
+    {
+        WmvRuntimeMapObject rt = p.Runtime;
+        if (rt == null)
+            return;
+        if (renderers != null && renderers.Count > 0 && rt.Root != null)
+        {
+            var liquid = new HashSet<Renderer>(renderers);
+            Renderer[] all = rt.Root.GetComponentsInChildren<Renderer>(true);
+            p.LiquidRendererMask = new bool[all.Length];
+            for (int i = 0; i < all.Length; i++)
+                p.LiquidRendererMask[i] = liquid.Contains(all[i]);
+        }
+        if (meshes.Count > 0)
+        {
+            var all = new Mesh[rt.Meshes.Length + meshes.Count];
+            System.Array.Copy(rt.Meshes, all, rt.Meshes.Length);
+            for (int i = 0; i < meshes.Count; i++)
+                all[rt.Meshes.Length + i] = meshes[i];
+            rt.Meshes = all;
+        }
+        rt.GpuGeometryBytes += bytes;
+        LiveMeshes += meshes.Count;
+        LiveGpuGeometryBytes += bytes;
+        p.LiquidObjects += objects;
+        p.LiquidMeshes += meshes.Count;
+        p.LiquidGeometryBytes += bytes;
+        WmvLiquidMeshes.LiveObjects += objects;
+        WmvLiquidMeshes.LiveMeshes += meshes.Count;
+        WmvLiquidMeshes.LiveGeometryBytes += bytes;
+    }
+
     /// <summary>Place an instance of `prototype` (active, on layer 30) relative to `origin`.</summary>
     public WmvWorldInstance Place(WmvWorldPrototype prototype, WorldModelPlacement placement, WorldOrigin origin, int load)
     {
@@ -175,6 +234,12 @@ public sealed class WmvWorldModels
         go.SetActive(true);
         var inst = new WmvWorldInstance { Prototype = prototype, Placement = placement, Load = load, Root = go };
         inst.Renderers = go.GetComponentsInChildren<Renderer>(true);
+        bool[] liquid = prototype.LiquidRendererMask;
+        inst.LiquidRenderers = liquid != null && liquid.Length == inst.Renderers.Length ? liquid : null;
+        inst.GroupRenderers = inst.Renderers.Length;
+        if (inst.LiquidRenderers != null)
+            foreach (bool l in inst.LiquidRenderers)
+                if (l) inst.GroupRenderers--;
         inst.RendererBounds = new Bounds[inst.Renderers.Length];
         for (int i = 0; i < inst.Renderers.Length; i++)
         {
@@ -223,6 +288,17 @@ public sealed class WmvWorldModels
         if (p == null || p.Disposed)
             return;
         p.Disposed = true;
+        // Stage 09: its liquid off the liquid tallies (its meshes go with Runtime.Meshes below), its liquid types given back.
+        WmvLiquidMeshes.LiveObjects -= p.LiquidObjects;
+        WmvLiquidMeshes.LiveMeshes -= p.LiquidMeshes;
+        WmvLiquidMeshes.LiveGeometryBytes -= p.LiquidGeometryBytes;
+        p.LiquidObjects = p.LiquidMeshes = 0;
+        p.LiquidGeometryBytes = 0;
+        if (p.Liquids != null)
+        {
+            p.Liquids.Release(p);
+            p.Liquids = null;
+        }
         WmvRuntimeMapObject rt = p.Runtime;
         if (rt != null)
         {
@@ -257,10 +333,12 @@ public sealed class WmvWorldModels
                     Renderer r = inst.Renderers[i];
                     if (r == null)
                         continue;
-                    groups++;
                     bool show = any && GeometryUtility.TestPlanesAABB(planes, inst.RendererBounds[i]);
                     if (r.enabled != show)
                         r.enabled = show;
+                    if (inst.LiquidRenderers != null && inst.LiquidRenderers[i])
+                        continue;               // a group's liquid: culled by its own box, not a group
+                    groups++;
                     if (show) visible++;
                     else culled++;
                 }

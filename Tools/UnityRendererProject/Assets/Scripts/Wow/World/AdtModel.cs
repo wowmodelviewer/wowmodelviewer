@@ -46,41 +46,106 @@ namespace Wmv.Wow.World
         public bool HasVertexColors { get { return VertexColorsRaw != null; } }
     }
 
-    /// <summary>MH2O per-chunk header (12 bytes): offsets from the start of MH2O's payload (proven:
-    /// every instance they point at is in bounds in all audited tiles, 5.7).</summary>
+    // MH2O evidence: docs/world-viewer/09-liquids.md 1.2 (every root ADT of the four clients' catalogued maps,
+    // 6,334,582 instances, read on 2026-10-18). Offsets inside MH2O count from the start of its payload.
+
+    /// <summary>MH2O per-chunk header (12 bytes); entry n belongs to MCNK n. An empty entry is all zero
+    /// (PROVEN_BYTES).</summary>
     public struct LiquidChunkHeader
     {
-        public uint InstancesOffset;
-        public uint LayerCount;
-        public uint AttributesOffset;             // located, not decoded
+        public uint InstancesOffset;              // +0: the chunk's LayerCount 24-byte instances
+        public uint LayerCount;                   // +4: 1..4 in the clients
+        public uint AttributesOffset;             // +8: 16-byte LiquidAttributes, 0 = none
     }
 
-    /// <summary>One 24-byte MH2O instance, kept raw. Its boundaries are proven; the names below are
-    /// the audit's Python reader's and are NOT verified (U14): no liquid type, material, height or
-    /// vertex meaning is asserted here.</summary>
-    public struct LiquidInstanceRaw
+    /// <summary>A chunk's 16-byte attribute block: two 64-bit cell masks, cell (row, col) = bit row*8 + col,
+    /// least significant first; the second is a subset of the first in 100% of chunks (PROVEN_BYTES, layout).
+    /// The names are public documentation's (INFERRED); nothing here uses them.</summary>
+    public struct LiquidAttributes
     {
-        public ushort Word0;      // Python: liquid_type (values 1, 2, 5, 7, 301 seen; not checked against DB2)
-        public ushort Word2;      // Python: object_or_lvf (42 or larger seen)
-        public float Float4;      // Python: min_height
-        public float Float8;      // Python: max_height
-        public byte Byte12;       // Python: x
-        public byte Byte13;       // Python: y
-        public byte Byte14;       // Python: width
-        public byte Byte15;       // Python: height
-        public uint Word16;       // Python: offset of the exists bitmap (not decoded)
-        public uint Word20;       // Python: offset of the vertex data (not decoded)
+        public bool Present;                      // false when the chunk has none, or its block was malformed
+        public ulong Fishable;
+        public ulong Deep;
+    }
+
+    /// <summary>
+    /// One MH2O instance (a liquid layer of one chunk): the 24-byte record as stored, then what its exists
+    /// bitmap and vertex data decode to. Instance-local grid: quad (row r, column c), r &lt; Height, c &lt; Width,
+    /// lies on the chunk's cell (Y + r, X + c); vertex (i, j), i &lt;= Height, j &lt;= Width, is the chunk's outer
+    /// terrain vertex (row Y + i, column X + j) and has index i * (Width + 1) + j (PROVEN_BYTES, seam tests).
+    /// Only a Decoded instance has geometry; a Malformed one says why in Problem and its arrays are null.
+    /// </summary>
+    public sealed class LiquidInstance
+    {
+        // ---- the 24-byte record, raw words kept for diagnostics
+        public ushort LiquidType;                 // +0: a LiquidType id (100%)
+        public ushort ObjectOrFormat;             // +2: 0, 1, 2 = the vertex format itself (Retail only); 42 on
+                                                  //     ocean-class liquid (never a LiquidObject id); otherwise a
+                                                  //     LiquidObject id (not resolved here)
+        public float MinHeight;                   // +4: absolute world height (the terrain's z frame), as stored
+        public float MaxHeight;                   // +8: min <= max in 100%
+        public byte X;                            // +12: first cell column (index_x direction)
+        public byte Y;                            // +13: first cell row (index_y direction)
+        public byte Width;                        // +14: columns, X + Width <= 8
+        public byte Height;                       // +15: rows, Y + Height <= 8
+        public uint ExistsOffset;                 // +16: exists bitmap, 0 = none (every quad exists)
+        public uint VertexOffset;                 // +20: vertex data, 0 = none (flat at MinHeight)
+
+        // ---- decoded
+        public int Chunk;                         // MCNK index 0..255
+        public int Layer;                         // position among the chunk's instances
+        public WorldDataStatus Status;            // Decoded, or Malformed (no geometry)
+        public string Problem;                    // why it is Malformed, else null
+        /// <summary>Bytes of the vertex block: the gap from VertexOffset to the next structure (or the end of
+        /// MH2O); 0 without vertex data.</summary>
+        public int VertexBlockBytes;
+        /// <summary>The vertex format the block's size gives (LiquidFormat: 1, 5, 8 or 9 bytes per vertex =
+        /// 2, 0, 1, 3), -1 without vertex data. The four sizes are distinct, so the size decides.</summary>
+        public int FormatBySize = -1;
+        /// <summary>Width * Height quads, row-major (quad r, c at r * Width + c): bit r * Width + c of the stored
+        /// bitmap, least significant first, bits past Width * Height masked; every quad without a bitmap.</summary>
+        public bool[] Exists;
+        public bool HasExistsBitmap;
+        public bool ExistsSpareBits;              // the stored bitmap set bits past Width * Height (masked off)
+        public float[] Heights;                   // formats 0, 1, 3: absolute heights per vertex, else null
+        public byte[] Depths;                     // formats 0, 2, 3: one byte per vertex (LiquidFormat.DepthYards), else null
+        public ushort[] U, V;                     // formats 1, 3: the stored texture coordinates (scale UNKNOWN), else null
+
+        public int VertexCount { get { return (Width + 1) * (Height + 1); } }
+
+        /// <summary>Whether quad (row r, column c) of the instance exists (false outside the instance or when
+        /// nothing was decoded).</summary>
+        public bool QuadExists(int r, int c)
+        {
+            if (Exists == null || r < 0 || r >= Height || c < 0 || c >= Width)
+                return false;
+            return Exists[r * Width + c];
+        }
+
+        /// <summary>The height of vertex (i, j): its stored height, or MinHeight for depth-only data and for
+        /// an instance without vertex data (flat; MinHeight == MaxHeight in 100% of those).</summary>
+        public float HeightAt(int i, int j)
+        {
+            if (i < 0 || i > Height || j < 0 || j > Width)
+                throw new System.ArgumentOutOfRangeException("i/j", "liquid vertex row/column outside the instance");
+            return Heights != null ? Heights[i * (Width + 1) + j] : MinHeight;
+        }
     }
 
     public sealed class AdtLiquids
     {
-        /// <summary>PartiallyDecoded when the header table and every instance record are in bounds;
-        /// Malformed otherwise. Vertex data, bitmaps and attributes are never decoded.</summary>
+        /// <summary>PartiallyDecoded when the header table and every instance record are in bounds (some
+        /// meanings stay raw: the LiquidObject word, the depth and texture-coordinate scales); Malformed
+        /// otherwise, with no instances. A malformed attribute block, bitmap or vertex block is reported per
+        /// chunk or instance (root issues "MH2O chunk n ...") and leaves the rest decoded.</summary>
         public WorldDataStatus Status;
         public int DataOffset;                    // MH2O payload start in the root file
         public int Size;
         public LiquidChunkHeader[] Headers;       // 256
-        public LiquidInstanceRaw[][] Instances;   // per chunk
+        public LiquidAttributes[] Attributes;     // 256
+        public LiquidInstance[][] Instances;      // per chunk, in layer order; empty when the chunk has none
+        public int MalformedInstances;
+        public int MalformedAttributes;
     }
 
     public sealed class AdtRoot

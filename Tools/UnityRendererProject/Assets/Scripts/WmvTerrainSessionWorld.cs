@@ -1047,6 +1047,8 @@ public sealed partial class WmvTerrainSession
             m.State = ModelState.Built;
             m.Active = false;
             PlaceAll(j, m, m.Built);
+            // Protocol 19: the frames of its liquid types the scene does not hold yet (WmvTerrainSessionLiquids.cs).
+            SharedWorldModelLiquids(j, m.Built);
             if (!m.Unpinned)
             {
                 m.Unpinned = true;
@@ -1081,6 +1083,8 @@ public sealed partial class WmvTerrainSession
                 FailGlobal(j, m.Reason);
             return;
         }
+        // Protocol 19: its groups' liquid (MLIQ), on this path only -- before any instance is made from it.
+        AddWorldModelLiquids(j, m, proto);
         double buildMs = clock.Elapsed.TotalMilliseconds;
         w.BuildMs += buildMs;
         w.BuildMaxMs = Math.Max(w.BuildMaxMs, buildMs);
@@ -1186,6 +1190,9 @@ public sealed partial class WmvTerrainSession
         ForgetShownInputs();
         world = scene;
         world.Prototypes[m.FileDataID] = proto;
+        // Protocol 19: the load's liquid registry (its world model's liquid types) and zone lights are the scene's.
+        sceneLiquids = j.Liquid != null ? j.Liquid.Registry : null;
+        CommitSceneLights(j);
         for (int k = 0; k < m.Placements.Count; k++)
         {
             PlacementWork pw = m.Placements[k];
@@ -1561,7 +1568,7 @@ public sealed partial class WmvTerrainSession
                 e.HasRendered = true;
                 e.Rendered = WmvWorldModels.RenderedWorldBox(inst, world.Origin);
                 e.Groups = inst.Prototype != null && inst.Prototype.Runtime != null ? inst.Prototype.Runtime.GroupCount : 0;
-                e.GroupsDrawn = inst.Renderers.Length;
+                e.GroupsDrawn = inst.GroupRenderers;          // (a group's liquid renderer is not a group)
             }
             r.WorldPlacementList.Add(e);
         }

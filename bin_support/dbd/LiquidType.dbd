@@ -1,0 +1,56 @@
+COLUMNS
+int ID
+string Name // the liquid type's name ("Water", "Ocean", "Magma", "Slime", "Slow Water", ...): proven from the bytes
+string Texture // six texture path templates per type; slot 0 names the animated frames ("XTextures\river\lake_a.%d.blp" gives lake_a.1.blp to lake_a.N.blp, N its FrameCountTexture): proven from the bytes; what slots 1-5 are for is not established
+int Field_02 // not established (bit-set-like values)
+int SoundBank // the type's kind -- 0 water, 1 ocean, 2 magma, 3 slime on the four base rows and on every variant of each, and MLIQ's vertex form follows it: proven from the bytes (the name is the public definitions'; nothing about sound is established)
+int Field_04 // not established
+int Field_05 // not established
+float Field_06 // not established
+float Field_07 // not established
+float Field_08 // not established
+float Field_09 // not established
+int Field_10 // not established (16 bits: its pallet words carry a constant upper half)
+float Field_11 // not established
+int Field_12 // not established
+int Field_13 // not established
+int MaterialID // a LiquidMaterial row: every value is one, in every client (proven from the bytes)
+int MinimapStaticCol // a colour, 0xAARRGGBB as stored (water 0x9F12A0D5, magma 0xFFD06800, slime 0xFF4ABA3C): a colour proven from the bytes; that it is the minimap's is inferred
+int FrameCountTexture // per Texture slot, the frames of a %d template in the low byte (30 for lake_a, 16 for fast_a; lake_a.31.blp does not exist): proven from the bytes; the pallet's upper 24 bits are a constant that is not part of the value
+int Field_17 // not established (colour-like)
+float Float // floats: proven from the bytes; what the first two are for is inferred, not proven
+int Field_19 // not established
+float Field_20 // not established
+
+COMMENT Written for WoW Model Viewer's liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4). The
+COMMENT layout comes from public table definitions, read as hypotheses: every column the catalogue reads (database.xml,
+COMMENT table LiquidType) was checked against the four clients' own bytes, and only those columns carry established
+COMMENT meanings; the others are named by their field index, their types and widths the hypotheses' (never read). Every
+COMMENT field is listed in file order, so the positions are right for the layout below. Its hash is the same in Retail
+COMMENT 12.1.5, Classic Era 1.15.9, MoP Classic 5.5.4 and Classic Beta 1.60.1. A layout not listed here is not read.
+
+LAYOUT D1ECEEC9
+BUILD 12.1.5.70448, 1.15.9.70003, 5.5.4.70449, 1.60.1.70450
+COMMENT 21 fields in each of the four clients; IDs in the section's ID list (Retail adds 2 copy rows).
+$noninline,id$ID<32>
+Name
+Texture[6]
+Field_02<32>
+SoundBank<u8>
+Field_04<u32>
+Field_05<u32>
+Field_06
+Field_07
+Field_08
+Field_09
+Field_10<u16>
+Field_11
+Field_12<u8>
+Field_13<u8>
+MaterialID<u8>
+MinimapStaticCol<32>
+FrameCountTexture<u8>[6]
+Field_17<32>[3]
+Float[38]
+Field_19<u32>[4]
+Field_20[4]

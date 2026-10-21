@@ -7,7 +7,8 @@
 // write mesh dumps of the pinned tiles to WMV_TERRAIN_DUMP_DIR when it is set (TerrainCorpusTests.cs); the
 // terrain material corpus tests (TerrainMaterialCorpusTests.cs) run under the same condition. The
 // world-map contract check runs only when WMV_MAP_CONTRACT_DIR names a folder of WDTs the viewer's map
-// catalogue wrote (MapContractCheck.cs).
+// catalogue wrote (MapContractCheck.cs). The liquid corpus tests (LiquidCorpusTests.cs) run under the corpus condition
+// and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set.
 
 using System;
 using System.Globalization;
@@ -87,6 +88,22 @@ static class Program
             Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
         else
             failures += StreamSeamTests.Run(corpus, Console.WriteLine);
+
+        // Stage 09: MH2O and MLIQ decode, the format rule and the liquid meshes, synthetic, then on the real client bytes:
+        // the pinned corpus's roots and exit tiles, and the investigation's WMO liquid examples (WMV_LIQUID_EXAMPLES).
+        Console.WriteLine("== LiquidTests (MH2O decode, format rule, terrain and MLIQ liquid meshes; synthetic)");
+        failures += LiquidTests.RunAll(Console.WriteLine);
+        Console.WriteLine("== LiquidCorpusTests (MH2O and MLIQ on real client bytes)");
+        if (string.IsNullOrEmpty(corpus))
+            Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
+        else
+            failures += LiquidCorpusTests.Run(corpus, Environment.GetEnvironmentVariable("WMV_LIQUID_EXAMPLES"), Console.WriteLine);
+
+        // Stage 09 tuning: the zone light the water colours follow, its ease, and the depth and planar uv the shader reads.
+        Console.WriteLine("== LiquidLightTests (zone lights: selection, point lights, ease, sky; depth in yards, planar uv)");
+        failures += LiquidLightTests.RunAll(Console.WriteLine);
+        Console.WriteLine("== LiquidHighTests (the High water look: formulas, the water tune, the ripple map's check)");
+        failures += LiquidHighTests.RunAll(Console.WriteLine);
 
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))

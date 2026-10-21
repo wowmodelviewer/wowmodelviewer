@@ -39,6 +39,9 @@
 //     one alpha array (a second slice for each chunk of more than 5 layers) and its one sampler carrier (bound into
 //     the layer slots without a texture: WmvTerrainMaterials.CreateSamplerCarrier) are created here and tracked the
 //     moment they exist.
+//   - LIQUID (stage 09, WmvLiquids.cs): the tile's MH2O as one GameObject, Mesh and MeshRenderer per liquid type under
+//     the root, in every view, tracked like the chunks, drawn with the type's shared material from the scene's liquid
+//     registry, which the tile holds until it is released.
 //
 // Debug switches (WmvTerrainDebug; command line or the space-separated WMV_DEBUG, as the other -wmv*
 // switches): -wmvTerrainView=shaded|chunks|wire|shadedwire|normals|textured|texturedlit|texturedplainweights|materials
@@ -389,6 +392,18 @@ public class WmvRuntimeTerrainTile
     public long TextureGpuBytes, AlphaGpuBytes, MaterialVertexBytes;
     public int TexturedMaterialCount;
     public double AlphaBuildMs = -1, MaterialCreateMs = -1;
+    // Stage 09: the tile's liquid (WmvLiquidMeshes.BuildTileLiquids): one object and mesh per liquid type drawn, under the
+    // root, tracked like every other object (so in the tallies above too) and counted apart here and in WmvLiquidMeshes'
+    // tallies; the registry whose types the tile holds, given back when it is released; the liquid types it draws.
+    public int LiquidObjectCount, LiquidMeshCount;
+    public long LiquidGeometryBytes;
+    public WmvLiquidRegistry Liquids;
+    public readonly List<int> LiquidTypes = new List<int>();
+    /// <summary>The drawn liquid's bounds (Unity, root-local), apart from Bounds (the terrain's: the orbit's framing and the
+    /// logged bounds); HasLiquidBounds false without drawn liquid. A liquid can lie above the terrain's top (an ocean over
+    /// its seabed): the top-down capture's clip range takes both (WmvMain.TopDownRange).</summary>
+    public Bounds LiquidBounds;
+    public bool HasLiquidBounds;
 
     readonly List<GameObject> objects = new List<GameObject>();
     readonly List<Mesh> meshes = new List<Mesh>();
@@ -456,6 +471,26 @@ public class WmvRuntimeTerrainTile
         alphaArrays.Add(a);
         liveAlphaArrays++;
         AlphaGpuBytes += gpuBytes;
+    }
+
+    /// <summary>Stage 09: a liquid object and its mesh (null when making it threw), tracked as every object is and counted as
+    /// the tile's liquid; `bytes` its geometry's GPU bytes.</summary>
+    public void TrackLiquid(GameObject go, Mesh m, long bytes)
+    {
+        if (go != null)
+        {
+            Track(go);
+            LiquidObjectCount++;
+            WmvLiquidMeshes.LiveObjects++;
+        }
+        if (m != null)
+        {
+            Track(m);
+            LiquidMeshCount++;
+            LiquidGeometryBytes += bytes;
+            WmvLiquidMeshes.LiveMeshes++;
+            WmvLiquidMeshes.LiveGeometryBytes += bytes;
+        }
     }
 
     /// <summary>A layer texture taken off the tile (WmvTerrainBuilder.Build, after an upload failure: a texture no chunk
@@ -548,6 +583,17 @@ public class WmvRuntimeTerrainTile
         liveTextures -= textures.Count;
         foreach (long b in textureBytes) liveTextureBytes -= b;
         liveAlphaArrays -= alphaArrays.Count;
+        // Stage 09: its liquid off the liquid tallies, and the liquid types it held given back to their registry.
+        WmvLiquidMeshes.LiveObjects -= LiquidObjectCount;
+        WmvLiquidMeshes.LiveMeshes -= LiquidMeshCount;
+        WmvLiquidMeshes.LiveGeometryBytes -= LiquidGeometryBytes;
+        LiquidObjectCount = LiquidMeshCount = 0;
+        LiquidGeometryBytes = 0;
+        if (Liquids != null)
+        {
+            Liquids.Release(this);
+            Liquids = null;
+        }
         // Children were created after their parents: newest first, so DestroyImmediate never meets a child its parent
         // already took with it (a destroyed object compares equal to null and is skipped either way).
         for (int i = objects.Count - 1; i >= 0; i--)
@@ -987,6 +1033,18 @@ public static class WmvTerrainBuilder
         rt.MaterialCreateMs = rt.TexturedMaterialCount > 0 ? materialClock.Elapsed.TotalMilliseconds : -1;
         rt.HasBounds = mesh.BoundsMin != null && mesh.BoundsMax != null;
         rt.Bounds = rt.HasBounds ? BoundsOf(mesh.BoundsMin, mesh.BoundsMax) : new Bounds();
+        // Stage 09: the tile's liquid (its MH2O, built on the worker with the terrain: content.LiquidTile), one object per liquid
+        // type under the root, whatever the terrain view (a liquid is its own object, never part of a chunk's material).
+        TerrainLiquidTile liquid = content != null ? content.LiquidTile : null;
+        var liquidClock = System.Diagnostics.Stopwatch.StartNew();
+        int liquidDrawn = content != null ? WmvLiquidMeshes.BuildTileLiquids(rt, liquid, content.Liquids, root.transform, o.KeepReadable) : 0;
+        if (log != null && liquid != null && liquid.Surfaces.Count > 0)
+            log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                "tile {0}_{1} (load {2}) liquid: {3} of {4} surface(s) drawn in {9:0.###} ms, {5} object(s), {6} mesh byte(s); types [{7}]{8}",
+                rt.TileX, rt.TileY, rt.Load, liquidDrawn, liquid.Surfaces.Count, rt.LiquidObjectCount, rt.LiquidGeometryBytes,
+                string.Join(",", rt.LiquidTypes.ConvertAll(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray()),
+                liquidDrawn < liquid.Surfaces.Count ? " (a type the catalogue lacks, or the liquid shader missing, is not drawn)" : "",
+                liquidClock.Elapsed.TotalMilliseconds));
         if (log != null)
         {
             log(string.Format(System.Globalization.CultureInfo.InvariantCulture,

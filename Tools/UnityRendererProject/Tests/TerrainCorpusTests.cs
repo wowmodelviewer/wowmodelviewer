@@ -88,7 +88,7 @@ namespace Wmv.Wow.Tests
 
         static string G(double v) { return v.ToString("R", CultureInfo.InvariantCulture); }
 
-        sealed class Pins
+        internal sealed class Pins
         {
             public Dictionary<string, string> Files = new Dictionary<string, string>(StringComparer.Ordinal);
             public Dictionary<string, KeyValuePair<int, string>> Sets = new Dictionary<string, KeyValuePair<int, string>>(StringComparer.Ordinal);
@@ -353,7 +353,7 @@ namespace Wmv.Wow.Tests
                 return doc.RootElement.GetProperty("window").EnumerateArray().Select(e => e.GetInt32()).ToArray();
         }
 
-        static string FindPins()
+        internal static string FindPins()
         {
             string env = Environment.GetEnvironmentVariable("WMV_WORLD_AUDIT_PINS");
             if (!string.IsNullOrEmpty(env) && File.Exists(env))
@@ -372,7 +372,7 @@ namespace Wmv.Wow.Tests
             return null;
         }
 
-        static Pins LoadPins(string path)
+        internal static Pins LoadPins(string path)
         {
             var pins = new Pins();
             using (JsonDocument doc = JsonDocument.Parse(File.ReadAllText(path)))
@@ -390,8 +390,9 @@ namespace Wmv.Wow.Tests
         }
 
         /// <summary>Null when the file at `rel` (corpus-relative, '/' separators) has its own pinned SHA-256 or
-        /// lies in a pinned file set whose digest holds; otherwise what is wrong.</summary>
-        static string CheckPinned(string corpus, Pins pins, string rel)
+        /// lies in a pinned file set whose digest holds; otherwise what is wrong. A set's first check is reported to
+        /// `note` (default: this suite's output).</summary>
+        internal static string CheckPinned(string corpus, Pins pins, string rel, Action<string> note = null)
         {
             string path = Path.Combine(corpus, rel);
             if (!File.Exists(path))
@@ -415,12 +416,12 @@ namespace Wmv.Wow.Tests
                     digest = Convert.ToHexString(h.ComputeHash(Encoding.ASCII.GetBytes(sb.ToString()))).ToLowerInvariant();
                 verified = names.Count == set.Key && digest == set.Value;
                 pins.SetVerified[dir] = verified;
-                say(string.Format("    pinned set {0}: {1} files, digest {2}", dir, names.Count, verified ? "holds" : "CHANGED"));
+                (note ?? say)?.Invoke(string.Format("    pinned set {0}: {1} files, digest {2}", dir, names.Count, verified ? "holds" : "CHANGED"));
             }
             return verified ? null : "the pinned set " + dir + " changed";
         }
 
-        static string Sha256(string path)
+        internal static string Sha256(string path)
         {
             using (var s = SHA256.Create())
             using (FileStream f = File.OpenRead(path))

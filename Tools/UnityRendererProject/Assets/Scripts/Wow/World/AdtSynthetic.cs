@@ -12,6 +12,10 @@
 // position is the chunk's corner from TerrainCoordinates rounded to float32, the base height 50 and
 // the heights k * 0.25.
 //
+// MH2O written by Mh2o (pass it to Root as `extra`): the header table, the instances in chunk order, then
+// per chunk its attributes and per layer its exists bitmap and vertex data, packed as in the client files
+// (docs/world-viewer/09-liquids.md 1.2).
+//
 // tex0 written by Tex0 (terrain materials): MVER, MAMP (4 zero bytes), MDID, MHID, 256 MCNKs of MCLY,
 // MCSH and MCAL (alpha maps back to back: RLE row by row, raw 4096 bytes, or raw 2048 bytes low nibble
 // first), then MTXP (16 bytes per MDID entry) when asked, then any extra top-level chunks (repeats).
@@ -261,6 +265,175 @@ namespace Wmv.Wow.World
             var header = new byte[128];
             Buffer.BlockCopy(m, 8, header, 0, 128);
             return Chunk("MCNK", Cat(header, Cat(subs)));
+        }
+
+        // ------------------------------------------------------------------ MH2O
+
+        /// <summary>One MH2O instance for Mh2o. Defaults: liquid type 5, second word 42, the whole chunk, no
+        /// bitmap, no vertex data, flat at 100.</summary>
+        public sealed class LiquidInstanceSpec
+        {
+            public ushort LiquidType = 5;
+            public ushort ObjectOrFormat = 42;
+            public byte X, Y, Width = 8, Height = 8;
+            /// <summary>-1 = no vertex data; 0..3 = that layout (LiquidFormat).</summary>
+            public int Format = -1;
+            /// <summary>Vertex (i, j) -> absolute height (formats 0, 1, 3); null = 100.</summary>
+            public Func<int, int, float> HeightAt;
+            public Func<int, int, byte> DepthAt;      // null = 0
+            public Func<int, int, ushort> UAt, VAt;   // null = 0
+            /// <summary>Stored min / max; null = over the vertices an existing quad uses (HeightAt), or 100.</summary>
+            public float? MinHeight, MaxHeight;
+            /// <summary>Quad (r, c) -> exists; null = no bitmap.</summary>
+            public Func<int, int, bool> Exists;
+            /// <summary>Also set the bitmap's bits past Width * Height in its last byte.</summary>
+            public bool SpareBits;
+            /// <summary>Write these offsets instead of the packed ones (malformed input).</summary>
+            public uint? ExistsOffset, VertexOffset;
+            /// <summary>Zero bytes appended to the vertex block (a block of the wrong size).</summary>
+            public int VertexExtraBytes;
+        }
+
+        /// <summary>One chunk's MH2O entry for Mh2o: its layers and attributes.</summary>
+        public sealed class LiquidChunkSpec
+        {
+            public LiquidInstanceSpec[] Layers = new LiquidInstanceSpec[0];
+            public bool Attributes;
+            public ulong Fishable, Deep;
+            public uint? AttributesOffset;            // written instead of the packed offset
+
+            public static LiquidChunkSpec Of(params LiquidInstanceSpec[] layers) { return new LiquidChunkSpec { Layers = layers }; }
+        }
+
+        /// <summary>The MH2O chunk of Mh2oPayload.</summary>
+        public static byte[] Mh2o(Func<int, LiquidChunkSpec> chunk)
+        {
+            return Chunk("MH2O", Mh2oPayload(chunk));
+        }
+
+        /// <summary>An MH2O payload laid out as the client files are (09-liquids.md 1.2): the 256 x 12-byte header
+        /// table, the instances from 3,072 in chunk order, then in chunk order each chunk's attributes and, per layer,
+        /// its exists bitmap and its vertex data, packed. `chunk(n)` null = no liquid in chunk n.</summary>
+        public static byte[] Mh2oPayload(Func<int, LiquidChunkSpec> chunk)
+        {
+            var specs = new LiquidChunkSpec[256];
+            int total = 0;
+            for (int n = 0; n < 256; n++)
+            {
+                specs[n] = chunk != null ? chunk(n) : null;
+                if (specs[n] != null && specs[n].Layers != null)
+                    total += specs[n].Layers.Length;
+            }
+            var table = new byte[256 * 12 + 24 * total];
+            var data = new List<byte>();
+            int dataStart = table.Length, next = 256 * 12;
+            for (int n = 0; n < 256; n++)
+            {
+                LiquidChunkSpec cs = specs[n];
+                if (cs == null || cs.Layers == null || cs.Layers.Length == 0)
+                    continue;
+                PutU32(table, 12 * n, (uint)next);
+                PutU32(table, 12 * n + 4, (uint)cs.Layers.Length);
+                if (cs.Attributes || cs.AttributesOffset.HasValue)
+                {
+                    uint at = (uint)(dataStart + data.Count);
+                    if (cs.Attributes)
+                    {
+                        var a = new byte[16];
+                        PutU64(a, 0, cs.Fishable);
+                        PutU64(a, 8, cs.Deep);
+                        data.AddRange(a);
+                    }
+                    PutU32(table, 12 * n + 8, cs.AttributesOffset ?? at);
+                }
+                foreach (LiquidInstanceSpec li in cs.Layers)
+                {
+                    int o = next;
+                    next += 24;
+                    int w = li.Width, h = li.Height, nv = (w + 1) * (h + 1);
+                    PutU16(table, o, li.LiquidType);
+                    PutU16(table, o + 2, li.ObjectOrFormat);
+                    table[o + 12] = li.X; table[o + 13] = li.Y; table[o + 14] = li.Width; table[o + 15] = li.Height;
+                    Func<int, int, bool> exists = li.Exists ?? ((r, c) => true);
+                    if (li.Exists != null)
+                    {
+                        int quads = w * h;
+                        var bits = new byte[(quads + 7) / 8];
+                        for (int r = 0; r < h; r++)
+                            for (int c = 0; c < w; c++)
+                                if (li.Exists(r, c))
+                                    bits[(r * w + c) >> 3] |= (byte)(1 << ((r * w + c) & 7));
+                        if (li.SpareBits && quads % 8 != 0)
+                            bits[bits.Length - 1] |= (byte)(0xFF << (quads % 8));
+                        PutU32(table, o + 16, li.ExistsOffset ?? (uint)(dataStart + data.Count));
+                        data.AddRange(bits);
+                    }
+                    else if (li.ExistsOffset.HasValue)
+                        PutU32(table, o + 16, li.ExistsOffset.Value);
+                    float min = li.MinHeight ?? float.PositiveInfinity, max = li.MaxHeight ?? float.NegativeInfinity;
+                    if (!li.MinHeight.HasValue || !li.MaxHeight.HasValue)
+                    {
+                        bool heights = li.Format == 0 || li.Format == 1 || li.Format == 3;
+                        float lo = float.PositiveInfinity, hi = float.NegativeInfinity;
+                        for (int i = 0; i <= h; i++)
+                            for (int j = 0; j <= w; j++)
+                            {
+                                bool used = (i > 0 && j > 0 && exists(i - 1, j - 1)) || (i > 0 && j < w && exists(i - 1, j)) ||
+                                            (i < h && j > 0 && exists(i, j - 1)) || (i < h && j < w && exists(i, j));
+                                if (!used)
+                                    continue;
+                                float z = heights && li.HeightAt != null ? li.HeightAt(i, j) : 100f;
+                                lo = Math.Min(lo, z);
+                                hi = Math.Max(hi, z);
+                            }
+                        if (float.IsPositiveInfinity(lo)) lo = hi = 100f;
+                        if (!li.MinHeight.HasValue) min = lo;
+                        if (!li.MaxHeight.HasValue) max = hi;
+                    }
+                    PutF32(table, o + 4, min);
+                    PutF32(table, o + 8, max);
+                    if (li.Format >= 0)
+                    {
+                        PutU32(table, o + 20, li.VertexOffset ?? (uint)(dataStart + data.Count));
+                        data.AddRange(LiquidVertexBlock(li, nv));
+                        for (int k = 0; k < li.VertexExtraBytes; k++)
+                            data.Add(0);
+                    }
+                    else if (li.VertexOffset.HasValue)
+                        PutU32(table, o + 20, li.VertexOffset.Value);
+                }
+            }
+            return Cat(table, data.ToArray());
+        }
+
+        /// <summary>The vertex block of one instance in its format's layout (LiquidFormat), vertex (i, j) at
+        /// i * (Width + 1) + j.</summary>
+        static byte[] LiquidVertexBlock(LiquidInstanceSpec li, int n)
+        {
+            bool heights = li.Format == 0 || li.Format == 1 || li.Format == 3;
+            bool uv = li.Format == 1 || li.Format == 3;
+            bool depth = li.Format == 0 || li.Format == 2 || li.Format == 3;
+            var b = new byte[(heights ? 4 * n : 0) + (uv ? 4 * n : 0) + (depth ? n : 0)];
+            int o = 0, w = li.Width;
+            if (heights)
+            {
+                for (int k = 0; k < n; k++)
+                    PutF32(b, o + 4 * k, li.HeightAt != null ? li.HeightAt(k / (w + 1), k % (w + 1)) : 100f);
+                o += 4 * n;
+            }
+            if (uv)
+            {
+                for (int k = 0; k < n; k++)
+                {
+                    PutU16(b, o + 4 * k, li.UAt != null ? li.UAt(k / (w + 1), k % (w + 1)) : (ushort)0);
+                    PutU16(b, o + 4 * k + 2, li.VAt != null ? li.VAt(k / (w + 1), k % (w + 1)) : (ushort)0);
+                }
+                o += 4 * n;
+            }
+            if (depth)
+                for (int k = 0; k < n; k++)
+                    b[o + k] = li.DepthAt != null ? li.DepthAt(k / (w + 1), k % (w + 1)) : (byte)0;
+            return b;
         }
 
         // ------------------------------------------------------------------ tex0

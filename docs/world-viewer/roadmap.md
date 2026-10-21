@@ -44,7 +44,7 @@ builder, the orbit camera, and the IPC asset path.
 
 ## 3. The gap, feature by feature
 
-| Feature of the video | Today (after Stage 08) | Milestone |
+| Feature of the video | Today (after Stage 09) | Milestone |
 |---|---|---|
 | Map list with search | done | 05 |
 | Overhead map from minimap images | done in 05 (see 4) | 05 |
@@ -56,7 +56,7 @@ builder, the orbit camera, and the IPC asset path.
 | World models placed on terrain (MODF) | done in 06 (the loaded tile's) | 06 |
 | Doodads (MDDF, WMO doodad sets) | done in 07 (the loaded tile's MDDF and the placed world models' sets; static, in their rest pose) | 07 |
 | Several tiles, streaming around the camera | done in 08 (3 x 3 around the camera, kept within 2 tiles, at most 16 resident; Stormwind flown through on four clients) | 08 |
-| Liquids (MH2O, WMO MLIQ) | no | 09 |
+| Liquids (MH2O, WMO MLIQ) | done in 09, accepted 2026-10-21 under the owner's revised criteria: MH2O on the streamed tiles and MLIQ in placed world models on four clients, from the liquid tables' layouts settled per client (U14); water and ocean coloured by the zone light at the camera and drawn in an approximation of the game's High look (clear water over the bed, ripples from the client's ripple map, screen-space reflection; `WMV_WATER=low` keeps the Low look), validated functionally on all four clients, compared with in-game references on Retail only (one spot, the Southfury River); the original exit test superseded, not passed; Classic Era and MoP Classic visual parity unverified (accepted) (`09-liquids.md` 9, 11, 12, 13) | 09 |
 | World-model interior lighting (vertex colours, lights) | no | 10 |
 | Animated doodads and particle effects in the world | no | 11 |
 | Sky, fog, outdoor light | no | 12 |
@@ -94,7 +94,7 @@ evidence from the client files, all four clients, no claim of game parity withou
 | 06 | World models in the world | A world scene (the terrain session generalised) that holds placed objects beside the tiles, under the one floating origin. MODF placements of the loaded tile and the global world model of world-model-only maps, with the proven transform (`00-audit.md` 6.3-6.4, the DireMaul yaw), the existing WMO renderer per instance, group culling by extents. Maps enters world-model-only maps at a target inside the model's extents. | 05 merged | map 34 (Stormwind jail, world-model-only) entered and flown through; Retail 30_47's world models placed within their MODF extents; Era DireMaul's yaw applied; WMO pictures in Buildings unchanged |
 | 07 | Doodads | MDDF placements of the tile and the doodad sets of placed world models (set 0 plus the placement's set, U15), static M2s with shared meshes and materials, bounds from the mesh (MLDX verifies the MDDF placement), instance budget | 06 | one city tile's doodads placed (MLDX boxes match), within a recorded memory budget; M2 pictures unchanged |
 | 08 | Streaming | Tiles around the camera (from 3 x 3), residency and eviction, a prioritised cancellable scheduler, block-compressed upload, GPU and memory budgets, loading progress by file count. First: the transport-wide send cap (`04b-asset-serving.md` 18.2); the Maps entry cost was cut by the lazy Browse list (`05-maps-viewer-ui.md` 13.1) | 07 | a 3 x 3 city flown through within the budgets; frame and upload times recorded; no GUI-thread stall over 50 ms |
-| 09 | Liquids | MH2O on terrain, MLIQ in world models; their tables' layouts per client | U14 settled (definitions, byte checks) | water tiles against references on Retail and Era |
+| 09 | Liquids | MH2O on terrain, MLIQ in world models; their tables' layouts per client | U14 settled (definitions, byte checks) | water tiles against references on Retail and Era. **Done 2026-10-21** under the owner's revised acceptance: the Retail Southfury River comparison and functional validation on four clients; this exit test superseded, not passed; Era and MoP visual parity unverified (accepted; `09-liquids.md` 13) |
 | 10 | World-model lighting | vertex colours (MOCV), interior and exterior groups, the model's lights (MOLT), ambient | 06 | interiors against in-game references |
 | 11 | World effects | animated doodads and their particle emitters in the world (the model viewer's emitter runtime), with an effect budget | 07 | the emitters of a tile's doodads run within the budget |
 | 12 | Light, sky and fog | Light tables, `_lgt.wdt`, `_fogs.wdt`, sky | U16 settled per client | per-client comparison against in-game references |

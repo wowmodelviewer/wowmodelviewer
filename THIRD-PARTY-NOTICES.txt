@@ -4001,7 +4001,7 @@ Licence    BSD 2-clause licence (SPDX: BSD-2-Clause)
 
 4.1  WoWDBDefs table definitions
 --------------------------------------------------------------------------------------------
-Files      dbd\*.dbd except dbd\Map.dbd (47 files)
+Files      dbd\*.dbd except dbd\Map.dbd (57 files)
 Source     WoWDBDefs, https://github.com/wowdev/WoWDBDefs
 Credit     WoWDBDefs contributors
 Licence    Creative Commons Attribution-ShareAlike 4.0 International (SPDX: CC-BY-SA-4.0)
@@ -4012,6 +4012,11 @@ under the CC BY-SA 4.0 licence. Some of them were updated or extended for WoW Mo
 those changes are also available under CC BY-SA 4.0. They are provided as is, without
 warranties of any kind; see the licence. dbd\Map.dbd is not from WoWDBDefs: it was written for
 WoW Model Viewer from the clients' own data, in the same format (see section 1).
+dbd\LiquidType.dbd, dbd\LiquidMaterial.dbd, dbd\LiquidObject.dbd and dbd\LiquidTypeXTexture.dbd
+were written for WoW Model Viewer from the WoWDBDefs layouts of those tables, with every column the
+viewer reads checked against the clients' own data; they are adaptations of WoWDBDefs definitions
+and are available under CC BY-SA 4.0 as well. So are dbd\Light.dbd, dbd\LightParams.dbd,
+dbd\LightData.dbd, dbd\ZoneLight.dbd and dbd\ZoneLightPoint.dbd, written the same way.
 
 
 4.2  Animation names

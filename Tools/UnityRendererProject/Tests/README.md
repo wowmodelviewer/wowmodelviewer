@@ -63,6 +63,33 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   `<WMV_WORLD_AUDIT_CORPUS>/world07`): every MDDF doodad's placed M2 box against the client's MLDX box on four clients,
   the plan's counts against the census, the doodad-set and MODR facts, the MODD rotation convention measured against the
   world models' walls (the counts of an independent probe pinned), and reference positions computed independently.
+- `LiquidTests.cs`: the liquid layer of stage 09 (`docs/world-viewer/09-liquids.md`) on hand-built bytes from
+  `AdtSynthetic.Mh2o` and `WmoSynthetic.Mliq`: the MH2O decode (the four vertex formats by the vertex block's size, exists
+  bitmaps with spare bits, partial and multi-layer instances, attributes, every malformed structure reported per chunk or
+  instance, random corruption), the format rule (`LiquidFormat`), the terrain liquid mesh (positions on the terrain's grid,
+  winding, uv0 planar on the game's axes and stored with the u16 wrap, uv1 with the depth in yards by the second word, seams,
+  counters), and MLIQ (the size equation, tiles, the group liquid type rule, the group-frame mesh).
+- `LiquidCorpusTests.cs`: the same on real client bytes: every MH2O instance of the pinned corpus windows, the exit tiles
+  (Retail 29_48, Era 36_49) with exact counts, a byte walkthrough, the terrain grid and the seams; and, when
+  `WMV_LIQUID_EXAMPLES` names the stage 09 investigation's MLIQ examples folder (`manifest.json` plus
+  `<client>/<FileDataID>.bin`, pinned by the manifest's SHA-256), every example group against the investigation's census.
+  It runs when `WMV_WORLD_AUDIT_CORPUS` is set (otherwise SKIPPED); without `WMV_LIQUID_EXAMPLES` the MLIQ part is SKIPPED.
+- `LiquidLightTests.cs`: the zone light the water and ocean colours follow (`Assets/Scripts/Wow/World/LiquidLights.cs`): the
+  polygon test with both windings and a concave polygon, the Z band, the zone order, the default light, an invalid base light,
+  point lights weakest first and their weight ramp, the Durotar values at 12:00 from a small fixture of the client's rows, the
+  validation of the host's entries, the ease with its snap rules, and the High look's optional sky (read, carried through the
+  selection by the base light and the point lights that carry one, eased, snapped when it comes or goes); and the mesh inputs of
+  the shader's zone path: the depth
+  byte's W and O scales (`LiquidFormat.DepthYards`, bytes 0 and 255 included) and the planar uv on the game's axes at twice the
+  repeats (`TerrainLiquidMesh.PlanarUv` pinned).
+- `LiquidHighTests.cs`: the High water look's pure parts (`Assets/Scripts/Wow/World/LiquidHigh.cs`): the HIGH path's formulas on
+  numbers (the transmission T(Ls) with the start values against hand-computed values, the water colour's depth ramp and gain under
+  a zone light and, without one, the type's colour times the no-zone gain saturated, Schlick, the refraction ramp and the rule that
+  accepts the shifted sample, the refracted colour, a reflection texel's coverage, the reflection mix with its shares limited and
+  the output saturated, and the ripple map's offset for the floating origin), the `-wmvWaterTune` string (start values, overrides,
+  every reason a token is ignored, the log line) and which command-line and `WMV_DEBUG` tokens are its pairs, which side of a sheet
+  the camera sees (the HIGH path by the triangle's facing: a sloped sheet rising above the eye, flat water, no normal), and the
+  ripple map's unit-normal check with its slope spread, strength factor and mean slope (taken out: mean 0 after, the spread kept).
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

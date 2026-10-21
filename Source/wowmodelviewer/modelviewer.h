@@ -48,7 +48,7 @@ class UnityRendererHost;
 class TextureView;
 class BackgroundColorDialog;
 namespace ModelIdLookup { struct Resolved; }
-namespace wow { class WorldMapCatalog; }
+namespace wow { class WorldMapCatalog; class LiquidCatalog; class LightCatalog; }
 struct TextureEntry;
 class CharInfos;
 
@@ -763,8 +763,8 @@ public:
     // What the load has had (accounted when a request goes on to the read, noteMapAssetRead, and after it,
     // noteMapAssetResult).
     int reads = 0;                      // requests that went on to the storage read, every role: the terrain roles' at
-                                        // most 3 + maxTexturesPerLoad, the world roles' (worldReads) and the doodad
-                                        // roles' (doodadReads) apart
+                                        // most 3 + maxTexturesPerLoad, the world roles' (worldReads), the doodad
+                                        // roles' (doodadReads) and the liquid role's (liquidReads) apart
     int worldReads = 0;                 // ... of them the world roles' (obj0Adt, wmoRoot, wmoGroup, wmoTexture): at most
                                         // 1 + maxWmoModelsPerLoad + maxWmoGroupsPerLoad + maxWmoTexturesPerLoad
     int doodadReads = 0;                // ... of them the doodad roles' (m2Model, m2Skin, m2Texture): at most
@@ -829,6 +829,20 @@ public:
     bool sessionObj0Served = false;
     int sessionWmoRootsServed = 0;
     int sessionM2ModelsServed = 0;
+    // LIQUIDS (protocol 19, docs/world-viewer/09-liquids.md 1.6): a load to a player that draws liquids -- the animated
+    // frames and the bumps of the liquid catalogue's types, asked for by FileDataID (getMapAsset "liquidTexture"). The
+    // budgets it was sent with (0: none -- a load to an older player, which is served no liquid texture: the load "carries
+    // a liquids offer" when maxLiquidTexturesPerLoad > 0), the frames and bumps of the catalogue it was sent with
+    // (LiquidCatalog::textureIds: sorted; the only files the role serves), and what it has had. A streaming session's tile
+    // loads take the entry's (OnStreamTile).
+    int maxLiquidTexturesPerLoad = 0;
+    qint64 maxLiquidTextureBytes = 0;
+    qint64 maxLiquidTextureBytesPerLoad = 0;
+    std::shared_ptr<const std::vector<int>> liquidFrames;
+    int liquidReads = 0;                // requests of the liquid role that went on to the read: at most maxLiquidTexturesPerLoad
+    std::vector<int> liquidTextureIds;  // the liquid textures that went on to the read, each once
+    qint64 liquidTextureBytesRead = 0;  // their bytes read, kind failures included: at most maxLiquidTextureBytesPerLoad
+    qint64 liquidTextureBytesReserved = 0; // the limits of the liquid texture reads in flight
   };
   // What getMapAsset decided before anything is read: state "" goes on to the read (at most maxBytes), "refused" or
   // "stale" is the answer.
@@ -864,6 +878,12 @@ public:
   // capped at 2 * maxM2ModelsPerLoad + maxM2TexturesPerLoad apart from the terrain's and the world models' (the terrain
   // roles counted as reads less both). The read's limit: the smaller of maxM2FileBytes (maxM2TextureBytes) and what is
   // left of the load's bytes.
+  // LIQUIDS (protocol 19): "liquidTexture" is served to a load that carries a liquids offer only ("liquids not offered"
+  // otherwise), once the load's WDT was served (a streaming session's tile loads count it served), and only an id among
+  // the frames of the liquid catalogue the load was sent with ("not a liquid texture" otherwise); each id once, at most
+  // maxLiquidTexturesPerLoad ids, the bytes within maxLiquidTextureBytesPerLoad (the reads in flight reserved). Its reads
+  // are a fourth family, capped at maxLiquidTexturesPerLoad apart from the others (the terrain roles counted as reads less
+  // all three). The read's limit: the smaller of maxLiquidTextureBytes and what is left of the load's liquid bytes.
   static MapAssetDecision decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current, int epochNow,
                                                 bool catalogueBelongs, bool clientLoading);
   // The accounting of a request the decision let through, before its read (the read counted, the tex0 or texture id
@@ -878,8 +898,8 @@ public:
   static QString mapAssetBudgetRefusal(const TerrainRequest & load, const QString & role, qint64 fileSize, qint64 readLimit);
   // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; WORLD MODELS: "obj0Adt"
   // MVER then MDDF, "wmoRoot" MVER then MOHD, "wmoGroup" MVER then MOGP, "wmoTexture" BLP2; DOODADS: "m2Model" MD21 then,
-  // at 8, MD20, "m2Skin" SKIN, "m2Texture" BLP2; nothing for the other roles): "" when it is that kind, else what was
-  // found, the answer's detail.
+  // at 8, MD20, "m2Skin" SKIN, "m2Texture" BLP2; LIQUIDS: "liquidTexture" BLP2; nothing for the other roles): "" when it is
+  // that kind, else what was found, the answer's detail.
   static QString mapAssetKindProblem(const QString & role, const QByteArray & bytes);
   // Show one terrain tile: refused, 0 with why, unless a client is loaded (and none is loading), the player draws terrain,
   // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
@@ -1122,6 +1142,17 @@ public:
   // outlives the client finds it no longer belongs to the loaded one.
   std::shared_ptr<wow::WorldMapCatalog> mapCatalog() const { return m_mapCatalog; }
   std::shared_ptr<wow::WorldMapCatalog> m_mapCatalog;
+  // The loaded client's liquid catalogue (its liquid tables' types and their frames, docs/world-viewer/09-liquids.md 1.6):
+  // built as the client loads, beside the map catalogue, and dropped with it. Never null: before a client is loaded and
+  // while one loads it is a catalogue of no client. Every load to a player that draws liquids carries its toJson().
+  std::shared_ptr<wow::LiquidCatalog> liquidCatalog() const { return m_liquidCatalog; }
+  std::shared_ptr<wow::LiquidCatalog> m_liquidCatalog;
+  // The loaded client's light catalogue (its light tables' zone polygons, lights and water colours at 12:00,
+  // docs/world-viewer/09-liquids.md): built and dropped with the liquid catalogue. Never null: before a client is loaded
+  // and while one loads it is a catalogue of no client. Every load to a player that draws liquids carries its mapJson() of
+  // the load's map in the liquids offer ("lights").
+  std::shared_ptr<wow::LightCatalog> lightCatalog() const { return m_lightCatalog; }
+  std::shared_ptr<wow::LightCatalog> m_lightCatalog;
   // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the fourth viewer mode's state, made with the viewer.
   std::unique_ptr<MapsViewer> m_maps;
   MapsViewer * maps() const { return m_maps.get(); }
