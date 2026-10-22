@@ -18,7 +18,7 @@ The catalog covers the loaded player body and its current class context. It incl
 conditionally reachable choices, not just the choices currently shown by the UI. It
 excludes other class contexts, NPC-only choices, and unlock requirements unavailable
 in that context, recording excluded IDs. The captured default must be in this scope.
-This does not export every body of a race or enumerate complete combinations.
+Orc male posture choices additionally export their declared body models, each with its own skeleton. This does not export every body of a race or enumerate complete combinations.
 
 Unknown effect semantics, missing resources, unresolved variants, invalid bone sets,
 and unsupported equipment fail the complete export instead of advertising a partial
@@ -35,7 +35,7 @@ cross-outfit mixing is not promised.
 
 ## Catalog
 
-`schema: wmv.customization`, `version: 1` identifies the package contract. All paths
+`schema: wmv.customization` identifies the package contract. Single-body packages use `version: 1`; Orc posture packages use `version: 2` with the required feature described below. All paths
 are relative to the package root. Keep the whole folder together when moving it.
 
 - `options` contains choice IDs, names, requirements, and conditional effects.
@@ -212,3 +212,40 @@ PixelBuffer failure, reproduced with both the changed and previous daily binarie
 The contribution was rebuilt on official develop 8f4e791f in Release x64. Catalog geoset group rules follow this base's customization behavior. A normal code review corrected export snapshot preservation of sheathed weapons, helmet suppression preferences and attached-model visibility. Hidden equipment resources remain reusable with their captured `defaultVisible` value.
 
 Hidden regression exports and independent FBX SDK reimports passed for male and female Night Elves, optional equipment, relocated packages and Current appearance with raw textures. Existing-target rejection, missing non-neutral bone resources and cancellation were checked. The final snapshot regressions verified the bow's changed parent bone, hidden helmet metadata and helmet suppression preferences, followed by female and Current appearance exports with three clips. Bone validation covered 30 files, 1,000 corrections and 16,000 independent reference samples. No new visual validation or formal QA is claimed.
+
+## Orc male faces and posture (version 2)
+
+`ChrCustomizationCondModel.CreatureModelDataID` resolves the upright model; the
+base body comes from `ChrModel.DisplayID`. The table definition is bundled from
+[WoWDBDefs](https://github.com/wowdev/WoWDBDefs/blob/master/definitions/ChrCustomizationCondModel.dbd)
+and checked against the client's layout. Schema cache version 23 includes it.
+
+The package's `bodyVariants` entries pair option/choice IDs with `modelFileId` and
+a relative `catalog` path. Select the posture first, then use that catalog's mesh,
+skeleton, animation takes, textures and `boneSets`. An entry referring to
+`catalog.json` selects the root FBX directly (do not recurse). Other postures are
+under `postures/choice-<id>/character.fbx.customization/`. All Orc posture catalogs
+use version 2, including nested ones; `bodyModelFileId` identifies their body.
+An older consumer must reject the unsupported version instead of silently showing
+the root body for both postures.
+
+For each selected face, apply only effects whose `relatedChoice` matches the
+posture. Corrections for another model are exported exclusively with that model's
+own skeleton; bone indices are never presumed interchangeable. Same-model bone
+alternatives are accepted only when their gates are different choices of the
+same option. Potentially simultaneous distinct correction sets remain rejected.
+Unsupported conditional-model families and display-info effects remain rejected.
+
+Animations for an alternate model are matched by WoW animation ID and
+subanimation ID, never by list position. `unavailableAnimations` records requested
+pairs that the alternate model does not have; no unrelated clip is substituted.
+Each model exports its own animation data and uncorrected bind pose. Optional
+current equipment is resolved separately on both bodies. No renderer or consumer
+in another project is changed by this export support.
+
+Tests: configure/build `scripts/tests/customization-bone-selection` and run its
+executable for conditional-selection negatives. `verify-orc.py <package>
+--database <client-cache.sqlite> --inspector <inspect-package.exe>` checks each
+exported face/posture combination against the client's authored mappings and
+independently reimports every posture FBX. `check-package.py <package>
+<inspect-package.exe>` also validates single-body regression packages.
