@@ -39,6 +39,14 @@
 //     one alpha array (a second slice for each chunk of more than 5 layers) and its one sampler carrier (bound into
 //     the layer slots without a texture: WmvTerrainMaterials.CreateSamplerCarrier) are created here and tracked the
 //     moment they exist.
+//   - THE OUTDOOR LIGHT'S NORMALS (Stage 10 step 5, Wow/World/TerrainLight.cs): while the outdoor light is on when the tile is
+//     built (WmvWorldLight.TerrainNormalsUploaded: not WMV_LIGHT=off, not -wmvTerrainLight=off, and switched on), a chunk
+//     drawn textured also gets UV1, its MCNR normals decoded (TerrainMcnr; a chunk without MCNR its geometry normals,
+//     counted and logged), which only Wmv/TerrainTextured's world-lit branch reads. With the light off -- the default until
+//     the host switches it on -- no chunk gets it (Stage 09's vertex data exactly) and the tile says so
+//     (LightNormalsOmitted): a setWorldLight on draws it again (WmvTerrainSession.WorldLightOn). Positions, normals, UV0,
+//     colours and every count above stay as they were (the stream's bytes are LightNormalBytes, apart; a streaming session's
+//     geometry budget counts them).
 //   - LIQUID (stage 09, WmvLiquids.cs): the tile's MH2O as one GameObject, Mesh and MeshRenderer per liquid type under
 //     the root, in every view, tracked like the chunks, drawn with the type's shared material from the scene's liquid
 //     registry, which the tile holds until it is released.
@@ -391,6 +399,16 @@ public class WmvRuntimeTerrainTile
     /// added (UV0 and MCCV); the Wmv/TerrainTextured materials made; the times the alpha array and the materials took.</summary>
     public long TextureGpuBytes, AlphaGpuBytes, MaterialVertexBytes;
     public int TexturedMaterialCount;
+    /// <summary>Stage 10: the outdoor light's normal stream (UV1, 12 bytes a vertex) of the chunks drawn textured -- the chunks
+    /// that carry it, those without MCNR (their geometry normals instead) and its bytes, apart from UploadedBytes and
+    /// MaterialVertexBytes (which stay Stage 09's). None with WMV_LIGHT=off or -wmvTerrainLight=off, and none while the light
+    /// is off when the tile is built (WmvWorldLight.TerrainNormalsUploaded).</summary>
+    public int LightNormalChunks, LightNormalFallbacks;
+    public long LightNormalBytes;
+    /// <summary>Stage 10: the tile draws chunks textured but was built while the outdoor light was off, so it has no normal
+    /// stream; a setWorldLight on draws it again (WmvTerrainSession.WorldLightOn). False with WMV_LIGHT=off or
+    /// -wmvTerrainLight=off (the stream is never wanted).</summary>
+    public bool LightNormalsOmitted;
     public double AlphaBuildMs = -1, MaterialCreateMs = -1;
     // Stage 09: the tile's liquid (WmvLiquidMeshes.BuildTileLiquids): one object and mesh per liquid type drawn, under the
     // root, tracked like every other object (so in the tallies above too) and counted apart here and in WmvLiquidMeshes'
@@ -919,6 +937,12 @@ public static class WmvTerrainBuilder
         var block = new MaterialPropertyBlock();
         var positions = new Vector3[TerrainMeshBuilder.VerticesPerChunk];
         var normals = new Vector3[TerrainMeshBuilder.VerticesPerChunk];
+        // Stage 10: the outdoor light's normal stream for the chunks drawn textured, only while the light is on
+        // (WmvWorldLight.TerrainNormalsUploaded); a tile built with it off is drawn again when it is switched on.
+        bool normalsNow = texturedChunks > 0 && WmvWorldLight.TerrainNormalsUploaded;
+        rt.LightNormalsOmitted = texturedChunks > 0 && !normalsNow && WmvWorldLight.TerrainNormalsWanted;
+        Vector3[] lightNormals = normalsNow ? new Vector3[TerrainMeshBuilder.VerticesPerChunk] : null;
+        float[] mcnr = lightNormals != null ? new float[TerrainMcnr.Bytes] : null;
         int edges = 0;
         for (int n = 0; n < AdtParser.ChunksPerTile; n++)
         {
@@ -951,6 +975,19 @@ public static class WmvTerrainBuilder
                 long vb = WmvTerrainMaterials.VertexBytes(colours != null);
                 rt.MaterialVertexBytes += vb;
                 rt.UploadedBytes += vb;
+                // Stage 10: the outdoor light's normals (MCNR, else the geometry's) as a stream of their own (UV1), only while
+                // the light is on: the geometry normals, the composite and the counts above stay as they were. Counted apart
+                // (LightNormalBytes).
+                if (lightNormals != null)
+                {
+                    if (!TerrainMcnr.Fill(c, mcnr))
+                        rt.LightNormalFallbacks++;
+                    for (int k = 0; k < TerrainMeshBuilder.VerticesPerChunk; k++)
+                        lightNormals[k] = new Vector3(mcnr[3 * k], mcnr[3 * k + 1], mcnr[3 * k + 2]);
+                    m.SetUVs(1, lightNormals);
+                    rt.LightNormalChunks++;
+                    rt.LightNormalBytes += TerrainMeshBuilder.VerticesPerChunk * 12L;
+                }
             }
             Bounds b = BoundsOf(c.BoundsMin, c.BoundsMax);
             m.bounds = b;
@@ -1077,6 +1114,12 @@ public static class WmvTerrainBuilder
                                                 " (the layer slots without a texture; never drawn)" : ""));
             if (materialsView && ts != null)
                 log("materials view legend: " + WmvTerrainMaterials.Legend());
+            if (rt.LightNormalChunks > 0)
+                log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    "tile {0}_{1} (load {2}) outdoor light normals: {3} chunk(s), {4} from MCNR, {5} without MCNR (their geometry normals); " +
+                    "{6} vertex bytes beside the bytes above (UV1)",
+                    rt.TileX, rt.TileY, rt.Load, rt.LightNormalChunks, rt.LightNormalChunks - rt.LightNormalFallbacks, rt.LightNormalFallbacks,
+                    rt.LightNormalBytes));
         }
     }
 

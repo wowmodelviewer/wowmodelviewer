@@ -39,6 +39,8 @@
     <Compile Include="..\LiquidCorpusTests.cs" />
     <Compile Include="..\LiquidLightTests.cs" />
     <Compile Include="..\LiquidHighTests.cs" />
+    <Compile Include="..\WorldLightTests.cs" />
+    <Compile Include="..\SkyTerrainLightTests.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>

@@ -934,6 +934,9 @@ public sealed partial class WmvTerrainSession
         // Protocol 19: the tile's liquid against the same origin, with the offer's catalogue (immutable from here on).
         ILiquidCatalog catalog = j.Liquid != null ? j.Liquid.Registry.Catalog : null;
         bool liquids = j.Liquid != null;
+        // Stage 10: the chunks' MCNR bytes kept with the mesh only while the outdoor light's normals may be wanted (not
+        // WMV_LIGHT=off, not -wmvTerrainLight=off): a tile built while the light is off is drawn with them once it is on.
+        bool keepMcnr = WmvWorldLight.TerrainNormalsWanted;
         RunWorker(j, () =>
         {
             string md5 = Md5Hex(bytes);
@@ -950,7 +953,7 @@ public sealed partial class WmvTerrainSession
                 sw.Start();
                 // The builder's own failures say what they are ("root ADT does not belong to tile x_y ...", "no decodable
                 // chunk ..."); anything else is named by its type.
-                try { mesh = TerrainMeshBuilder.Build(root, x, y, origin); }
+                try { mesh = TerrainMeshBuilder.Build(root, x, y, origin, keepMcnr); }
                 catch (TerrainBuildException e) { error = e.Message; }
                 catch (Exception e) { error = "terrain mesh build failed: " + e.GetType().Name + ": " + e.Message; }
                 buildMs = sw.Elapsed.TotalMilliseconds;
@@ -1033,9 +1036,10 @@ public sealed partial class WmvTerrainSession
         }
         j.Root = root;
         Log("load {0}: root ADT {1} ({2} bytes, md5 {3}) parsed in {4:0.###} ms ({5} issue(s)), mesh built in {6:0.###} ms on the worker: " +
-            "{7} chunk(s) built, {8} skipped, {9} unsupported, {10} vertices, {11} triangles, {12} hole cell(s), {13} mesh bytes",
+            "{7} chunk(s) built, {8} skipped, {9} unsupported, {10} vertices, {11} triangles, {12} hole cell(s), {13} mesh bytes{14}",
             j.Cmd.Load, j.RootFileDataID, j.RootBytes, md5, parseMs, issues, buildMs, mesh.ChunksBuilt, mesh.ChunksSkipped,
-            mesh.ChunksUnsupported, mesh.Vertices, mesh.Triangles, mesh.HoleCells, mesh.MeshBytes);
+            mesh.ChunksUnsupported, mesh.Vertices, mesh.Triangles, mesh.HoleCells, mesh.MeshBytes,
+            mesh.McnrBytes > 0 ? "; " + mesh.McnrBytes + " MCNR bytes kept for the outdoor light's normals (managed, apart from the mesh bytes)" : "");
         foreach (TerrainChunkMesh c in mesh.Chunks)
             if (c.State != TerrainChunkState.Built)
                 Log("load {0}: chunk {1} {2}: {3}", j.Cmd.Load, c.Index, c.State, c.Reason);
@@ -1360,6 +1364,8 @@ public sealed partial class WmvTerrainSession
             // Protocol 19: the load's liquid registry and zone lights are the scene's (DisposeTiles took the last scene's).
             sceneLiquids = j.Liquid != null ? j.Liquid.Registry : null;
             CommitSceneLights(j);
+            // Protocol 20: the load's outdoor light is the scene's too (WmvTerrainSessionWorldLight.cs).
+            CommitSceneWorldLight(j);
             int fromEpoch = sceneEpoch, fromMap = sceneMapId;
             sceneEpoch = cmd.AssetEpoch;
             sceneMapId = cmd.MapId;
@@ -1709,6 +1715,7 @@ public sealed partial class WmvTerrainSession
         DisposeTerrainTextures();
         DisposeSceneLiquids(keep);
         DropSceneLights();
+        DropSceneWorldLight();
         return n;
     }
 

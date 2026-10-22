@@ -35,6 +35,8 @@
 // changes, on a move of more than 60 yd in one frame, and whenever the liquid clock is pinned (pinned pictures are
 // reproducible). An invalid sample
 // turns the zone light off at once. The time constant and the jump distance are documented choices, not the game's.
+// The polygon test, the point weight and the order of the point lights are LightGeometry's (LightGeometry.cs, shared with the
+// outdoor light of Stage 10; moved there unchanged).
 // Thread safety: an instance is filled once (the reader thread) and then read on the main thread only.
 
 using System;
@@ -59,18 +61,7 @@ namespace Wmv.Wow.World
         /// point exactly on an edge may fall either way).</summary>
         public bool Contains(double x, double y)
         {
-            if (x < MinX || x > MaxX || y < MinY || y > MaxY)
-                return false;
-            bool inside = false;
-            int n = Poly.Length / 2;
-            for (int i = 0, j = n - 1; i < n; j = i++)
-            {
-                double xi = Poly[2 * i], yi = Poly[2 * i + 1], xj = Poly[2 * j], yj = Poly[2 * j + 1];
-                // (An edge with yi == yj is never crossed: no division by zero, repeated points are harmless.)
-                if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi)
-                    inside = !inside;
-            }
-            return inside;
+            return LightGeometry.Contains(Poly, MinX, MaxX, MinY, MaxY, x, y);
         }
     }
 
@@ -85,11 +76,7 @@ namespace Wmv.Wow.World
         /// when End &lt;= Start); else linear, (End - d) / (End - Start).</summary>
         public double Weight(double d)
         {
-            if (!(d < End))
-                return 0.0;
-            if (End <= Start || d <= Start)
-                return 1.0;
-            return (End - d) / (End - Start);
+            return LightGeometry.PointWeight(Start, End, d);
         }
     }
 
@@ -129,39 +116,25 @@ namespace Wmv.Wow.World
         public readonly List<LiquidLightZone> Zones = new List<LiquidLightZone>();
         public readonly List<LiquidLightPoint> Points = new List<LiquidLightPoint>();
         readonly Dictionary<int, LiquidLightValues> values = new Dictionary<int, LiquidLightValues>();
-        readonly List<KeyValuePair<double, LiquidLightValues>> applied = new List<KeyValuePair<double, LiquidLightValues>>(8);  // Evaluate's
+        readonly List<LightGeometry.Weighted<LiquidLightValues>> applied = new List<LightGeometry.Weighted<LiquidLightValues>>(8);  // Evaluate's
         /// <summary>Entries the Add methods refused (too few points, an odd coordinate count, short arrays, not finite).</summary>
         public int DroppedZones, DroppedPoints, DroppedValues;
 
         public int ValueCount { get { return values.Count; } }
 
-        static bool Finite(double d) { return !double.IsNaN(d) && !double.IsInfinity(d); }
+        static bool Finite(double d) { return LightGeometry.Finite(d); }
 
         /// <summary>Appends a zone (tried in the order added); false, and counted dropped, when its polygon has fewer than 3
         /// points or an odd coordinate count, or a value is not finite.</summary>
         public bool AddZone(int zone, int light, double zmin, double zmax, int conditional, double[] poly)
         {
-            bool ok = poly != null && poly.Length >= 6 && poly.Length % 2 == 0 && Finite(zmin) && Finite(zmax);
-            if (ok)
-                foreach (double c in poly)
-                    ok &= Finite(c);
-            if (!ok)
+            if (!(Finite(zmin) && Finite(zmax) && LightGeometry.ValidPolygon(poly)))
             {
                 DroppedZones++;
                 return false;
             }
-            var z = new LiquidLightZone
-            {
-                Zone = zone, Light = light, Conditional = conditional, ZMin = zmin, ZMax = zmax, Poly = (double[])poly.Clone(),
-                MinX = double.PositiveInfinity, MaxX = double.NegativeInfinity, MinY = double.PositiveInfinity, MaxY = double.NegativeInfinity,
-            };
-            for (int k = 0; k < poly.Length; k += 2)
-            {
-                z.MinX = Math.Min(z.MinX, poly[k]);
-                z.MaxX = Math.Max(z.MaxX, poly[k]);
-                z.MinY = Math.Min(z.MinY, poly[k + 1]);
-                z.MaxY = Math.Max(z.MaxY, poly[k + 1]);
-            }
+            var z = new LiquidLightZone { Zone = zone, Light = light, Conditional = conditional, ZMin = zmin, ZMax = zmax, Poly = (double[])poly.Clone() };
+            LightGeometry.Bounds(poly, out z.MinX, out z.MaxX, out z.MinY, out z.MaxY);
             Zones.Add(z);
             return true;
         }
@@ -283,19 +256,16 @@ namespace Wmv.Wow.World
                 LiquidLightValues pv;
                 if (w <= 0.0 || !values.TryGetValue(p.Light, out pv))
                     continue;
-                int at = applied.Count;
-                while (at > 0 && (w < applied[at - 1].Key || (w == applied[at - 1].Key && pv.Light < applied[at - 1].Value.Light)))
-                    at--;
-                applied.Insert(at, new KeyValuePair<double, LiquidLightValues>(w, pv));
+                LightGeometry.InsertInOrder(applied, w, w, pv.Light, pv);
             }
             if (applied.Count == 0)
                 return;
-            foreach (KeyValuePair<double, LiquidLightValues> kv in applied)
+            foreach (LightGeometry.Weighted<LiquidLightValues> kv in applied)
             {
                 // (The sky only from a point light that carries one: a light without it leaves the sky as it is.)
-                int n = kv.Value.HasSky ? LiquidLightSample.Count : LiquidLightSample.Sky;
+                int n = kv.Item.HasSky ? LiquidLightSample.Count : LiquidLightSample.Sky;
                 for (int k = 0; k < n; k++)
-                    s.V[k] += (kv.Value.V[k] - s.V[k]) * kv.Key;
+                    s.V[k] += (kv.Item.V[k] - s.V[k]) * kv.W;
             }
             s.Points = applied.Count;
         }

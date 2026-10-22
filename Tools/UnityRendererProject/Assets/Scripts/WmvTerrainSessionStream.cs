@@ -921,6 +921,8 @@ public sealed partial class WmvTerrainSession
             MaxDoodadInstancesPerLoad = e.MaxDoodadInstancesPerLoad,
             // Protocol 19: the entry's liquid offer -- budgets, catalogue and zone lights -- as the host gives the tile load the entry's.
             Liquids = e.Liquids,
+            // Protocol 20: and its outdoor light (only the entry's commit makes it the scene's).
+            WorldLight = e.WorldLight,
         };
         var j = new Job { Cmd = cmd, MaxBytes = cmd.MaxAssetBytes > 0 ? cmd.MaxAssetBytes : DefaultMaxAssetBytes, Stream = st, Support = s.Support };
         j.World = new WorldWork { Global = false, Frame = PlacementFrame.Tile, Doodads = new DoodadsWork { Offered = cmd.DoodadsOffered } };
@@ -2582,13 +2584,15 @@ public sealed partial class WmvTerrainSession
         geometry = WmvWorldModels.LiveGpuGeometryBytes + WmvWorldDoodads.LiveGpuGeometryBytes;
         // The resident tiles' alpha arrays (texture memory, never in LiveTextureBytes) and their meshes and material vertices --
         // and (protocol 19) their liquid geometry; the session's liquid frame arrays (a world model's liquid geometry is in
-        // its prototype's, above).
+        // its prototype's, above). Stage 10: the outdoor light's normal stream of a tile built while the light was on (0
+        // otherwise: with the light off the figure is Stage 09's).
         if (stream != null)
             foreach (StreamTile st in stream.Tiles.Values)
                 if (st.Tile != null && !st.Tile.Disposed)
                 {
                     textures += st.Tile.AlphaGpuBytes;
-                    geometry += (st.Mesh != null ? st.Mesh.MeshBytes : 0) + st.Tile.MaterialVertexBytes + st.Tile.LiquidGeometryBytes;
+                    geometry += (st.Mesh != null ? st.Mesh.MeshBytes : 0) + st.Tile.MaterialVertexBytes + st.Tile.LiquidGeometryBytes +
+                                st.Tile.LightNormalBytes;
                 }
         WmvLiquidRegistry liquids = StreamLiquids;
         if (liquids != null)

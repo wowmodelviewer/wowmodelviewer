@@ -8,7 +8,10 @@
 // terrain material corpus tests (TerrainMaterialCorpusTests.cs) run under the same condition. The
 // world-map contract check runs only when WMV_MAP_CONTRACT_DIR names a folder of WDTs the viewer's map
 // catalogue wrote (MapContractCheck.cs). The liquid corpus tests (LiquidCorpusTests.cs) run under the corpus condition
-// and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set.
+// and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set. The outdoor light's fixture part
+// (WorldLightTests.cs) runs when WMV_WORLD_LIGHT_FIXTURES names the offline fixtures, and reads the host's own objects
+// from WMV_WORLD_LIGHT_HOST_DUMPS when that is set; the MCNR proof on the four Southfury tiles (SkyTerrainLightTests.cs) runs
+// when WMV_MCNR_TILES names the folder holding them.
 
 using System;
 using System.Globalization;
@@ -104,6 +107,17 @@ static class Program
         failures += LiquidLightTests.RunAll(Console.WriteLine);
         Console.WriteLine("== LiquidHighTests (the High water look: formulas, the water tune, the ripple map's check)");
         failures += LiquidHighTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 3: the outdoor light state -- the day, the selection, the clock, the ease, the switches, the graded model;
+        // with WMV_WORLD_LIGHT_FIXTURES the host's sample() parity and the survey's spots on five clients, with
+        // WMV_WORLD_LIGHT_HOST_DUMPS the host's own objects.
+        Console.WriteLine("== WorldLightTests (outdoor light: day, selection, clock, ease, switches, model; fixtures when given)");
+        failures += WorldLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 steps 4 and 5: the sky's colour dome and program, the MCNR decode and the terrain light; with WMV_MCNR_TILES the
+        // MCNR mapping proved again on the four Southfury tiles.
+        Console.WriteLine("== SkyTerrainLightTests (the sky dome and program, MCNR and the terrain light; Southfury tiles when given)");
+        failures += SkyTerrainLightTests.RunAll(Console.WriteLine);
 
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))

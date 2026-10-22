@@ -33,7 +33,12 @@
 // Direction is for true vectors only. Outer vertices are accumulated tile-wide (keyed by the tile's
 // 129 x 129 outer grid), so the copies of a vertex on a chunk border are bit-equal; inner vertices
 // belong to one cell. A vertex with no kept triangle gets (0, 1, 0). Tile-edge normals are one-sided
-// (the multi-tile stage re-accumulates them across loaded neighbours).
+// (the multi-tile stage re-accumulates them across loaded neighbours). Stage 10: when the caller asks
+// (keepMcnr: the player while the outdoor light's normals may be wanted, not with WMV_LIGHT=off or
+// -wmvTerrainLight=off), a Built chunk also carries its MCNR bytes (McnrRaw, a reference to the parser's array,
+// counted in McnrBytes apart from MeshBytes) for the outdoor light's vertex stream of its own (TerrainLight.cs:
+// TerrainMcnr); otherwise McnrRaw is null and the tile holds nothing more than before. Normals and every dump stay
+// the geometry's.
 //
 // Rules of the build (design section 3):
 //   - 256 chunks in file order, chunk n at (n % 16, n / 16).
@@ -126,6 +131,9 @@ namespace Wmv.Wow.World
         public string Reason;               // null for a Built chunk
         public float[] Positions;           // 145 * 3, origin-local Unity, MCVT order k; null unless Built
         public float[] Normals;             // 145 * 3, geometry-derived DIAGNOSTIC normals (not MCNR); null unless Built
+        public sbyte[] McnrRaw;             // the root's MCNR triplets as parsed (AdtRootChunk.NormalsRaw, not copied) when the
+                                            // build kept them (keepMcnr), else null: decoded only for the outdoor light's own
+                                            // vertex stream (TerrainMcnr, Stage 10)
         public ushort[] Indices;            // 3 * Triangles, front faces up; never null, length 0 without triangles
         public int Triangles;
         public int HoleCells;               // cells left out as holes (Built chunks only)
@@ -146,6 +154,9 @@ namespace Wmv.Wow.World
         public float[] BoundsMin, BoundsMax;   // over the chunks with triangles; null when the tile has none
         /// <summary>Vertex (position + normal, 24 bytes each) plus 16-bit index bytes of the chunks with triangles.</summary>
         public long MeshBytes;
+        /// <summary>Stage 10: the MCNR bytes the Built chunks keep (McnrRaw, managed memory held as long as the tile's mesh
+        /// is; not uploaded, so not in MeshBytes); 0 unless the build kept them (keepMcnr).</summary>
+        public long McnrBytes;
     }
 
     /// <summary>The whole terrain build failed (no part of the tile is usable).</summary>
@@ -246,7 +257,9 @@ namespace Wmv.Wow.World
             }
         }
 
-        public static TerrainTileMesh Build(AdtRoot root, int tileX, int tileY, WorldOrigin origin)
+        /// <summary>The tile's mesh data; `keepMcnr` (Stage 10) keeps each Built chunk's MCNR bytes (McnrRaw, McnrBytes) for the
+        /// outdoor light's normal stream, otherwise none are kept.</summary>
+        public static TerrainTileMesh Build(AdtRoot root, int tileX, int tileY, WorldOrigin origin, bool keepMcnr = false)
         {
             if (tileX < 0 || tileX >= TerrainCoordinates.TilesPerSide || tileY < 0 || tileY >= TerrainCoordinates.TilesPerSide)
                 throw new ArgumentOutOfRangeException("tile", "tile x/y must be 0..63");
@@ -329,6 +342,11 @@ namespace Wmv.Wow.World
                 }
                 unity[n] = pd;
                 ch.Positions = pf;
+                if (keepMcnr && mc.NormalsRaw != null)
+                {
+                    ch.McnrRaw = mc.NormalsRaw;
+                    tile.McnrBytes += mc.NormalsRaw.Length;
+                }
 
                 kept.Clear();
                 int holes = 0;
