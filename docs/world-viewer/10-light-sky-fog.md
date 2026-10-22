@@ -1,8 +1,9 @@
 # World viewer 10 -- light, sky and fog (outdoor)
 
 Branch `world/10-light-sky-fog`, from `develop` 678071f0 (Stage 09, PR #127). **Status: the owner approved the
-direction on 2026-10-21 with the adjustments of section 0; implementation runs in the order of section 7, up to an early
-visual checkpoint first.** This document records the owner's decisions (section 0), the investigation (sections 1-5), the
+direction on 2026-10-21 with the adjustments of section 0; implementation runs in the order of section 7. Steps 1-5 are
+done and the early visual checkpoint ran on 2026-10-22 with a built player (13.1); the owner reviews its pictures
+before steps 6-9.** This document records the owner's decisions (section 0), the investigation (sections 1-5), the
 architecture and order of work (sections 6-8), the validation against in-game screenshots (section 9), the remaining
 decisions (section 10) and, as work lands, its results. The roadmap change that made this milestone 10 is `roadmap.md` 5.1.
 
@@ -1183,7 +1184,7 @@ possible).
 | R14 (medium) | Capture logistics (hour-only clock, fly mode, one race, settings drift, the owner's time: about 5-7 h plus live slots) | the questions first; the helper addon records seconds and settings; tiers ordered by what they unblock |
 | R15 (low-medium) | The unversioned Unity project shapes bloom and the baselines | post changes in versioned code with exact restore; project files hashed for both arms |
 | R16 (low-medium) | Schema 23 mistypes a column; the cache rebuild on every client | per-layout shape tests and named-row values; disk checked |
-| R17 (operational) | The Unity licence renewal (due about 2026-10-21; batch builds exit 198), F: space, mid-update installs, Era's install state, the owner using the machine | checked before WP 1 and each run; build on D:; hidden desktop only |
+| R17 (operational) | The Unity licence renewal (renewed 2026-10-22, next due about 2026-11-21; batch builds exit 198), F: space, mid-update installs, Era's install state, the owner using the machine | checked before WP 1 and each run; build on D:; hidden desktop only |
 
 ## 12. Evidence files (outside the repository)
 
@@ -1198,26 +1199,77 @@ possible).
 | `D:\wmv-10\step1\{mocv,lightmode,mapping,refnav}` and `...-verify` | step 1: exterior MOCV, the engine branches and `linear`, the measured sky and terrain mapping, the helper addon v3.1 (with `CAPTURE.md`) |
 | `D:\wmv-10\baseline` | step 2: the light-off baseline (manifest of 258 items, `compare.py`, the rig) |
 | `D:\wmv-10\step3`, `D:\wmv-10\step45` | steps 3-5: specs, implementer reports, reviews, fixes, test logs |
-| `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs |
+| `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs; the 2026-10-22 run in `runs\p30a` (13.1) |
 
-## 13. Progress (2026-10-21)
+## 13. Progress (2026-10-21, updated 2026-10-22)
 
 | Step | State | Evidence |
 |---|---|---|
 | 1 Mappings and shader interpretation | done: exterior MOCV partly established and kept out (2.2); the references' engine path settled (4.0); the terrain light and the upper sky measured on the Stage 09 shots (4.3, 4.5); helper addon v3.1 with a 20-minute capture page | `D:\wmv-10\step1` |
 | 2 Light-off baseline | done: develop 678071f0 rebuilt (host and a player from the project copy), every Stage 09 set and guard re-run twice: identical to Stage 09's outputs (one MoP magma picture has two one-pixel variants from run to run of the same build; the free-clock water flight varies as before) | `D:\wmv-10\baseline` |
-| 3 Time of day and the outdoor light state | host committed (063943e0: schema 23, the store, protocol 20, 14 new checks, 0 failures on five clients, Stage 09's dumps byte-identical); player written and runner-tested (byte parity with the host's day evaluation on five clients), not yet run in a player | `D:\wmv-10\step3` |
-| 4 The first sky | written, reviewed (the pixel program matches the client's operation for operation), runner-tested; not yet run | `D:\wmv-10\step45` |
-| 5 Lit terrain with MCNR normals | written, reviewed (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg), runner-tested; not yet run | `D:\wmv-10\step45` |
-| Checkpoint | blocked: the Unity licence lapsed at 20:12 on 2026-10-21, so no player can be built until the owner signs in to Unity Hub. The one-command rig (`run_checkpoint.ps1`: build, self-test, the baseline compare with the light off and on, the Southfury renders, side-by-sides, metrics) ran end to end with the develop player: the committed host with the light off is identical to the baseline on all 258 must-match items | `D:\wmv-10\checkpoint` |
+| 3 Time of day and the outdoor light state | done: host 063943e0 (schema 23, the store, protocol 20, 14 new checks, 0 failures on five clients, Stage 09's dumps byte-identical); player 28b10e98 (byte parity with the host's day evaluation on five clients in the runner; in a built player the self-test's outdoor-light cases pass and, at every checkpoint camera, the player selects the zone, Light and LightParams the offline port selects) | `D:\wmv-10\step3`, 13.1 |
+| 4 The first sky | done: 28b10e98 (the pixel program matches the client's operation for operation; the GPU dome equals its CPU twin within 0.0006 over 12,288 pixels); at the checkpoint within 0.3-0.6 dE00 of the game's clean sky (13.1) | `D:\wmv-10\step45`, 13.1 |
+| 5 Lit terrain with MCNR normals | done: 28b10e98 (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg; the GPU branch equals its CPU twin within 0.0005 on five probes); at the checkpoint the render equals its offline model on 99.8 % of the lit terrain within 2 sRGB steps (13.1) | `D:\wmv-10\step45`, 13.1 |
+| Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner reviews the pictures before steps 6-9 | `D:\wmv-10\checkpoint\runs\p30a` |
 
-**Offline prediction, meanwhile (not a viewer render).** The Stage 09 light-off renders at the seven fitted Southfury
-cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
+**Offline prediction (2026-10-21, before a player could be built; not a viewer render).** The Stage 09 light-off
+renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
 normals, the dome with table A, the host's light state at each shot's recorded time), against the PTR references
 (`linear 0`: Retail's shader path, the CPU side unverified): median terrain difference 1-3 sRGB steps per channel against
 63-106 for Stage 09; sky 0.1-4.8 dE00 in the clean 10-18 deg bands against 57-84 for Stage 09 (two shots' bands include a
 far hill the viewer does not draw). Light-facing terrain at noon is left 3-7 % dark at N . L 0.3-0.7 (the specular term,
 held at 0). At dawn and dusk the remaining difference lies on terrain the game puts in cast shadow: removing the direct
 light there would remove 57 % and 62 % of the squared difference, so those shots read "differs: cast shadows not drawn"
-(6.15). Pictures and numbers: `D:\wmv-10\checkpoint\predicted` (`metrics.md`).
+(6.15). Pictures and numbers: `D:\wmv-10\checkpoint\predicted` (`metrics.md`). The real renders of 13.1 confirm it;
+its 57 % and 62 % were measured with the trees in front of the terrain lit as terrain, and read 60 % on lit terrain.
+
+### 13.1 The early visual checkpoint (2026-10-22)
+
+The Unity licence was renewed on 2026-10-22 (05:55; next lapse about 2026-11-21) and the checkpoint ran as one command,
+`D:\wmv-10\checkpoint\run_checkpoint.ps1 -Player p30a`: player p30a built from the worktree's player files (now
+28b10e98; Assembly-CSharp 860A16ADF00DF740) with the committed host. References: the Stage 09 PTR shots at Southfury
+(`linear 0`: Retail's shader path; Retail's CPU side unverified), seven fitted or registered cameras, five at noon, one at
+06:49 and one at 18:46. Everything below is in `D:\wmv-10\checkpoint\runs\p30a` (`out\report.md`, `out\avp.md`, the
+pictures beside them).
+
+**Functional and regression.**
+
+| Check | Result |
+|---|---|
+| Build | succeeded, 0 compile errors; the main scene's script bound |
+| Lifecycle self-test | 1076 passed, 0 failed, the GPU probes of the sky and the lit terrain included |
+| `WMV_LIGHT=off` against the Stage 09 baseline | identical: 0 of 258 must-match items differ (the terrain, water and border guards, every view incl. depth, Buildings, Models, Characters, the tallies, the light dumps); the count items changed only by the added tests (14 `-terraintile` checks per client, 6 self-test cases); far3 varies as before; 4 timing-only info lines differ (one an integer "7 ms" the mask does not hide; life08/life08b differ between Stage 09's own runs) |
+| The checkpoint's own light-off pictures | all six viewports pixel-identical to the develop player's |
+| Light on: Buildings and Models | identical to the baseline (8 of 8) |
+| Pure runner | 2242 passed, 0 failed (Stage 09: 2199) |
+| Player log | no warning or error with the light on or off (the review's open item: no missing-channel message without UV1) |
+| Light state | at every checkpoint camera the player logs zone 139, Light 204, LightParams 5985 at the shot's time, as the offline port; its first line, before the world camera flies in, is the tile-framing camera's (about 990 yd out, zone 142) |
+
+**The render against its own model (9.6 class A).** The offline model (the Stage 09 picture lit with the client's
+formulas, `rig\cpmetrics.offline_prediction`) against the render at every camera: on lit terrain, 99.8 % of the pixels
+within 2 sRGB steps (mean signed difference under 1 step; 458,000-541,000 pixels per shot); the sky away from its edge
+within 1.13 steps everywhere. The rest of the raw "terrain" difference is trees and doodads standing in front of the
+terrain, which Stage 10 leaves unlit and the model lit as terrain: a model limitation, not a renderer one. No renderer
+defect was found.
+
+**The render against the game.**
+
+| Family | Result | Class (9.6) |
+|---|---|---|
+| Sky, clean bands | the measuring bands within 0.3-0.6 dE00 at noon, dawn and dusk (Stage 09: 58-84); 2.2 dE00 in one shot's 16-17 deg band, where the far hill's top fades out | matches |
+| Sky, 10-16 deg on cameras hi05/hi06 | a far hill seen through haze, which the viewer does not draw (it lies beyond the resident terrain); 13-15 dE00 at noon, up to 4.7 at dusk | B (Stage 13, far terrain) |
+| Sky above about 16-18 deg | clouds; at dusk a red-lit cloud bank at the top of the frame | out (clouds, D8) |
+| Terrain at noon | reference / Stage 10 scale 1.00-1.02 per channel, log spread 0.016-0.026 (step 1's figure for the client's formula: 0.023); median difference 1-2 steps (Stage 09: up to 70); light-facing slopes at N . L 0.3-0.7 are 3-7 % darker than the game, as predicted | matches; the 3-7 % is C: the terrain specular, held at 0 until a reference isolates it |
+| Terrain at dawn and dusk | "differs: cast shadows not drawn" (6.15): on lit light-facing terrain, the terrain the game shadows carries 99 % of the remaining difference and the client's shadow factor would remove 60 % of the squared difference; Stage 10 is (17, 8, 0) and (17, 6, 0) steps brighter there against a direct term of (20, 9, 0) and (20, 7, 0) | shadows (follow-up milestone) |
+| Trees and doodads | unlit, so they read bright against the lit terrain, most visibly at dusk | step 6 |
+| Water | Stage 09's shading, its own light still the fixed 12:00 values in both arms; an isolation render (light on, `-wmvTerrainLight=off`) is identical to Stage 09 outside the sky apart from bright pixels 1-2 steps darker in every case (the bloom held at 0, D9), so the water's changed look in Stage 10 is the lit river bed it refracts | step 8 (not tuned here) |
+
+**Fixed after the run (the evidence rig only; no player code changed).** The side-by-sides' caption quoted the player's
+first light line (the tile-framing camera's zone 142): the rig now keeps every line and quotes the last. The far-hill note
+covered only the noon shots of camera hi06/hi05: the dawn and dusk shots use hi06 too. The report adds the sky on its
+measuring bands, the render against its model on lit terrain only, and the shadow split on lit terrain only. Steps 6-7
+re-ran on the same renders; the light-off pictures were not re-rendered.
+
+**Open.** The owner's review of the pictures. Retail's CPU side (one live Retail shot settles it). The terrain specular's
+share (C). Then steps 6-9 in the order of 7.1; no tuning, fog, water or Stage 11 work has started.
 
