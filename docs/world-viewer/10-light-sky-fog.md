@@ -892,6 +892,7 @@ and moons.
 | CelestialBody, SkyScene, LightShaft, WorldShadow, TerrainColorGradingRamp | out | rare, conditional or of unknown meaning |
 | Far terrain, a larger stream radius | Stage 13 / Stage 08 | Stage 10's sky and fog do not depend on the far plane |
 | Fog and light on particles and animated doodads | Stage 11 | it uses Stage 10's include |
+| Terrain ground cover (the grass and pebbles the game generates per texture layer) | Stage 11B, after U21 (roadmap 5.2) | found missing at the checkpoint (13.1); the owner gave it a stage on 2026-10-22; it takes Stage 10's outdoor doodad light and fog |
 | Retuning Stage 09's water | a follow-up the owner approves | after the class B re-measure |
 | A "strong look" that alters the data | never (D11) | a strong presentation can only be a separate, labelled option |
 | The Characters non-determinism on `develop` (`TabardDetails::tier`) | its own fix branch | Stage 10 baselines Characters on the tabard-fixed host |
@@ -1267,7 +1268,7 @@ defect was found.
 | Terrain at dawn and dusk | "differs: cast shadows not drawn" (6.15): on lit light-facing terrain, the terrain the game shadows carries 99 % of the remaining difference and the client's shadow factor would remove 60 % of the squared difference; Stage 10 is (17, 8, 0) and (17, 6, 0) steps brighter there against a direct term of (20, 9, 0) and (20, 7, 0). By eye: the hill's right flank (a sharp-edged lit patch in the game, a smooth lit stripe in Stage 10) and the slope under the acacias, 10-19 % darker in the game; the rest of the terrain within 1-4 % | shadows (follow-up milestone) |
 | Shadows at noon | no terrain self-shadow, as step 1 found, but a sharp-edged shadow on the slope beside the palms and shrub (game 23 % darker than Stage 10), most likely cast by the trees | shadows (follow-up milestone) |
 | Trees and doodads | unlit: Stage 09's pixels exactly. In the game they are darker than the terrain around them (luminance ratio about 0.45-0.5), in Stage 10 brighter (1.4 at noon, 2.2 at dawn, 3.1 at dusk); the canopies read bright gold, the palm trunks pale cream. The most visible difference, worst at dusk | step 6 |
-| Ground cover | the game's dry grass tufts on the ridges, behind the acacias and around the palms; neither viewer stage draws ground cover | not in any stage yet (the MCLY ground-effect field is unresolved, 04 2.4) |
+| Ground cover | the game's dry grass tufts on the ridges, behind the acacias and around the palms; neither viewer stage draws ground cover | out: stage 11B, after U21 (roadmap 5.2, added 2026-10-22) |
 | Haze | the game softens and blues only the far-left hill (texture contrast about 6-11 % against Stage 10's 11-14 %); the other slopes match | step 7 (fog) |
 | Water | Stage 09's shading, its own light still the fixed 12:00 values in both arms; an isolation render (light on, `-wmvTerrainLight=off`) is identical to Stage 09 outside the sky apart from bright pixels 1-2 steps darker in every case (the bloom held at 0, D9), so the water's changed look in Stage 10 (12-36 % darker than Stage 09, the flecks included) is the lit river bed it blends over. The game's water shows a bright sky sheen at noon (High) and golden or copper sun glints over its right third at dawn and dusk (Low), which neither stage draws | step 8 (not tuned here) |
 
