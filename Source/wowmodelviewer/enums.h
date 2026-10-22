@@ -263,6 +263,8 @@ enum ObjectID {
   // View > Swap Background Color (the Models viewport's background)
   ID_VIEW_BACKGROUND_COLOR,
 
+  ID_EXPORT_EQUIPMENT,
+
   ID_EQUIPMENT = 5000
 };
 

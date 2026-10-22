@@ -110,6 +110,8 @@ std::wstring FBXExporter::fileSaveFilter() const
 
 bool FBXExporter::exportModel(Model * model, std::wstring target)
 {
+  if (!m_equipmentRequest.empty())
+    return exportEquipmentPackage(dynamic_cast<WoWModel *>(model), target);
   if (m_exportAllCustomizations)
     return exportCustomizationPackage(dynamic_cast<WoWModel *>(model), target);
   reset();
@@ -179,7 +181,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   // when clips will actually be written (this is what makes the takes land in the file).
   ios->SetBoolProp(EXP_FBX_MATERIAL, wantMesh);
   ios->SetBoolProp(EXP_FBX_TEXTURE, wantMesh);
-  ios->SetBoolProp(EXP_FBX_EMBEDDED, wantMesh);
+  ios->SetBoolProp(EXP_FBX_EMBEDDED, wantMesh && m_equipmentTextureRoot.isEmpty());
   ios->SetBoolProp(EXP_FBX_SHAPE, true);
   ios->SetBoolProp(EXP_FBX_GOBO, true);
   ios->SetBoolProp(EXP_FBX_ANIMATION, wantAnimation);
@@ -252,6 +254,8 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   }
 
   if (m_packageScene && !describeCustomizationGeometry())
+    return false;
+  if (!m_equipmentTextureRoot.isEmpty() && !shareEquipmentTextures())
     return false;
   wmvProgress("STAGE WRITE");
   if(!exporter->Export(m_p_scene))

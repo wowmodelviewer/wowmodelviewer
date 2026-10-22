@@ -41,7 +41,9 @@ class CharControl : public wxScrolledWindow, public Observer
 
   void tryToEquipItem(int id);
   std::vector<ItemSets::Set> m_itemSets;
-  void applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll);
+  void applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll, const QString & name);
+  QString m_exportSetName;
+  std::vector<std::pair<int, int>> m_exportSetEquipment;
 
   public:
   // Item selection stuff
@@ -53,6 +55,7 @@ class CharControl : public wxScrolledWindow, public Observer
   CharControl(wxWindow* parent, wxWindowID id);
   ~CharControl();
 
+  QString suggestedEquipmentSetName() const;
   bool Init();
   void UpdateModel(Attachment *a);
 

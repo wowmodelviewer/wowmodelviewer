@@ -176,6 +176,9 @@ class FBXExporter : public ExporterPlugin
     void linkMeshAndSkeleton();
     void createAnimations();
     void reset();
+    bool exportEquipmentPackage(WoWModel *, const std::wstring & target);
+    bool shareEquipmentTextures();
+    QString m_equipmentTextureRoot;
     bool exportCustomizationPackage(WoWModel *, const std::wstring & target);
     bool describeCustomizationGeometry();
     bool m_packageScene = false;

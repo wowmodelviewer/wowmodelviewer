@@ -48,7 +48,7 @@ target_include_directories(item-set-appearance PRIVATE "${CMAKE_CURRENT_BINARY_D
 target_link_libraries(item-set-appearance PRIVATE Qt5::Core)
 
 file(READ "${WMV_ROOT}/Source/wowmodelviewer/charcontrol.cpp" control)
-string(FIND "${control}" "void CharControl::applySetPieces" begin)
+string(FIND "${control}" "QString CharControl::suggestedEquipmentSetName" begin)
 string(FIND "${control}" "void CharControl::selectStart" end)
 math(EXPR length "${end} - ${begin}")
 string(SUBSTRING "${control}" ${begin} ${length} equipment)

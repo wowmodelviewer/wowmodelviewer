@@ -1055,6 +1055,7 @@ public:
   void OnAbout(wxCommandEvent &event);
   void OnTest(wxCommandEvent &event);
   void OnExport(wxCommandEvent &event);
+  void OnExportEquipment(wxCommandEvent &event);
   void OnExportOther(wxCommandEvent &event);
   // Compute the pose of everything in the scene for the current animation frame, without drawing, so
   // an export reads the pose the Animation panel shows. Called before every export (the in-process ones

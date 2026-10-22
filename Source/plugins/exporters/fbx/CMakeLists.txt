@@ -15,6 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/wowmodelviewer) # needed for util
 
 set(src FBXExporter.cpp
   FBXCustomizationExporter.cpp
+  FBXEquipmentExporter.cpp
   FBXAnimExporter.cpp
   FBXHeaders.cpp)
 

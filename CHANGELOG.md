@@ -6,6 +6,7 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Independent equipment packages.** File > Export equipment exports selected armor and weapons for selected race/body combinations, with reference skeletons, textures and composition catalogs. Armor can be grouped under an editable set name or exported individually; weapons stay in separate portable folders. Existing destinations are protected, and invalid set names are explained before exporting. These packages require a catalog consumer and do not include character surfaces or animations.
 - **FBX export of all of a character's customization options (by mubilla).** The FBX Export Options dialog has a
   new **Appearance** choice. **Current appearance** exports as before. **All customization options** writes a
   `<name>.fbx.customization` folder: the FBX with every alternative geometry, the source textures, a

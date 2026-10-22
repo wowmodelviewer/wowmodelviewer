@@ -727,12 +727,25 @@ void CharControl::selectSet()
     choices.Add(name); cats.push_back(set.category); numbers.push_back(set.id);
   }
   itemDialog = new ItemSetChoiceDialog(g_modelViewer, choices, cats, catnames, m_itemSets,
-    [this](const std::vector<ItemSets::Equipped>& pieces, bool replaceAll) { applySetPieces(pieces, replaceAll); });
+    [this](const std::vector<ItemSets::Equipped>& pieces, bool replaceAll, const QString & name) { applySetPieces(pieces, replaceAll, name); });
   itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
 }
 
-void CharControl::applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll)
+QString CharControl::suggestedEquipmentSetName() const
+{
+  if (!model || m_exportSetEquipment.size() != NUM_CHAR_SLOTS) return QString();
+  for (int slot = 0; slot < NUM_CHAR_SLOTS; ++slot)
+  {
+    if (slot == CS_HAND_RIGHT || slot == CS_HAND_LEFT) continue;
+    const auto * item = model->getItem((CharSlots)slot);
+    const auto current = std::make_pair(item ? item->id() : -1, item ? item->displayId() : -1);
+    if (current != m_exportSetEquipment[slot]) return QString();
+  }
+  return m_exportSetName;
+}
+
+void CharControl::applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll, const QString & name)
 {
   if (!model) return;
   if (replaceAll)
@@ -748,6 +761,13 @@ void CharControl::applySetPieces(const std::vector<ItemSets::Equipped>& pieces, 
   RefreshEquipment();
   RefreshModel();
   g_modelViewer->UpdateControls();
+  m_exportSetName = name;
+  m_exportSetEquipment.clear();
+  for (int slot = 0; slot < NUM_CHAR_SLOTS; ++slot)
+  {
+    const auto * item = model->getItem((CharSlots)slot);
+    m_exportSetEquipment.emplace_back(item ? item->id() : -1, item ? item->displayId() : -1);
+  }
 }
 
 void CharControl::selectStart()

@@ -4,6 +4,8 @@
 #include "ClientInstallations.h"
 
 #include "AnimationExportChoiceDialog.h"
+#include "EquipmentExportDialog.h"
+#include <QJsonDocument>
 #include "ArmoryImportDialog.h"
 #include "itemselection.h"   // ChoiceDialog: the item chooser a viewer switch puts away
 #include "TextureView.h"
@@ -207,6 +209,7 @@ EVT_UPDATE_UI(ID_VIEW_ITEM, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_LOAD_CHAR, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_IMPORT_CHAR, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_IMPORT_NPC, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_EXPORT_EQUIPMENT, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_EXPORT_MODEL, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_FILE_MODEL_INFO, ModelViewer::OnUpdateCommandUI)
 // (The OpenGL viewport's commands -- background, camera, canvas size, bounds, debug info, saved views,
@@ -252,6 +255,7 @@ EVT_MENU(ID_ABOUT, ModelViewer::OnAbout)
 EVT_MENU(ID_KEYBOARD_SHORTCUTS, ModelViewer::OnKeyboardShortcuts)
 
 // Export
+EVT_MENU(ID_EXPORT_EQUIPMENT, ModelViewer::OnExportEquipment)
 EVT_MENU(ID_EXPORT_MODEL, ModelViewer::OnExport)
 
 // refesh status bar timer
@@ -573,6 +577,7 @@ void ModelViewer::InitMenu()
   }
   m_exportMenuEnd = subMenuId;
   fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), ExportMenu);
+  fileMenu->Append(ID_EXPORT_EQUIPMENT, wxT("Export equipment..."));
 
 
 
@@ -8256,6 +8261,15 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
     event.Enable(capabilityRefusal(event.GetId()).isEmpty()); // both ways: a refusal ends (a load finishes)
   switch (event.GetId())
   {
+    case ID_EXPORT_EQUIPMENT:
+    {
+      bool equipped = false;
+      auto * model = canvas ? const_cast<WoWModel *>(canvas->model()) : nullptr;
+      if (model && isChar && !model->infos.isNPC)
+        for (auto * item : *model) equipped = equipped || item->isEquipped();
+      event.Enable(isModelsMode() && !m_clientLoading && equipped);
+      break;
+    }
     case ID_SHOW_FILE_LIST:
       event.Check(fileControl && interfaceManager.GetPane(fileControl).IsShown());
       break;
@@ -8306,6 +8320,7 @@ bool ModelViewer::needsModelViewer(int id) const
     case ID_LOAD_CHAR:
     case ID_IMPORT_CHAR:
     case ID_IMPORT_NPC:
+    case ID_EXPORT_EQUIPMENT:
     case ID_EXPORT_MODEL:       // exporting the model: the submenu, ModelInfo.xml and each exporter
     case ID_FILE_MODEL_INFO:
     case ID_VIEW_BACKGROUND_COLOR:   // the Models viewport's background, not on show in the other viewers
@@ -9333,6 +9348,47 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
     charControl->SyncModelVariant();
   }
   return switched;
+}
+
+void ModelViewer::OnExportEquipment(wxCommandEvent &)
+{
+  auto * model = canvas ? const_cast<WoWModel *>(canvas->model()) : nullptr;
+  if (!isModelsMode() || !isChar || !model || model->infos.isNPC || !m_exportJobManager) return;
+  bool equipped = false;
+  for (auto * item : *model) equipped = equipped || item->isEquipped();
+  if (!equipped) return;
+  wxDirDialog destination(this, _("Choose the containing folder"), wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+  if (destination.ShowModal() != wxID_OK) return;
+  EquipmentExportDialog options(this, model, charControl ? charControl->suggestedEquipmentSetName() : QString());
+  if (options.ShowModal() != wxID_OK) return;
+  wxString args, label, snapshot;
+  if (!PrepareFbxAsset(args, label, snapshot, true))
+  {
+    wxMessageBox(_("Could not save the equipment for export."), _("Export error"), wxOK | wxICON_ERROR, this);
+    return;
+  }
+  ExportJobManager::Request req;
+  req.assetArgs = args;
+  req.assetLabel = _("Equipment");
+  const wxString logFolder = wxStandardPaths::Get().GetUserLocalDataDir() + wxFILE_SEP_PATH + "export-logs";
+  if (!wxFileName::Mkdir(logFolder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL) && !wxDirExists(logFolder))
+  {
+    wxRemoveFile(snapshot);
+    wxMessageBox(_("Cannot create the export log folder."), _("Export error"), wxOK | wxICON_ERROR, this);
+    return;
+  }
+  req.outPath = wxFileName::CreateTempFileName(logFolder + wxFILE_SEP_PATH + "equipment-");
+  if (req.outPath.IsEmpty()) { wxRemoveFile(snapshot); return; }
+  wxRemoveFile(req.outPath);
+  req.build = wxString(m_loadedBuild.toStdWString());
+  req.product = wxString(m_loadedProduct.toStdWString());
+  req.mesh = req.skeleton = req.skinning = req.component = true;
+  req.animation = false;
+  req.tempCharPath = snapshot;
+  auto equipmentRequest = options.request();
+  equipmentRequest["destination"] = QString::fromStdWString(destination.GetPath().ToStdWstring());
+  req.equipmentRequest = wxString::FromUTF8(QJsonDocument(equipmentRequest).toJson(QJsonDocument::Compact).toBase64().constData());
+  if (!m_exportJobManager->startExport(req) && !snapshot.IsEmpty()) wxRemoveFile(snapshot);
 }
 
 void ModelViewer::OnExport(wxCommandEvent &event)
