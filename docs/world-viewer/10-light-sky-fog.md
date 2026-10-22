@@ -504,7 +504,9 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
 - **Measured** (step 1, 2026-10-21, `D:\wmv-10\step1\mapping`): fed with the bytes at each shot's recorded time and
   not tuned, the shared dome (pole and rings 1-3) fits clean sky within 0.3-3.6 sRGB steps at 10-19 deg elevation in
   five PTR shots at 06:49, noon and 18:46; a 1-deg shift of ring 1 would move about 12 steps, so rings 1-2 sit within
-  about 0.3 deg (MEASURED). The earlier report of 39-105 steps below 18 deg came from a sunlit hill counted as sky, and
+  about 0.3 deg (MEASURED). The earlier report of 39-105 steps below 18 deg came from a soft cloud/haze band in the
+  upper-left sky of the noon shots of cameras hi05/hi06 (corrected 2026-10-22: step 1 read it as a sunlit far hill, but
+  no terrain lies in those directions and the same camera shows clean sky there at dawn and dusk, 13.1), and
   deviations above about 18 deg are clouds. The two public ring tables differ only below 2.16 deg, and the lowest sky in
   any fitted shot is at 10 deg, so the lowest two rings (and whether the last ring leans to the end-fog colour) stay open:
   one level horizon view settles them (T1). The sky program's horizon ramp works in the dome's own object units over z
@@ -1208,7 +1210,7 @@ possible).
 | 1 Mappings and shader interpretation | done: exterior MOCV partly established and kept out (2.2); the references' engine path settled (4.0); the terrain light and the upper sky measured on the Stage 09 shots (4.3, 4.5); helper addon v3.1 with a 20-minute capture page | `D:\wmv-10\step1` |
 | 2 Light-off baseline | done: develop 678071f0 rebuilt (host and a player from the project copy), every Stage 09 set and guard re-run twice: identical to Stage 09's outputs (one MoP magma picture has two one-pixel variants from run to run of the same build; the free-clock water flight varies as before) | `D:\wmv-10\baseline` |
 | 3 Time of day and the outdoor light state | done: host 063943e0 (schema 23, the store, protocol 20, 14 new checks, 0 failures on five clients, Stage 09's dumps byte-identical); player 28b10e98 (byte parity with the host's day evaluation on five clients in the runner; in a built player the self-test's outdoor-light cases pass and, at every checkpoint camera, the player selects the zone, Light and LightParams the offline port selects) | `D:\wmv-10\step3`, 13.1 |
-| 4 The first sky | done: 28b10e98 (the pixel program matches the client's operation for operation; the GPU dome equals its CPU twin within 0.0006 over 12,288 pixels); at the checkpoint within 0.3-0.6 dE00 of the game's clean sky (13.1) | `D:\wmv-10\step45`, 13.1 |
+| 4 The first sky | done: 28b10e98 (the pixel program matches the client's operation for operation; the GPU dome equals its CPU twin within 0.0006 over 12,288 pixels); at the checkpoint within 0.3-0.6 dE00 of the game's clean sky, except the dusk shot's lowest sky (3.2-4.7 dE00 at 10-13 deg, open; 13.1) | `D:\wmv-10\step45`, 13.1 |
 | 5 Lit terrain with MCNR normals | done: 28b10e98 (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg; the GPU branch equals its CPU twin within 0.0005 on five probes); at the checkpoint the render equals its offline model on 99.8 % of the lit terrain within 2 sRGB steps (13.1) | `D:\wmv-10\step45`, 13.1 |
 | Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner reviews the pictures before steps 6-9 | `D:\wmv-10\checkpoint\runs\p30a` |
 
@@ -1216,8 +1218,8 @@ possible).
 renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
 normals, the dome with table A, the host's light state at each shot's recorded time), against the PTR references
 (`linear 0`: Retail's shader path, the CPU side unverified): median terrain difference 1-3 sRGB steps per channel against
-63-106 for Stage 09; sky 0.1-4.8 dE00 in the clean 10-18 deg bands against 57-84 for Stage 09 (two shots' bands include a
-far hill the viewer does not draw). Light-facing terrain at noon is left 3-7 % dark at N . L 0.3-0.7 (the specular term,
+63-106 for Stage 09; sky 0.1-4.8 dE00 in the clean 10-18 deg bands against 57-84 for Stage 09 (two noon shots' bands
+include a cloud/haze band, which these notes first called a far hill; corrected in 13.1). Light-facing terrain at noon is left 3-7 % dark at N . L 0.3-0.7 (the specular term,
 held at 0). At dawn and dusk the remaining difference lies on terrain the game puts in cast shadow: removing the direct
 light there would remove 57 % and 62 % of the squared difference, so those shots read "differs: cast shadows not drawn"
 (6.15). Pictures and numbers: `D:\wmv-10\checkpoint\predicted` (`metrics.md`). The real renders of 13.1 confirm it;
@@ -1256,20 +1258,35 @@ defect was found.
 
 | Family | Result | Class (9.6) |
 |---|---|---|
-| Sky, clean bands | the measuring bands within 0.3-0.6 dE00 at noon, dawn and dusk (Stage 09: 58-84); 2.2 dE00 in one shot's 16-17 deg band, where the far hill's top fades out | matches |
-| Sky, 10-16 deg on cameras hi05/hi06 | a far hill seen through haze, which the viewer does not draw (it lies beyond the resident terrain); 13-15 dE00 at noon, up to 4.7 at dusk | B (Stage 13, far terrain) |
-| Sky above about 16-18 deg | clouds; at dusk a red-lit cloud bank at the top of the frame | out (clouds, D8) |
+| Sky, clean bands | noon and dawn within 0.3-0.6 dE00 over their measuring bands (Stage 09: 58-84; 2.2 dE00 in one noon shot's 16-17 deg band, which the cloud band below reaches); dusk within 0.7 at 13-18 deg | matches |
+| Sky at dusk, 10-13 deg | the lowest sky the dusk shot shows (between the hills, azimuth about 105-115 deg) is redder in the game: 3.2-4.7 dE00, above the proposed 3; the render equals the client's dome formula there, so the formula's inputs or a layer Stage 10 lacks differ. Candidates: the sun tint's public day curve (weight 0 after 18:30) or its public sun position, fog or haze over the low sky, the lower edge of the dusk cloud bank | C (open; not tuned) |
+| Sky, 10-16 deg in the noon shots of cameras hi05/hi06 | a soft brown cloud/haze band in the game: no silhouette, no terrain in those directions (`rig\farcast.py`: the camera's rays cast against Kalimdor tiles 34-41 x 26-32 hit nothing beyond the resident tiles), and clean sky there at dawn and dusk from the same camera; 13-15 dE00. Corrected 2026-10-22: step 1 and the first version of this section called it a far hill (class B) | out (clouds, D8) |
+| Sky above about 16-18 deg | clouds: at noon brown haze patches, at dawn a faint pink glow at the top centre, at dusk a deep red-lit cloud bank behind the hilltop trees | out (clouds, D8) |
+| Distant terrain | not visible from these cameras: the near hills close the horizon; no ray of cameras hi06, hi08 or hi10 (the comparison image's, the lowest-looking and the highest-looking) reaches terrain beyond the resident 3 x 3 tiles (`rig\farcast.py`) | -- (Stage 13 not exercised) |
 | Terrain at noon | reference / Stage 10 scale 1.00-1.02 per channel, log spread 0.016-0.026 (step 1's figure for the client's formula: 0.023); median difference 1-2 steps (Stage 09: up to 70); light-facing slopes at N . L 0.3-0.7 are 3-7 % darker than the game, as predicted | matches; the 3-7 % is C: the terrain specular, held at 0 until a reference isolates it |
-| Terrain at dawn and dusk | "differs: cast shadows not drawn" (6.15): on lit light-facing terrain, the terrain the game shadows carries 99 % of the remaining difference and the client's shadow factor would remove 60 % of the squared difference; Stage 10 is (17, 8, 0) and (17, 6, 0) steps brighter there against a direct term of (20, 9, 0) and (20, 7, 0) | shadows (follow-up milestone) |
-| Trees and doodads | unlit, so they read bright against the lit terrain, most visibly at dusk | step 6 |
-| Water | Stage 09's shading, its own light still the fixed 12:00 values in both arms; an isolation render (light on, `-wmvTerrainLight=off`) is identical to Stage 09 outside the sky apart from bright pixels 1-2 steps darker in every case (the bloom held at 0, D9), so the water's changed look in Stage 10 is the lit river bed it refracts | step 8 (not tuned here) |
+| Terrain at dawn and dusk | "differs: cast shadows not drawn" (6.15): on lit light-facing terrain, the terrain the game shadows carries 99 % of the remaining difference and the client's shadow factor would remove 60 % of the squared difference; Stage 10 is (17, 8, 0) and (17, 6, 0) steps brighter there against a direct term of (20, 9, 0) and (20, 7, 0). By eye: the hill's right flank (a sharp-edged lit patch in the game, a smooth lit stripe in Stage 10) and the slope under the acacias, 10-19 % darker in the game; the rest of the terrain within 1-4 % | shadows (follow-up milestone) |
+| Shadows at noon | no terrain self-shadow, as step 1 found, but a sharp-edged shadow on the slope beside the palms and shrub (game 23 % darker than Stage 10), most likely cast by the trees | shadows (follow-up milestone) |
+| Trees and doodads | unlit: Stage 09's pixels exactly. In the game they are darker than the terrain around them (luminance ratio about 0.45-0.5), in Stage 10 brighter (1.4 at noon, 2.2 at dawn, 3.1 at dusk); the canopies read bright gold, the palm trunks pale cream. The most visible difference, worst at dusk | step 6 |
+| Ground cover | the game's dry grass tufts on the ridges, behind the acacias and around the palms; neither viewer stage draws ground cover | not in any stage yet (the MCLY ground-effect field is unresolved, 04 2.4) |
+| Haze | the game softens and blues only the far-left hill (texture contrast about 6-11 % against Stage 10's 11-14 %); the other slopes match | step 7 (fog) |
+| Water | Stage 09's shading, its own light still the fixed 12:00 values in both arms; an isolation render (light on, `-wmvTerrainLight=off`) is identical to Stage 09 outside the sky apart from bright pixels 1-2 steps darker in every case (the bloom held at 0, D9), so the water's changed look in Stage 10 (12-36 % darker than Stage 09, the flecks included) is the lit river bed it blends over. The game's water shows a bright sky sheen at noon (High) and golden or copper sun glints over its right third at dawn and dusk (Low), which neither stage draws | step 8 (not tuned here) |
 
 **Fixed after the run (the evidence rig only; no player code changed).** The side-by-sides' caption quoted the player's
-first light line (the tile-framing camera's zone 142): the rig now keeps every line and quotes the last. The far-hill note
-covered only the noon shots of camera hi06/hi05: the dawn and dusk shots use hi06 too. The report adds the sky on its
-measuring bands, the render against its model on lit terrain only, and the shadow split on lit terrain only. Steps 6-7
-re-ran on the same renders; the light-off pictures were not re-rendered.
+first light line (the tile-framing camera's zone 142): the rig now keeps every line and quotes the last. The report adds
+the sky on its measuring bands, the render against its model on lit terrain only, and the shadow split on lit terrain
+only. The sky-band note is corrected (the cloud band above): the noon shots of hi05/hi06 measure from 16 deg, dawn and
+dusk over all bands. Steps 6-7 re-ran on the same renders; nothing was re-rendered.
 
-**Open.** The owner's review of the pictures. Retail's CPU side (one live Retail shot settles it). The terrain specular's
-share (C). Then steps 6-9 in the order of 7.1; no tuning, fog, water or Stage 11 work has started.
+**The owner's comparison image (2026-10-22).** `D:\wmv-10\checkpoint\runs\p30a\out\stage10_owner_comparison.png`
+(`rig\owner_compare.py`): rows noon (n185243, Liquid Detail High), dawn (d185020) and dusk (k184643), all camera hi06;
+columns the game, Stage 09 and Stage 10. The viewer panels are 1:1 crops of the captures (x 83-1581, y 57-898 of the
+viewport: the field the screenshot covers) and the screenshots are scaled onto that field by exact area averaging of
+their stored values, so all nine panels are 1499 x 842 and aligned within 0.06 px (phase correlation); no colour
+correction, overlay or retouching. Checked twice: the viewer panels are byte-exact, the reference panels equal an
+independent area average within rounding with the same mean colour, nothing is drawn on a panel. The dusk screenshot
+was saved at a lower JPEG quality than the other two (visible 8 x 8 blocking).
+
+**Open.** The owner's review of the pictures. The dusk sky's lowest bands (C). Retail's CPU side (one live Retail shot
+settles it). The terrain specular's share (C). Distant terrain needs a camera that sees past the resident tiles. Then
+steps 6-9 in the order of 7.1; no tuning, fog, water or Stage 11 work has started.
 
