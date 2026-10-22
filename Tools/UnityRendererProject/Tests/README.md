@@ -99,8 +99,8 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   stand's day: the plan's named values), the selection with Stage 09's rules (zone order and Z band, the default light, an invalid
   light without keys, the slot fallback, copy rows -- two LightParams naming one day --, point lights weakest first and the
   debug arms, on a case where all three orders differ), the sample's channels and groups, the clock (the half-minute from
-  HH:MM:SS, running and wrapping, the map's TimeOfDayOverride and its 16-bit -1), the ease, the switches (steps 3-5) and the
-  graded hypothesis tables (the light direction, the sun path, the dome's rings, the sky and the terrain light). With
+  HH:MM:SS, running and wrapping, the map's TimeOfDayOverride and its 16-bit -1), the ease, the switches (steps 3-6) and the
+  graded hypothesis tables (the light direction, the sun path, the dome's rings, the sky, the terrain light and the model light). With
   `WMV_WORLD_LIGHT_FIXTURES` naming the offline fixtures (`<client>_map<m>.json` in the spec's format,
   `parity_<client>_map<m>.json`, the survey's `spots.json` and `manifest.json`, whose SHA-256 is pinned in the test and which
   pins every other file; written outside the repository from the extracted DB2s) it also checks, on maps 0 and 1 of the five
@@ -121,6 +121,19 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   40_30, each pinned by its SHA-256) it proves the MCNR mapping again against the tiles' geometry normals (mean under 3 deg,
   the best of the 48 axis orders and signs), measures the decoded lengths the light uses, and checks their four seams (under
   1 deg: the data's continuity and the vertex match, not the decode); otherwise that part is SKIPPED.
+- `WorldModelLightTests.cs`: Stage 10 step 6 (`docs/world-viewer/10-light-sky-fog.md` 2.2, 6.6, 6.7, 6.15;
+  `Assets/Scripts/Wow/World/ModelLight.cs`): the outdoor light on doodads and exterior world-model groups against the client's
+  own M2 programs executed at the Southfury light (the hemisphere and the flat class, 54 rows each at 11:57, 06:49 and 18:46,
+  embedded to four decimals), the doodad light equal to the terrain's with a unit normal and to base x Factor with every hold
+  neutral, a raw interpolated normal shorter than 1 (H and the wrap normalised, the direct term raw), the zero-colour fallbacks,
+  N.L < 0, unlit, the shadow on the direct term only (not the terrain flat class's placement), AO, the local light's combine,
+  the world model's base albedo x (1, 0.99998, 1) and its flat arm; and the context rule on synthetic world models
+  (`WmoSynthetic.ContextRoot` / `ContextGroup`: exterior, interior, both and neither flags, MODD records listed by each kind,
+  by both, by none, an incomplete world model, MDDF, the census, MDDF doodads inside an interior under a turned, tilted and
+  scaled placement). With `WMV_WORLD_AUDIT_CORPUS` it prints the census of every client's world models in the world07
+  corpus and checks the Retail asset window (`<corpus>/assets/wow`, its file set checked against `corpus_hashes.json`
+  first) against the plan's 2.2: 52 complete roots, 531 LOD0 groups (300 exterior, 231 interior), 11,470 MODD records
+  listed, 6 by both kinds; otherwise that part is SKIPPED.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

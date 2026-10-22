@@ -513,6 +513,38 @@ namespace Wmv.Wow.Tests
                   "switches (steps 4 and 5): by default the sky (table a, ring 5 leaning to EndFogColor) and the lit terrain (hemisphere); " +
                   "-wmvSky=off, -wmvSkyTable=b, -wmvSkyEndFog=off, -wmvTerrainLight=off, -wmvTerrainVariant=flat each taken; a bad value a note " +
                   "(" + drawBad.Notes.Count + ") and the default kept; the last of two values wins (" + draw.DescribeDraw() + ")");
+
+            // Step 6: the doodads' and world models' switches (they act where the world renderers are bound).
+            WorldLightSwitches models = WorldLightSwitches.Parse(new[] { "-wmvDoodadLight=off", "-wmvWorldModelLight=off", "-wmvDoodadVariant=flat",
+                                                                         "-wmvWorldModelVariant=flat", "-wmvInteriorLight=outdoor", "-wmvWorldLitView=albedo" }, "on");
+            WorldLightSwitches modelsBad = WorldLightSwitches.Parse(new[] { "-wmvDoodadLight=no", "-wmvWorldModelLight=1", "-wmvDoodadVariant=round",
+                                                                            "-wmvWorldModelVariant=", "-wmvInteriorLight=indoor", "-wmvWorldLitView=none" }, null);
+            WorldLightSwitches modelsBack = WorldLightSwitches.Parse(new[] { "-wmvDoodadLight=off", "-wmvDoodadLight=on", "-wmvDoodadVariant=flat",
+                                                                             "-wmvDoodadVariant=hemisphere", "-wmvWorldModelVariant=flat",
+                                                                             "-wmvWorldModelVariant=hemisphere", "-wmvInteriorLight=outdoor",
+                                                                             "-wmvInteriorLight=rig", "-wmvWorldLitView=albedo", "-wmvWorldLitView=normal" }, null);
+            WorldLightSwitches lit = WorldLightSwitches.Parse(new[] { "-wmvDoodadVariant=flat" }, null);
+            string dd = d.DescribeDraw(), md = models.DescribeDraw(), nd = modelsBack.DescribeDraw(), ld = lit.DescribeDraw();
+            Check(d.DoodadLight && d.WorldModelLight && !d.DoodadFlat && !d.WorldModelFlat && !d.InteriorOutdoor &&
+                  d.WorldLitView == WorldLightSwitches.WorldLitViewNone &&
+                  !models.DoodadLight && !models.WorldModelLight && models.DoodadFlat && models.WorldModelFlat && models.InteriorOutdoor &&
+                  models.WorldLitView == WorldLightSwitches.WorldLitViewAlbedo && models.On && models.Notes.Count == 0 && !models.DrawDefaults &&
+                  modelsBad.DrawDefaults && modelsBad.Notes.Count == 6 && modelsBad.Notes.TrueForAll(n => n.Contains("ignored") || n.Contains(" -- ")) &&
+                  modelsBack.DoodadLight && !modelsBack.DoodadFlat && !modelsBack.WorldModelFlat && !modelsBack.InteriorOutdoor &&
+                  modelsBack.WorldLitView == WorldLightSwitches.WorldLitViewNormal && modelsBack.Notes.Count == 0 && !modelsBack.DrawDefaults &&
+                  !lit.DrawDefaults && d.DrawDefaults,
+                  "switches (step 6): by default doodads and world models lit (hemisphere), interiors on the rig, no diagnostic view; " +
+                  "-wmvDoodadLight=off, -wmvWorldModelLight=off, -wmvDoodadVariant=flat, -wmvWorldModelVariant=flat, -wmvInteriorLight=outdoor, " +
+                  "-wmvWorldLitView=albedo|normal each taken; a bad value a note (" + modelsBad.Notes.Count + ") and the default kept; the last of " +
+                  "two values wins; DrawDefaults false with any of them");
+            Check(dd.Contains("; doodads: outdoor lit (hemisphere variant), interior as Stage 09; world models: exterior groups lit (hemisphere " +
+                              "variant), interior groups on the preview rig until Stage 12; exterior MOCV not drawn; fog and water as Stage 09") &&
+                  !dd.Contains("DIAGNOSTIC") && md.Contains("doodads as Stage 09 (-wmvDoodadLight=off)") &&
+                  md.Contains("world models as Stage 09 (-wmvWorldModelLight=off)") && md.Contains("DIAGNOSTIC VIEW (-wmvWorldLitView=albedo)") &&
+                  nd.Contains("DIAGNOSTIC VIEW (-wmvWorldLitView=normal)") && ld.Contains("FLAT variant (-wmvDoodadVariant=flat, for the record)") &&
+                  WorldLightSwitches.Parse(new[] { "-wmvInteriorLight=outdoor" }, null).DescribeDraw().Contains("interior groups lit too (-wmvInteriorLight=outdoor") &&
+                  d.Describe().Contains("doodads: outdoor lit"),
+                  "DescribeDraw (step 6): \"" + dd + "\"; the switches' departures named (" + md + ")");
         }
 
         static void ModelTests()
@@ -549,9 +581,24 @@ namespace Wmv.Wow.Tests
                 graded &= v.Grade == "PROVEN_BYTES" || v.Grade == "PROVEN_SOURCE" || v.Grade == "MEASURED" || v.Grade == "INFERRED" ||
                           v.Grade == "INFERRED (public)" || v.Grade == "UNKNOWN";
             Check(graded && WorldLightModel.Table().Count == 5 + 4 + 1 + WorldLightModel.Fog.Length + WorldLightModel.Rings.Length + WorldLightModel.Sky.Length +
-                  WorldLightModel.Terrain.Length && WorldLightModel.Rings.Length == 5 && WorldLightModel.DefaultFarClip == 7000,
-                  "every constant of the model's table (light direction, sun path, far clip, fog, the dome's rings, the sky, the terrain light) " +
-                  "carries one of the plan's grades");
+                  WorldLightModel.Terrain.Length + WorldLightModel.Models.Length && WorldLightModel.Rings.Length == 5 && WorldLightModel.DefaultFarClip == 7000,
+                  "every constant of the model's table (light direction, sun path, far clip, fog, the dome's rings, the sky, the terrain light, the " +
+                  "model light) carries one of the plan's grades");
+            // Step 6: the model light's rows carry the values ModelLight.cs uses.
+            var byName = new Dictionary<string, GradedValue>();
+            foreach (GradedValue v in WorldLightModel.Models)
+                byName[v.Name] = v;
+            Check(WorldLightModel.Models.Length == byName.Count && byName["model wrap base"].Value == 0.7 && byName["model wrap scale"].Value == 0.4 &&
+                  byName["model wrap half (0.5 + 0.5 N.L, N.L not saturated)"].Value == 0.5 &&
+                  byName["world-model base factor, green (2 x 0.49999)"].Value == 2.0 * 0.49999 &&
+                  byName["world-model base factor, red and blue (2 x 0.5)"].Value == 1.0 &&
+                  byName["M2 base factor (combiner x _Color, nothing added)"].Value == 1.0 &&
+                  byName["doodad variant (0 hemisphere, 1 flat)"].Grade == "MEASURED" && byName["world-model variant (0 hemisphere, 1 flat)"].Grade == "INFERRED" &&
+                  byName["world-model MOCV light E (deferred)"].Value == 0.0 && byName["world-model MOCV light E (deferred)"].Grade == "UNKNOWN" &&
+                  byName["shadow (held; on D only)"].Value == 1.0 && byName["combine sqrt((base F)^2 + base^2 local): local light (held)"].Value == 0.0,
+                  "the model light's table (" + WorldLightModel.Models.Length + " rows, names unique): the wrap 0.7 / 0.4 / 0.5, the bases (M2 1, " +
+                  "world model 1 / 0.99998), the variants (doodads hemisphere MEASURED, world models INFERRED), the holds (shadow 1 on D only, " +
+                  "local 0, the MOCV light 0 UNKNOWN)");
         }
 
         static void GeometryTests()

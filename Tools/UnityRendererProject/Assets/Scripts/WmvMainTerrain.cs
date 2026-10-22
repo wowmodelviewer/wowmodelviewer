@@ -47,7 +47,9 @@
 //   "worldLight"     -> (protocol 20) a loadTerrainTile's or loadWorld's outdoor light: the scene's from its commit
 //                       (WmvTerrainSessionWorldLight), evaluated at the main camera once a rendered frame (WorldLightFrame,
 //                       WmvWorldLight: the frame state and its _WmvWL* globals, read by the sky -- WmvWorldSky, enqueued for
-//                       the world view's main camera -- and the textured terrain's world-lit branch); setWorldLight switches it,
+//                       the world view's main camera --, the textured terrain's world-lit branch and, while the light is shown,
+//                       the exterior world-model groups and outdoor doodads, bound then to the world-lit variants by
+//                       BindWorldLit: WmvWorldLitDriver, WmvWorldLitMaterials); setWorldLight switches it,
 //                       its clock and its time (HandleSetWorldLight: WmvWorldLight.SetFromHost, and when it switches the light
 //                       on the resident tiles built without the terrain's normal stream are drawn again,
 //                       WmvTerrainSession.WorldLightOn). WmvWorldLight's per-camera handlers are installed with the terrain
@@ -1033,8 +1035,11 @@ public partial class WmvMain
     /// scene's outdoor light -- a single tile's, a world's or a streaming session's entry's, in the terrain view only and never
     /// in the top-down overview (orthographic) -- at the camera's game position, with the game Z the floating origin stands
     /// for; otherwise the outdoor light is off for the frame. Its clock is its own (not -wmvAnimTime), but -wmvAnimTime snaps
-    /// its ease as it snaps the water's. Then the sky and bloom for this render (WmvWorldLight.Sky). A fault here switches the
-    /// light off (WmvWorldLight.FailOff): the frame is drawn as Stage 09 draws it. Nothing with WMV_LIGHT=off.</summary>
+    /// its ease as it snaps the water's. Then (Stage 10 step 6) the world models' and doodads' renderers bound to the world-lit
+    /// variants while the light is shown and to their own materials otherwise (BindWorldLit), before this camera culls and
+    /// draws, so no frame draws a stale binding; then the sky and bloom for this render (WmvWorldLight.Sky). A fault here
+    /// switches the light off (WmvWorldLight.FailOff) and binds every world renderer to its own materials: the frame is drawn
+    /// as Stage 09 draws it. Nothing with WMV_LIGHT=off.</summary>
     void WorldLightFrame(Camera cam)
     {
         if (WmvWorldLight.HardOff)
@@ -1047,13 +1052,36 @@ public partial class WmvMain
             bool positioned = set != null && CameraWorldPosition(cam.transform.position, out x, out y, out z) &&
                               CameraWorldPosition(Vector3.zero, out ox, out oy, out oz);
             WmvWorldLight.Frame(Time.frameCount, Time.deltaTime, set, positioned, x, y, z, oz, WmvModelBuilder.Debug_.AnimTime >= 0f);
+            BindWorldLit(WmvWorldLight.ObjectsLit, cam, set, positioned);
             WmvWorldLight.Sky(cam, worldView);
         }
         catch (System.Exception e)
         {
             Debug.LogError("WMV: [light] the outdoor light's frame failed: " + e);
             WmvWorldLight.FailOff(e);
+            try { BindWorldLit(false, null, null, false); }
+            catch (System.Exception f)
+            {
+                if (!worldLitBindFaultSaid)
+                    Debug.LogError("WMV: [light] binding the world's renderers to their own materials failed (said once): " + f);
+                worldLitBindFaultSaid = true;
+            }
         }
+    }
+
+    // Stage 10 step 6: the world's binding, frame by frame, and its lines.
+    readonly WmvWorldLitDriver worldLit = new WmvWorldLitDriver(s => Debug.Log("WMV: [light] " + s));
+    bool worldLitBindFaultSaid;
+
+    /// <summary>Stage 10 step 6: the world models' and doodads' renderers to the world-lit variants while the light is shown
+    /// (`lit`: WmvWorldLight.ObjectsLit) or to their own materials, with the lines that go with it (WmvWorldLitDriver: per
+    /// frame a few compares unless something changed): why the light is not shown comes from `cam`, `set` and `positioned`
+    /// (null cam: a fault; WmvWorldLitMaterials.WhyNotShown).</summary>
+    void BindWorldLit(bool lit, Camera cam, WorldLightSet set, bool positioned)
+    {
+        string why = lit ? null : WmvWorldLitMaterials.WhyNotShown(cam, WmvWorldLight.Enabled, TerrainViewActive, set, positioned);
+        if (worldLit.Frame(worldModels, worldDoodads, lit, why, Time.frameCount, Time.unscaledDeltaTime * 1000.0) != null)
+            worldLitBindFaultSaid = false;
     }
 
     /// <summary>A tile world load's world models are settled (protocol 17: before its doodads): its camera now -- it stands on

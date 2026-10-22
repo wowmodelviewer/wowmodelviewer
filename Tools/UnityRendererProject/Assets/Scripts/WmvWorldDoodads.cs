@@ -23,6 +23,13 @@
 //                 textures. Nothing here outlives the scene that owns it.
 //   CULLING       once per frame in the world view: each instance's box (its mesh box placed) against the camera frustum; a
 //                 renderer outside is disabled, one inside enabled. Counted for runtimeState.
+//   THE OUTDOOR   Stage 10 step 6 (WmvWorldLitMaterials): a doodad's context is its WorldDoodad's (an MDDF doodad OUTDOOR, a
+//   LIGHT         world model's from its MODD contexts: WmvTerrainSessionDoodads.cs). While the outdoor light is shown
+//                 (RebindWorldLit(true), driven by WmvMain.WorldLightFrame) an OUTDOOR doodad's renderer holds the prototype's
+//                 world-lit materials -- copies of its originals on "WMV/Opaque Textured (world)", made when first bound, one
+//                 per distinct original, destroyed with the prototype; otherwise, and always for an interior-interim doodad,
+//                 the prototype's own. A doodad placed while bound is bound at once, and counted and timed in
+//                 PlacedWhileShown (said by WmvWorldLitDriver); a rebind leaves a doodad already as asked alone.
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -46,6 +53,18 @@ public sealed class WmvDoodadPrototype
     public readonly List<Texture2D> TextureRefs = new List<Texture2D>();
     public double BuildMs;
     public bool Disposed;
+    /// <summary>Stage 10 step 6 (WmvWorldDoodads.WorldLitMaterials, made when an instance that wants it is first bound):
+    /// Materials with each original that has a world-lit variant replaced by the prototype's copy of it (null kept null), each
+    /// slot's blend class (-1 for a slot left on its original), whether any slot holds a copy, and the first shader of a slot
+    /// without a variant (null for none). The copies, one per distinct original, are destroyed with the prototype.</summary>
+    public Material[] WorldLit;
+    public int[] WorldLitBlends;
+    public bool WorldLitAny;
+    public string WorldLitNoVariant;
+    public readonly Dictionary<Material, Material> LitCopies = new Dictionary<Material, Material>();
+
+    /// <summary>The world-lit copies made for it (a new list: the self-test's views destroy them at once).</summary>
+    public List<Material> WorldLitCopies { get { return new List<Material>(LitCopies.Values); } }
 }
 
 /// <summary>One doodad placed in the world scene.</summary>
@@ -59,6 +78,7 @@ public sealed class WmvDoodadInstance
     public Bounds Bounds;                 // Unity world space, as placed (static)
     public bool Culled;
     public bool Disposed;
+    public bool LitBound;                 // Stage 10 step 6: last bound to the light (it may hold the world-lit materials)
 }
 
 /// <summary>A world scene's doodad textures: one upload per (file, alpha treatment, wrap) -- per (file, wrap) for DXT blocks --
@@ -306,6 +326,18 @@ public sealed class WmvWorldDoodads
     // The doodads' tallies, over the whole player (the self-test's and runtimeState's): what is alive now.
     public static int LivePrototypes, LiveInstances, LiveMeshes, LiveMaterials, LiveTextures;
     public static long LiveGpuGeometryBytes, LiveGpuTextureBytes;
+    /// <summary>Stage 10 step 6: the world-lit copies alive (counted in LiveMaterials too), and those with a non-white tint.</summary>
+    public static int LiveCopies, LiveTintedCopies;
+
+    /// <summary>Stage 10 step 6: what the last RebindWorldLit asked for (PlaceOn binds a new doodad by it), and whether that
+    /// rebind finished (WmvWorldLitMaterials.BindFrame rebinds an unsettled manager; so does a placement whose binding
+    /// failed).</summary>
+    public bool WorldLitBound { get; private set; }
+    public bool WorldLitSettled { get; private set; } = true;
+    /// <summary>Stage 10 step 6: what PlaceOn bound while the light was shown and nobody has said yet (made at the first such
+    /// placement, timed; WmvWorldLitMaterials.TakePlaced takes it), or null.</summary>
+    public WmvWorldLitBind PlacedWhileShown { get; private set; }
+    bool placeFaultSaid;
 
     // The last frame's culling.
     public int Visible { get; private set; }
@@ -445,15 +477,177 @@ public sealed class WmvWorldDoodads
         go.transform.localScale = Vector3.one * (float)doodad.Scale;
         go.AddComponent<MeshFilter>().sharedMesh = prototype.Mesh;
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.sharedMaterials = prototype.Materials;
+        bool lit = false;
+        mr.sharedMaterials = WorldLitBound ? PlacedMaterials(prototype, doodad, out lit) : prototype.Materials;
         mr.shadowCastingMode = prototype.Shadows;
         mr.receiveShadows = prototype.ReceiveShadows;
-        var inst = new WmvDoodadInstance { Prototype = prototype, Doodad = doodad, Load = load, Root = go, Renderer = mr };
+        var inst = new WmvDoodadInstance { Prototype = prototype, Doodad = doodad, Load = load, Root = go, Renderer = mr, LitBound = lit };
         inst.Bounds = PlacedBounds(prototype.LocalBounds, go.transform.localToWorldMatrix);
         prototype.Instances++;
         instances.Add(inst);
         LiveInstances++;
         return inst;
+    }
+
+    // ---------------------------------------------------------------- Stage 10 step 6: the outdoor light's binding
+
+    /// <summary>
+    /// Every doodad's renderer to its prototype's world-lit materials (`on`, where wanted: WmvWorldLitMaterials) or back to
+    /// the prototype's own; `bind` counts what was done. A doodad already as asked (LitBound) is left alone, unless the last
+    /// rebind did not finish: then every doodad is set again, whatever it holds. Sets WorldLitBound first and WorldLitSettled
+    /// only after the loop, so a throw mid-loop leaves the manager unsettled and the next frame rebinds every doodad. A doodad
+    /// whose renderer is gone is skipped. Nothing with WMV_LIGHT=off.
+    /// </summary>
+    public void RebindWorldLit(bool on, WmvWorldLitBind bind)
+    {
+        if (WmvWorldLight.HardOff)
+            return;
+        bool every = !WorldLitSettled;
+        WorldLitBound = on;
+        WorldLitSettled = false;
+        if (bind == null)
+            bind = new WmvWorldLitBind { Lit = on };
+        foreach (WmvDoodadInstance inst in instances)
+        {
+            MeshRenderer r = inst.Renderer;
+            WmvDoodadPrototype p = inst.Prototype;
+            if (inst.Disposed || r == null || p == null || p.Disposed || (!every && inst.LitBound == on))
+                continue;
+            if (on)
+            {
+                inst.LitBound = true;     // before the set: a throw leaves the doodad to the next rebind to the originals
+                Material[] m = BoundMaterials(p, inst.Doodad, bind);
+                if (m != p.Materials)
+                    r.sharedMaterials = m;
+            }
+            else
+            {
+                if (p.WorldLitAny && Wants(inst.Doodad))
+                {
+                    r.sharedMaterials = p.Materials;
+                    bind.Unbound++;
+                }
+                inst.LitBound = false;
+            }
+        }
+        WorldLitSettled = true;
+    }
+
+    /// <summary>What PlaceOn bound while the light was shown since it was last taken (WmvWorldLitMaterials.TakePlaced), or
+    /// null; the next such placement starts a new count.</summary>
+    public WmvWorldLitBind TakePlacedWhileShown()
+    {
+        WmvWorldLitBind b = PlacedWhileShown;
+        PlacedWhileShown = null;
+        return b;
+    }
+
+    /// <summary>What a doodad placed while the light is shown holds (BoundMaterials), counted and timed in PlacedWhileShown;
+    /// `bound` false when its binding threw: it then keeps the prototype's own materials (its placement stands), the fault
+    /// is said once, and the manager is left unsettled so the next frame rebinds every doodad -- or, if it throws there, the
+    /// light's fault puts every one on its own.</summary>
+    Material[] PlacedMaterials(WmvDoodadPrototype prototype, WorldDoodad doodad, out bool bound)
+    {
+        if (PlacedWhileShown == null)
+            PlacedWhileShown = new WmvWorldLitBind { Lit = true, Placed = true };
+        long t0 = System.Diagnostics.Stopwatch.GetTimestamp();
+        Material[] m;
+        try
+        {
+            m = BoundMaterials(prototype, doodad, PlacedWhileShown);
+            bound = true;
+        }
+        catch (System.Exception e)
+        {
+            WorldLitSettled = false;
+            m = prototype.Materials;
+            bound = false;
+            if (!placeFaultSaid)
+                Debug.LogError("WMV: [light] binding a doodad placed while the outdoor light is shown failed (said once; it keeps its own " +
+                               "materials and the next frame rebinds every one): " + e);
+            placeFaultSaid = true;
+        }
+        PlacedWhileShown.AddSince(t0);
+        return m;
+    }
+
+    /// <summary>The kind's switch and the doodad's context (not the shaders: BoundMaterials keeps a slot without a variant on
+    /// its original).</summary>
+    static bool Wants(WorldDoodad doodad)
+    {
+        return WmvWorldLitMaterials.KindOn(true) && WmvWorldLitMaterials.ContextOn(doodad != null ? doodad.Context : WorldLightContext.InteriorInterim);
+    }
+
+    /// <summary>What a doodad holds while the outdoor light is shown: the prototype's world-lit materials when it wants them
+    /// and some slot has a variant, the prototype's own otherwise; counted in `bind` (when given).</summary>
+    Material[] BoundMaterials(WmvDoodadPrototype p, WorldDoodad doodad, WmvWorldLitBind bind)
+    {
+        if (!WmvWorldLitMaterials.KindOn(true))
+        {
+            if (bind != null)
+                bind.KindOff++;
+            return p.Materials;
+        }
+        if (!WmvWorldLitMaterials.ContextOn(doodad != null ? doodad.Context : WorldLightContext.InteriorInterim))
+        {
+            if (bind != null)
+                bind.OwnMaterials++;
+            return p.Materials;
+        }
+        Material[] lit = WorldLitMaterials(p, bind);
+        if (bind != null)
+        {
+            if (p.WorldLitNoVariant != null)
+                bind.AddNoVariant(p.WorldLitNoVariant);
+            if (p.WorldLitAny)
+            {
+                bind.Doodads++;
+                bind.AddBatches(p.WorldLitBlends);
+            }
+        }
+        return p.WorldLitAny ? lit : p.Materials;
+    }
+
+    /// <summary>The prototype's world-lit materials (WmvDoodadPrototype.WorldLit), made the first time: each slot whose
+    /// original has a variant holds the prototype's copy of it (made now the first time, counted in the tallies), every other
+    /// slot its original, null kept null.</summary>
+    public Material[] WorldLitMaterials(WmvDoodadPrototype p, WmvWorldLitBind bind)
+    {
+        if (p.WorldLit != null)
+            return p.WorldLit;
+        Material[] originals = p.Materials;
+        var arr = new Material[originals.Length];
+        var blends = new int[originals.Length];
+        for (int k = 0; k < originals.Length; k++)
+        {
+            Material m = originals[k];
+            arr[k] = m;
+            blends[k] = -1;
+            if (m == null)
+                continue;
+            Shader variant = WmvWorldLitMaterials.ResolveVariant(true, m, WmvWorldLight.Log);
+            if (variant == null)
+            {
+                if (p.WorldLitNoVariant == null)
+                    p.WorldLitNoVariant = m.shader != null ? m.shader.name : "no shader";
+                continue;
+            }
+            bool made;
+            Material c = WmvWorldLitMaterials.CopyOf(p.LitCopies, m, variant, bind, out made);
+            if (made)
+            {
+                LiveMaterials++;
+                LiveCopies++;
+                if (WmvWorldLitMaterials.Tinted(c))
+                    LiveTintedCopies++;
+            }
+            arr[k] = c;
+            blends[k] = WmvWorldLitMaterials.BlendOf(c);
+            p.WorldLitAny = true;
+        }
+        p.WorldLitBlends = blends;
+        p.WorldLit = arr;
+        return arr;
     }
 
     /// <summary>A model-space box placed by a matrix (all eight corners): the instance's box for culling, valid whether or
@@ -543,6 +737,20 @@ public sealed class WmvWorldDoodads
             foreach (Material m in rt.Materials) if (m != null) LiveMaterials--;
             rt.Dispose();                 // its root, mesh and materials; its Textures are none (the scene's cache owns them)
         }
+        // Stage 10 step 6: its world-lit copies (the self-test's views destroy them at once as well).
+        foreach (Material c in p.LitCopies.Values)
+        {
+            if (c != null)
+            {
+                if (WmvWorldLitMaterials.Tinted(c))
+                    LiveTintedCopies--;
+                Object.Destroy(c);
+            }
+            LiveMaterials--;
+            LiveCopies--;
+        }
+        p.LitCopies.Clear();
+        p.WorldLit = null;
         LiveGpuGeometryBytes -= p.GpuGeometryBytes;
         LivePrototypes--;
         p.Runtime = null;

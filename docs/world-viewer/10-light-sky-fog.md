@@ -145,8 +145,12 @@ Consequences:
   cannot be read: the per-batch mode, the gate, which program draws ordinary batches, and the scale k (1 only in
   `material3`; in `uber` a constant times, on Retail, a per-instance factor; on the PTR/Beta branch a further factor).
   So including it would need a constant not taken from bytes: **exterior MOCV stays out of Stage 10, as the owner's rule
-  requires**, recorded as a known difference (small: the median drawn exterior MOCV is 0; it shows as a faint warm
-  glow near lanterns). One measurement could settle k for one client branch: the Ratchet warehouse's lantern wall
+  requires**, recorded as a known difference (its size: the median drawn exterior MOCV is 0, but if the batches use
+  lighting mode 2 with k = 1 it would add +0.12 to +0.18 x albedo at the 75th percentile of drawn exterior MOCV and +0.35
+  to +0.52 x albedo at the 95th, down-facing to up-facing surfaces; it is not small everywhere: Orgrimmar's `orgrimmar2`
+  carries MOCV on 69 of its 74 exterior groups, per-model 95th percentile 49, maximum 165. Step 6 draws exterior groups
+  with E = 0, the client's exact mode-1 output, equal to mode 2 wherever MOCV is black;
+  `D:\wmv-10\step6\wmo\out\run_subset_summary.txt`, `session_wmo_census.txt`). One measurement could settle k for one client branch: the Ratchet warehouse's lantern wall
   (group 107919, MOCV up to (71, 32, 0)) at 12:00 and 00:00 on live Retail or MoP Classic (a PTR measurement does not
   carry over). The validation keeps to MOCV-free exteriors (the Crossroads) and classes MOCV-carrying exteriors (Razor
   Hill's burrow, Ratchet's warehouse) as B. Evidence: `D:\wmv-10\step1\mocv`, `...\mocv-verify`.
@@ -159,6 +163,11 @@ Outdoor doodads need the scene's ambient, direct light, light direction and fog.
 Models and Characters viewers share, so the outdoor path is a separate branch behind a world-only uniform, whose
 arithmetic is unchanged when off, verified with the guard pictures (2.10). M2 materials flagged unlit keep lum 1 today and
 keep it under the outdoor light (INFERRED (public): unlit means unlit in the game too).
+
+**As built (step 6, 2026-10-22).** The "separate branch behind a world-only uniform" became 6.6's include split: the shared
+shaders keep their programs token for token (offline compile check, 6.6), and the outdoor path lives only in the world-lit
+variants, bound to world renderers while the light is shown. The Models, Buildings and Characters viewers draw the original
+programs and never hold a copy.
 
 ### 2.4 Stage 09 (liquids): affected, not changed
 
@@ -724,6 +733,49 @@ materials are bound to the variants after the build, only on the world path.
   serves both. **Fallback:** a uniform-gated branch whose else-branch is today's text, with the guard pictures as the
   only proof.
 
+**As built for world models and doodads (step 6, 2026-10-22).** (The terrain's world-only shader kept step 5's uniform-gated
+branch.)
+
+- **Files.** `WmvOpaque.shader` and `WmvWmo.shader` keep their header, properties, render state and pragmas and include their
+  pass bodies from `WmvOpaquePass.cginc` / `WmvWmoPass.cginc`; `WmvOpaqueWorld.shader` ("WMV/Opaque Textured (world)") and
+  `WmvWmoWorld.shader` ("WMV/Map Object (world)") define `WMV_WORLD_LIT` before the same include; `WmvWorldLight.hlsl` holds
+  the globals, the named holds and `WmvWorldModelShade`. The hooks sit inside `#ifdef WMV_WORLD_LIT`, so without the symbol
+  the bodies are HEAD's text.
+- **The light.** The client's hemisphere program for M2 and world models: H and the wrap 0.7 + 0.4 x (0.5 + 0.5 N.L) on the
+  normalised normal (N.L not saturated), the direct term saturated on the raw interpolated normal, colour = sqrt((base x
+  F)^2 + base^2 x local) with F = A + D; local light, shadow, AO, the second directional term, the override weight, the
+  MOCV light, glow and desaturation held at their neutral values, so the colour is base x F. M2 base = the combiner x the
+  material colour (the vertex program's 0.5 x colour times the pixel program's 2: no extra factor); world-model base =
+  albedo x (1, 0.99998, 1) (the vertex programs' gate-off COLOR0 x 2). Unlit batches (M2 flag 0x01, additive; MOMT
+  F_UNLIT) return the base. No constant was added: the only numbers are the bytes' 0.7, 0.4, 0.5 and 2 x (0.5, 0.49999,
+  0.5). Evidence: `D:\wmv-10\step6\m2` (2,688 lit M2 programs executed; hemisphere and flat classes), `D:\wmv-10\step6\wmo`.
+- **Binding while shown.** Copies of a prototype's materials on the variants (one per distinct original, kept until the
+  prototype goes) are bound per renderer only while the outdoor light is shown in the perspective world view
+  (`WmvWorldLight.ObjectsLit`), at the main camera's begin, before its culling and draw; in every other state -- default
+  mode, the top-down overview, no valid light, the camera not placed, the light off, after a fault -- every world renderer
+  holds the builder's material, so those states draw the original programs. Interior groups and the doodads interior
+  groups list keep the builder's materials always (until Stage 12). Default mode makes no copy; `WMV_LIGHT=off` loads no
+  variant.
+- **Binding at placement.** With the light on from the start the tile and its light are committed before the load's world
+  models and doodads are placed, so every world model and doodad is bound as it is placed. Those bindings are counted and
+  timed per manager and said as one line once a frame passes without a new placement (or before a rebind), marked
+  "(placed while shown)"; the 50 ms budget of 8.3 applies to a rebind (a toggle), not to these sums.
+- **The lines** (none with `WMV_LIGHT=off`). Per load: "load N: outdoor light contexts: ..." (world models and their groups
+  by context, doodads by context and listing, MDDF doodads standing inside an interior group's box). Per rebind and per
+  burst of placements: "world light: world models and doodads -> the outdoor light ..." with renderers, placements,
+  doodads and batches by blend mode; "... -> their own materials (not shown: overview / no valid light / camera not placed
+  / light off / not the world view / fault) ..."; and once per show "world light: first lit frame T ms (frame N, ...)",
+  which includes the variants' pipeline-state creation.
+- **Identity, as checked.** (1) Offline compile check (the editor's include files and Unity's implicit prelude, the SDK
+  compilers): HEAD's and the split's originals give identical preprocessed tokens and identical disassembly as whole files,
+  reflection headers included, for WmvOpaque vs / ps / ps with `_ALPHATEST_ON` and WmvWmo vs / ps; the variants compile with
+  0 errors. (2) Unity's own compiled bytecode hashes were not taken (they need an editor script; the editor is started only
+  through the checkpoint script). Identity therefore rests on (1) and on the guard pictures (13.2), which gate the commit.
+  (3) Self-test: the original program under the light's globals equals itself exactly; the variants' else-branch against
+  the original is reported (no picture draws it). The exactness gate above was written for variants bound whenever the world
+  view draws; bound only while the light is shown, no Stage 09 world picture draws them, so the default-mode,
+  light-on/models-off, overview and Models/Buildings/Characters guards serve its purpose.
+
 ### 6.7 The indoor/outdoor context (the Stage 12 foundation, kept small)
 
 A context per world renderer: OUTDOOR (exterior groups, MDDF doodads) or INTERIOR_INTERIM (interior groups, doodads listed
@@ -789,6 +841,13 @@ preview rig feed it today), restored exactly on Leave. The client's glow and LUT
 at 1x, noon and dusk presets; "fixed by the map" under an override), sending `setWorldLight` only on change, within 50 ms
 per GUI round. The labels "no WoW lighting, sky or fog" (`WmvMainTerrain.cs:1672-1679`, `MapsViewer.cpp:1481`) change.
 
+Step 6 (read once; a refused value is a Note; none acts with `WMV_LIGHT=off`): `-wmvDoodadLight=on|off` and
+`-wmvWorldModelLight=on|off` (default on; off keeps that kind on the builder's materials with the light on);
+`-wmvDoodadVariant=hemisphere|flat` and `-wmvWorldModelVariant=hemisphere|flat` (default hemisphere; flat is the client's
+flat class with K = 0, for the record); `-wmvInteriorLight=rig|outdoor` (default rig; outdoor also binds interior groups and
+their doodads, for the side-by-sides only); DIAGNOSTIC `-wmvWorldLitView=albedo|normal` (the variants draw the albedo, or 0.5
++ 0.5 x the raw interpolated normal; valid on opaque and alpha-keyed batches only; never in the owner's pictures).
+
 ### 6.14 Stage 09 files that Stage 10 changes (in its own diff)
 
 `LightCatalog.{h,cpp}` (extended; the water path unchanged; the comments at `.h:7, 59`), `UnityIpcServer.h` (the
@@ -802,8 +861,12 @@ behaviour. `09-liquids.md` is not edited.
 Shadows are not drawn in Stage 10, but nothing in it has to be rebuilt to add them:
 
 - **The light keeps the client's split.** `WorldLit()` takes a shadow factor as an input, applied exactly where the
-  client's programs apply it (4.0): on the direct and specular terms of the hemisphere variant, on the whole colour as
-  0.7 + 0.3 x shadow in the flat variant. Stage 10 feeds it 1; a later shadow stage feeds it a shadow-map lookup.
+  client's programs apply it (4.0). For the terrain: on the direct and specular terms of the hemisphere variant, on the
+  whole colour as 0.7 + 0.3 x shadow in the flat variant. For M2 doodads and world models the programs differ (step 6,
+  PROVEN_BYTES: `2977063 p_203:199-212`, `5446718 p_17:164-176`): the shadow multiplies the direct term only, in both the
+  hemisphere and the flat class, and 0.7 + 0.3 x shadow appears only in lighting mode 0 (unlit batches), where today's
+  unlit path returns the base and must take that factor once a shadow is fed. Stage 10 feeds it 1; a later shadow stage
+  feeds it a shadow-map lookup.
 - **The world-lit variants own their passes.** A shadow-caster pass and a shadow-map lookup can be added to the world
   variants (6.6) without touching the Models, Buildings or Characters shaders.
 - **The inputs are already carried.** The light direction is a uniform of its own (`_WmvWL*`), separate from the sun
@@ -1213,7 +1276,8 @@ possible).
 | 3 Time of day and the outdoor light state | done: host 063943e0 (schema 23, the store, protocol 20, 14 new checks, 0 failures on five clients, Stage 09's dumps byte-identical); player 28b10e98 (byte parity with the host's day evaluation on five clients in the runner; in a built player the self-test's outdoor-light cases pass and, at every checkpoint camera, the player selects the zone, Light and LightParams the offline port selects) | `D:\wmv-10\step3`, 13.1 |
 | 4 The first sky | done: 28b10e98 (the pixel program matches the client's operation for operation; the GPU dome equals its CPU twin within 0.0006 over 12,288 pixels); at the checkpoint within 0.3-0.6 dE00 of the game's clean sky, except the dusk shot's lowest sky (3.2-4.7 dE00 at 10-13 deg, open; 13.1) | `D:\wmv-10\step45`, 13.1 |
 | 5 Lit terrain with MCNR normals | done: 28b10e98 (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg; the GPU branch equals its CPU twin within 0.0005 on five probes); at the checkpoint the render equals its offline model on 99.8 % of the lit terrain within 2 sRGB steps (13.1) | `D:\wmv-10\step45`, 13.1 |
-| Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner reviews the pictures before steps 6-9 | `D:\wmv-10\checkpoint\runs\p30a` |
+| Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner approved steps 1-5 on 2026-10-22 | `D:\wmv-10\checkpoint\runs\p30a` |
+| 6 Outdoor world models and doodads | done, the owner reviews its pictures before step 7: the world-lit variants by include split (6.6), the client's M2 and world-model hemisphere program; exterior groups and outdoor doodads lit while the light is shown, interior groups and their doodads on the builder's materials until Stage 12; exterior MOCV deferred; results in 13.2 | `D:\wmv-10\step6`, `D:\wmv-10\checkpoint\runs\p31a`, 13.2 |
 
 **Offline prediction (2026-10-21, before a player could be built; not a viewer render).** The Stage 09 light-off
 renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
@@ -1290,4 +1354,91 @@ was saved at a lower JPEG quality than the other two (visible 8 x 8 blocking).
 **Open.** The owner's review of the pictures. The dusk sky's lowest bands (C). Retail's CPU side (one live Retail shot
 settles it). The terrain specular's share (C). Distant terrain needs a camera that sees past the resident tiles. Then
 steps 6-9 in the order of 7.1; no tuning, fog, water or Stage 11 work has started.
+
+### 13.2 Step 6: outdoor world models and doodads (2026-10-22)
+
+The owner approved steps 1-5 on 2026-10-22 and asked for step 6: the terrain's verified outdoor light adapted to the M2
+and world-model shader semantics the client's bytes establish, no correction for this scene; exterior groups and outdoor
+doodads lit, interiors and their doodads unchanged until Stage 12; exterior MOCV deferred; the Stage 09 fallback, Models,
+Buildings, Characters and the tabard fixes preserved; shadows, ground cover, clouds and water never compensated in the
+light. Spec, research and reviews: `D:\wmv-10\step6` (`spec\step6_spec.md`, revision 2, with its review resolution);
+implementation notes `D:\wmv-10\step6\impl`; the run `D:\wmv-10\checkpoint\runs\p31a`.
+
+**What the client's programs say** (PROVEN_BYTES unless marked; 6.6, 6.15). Doodads are drawn by seven M2 pixel
+containers, byte-identical in Retail, Classic Era and MoP Classic; all 2,688 lit programs were executed, and each matches
+one of two closed forms: the hemisphere class (the terrain's ambient bands and unsaturated wrap, on the normalised normal;
+the direct term saturated on the raw interpolated normal; no specular) or the flat class. The M2 base is the combiner
+times the material colour (the vertex program's 0.5 x colour times the pixel program's 2). World models use the same
+light core; their base is albedo x (1, 0.99998, 1) with the vertex-colour gate off, and dropping the MOCV light is the
+client's exact lighting-mode-1 output. Which class and light set the CPU binds is not in the bytes: hemisphere was
+MEASURED offline on the references before any code (back-facing doodad pixels, game / prediction 0.975-1.026 in every
+channel at three times of day; flat 0.55-0.89) and is confirmed on the renders below.
+
+**Built.** Player p31a (Assembly-CSharp 94415A38A0AB3003) from the step-6 sources. Build 0 errors; lifecycle self-test
+1,103 passed, 0 failed (27 new cases: the variants against their CPU twins within 2.4e-4 with non-unit and downward
+normals, flat arms, tints, unlit and alpha-keyed batches, two-sided faces, the copies' properties, binding and rebinding
+of world models (with liquids) and doodads, placement while shown, the driver's reasons and faults); with
+`WMV_LIGHT=off` 1,063 passed, 0 failed; pure runner 2,511 passed, 0 failed (the client's hemisphere and flat programs
+reproduced within 5e-5 over 54 fixture values; the Retail Stormwind context census as in 2.2); offline compile check:
+the original programs identical (6.6).
+
+**Guards** (gating). The Battle.net launcher patched the Retail client from 12.1.5.70448 to 70529 during the run (storage index
+rewrites at 19:07, 20:15, 20:57 and 21:07; "files not installed" went from Retail 0 / Era 0 / Beta 16 to 62,974 / 47,056 /
+9,609 and back to 0 / 0 / 1,897 on the new build), so only the guard run before 19:07 is compared with the frozen Stage 09
+baseline; every later guard compares the step-6 player with the approved steps 1-5 player p30a item by item, each pair
+run back to back under one install state (the storage index checked before and after every pair;
+`D:\wmv-10\checkpoint\paired_interleaved.ps1`, results in `runs\p31a\paired2`).
+
+| Guard | Result |
+|---|---|
+| `WMV_LIGHT=off` against the Stage 09 baseline (complete 70448 install) | identical: 0 of 258 must-match items differ (terrain, water and border guards, every view incl. depth, Buildings, Models, Characters, the tallies, the light dumps); the count items changed only by the added tests |
+| Light on: Buildings, Models, Characters, paired with p30a | identical: 10 of 10 (the first, unpaired run at 19:08 had failed on files the patch had made unavailable) |
+| Default mode (neither `WMV_LIGHT` nor `-wmvWorldLight`), paired with p30a | identical: 0 of 166 must-match items differ (49 regress pictures, far3 varying as always; 13 of 13 tallies; 17 view counts; every view on four clients incl. the 30 depth views); 2 info lines differ by streaming order only (a world model's liquid credited to the other tile it spans; tiles closed at other moments) |
+| Light-on streaming run (Stormwind life08), paired with p30a | identical: 70 / 0 / 0 checks, 6 clears with every liquid tally 0 after each; the info line differs by streaming order and GUI timing only (GUI rounds over 50 ms: p30a 0, longest 42 ms; step 6 3, longest 93 ms; earlier repeats without step 6 gave 1-3, longest 57-72 ms, so the spread between runs). Binding as instances are placed: 1,123 bursts, 197.6 ms in all, the longest 7.4 ms; no rebind (the light was on from the start); frames over 33 ms 20 against the baseline's 25 |
+| Light on, doodads and world models off, at the seven Southfury cameras and the Crossroads camera (rendered on the 70448 install) | byte-identical to p30a |
+| The tile framing (light shown), doodads and world models off, paired with p30a | byte-identical (0 px); p30a against its own repeat 0 px |
+
+**At the seven Southfury cameras** (`out\objects.md`):
+
+| Check | Result |
+|---|---|
+| Light on, doodads and world models off, against the steps 1-5 player | byte-identical at all seven cameras |
+| Step 6 against that arm outside the world-lit pixels (+3 px) and water | byte-identical at all seven cameras: sky and terrain untouched |
+| The render against its own model (the albedo and normal views x the light) | every labelled object 100.00 % within 2 sRGB steps, mean signed under 0.7 step (38,000-47,000 eligible px per shot) |
+| Back-facing doodad pixels against the game (frozen thresholds) | every object at every shot "matches": k 0.975-1.05 per channel; MAD under 0.1 in red and green (the blue channel, small on these objects, up to 0.47) |
+| Time of day (dawn / noon, dusk / noon) against the game | within 0.01 in red and green, up to 0.034 in the small blue channel: "matches" |
+| Light-facing pixels at dawn and dusk | "differs: cast shadows not drawn (follow-up milestone)": 96 % lie in the terrain's shadow toward the light, and the client's shadow factor would remove 84-87 % of the squared difference; at noon no shadow signature on the trees (the game's leaves are darker on their sunny side: self-shadowing and SSAO, not drawn) |
+| Doodad / terrain luminance ratio at camera hi06, noon / dawn / dusk | game 0.46 / 0.49 / 0.51; Stage 09 0.49; steps 1-5 1.46 / 2.19 / 3.20; step 6 0.48 / 0.52 / 0.55 (every object pixel shadowed: 0.38 / 0.42 / 0.43; the game lies between) |
+| The class decider (palm trunks' blue against N . L, free of the direct light, shadows and the flat constant) | hemisphere at all three times (95 % intervals exclude the flat class's 0); the slopes 0.187 / 0.143 / 0.107 are larger than the hemisphere's 0.121 / 0.097 / 0.095 (C: SSAO, which darkens shaded sides, or the PTR's secondary light; not tuned) |
+| Modulate M2 batches in view | none |
+
+**World models.** None is visible at the Southfury cameras, so world models are "not compared with the game". At a
+viewer-only Crossroads camera (the orc inn, `rig\xr_shots.json`): light on with world models and doodads off equals the
+steps 1-5 player; the interior groups seen through the door (22,964 px) and the doodads interior groups list (2,962 px) are
+byte-identical to it at 12:00 and 18:46; the exterior groups (468,285 px) match their own model on 99.997 %. Pictures:
+`out\stage10_step6_crossroads_1200.png`, `..._1846.png`.
+
+**The tile framing** (the harness's "camera:overview": a perspective framing of the tile from about 990 yd, not the
+orthographic overview): the light is shown there, so its world models and doodads are lit and the picture differs from the
+steps 1-5 player by design; with world models and doodads off it is byte-identical to the steps 1-5 player (paired, one
+install state).
+
+**The owner's pictures.** `out\stage10_step6_owner_comparison.png` (the game, Stage 09 and step 6 at noon, dawn and dusk,
+camera hi06; built as the approved comparison, alignment within 0.04 px) and `out\stage10_step6_trees.png` (the trees and
+palms at 2x: the game, Stage 09, steps 1-5, step 6), the offline prediction sheet beside them labelled as such.
+
+**Documented, not compensated in the light.** Cast shadows (terrain-cast at dawn and dusk, the trees' shadows and their
+self-shadowing at noon) and SSAO: the follow-up milestone of D10. Ground cover: stage 11B. Clouds: D8. Water, its
+reflections and sun glints: step 8. Fog and haze: step 7. Exterior MOCV (2.2, deferred). The interim interiors: Stage 12;
+a doorway shows the step.
+
+**Known choices carried.** MDDF doodads standing inside an interior group's box take the outdoor light (counted and named
+per load). MODD records listed by both kinds or by none, and every record of an incomplete world model, keep today's look.
+Additive and unlit batches keep lum 1; modulate batches would be lit as the builder classifies them (none in view). The M2
+tint is the Models viewer's (linearised by the engine), unchanged. The light is evaluated at the camera. Doodads: "PTR
+12.1.7 (linear 0): Retail M2 equivalence not established; Retail CPU side unverified" until a live Retail shot (T12).
+
+**Open, for the owner.** The review of the step-6 pictures before step 7. The Crossroads capture (PTR `linear 0`, facings
+225 and 45 deg, noon and 18:45) would compare world models with the game and settle their class. The exterior MOCV
+measurement (Ratchet's lantern wall on live Retail or MoP).
 

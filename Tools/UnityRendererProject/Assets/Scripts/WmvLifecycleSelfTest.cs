@@ -4885,6 +4885,8 @@ public static partial class WmvLifecycleSelfTest
         public readonly List<string[]> Sent = new List<string[]>();    // requestId, role, fileDataID, load, epoch
         public readonly WmvTerrainSession Session;
         public double Now = 1000.0;
+        /// <summary>Where the session's log lines go (null: nowhere, as before; Stage 10 step 6 reads its context line).</summary>
+        public Action<string> Log;
         int next;
 
         public TerrainHarness(double timeoutMs = WmvTerrainSession.DefaultTimeoutMs)
@@ -4894,7 +4896,7 @@ public static partial class WmvLifecycleSelfTest
                 string r = "t" + (++next);
                 Sent.Add(new[] { r, role, id.ToString(), load.ToString(), epoch.ToString() });
                 return r;
-            }, r => Reports.Add(r), null, a => a(), timeoutMs);
+            }, r => Reports.Add(r), s => { if (Log != null) Log(s); }, a => a(), timeoutMs);
         }
 
         public string Last(string role)

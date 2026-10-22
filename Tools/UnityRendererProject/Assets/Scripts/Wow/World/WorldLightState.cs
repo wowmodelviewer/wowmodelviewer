@@ -27,7 +27,13 @@
 //                 and 5: -wmvSky=off (no sky, the rest lit), -wmvSkyTable=a|b (the dome's public ring table, SkyDome.cs; a by
 //                 default), -wmvSkyEndFog=off (ring 5 plain SkyFogColor), -wmvTerrainLight=off (the sky kept, the terrain as
 //                 Stage 09 draws it) and -wmvTerrainVariant=hemisphere|flat (the client's flat class, for the record only;
-//                 TerrainLight.cs).
+//                 TerrainLight.cs); Stage 10 step 6 (ModelLight.cs), each acting where the world renderers are bound, never
+//                 in a shader: -wmvDoodadLight=off and -wmvWorldModelLight=off (doodads, world-model groups as Stage 09 draws
+//                 them), -wmvDoodadVariant=hemisphere|flat and -wmvWorldModelVariant=hemisphere|flat (the flat class, for
+//                 the record), -wmvInteriorLight=rig|outdoor (outdoor: interior groups and the doodads they list take the
+//                 outdoor light too, for the side-by-sides of plan 6.13) and the DIAGNOSTIC -wmvWorldLitView=albedo|normal
+//                 (the world-lit variants draw the albedo, or 0.5 + 0.5 x the raw interpolated normal; valid on opaque and
+//                 alpha-keyed batches only).
 
 using System;
 using System.Collections.Generic;
@@ -380,10 +386,26 @@ namespace Wmv.Wow.World
         public bool SkyEndFog = true;                     // -wmvSkyEndFog=off: ring 5 plain SkyFogColor
         public bool TerrainLight = true;                  // -wmvTerrainLight=off: the terrain as Stage 09 draws it
         public bool TerrainFlat;                          // -wmvTerrainVariant=flat: the flat class (for the record)
+        public bool DoodadLight = true;                   // -wmvDoodadLight=off: doodads as Stage 09 draws them
+        public bool WorldModelLight = true;               // -wmvWorldModelLight=off: world-model groups as Stage 09 draws them
+        public bool DoodadFlat;                           // -wmvDoodadVariant=flat: the flat class (for the record)
+        public bool WorldModelFlat;                       // -wmvWorldModelVariant=flat: the flat class (for the record)
+        public bool InteriorOutdoor;                      // -wmvInteriorLight=outdoor: interiors take the outdoor light too
+        public int WorldLitView;                          // -wmvWorldLitView: 0 none, WorldLitViewAlbedo, WorldLitViewNormal
         public readonly List<string> Notes = new List<string>();
 
-        /// <summary>The defaults of the sky and terrain switches (steps 4 and 5)?</summary>
-        public bool DrawDefaults { get { return Sky && !SkyTableB && SkyEndFog && TerrainLight && !TerrainFlat; } }
+        /// <summary>-wmvWorldLitView's values (DIAGNOSTIC; _WmvWLModels.z).</summary>
+        public const int WorldLitViewNone = 0, WorldLitViewAlbedo = 1, WorldLitViewNormal = 2;
+
+        /// <summary>The defaults of the sky, terrain, doodad and world-model switches (steps 4 to 6)?</summary>
+        public bool DrawDefaults
+        {
+            get
+            {
+                return Sky && !SkyTableB && SkyEndFog && TerrainLight && !TerrainFlat && DoodadLight && WorldModelLight && !DoodadFlat &&
+                       !WorldModelFlat && !InteriorOutdoor && WorldLitView == WorldLitViewNone;
+            }
+        }
 
         static bool OnOff(string a, string name, ref bool value, List<string> notes)
         {
@@ -476,6 +498,25 @@ namespace Wmv.Wow.World
                         w.TerrainFlat = a == "-wmvTerrainVariant=flat";
                     else if (a.StartsWith("-wmvTerrainVariant=", StringComparison.Ordinal))
                         w.Notes.Add(a + " is not -wmvTerrainVariant=hemisphere or =flat -- the hemisphere variant");
+                    else if (OnOff(a, "-wmvDoodadLight", ref w.DoodadLight, w.Notes) || OnOff(a, "-wmvWorldModelLight", ref w.WorldModelLight, w.Notes))
+                    {
+                    }
+                    else if (a == "-wmvDoodadVariant=hemisphere" || a == "-wmvDoodadVariant=flat")
+                        w.DoodadFlat = a == "-wmvDoodadVariant=flat";
+                    else if (a.StartsWith("-wmvDoodadVariant=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvDoodadVariant=hemisphere or =flat -- the hemisphere variant");
+                    else if (a == "-wmvWorldModelVariant=hemisphere" || a == "-wmvWorldModelVariant=flat")
+                        w.WorldModelFlat = a == "-wmvWorldModelVariant=flat";
+                    else if (a.StartsWith("-wmvWorldModelVariant=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvWorldModelVariant=hemisphere or =flat -- the hemisphere variant");
+                    else if (a == "-wmvInteriorLight=rig" || a == "-wmvInteriorLight=outdoor")
+                        w.InteriorOutdoor = a == "-wmvInteriorLight=outdoor";
+                    else if (a.StartsWith("-wmvInteriorLight=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvInteriorLight=rig or =outdoor -- interiors keep the preview rig");
+                    else if (a == "-wmvWorldLitView=albedo" || a == "-wmvWorldLitView=normal")
+                        w.WorldLitView = a == "-wmvWorldLitView=albedo" ? WorldLitViewAlbedo : WorldLitViewNormal;
+                    else if (a.StartsWith("-wmvWorldLitView=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvWorldLitView=albedo or =normal -- no diagnostic view");
                 }
             if (cmdOn && cmdOff)
                 w.Notes.Add("-wmvWorldLight=on and =off both given -- off");
@@ -499,14 +540,39 @@ namespace Wmv.Wow.World
                                  Notes.Count > 0 ? "; " + string.Join("; ", Notes.ToArray()) : "");
         }
 
-        /// <summary>What the sky and the terrain draw (steps 4 and 5).</summary>
+        /// <summary>What the sky, the terrain, the doodads and the world models draw (steps 4 to 6).</summary>
         public string DescribeDraw()
         {
             return (Sky ? "sky: the colour dome, table " + (SkyTableB ? "b (-wmvSkyTable=b)" : "a") +
                           (SkyEndFog ? ", ring 5 leaning to EndFogColor" : ", ring 5 plain SkyFogColor (-wmvSkyEndFog=off)")
                         : "sky off (-wmvSky=off)") +
                    (TerrainLight ? "; terrain lit, the " + (TerrainFlat ? "FLAT variant (-wmvTerrainVariant=flat, for the record)" : "hemisphere variant")
-                                 : "; terrain as Stage 09 (-wmvTerrainLight=off)");
+                                 : "; terrain as Stage 09 (-wmvTerrainLight=off)") +
+                   DescribeObjects();
+        }
+
+        /// <summary>What the doodads and the world models draw (step 6), and what is still Stage 09's: DescribeDraw's tail, and
+        /// the capture log line's (WmvWorldLight.Describe). Starts with "; ".</summary>
+        public string DescribeObjects()
+        {
+            const string interiorLit = "lit too (-wmvInteriorLight=outdoor, for the side-by-sides)";
+            return (DoodadLight ? "; doodads: outdoor lit (" + Variant(DoodadFlat, "-wmvDoodadVariant=flat") + "), interior " +
+                                  (InteriorOutdoor ? interiorLit : "as Stage 09")
+                                : "; doodads as Stage 09 (-wmvDoodadLight=off)") +
+                   (WorldModelLight ? "; world models: exterior groups lit (" + Variant(WorldModelFlat, "-wmvWorldModelVariant=flat") + "), interior groups " +
+                                      (InteriorOutdoor ? interiorLit : "on the preview rig until Stage 12")
+                                    : "; world models as Stage 09 (-wmvWorldModelLight=off)") +
+                   "; exterior MOCV not drawn; fog and water as Stage 09" +
+                   (WorldLitView == WorldLitViewAlbedo ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=albedo): the world-lit variants draw the albedo " +
+                                                         "(light factor 1, no world-model gate factor), valid on opaque and alpha-keyed batches only"
+                    : WorldLitView == WorldLitViewNormal ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=normal): the world-lit variants draw 0.5 + 0.5 x the raw " +
+                                                           "interpolated normal (unlit), valid on opaque and alpha-keyed batches only"
+                    : "");
+        }
+
+        static string Variant(bool flat, string flag)
+        {
+            return flat ? "FLAT variant (" + flag + ", for the record)" : "hemisphere variant";
         }
     }
 }

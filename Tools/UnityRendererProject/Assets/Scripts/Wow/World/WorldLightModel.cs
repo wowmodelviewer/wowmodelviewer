@@ -21,6 +21,8 @@
 //                        that construction gives it, with its grade.
 //   the sky              (4.0, 4.3) the sky program's constant and the hypotheses that feed it (SkyDome.cs).
 //   the terrain light    (4.0, 4.5, 6.10, 6.15) the terrain program's constants and the terms held neutral (TerrainLight.cs).
+//   the model light      (2.2, 6.6, 6.7, 6.15; step 6) the M2 and world-model programs' constants, the bases, the variant
+//                        choices and the terms held neutral on doodads and exterior world-model groups (ModelLight.cs).
 
 using System;
 using System.Collections.Generic;
@@ -156,6 +158,52 @@ namespace Wmv.Wow.World
                             "mapping report 2: DirectColor's hue MEASURED, the scale x layer alpha about 0.12"),
         };
 
+        // ---- the model light (plan 2.2, 6.6, 6.7, 6.15; step 6: ModelLight.cs, doodads and exterior world-model groups)
+
+        public static readonly GradedValue[] Models =
+        {
+            new GradedValue("model wrap base", ModelOutdoorLight.WrapBase, ModelOutdoorLight.WrapGrade, "M2 2977063 p_1:219-222; world model 5446718 p_1:185-188"),
+            new GradedValue("model wrap scale", ModelOutdoorLight.WrapScale, ModelOutdoorLight.WrapGrade, "M2 2977063 p_1:219-222; world model 5446718 p_1:185-188"),
+            new GradedValue("model wrap half (0.5 + 0.5 N.L, N.L not saturated)", ModelOutdoorLight.WrapHalf, ModelOutdoorLight.WrapGrade,
+                            "M2 2977063 p_1:219-222; world model 5446718 p_1:185-188"),
+            new GradedValue("H and the wrap on the normalised normal (1 = yes)", 1.0, ProvenBytes, "M2 2977063 p_1:186-190; world model 5446718 p_1:152-156"),
+            new GradedValue("direct term on the raw interpolated normal, saturated (1 = yes)", 1.0, ProvenBytes, "M2 2977063 p_1:223; world model 5446718 p_1:189"),
+            new GradedValue("vertex normal normalised per vertex (1 = yes)", 1.0, ProvenBytes, "M2 vertex 2977756 v_1:61-72; world model 5446713 p_1:73-78"),
+            new GradedValue("combine sqrt((base F)^2 + base^2 local): local light (held)", ModelOutdoorLight.Local, Measured,
+                            "M2 2977063 p_1:278-279, world model 5446718 p_1:247-248; consistent with k about 1 on the back set (measure plan 2.3); placed lights are Stage 12"),
+            new GradedValue("M2 base factor (combiner x _Color, nothing added)", ModelOutdoorLight.M2BaseFactor, ProvenBytes,
+                            "diffuse_* vertex families 2977756 v_1:57-58, v_5:57 (COLOR0 = 0.5 x colour), pixel x 2 2977063 p_1:180-181; the family per batch INFERRED (public)"),
+            new GradedValue("world-model base factor, red and blue (2 x 0.5)", ModelOutdoorLight.WmoGateOffRed, ProvenBytes,
+                            "gate-off COLOR0 5446713 p_1:89, 2977862 p_1:89, pixel x 2 5446718 p_1:146-147; the gate off for exterior batches INFERRED"),
+            new GradedValue("world-model base factor, green (2 x 0.49999)", ModelOutdoorLight.WmoGateOffGreen, ProvenBytes,
+                            "gate-off COLOR0 5446713 p_1:89, 2977862 p_1:89, pixel x 2 5446718 p_1:146-147; the gate off for exterior batches INFERRED"),
+            new GradedValue("doodad variant (0 hemisphere, 1 flat)", 0.0, Measured,
+                            "measure plan 2.3: fits with no free term at three independent times; flat excluded only at K = 0; the trunk blue slope decides on the render"),
+            new GradedValue("world-model variant (0 hemisphere, 1 flat)", 0.0, Inferred,
+                            "the same scene block and classes as the doodads and the terrain; open until a capture with an exterior world model"),
+            new GradedValue("modulate M2 batches (Mod, Mod2x) lit by F (1 = yes, as the builder classifies them)", 1.0, Unknown,
+                            "the client's lighting mode for them is set on the CPU; a labelled choice, counted per blend mode"),
+            new GradedValue("additive M2 batches without flag 0x01 unlit (1 = yes, today's choice)", 1.0, Unknown,
+                            "the client's lighting mode for them is set on the CPU; lighting mode 0 returns the base (PROVEN_BYTES)"),
+            new GradedValue("attenuation (held)", ModelOutdoorLight.Attenuation, Measured, "consistent with k about 1 on the back set (measure plan 2.3)"),
+            new GradedValue("shadow (held; on D only)", ModelOutdoorLight.Shadow, Measured,
+                            "placement PROVEN_BYTES (2977063 p_203:199-212, 5446718 p_17:164-176); right on back-facing pixels, wrong on light-facing ones " +
+                            "at dawn and dusk: cast shadows not drawn (D10, plan 6.15)"),
+            new GradedValue("ambient occlusion (held)", ModelOutdoorLight.Ao, Measured,
+                            "jointly with the base, the scene colours and the secondary light: k about 1 on the back set; SSAO not drawn"),
+            new GradedValue("secondary light G (PTR; held)", 0.0, Measured, "jointly, as the ambient occlusion; Retail has none (PROVEN_BYTES)"),
+            new GradedValue("second directional term (held)", ModelOutdoorLight.SecondLight, Measured, "consistent with k about 1; its source UNKNOWN"),
+            new GradedValue("override weight (held)", ModelOutdoorLight.OverrideWeight, Inferred,
+                            "outdoor context: exterior MOCV alpha 255 on 99.993 % of vertices (groups that carry MOCV only); no data for the rest and for M2"),
+            new GradedValue("world-model MOCV light E (deferred)", ModelOutdoorLight.MocvLight, Unknown,
+                            "its k and per-batch mode are set on the CPU; up to about +0.5 x albedo at the p95 if mode 2 with k = 1 (plan 2.2)"),
+            new GradedValue("world-model per-material colour lerp (held)", 0.0, Unknown, "5446718 p_1 cb0[17]; its source UNKNOWN"),
+            new GradedValue("M2 glow (held)", ModelOutdoorLight.Glow, Unknown, "2977063 p_1:281-300 (cb0[16].w); not drawn today"),
+            new GradedValue("M2 desaturation (held)", ModelOutdoorLight.Desaturation, Unknown, "2977063 p_1:303-308 (cb0[17].w); not drawn today"),
+            new GradedValue("flat class K (cb8[9]; the flat arms only)", ModelOutdoorLight.FlatK, Unknown, "the flat class's rejection holds at K = 0 only"),
+            new GradedValue("M2 specular", 0.0, ProvenBytes, "0 of 2,688 lit M2 programs read cb8[7]"),
+        };
+
         /// <summary>Every constant above in one list (the log's).</summary>
         public static IList<GradedValue> Table()
         {
@@ -171,6 +219,7 @@ namespace Wmv.Wow.World
             t.AddRange(Rings);
             t.AddRange(Sky);
             t.AddRange(Terrain);
+            t.AddRange(Models);
             return t;
         }
 

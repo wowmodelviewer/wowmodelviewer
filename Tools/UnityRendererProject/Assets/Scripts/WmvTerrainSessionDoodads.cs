@@ -31,6 +31,11 @@
 //     load, its pixels released once the last model waiting for it is built (its file's bytes kept to decode it again for a
 //     later model: the host serves an id once per load), and uploaded once per scene (WmvDoodadTextures).
 //   - The scene owns its doodads: disposed before its world models, with its tiles (DisposeWorldScene).
+//   - THE OUTDOOR LIGHT'S CONTEXTS (Stage 10 step 6, Wow/World/ModelLight.cs): at discovery every WMO doodad takes its MODD
+//     record's context from its world model's prototype (WmvWorldPrototype.ModdContexts: OUTDOOR when only exterior groups list
+//     it; every record INTERIOR_INTERIM when a group file could not be read); an MDDF doodad is OUTDOOR. One line per load
+//     says the contexts and counts the MDDF doodads standing inside an interior group's box. Never with WMV_LIGHT=off; the
+//     counts live in the log only (no report field).
 
 using System;
 using System.Collections.Generic;
@@ -203,6 +208,7 @@ public sealed partial class WmvTerrainSession
                 Log("load {0}: doodad plan note: {1}", cmd.Load, n);
         }
         int wmoWithoutRoot = 0, missingGroupDoodads = 0;
+        LightContextCensus contexts = WmvWorldLight.HardOff ? null : new LightContextCensus();
         for (int i = 0; i < w.Placements.Count; i++)
         {
             PlacementWork pw = w.Placements[i];
@@ -222,6 +228,8 @@ public sealed partial class WmvTerrainSession
             WmoGroup[] groups = pw.Instance.Prototype.Groups;
             if (Array.IndexOf(groups, null) >= 0)
                 missingGroupDoodads += DoodadPlan.MarkMissingGroups(list, DoodadPlan.GroupMembership(root, groups), groups);
+            if (contexts != null)
+                contexts.Add(pw.Instance.Prototype, pw.P, list);
             if (list.Count > 0)
                 d.WmoPlacementsWithDoodads++;
             d.WmoDoodadRecords += list.Count;
@@ -281,7 +289,82 @@ public sealed partial class WmvTerrainSession
                 Log("load {0}:   WMO {1} uniqueId {2}: placement set {3} of {4} -> sets [{5}] ({6}), {7} record(s){8}", cmd.Load, s.WmoFileDataID,
                     s.UniqueId, s.Requested, s.SetCount, string.Join(", ", s.Active), string.Join(", ", s.Names), s.Records,
                     s.Reason != null ? " -- " + s.Reason : "");
+        if (contexts != null)
+            Log("load {0}: outdoor light contexts: {1}", cmd.Load, contexts.Describe(all));
         AdvanceDoodads(j);
+    }
+
+    /// <summary>Stage 10 step 6: a load's outdoor-light contexts (its line, StartDoodads): the placed world models and their
+    /// groups, the WMO doodads by context and listing (each doodad's Context set here from its world model's MODD contexts), and
+    /// the MDDF doodads inside an interior group's box (WorldLightContexts.MddfInsideInterior over the world models this load
+    /// placed: in a streaming session an MDDF doodad inside a world model another tile's load placed is not seen).</summary>
+    sealed class LightContextCensus
+    {
+        public int Placements, Incomplete, IncompleteDoodads, Exterior, Interior, NeitherOrBoth, InteriorExteriorLit;
+        public int ListedByExterior, Interim, ListedByBoth, ListedByNone;
+        public readonly List<string> Both = new List<string>();
+        public readonly List<WorldModelGeometry> Models = new List<WorldModelGeometry>();
+        const int BothNamed = 8;
+
+        /// <summary>A placed world model and the doodads of its active sets: each doodad's context from the prototype's MODD
+        /// contexts, counted (the placeable ones; for an incomplete prototype every doodad of its active sets, as interim).</summary>
+        public void Add(WmvWorldPrototype proto, WorldModelPlacement placement, List<WorldDoodad> doodads)
+        {
+            ModdContexts mc = proto.ModdContexts;
+            Placements++;
+            Exterior += mc.ExteriorGroups;
+            Interior += mc.InteriorGroups;
+            NeitherOrBoth += mc.NeitherOrBothGroups;
+            InteriorExteriorLit += mc.InteriorExteriorLitGroups;
+            if (mc.Incomplete)
+            {
+                Incomplete++;
+                IncompleteDoodads += doodads.Count;
+            }
+            Models.Add(new WorldModelGeometry(placement, proto.Root, proto.Groups));
+            foreach (WorldDoodad dd in doodads)
+            {
+                dd.Context = mc.Of(dd.ModdIndex);
+                if (dd.Unsupported != null)
+                    continue;
+                if (dd.Context == WorldLightContext.Outdoor)
+                {
+                    ListedByExterior++;
+                    continue;
+                }
+                Interim++;
+                byte listing = dd.ModdIndex >= 0 && dd.ModdIndex < mc.Listing.Length ? mc.Listing[dd.ModdIndex] : (byte)0;
+                if (listing == (ModdContexts.ByExterior | ModdContexts.ByInterior))
+                {
+                    ListedByBoth++;
+                    if (Both.Count < BothNamed)
+                        Both.Add("WMO " + dd.WmoFileDataID + " MODD " + dd.ModdIndex);
+                }
+                else if (listing == 0)
+                    ListedByNone++;
+            }
+        }
+
+        /// <summary>The line's text, with the MDDF doodads among `all` (the load's discovered doodads).</summary>
+        public string Describe(List<WorldDoodad> all)
+        {
+            var mddf = new List<WorldDoodad>();
+            foreach (WorldDoodad dd in all)
+                if (dd.Source == DoodadSource.Mddf)
+                    mddf.Add(dd);
+            InteriorDoodadCensus inside = WorldLightContexts.MddfInsideInterior(mddf, Models);
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                 "world models {0} placement(s) ({1} incomplete: their {2} doodad(s) of the active sets interior-interim), {3} group(s): " +
+                                 "{4} exterior, {5} interior ({6} with neither or both flags; {7} interior with 0x40); doodads {8} outdoor ({9} MDDF, of which " +
+                                 "{10} stand inside an interior group's box of this load's world models{11}; {12} listed by exterior groups), {13} interior-interim " +
+                                 "({14} listed by both kinds{15}; {16} listed by no group)",
+                                 Placements, Incomplete, IncompleteDoodads, Exterior + Interior, Exterior, Interior, NeitherOrBoth, InteriorExteriorLit,
+                                 inside.Doodads + ListedByExterior, inside.Doodads, inside.Inside,
+                                 inside.Names.Count > 0 ? ": " + string.Join("; ", inside.Names.ToArray()) + (inside.Inside > inside.Names.Count ? "; ..." : "") : "",
+                                 ListedByExterior, Interim,
+                                 ListedByBoth, Both.Count > 0 ? ": " + string.Join(", ", Both.ToArray()) + (ListedByBoth > Both.Count ? ", ..." : "") : "",
+                                 ListedByNone);
+        }
     }
 
     // ---------------------------------------------------------------- fetching

@@ -11,7 +11,8 @@
 // and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set. The outdoor light's fixture part
 // (WorldLightTests.cs) runs when WMV_WORLD_LIGHT_FIXTURES names the offline fixtures, and reads the host's own objects
 // from WMV_WORLD_LIGHT_HOST_DUMPS when that is set; the MCNR proof on the four Southfury tiles (SkyTerrainLightTests.cs) runs
-// when WMV_MCNR_TILES names the folder holding them.
+// when WMV_MCNR_TILES names the folder holding them. The world-model context census (WorldModelLightTests.cs) runs under the
+// corpus condition.
 
 using System;
 using System.Globalization;
@@ -118,6 +119,11 @@ static class Program
         // MCNR mapping proved again on the four Southfury tiles.
         Console.WriteLine("== SkyTerrainLightTests (the sky dome and program, MCNR and the terrain light; Southfury tiles when given)");
         failures += SkyTerrainLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 6: the outdoor light on doodads and exterior world-model groups against the client's own programs, and the
+        // context rule; with WMV_WORLD_AUDIT_CORPUS the census of the client's world models.
+        Console.WriteLine("== WorldModelLightTests (doodad and world-model light, the client's programs, the contexts; census when given)");
+        failures += WorldModelLightTests.RunAll(Console.WriteLine);
 
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))

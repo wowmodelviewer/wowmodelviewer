@@ -3,16 +3,21 @@
 // THE OUTDOOR LIGHT'S FRAME STATE (Stage 10, docs/world-viewer/10-light-sky-fog.md 6.5): once per rendered frame, the scene's
 // outdoor light (its load's "worldLight", Wow/World/WorldLight.cs; WmvTerrainSession.SceneWorldLight) evaluated at the main
 // camera's game position on the world clock (WorldClock) and eased (WorldLightEase, Wow/World/WorldLightState.cs), then
-// published as GLOBALS for the main camera in the world view only. Read by the sky (step 4: WmvWorldSky, Resources/WmvSky.shader)
-// and the terrain (step 5: Resources/WmvTerrainTextured.shader's world-lit branch); world models, doodads, fog and water read
-// nothing of it yet. RenderSettings, the preview rig and the shadow rig are never touched. The globals (colours authored 0..1
-// = the table's byte / 255, w 1; directions in Unity's world frame, w 0):
+// published as GLOBALS for the main camera in the world view only. Read by the sky (step 4: WmvWorldSky, Resources/WmvSky.shader),
+// the terrain (step 5: Resources/WmvTerrainTextured.shader's world-lit branch), and the exterior world-model groups and outdoor
+// doodads (step 6: Resources/WmvWorldLight.hlsl in the world-lit variants WmvOpaqueWorld.shader and WmvWmoWorld.shader, which
+// WmvWorldLitMaterials binds while ObjectsLit); fog and water read nothing of it yet. RenderSettings, the preview rig and the
+// shadow rig are never touched. The globals (colours authored 0..1 = the table's byte / 255, w 1; directions in Unity's world
+// frame, w 0):
 //   _WmvWLOn               1 while the main camera of the world view renders with a valid light; 0 at every other camera's
 //                          begin, at every camera's end, in WmvTerrainComposite's renders, in the self-test's fixtures, with no
 //                          scene, a scene without an outdoor light, an invalid light (its base light has no keys), in the
 //                          top-down overview (orthographic), while switched off -- and never set at all with WMV_LIGHT=off.
 //                          Written only when it changes, so outside the world view the per-camera handlers write nothing
 //   _WmvWLTerrain          (the terrain lit: 1, or 0 with -wmvTerrainLight=off; the flat variant: 1 with -wmvTerrainVariant=flat)
+//   _WmvWLModels           (the doodads' flat arm: 1 with -wmvDoodadVariant=flat; the world models' flat arm: 1 with
+//                          -wmvWorldModelVariant=flat; the DIAGNOSTIC view of -wmvWorldLitView: 0 none, 1 the albedo, 2 the raw
+//                          normal; 0 -- step 7's fog)
 //   _WmvWLLightDir         towards the directional light (WorldLightModel: from the north-west, 37/20 deg by the hour -- the
 //                          public table, MEASURED within 2.5 deg at three times in step 1); it does not follow the sun
 //   _WmvWLSunDir           towards the sun (WorldLightModel's sun path, INFERRED (public); below the horizon at night)
@@ -42,8 +47,10 @@
 // THE SWITCHES (WorldLightSwitches, read once): WMV_LIGHT=off -- hard off, nothing installed, evaluated, set or logged (Stage 09
 // exactly); WMV_LIGHT=on or -wmvWorldLight=on -- on from the start (the default is off until the owner accepts the stage, D14);
 // -wmvGameTime=HH:MM[:SS] (pinned; 12:00:00 by default), -wmvGameFarclip=N; the debug arms -wmvLightRule, -wmvLightWrap; the
-// sky's and terrain's -wmvSky, -wmvSkyTable, -wmvSkyEndFog, -wmvTerrainLight, -wmvTerrainVariant. The host switches it, its
-// clock, its time and the far clip with setWorldLight (SetFromHost).
+// sky's and terrain's -wmvSky, -wmvSkyTable, -wmvSkyEndFog, -wmvTerrainLight, -wmvTerrainVariant; the world models' and
+// doodads' -wmvDoodadLight, -wmvWorldModelLight, -wmvDoodadVariant, -wmvWorldModelVariant, -wmvInteriorLight and the diagnostic
+// -wmvWorldLitView (they act where the world's renderers are bound, WmvWorldLitMaterials, except the flat arms and the view,
+// which _WmvWLModels carries). The host switches it, its clock, its time and the far clip with setWorldLight (SetFromHost).
 // THE LOG: one line per load and per change of the base light (zone, Light, LightParams, time, valid), one per setWorldLight;
 // Describe() is the capture log line's field. None of it with WMV_LIGHT=off.
 
@@ -71,7 +78,7 @@ public static class WmvWorldLight
                                EndFogColorId = Shader.PropertyToID("_WmvWLEndFogColor"), SunFogColorId = Shader.PropertyToID("_WmvWLSunFogColor"),
                                FogHeightColorId = Shader.PropertyToID("_WmvWLFogHeightColor"),
                                EndFogHeightColorId = Shader.PropertyToID("_WmvWLEndFogHeightColor"), FrameId = Shader.PropertyToID("_WmvWLFrame"),
-                               TerrainId = Shader.PropertyToID("_WmvWLTerrain");
+                               TerrainId = Shader.PropertyToID("_WmvWLTerrain"), ModelsId = Shader.PropertyToID("_WmvWLModels");
 
     /// <summary>The colour globals in the order Publish sets them, with their column (WorldLightColumns).</summary>
     static readonly int[] ColourIds =
@@ -216,8 +223,8 @@ public static class WmvWorldLight
         }
         SetOn(false);
         Say("world light: " + w.Describe() + "; light direction " + WorldLightModel.LightDirectionGrade + ", sun path " + WorldLightModel.SunPathGrade +
-            ", game far clip default " + WorldLightModel.DefaultFarClipGrade + " (the reference sessions' setting); read by the sky and the " +
-            "terrain (steps 4 and 5)");
+            ", game far clip default " + WorldLightModel.DefaultFarClipGrade + " (the reference sessions' setting); read by the sky, the " +
+            "terrain, exterior world-model groups and outdoor doodads (steps 4-6)");
     }
 
     /// <summary>The terrain session's end (WmvMain.DisposeTerrain): removes the handlers when `who` installed them, and only then
@@ -327,6 +334,13 @@ public static class WmvWorldLight
     /// <summary>Is there a valid eased state to show for the main camera now (on, evaluated, valid, not pinned off)?</summary>
     static bool Showing { get { return Enabled && evaluated && ease.Valid && pinnedOff == 0; } }
 
+    /// <summary>Stage 10 step 6: the world's renderers are drawn lit now (WmvMain.WorldLightFrame binds them by it,
+    /// WmvWorldLitMaterials.BindFrame) -- on, evaluated at the main camera of the perspective world view, the light valid:
+    /// Showing without the fixtures' pin (a fixture draws no world prototype, and a rebind per composite would be wasted). False
+    /// in the top-down overview and outside the world view (no set is evaluated there), with the camera not placed, without a
+    /// valid light, while off, after a fault (FailOff) and with WMV_LIGHT=off.</summary>
+    public static bool ObjectsLit { get { return Enabled && evaluated && ease.Valid; } }
+
     /// <summary>The globals for the camera rendering now (the main camera's begin): every value from the eased state, then
     /// _WmvWLOn 1 -- or only _WmvWLOn 0 when there is nothing valid to show, while pinned off, or switched off.</summary>
     static void Publish()
@@ -356,7 +370,15 @@ public static class WmvWorldLight
         Shader.SetGlobalVector(HeightDensityCoefId, Floats(v, d, d + 1, d + 2, d + 3));
         Shader.SetGlobalVector(FrameId, new Vector4((float)farClip, (float)originZ, clock.HalfMinute, (float)clock.Effective));
         Shader.SetGlobalVector(TerrainId, new Vector4(Switches.TerrainLight ? 1f : 0f, Switches.TerrainFlat ? 1f : 0f, 0f, 0f));
+        Shader.SetGlobalVector(ModelsId, ModelsVector());
         SetOn(true);
+    }
+
+    /// <summary>_WmvWLModels from the switches: (doodads' flat arm, world models' flat arm, -wmvWorldLitView, 0).</summary>
+    public static Vector4 ModelsVector()
+    {
+        WorldLightSwitches w = Switches;
+        return new Vector4(w.DoodadFlat ? 1f : 0f, w.WorldModelFlat ? 1f : 0f, w.WorldLitView, 0f);
     }
 
     /// <summary>The sky and bloom for this render of the main camera (WmvMain, after Frame): bloom held at 0 while the light is
@@ -514,7 +536,7 @@ public static class WmvWorldLight
             return "world light on: no outdoor light here (" + WorldClock.Format(clock.Effective) + ", " + clock.Source + ")";
         return "world light on: " + StateText() + " -- drawn: " + (skyDrawn ? "the sky" : "no sky") + ", " +
                (Switches.TerrainLight ? "the terrain lit" + (Switches.TerrainFlat ? " (FLAT variant)" : "") : "the terrain unlit (-wmvTerrainLight=off)") +
-               "; world models, doodads, fog and water as Stage 09";
+               Switches.DescribeObjects();
     }
 
     static string StateText()

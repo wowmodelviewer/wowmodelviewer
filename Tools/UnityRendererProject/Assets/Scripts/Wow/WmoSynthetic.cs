@@ -416,5 +416,72 @@ namespace Wmv.Wow
             }
             return BuildGroup(spec);
         }
+
+        // ------------------------------------------------------------------ context model (Stage 10 step 6)
+
+        /// <summary>
+        /// A small valid WMO whose groups carry chosen flags, for the outdoor light's context rule (Wow/World/ModelLight.cs):
+        /// group i is SquaresRoot's square i (12 units apart along +X) with a box 10 units high, its flags `groupFlags[i]`
+        /// written into MOGI (ContextGroup writes them into MOGP). The two materials are SquaresRoot's (0: opaque, texture1 =
+        /// `textureFileDataId`; 1: two-sided alpha-keyed, no texture), so groups of either kind can draw the same MOMT entry.
+        /// `moddRecords` (40 bytes each), when given, are written as MODD; a caller that needs MODS and MODI appends them to the
+        /// returned bytes as chunks of its own (the root's chunks are a flat list).
+        /// GFID uses `firstGroupFileDataId` + i. SquaresRoot and SquaresGroup are not changed by this.
+        /// </summary>
+        public static byte[] ContextRoot(uint[] groupFlags, uint firstGroupFileDataId, uint textureFileDataId, byte[][] moddRecords)
+        {
+            int groupCount = groupFlags.Length;
+            var spec = new RootSpec
+            {
+                Materials = new[]
+                {
+                    Material(0, 0, 0, textureFileDataId),
+                    Material(WmoMaterial.FlagCullDisabled, 0, 1, 0),
+                },
+                GroupInfos = new byte[groupCount][],
+                GroupFileDataIDs = new uint[groupCount],
+                GroupNames = new string[groupCount],
+                BoundsMin = new WowVec3(0f, 0f, 0f),
+                BoundsMax = new WowVec3(12f * Math.Max(0, groupCount - 1) + 10f, 10f, 10f),
+            };
+            int nameOffset = 1;
+            for (int i = 0; i < groupCount; i++)
+            {
+                spec.GroupNames[i] = "context" + i;
+                spec.GroupInfos[i] = GroupInfo(groupFlags[i], new WowVec3(12f * i, 0f, 0f), new WowVec3(12f * i + 10f, 10f, 10f), nameOffset);
+                nameOffset += spec.GroupNames[i].Length + 1;
+                spec.GroupFileDataIDs[i] = firstGroupFileDataId + (uint)i;
+            }
+            if (moddRecords != null)
+                spec.ExtraChunks.Add(new KeyValuePair<string, byte[]>("MODD", Concat(moddRecords)));
+            return BuildRoot(spec);
+        }
+
+        /// <summary>Group `groupIndex` of ContextRoot: the square, its MOGP flags `flags` (0x800 added when `modr` is given,
+        /// with MODR), one batch drawing material `materialId` (MOBA and MPY2).</summary>
+        public static byte[] ContextGroup(int groupIndex, uint flags, int materialId, ushort[] modr = null)
+        {
+            float x = 12f * groupIndex;
+            var spec = new GroupSpec
+            {
+                Flags = flags,
+                AutoBounds = false,
+                BoundsMin = new WowVec3(x, 0f, 0f),
+                BoundsMax = new WowVec3(x + 10f, 10f, 10f),
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                // counter-clockwise seen from +Z, the format's front-face convention
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, materialId) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)materialId, (byte)(materialId >> 8), 0x20, 0, (byte)materialId, (byte)(materialId >> 8) },
+            };
+            spec.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
+            if (modr != null)
+            {
+                spec.Flags |= WmoGroupFlags.DoodadRefs;    // has doodads: MODR present
+                spec.ExtraChunks.Add(new KeyValuePair<string, byte[]>("MODR", U16s(modr)));
+            }
+            return BuildGroup(spec);
+        }
     }
 }
