@@ -27,6 +27,24 @@ Concretely:
   again. Nothing ships the player yet -- neither the installer nor the CMake install rules
   include it -- so it is built locally (see "Locating the player").
 
+## Effects without a surface mesh
+
+M2 effects may contain only particle or ribbon emitters, with zero vertices and an
+empty skin profile. The builder accepts these when parsed emitter definitions exist,
+retaining the skeleton and animation clock. Truly empty models are still rejected.
+For effects with no surface triangles, framing samples the first second of emitted
+geometry and then resets the pose and simulation. This avoids using invalid M2 header
+bounds; effects with no geometry during that interval use a small origin-centred fallback.
+It is an initial preview envelope, not a guarantee of bounds for every later animation.
+
+`-wmvLifecycleTest` includes particle-only, ribbon-only and combined empty-surface
+fixtures, checking framing, playback reset, emission, pause, sequence switching and
+disposal. Real-client regression cases: `spells/cfx_mage_fireball_missile.m2`
+(1327009), `spells/cfx_mage_fireball_precasthands.m2` (1327008), and the existing
+mesh-based `spells/cfx_mage_arcanemissiles_missile.m2` (1594683). Load each, change
+animation, pause/resume, switch to a creature and back, and capture the viewport.
+This affects the embedded preview; it does not add particle export to FBX.
+
 ## Equipment on exclusive NPC models (protocol 11)
 
 An exclusive NPC remains an ordinary `loadWoWModel` (`character: false`). Its equipment travels

@@ -297,6 +297,38 @@ public class WmvEmitterRuntime : MonoBehaviour
 
     public bool HasAnything { get { return particles.Count > 0 || ribbons.Count > 0; } }
 
+    /// <summary>Frame effects without a surface mesh using their first second of geometry.
+    /// Reset both the simulation and pose afterwards; playback still starts at zero.</summary>
+    public Bounds MeasurePreviewBounds(Func<float, float> sequenceTimeAt, Action<float> poseAt)
+    {
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.one * 2f);
+        bool any = false;
+        ResetState();
+        try
+        {
+            for (int step = 1; step <= 60; step++)
+            {
+                float wall = step * (1000f / 60f);
+                float seq = sequenceTimeAt(wall);
+                poseAt(seq);
+                Advance(1f / 60f, seq, wall);
+                Build(seq, wall);
+                foreach (Mesh mesh in ownedMeshes)
+                {
+                    if (mesh.vertexCount == 0) continue;
+                    if (!any) { bounds = mesh.bounds; any = true; }
+                    else bounds.Encapsulate(mesh.bounds);
+                }
+            }
+            return bounds;
+        }
+        finally
+        {
+            ResetState();
+            poseAt(0f);
+        }
+    }
+
     // =========================================================================================
     // Build
     // =========================================================================================
