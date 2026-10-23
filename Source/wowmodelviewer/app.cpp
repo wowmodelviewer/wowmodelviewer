@@ -15355,6 +15355,8 @@ bool WowModelViewApp::OnInit()
         doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath, optCustomizations, optEquipment, equipmentRequest);
         return false;
       }
+      if (unityIpcTest)
+        doHeadlessUnityIpcTest(frame);
       logNoHeadlessScreenshot();
       return false;
     }

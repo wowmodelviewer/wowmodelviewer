@@ -1,4 +1,5 @@
 #include "AnimationFileSnapshot.h"
+#include "SkeletonAnimationOverlay.h"
 #include "CASCChunks.h"
 #include "animated.h"
 #include <QJsonArray>
@@ -132,7 +133,7 @@ static RawTrack<T> rawTrack(const AnimationBlock &b, int source,
   result.interpolation = b.type;
   require(b.type == 0 || b.type == 1, "unsupported oracle interpolation");
   int index = b.seq >= 0 ? 0 : source;
-  if (index >= b.nTimes || index >= b.nKeys)
+  if (index < 0 || index >= b.nTimes || index >= b.nKeys)
     return result;
   const auto th =
       rawValue<AnimationBlockHeader>(headers, b.ofsTimes + 8 * index);
@@ -158,6 +159,31 @@ static RawTrack<T> rawTrack(const AnimationBlock &b, int source,
   return result;
 }
 static void synthetic() {
+  // Child sequence order, aliases, globals and interpolation must remain local
+  // to their source after a parent/child union.
+  std::vector<ModelAnimation> parent(3), child(2);
+  parent[0].animID = 0; parent[1].animID = 4; parent[2].animID = 5;
+  child[0].animID = 4; child[1].animID = 0;
+  child[0].NextAnimation = child[1].NextAnimation = -1;
+  child[1].flags = 0x40; child[1].Index = 0;
+  std::vector<Bone> pb(1), cb(1);
+  pb[0].parent = cb[0].parent = -1;
+  pb[0].boneDef.keyboneid = cb[0].boneDef.keyboneid = 0;
+  for (auto * b : {&pb[0], &cb[0]}) {
+    b->trans.seq = b->rot.seq = b->scale.seq = -1;
+    b->trans.type = b->rot.type = b->scale.type = 0;
+  }
+  pb[0].trans.type = 1; pb[0].trans.times[2] = {0, 100};
+  pb[0].trans.data[2] = {glm::vec3(1), glm::vec3(3)};
+  cb[0].trans.seq = 0; cb[0].trans.globals = {100};
+  cb[0].trans.times[0] = {0, 50}; cb[0].trans.data[0] = {glm::vec3(7), glm::vec3(9)};
+  require(overlaySkeletonAnimations(parent, pb, child, cb), "skeleton overlay failed");
+  require(parent[0].Index == 1, "child alias not remapped by identity");
+  require(pb[0].trans.getValueAtGlobalTime(1, 0, 175).x == 9, "child global clock lost");
+  require(pb[0].trans.getValueAtGlobalTime(2, 50, 175).x == 2, "parent interpolation lost");
+  require(pb[0].trans.getValueAtGlobalTime(0, 0, 0).x == 7, "reordered child track lost");
+  auto duplicateChild = child; duplicateChild.push_back(child[0]);
+  require(!overlaySkeletonAnimations(parent, pb, duplicateChild, cb), "duplicate child identity accepted");
   modelAnimData d;
   d.sequences.resize(8);
   d.sequences[0].animID = 69;
@@ -331,9 +357,12 @@ static void collect(FbxNode *n, std::vector<FbxNode *> &bones) {
   for (int i = 0; i < n->GetChildCount(); ++i)
     collect(n->GetChild(i), bones);
 }
+#include "orc-regression.h"
+
 int main(int argc, char **argv) {
   try {
     synthetic();
+    if (argc == 5 && std::string(argv[1]) == "--orc") return verifyOrc(argv[2], argv[3], argv[4]);
     if (argc == 1)
       return 0;
     require(

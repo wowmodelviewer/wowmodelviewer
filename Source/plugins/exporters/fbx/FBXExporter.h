@@ -182,6 +182,7 @@ class FBXExporter : public ExporterPlugin
     bool exportCustomizationPackage(WoWModel *, const std::wstring & target);
     bool describeCustomizationGeometry();
     bool m_packageScene = false;
+    bool m_postureVariant = false;
     QJsonArray m_packageGeometry;
 
     // Bakes a multi-texture-unit M2 combiner pass (see ModelRenderPass::init()/render(), the

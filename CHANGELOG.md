@@ -19,6 +19,7 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   table).
 
 ### Fixed
+- **Male Orc customization packages rejected faces with posture-specific bone corrections.** Both Hunched and Upright now export their own model, skeleton, facial corrections and selected animations. These packages use catalog version 2; consumers must select the posture catalog before composing the character. The database cache rebuilds once for the conditional-model table (schema 23).
 - **Some Classic helms, shoulders, bracers, belts and pants painted a whole outfit on the body (#110).** In the
   Classic clients' data, some of these displays also list a full set's chest, sleeve and leg textures, and the
   viewer painted them all: the Lightbringer helm alone dressed a character in a plate suit, and the Lightbringer
