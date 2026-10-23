@@ -13,7 +13,7 @@ Run once for the root Hunched package and once for its nested Upright package.
 The oracle independently chooses each native sequence by ID/sub-ID, reads its
 tracks directly and compares all baked FBX frames after SDK reimport. It also
 checks take names and durations. It detects the supplied pre-fix Upright package;
-the old catalog without `animations` is recognized only as the documented 0â€“225
+the old catalog without `animations` is recognized only as the documented 0–225
 selection. No source files or expected poses are committed.
 
 For HumanMale, supply the read-only raw fixtures from the diagnosis (build 12.1.0.69933). Expected poses are read and sampled independently of `Animated<>`, the production alias resolver and snapshot helper, using the diagnosed sequence/file pairs. The harness imports the new FBX with the FBX SDK and checks the 12 affected clips and the fifth dance / EmoteDanceSpecial controls: names, duration, source key finiteness, monotonic times, motion and translation/scale/quaternion samples at every baked frame on all 216 bones. Quaternion comparison is orientation-based, so Euler unrolling and quaternion sign changes do not create false failures. Translation/scale properties preserve signed scales; decomposing a matrix would incorrectly turn negative scales into rotation differences.
