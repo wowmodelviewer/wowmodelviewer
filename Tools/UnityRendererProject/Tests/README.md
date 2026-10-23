@@ -2,6 +2,15 @@
 
 Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/Wow`, no UnityEngine):
 
+Orc posture regression: set `WMV_ORC_POSTURE_CORPUS` to a local raw-file directory
+containing models 917116/1968587, skeletons 1964411/1969462 and their AFID files
+(named `<FileDataID>.bin`). The runner checks the 151 selected animation identities
+on both bodies against their native source tracks, including external animations,
+aliases and global clocks. It writes `preview-tracks.json` alongside that local
+corpus for Stand/Walk/Run. Keep the corpus and derived poses outside Git. Synthetic
+`posture:` tests run without these assets and cover child overrides, inherited and
+appended identities, source-local AFIDs, global periods, pivots and switching back.
+
 - `WowParserTests.cs`: M2, skin, BLP, WMO and the model-space coordinate conversion.
 - `WorldParserTests.cs`: the world parsers (`Assets/Scripts/Wow/World`) on hand-built bytes: WDT, split ADT,
   terrain coordinates and vertex layout, holes, alpha storage, placements, tile assembly, and truncated or

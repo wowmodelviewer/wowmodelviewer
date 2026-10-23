@@ -5,6 +5,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "CustomizationBoneFile.h"
+#include "CustomizationBoneSelection.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <functional>
@@ -137,6 +138,41 @@ bool CharDetails::customizationCatalog(QJsonObject & catalog, QString & reason) 
   std::map<uint, QString> onames, cnames;
   for (const auto & r : optionNames.values) onames[r[0].toUInt()] = r[1];
   for (const auto & r : choiceNames.values) cnames[r[0].toUInt()] = r[1];
+  // Orc posture swaps the complete body, not just a correction on the same skeleton.
+  // Resolve it from the client's conditional-model table, never by bone-index remapping.
+  std::map<uint, int> bodyChoiceModels;
+  uint bodyOption = 0;
+  const auto conditional = GAMEDATABASE.sqlQuery(QString("SELECT C.ID, C.ChrCustomizationOptionID, E.RelatedChrCustomizationChoiceID, E.ChrCustomizationCondModelID FROM ChrCustomizationElement E JOIN ChrCustomizationChoice C ON C.ID=E.ChrCustomizationChoiceID JOIN ChrCustomizationOption O ON O.ID=C.ChrCustomizationOptionID WHERE O.ChrModelID=%1 AND E.ChrCustomizationCondModelID<>0").arg(chr));
+  if (!conditional.valid) return fail("Cannot read conditional customization models.");
+  for (const auto & row : conditional.values)
+  {
+    const uint choice = row[0].toUInt(), option = row[1].toUInt();
+    if (!included.count(choice)) continue;
+    if (model_->infos.raceID != 2 || model_->infos.sexID != 0 || row[2].toUInt() ||
+        (bodyOption && bodyOption != option) || bodyChoiceModels.count(choice))
+      return fail("This character uses an unsupported conditional body selection.");
+    const auto body = GAMEDATABASE.sqlQuery(QString("SELECT M.FileDataID FROM ChrCustomizationCondModel C JOIN CreatureModelData M ON M.ID=C.CreatureModelDataID WHERE C.ID=%1").arg(row[3]));
+    if (!body.valid || body.values.size() != 1 || body.values[0][0].toInt() <= 0)
+      return fail("Cannot resolve the conditional body model.");
+    bodyOption = option;
+    bodyChoiceModels[choice] = body.values[0][0].toInt();
+  }
+  QJsonArray bodyModels;
+  if (bodyOption)
+  {
+    const auto base = GAMEDATABASE.sqlQuery(QString("SELECT M.FileDataID FROM ChrModel C JOIN CreatureDisplayInfo D ON D.ID=C.DisplayID JOIN CreatureModelData M ON M.ID=D.ModelID WHERE C.ID=%1").arg(chr));
+    if (!base.valid || base.values.size() != 1) return fail("Cannot resolve the default body model.");
+    bool currentKnown = false;
+    for (uint choice : choicesPerOptionMap_.at(bodyOption))
+    {
+      if (!included.count(choice)) continue;
+      if (!bodyChoiceModels.count(choice)) bodyChoiceModels[choice] = base.values[0][0].toInt();
+      const int file = bodyChoiceModels.at(choice);
+      currentKnown = currentKnown || file == model_->gamefile->fileDataId();
+      bodyModels.append(QJsonObject{{"option", (int)bodyOption}, {"choice", (int)choice}, {"name", cnames[choice]}, {"modelFileId", file}});
+    }
+    if (!currentKnown) return fail("This model is not a declared posture of this character.");
+  }
   QJsonArray options;
   std::map<uint, QJsonObject> boneSets;
   uint boneSetOption = 0;
@@ -150,28 +186,42 @@ bool CharDetails::customizationCatalog(QJsonObject & catalog, QString & reason) 
       auto rows = GAMEDATABASE.sqlQuery(QString("SELECT ID, RelatedChrCustomizationChoiceID, ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID=%1 ORDER BY ID").arg(c));
       if (!rows.valid) return fail(QString("Cannot read customization choice %1.").arg(c));
       QJsonArray effects;
-      uint choiceBoneSet = 0;
+      std::vector<customization::BoneSetEffect> choiceBoneSets;
       for (const auto & r : rows.values)
       {
         const uint related = r[1].toUInt();
         if (related && !choiceOption_.count(related)) return fail("Customization effect references an unknown choice.");
         if (related && !included.count(related)) continue;
-        if (r[6].toUInt() || r[7].toUInt())
+        if ((r[6].toUInt() && !bodyChoiceModels.count(c)) || r[7].toUInt())
           return fail(QString("Choice %1 uses conditional-model or display-info customization, which cannot yet be exported.").arg(c));
         QJsonObject e{{"id", r[0].toInt()}, {"relatedChoice", (int)related}};
+        if (r[6].toUInt()) e["bodyModelFileId"] = bodyChoiceModels.at(c);
         if (const uint id = r[5].toUInt())
         {
-          // The client selects a correction SET, not a stack of independently
-          // composable facial deltas. Restrict ambiguous multi-option/choice data.
-          if ((boneSetOption && boneSetOption != option.first) || (choiceBoneSet && choiceBoneSet != id))
+          auto values = GAMEDATABASE.sqlQuery(QString("SELECT BoneFileDataID, ModelFileDataID FROM ChrCustomizationBoneSet WHERE ID=%1").arg(id));
+          if (!values.valid || values.values.size() != 1 || values.values[0][0].toInt() <= 0)
+            return fail(QString("Missing customization bone set %1.").arg(id));
+          const int setModel = values.values[0][1].toInt();
+          if (setModel != model_->gamefile->fileDataId())
+          {
+            if (related && bodyChoiceModels.count(related) && bodyChoiceModels.at(related) == setModel)
+              continue; // Exported with that posture's own model, skeleton and catalog.
+            return fail(QString("Customization bone set %1 belongs to a different model.").arg(id));
+          }
+          if (related && bodyChoiceModels.count(related) && bodyChoiceModels.at(related) != setModel)
+            return fail("Customization bones do not match their declared posture.");
+          // Preserve conditional alternatives, but never export ambiguous stacks.
+          // Orc faces have separate correction sets gated by Hunched/Upright.
+          const customization::BoneSetEffect effect{id, related ? choiceOption_.at(related) : 0, related};
+          if ((boneSetOption && boneSetOption != option.first) ||
+              std::any_of(choiceBoneSets.begin(), choiceBoneSets.end(), [&](const customization::BoneSetEffect & previous) {
+                return customization::conflictingBoneSetEffects(previous, effect);
+              }))
             return fail("This character requires an unresolved combination of customization bone sets.");
           boneSetOption = option.first;
-          choiceBoneSet = id;
+          choiceBoneSets.push_back(effect);
           if (!boneSets.count(id))
           {
-            auto values = GAMEDATABASE.sqlQuery(QString("SELECT BoneFileDataID, ModelFileDataID FROM ChrCustomizationBoneSet WHERE ID=%1").arg(id));
-            if (!values.valid || values.values.size() != 1 || values.values[0][0].toInt() <= 0)
-              return fail(QString("Missing customization bone set %1.").arg(id));
             const int fileId = values.values[0][0].toInt();
             if (values.values[0][1].toInt() != model_->gamefile->fileDataId())
               return fail(QString("Customization bone set %1 belongs to a different model.").arg(id));
@@ -301,6 +351,6 @@ bool CharDetails::customizationCatalog(QJsonObject & catalog, QString & reason) 
     {"modelFileId", (int)model_->gamefile->fileDataId()}, {"raceId", model_->infos.raceID}, {"sexId", model_->infos.sexID},
     {"context", QJsonObject{{"demonHunter", isDemonHunter_}, {"scope", "current-player-context"},
       {"excludedChoiceIds", exclusions}, {"unlocks", "viewer-available-only"}}},
-    {"options", options}, {"requirements", requirements}, {"defaultSelection", selection}, {"boneSets", boneSetValues}};
+    {"bodyModels", bodyModels}, {"options", options}, {"requirements", requirements}, {"defaultSelection", selection}, {"boneSets", boneSetValues}};
   return true;
 }

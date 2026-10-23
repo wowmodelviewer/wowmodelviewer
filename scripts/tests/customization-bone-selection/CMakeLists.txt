@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(CustomizationBoneSelectionTests LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 14)
+add_executable(customization-bone-selection main.cpp)
+target_include_directories(customization-bone-selection PRIVATE ../../../Source/games/wow)
+enable_testing()
+add_test(NAME conditional-bones COMMAND customization-bone-selection)
