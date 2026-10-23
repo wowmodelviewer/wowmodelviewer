@@ -1181,9 +1181,11 @@ public static class WmvModelBuilder
                                   skin.Submeshes.Length));
             submeshVisible = null;
         }
-        if (model.Vertices.Length == 0)
+        // Spell effects can consist entirely of emitters (and have an empty skin).
+        bool hasEmitters = model.ParticleEmitters.Length > 0 || model.RibbonEmitters.Length > 0;
+        if (model.Vertices.Length == 0 && !hasEmitters)
             throw new WowParseException("builder: model has no vertices");
-        if (skin.Batches.Length == 0)
+        if (skin.Batches.Length == 0 && !hasEmitters)
             throw new WowParseException("builder: skin profile has no draw batches");
 
         var result = new WmvRuntimeModel();
@@ -1809,7 +1811,7 @@ public static class WmvModelBuilder
                                       "to bone 0 (identity at rest)", dropped, unweighted));
             }
 
-            if (Debug_.SkinCheck)
+            if (Debug_.SkinCheck && n > 0)
                 ReportSkinDeviation(smr, positions, log);
 
             // ---- animation ------------------------------------------------------------
@@ -1859,7 +1861,7 @@ public static class WmvModelBuilder
                     // real bounds each frame instead of clipping the model as it moves.
                     smr.updateWhenOffscreen = true;
                     result.Animator = animator;
-                    if (Debug_.AnimCheck)
+                    if (Debug_.AnimCheck && n > 0)
                         ReportAnimationRange(smr, animator, positions, mesh.bounds, log);
                     // FRAME WHAT IS DRAWN, NOT WHAT THE FILE STORES. mesh.bounds is the box of the
                     // vertices in the rest pose, and the idle can carry the whole model away from
@@ -1869,7 +1871,8 @@ public static class WmvModelBuilder
                     // the union of the skinned mesh over the idle, sampled along the sequence, so
                     // the model is in frame at every point of its loop. One rule, nothing per
                     // model; a model whose idle moves nothing keeps the rest-pose box.
-                    displayBounds = PosedRange(smr, animator, mesh.bounds, DrawnMask(n, triangleSets), log);
+                    if (n > 0)
+                        displayBounds = PosedRange(smr, animator, mesh.bounds, DrawnMask(n, triangleSets), log);
                     animator.ApplyPose(0f);          // back at the start of the idle for the first frame
                 }
                 result.Skin = smr;
@@ -1914,6 +1917,11 @@ public static class WmvModelBuilder
         result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
         result.TextureUploads = textureCache;
+        // No surface to frame: measure a short preview, then reset the simulation so loading
+        // does not advance playback. M2 header bounds can be inverted sentinels on spells.
+        if (totalTriangles == 0 && result.Emitters != null && result.Animator != null)
+            displayBounds = result.Emitters.MeasurePreviewBounds(result.Animator.SequenceTimeAt,
+                                                                 result.Animator.ApplyPose);
         result.Bounds = displayBounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
