@@ -82,7 +82,7 @@ running Blizzard client or test inside WowCharacterViewer is claimed; the source
 comparison uses the original installed files of the exact requested build.
 
 Validation above was performed on the integrated development build. The isolated
-PR branch is additionally compiled and its synthetic/native-corpus tests rerun
-before publication. Local fixtures, FBX packages and screenshots remain exclusively
+PR #128 branch also passed a full Release x64 build, C++ synthetic tests and the
+.NET suite including all 199,320 native-corpus track comparisons. Local fixtures, FBX packages and screenshots remain exclusively
 in the shared `WowBattlegrounds/LocalAssets` deposit; none are included in Git.
 The user confirmed the installed correction works on 23 October 2026.
