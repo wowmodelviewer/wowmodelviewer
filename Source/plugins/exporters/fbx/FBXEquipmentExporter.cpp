@@ -136,16 +136,37 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
     if (!item || !item->isEquipped()) return fail("A selected slot is no longer equipped.");
     items.push_back(item);
   }
-  std::vector<RaceInfos> bodies;
+  struct Body : RaceInfos { int option = 0, choice = 0; QString suffix; };
+  std::vector<Body> bodies;
   std::set<std::pair<int, int>> bodyKeys;
   for (const auto & value : request["bodies"].toArray())
   {
     const auto body = value.toObject();
-    RaceInfos info;
+    Body info;
     const int race = body["race"].toInt(-1), sex = body["sex"].toInt(-1);
     if (sex < 0 || sex > 1 || !bodyKeys.emplace(race, sex).second ||
         !RaceInfos::getRaceInfosForRaceSex(race, sex, info) || info.isNPC || info.modelFileID <= 0)
       return fail("An unavailable body was selected.");
+    // The base race/sex remains at its original path. Orc male additionally
+    // resolves the authored conditional body, using its own model and item load.
+    if (race == 2 && sex == 0 && !info.ChrModelID.empty())
+    {
+      const auto rows = GAMEDATABASE.sqlQuery(QString("SELECT C.ID, C.ChrCustomizationOptionID, E.RelatedChrCustomizationChoiceID, M.FileDataID FROM ChrCustomizationElement E JOIN ChrCustomizationChoice C ON C.ID=E.ChrCustomizationChoiceID JOIN ChrCustomizationOption O ON O.ID=C.ChrCustomizationOptionID JOIN ChrCustomizationCondModel B ON B.ID=E.ChrCustomizationCondModelID JOIN CreatureModelData M ON M.ID=B.CreatureModelDataID WHERE O.ChrModelID=%1 AND E.ChrCustomizationCondModelID<>0").arg(info.ChrModelID[0]));
+      if (!rows.valid) return fail("Cannot resolve equipment posture models.");
+      if (!rows.values.empty())
+      {
+        if (rows.values.size() != 1 || rows.values[0][2].toInt() != 0 || rows.values[0][3].toInt() <= 0)
+          return fail("Unsupported equipment posture conditions.");
+        const auto & row = rows.values[0];
+        info.option = row[1].toInt();
+        const auto choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID=%1 AND ID<>%2").arg(info.option).arg(row[0]));
+        if (!choices.valid || choices.values.size() != 1) return fail("Cannot resolve the base equipment posture.");
+        info.choice = choices.values[0][0].toInt();
+        bodies.push_back(info);
+        info.choice = row[0].toInt(); info.modelFileID = row[3].toInt();
+        info.suffix = QString("/postures/choice-%1").arg(info.choice);
+      }
+    }
     bodies.push_back(info);
   }
   if (items.empty() || bodies.empty()) return fail("Select at least one item and one body.");
@@ -200,7 +221,7 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
 
   // Resolve each selection with the same item loader, fallback tables and merging as the viewer.
   // This never changes the character that the user is looking at.
-  const auto variant = [&](const std::vector<WoWItem *> & selected, const RaceInfos & info,
+  const auto variant = [&](const std::vector<WoWItem *> & selected, const Body & info,
                            const QString & relative, bool geometry, QJsonObject & result) -> bool {
     QString label = QString("%1 - %2, %3").arg(geometry ? selected.front()->name() : request["setName"].toString())
       .arg(QString::fromStdString(info.nameLang)).arg(info.sexID ? "Female" : "Male");
@@ -218,6 +239,12 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
     model->bSheathe = source->bSheathe;
     model->td = source->td;
     model->cd.autoHideGeosetsForHeadItems = source->cd.autoHideGeosetsForHeadItems;
+    if (info.option)
+    {
+      auto selection = model->cd.captureAppearance().selection;
+      selection[(uint)info.option] = (uint)info.choice;
+      model->cd.applyAppearance(selection, false, true);
+    }
     model->refresh();
     const auto baseGroups = model->cd.geosets;
     std::set<uint> declaredGroups;
@@ -263,6 +290,10 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
     result = QJsonObject{{"race", info.raceID}, {"sex", info.sexID}, {"modelFileId", info.modelFileID},
       {"items", itemRecords}, {"groupOverrides", overrides}, {"hideGroups", hidden}, {"bodyLayers", layers}, {"suppressCustomizationRegions", suppressed},
       {"textureLayout", QJsonObject{{"width", size.width}, {"height", size.height}, {"regions", regionArray}, {"origin", "top-left"}}}};
+    result["exporter"] = "wmv-fbx-posture-2";
+    result["build"] = QString::fromStdString(m_exportBuild);
+    result["product"] = QString::fromStdString(m_exportProduct);
+    if (info.option) { result["option"] = info.option; result["choice"] = info.choice; }
     QJsonArray textures;
     for (int id : textureIds)
     {
@@ -352,6 +383,19 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
     return writeJson(folder.filePath("catalog.json"), result) || fail("Cannot write the variant catalog.");
   };
 
+  const auto appendVariant = [](QJsonArray & variants, const Body & body, const QString & path) {
+    QJsonObject entry{{"race", body.raceID}, {"sex", body.sexID}, {"modelFileId", body.modelFileID}, {"catalog", path}};
+    if (!body.option) { variants.append(entry); return; }
+    QJsonObject posture{{"option", body.option}, {"choice", body.choice}, {"modelFileId", body.modelFileID}, {"catalog", path}};
+    for (int i = 0; i < variants.size(); ++i)
+    {
+      auto existing = variants[i].toObject();
+      if (existing["race"].toInt() != body.raceID || existing["sex"].toInt() != body.sexID) continue;
+      auto postures = existing["bodyVariants"].toArray(); postures.append(posture);
+      existing["bodyVariants"] = postures; variants[i] = existing; return;
+    }
+    entry["bodyVariants"] = QJsonArray{posture}; variants.append(entry);
+  };
   for (auto * item : items)
   {
     const bool weapon = isWeapon(item->slot());
@@ -360,12 +404,12 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
     QJsonArray variants;
     for (const auto & body : bodies)
     {
-      const QString bodyFolder = QString("race-%1/%2").arg(body.raceID).arg(body.sexID ? "female" : "male");
+      const QString bodyFolder = QString("race-%1/%2").arg(body.raceID).arg(body.sexID ? "female" : "male") + body.suffix;
       QJsonObject resolved;
       if (!variant({item}, body, relative + "/" + bodyFolder, true, resolved)) return false;
-      variants.append(QJsonObject{{"race", body.raceID}, {"sex", body.sexID}, {"catalog", bodyFolder + "/catalog.json"}});
+      appendVariant(variants, body, bodyFolder + "/catalog.json");
     }
-    if (!writeJson(root.filePath(relative + "/catalog.json"), QJsonObject{{"version", 1}, {"type", weapon ? "weapon" : "armor"}, {"slot", (int)item->slot()}, {"name", item->name()}, {"build", QString::fromStdString(m_exportBuild)}, {"product", QString::fromStdString(m_exportProduct)}, {"rules", "wmv-player-layers-v1; resolved-equipment-groups-v1"}, {"variants", variants}})) return fail("Cannot write the item catalog.");
+    if (!writeJson(root.filePath(relative + "/catalog.json"), QJsonObject{{"exporter", "wmv-fbx-posture-2"}, {"version", 1}, {"type", weapon ? "weapon" : "armor"}, {"slot", (int)item->slot()}, {"name", item->name()}, {"build", QString::fromStdString(m_exportBuild)}, {"product", QString::fromStdString(m_exportProduct)}, {"rules", "wmv-player-layers-v1; resolved-equipment-groups-v1"}, {"variants", variants}})) return fail("Cannot write the item catalog.");
     entries.append(QJsonObject{{"slot", (int)item->slot()}, {"catalog", relative + "/catalog.json"}});
     if (!weapon) setEntries.append(QJsonObject{{"slot", (int)item->slot()}, {"catalog", name + "/catalog.json"}});
   }
@@ -373,19 +417,19 @@ bool FBXExporter::exportEquipmentPackage(WoWModel * source, const std::wstring &
   {
     for (const auto & body : bodies)
     {
-      const QString relative = QString("rules/race-%1/%2").arg(body.raceID).arg(body.sexID ? "female" : "male");
+      const QString relative = QString("rules/race-%1/%2").arg(body.raceID).arg(body.sexID ? "female" : "male") + body.suffix;
       QJsonObject resolved;
       if (!variant(armor, body, setFolder + "/" + relative, false, resolved)) return false;
-      setVariants.append(QJsonObject{{"race", body.raceID}, {"sex", body.sexID}, {"catalog", relative + "/catalog.json"}});
+      appendVariant(setVariants, body, relative + "/catalog.json");
     }
-    if (!writeJson(root.filePath(setFolder + "/catalog.json"), QJsonObject{{"version", 1}, {"type", "armor-set"}, {"name", request["setName"]}, {"build", QString::fromStdString(m_exportBuild)}, {"product", QString::fromStdString(m_exportProduct)}, {"rules", "wmv-player-layers-v1; resolved-equipment-groups-v1"}, {"pieces", setEntries}, {"variants", setVariants}})) return fail("Cannot write the set catalog.");
+    if (!writeJson(root.filePath(setFolder + "/catalog.json"), QJsonObject{{"exporter", "wmv-fbx-posture-2"}, {"version", 1}, {"type", "armor-set"}, {"name", request["setName"]}, {"build", QString::fromStdString(m_exportBuild)}, {"product", QString::fromStdString(m_exportProduct)}, {"rules", "wmv-player-layers-v1; resolved-equipment-groups-v1"}, {"pieces", setEntries}, {"variants", setVariants}})) return fail("Cannot write the set catalog.");
   }
   const QJsonObject catalog{{"version", 1}, {"type", "wmv-equipment"}, {"build", QString::fromStdString(m_exportBuild)}, {"product", QString::fromStdString(m_exportProduct)},
     {"items", entries}, {"set", asSet && !armor.empty() ? setFolder + "/catalog.json" : QString()},
     {"rules", "wmv-player-layers-v1; resolved-equipment-groups-v1"}};
   if (!direct && !writeJson(root.filePath("catalog.json"), catalog)) return fail("Cannot write the equipment catalog.");
   QFile readme(root.filePath("README.txt"));
-  const QByteArray instructions = "WMV equipment package v1\nEach piece has its own folder. An armor set groups those folders and supplies combined rules. Weapons remain independent.\nRead catalog.json; paths are relative to the catalog that contains them. Each selected race/sex has its own resolved variant.\nFBX contains equipment and supplemental clothing geosets on the body's reference skeleton, without animations or the character surface. Retarget to the matching body's joints by bone index/name.\nGeometry is addressed by FBX node and material/submesh. Owner base means supplemental body clothing geometry; equipment:<slot> means attached or merged equipment.\nApply groupOverrides after character customization, then hideGroups. Add bodyLayers by ascending layer; suppress the listed customization regions. For a complete set use its combined rules, not sequential per-piece overrides.\nTextures use top-left atlas regions; blend 4 multiply, 6 overlay, otherwise source-over. Recompose skin for texture types 1/8; retain other FBX material bindings. Read the material sidecar for blend modes, UVs and shaders.\nA compatible consumer is required; this does not install an importer into another project. Unsupported/missing resources fail the complete export.\n";
+  const QByteArray instructions = "WMV equipment package v1\nEach piece has its own folder. An armor set groups those folders and supplies combined rules. Weapons remain independent.\nRead catalog.json; paths are relative to the catalog that contains them. Each selected race/sex has its own resolved variant. When bodyVariants is present, select its modelFileId matching the active character body, for both pieces and combined rules; never relabel or reuse another posture. Catalog paths are relative to the containing index.\nFBX contains equipment and supplemental clothing geosets on the body's reference skeleton, without animations or the character surface. Retarget to the matching body's joints by bone index/name.\nGeometry is addressed by FBX node and material/submesh. Owner base means supplemental body clothing geometry; equipment:<slot> means attached or merged equipment.\nApply groupOverrides after character customization, then hideGroups. Add bodyLayers by ascending layer; suppress the listed customization regions. For a complete set use its combined rules, not sequential per-piece overrides.\nTextures use top-left atlas regions; blend 4 multiply, 6 overlay, otherwise source-over. Recompose skin for texture types 1/8; retain other FBX material bindings. Read the material sidecar for blend modes, UVs and shaders.\nA compatible consumer is required; this does not install an importer into another project. Unsupported/missing resources fail the complete export.\n";
   if (!direct)
   {
     if (!readme.open(QIODevice::WriteOnly) || readme.write(instructions) != instructions.size()) return fail("Cannot write equipment instructions.");

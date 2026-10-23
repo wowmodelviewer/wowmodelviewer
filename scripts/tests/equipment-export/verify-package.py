@@ -8,6 +8,8 @@ import subprocess
 parser = argparse.ArgumentParser()
 parser.add_argument("package", type=pathlib.Path)
 parser.add_argument("--inspector", required=True, type=pathlib.Path)
+parser.add_argument("--race", type=int)
+parser.add_argument("--sex", type=int, choices=(0, 1))
 args = parser.parse_args()
 root = args.package.resolve()
 
@@ -37,13 +39,25 @@ for item in top["items"]:
     piece = read(index)
     assert piece["type"] in ("armor", "weapon")
     seen = set()
+    expanded = []
     for variant in piece["variants"]:
-        key = (variant["race"], variant["sex"])
+        if args.race is not None and variant["race"] != args.race:
+            continue
+        if args.sex is not None and variant["sex"] != args.sex:
+            continue
+        bodies = variant.get("bodyVariants", [variant])
+        for body in bodies:
+            expanded.append(dict(variant, **body))
+    for variant in expanded:
+        key = (variant["race"], variant["sex"], variant.get("modelFileId"))
         assert key not in seen
         seen.add(key)
         path = reference(index, variant["catalog"])
         catalog = read(path)
-        assert key == (catalog["race"], catalog["sex"])
+        assert key[:2] == (catalog["race"], catalog["sex"])
+        if key[2] is not None: assert key[2] == catalog["modelFileId"]
+        if "choice" in variant:
+            assert catalog["choice"] == variant["choice"] and catalog["option"] == variant["option"]
         assert len(catalog["items"]) == 1 and catalog["items"][0]["slot"] == item["slot"]
         textures = {t["fileId"]: reference(path, t["file"]) for t in catalog["textures"]}
         assert all(t["fileId"] in textures for t in catalog["bodyLayers"])
@@ -86,10 +100,17 @@ if top["set"]:
     for piece in outfit["pieces"]:
         assert read(reference(index, piece["catalog"]))["type"] == "armor"
     for variant in outfit["variants"]:
-        path = reference(index, variant["catalog"])
-        rules = read(path)
-        assert {p["slot"] for p in rules["items"]} == armor_slots
-        for texture in rules["textures"]:
-            reference(path, texture["file"])
+        if args.race is not None and variant["race"] != args.race:
+            continue
+        if args.sex is not None and variant["sex"] != args.sex:
+            continue
+        for body in variant.get("bodyVariants", [variant]):
+            path = reference(index, body["catalog"])
+            rules = read(path)
+            if "modelFileId" in body:
+                assert body["modelFileId"] == rules["modelFileId"]
+            assert {p["slot"] for p in rules["items"]} == armor_slots
+            for texture in rules["textures"]:
+                reference(path, texture["file"])
 
 print(json.dumps(dict(items=len(top["items"]), variants=variants, geometry=geometry, shared_textures=len(list((root / "textures").glob("*.png")))), indent=2))

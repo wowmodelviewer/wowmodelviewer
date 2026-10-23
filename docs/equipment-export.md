@@ -114,6 +114,31 @@ of every class/form-specific body or every possible item combination. Mirrored
 equipment, absent assets, unresolved textures and invalid attachments fail the
 export explicitly rather than publishing an incomplete successful package.
 
+### Orc posture variants (exporter `wmv-fbx-posture-2`)
+
+Selecting Orc male now exports both authored posture models when the client
+declares them. Hunched retains `race-2/male/catalog.json`; Upright uses
+`race-2/male/postures/choice-439/catalog.json`. Combined set rules follow the
+same suffix beneath `rules/`. Each variant loads the actual body model, applies
+the posture selection, resolves the items again, and exports its geometry,
+reference hierarchy, pivots, attachment transforms and binding metadata.
+The model ID is never relabelled on another body's geometry.
+
+The version-1 equipment index retains one `variants` entry per race/sex and
+its existing base `catalog`. An additive `bodyVariants` array on that entry
+lists `{option, choice, modelFileId, catalog}` for both bodies. These paths are
+relative to the index containing `variants`, just like its base `catalog`.
+Variant catalogs also record `option`, `choice`, `exporter`, `build` and
+`product`. Character customization version 2 is unchanged.
+
+Consumers supporting Upright must select the `bodyVariants` entry whose
+`modelFileId` matches the active character, for **every piece and the combined
+set rules**. The legacy base path continues to mean Hunched. Consumers without
+this additive support can keep using Hunched, but must retain their model
+compatibility rejection for Upright. Do not fall back to the first race/sex
+entry or mix a body's pieces with another body's rules. No consumer project is
+modified by this exporter correction.
+
 ## Process and failure behavior
 
 The export uses the existing separate-process FBX worker and a captured character
@@ -166,3 +191,28 @@ Local real-asset evidence and installation manifest are recorded separately in
 WoW or Unity.
 
 `named-folders.py --runtime <runtime> --character <battlelord.chr> --output <new-evidence-folder> --inspector <equipment-inspect.exe>` exercises the new layout with the documented Battlelord armor/bow fixture, independently relocates sets and weapons, and checks collisions and invalid names. The dialog tests cover every forbidden character, reserved names, trailing characters, spaces and underscores.
+
+## Orc posture dependency and validation
+
+The Orc variants depend on PR #128 for conditional-model data and skeleton source
+resolution. Merge #128 first; this branch contains that prerequisite.
+
+Retail `wow` build `12.1.5.70391`, exporter `wmv-fbx-posture-2`: Oathclaw Wargarb
+exports seven pieces for both postures (14 variants), and Battlelords Plate eight
+(16 variants), each with combined rules for both models. Native FBX reimport checks
+resources, geometry and weights. Independent skin evaluation covers 18 cases
+(body / each outfit, both postures, Stand/Walk/Run), with 11,928 matching bind and
+attachment matrices and 99,600 finite posed points. These are sampled frames, not
+an exhaustive collision test. Hidden WMV captures and native geometry renders
+were reviewed on the integrated build; the user confirmed the installed fix works.
+No Blizzard live-client capture or WowCharacterViewer test is claimed.
+
+Build `scripts/tests/animation-sources` to obtain `equipment-pose`, then run:
+
+```text
+equipment-pose <body-package> <set-package-or-dash> <take> <milliseconds> <pose.json>
+```
+
+It selects piece and combined-rule catalogs by the actual body model ID and
+evaluates skin weights on that body's animation. Keep original fixtures, generated
+FBX, screenshots and pose outputs in the local asset deposit; none belong in Git.
