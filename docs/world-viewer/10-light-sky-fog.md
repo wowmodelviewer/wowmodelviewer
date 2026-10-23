@@ -1394,7 +1394,7 @@ run back to back under one install state (the storage index checked before and a
 | `WMV_LIGHT=off` against the Stage 09 baseline (complete 70448 install) | identical: 0 of 258 must-match items differ (terrain, water and border guards, every view incl. depth, Buildings, Models, Characters, the tallies, the light dumps); the count items changed only by the added tests |
 | Light on: Buildings, Models, Characters, paired with p30a | identical: 10 of 10 (the first, unpaired run at 19:08 had failed on files the patch had made unavailable) |
 | Default mode (neither `WMV_LIGHT` nor `-wmvWorldLight`), paired with p30a | identical: 0 of 166 must-match items differ (49 regress pictures, far3 varying as always; 13 of 13 tallies; 17 view counts; every view on four clients incl. the 30 depth views); 2 info lines differ by streaming order only (a world model's liquid credited to the other tile it spans; tiles closed at other moments) |
-| Light-on streaming run (Stormwind life08), paired with p30a | identical: 70 / 0 / 0 checks, 6 clears with every liquid tally 0 after each; the info line differs by streaming order and GUI timing only (GUI rounds over 50 ms: p30a 0, longest 42 ms; step 6 3, longest 93 ms; earlier repeats without step 6 gave 1-3, longest 57-72 ms, so the spread between runs). Binding as instances are placed: 1,123 bursts, 197.6 ms in all, the longest 7.4 ms; no rebind (the light was on from the start); frames over 33 ms 20 against the baseline's 25 |
+| Light-on streaming run (Stormwind life08), paired with p30a | identical: 70 / 0 / 0 checks, 6 clears with every liquid tally 0 after each. Binding as instances are placed: 1,284 bursts, 202.9 ms in all, the longest 4.7 ms (the unpaired light-on run: 1,123, 197.6 ms, 7.4 ms); no rebind (the light was on from the start); the player's frames over 33 ms 26 against p30a's 25. Info only: the geometry lines differ by one unmasked integer timing ("in 1 ms"), and the GUI rounds over 50 ms were p30a 0 (longest 42 ms), step 6 3 (longest 93 ms). Investigated 2026-10-23 (`D:\wmv-10\step6\guiround`): a GUI round is the host GUI thread's wall time (the same host binary in both arms); 92 of the 93 ms passed inside one host log-file write, with no player work there, the player's frames during the other two slow rounds were 19-21 ms, and no slow round falls at a first world-lit binding or draw; 12 interleaved repeats on one install state (4 each of p30a, step 6, step 6 with `-wmvDoodadLight=off -wmvWorldModelLight=off`) gave step 6 0 rounds over 50 ms (longest 42-49 ms) against 0 (41-46 ms) and 0-1 (41-61 ms); life08 runs without step 6 active range 0-3 rounds over 50 ms, longest 41-88 ms. Verdict: run-to-run variation of the host (two independent reviews agree); four repeats cannot exclude a small rise in the rate of rare host stalls |
 | Light on, doodads and world models off, at the seven Southfury cameras and the Crossroads camera (rendered on the 70448 install) | byte-identical to p30a |
 | The tile framing (light shown), doodads and world models off, paired with p30a | byte-identical (0 px); p30a against its own repeat 0 px |
 
@@ -1439,6 +1439,10 @@ tint is the Models viewer's (linearised by the engine), unchanged. The light is 
 12.1.7 (linear 0): Retail M2 equivalence not established; Retail CPU side unverified" until a live Retail shot (T12).
 
 **Open, for the owner.** The review of the step-6 pictures before step 7. The Crossroads capture (PTR `linear 0`, facings
-225 and 45 deg, noon and 18:45) would compare world models with the game and settle their class. The exterior MOCV
-measurement (Ratchet's lantern wall on live Retail or MoP).
+225 and 45 deg, noon and 18:45) would compare world models with the game and settle their class; until then the
+Crossroads world models are functionally validated only (against their own model), not compared with the game. The
+exterior MOCV measurement (Ratchet's lantern wall on live Retail or MoP); exterior MOCV itself stays with Stage 12
+(roadmap 5.1), its possible size in 2.2. The acceptance line "no GUI round over 50 ms" (9): no player meets it at the
+life08 run's Models-viewer step (the bear load: over 50 ms in 14 of 36 life08 runs, Stage 09 players included, up to
+88 ms), so before the stage closes it needs a reading (the world steps only?) from the owner.
 

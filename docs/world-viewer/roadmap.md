@@ -134,7 +134,12 @@ content and numbers, and both gain 10 as an entry (fog and the outdoor light).
   What interiors show until 12 is the owner's choice (proposed: today's look). Exterior groups take the outdoor light.
   Most of them also carry vertex colours (MOCV); on 2026-10-21 the owner asked for exterior MOCV to come into 10 if the
   client's own shader programs establish its behaviour reliably, with interior lighting, MOLT, interior ambient and
-  interior fog staying in 12.
+  interior fog staying in 12. Outcome (step 1, 2026-10-21; unchanged by step 6): only partly established, because its
+  scale and per-batch lighting mode are set on the CPU side, so **exterior MOCV stays in 12**. Its possible contribution
+  is not small: up to +0.12 to +0.18 x albedo at the 75th percentile of drawn exterior MOCV and +0.35 to +0.52 x albedo
+  at the 95th, if the batches use the MOCV lighting mode with scale 1; Orgrimmar's `orgrimmar2` carries it on 69 of its 74
+  exterior groups (`10-light-sky-fog.md` 2.2). Until 12, exterior groups are drawn with the MOCV term zero (the client's
+  exact output for the other lighting mode).
 - **12 gains from the order.** Its interior/exterior blend needs the outdoor light to blend with; under the old order
   that half would have been a stand-in.
 - **11 gains.** Emitters and animated doodads take 10's fog and light from the start.
