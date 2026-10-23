@@ -539,25 +539,10 @@ namespace Wmv.Wow
         }
 
         /// <summary>
-        /// Complete an SKID model from its skeleton file, the way WoWModel::initAnimated and its
-        /// neighbours do it:
-        ///
-        ///   global sequences  the skel's SKS1, then the parent's SKS1 appended (WoWModel.cpp:505-543)
-        ///   sequences, animation lookup, AFID
-        ///                     the PARENT's SKS1 / AFID when there is one, else the skel's (:1022-1057)
-        ///   bones, key-bone lookup
-        ///                     the PARENT's SKB1 when there is one, else the skel's (:1062-1095)
-        ///   attachments       the skel's SKA1 only -- never the parent's (:726-763)
-        ///
-        /// then resolves wantedSequence exactly as Parse does, reads the bone tracks from the SKB1
-        /// payload (keys from the .anim for a sequence stored outside the skeleton), and re-reads
-        /// the .m2's own material tracks and emitters for the sequence that resolved, because
-        /// their per-sequence arrays index the skeleton's sequence table rather than the header's.
-        ///
-        /// externalAnim is the raw .anim file for wantedSequence, as for Parse. Throws
-        /// WowParseException, leaving the model untouched, when either skeleton is not chunked or
-        /// lacks SKS1 or SKB1, or when its sequence or bone array does not fit; a missing SKA1
-        /// only means no attachments.
+        /// Complete an SKID model. Child sequence identities override the parent;
+        /// absent identities inherit it. Native headers, AFID, aliases and global
+        /// clocks remain attached to the sequence's actual source skeleton.
+        /// Attachments and bind hierarchy belong to the child.
         /// </summary>
         public static void ApplySkeleton(M2ParsedModel model, byte[] skel, byte[] parentSkel,
                                          int wantedSequence, byte[] externalAnim = null)
@@ -628,7 +613,87 @@ namespace Wmv.Wow
             model.SkeletonBonesPayload = skb1;
             model.ParentSkeletonFileDataID = ReadSkeletonParentId(skel);
             model.SkeletonApplied = true;
+            model.SkeletonSources = null;
+            if (parent != null) ComposeSkeletonSources(model, skel, parentSkel);
             ReadSkeletonAnimation(model, wantedSequence, keyBuffer);
+        }
+
+        static void ComposeSkeletonSources(M2ParsedModel model, byte[] ownBytes, byte[] parentBytes)
+        {
+            Func<byte[], M2ParsedModel> definition = bytes => {
+                var chunks = RequireSkel(bytes, "skeleton source");
+                var sks = new ByteCursor(Slice(bytes, chunks["SKS1"]), "source:SKS1");
+                var source = new M2ParsedModel();
+                source.GlobalSequences = ReadSks1Globals(sks).ToArray();
+                sks.Seek(8); var sequences = sks.ReadArray(); sks.RequireArray(sequences, SequenceStride, "sequences");
+                source.Sequences = ReadSequences(sks, sequences);
+                source.AnimFileIds = ReadAnimFileIds(bytes, chunks);
+                source.SkeletonBonesPayload = Slice(bytes, chunks["SKB1"]);
+                var bones = new ByteCursor(source.SkeletonBonesPayload, "source:SKB1");
+                var array = bones.ReadArray(); bones.RequireArray(array, BoneStride, "bones");
+                source.Bones = ReadBoneHierarchy(bones, array);
+                bones.Seek(8); source.KeyBoneLookup = SanitiseKeyBones(ReadInt16Array(bones, bones.ReadArray()), source.Bones.Length);
+                return source;
+            };
+            var parent = definition(parentBytes); var own = definition(ownBytes);
+            if (ReadSkeletonParentId(parentBytes) != 0)
+                throw new WowParseException("nested parent skeletons are not supported by the viewport");
+            // Some attachment/partial skeletons use a different bone index space;
+            // preserve their existing parent-only path. Full child rigs such as
+            // Orc Upright share the parent's index space and override its clips.
+            if (own.Bones.Length != parent.Bones.Length) return;
+            for (int b = 0; b < own.Bones.Length; b++)
+                if (own.Bones[b].Parent != parent.Bones[b].Parent || own.Bones[b].KeyBoneId != parent.Bones[b].KeyBoneId)
+                    throw new WowParseException("incompatible parent/child bone identities");
+            var sequences = new List<M2Sequence>(parent.Sequences);
+            var sources = new List<M2ParsedModel>(); var indices = new List<int>(); var offsets = new List<int>();
+            var identities = new Dictionary<long, int>();
+            for (int i = 0; i < sequences.Count; i++) {
+                long id = AfidKey(sequences[i].AnimId, sequences[i].SubAnimId);
+                if (identities.ContainsKey(id)) throw new WowParseException("duplicate parent sequence identity");
+                identities.Add(id, i); sources.Add(parent); indices.Add(i); offsets.Add(own.GlobalSequences.Length);
+            }
+            var seen = new HashSet<long>();
+            for (int i = 0; i < own.Sequences.Length; i++) {
+                var sequence = own.Sequences[i]; long id = AfidKey(sequence.AnimId, sequence.SubAnimId);
+                if (!seen.Add(id)) throw new WowParseException("duplicate child sequence identity");
+                int target;
+                if (!identities.TryGetValue(id, out target)) {
+                    target = sequences.Count; identities.Add(id, target);
+                    sequences.Add(sequence); sources.Add(own); indices.Add(i); offsets.Add(0);
+                } else { sequences[target] = sequence; sources[target] = own; indices[target] = i; offsets[target] = 0; }
+            }
+            var globals = new List<uint>(own.GlobalSequences); globals.AddRange(parent.GlobalSequences);
+            model.GlobalSequences = globals.ToArray(); model.Sequences = sequences.ToArray();
+            model.SkeletonSources = sources.ToArray(); model.SkeletonSourceIndices = indices.ToArray(); model.SkeletonGlobalOffsets = offsets.ToArray();
+            model.Bones = own.Bones; model.BoneCount = own.Bones.Length; model.KeyBoneLookup = own.KeyBoneLookup;
+            model.SkeletonBonesPayload = own.SkeletonBonesPayload;
+            int lookupCount = model.AnimationLookup.Length;
+            var lookup = new short[lookupCount]; for (int i = 0; i < lookup.Length; i++) lookup[i] = -1;
+            for (int i = 0; i < sequences.Count; i++)
+                if (sequences[i].SubAnimId == 0 && sequences[i].AnimId >= 0 && sequences[i].AnimId < lookup.Length) lookup[sequences[i].AnimId] = (short)i;
+            model.AnimationLookup = lookup;
+        }
+
+        static M2BoneDef[] ReadComposedBoneTracks(M2ParsedModel model, int sequence, byte[] keyBuffer)
+        {
+            var bones = (M2BoneDef[])model.Bones.Clone();
+            if (sequence < 0 || sequence >= model.Sequences.Length) {
+                for (int i = 0; i < bones.Length; i++) ClearBoneTracks(ref bones[i]);
+                return bones;
+            }
+            var source = model.SkeletonSources[sequence];
+            int local = model.SkeletonSourceIndices[sequence]; int keys = AliasTarget(source, local);
+            if (keys < 0 || (!source.Sequences[keys].PrimarySequence && keyBuffer == null)) keys = -1;
+            var cursor = new ByteCursor(source.SkeletonBonesPayload, "source:SKB1"); var array = cursor.ReadArray();
+            ReadBoneTracks(cursor, array, bones, keys, keys >= 0 && !source.Sequences[keys].PrimarySequence ? keyBuffer : null);
+            int offset = model.SkeletonGlobalOffsets[sequence];
+            for (int b = 0; b < bones.Length; b++) {
+                if (bones[b].Translation.GlobalSequence >= 0) bones[b].Translation.GlobalSequence += offset;
+                if (bones[b].Rotation.GlobalSequence >= 0) bones[b].Rotation.GlobalSequence += offset;
+                if (bones[b].Scale.GlobalSequence >= 0) bones[b].Scale.GlobalSequence += offset;
+            }
+            return bones;
         }
 
         static Dictionary<string, M2Array> RequireSkel(byte[] skel, string what)
@@ -671,6 +736,14 @@ namespace Wmv.Wow
                 throw new WowParseException("skel: the model does not hold the payloads its skeleton was read from");
             model.AnimatedSequence = ResolveSequence(model, keyBuffer, wantedSequence,
                                                      out model.AnimationSkipReason);
+            if (model.SkeletonSources != null)
+            {
+                model.Bones = ReadComposedBoneTracks(model, model.AnimatedSequence, keyBuffer);
+                model.RequiredAnimFileId = ExternalAnimFileId(model, model.AnimatedSequence);
+                var materialCursor = new ByteCursor(model.Md21Payload, "m2");
+                ReadMaterialTracks(materialCursor, model, keyBuffer); ReadEmittersForSequence(materialCursor, model);
+                return;
+            }
             var bc = new ByteCursor(model.SkeletonBonesPayload, "skel:SKB1");
             bc.Seek(0);
             M2Array boneArr = bc.ReadArray();
@@ -700,6 +773,8 @@ namespace Wmv.Wow
         {
             if (model == null)
                 return new M2BoneDef[0];
+            if (model.SkeletonSources != null)
+                return ReadComposedBoneTracks(model, sequence, AnimKeyframeBuffer(externalAnim));
             var bones = (M2BoneDef[])model.Bones.Clone();
 
             byte[] payload = model.SkeletonApplied ? model.SkeletonBonesPayload
@@ -2064,6 +2139,8 @@ namespace Wmv.Wow
         /// </summary>
         static bool Playable(M2ParsedModel model, int index, bool haveExternal, out string why)
         {
+            if (model.SkeletonSources != null)
+                return Playable(model.SkeletonSources[index], model.SkeletonSourceIndices[index], haveExternal, out why);
             M2Sequence seq = model.Sequences[index];
             if (seq.Length == 0)
             {
@@ -2162,6 +2239,8 @@ namespace Wmv.Wow
         /// its alias target, or itself when it is not an alias or its chain is broken.</summary>
         static M2Sequence KeySequenceOf(M2ParsedModel model, int index)
         {
+            if (model.SkeletonSources != null)
+                return KeySequenceOf(model.SkeletonSources[index], model.SkeletonSourceIndices[index]);
             int keys = AliasTarget(model, index);
             return model.Sequences[keys >= 0 ? keys : index];
         }
@@ -2220,6 +2299,8 @@ namespace Wmv.Wow
         /// </summary>
         public static int ExternalAnimFileId(M2ParsedModel model, int sequenceIndex)
         {
+            if (model != null && model.SkeletonSources != null && sequenceIndex >= 0 && sequenceIndex < model.Sequences.Length)
+                return ExternalAnimFileId(model.SkeletonSources[sequenceIndex], model.SkeletonSourceIndices[sequenceIndex]);
             if (model == null || model.AnimFileIds.Length == 0 ||
                 sequenceIndex < 0 || sequenceIndex >= model.Sequences.Length)
                 return 0;

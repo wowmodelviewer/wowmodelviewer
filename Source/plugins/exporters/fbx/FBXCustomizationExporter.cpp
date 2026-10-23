@@ -169,6 +169,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   if (copy->cd.isDemonHunter() || (copy->infos.raceID == RACE_PANDAREN && copy->infos.sexID == GENDER_FEMALE))
     underwearGroups.append(QJsonObject{{"group", (int)CG_DH_LOINCLOTH}, {"variant", copy->cd.showUnderwear ? 1 : 0}});
   catalog["baseUnderwearGroups"] = underwearGroups;
+  catalog["exporter"] = "wmv-fbx-posture-2";
   catalog["build"] = QString::fromStdString(m_exportBuild);
   catalog["product"] = QString::fromStdString(m_exportProduct);
   catalog["fbx"] = destination.fileName();
@@ -450,6 +451,17 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   QJsonArray clips;
   for (const auto & name : scene.m_exportedClipNames) clips.append(QString::fromStdString(name));
   catalog["animationTakes"] = clips;
+  QJsonArray animations;
+  if (m_exportAnimation)
+    for (int index : m_animsToExport)
+    {
+      if (index < 0 || index >= (int)copy->anims.size()) return fail("Invalid animation identity.");
+      const auto & animation = copy->anims[index];
+      if (animations.size() >= clips.size()) return fail("Missing exported animation take.");
+      animations.append(QJsonObject{{"take", clips[animations.size()]}, {"animationId", animation.animID},
+        {"subAnimationId", animation.subAnimID}, {"durationMs", (int)animation.length}});
+    }
+  catalog["animations"] = animations;
   catalog["rules"] = QJsonObject{{"geometry", "wmv-player-geosets-v1"}, {"textures", "wmv-player-layers-v1"},
     {"equipment", "resolved-current-outfit-v1"}, {"bones", "animated-joint-origin-v1"}, {"instructions", "README.txt"}};
 

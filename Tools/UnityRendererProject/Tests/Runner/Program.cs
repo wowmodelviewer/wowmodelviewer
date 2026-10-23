@@ -35,6 +35,8 @@ static class Program
         Console.WriteLine("== TerrainMaterialTests (terrain material states, alpha slices, compositor, BLP header; synthetic tex0)");
         failures += TerrainMaterialTests.RunAll(Console.WriteLine);
 
+        string orcCorpus = Environment.GetEnvironmentVariable("WMV_ORC_POSTURE_CORPUS");
+        if (!string.IsNullOrEmpty(orcCorpus)) failures += OrcPostureCorpusTests.Run(orcCorpus, Console.WriteLine);
         string corpus = Environment.GetEnvironmentVariable("WMV_WORLD_AUDIT_CORPUS");
         Console.WriteLine("== WorldCorpusValidation (real client bytes)");
         if (string.IsNullOrEmpty(corpus))

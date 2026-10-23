@@ -167,9 +167,35 @@ public:
   std::vector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
   size_t sizes; // for fix function
 
+  // Composed skeletons can inherit a clip from a different skeleton. Each clip
+  // keeps that source track's interpolation and global clock (not its indices).
+  struct SequenceMode { ssize_t interpolation; int64_t period; };
+  std::vector<SequenceMode> sequenceModes;
+
+  void copySequence(size_t target, const Animated & source, size_t index)
+  {
+    if (target >= MAX_ANIMATED || index >= MAX_ANIMATED) return;
+    if (sequenceModes.size() <= target) sequenceModes.resize(target + 1, {type, -1});
+    int64_t period = -1;
+    ssize_t interpolation = source.type;
+    if (!source.sequenceModes.empty() && index < source.sequenceModes.size())
+    {
+      period = source.sequenceModes[index].period;
+      interpolation = source.sequenceModes[index].interpolation;
+    }
+    else if (source.seq >= 0 && source.seq < (ssize_t)source.globals.size())
+    {
+      period = source.globals[source.seq];
+      index = 0;
+    }
+    sequenceModes[target] = {interpolation, period};
+    times[target] = source.times[index]; data[target] = source.data[index];
+    in[target] = source.in[index]; out[target] = source.out[index];
+  }
+
   bool uses(ssize_t anim) const
   {
-    if (seq>-1)
+    if (sequenceModes.empty() && seq>-1)
       anim = 0;
     // data[]/times[] are fixed-size arrays of MAX_ANIMATED; a model with more animation
     // sequences than that (or a bogus index) must not run off the end.
@@ -186,8 +212,17 @@ public:
   // Exporters use a deterministic global clock without modifying the live viewer's.
   T getValueAtGlobalTime(ssize_t anim, size_t time, size_t globalClock)
   {
+    ssize_t interpolation = type;
+    if (!sequenceModes.empty())
+    {
+      if (anim < 0 || anim >= (ssize_t)sequenceModes.size()) return T();
+      const auto mode = sequenceModes[anim];
+      interpolation = mode.interpolation;
+      if (mode.period == 0) return T();
+      if (mode.period > 0) time = globalClock % mode.period;
+    }
     // obtain a time value and a data range
-    if (seq >= 0 && seq < (int)globals.size()) {
+    else if (seq >= 0 && seq < (int)globals.size()) {
       // TODO
       if (!globals[seq])
         return T();
@@ -210,15 +245,15 @@ public:
         pos=times[anim].size()-1;
         r = 1.0f;
 
-        if (type == INTERPOLATION_NONE) 
+        if (interpolation == INTERPOLATION_NONE)
           return data[anim][pos];
-        else if (type == INTERPOLATION_LINEAR) 
+        else if (interpolation == INTERPOLATION_LINEAR)
           return interpolate<T>(r,data[anim][pos],data[anim][pos]);
-        else if (type==INTERPOLATION_HERMITE){
+        else if (interpolation==INTERPOLATION_HERMITE){
           // INTERPOLATION_HERMITE is only used in cameras afaik?
           return interpolateHermite<T>(r,data[anim][pos],data[anim][pos],in[anim][pos],out[anim][pos]);
         }
-        else if (type==INTERPOLATION_BEZIER){
+        else if (interpolation==INTERPOLATION_BEZIER){
           //Is this used ingame or only by custom models?
           return interpolateBezier<T>(r,data[anim][pos],data[anim][pos],in[anim][pos],out[anim][pos]);
         }
@@ -235,15 +270,15 @@ public:
         t2 = times[anim][pos+1];
         r = (time-t1)/(float)(t2-t1);
 
-        if (type == INTERPOLATION_NONE) 
+        if (interpolation == INTERPOLATION_NONE)
           return data[anim][pos];
-        else if (type == INTERPOLATION_LINEAR) 
+        else if (interpolation == INTERPOLATION_LINEAR)
           return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
-        else if (type==INTERPOLATION_HERMITE){
+        else if (interpolation==INTERPOLATION_HERMITE){
           // INTERPOLATION_HERMITE is only used in cameras afaik?
           return interpolateHermite<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
         }
-        else if (type==INTERPOLATION_BEZIER){
+        else if (interpolation==INTERPOLATION_BEZIER){
           //Is this used ingame or only by custom models?
           return interpolateBezier<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
         }

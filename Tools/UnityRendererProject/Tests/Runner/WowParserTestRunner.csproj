@@ -22,6 +22,7 @@
   <ItemGroup>
     <Compile Include="..\..\Assets\Scripts\Wow\**\*.cs" />
     <Compile Include="..\WowParserTests.cs" />
+    <Compile Include="..\OrcPostureCorpusTests.cs" />
     <Compile Include="..\WorldParserTests.cs" />
     <Compile Include="..\TerrainMeshTests.cs" />
     <Compile Include="..\TerrainCorpusTests.cs" />

@@ -243,6 +243,37 @@ Each model exports its own animation data and uncorrected bind pose. Optional
 current equipment is resolved separately on both bodies. No renderer or consumer
 in another project is changed by this export support.
 
+### Skeleton inheritance correction (exporter `wmv-fbx-posture-2`)
+
+Retail `wow` 12.1.5.70391 has base model 917116 / skeleton 1964411 and
+Upright model 1968587 / skeleton 1969462. The latter declares SKPD parent 1964411,
+but also contains its own SKS1, SKB1 and AFID. Replacing these chunks with the
+parent discarded all 118 authored child sequences and produced Hunched motion
+on Upright geometry. Walk is 1000 ms in the child and 1066 ms in the parent.
+
+The shared model loader now composes skeleton inheritance by AnimationID and
+SubAnimationID. Child sequences override matching parent identities; missing
+identities inherit the parent. Source-local aliases and variation links are
+remapped, and each track retains its own interpolation and global-loop period.
+Empty child tracks are intentional and never filled with the parent's motion.
+The child's hierarchy and pivots are retained; incompatible skeletons fail.
+This also corrects direct-model preview sampling, not just FBX output.
+
+Customization schema/version, `conditional-body-models-v1`, `bodyVariants` and
+posture paths are unchanged. `exporter: "wmv-fbx-posture-2"` identifies corrected
+exports. An additive `animations` array pairs each existing `animationTakes`
+name with `animationId`, `subAnimationId` and `durationMs`. Consumers can ignore
+this diagnostic array; no animation/correction application rule changes.
+
+The independent regression can be run as
+`animation-sources --orc <raw-directory> <posture-package> <report.json>`.
+It reads the original skeleton/AFID/animation bytes, chooses the source per
+identity independently, and compares every baked frame of each exported take
+after FBX SDK reimport. Both posture catalogs must be checked separately.
+Choosing Upright in the current WMV Appearance UI alone is not a reference:
+its conditional-model effect remains unimplemented. Preview comparisons must
+load the actual `orcmaleupright.m2`, not rely on that toggle.
+
 Tests: configure/build `scripts/tests/customization-bone-selection` and run its
 executable for conditional-selection negatives. `verify-orc.py <package>
 --database <client-cache.sqlite> --inspector <inspect-package.exe>` checks each
