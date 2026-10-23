@@ -97,6 +97,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // Blender add-on can rebuild the item-component node graph (UV1/UV2 selection, alpha-as-spec vs
     // transparency, glow emission, animated UV scroll). Default off -> the legacy bake pipeline,
     // whose output stays byte-for-byte unchanged.
+    void setEquipmentExport(const std::string & request) { m_equipmentRequest = request; }
     void setComponentRawExport(bool v) { m_exportComponentRaw = v; }
     // Defaults keep ordinary export unchanged. Capability queries must not mutate the model.
     virtual bool canExportCustomizations(Model *, std::wstring & reason) const
@@ -171,6 +172,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     bool m_exportAllCustomizations = false;
     bool m_includeEquipment = false;
     std::string m_exportBuild, m_exportProduct;
+    std::string m_equipmentRequest;
 
     // Set by exporters when exportModel() fails, read by the UI via lastError().
     std::wstring m_lastError;

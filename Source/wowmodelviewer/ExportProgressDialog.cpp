@@ -90,6 +90,12 @@ void ExportProgressDialog::setPercent(int percent)
   m_gauge->SetValue(percent);
 }
 
+void ExportProgressDialog::setVariant(int current, int total, const wxString & name)
+{
+  if (m_clipText)
+    m_clipText->SetLabel(wxString::Format(_("Variant %d / %d: %s"), current, total, name.c_str()));
+}
+
 void ExportProgressDialog::markHung(bool hung)
 {
   if (!m_stageText)

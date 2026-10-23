@@ -7,7 +7,8 @@ include_directories(.)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # add wmv source files compilation
-set(src  AnimationExportChoiceDialog.cpp
+set(src  EquipmentExportDialog.cpp
+         AnimationExportChoiceDialog.cpp
          ArmoryImportDialog.cpp
          BlpInfo.cpp
          animcontrol.cpp

@@ -769,6 +769,37 @@ namespace Wmv.Wow
             return Concat(parts.ToArray());
         }
 
+        // A complete child rig: Stand overrides the parent, Run is appended,
+        // and Walk exists only in the parent. Distinct AFIDs expose source mixups.
+        public static byte[] PostureSkeleton(bool child, int parentFileId = 0)
+        {
+            byte[] bytes = Skeleton(0, child ? parentFileId : 0);
+            for (int at = 0; at + 8 <= bytes.Length; )
+            {
+                string magic = System.Text.Encoding.ASCII.GetString(bytes, at, 4);
+                int size = (int)BitConverter.ToUInt32(bytes, at + 4), p = at + 8;
+                if (magic == "SKS1")
+                {
+                    if (child) PutU32(bytes, p + 32 + 4, 900);
+                    else PutU16(bytes, p + 32 + 64, 4);
+                }
+                if (magic == "AFID" && !child)
+                {
+                    PutU16(bytes, p, 4); PutU32(bytes, p + 4, SkelAnimFileIdBase + 1);
+                }
+                if (magic == "SKB1" && child)
+                {
+                    int bone = p + 16 + 2 * BoneStride;
+                    PutF32(bytes, bone + 84, 2f);
+                    int keyHeaders = (int)BitConverter.ToUInt32(bytes, bone + 32);
+                    int keys = (int)BitConverter.ToUInt32(bytes, p + keyHeaders + 4);
+                    PutF32(bytes, p + keys + 12, 6f);
+                }
+                at += 8 + size;
+            }
+            return bytes;
+        }
+
         /// <summary>
         /// The keyframe bytes of the external sequence for boneCount bones, laid out at
         /// AnimKeysAt. chunked wraps them the modern way, AFM2 then AFSB, where the AFM2 holds a

@@ -1,3 +1,5 @@
+#include <QJsonDocument>
+#include <QJsonObject>
 /*----------------------------------------------------------------------*\
 | This file is part of WoW Model Viewer                                  |
 |                                                                        |
@@ -161,6 +163,8 @@ bool ExportJobManager::startExport(const Request & req)
       << wxT(" -fbxanim ") << (req.animation ? 1 : 0);
   if (req.component)
     cmd << wxT(" -fbxcomponent");
+  if (!req.equipmentRequest.IsEmpty())
+    cmd << wxT(" -fbxequipmentpackage ") << req.equipmentRequest;
   if (req.allCustomizations)
     cmd << wxT(" -fbxcustomizations -fbxincludeequipment ") << (req.includeEquipment ? 1 : 0);
   if (!req.clipsCsv.IsEmpty())
@@ -175,7 +179,12 @@ bool ExportJobManager::startExport(const Request & req)
   job->assetKey     = assetKey;
   job->assetLabel   = req.assetLabel;
   job->outPath      = req.outPath;
-  job->resultPath   = req.outPath + (req.allCustomizations ? wxT(".customization") : wxT(""));
+  job->resultPath   = req.outPath + (!req.equipmentRequest.IsEmpty() ? wxT(".equipment") : req.allCustomizations ? wxT(".customization") : wxT(""));
+  if (!req.equipmentRequest.IsEmpty())
+  {
+    const auto request = QJsonDocument::fromJson(QByteArray::fromBase64(QByteArray(req.equipmentRequest.ToUTF8().data()))).object();
+    if (request.contains("destination")) job->resultPath = wxString(request["destination"].toString().toStdWString());
+  }
   job->statusPath   = statusPath;
   job->logPath      = req.outPath + wxT(".export.log");
   job->lockPath     = lockPath;
@@ -357,8 +366,24 @@ void ExportJobManager::handleLine(ExportJob * job, const wxString & rawLine)
     if (job->dialog)
       job->dialog->setStage(job->stage);
     int p = stagePercent(job->stage);
+    if (p >= 0 && job->equipmentTotal > 0 && job->stage != wxT("DONE"))
+      p = 5 + (90 * (job->equipmentIndex - 1) + p * 90 / 100) / job->equipmentTotal;
     if (p >= 0 && p > job->percent)
       job->percent = p;
+  }
+  else if (token == wxT("EQUIPMENT"))
+  {
+    wxString remaining = rest;
+    long current = 0, total = 0;
+    remaining.BeforeFirst(' ').ToLong(&current); remaining = remaining.AfterFirst(' ');
+    remaining.BeforeFirst(' ').ToLong(&total); remaining = remaining.AfterFirst(' ');
+    if (current > 0 && total >= current)
+    {
+      job->equipmentIndex = (int)current;
+      job->equipmentTotal = (int)total;
+      job->percent = 5 + 90 * ((int)current - 1) / (int)total;
+      if (job->dialog) job->dialog->setVariant((int)current, (int)total, remaining);
+    }
   }
   else if (token == wxT("TOTAL_CLIPS"))
   {

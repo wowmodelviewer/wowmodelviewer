@@ -50,6 +50,7 @@ class ExportProgressDialog : public wxDialog
     // Driven by ExportJobManager as progress lines arrive from the child process.
     void setStage(const wxString & stage);
     void setClip(int current, int total, const wxString & name);
+    void setVariant(int current, int total, const wxString & name);
     void setPercent(int percent);          // 0..100 (clamped)
     void markHung(bool hung);              // shows a "no progress" hint, keeps Cancel live
     void finishMessage(const wxString & msg); // final line before the dialog is destroyed

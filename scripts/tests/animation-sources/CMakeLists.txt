@@ -9,3 +9,8 @@ add_executable(animation-sources regression.cpp)
 target_include_directories(animation-sources PRIVATE "${WMV_ROOT}/Source/core" "${WMV_ROOT}/Source/games/wow" "${WMV_ROOT}/ThirdParty" "${QT_ROOT}/include" "${QT_ROOT}/include/QtCore" "${FBX_ROOT}/include")
 target_compile_definitions(animation-sources PRIVATE FBXSDK_SHARED)
 target_link_libraries(animation-sources PRIVATE "${WMV_BUILD}/Source/core/Release/core.lib" "${WMV_BUILD}/Source/games/wow/Release/wow.lib" "${QT_ROOT}/lib/Qt5Core.lib" "${FBX_ROOT}/lib/libfbxsdk.lib")
+
+add_executable(equipment-pose ../equipment-export/pose.cpp)
+target_compile_definitions(equipment-pose PRIVATE FBXSDK_SHARED)
+target_include_directories(equipment-pose PRIVATE "${QT_ROOT}/include" "${QT_ROOT}/include/QtCore" "${FBX_ROOT}/include")
+target_link_libraries(equipment-pose PRIVATE "${QT_ROOT}/lib/Qt5Core.lib" "${FBX_ROOT}/lib/libfbxsdk.lib")

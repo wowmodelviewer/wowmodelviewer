@@ -673,7 +673,7 @@ namespace Wmv.Wow
         /// <summary>
         /// The SKID chunk: the FileDataID of a separate skeleton (.skel) file. Non-zero means the
         /// bone array in the header is not the one the renderer must use -- the real one lives in
-        /// that file's SKB1 chunk (or, when it carries an SKPD, in its parent skeleton's). Parse
+        /// that file's SKB1 chunk, with sequence inheritance through SKPD. Parse
         /// leaves such a model without bones; M2Parser.ApplySkeleton completes it once the
         /// skeleton bytes have been fetched.
         /// </summary>
@@ -689,11 +689,17 @@ namespace Wmv.Wow
         public int ParentSkeletonFileDataID;
 
         /// <summary>
-        /// The SKB1 chunk payload the applied skeleton's bones were read from (the parent's when
-        /// there is one). Kept for the same reason as Md21Payload: a sequence change re-reads the
+        /// The SKB1 payload for the bind hierarchy. Composed rigs keep each animation's
+        /// native payload in SkeletonSources. A sequence change re-reads the
         /// bone tracks, and their headers -- and in-skeleton keys -- are addressed relative to it.
         /// </summary>
         public byte[] SkeletonBonesPayload;
+
+        // Resolved SKPD union: each public sequence retains its native skeleton
+        // definition and local index, so aliases and external keys stay local.
+        public M2ParsedModel[] SkeletonSources;
+        public int[] SkeletonSourceIndices;
+        public int[] SkeletonGlobalOffsets;
 
         /// <summary>
         /// Animation id -> index into Sequences, -1 where the model has no such animation. From

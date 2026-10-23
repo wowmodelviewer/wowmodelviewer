@@ -169,6 +169,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   if (copy->cd.isDemonHunter() || (copy->infos.raceID == RACE_PANDAREN && copy->infos.sexID == GENDER_FEMALE))
     underwearGroups.append(QJsonObject{{"group", (int)CG_DH_LOINCLOTH}, {"variant", copy->cd.showUnderwear ? 1 : 0}});
   catalog["baseUnderwearGroups"] = underwearGroups;
+  catalog["exporter"] = "wmv-fbx-posture-2";
   catalog["build"] = QString::fromStdString(m_exportBuild);
   catalog["product"] = QString::fromStdString(m_exportProduct);
   catalog["fbx"] = destination.fileName();
@@ -450,6 +451,17 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   QJsonArray clips;
   for (const auto & name : scene.m_exportedClipNames) clips.append(QString::fromStdString(name));
   catalog["animationTakes"] = clips;
+  QJsonArray animations;
+  if (m_exportAnimation)
+    for (int index : m_animsToExport)
+    {
+      if (index < 0 || index >= (int)copy->anims.size()) return fail("Invalid animation identity.");
+      const auto & animation = copy->anims[index];
+      if (animations.size() >= clips.size()) return fail("Missing exported animation take.");
+      animations.append(QJsonObject{{"take", clips[animations.size()]}, {"animationId", animation.animID},
+        {"subAnimationId", animation.subAnimID}, {"durationMs", (int)animation.length}});
+    }
+  catalog["animations"] = animations;
   catalog["rules"] = QJsonObject{{"geometry", "wmv-player-geosets-v1"}, {"textures", "wmv-player-layers-v1"},
     {"equipment", "resolved-current-outfit-v1"}, {"bones", "animated-joint-origin-v1"}, {"instructions", "README.txt"}};
 
@@ -468,7 +480,9 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
     "WMV customizable character package v1\n"
     "Read catalog.json and the FBX material sidecar; FBX alone is a geometry library, not a ready-made character.\n"
     "Geometry is addressed by FBX node + material (submesh). All alternative geometry is present.\n"
-    "Scope: current body/player context only; excludedChoiceIds are intentional exclusions.\n"
+    "Scope: current player context; excludedChoiceIds are intentional exclusions.\n"
+    "Version 2 requires conditional-body-models-v1: resolve bodyVariants by the selected option/choice first, then read that catalog and use its own mesh, skeleton, animations and boneSets. Never apply another posture's bone indices to this skeleton.\n"
+    "An entry pointing to catalog.json uses this catalog's FBX directly; do not recurse. Keep the full package when moving postures. unavailableAnimations lists requested ID/sub-ID pairs absent in the alternate model.\n"
     "Requirements: zero is unconditional; anyChoice is OR. Option and choice requirements are AND.\n"
     "Effects apply for the selected choice and, if nonzero, relatedChoice. Options/effects are in composition order.\n"
     "Base geometry defaults: id 0, ids ending 01, or 32xx visible; 17xx,35xx,12xx hidden.\n"
@@ -490,7 +504,8 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
     "To enable the outfit, apply its groupOverrides after customization, then hideGroups; add bodyLayers and suppress listed customization regions.\n"
     "Enable equipment:<slot> geometry for included pieces according to defaultVisible (attached nodes already follow their FBX bones).\n"
     "To remove the outfit, recompute base visibility and textures without its overrides, suppression or layers; hide equipment geometry.\n"
-    "Face bones: resolve the selected active boneSet effect; no active boneSet means identity, not the previous selection.\n"
+    "Face bones: resolve boneSet effects for the selected choice AND relatedChoice; different posture choices are alternatives, never stacked.\n"
+    "Use the single active boneSet; duplicate references to the same set apply once. No active boneSet means identity, not the previous selection.\n"
     "boneSets.transforms target the named FBX joint. Matrices are column-major, column-vector, FBX-native axes and centimeters.\n"
     "On EACH fresh sampled animation/rest local matrix L, let t=L.translation; apply L'=T(t)*C*T(-t)*L before accumulating parents.\n"
     "Apply once per frame, after animation blending. Never accumulate corrections from the previous frame or alter shared bind poses.\n"
@@ -502,6 +517,94 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   if (!instructions.open(QIODevice::WriteOnly) || instructions.write(readme) != readme.size() || !instructions.flush())
     return fail("Cannot write package instructions.");
   instructions.close();
+  if (!catalog["bodyModels"].toArray().isEmpty())
+  {
+    catalog["version"] = 2;
+    catalog["requiredFeatures"] = QJsonArray{"conditional-body-models-v1"};
+    catalog["bodyModelFileId"] = (int)source->gamefile->fileDataId();
+  }
+  if (!m_postureVariant && !catalog["bodyModels"].toArray().isEmpty())
+  {
+    QJsonArray bodyVariants;
+    for (const auto & value : catalog["bodyModels"].toArray())
+    {
+      auto body = value.toObject();
+      const int fileId = body["modelFileId"].toInt();
+      if (fileId == source->gamefile->fileDataId())
+      {
+        body["catalog"] = "catalog.json";
+        bodyVariants.append(body);
+        continue;
+      }
+      auto * modelFile = GAMEDIRECTORY.getFile((uint)fileId);
+      if (!modelFile) return fail("A posture model is not available in this installation.");
+      std::unique_ptr<WoWModel> alternate(new WoWModel(modelFile, true));
+      if (!alternate->ok || !alternate->setRaceSex(source->infos.raceID, source->infos.sexID))
+        return fail("Cannot load the alternate posture model.");
+      alternate->charModelDetails = source->charModelDetails;
+      alternate->modelType = MT_CHAR;
+      alternate->setBodySex(source->itemSexID());
+      Attachment alternateAttachment(nullptr, alternate.get(), 0, -1);
+      for (auto * item : *source) alternate->addChild(new WoWItem(item->slot()));
+      alternate->cd.showUnderwear = source->cd.showUnderwear;
+      alternate->cd.showEars = source->cd.showEars;
+      alternate->cd.showHair = source->cd.showHair;
+      alternate->cd.showFacialHair = source->cd.showFacialHair;
+      alternate->cd.showFeet = source->cd.showFeet;
+      alternate->cd.autoHideGeosetsForHeadItems = source->cd.autoHideGeosetsForHeadItems;
+      alternate->cd.eyeGlowType = source->cd.eyeGlowType;
+      auto selection = source->cd.captureAppearance().selection;
+      selection[(uint)body["option"].toInt()] = (uint)body["choice"].toInt();
+      alternate->cd.applyAppearance(selection, source->cd.isDemonHunter(), true);
+      alternate->bSheathe = source->bSheathe;
+      alternate->td = source->td;
+      if (m_includeEquipment)
+      {
+        for (auto * item : *source)
+          if (item->isEquipped()) alternate->getItem(item->slot())->restore(item->id(), item->displayId(), item->level());
+        alternate->refresh();
+        for (auto * item : *source)
+        {
+          const auto originalParts = item->models();
+          for (const auto & part : alternate->getItem(item->slot())->models())
+          {
+            const auto original = originalParts.find(part.first);
+            if (original != originalParts.end()) part.second->showModel = original->second->showModel;
+          }
+        }
+      }
+      std::vector<int> clips;
+      QJsonArray unavailable;
+      // List positions are model-local. Carry the actual animation ID + variant.
+      for (int index : m_animsToExport)
+      {
+        if (index < 0 || index >= (int)source->anims.size()) return fail("Invalid requested animation index.");
+        const auto & requested = source->anims[index];
+        bool found = false;
+        for (size_t i = 0; i < alternate->anims.size(); ++i)
+          if (alternate->anims[i].animID == requested.animID && alternate->anims[i].subAnimID == requested.subAnimID)
+          {
+            if (std::find(clips.begin(), clips.end(), (int)i) == clips.end()) clips.push_back((int)i);
+            found = true;
+          }
+        if (!found) unavailable.append(QJsonObject{{"animationId", (int)requested.animID}, {"subAnimationId", (int)requested.subAnimID}});
+      }
+      const QString relative = QString("postures/choice-%1").arg(body["choice"].toInt());
+      if (!folder.mkpath(relative)) return fail("Cannot create the posture folder.");
+      const QString alternateTarget = folder.filePath(relative + "/character.fbx");
+      FBXExporter exporter;
+      exporter.m_postureVariant = true;
+      exporter.setExportOptions(true, true, true, m_exportAnimation);
+      exporter.setAnimationsToExport(clips);
+      exporter.setCustomizationExport(true, m_includeEquipment, m_exportBuild, m_exportProduct);
+      if (!exporter.exportCustomizationPackage(alternate.get(), alternateTarget.toStdWString()))
+      { m_lastError = exporter.lastError(); return false; }
+      body["catalog"] = relative + "/character.fbx.customization/catalog.json";
+      body["unavailableAnimations"] = unavailable;
+      bodyVariants.append(body);
+    }
+    catalog["bodyVariants"] = bodyVariants;
+  }
   if (!saveJson(folder.filePath("catalog.json"), catalog)) return fail("Cannot write customization catalog.");
   materialFile.close();
   if (!QDir().rename(staging.path(), packagePath)) return fail("Cannot publish the customization package. Choose another destination.");

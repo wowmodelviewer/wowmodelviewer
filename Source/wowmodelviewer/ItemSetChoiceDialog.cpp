@@ -200,7 +200,7 @@ void ItemSetChoiceDialog::chooseSet(wxListEvent&)
   }
   m_details->Layout(); m_details->FitInside(); m_details->Thaw();
   m_details->Scroll(0, 0); Layout();
-  if (!pieces.empty() || !set.id) m_apply(pieces, true);
+  if (!pieces.empty() || !set.id) m_apply(pieces, true, set.name);
 }
 void ItemSetChoiceDialog::changeItem(int slot)
 {
@@ -210,7 +210,7 @@ void ItemSetChoiceDialog::changeItem(int slot)
   m_selected[slot] = {static_cast<size_t>(index), 0};
   updateSlot(slot);
   m_details->Layout(); m_details->FitInside();
-  m_apply({equipment(slot)}, false);
+  m_apply({equipment(slot)}, false, m_sets[m_active].name);
 }
 void ItemSetChoiceDialog::changeAppearance(int slot)
 {
@@ -218,7 +218,7 @@ void ItemSetChoiceDialog::changeAppearance(int slot)
   const int index = m_appearances[slot]->GetSelection();
   if (!values || index < 0 || static_cast<size_t>(index) >= values->items[m_selected[slot].item].appearances.size()) return;
   m_selected[slot].appearance = static_cast<size_t>(index);
-  m_apply({equipment(slot)}, false);
+  m_apply({equipment(slot)}, false, m_sets[m_active].name);
 }
 void ItemSetChoiceDialog::fitListColumn()
 {

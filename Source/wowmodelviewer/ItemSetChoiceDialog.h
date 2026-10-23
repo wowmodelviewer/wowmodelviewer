@@ -7,7 +7,7 @@ class wxScrolledWindow;
 
 class ItemSetChoiceDialog : public CategoryChoiceDialog {
 public:
-  using Apply = std::function<void(const std::vector<ItemSets::Equipped>&, bool)>;
+  using Apply = std::function<void(const std::vector<ItemSets::Equipped>&, bool, const QString&)>;
   ItemSetChoiceDialog(wxWindow* parent, const wxArrayString& names,
     const std::vector<int>& categories, const wxArrayString& categoryNames,
     const std::vector<ItemSets::Set>& sets, Apply apply);

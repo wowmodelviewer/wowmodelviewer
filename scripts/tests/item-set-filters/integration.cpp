@@ -66,13 +66,14 @@ int main(int argc, char** argv)
     std::cout << "Catalog: " << legacy << " legacy, " << transmog << " transmog; " << elapsed << " ms" << std::endl;
     int calls = 0;
     bool replace = false;
+    QString selectedSetName;
     std::vector<ItemSets::Equipped> equipped;
     CategoryChoiceDialog original(nullptr, 0, nullptr, "Choose an item set", "Item sets", names, cats, catnames, nullptr);
     original.Layout();
     const wxSize originalClient = original.GetClientSize();
     const int originalListWidth = originalClient.x - 2 * original.FromDIP(10);
     ItemSetChoiceDialog d(nullptr, names, cats, catnames, sets,
-      [&](const std::vector<ItemSets::Equipped>& p, bool r) { ++calls; equipped=p; replace=r; });
+      [&](const std::vector<ItemSets::Equipped>& p, bool r, const QString & name) { ++calls; equipped=p; replace=r; selectedSetName=name; });
     require(d.GetClientSize().x == originalClient.x * 2, "popup must double original client width");
     require(d.GetClientSize().y == originalClient.y, "popup must preserve original height");
     require(d.m_listctrl->GetSize().x == originalListWidth, "original set list width must not change");
@@ -110,6 +111,7 @@ int main(int argc, char** argv)
         const auto& set=sets[index];
         if (set.equipmentSlots.empty()) { require(calls==before, "unresolved set cleared equipment"); continue; }
         require(calls==before+1 && replace, "set selection callback");
+        require(selectedSetName==set.name, "set name must accompany imported pieces");
         require(equipped.size()==set.equipmentSlots.size(), "all rendered slots equipped");
         for (size_t i=0;i<set.equipmentSlots.size();++i) {
           const auto& slot=set.equipmentSlots[i]; const auto& item=slot.items.front();
@@ -130,6 +132,7 @@ int main(int argc, char** argv)
             box->SetSelection(static_cast<int>(itemIndex));
             wxCommandEvent change(wxEVT_CHOICE,box->GetId()); change.SetEventObject(box); box->GetEventHandler()->ProcessEvent(change);
             require(!replace && equipped.size()==1 && equipped[0].itemId==slot.items[itemIndex].id,"item option updates only chosen slot");
+            require(selectedSetName==set.name,"item alternative retains set name");
             ++changedItems;
           }
           const auto& item=slot.items[itemIndex];
@@ -137,6 +140,7 @@ int main(int argc, char** argv)
             app->SetSelection(static_cast<int>(item.appearances.size()-1));
             wxCommandEvent change(wxEVT_CHOICE,app->GetId()); change.SetEventObject(app); app->GetEventHandler()->ProcessEvent(change);
             require(!replace && equipped.size()==1 && equipped[0].appearanceId==item.appearances.back().id,"appearance option maps exact appearance");
+            require(selectedSetName==set.name,"appearance alternative retains set name");
             ++changedAppearances;
           }
         }

@@ -21,6 +21,8 @@ public:
   bool setAppearanceId(int appearanceId);
   void load() { ++loads; }
   void setId(int id) { id_=id; level_=0; displayId_=0; }
+  int id() const { return id_; }
+  int displayId() const { return displayId_; }
 };
 #include "appearance-method.inc"
 struct Model : public std::vector<WoWItem*> {
@@ -35,7 +37,10 @@ public:
   int equipmentRefreshes=0, modelRefreshes=0;
   void RefreshEquipment() { ++equipmentRefreshes; }
   void RefreshModel() { ++modelRefreshes; }
-  void applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll);
+  QString m_exportSetName;
+  std::vector<std::pair<int, int>> m_exportSetEquipment;
+  QString suggestedEquipmentSetName() const;
+  void applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll, const QString & name = QString());
 };
 #include "equipment-method.inc"
 void require(bool value) { if(!value) throw std::runtime_error("Appearance application failed"); }
@@ -58,9 +63,11 @@ int main() {
   WoWItem first, second; first.levelDisplayMap_={{0,101},{1,102}}; second.levelDisplayMap_=first.levelDisplayMap_;
   Model model; model.push_back(&first); model.push_back(&second);
   CharControl control; control.model=&model;
-  control.applySetPieces({{0,123,102}},true);
+  control.applySetPieces({{0,123,102}},true,"Test set");
+  require(control.suggestedEquipmentSetName()=="Test set");
   require(first.id_==123 && first.displayId_==502 && second.id_==0 && viewer.updates==1);
   second.id_=456;
+  require(control.suggestedEquipmentSetName().isEmpty());
   control.applySetPieces({{0,124,102}},false);
   require(first.id_==124 && second.id_==456 && viewer.updates==2);
   control.applySetPieces({},true);
