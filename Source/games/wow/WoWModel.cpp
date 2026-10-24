@@ -1,4 +1,7 @@
 #include "AnimationFileSnapshot.h"
+#include "SkeletonAnimationOverlay.h"
+#include <functional>
+#include <set>
 #include <map>
 #include "WoWModel.h"
 
@@ -554,12 +557,13 @@ void WoWModel::initCommon()
             SKS1 Sks1;
             memcpy(&Sks1, parentFile->getBuffer(), sizeof(SKS1));
 
-            if (Sks1.nGlobalSequences > 0)
+            if (globalSequences.empty() && Sks1.nGlobalSequences > 0)
             {
               uint32 * buffer = new uint32[Sks1.nGlobalSequences];
               memcpy(buffer, parentFile->getBuffer() + Sks1.ofsGlobalSequences, sizeof(uint32)*Sks1.nGlobalSequences);
               for (uint i = 0; i < Sks1.nGlobalSequences; i++)
                 globalSequences.push_back(buffer[i]);
+              delete[] buffer;
             }
 
             parentFile->close();
@@ -1112,124 +1116,90 @@ void WoWModel::initAnimated()
   {
     uint32 skelFileID;
     gamefile->read(&skelFileID, sizeof(skelFileID));
-    GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
-
-    if (skelFile->open())
-    {
-      // skelFile->dumpStructure();
-      std::vector<AFID> afids = readAFIDSFromFile(skelFile);
-
-      if (skelFile->setChunk("SKS1"))
+    std::set<uint32> visiting;
+    std::function<bool(uint32)> loadSkeleton = [&](uint32 id) {
+      if (visiting.size() >= 32 || !visiting.insert(id).second) return false;
+      auto * file = GAMEDIRECTORY.getFile(id);
+      if (!file || !file->open()) return false;
+      const auto range = [&](size_t offset, size_t count, size_t stride) {
+        return offset <= file->getSize() && count <= (file->getSize() - offset) / stride;
+      };
+      uint32 parent = 0;
+      if (file->setChunk("SKPD"))
       {
-        SKS1 sks1;
-
-        // let's try if there is a parent skel file to read
-        GameFile * parentFile = 0;
-        bool hasParent = false;
-        bool parentRead = false;
-        uint32 parentId = 0;
-        if (skelFile->setChunk("SKPD"))
+        SKPD link;
+        if (!range(0, 1, sizeof(link))) { file->close(); return false; }
+        memcpy(&link, file->getBuffer(), sizeof(link)); parent = link.parentFileId;
+      }
+      modelAnimData ownData;
+      std::vector<ModelAnimation> ownSequences;
+      std::vector<int16> ownLookup;
+      std::vector<Bone> ownBones;
+      std::vector<int16> ownKeyBones;
+      auto afids = readAFIDSFromFile(file);
+      bool valid = file->setChunk("SKS1") && range(0, 1, sizeof(SKS1));
+      if (valid)
+      {
+        SKS1 h; memcpy(&h, file->getBuffer(), sizeof(h));
+        valid = range(h.ofsAnimations, h.nAnimations, sizeof(ModelAnimation)) &&
+                range(h.ofsAnimationLookup, h.nAnimationLookup, sizeof(int16)) &&
+                range(h.ofsGlobalSequences, h.nGlobalSequences, sizeof(uint32));
+        if (valid)
         {
-          SKPD skpd;
-          skelFile->read(&skpd, sizeof(skpd));
-
-          hasParent = true;
-          parentId = skpd.parentFileId;
-          parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
-
-          if (parentFile && parentFile->open())
-          {
-            parentRead = true;
-            // parentFile->dumpStructure();
-            afids = readAFIDSFromFile(parentFile);
-
-            if (parentFile->setChunk("SKS1"))
-            {
-              SKS1 Sks1;
-              parentFile->read(&Sks1, sizeof(Sks1));
-              readAnimsFromFile(parentFile, afids, data, Sks1.nAnimations, Sks1.ofsAnimations, Sks1.nAnimationLookup, Sks1.ofsAnimationLookup);
-            }
-
-            parentFile->close();
-          }
-        }
-        else
-        {
-          skelFile->read(&sks1, sizeof(sks1));
-          memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-          readAnimsFromFile(skelFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
-        }
-
-        animManager = new AnimManager(*this);
-        
-        // init bones...
-        GameFile * fileToUse = skelFile->setChunk("SKB1") ? skelFile : 0;
-        if (fileToUse && hasParent)
-        {
-          // The bones are the parent's, and their tracks index the parent's animations, so the
-          // child's own SKB1 cannot stand in. When the parent is missing or cannot be read, the
-          // model is left as when its own skeleton does not open: no bones, no animations (the
-          // animation manager goes below) and no attachment points (read from this skeleton in
-          // initCommon, they name bones). Reading through the unopened file crashed here.
-          if (parentFile && parentRead && parentFile->open() && parentFile->setChunk("SKB1"))
-          {
-            skelFile->close();
-            fileToUse = parentFile;
-          }
-          else
-          {
-            LOG_ERROR << "Parent skeleton" << (parentFile ? parentFile->fullname() : QString("ID %1").arg(parentId))
-                      << "of" << skelFile->fullname()
-                      << "could not be read; the model is loaded without bones or animations.";
-            if (parentFile)
-              parentFile->close();
-            fileToUse = 0;
-            anims.clear();
-            animLookups.clear();
-            atts.clear();
-            header.nAttachments = 0;
-            header.nAttachLookup = 0;
-            for (size_t i = 0; i < ATT_MAX; i++)
-              attLookup[i] = -1;
-          }
-        }
-
-        if (fileToUse)
-        {
-          SKB1 skb1;
-          fileToUse->read(&skb1, sizeof(skb1));
-          memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
-          bones.resize(skb1.nBones);
-          ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
-
-
-          for (size_t i = 0; i < skb1.nBones; i++)
-            bones[i].initV3(*fileToUse, mb[i], data);
-
-          // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
-          if (skb1.nKeyBoneLookup < BONE_MAX)
-          {
-            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
-          }
-          else
-          {
-            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
-            LOG_ERROR << "KeyBone number" << skb1.nKeyBoneLookup << "over" << BONE_MAX;
-          }
-          fileToUse->close();
-        }
-
-        // An animation manager crashes at its first tick when there are no animations (it reads
-        // the first one), so a skeleton that gives none leaves the model without one, as when the
-        // skeleton does not open.
-        if (anims.empty())
-        {
-          delete animManager;
-          animManager = 0;
+          ownData.globalSequences.resize(h.nGlobalSequences);
+          memcpy(ownData.globalSequences.data(), file->getBuffer() + h.ofsGlobalSequences, h.nGlobalSequences * sizeof(uint32));
+          readAnimsFromFile(file, afids, ownData, h.nAnimations, h.ofsAnimations, h.nAnimationLookup, h.ofsAnimationLookup);
+          ownSequences.swap(anims); ownLookup.swap(animLookups);
         }
       }
-      skelFile->close();
+      valid = valid && file->setChunk("SKB1") && range(0, 1, sizeof(SKB1));
+      if (valid)
+      {
+        SKB1 h; memcpy(&h, file->getBuffer(), sizeof(h));
+        valid = range(h.ofsBones, h.nBones, sizeof(ModelBoneDef)) &&
+                range(h.ofsKeyBoneLookup, h.nKeyBoneLookup, sizeof(int16));
+        if (valid)
+        {
+          ownBones.resize(h.nBones);
+          auto * defs = (ModelBoneDef *)(file->getBuffer() + h.ofsBones);
+          for (size_t i = 0; i < ownBones.size(); ++i) ownBones[i].initV3(*file, defs[i], ownData);
+          ownKeyBones.resize((std::min)((size_t)h.nKeyBoneLookup, (size_t)BONE_MAX));
+          memcpy(ownKeyBones.data(), file->getBuffer() + h.ofsKeyBoneLookup, ownKeyBones.size() * sizeof(int16));
+        }
+      }
+      file->close();
+      if (!valid) return false;
+      if (parent)
+      {
+        if (!loadSkeleton(parent)) return false;
+        // Partial/attachment skeletons can use another bone index space. Keep
+        // their existing parent-only path; full child rigs override by identity.
+        if (bones.size() != ownBones.size() || ownSequences.empty()) { visiting.erase(id); return true; }
+        if (!overlaySkeletonAnimations(anims, bones, ownSequences, ownBones)) return false;
+        // Lookup entries are sequence indices, not animation IDs. Rebuild from
+        // the resolved identities after overriding/appending child sequences.
+        animLookups.assign((std::max)(animLookups.size(), ownLookup.size()), -1);
+        for (size_t i = 0; i < anims.size(); ++i)
+          if (anims[i].subAnimID == 0 && anims[i].animID >= 0 && anims[i].animID < (int)animLookups.size())
+            animLookups[anims[i].animID] = (int16)i;
+      }
+      else
+      {
+        anims.swap(ownSequences); animLookups.swap(ownLookup); bones.swap(ownBones);
+      }
+      std::fill(keyBoneLookup, keyBoneLookup + BONE_MAX, (int16)-1);
+      std::copy(ownKeyBones.begin(), ownKeyBones.end(), keyBoneLookup);
+      visiting.erase(id);
+      return true;
+    };
+    if (!loadSkeleton(skelFileID))
+    {
+      LOG_ERROR << "Cannot resolve skeleton inheritance for model" << gamefile->fileDataId();
+      anims.clear(); animLookups.clear(); bones.clear(); atts.clear();
+      header.nAttachments = header.nAttachLookup = 0;
+      std::fill(attLookup, attLookup + ATT_MAX, (int16)-1);
     }
+    if (!anims.empty()) animManager = new AnimManager(*this);
     gamefile->setChunk("MD21", false);
   }
   else if (header.nAnimations > 0)
@@ -1338,10 +1308,18 @@ void WoWModel::initAnimated()
 
   if (header.nEvents)
   {
-    ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
-    events.resize(header.nEvents);
-    for (uint i = 0; i < events.size(); i++)
-      events[i].init(edefs[i]);
+    // Do not dereference malformed event definitions before the strict export
+    // reader gets a chance to report them. It rereads the original header, so
+    // this viewport guard cannot turn corrupt data into a successful empty export.
+    if (header.ofsEvents <= gamefile->getSize() &&
+        header.nEvents <= (gamefile->getSize() - header.ofsEvents) / sizeof(ModelEventDef))
+    {
+      ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
+      events.resize(header.nEvents);
+      for (uint i = 0; i < events.size(); i++)
+        events[i].init(edefs[i]);
+    }
+    else LOG_ERROR << "Invalid native event definition bounds in model" << gamefile->fileDataId();
   }
 
   // Legacy (pre-CASC) M2 files use an older particle/ribbon emitter struct layout than the modern

@@ -2208,6 +2208,29 @@ namespace Wmv.Wow.Tests
                   Math.Abs(TKey(Bone(p.Bones, 3).Translation, 1).Z - M2Synthetic.ExternalZ(3, 1)) < 1e-4f,
                   "parent: an external sequence reads its keys against the parent's bone headers");
 
+            // A full child rig must override rather than disappear behind SKPD.
+            var posture = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(posture, M2Synthetic.PostureSkeleton(true, parentId), M2Synthetic.PostureSkeleton(false), 0);
+            Check(posture.Sequences.Length == 3 && posture.Sequences[0].Length == 900 &&
+                  posture.Sequences[1].AnimId == 4 && posture.Sequences[2].AnimId == 5,
+                  "posture: identity union keeps child duration, parent Walk and appended child Run");
+            Near(Bone(posture.Bones, 2).Pivot.Z, 2f, "posture: bind pivots come from the actual child body");
+            Near(TKey(Bone(posture.Bones, 2).Translation, 1).X, 6f, "posture: Stand reads the child SKB1");
+            Check(M2Parser.ExternalAnimFileId(posture, 1) == M2Synthetic.SkelAnimFileIdBase + 1 &&
+                  M2Parser.ExternalAnimFileId(posture, 2) == M2Synthetic.SkelAnimFileIdBase,
+                  "posture: each identity keeps its native AFID");
+            M2Parser.ReadAnimationInto(m2, 1, posture, anim);
+            Check(posture.AnimatedSequence == 1 && Bone(posture.Bones, 1).Rotation.GlobalSequence == 3,
+                  "posture: inherited Walk retains its parent global-loop index");
+            Near(TKey(Bone(posture.Bones, 2).Translation, 1).Z, z2, "posture: inherited external track reads parent-local index");
+            M2Parser.ReadAnimationInto(m2, 2, posture, anim);
+            Check(posture.AnimatedSequence == 2 && Bone(posture.Bones, 1).Rotation.GlobalSequence == 1,
+                  "posture: appended Run reads child-local index and global loop");
+            Check(M2Parser.ReadBoneTracksForSequence(posture, 2, anim)[2].Translation.HasData,
+                  "posture: override sampling resolves the child's appended index");
+            M2Parser.ReadAnimationInto(m2, 0, posture);
+            Near(TKey(Bone(posture.Bones, 2).Translation, 1).X, 6f, "posture: switching back clears inherited tracks");
+
             // ---- optional and malformed chunks ----
             M2ParsedModel q = M2Parser.Parse(m2);
             M2Parser.ApplySkeleton(q, M2Synthetic.Skeleton(0, 0, false, true, false), null, -1);
