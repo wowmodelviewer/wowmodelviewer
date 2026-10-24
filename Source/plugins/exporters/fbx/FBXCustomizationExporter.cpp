@@ -379,6 +379,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   scene.setExportOptions(true, true, true, m_exportAnimation);
   scene.setAnimationsToExport(m_animsToExport);
   scene.setComponentRawExport(true);
+  scene.setCustomizationExport(false, false, m_exportBuild, m_exportProduct);
   scene.m_packageScene = true;
   copy->updatePose();
   if (!scene.exportModel(copy.get(), folder.filePath(destination.fileName()).toStdWString()))
@@ -451,6 +452,9 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   QJsonArray clips;
   for (const auto & name : scene.m_exportedClipNames) clips.append(QString::fromStdString(name));
   catalog["animationTakes"] = clips;
+  if (!scene.m_exportedClipNames.empty())
+    catalog["animationEvents"] = QJsonObject{{"schema", "wmv.animation-events"}, {"version", 1},
+      {"file", destination.fileName() + ".wmvevents.json"}};
   QJsonArray animations;
   if (m_exportAnimation)
     for (int index : m_animsToExport)
@@ -479,6 +483,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
   const QByteArray readme =
     "WMV customizable character package v1\n"
     "Read catalog.json and the FBX material sidecar; FBX alone is a geometry library, not a ready-made character.\n"
+    "When animations are present, animationEvents.file references the native event sidecar (wmv.animation-events v1). Resolve the active body's catalog first; match take and animation/sub-animation identity, and preserve separate clip/global clocks.\n"
     "Geometry is addressed by FBX node + material (submesh). All alternative geometry is present.\n"
     "Scope: current player context; excludedChoiceIds are intentional exclusions.\n"
     "Version 2 requires conditional-body-models-v1: resolve bodyVariants by the selected option/choice first, then read that catalog and use its own mesh, skeleton, animations and boneSets. Never apply another posture's bone indices to this skeleton.\n"

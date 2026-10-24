@@ -43,6 +43,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QFileInfo>
+#include <QSaveFile>
 
 // Externals
 
@@ -51,6 +53,9 @@
 #include "FBXHeaders.h"
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
+#include "NativeAnimationEvents.h"
+#include "Game.h"
+#include "GameFolder.h"
 #include "Attachment.h"
 #include "RenderTexture.h"
 #include "video.h"
@@ -246,7 +251,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   }
   catch(const std::exception& ex)
   {
-    m_lastError = L"An error occurred while building the FBX scene. See the log for details.";
+    m_lastError = QString("Unable to build FBX scene: %1").arg(QString::fromUtf8(ex.what())).toStdWString();
     LOG_ERROR << "Error during export:" << ex.what();
     return false;
   }
@@ -254,6 +259,9 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   if (m_packageScene && !describeCustomizationGeometry())
     return false;
   wmvProgress("STAGE WRITE");
+  if (wantAnimation)
+    FbxProperty::Create(sceneInfo, FbxGetDataTypeFromEnum(eFbxString), "WMVAnimationEvents").Set(FbxString(
+      (QFileInfo(QString::fromStdWString(m_filename)).fileName() + ".wmvevents.json").toUtf8().constData()));
   if(!exporter->Export(m_p_scene))
   {
     m_lastError = L"Unable to write the FBX file (check disk space and that the file is not open elsewhere).";
@@ -261,6 +269,26 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     return false;
   }
   LOG_INFO << "Model successfully created";
+
+  if (wantAnimation)
+  {
+    QSaveFile events(QString::fromStdWString(m_filename) + ".wmvevents.json");
+    const auto bytes = QJsonDocument(m_animationEvents).toJson();
+    if (!events.open(QIODevice::WriteOnly) || events.write(bytes) != bytes.size() || !events.commit())
+    {
+      m_lastError = L"Unable to write native animation events. The FBX export is incomplete.";
+      return false;
+    }
+  }
+  else
+  {
+    const QString oldEvents = QString::fromStdWString(m_filename) + ".wmvevents.json";
+    if (QFile::exists(oldEvents) && !QFile::remove(oldEvents))
+    {
+      m_lastError = L"Unable to remove stale animation events after exporting without animations.";
+      return false;
+    }
+  }
 
   // Material render-state sidecar for the bundled Blender importer add-on.
   writeMaterialSidecar();
@@ -426,8 +454,7 @@ void FBXExporter::createAnimations()
 {
   if (m_boneNodes.empty())
   {
-    LOG_ERROR << "No bone in skeleton, so no animation will be exported";
-    return;
+    throw std::runtime_error("Native animation events: no exported skeleton for the selected takes");
   }
 
   LOG_INFO << "Num animation clips to export:" << m_animsToExport.size();
@@ -436,6 +463,25 @@ void FBXExporter::createAnimations()
 
   std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
   std::set<std::string> usedNames;
+  nativeevents::require(!m_exportBuild.empty() && !m_exportProduct.empty(), "missing source build/product");
+  nativeevents::Reader eventReader(m_p_model->gamefile->fileDataId(), [&](uint32_t id) {
+    auto * file = id == (uint32_t)m_p_model->gamefile->fileDataId() ? m_p_model->gamefile : GAMEDIRECTORY.getFile(id);
+    nativeevents::require(file != nullptr, "file not found: " + std::to_string(id));
+    const bool borrowed = file->isCurrentlyOpen();
+    nativeevents::require(borrowed || file->open(), "cannot open file: " + std::to_string(id));
+    struct Close { GameFile * file; bool owned; ~Close() { if (owned) file->close(); } } close{file, !borrowed};
+    nativeevents::require(file->readComplete() && file->rawBuffer() && file->rawSize(), "incomplete file: " + std::to_string(id));
+    return nativeevents::Bytes(file->rawBuffer(), file->rawBuffer()+file->rawSize());
+  });
+  const auto eventObject = [](const nativeevents::Event & e) {
+    QByteArray code(e.code.data(), 4);
+    return QJsonObject{{"eventIndex", (int)e.index}, {"code", QString::fromLatin1(code)},
+      {"codeHex", QString::fromLatin1(code.toHex())}, {"payload", (double)e.payload},
+      {"bone", e.bone == UINT32_MAX ? -1 : (int)e.bone},
+      {"position", QJsonArray{e.position[0], e.position[1], e.position[2]}}};
+  };
+  QJsonArray definitions, eventClips;
+  for (const auto & e : eventReader.eventDefinitions()) definitions.append(eventObject(e));
 
   // Each selected clip becomes its own FbxAnimStack (take) bound to the SAME skeleton already
   // in the scene -- so the mesh, rig and every clip live in ONE file (the standard rigged-
@@ -446,8 +492,7 @@ void FBXExporter::createAnimations()
   {
     if (animIdx < 0 || animIdx >= (int)m_p_model->anims.size())
     {
-      LOG_ERROR << "Skipping out-of-range animation index" << animIdx;
-      continue;
+      throw std::runtime_error("Native animation events: selected animation index out of range");
     }
     ModelAnimation anim = m_p_model->anims[animIdx];
 
@@ -462,8 +507,46 @@ void FBXExporter::createAnimations()
     usedNames.insert(name.toStdString());
     m_exportedClipNames.push_back(name.toStdString());
 
-    wmvProgress("CLIP " + std::to_string(++clipNum) + " " + std::to_string(m_animsToExport.size()) + " " + name.toStdString());
-    FBXHeaders::createAnimation(m_p_model, m_p_scene, name, animIdx, m_boneNodes);
+    nativeevents::Clip clip;
+    try { clip = eventReader.clip(anim.animID, anim.subAnimID, anim.length); }
+    catch (const std::exception & ex) {
+      throw std::runtime_error("Model " + std::to_string(m_p_model->gamefile->fileDataId()) +
+        ", take " + name.toStdString() + " (" + std::to_string(anim.animID) + ":" +
+        std::to_string(anim.subAnimID) + "): " + ex.what());
+    }
+    QJsonArray tracks;
+    for (const auto & t : clip.events)
+    {
+      auto event = eventObject(t.event);
+      QJsonArray times;
+      for (uint32_t time : t.timestamps) times.append((double)time);
+      event["timestampsMs"] = times;
+      event["interpolationType"] = t.interpolation;
+      event["globalSequence"] = t.global;
+      event["clock"] = t.global < 0 ? "clip" : "global";
+      if (t.global >= 0) event["periodMs"] = (double)t.period;
+      event["trackChunk"] = QString::fromStdString(t.chunk);
+      event["timestampChunk"] = t.externalFileId ? "AFM2" : QString::fromStdString(t.chunk);
+      event["timestampFileId"] = (double)(t.externalFileId ? t.externalFileId : m_p_model->gamefile->fileDataId());
+      tracks.append(event);
+    }
+    eventClips.append(QJsonObject{{"take", name}, {"animationId", anim.animID}, {"subAnimationId", anim.subAnimID},
+      {"durationMs", (double)anim.length}, {"sequenceOwnerFileId", (double)clip.owner},
+      {"sourceSequenceIndex", (int)clip.sequence}, {"resolvedSequenceIndex", (int)clip.resolved}, {"events", tracks}});
+
+  }
+  m_animationEvents = QJsonObject{{"schema", "wmv.animation-events"}, {"version", 1}, {"status", "complete"},
+    {"modelFileId", m_p_model->gamefile->fileDataId()}, {"build", QString::fromStdString(m_exportBuild)},
+    {"product", QString::fromStdString(m_exportProduct)}, {"timeUnit", "millisecond"},
+    {"positionUnit", "WoW-model-unit"}, {"positionCoordinates", "M2-native-right-handed-Z-up"},
+    {"positionSpace", "native-event-bone-relative"}, {"sourceUnitsToFbx", (double)SCALE_FACTOR},
+    {"eventDefinitions", definitions}, {"clips", eventClips}};
+  // Validate every event source before spending time baking any takes.
+  for (int index : m_animsToExport)
+  {
+    const auto & name = m_exportedClipNames.at(clipNum);
+    wmvProgress("CLIP " + std::to_string(++clipNum) + " " + std::to_string(m_animsToExport.size()) + " " + name);
+    FBXHeaders::createAnimation(m_p_model, m_p_scene, QString::fromStdString(name), index, m_boneNodes);
   }
 }
 
@@ -1445,6 +1528,7 @@ void FBXExporter::reset()
   m_materialMeta.clear();
   m_boneClusters.clear();
   m_exportedClipNames.clear();
+  m_animationEvents = QJsonObject();
 }
 
 // Recursively count mesh control points, skeleton bones and skin clusters in a re-imported scene.

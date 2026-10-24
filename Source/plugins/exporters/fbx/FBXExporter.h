@@ -39,6 +39,7 @@
 #include <qlist.h>
 #include <qmutex.h>
 #include <QJsonArray>
+#include <QJsonObject>
 
 // Externals
 #include "fbxsdk.h"
@@ -245,6 +246,7 @@ class FBXExporter : public ExporterPlugin
     // Names of the animation takes actually written this export (after de-duplication), used by
     // selfTest() to confirm exactly the selected clips made it into the file.
     std::vector<std::string> m_exportedClipNames;
+    QJsonObject m_animationEvents;
 
     std::map<int, FbxNode*> m_attachSkeletonNode;
     std::map<int, FbxNode*> m_attachMeshNodes;

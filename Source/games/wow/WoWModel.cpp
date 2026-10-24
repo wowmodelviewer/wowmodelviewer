@@ -1308,10 +1308,18 @@ void WoWModel::initAnimated()
 
   if (header.nEvents)
   {
-    ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
-    events.resize(header.nEvents);
-    for (uint i = 0; i < events.size(); i++)
-      events[i].init(edefs[i]);
+    // Do not dereference malformed event definitions before the strict export
+    // reader gets a chance to report them. It rereads the original header, so
+    // this viewport guard cannot turn corrupt data into a successful empty export.
+    if (header.ofsEvents <= gamefile->getSize() &&
+        header.nEvents <= (gamefile->getSize() - header.ofsEvents) / sizeof(ModelEventDef))
+    {
+      ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
+      events.resize(header.nEvents);
+      for (uint i = 0; i < events.size(); i++)
+        events[i].init(edefs[i]);
+    }
+    else LOG_ERROR << "Invalid native event definition bounds in model" << gamefile->fileDataId();
   }
 
   // Legacy (pre-CASC) M2 files use an older particle/ribbon emitter struct layout than the modern

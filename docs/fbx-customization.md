@@ -243,6 +243,14 @@ Each model exports its own animation data and uncorrected bind pose. Optional
 current equipment is resolved separately on both bodies. No renderer or consumer
 in another project is changed by this export support.
 
+### Native animation events
+
+Animated exports now include all native event tracks automatically. Each body's
+catalog references its own `animationEvents.file` sidecar, including conditional
+posture variants. Existing take identities and catalog versions are unchanged.
+See [Native animation events](native-animation-events.md) for clocks, source
+resolution, failure behavior and consumer integration.
+
 ### Skeleton inheritance correction (exporter `wmv-fbx-posture-2`)
 
 Retail `wow` 12.1.5.70391 has base model 917116 / skeleton 1964411 and
