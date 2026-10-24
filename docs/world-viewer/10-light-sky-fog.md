@@ -2,8 +2,10 @@
 
 Branch `world/10-light-sky-fog`, from `develop` 678071f0 (Stage 09, PR #127). **Status: the owner approved the
 direction on 2026-10-21 with the adjustments of section 0; implementation runs in the order of section 7. Steps 1-5 are
-done and the early visual checkpoint ran on 2026-10-22 with a built player (13.1); the owner reviews its pictures
-before steps 6-9.** This document records the owner's decisions (section 0), the investigation (sections 1-5), the
+done and the early visual checkpoint ran on 2026-10-22 with a built player (13.1); the owner approved them that day.
+Step 6 is done (13.2). Step 7 (fog) is implemented and validated against its own model (13.3); its fit-set exit waits
+for in-game test T7, and the owner reviews its pictures and the open decisions of 13.3 before step 8.** This document
+records the owner's decisions (section 0), the investigation (sections 1-5), the
 architecture and order of work (sections 6-8), the validation against in-game screenshots (section 9), the remaining
 decisions (section 10) and, as work lands, its results. The roadmap change that made this milestone 10 is `roadmap.md` 5.1.
 
@@ -583,6 +585,46 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
   its meaning is established (D17, D18).
 - **Settings matter:** the far clip changes the fog under this model; the references must record it (9.2).
 
+**Graded as built (step 7, 2026-10-23; 6.9, 13.3).**
+
+- **The tail is PROVEN_BYTES and executed.** One fog function ends every terrain (316 Retail and 316 PTR programs), M2
+  (2,688 lit programs) and world-model (72) program of the client; the programs were executed against the project's
+  pseudo-code over every path, largest error 5.4e-7, and the viewer draws its layer 0. The `dx_6_0` programs the clients
+  bind are INFERRED to equal them by structure (terrain and world models carry the same literals; the M2 `dx_6_0`
+  containers were not extracted). The fog is the program's last arithmetic: after the light, the specular, the second
+  directional term and, on M2, glow, desaturation and the program's own colour-grading LUT; no encode and no clamp
+  follow. The sky and cloud programs apply no fog.
+- **Which table column feeds which row of the record is INFERRED (public)**, one graded row per constant or rule in
+  `WorldLightModel.Fog`:
+
+| Rule | As built | Grade |
+|---|---|---|
+| Start | min(far clip, 3000) x FogScaler, FogScaler as read (no clamp) | INFERRED (public); class C until T7 |
+| Density | FogDensity x 0.0005 per yard, as read (the 0.9 floor not applied) | INFERRED (public); class C until T7 |
+| End | the game far clip; the linear fade from 0.3 x the far clip | INFERRED (public); T7's low arm measures it |
+| Fog colour | SkyFogColor as byte / 255 | INFERRED (public); of the single table colours only SkyFog fits the references' far bands (MEASURED, preliminary: RMS 1.54 steps against 4.3-8.5) |
+| Height fog, the end-fog and height colours, the colour ramp, the sun tint | the public rules; the zero-colour, height-curve, kh := k and ramp-length fall-backs resolved per key; the tint in the sky's order | INFERRED (public) |
+| Second start term, layers, strength, interior weight | 0; one layer; 1 (the terrain's compiled-in value); 0 (the outdoor record) | held: no table gives them |
+
+- **Where each non-data constant is measured** (9.6: measured at two spots and times, or approved by the owner). The start
+  rule and the density: T7 (stand A the fit set, stand B and the dusk pairs the holdouts). The end: T7's low arm. The
+  colour fall-backs: T7's measured fog colour at two stands. The height-curve fall-back: one shot at a stand the tables
+  pick. kh := k, the ramp length and the polynomial switch: no planned view reaches them. The sun-tint inputs: T4 and T14.
+  The blend kinds and the skip: a reference with such a batch in a fogged range. The holds: none. Until then each is a
+  labelled default the owner is asked to approve (13.3, open item 2).
+- **The preliminary reading** (MEASURED on the six existing PTR references; start and density not separated). The far
+  bands are fogged about 1.5 times more than the default predicts. The shots constrain a start-density ridge from about
+  (250 yd, density x 0.8) to (350 yd, x 1.2), flat within 0.1 step around its minimum (0.69 steps RMS at 300 yd, x 1.00);
+  the 300-450 yd band holds only 258-318 px per shot, so a start near 300 yd is extrapolated, not observed; at the default
+  start of 450 yd the best density scale is x 1.75, with structured residuals. Read plainly: a nearer start or a denser
+  fog explains it. The default keeps the public rule, labelled, and the difference is class C ("fog start and density")
+  until T7 (9.4).
+- **Corrected (step 7).** The Stage 09 references are not fog-free: at every Southfury camera 0.9-2.8 % of the frame is
+  terrain or trees between the predicted start (450 yd) and about 822 yd (the far-left hill and the ridge tops), and the
+  game fogs it (13.3, C1); only the water (within 142 yd) and the nearer terrain lie inside the start. The dome's "fog
+  ring" is not a fog term: the client's sky has none, and the lowest ring's lean to EndFogColor is the dome's vertex
+  colours, which step 4 already draws, so step 7 changes no sky pixel.
+
 ### 4.7 Colour grading and glow
 
 - **LUTs** (3.2): Retail 1,691 keys, Beta 321; Era and MoP none. How they blend across keys and lights and in which
@@ -810,6 +852,63 @@ WMO F_UNFOGGED and M2 NoFog are honoured; the fog colour per blend mode follows 
 models, doodads and the water's own surface terms (never a second time to the refracted scene); particles follow in Stage
 11. URP's fog is not used.
 
+**As built (step 7, 2026-10-23; 13.3).**
+
+- **Where.** The client's tail, layer 0, in the project's own code: `Assets/Resources/WmvWorldFog.hlsl`, with its CPU twin
+  `Wow/World/WorldFog.cs`. It runs on the lit terrain (`Wmv/TerrainTextured`'s world branch, after the outdoor light and
+  before the saturate and the encode) and on outdoor doodads and exterior world-model groups (the world-lit variants of
+  6.6, after the lit colour and the alpha line, before the encode). Not fogged: interior groups and the doodads they list
+  (until Stage 12, D2), the water (step 8, 6.11), the sky (the client's has no fog), particles (Stage 11), the terrain's
+  neutral and diagnostic paths, the overview, every non-main camera, composite and fixture. No new variant, keyword or
+  host change; protocol 20.
+- **The record.** `WorldFog.Pack` fills the program's 14-row record once a frame from the light state the player already
+  evaluates, blends and eases. `Publish` uploads it with the eye (`_WmvWLEye`) and takes the height plane's offset from
+  that same eye, so a second render of the main camera in one frame stays consistent. Radial distance from the eye with
+  the vertical pull; the game far clip (6.1 rule 3), never the camera's far plane.
+- **The near field is the fog-off picture's bit for bit.** The hook returns its input through a select wherever the
+  visibility is 1, so every pixel nearer than both the start and 0.3 x the far clip is the pixel `-wmvFog=off` draws
+  (step 6's), whatever form the compiler gives the mix (the offline compile check finds the
+  select in every compiled program). The mix is not marked `precise`: the modifier would spread to the light-off path's
+  instructions.
+- **The mode is chosen by client, not per key** (D17, D18), which departs from the text above: Retail and the PTR draw
+  the Retail pattern, each key as read (a key with neither FogDensity nor FogEnd draws only the end fade); Classic Era, MoP
+  Classic, Classic Beta and any product not listed draw no fog by default. Their candidate rules are arms
+  (`-wmvFogClassic=public|power36`, each rule listed and labelled, never compared with the game until T8). Why: Era's maps
+  0 and 1 carry Map Flags[2] 0x2, under which the public rule does not use FogDensity as read, and Beta's volume-fog keys
+  cannot be told apart per key.
+- **Fall-backs per key, the tint in the sky's order.** Every fall-back only the record uses (the zero end-fog, height and
+  end-height colours, the height-curve fall-back u^3, kh := k, the ramp length, the polynomial switch) is resolved per
+  key as a derived channel of the light sample and blended with it, so the record is continuous in time and position
+  (INFERRED (public)). The sun-tint inputs stay the sky's (one function, `SkyDome.SunTint`), so sky and fog cannot
+  disagree.
+- **Blend kinds**, per copy from its blend state, counted in every binding line:
+
+| Kind | Batches | Fog | Grade |
+|---|---|---|---|
+| 0 | the terrain | rgb towards the fog colour | PROVEN_BYTES |
+| 0 | opaque, alpha-keyed and alpha-blended M2 batches; every world-model material; any blend state not recognised (counted as "unknown blend") | rgb towards the fog colour, alpha unchanged | INFERRED |
+| 1 | additive | rgb x vis (towards black) | INFERRED |
+| 2 | modulate | rgb towards white | INFERRED (public) |
+| 3 | modulate 2x | rgb towards grey 0.5 | INFERRED (public) |
+| 4 | premultiplied (One / OneMinusSrcAlpha, M2 mode 7) | rgba x vis, the client's blend-word-4 arithmetic | INFERRED |
+
+- **NoFog and F_UNFOGGED** (M2 material flag 0x02, MOMT flag 0x02) take the client's skip (INFERRED (public)); unlit
+  batches are fogged like lit ones, as the client's lighting mode 0 is.
+- **Not adopted, data as read:** the density floor 0.9, the FogScaler clamps and floors, the FogEnd floor, the FogHeight
+  clamps, the far-clip clamp, map flag 0x2 -> density 1 and the derived density; each is a row of `WorldLightModel.Fog`
+  marked "not applied" or "arm only". **No map-ID list and no per-map minima** exist anywhere.
+- **runtimeState carries no fog field** (protocol 20's field sequence is fixed): the mode, its label and the record's
+  start, density, end and colour are said in the player's state line and the capture log line; the fields join WP 14 with
+  the host's reporting. Logging the whole published record (the 14 rows, the eye and the plane) is prepared but not in
+  this commit (13.3, open item 3).
+- **The world view's frame and URP's grading LUT** (found by the step-7 review; NOT in this commit; the owner decides,
+  13.3). URP's uber post sends every frame through its internal 8-bit LDR grading LUT after the frame decode, which moves
+  a value by up to about one step (bytes 40-75 by -0.6 to -1). It is pre-existing (every Stage 10 light-on picture went
+  through it) and is not a fog defect. A prepared change, kept outside the repository as a patch, would put each channel
+  through that table's inverse in the frame decode (`WmvFrameDecode.shader`, the arithmetic `WmvMain.ClearChannel` already
+  applies to the background colour) while the main camera draws the world view with the light shown, with
+  `-wmvGradingLut=keep` to keep step 6's frame; every other view, `WMV_LIGHT=off` and default mode would stay as before.
+
 ### 6.10 Outdoor shading
 
 `WorldLit()` with the 4.0 shape. Which variant (hemisphere or flat) applies is decided by measurement (the A/D fit and
@@ -847,6 +946,13 @@ Step 6 (read once; a refused value is a Note; none acts with `WMV_LIGHT=off`): `
 flat class with K = 0, for the record); `-wmvInteriorLight=rig|outdoor` (default rig; outdoor also binds interior groups and
 their doodads, for the side-by-sides only); DIAGNOSTIC `-wmvWorldLitView=albedo|normal` (the variants draw the albedo, or 0.5
 + 0.5 x the raw interpolated normal; valid on opaque and alpha-keyed batches only; never in the owner's pictures).
+
+Step 7 (read once; a refused value is a Note; none acts with `WMV_LIGHT=off`): `-wmvFog=on|off` (default on; off: no fog
+anywhere, and the light-on picture is step 6's byte for byte); `-wmvFogClassic=off|public|power36`
+(default off; Classic Era, MoP Classic, Classic Beta and unlisted products only: the D17 candidate rules for side-by-sides,
+never compared with the game until T8). `-wmvGameFarclip=N` (default 7,000) is the far clip the fog uses. Under `-wmvInteriorLight=outdoor` the
+interiors that arm binds are fogged too, and the lines say so. There is no start-rule or density arm: T7 decides the start
+rule, which then changes one row of the packer in a commit the owner approves.
 
 ### 6.14 Stage 09 files that Stage 10 changes (in its own diff)
 
@@ -917,7 +1023,7 @@ only read-only work was allowed; after it (2026-10-21) repository edits follow t
 | 8 | The sky stack's dome and the bloom policy; **owner checkpoint 1** | 7; P0 sky captures | light off identical; coverage dump unchanged; GPU fixture within 3e-3; the sky within tolerance on its fit set | about 1 d plus the fit |
 | 9 | Shader foundation: the include split, the world-lit variants, binding, the context (6.6-6.7) | 4, 7 | the exactness gate of 6.6; guards identical; batch counts unchanged; original bytecode unchanged | about 1.5 d |
 | 10 | MCNR normals and the outdoor light on terrain | 9; 2's MCNR proof; P0 ground views and the P1 shadow series | seams continuous within 1 deg; A and D within 10 % per channel on the fit set; light direction within 3 deg of the table, or the measured one adopted and reported | 1-1.5 d |
-| 11 | Fog; **owner checkpoint 2** | 10; the P0 fog pairs and the P1 elevated view | visibility RMS 0.03 on the fit set; each far-clip arm checked for what it discriminates (9.4 T7); `-wmvFog=off` reproduces WP 10 | 1-1.5 d |
+| 11 | Fog; **owner checkpoint 2** | 10; the P0 fog pairs and the P1 elevated view | visibility RMS 0.03 on the fit set; each far-clip arm checked for what it discriminates (9.4 T7); `-wmvFog=off` reproduces WP 10. **State 2026-10-24 (step 7): implemented and validated against its own model; the fit-set exit waits for T7** (13.3; `-wmvFog=off` reproduces step 6 byte for byte) | 1-1.5 d |
 | 12 | Exterior world models, outdoor doodads, interim interiors; **owner checkpoint 3** | 9, 11 | Buildings, Models, Characters identical; the Crossroads exteriors checked (holdout, scored in 20) | 1-1.5 d |
 | 13 | Water coupling (6.11), including the reflection-miss change | 8, 11 | the 12:00 invariant on every day; no Stage 09 family worse by 0.1 z beyond explained class B; a double-fog fixture | 0.5-1 d |
 | 14 | Host time control, the Maps panel, reporting | 7 | the harness drives the time; no GUI round over 50 ms | 0.5-1 d |
@@ -1026,6 +1132,22 @@ the helper addon's record (GetGameTime) and the client's own log ("Time set to" 
 - **Procedure.** Keep screenshot quality 10, JPEG, 2,560 x 1,440 and field of view 90. Set the hour when the wall clock's
   minute reaches the target minute; wait 10 s. Within a time series, do not move or turn. Afterwards one PowerShell line
   copies the screenshots, the addon's saved variables and `Logs\General.log` into `D:\wmv-10\refs\<client>`.
+- **T7, as the step-7 capture asks for it** (2026-10-23: `D:\wmv-10\step7\capture\CAPTURE_T7.md` revision 3, sent to the
+  owner with the helper addon WmvRefNav 3.2; **not captured yet**). The PTR sandbox at `linear 0` with the 2026-10-19
+  profile and four changes for the whole session, against the procedure above: Shadow Quality Low, SSAO Disabled and
+  `sunShafts 0` (T13's rule for fit-set shots: no shadow cascade, SSAO or sun shaft can change with the far clip, and the
+  dusk pairs carry no cast-shadow class), and `screenshotFormat tga` (lossless: the pair test divides small
+  differences). The far clip is set with `/console farclip`, never with the View Distance slider; the owner waits
+  10 s after every change of `farclip`, `horizonStart` or `graphicsComputeEffects`; the interface is hidden for each
+  shot. Stand A `!tele 1335 -3995 148 1` facing 105 and stand B `!tele 1515 -3735 178 1` facing 180, both in tile (39, 29),
+  so the viewer keeps the Southfury stand's resident tiles. The noon block: A-7000, A-1000, A-1000b (15 s later: the
+  settle check), A-7000b (the repeat floor and the restore), optional A-HS (`horizonStart 1000` at far clip 7,000),
+  B-7000, B-1000, B-7000b, optional A-CE0 (`graphicsComputeEffects 0`) last; the dusk block (18:40-18:50, optional, the
+  only density contrast): A and B at both far clips. About 13 minutes, 20 with the dusk block. A low shot counts only at a
+  far clip of 1,500 or less (1,000 preferred). WmvRefNav 3.2 adds the `t7` set to 3.1: it gates every shot on the far clip
+  it needs, `horizonStart`, `graphicsComputeEffects`, the effects-off values and the TGA format, refuses a pair whose pose
+  moved, records every setting with each screenshot, and prints the console lines that restore the settings it noted at
+  `/wmvref t7`. It was tested offline only.
 
 ### 9.3 What is measured, and how
 
@@ -1056,7 +1178,7 @@ harness on a hidden desktop with the clock pinned.
 | T4 sun disc | any open stand; 08:00 and 17:00, turning to find the sun | whether the disc stays in the north-west (4.4) |
 | T5 zone border | the border walk at X 1261, Y -3910 to -3740 (9.5); 12:00, facing 0 | Stage 09's hard switch at Y -3823 against a 100-yd ramp (the two polygons overlap by 14.6 yd); the noon SkyBand1 differs strongly, (246, 178, 88) against (153, 220, 245) (4.2) |
 | T6 point-light order | Thousand Needles (-4666, -2202, ground) on map 1, 12:00 | farthest-, weakest- or strongest-first (fog colour about 91 % against 32 % of one light) (4.2) |
-| T7 modern fog | an elevated view west over the Barrens from Southfury (fly mode or a high teleport), 12:00, at far clip 7,000 and at a far clip well below 3,000 (about 1,000-1,500, after checking the setting's minimum) | the fog mapping of 4.6: at 7,000 and 3,000 the predicted start is the same 450 yd, so only a far clip below 3,000 moves the start (to 150-225 yd) and the end fade (from 300-450 yd) inside the resident terrain; a second key with a higher density or a negative FogScaler is added by script |
+| T7 modern fog (revised 2026-10-23 for step 7; the capture in 9.2) | two hilltops beside the Southfury stand, no fly mode: A (zone 139, LightParams 5985, facing 105) and B (zone 153, LightParams 5944, facing 180); 12:00 and the optional dusk block 18:40-18:50; far clip 7,000 and 1,000 (at most 1,500), with repeat shots; effects off, TGA | the fog mapping of 4.6 from the game's own pairs, without a viewer render: the start and how the far clip enters it (the default rule against no cap, a cap of 2,000, the horizon start, a start independent of the far clip), the end fade at the low far clip, the density at FogDensity about 3. The "second key with a higher density" is the dusk pairs (FogDensity 2.10 at A, 5.25 at B, against about 3 at noon). A negative FogScaler is not covered: no zone or point light on maps 0 and 1 of the PTR has one at 12:00 except Light 14857 (map 0, inner radius 605 yd) and Light 15855 (radius 10-17 yd), and a pair inside Light 14857 is not planned |
 | T8 Era/MoP fog | the same view on live Era and MoP | FogEnd's unit and the legacy fog path (4.6) |
 | T9 time override | map 861 (an override of 720) | minutes or half-minutes (3.3) |
 | T10 LUT | Classic Beta Southfury, 08:00 (no LUT) and 12:00 (LUT 8286665), contrast at its default | whether a global tone shift equal to the LUT applies (4.7) |
@@ -1179,7 +1301,7 @@ Every other capture below is introduced only when a step needs it, and asked for
 |---|---|---|
 | step 4-5 checkpoint, if the old shots leave the sky or light open | Southfury at 16:00 and 21:20 / 21:25 (sky view, ground view); one live Retail Southfury noon pair if the lighting-mode test leaves Retail equivalence open (T12) | sky bands, time of day, Retail equivalence |
 | step 5-6 | the cast-shadow series at Southfury (09:00, 12:00, 15:00, 18:00, from above) (T3); a low-sun seam shot at a tile border near Southfury; the Crossroads building exteriors at noon (MOCV-free) | light direction, normals, world models |
-| step 7 | T7 (two far clips, elevated view west over the Barrens from Southfury) | fog |
+| step 7 | T7 (two hilltops beside the Southfury stand at two far clips, 9.2 and 9.4; not captured yet) | fog |
 | step 9, as needed | the ZB transect and T11; T6; T2 (midnight); T10 (Beta LUT); a map-0 spot; Classic Era and MoP live passes if the owner can (D16); T9; gated packages' own spots | transitions, wrap, LUTs, Era/MoP parity |
 
 Every capture records (helper addon v3, the client's settings file and its log): game time to the second, Lighting Mode,
@@ -1208,7 +1330,7 @@ possible).
 | # | Question | Recommendation |
 |---|---|---|
 | D1 | Consent for outside material in Stage 10, as hypotheses only: (i) public table definitions for the new columns and tables; (ii) public format documentation for the side files and the group flags; (iii) a public renderer's CPU-side values (light direction table, sun path, fog scale and start mapping, ring elevations, zone band). Or (i) only, or none | all three, under the no-copy rule of 6.1: each public value is a labelled hypothesis paired with its measurement. Without (iii): the light direction from the shadow and n . L fits, the ring table from the captures alone, fog off until measured |
-| D2 | Interior world-model groups and their doodads until Stage 12: today's preview rig plus the outdoor fog by distance; the outdoor light everywhere; or the rig without fog. And world-model-only maps: sky drawn, or the clear colour until Stage 12 | the rig plus fog, decided on side-by-sides (the Crossroads, Razor Hill, map 34) before it is frozen; world-model-only maps keep the clear colour until Stage 12 |
+| D2 | Interior world-model groups and their doodads until Stage 12: today's preview rig plus the outdoor fog by distance; the outdoor light everywhere; or the rig without fog. And world-model-only maps: sky drawn, or the clear colour until Stage 12 | the rig plus fog, decided on side-by-sides (the Crossroads, Razor Hill, map 34) before it is frozen; world-model-only maps keep the clear colour until Stage 12. **Superseded for the fog (step 7, 2026-10-23):** interior groups and the doodads they list stay unfogged until Stage 12, by the owner's rule of 2026-10-21 (section 0 item 1: interior fog stays in Stage 12); this replaces "plus the outdoor fog by distance" |
 | D3 | Exterior-group MOCV (on 255 of 300 Retail exterior groups) | Stage 12; Stage 10 masks exteriors carrying it (class B) and validates on the MOCV-free Crossroads |
 | D4 | `_lgt.wdt` placed lights and `_fogs.wdt` fog volumes | both to Stage 12 or later |
 | D5 | The water under the new light | 6.11: the light set drives it with the light on; Stage 09 exactly with it off; no retune in Stage 10 |
@@ -1266,8 +1388,9 @@ possible).
 | `D:\wmv-10\baseline` | step 2: the light-off baseline (manifest of 258 items, `compare.py`, the rig) |
 | `D:\wmv-10\step3`, `D:\wmv-10\step45` | steps 3-5: specs, implementer reports, reviews, fixes, test logs |
 | `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs; the 2026-10-22 run in `runs\p30a` (13.1) |
+| `D:\wmv-10\step7` | step 7 (fog, 13.3): the research (`understand\`: `programs.md`, `mapping.md`, `player.md`, `validation.md`), the spec and its review (`spec\`, `review\`), the T7 page and WmvRefNav 3.2 (`capture\`, `refnav\`), the implementation notes, reviews, fix and finish rounds (`impl\`), the grading-LUT proof (`lutproof\`), the union lineage (`union\`, `union2\`); the runs `D:\wmv-10\checkpoint\runs\p32a` and `p32b`, the freeze `D:\wmv-10\checkpoint\frozen` |
 
-## 13. Progress (2026-10-21, updated 2026-10-22)
+## 13. Progress (2026-10-21, updated 2026-10-24)
 
 | Step | State | Evidence |
 |---|---|---|
@@ -1278,6 +1401,7 @@ possible).
 | 5 Lit terrain with MCNR normals | done: 28b10e98 (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg; the GPU branch equals its CPU twin within 0.0005 on five probes); at the checkpoint the render equals its offline model on 99.8 % of the lit terrain within 2 sRGB steps (13.1) | `D:\wmv-10\step45`, 13.1 |
 | Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner approved steps 1-5 on 2026-10-22 | `D:\wmv-10\checkpoint\runs\p30a` |
 | 6 Outdoor world models and doodads | done, the owner reviews its pictures before step 7: the world-lit variants by include split (6.6), the client's M2 and world-model hemisphere program; exterior groups and outdoor doodads lit while the light is shown, interior groups and their doodads on the builder's materials until Stage 12; exterior MOCV deferred; results in 13.2 | `D:\wmv-10\step6`, `D:\wmv-10\checkpoint\runs\p31a`, 13.2 |
+| 7 Fog | implemented and validated against its own model; the fit-set exit of WP 11 waits for T7 (not captured yet); the owner reviews the pictures and the open decisions of 13.3: the client's fog tail, layer 0, on the lit terrain, outdoor doodads and exterior groups; the Retail pattern for Retail and the PTR, off for Era, MoP and Beta (arms only); the near field identical to fog off; URP's grading LUT found to shift the world view by up to a step (a prepared undo, not committed, waits for the owner) | `D:\wmv-10\step7`, `D:\wmv-10\checkpoint\runs\p32a`, 13.3 |
 
 **Offline prediction (2026-10-21, before a player could be built; not a viewer render).** The Stage 09 light-off
 renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
@@ -1445,4 +1569,227 @@ exterior MOCV measurement (Ratchet's lantern wall on live Retail or MoP); exteri
 (roadmap 5.1), its possible size in 2.2. The acceptance line "no GUI round over 50 ms" (9): no player meets it at the
 life08 run's Models-viewer step (the bear load: over 50 ms in 14 of 36 life08 runs, Stage 09 players included, up to
 88 ms), so before the stage closes it needs a reading (the world steps only?) from the owner.
+
+### 13.3 Step 7: fog (2026-10-23/24)
+
+The owner asked for step 7 on 2026-10-23: the fog from the client's data and the client's shader behaviour, as faithful
+as the evidence permits (no generic Unity fog, no artistic adjustment, no speculative constant; a value that neither the
+bytes nor the game give is off by default or its result is class C); `WMV_LIGHT=off` byte-identical to Stage 09 and
+default mode to step 6; Models, Buildings and Characters (with the owner's tabard fixes) unchanged; interiors as they are
+until Stage 12 and the water in step 8; clouds, cast shadows and ground cover never compensated by fog; two test lineages
+kept apart (the clean Stage 10 player and the owner's union player with the screenshot matte); no deploy until the owner
+approves, then the union approach with the existing backup and rollback kept. The research, the spec (revision 2, after
+one review round with three lenses and 64 findings), the T7 page, the implementation notes, two code reviews, a results
+review and the fix and finish rounds are in `D:\wmv-10\step7`; the runs in `D:\wmv-10\checkpoint\runs\p32a` (validated)
+and `...\p32b` (the fix round's, incomplete).
+
+**What the client's programs say** (PROVEN_BYTES, executed; `understand\programs.md`). One fog tail ends every terrain,
+M2 and world-model program (4.6), reading a record of 14 rows per layer. The client has two fog behaviours: blend words
+0-3 and 5 mix towards the fog colour, and blend word 4 (premultiplied) multiplies rgb and alpha by the visibility; no
+Retail program fogs towards white or grey. The sky and cloud programs apply no fog. The fog position is the vector the
+vertex program feeds to the projection, the camera at the origin. **Correction:** the M2 programs' own colour-grading LUT
+(permutation bit 1) runs **before** the fog (`p_3.asm:312-331`, the tail from line 332), not "after lighting and fog" as
+step 6's M2 report said (`D:\wmv-10\step6\m2\m2_report.md`); it stays with the LUT work package (WP 18).
+
+**Built** (6.9 as built, 6.13). `WmvWorldFog.hlsl` (new) and three hooks (the terrain's world branch, the M2 and
+world-model variants); `WorldFog.cs` (new: the record, the per-key derived channels, Pack, the CPU twin, the modes and
+arms, the per-set census, the blend kinds); the derived block in `WorldLight.cs` and `WorldLightState.cs`;
+`SkyDome.SunTint` extracted with identical results; the graded table in `WorldLightModel.cs`; the per-copy fog flags and
+kinds in the doodad and world-model managers and one data field in the model builder; the switches and the log lines;
+self-test cases in `WmvLifecycleSelfTestWorldFog.cs` (new) and the runner suite `WorldFogTests.cs` (new). The player
+validated in full is **p32a** (Assembly-CSharp 4BC9F24BE2CCED24), and the committed sources are p32a's (checked file by
+file against its build manifest: 104 of 104 Unity assets equal). After the reviews a **fix round** (2026-10-23) prepared
+changes to eight files that are **not in this commit**: the grading-LUT undo in the frame decode with
+`-wmvGradingLut=keep` (6.9), the whole published fog record and the main camera's anti-aliasing state in the log, one
+formatter for the state line's fog clause, and self-test F17. They are kept outside the repository as a patch
+(`D:\wmv-10\step7\commit_prep\fix2_grading_lut_undo_and_fixes.patch`) for the owner's decision on the LUT (open item 3).
+Their player **p32b** (3ED075422BE90C5E) is evidence only; its checkpoint run stopped in step 5g (open item 5).
+
+**Functional.**
+
+| Check | Result |
+|---|---|
+| Build | p32a and p32b: 0 compile errors; WmvMain bound; `WmvScreenshot.cs` the repository's |
+| Lifecycle self-test | p32a 1,125 passed, 0 failed (F15 SKIP: this runtime counts no allocation per thread), with `WMV_LIGHT=off` 1,064 / 0; p32b 1,127 / 0 (F17: the frame decode undoes the 32-node LUT exactly, and is the plain decode with `_WmvWLOn` 0 or no table) and 1,064 / 0 |
+| Pure runner | p32a 2,296 passed, 0 failed (p31a 2,272), p32b 2,298 / 0: the client's programs re-executed against the CPU twin, the record against an independent port, the per-key channels' continuity, the switches; R12: Pack 0.016 microseconds median (budget 5), 0 bytes over 10,000 calls |
+| Offline compile check | the originals (`WmvOpaque`, `WmvWmo`) identical to HEAD's as whole disassembly files; the variants and `WmvTerrainTextured` 0 errors, no new shader warning; the output select in every hook; the terrain program outside the fog branch HEAD's instruction for instruction |
+| Logs | 233 player logs (light on, off and default): the only lines matching "warning" or "error" are the world-model parser's "0 warning(s)" count, as in p31a's; the per-set census and the fog clauses of the state and binding lines present |
+
+**Guards** (8.4 A; gating). The launcher patched Retail during the work (12.1.5.70529 for p32a's run, 70575 from the fix
+round on), so every comparison with a reference player is a pair run back to back under one install state (the newest
+storage index read before and after). The light pins hold on 70575, and six of p32a's pictures re-rendered on it (fog on
+and off at three cameras) are byte-identical to its 70529 renders.
+
+| Guard | Result |
+|---|---|
+| A1 `WMV_LIGHT=off` against the Stage 09 baseline | 255 of 258 must-match items identical; the three others are install state: Classic Beta's ocean picture (290,124 px; the Beta install now lacks 1,897 files, against 16 in the manifest) and the two Retail light dumps' build string. The paired fallback (the Stage 09 player, p31a and p32a back to back) is identical, 33 of 33, all three showing the same Beta difference. p32b: the same three items, and its paired fallback identical, 33 of 33 |
+| A2 default mode, paired with p31a | identical, 0 of 166 must-match items differ (p32a and p32b) |
+| A3 light on with `-wmvFog=off`, against p31a | p32a byte-identical at the seven Southfury shots, the Crossroads camera at 12:00 and 18:46, the tile framing and the orthographic overview. The prepared LUT undo (not committed, open item 3) would move the light-on frame, so the identity would then hold through its `-wmvGradingLut=keep`: shown at hi06 (the patched code with keep = p32a, 0 px; the patched union player with keep = the deployed player, 0 px); its full set of keep arms (A3, A6, A11) has not run |
+| A4 fog on against fog off, by class | the sky core unchanged at the seven shots and the Crossroads camera; the water unchanged at the seven shots. **FAIL as scored by the frozen gate at 14 of 18 cameras**, recorded as failures under the owner's rule and diagnosed rig side by the evidence: at five Southfury shots 9-13 near-field px (a far object seen through a near palm frond: the offline raster has no leaf holes, and the render's implied visibility there, 0.85-0.90, is the far object's model value); at the Crossroads camera 73 near and 56 outside px by the same mechanism, and 804 far pines beyond the raster's 1,000-yd range; at the tile framing 1,547 of 1,740 "interior" px (1,513 of them one raster instance, a particle model the viewer does not show, with fogged terrain behind it) and 17 sky-core px; at the T7 cameras the raster's object set. With the player's own arms the T7 sky core is 0 everywhere, and the near-field changes left are 1-step changes inside the 5-yd margin of the start (stand A), changes of 5 steps or more only within 3 px of the river (stand B, far clip 7,000) and pixels at the gate's edge (stand B, far clip 1,000) |
+| A5 the orthographic overview | identical to p31a: no fog there |
+| A6 interiors at the Crossroads camera | interior groups (25,867 px) and the doodads they list (2,962 px) identical at 12:00 and 18:46. Every interior pixel there lies inside the 600-yd start, so that interiors cannot fog rests on self-test F11 and the originals' identity |
+| A7 light on: Buildings 6/6, Models 2/2, Characters 2/2, paired | identical (p32a and p32b) |
+| A8 life08 with the light on, paired | 70 / 0 / 0, every cleared-state tally identical, no warning line; the longest binding 6.2 ms (gate 50); frames over 33 ms 23 against p31a's 22, a pass on this one pair (three more pairs under the budgets) |
+| A9 | build, self-test and runner without failure; the log lines present |
+| A10 refused values, hard off | `-wmvFog=maybe -wmvFogClassic=bogus` give Notes and the default picture; under `WMV_LIGHT=off` no fog line, 0 px differ |
+| A11 Era, MoP and Beta with the defaults (fog off by client) | **FAIL as scored**: the frozen script compares whole windows, where 89-288 px of the Browse panel's load-time text and the status bar's memory figure differ; inside the viewport 0 px differ in 12 of 12 pictures. MoP's `-wmvFogClassic=public` equals fog off at these cameras (its start is 2,400 yd there) |
+
+**Where the fog shows** (p32a). At camera hi06 at noon it changes 46,072 px by up to 35 steps, all in rows 0-285 of the
+viewport: the far-left hill and the ridge tops (450-822 yd). The near terrain, the river, the foreground trees and the sky
+do not change. The harness's tile framing (about 990 yd out) takes zone 142's light at the camera (LightParams 5951: start
+15 yd, k 0.00175 /yd, colour (43, 78, 125)) and turns mostly dark blue: the light is evaluated at the camera (T11 open),
+not a defect.
+
+**The render against its own model** (8.5 B, class A: a failure is a renderer defect, fixed, never tuned). The frozen
+gates: the share of eligible pixels within 2 steps, the same on the fogged subset, and the visibility domain (per 50-yd
+band the median |visibility observed - model|, at most 0.02). The run exposed two limits of the frozen scoring and one
+cause on the renderer's side:
+
+- **The object set W comes from the offline raster at the tile framing and the eight T7 cameras**, where 8.4 asks for
+  the player's own arms (no render arm existed there). The raster has no leaf holes, draws a particle model the viewer
+  does not show, and does not hide submerged rock behind the water surface. The player's own arms were rendered under one
+  install state and scored beside it.
+- **URP's 8-bit LDR grading LUT** (pre-existing, outside the step-7 diff; found by the second code review). Uber post
+  applies URP's internal LUT to every frame after the frame decode; it stores node k / 31 in 8 bits and interpolates
+  between nodes, so a byte leaves up to about one step off (40-75 by -0.6 to -1, 83-103 by up to +0.5). The fog targets
+  sit in that range (noon stand A's (113, 67, 58) moves by (-0.20, -0.93, -0.83)), and the model takes the fog-off
+  picture, already through the LUT, as the lit colour: render - model grows with distance and becomes a visibility bias
+  where the lit terrain is close to the fog colour (dusk). **The proof arm** (p32lut, built with the prepared LUT-undo
+  patch, evidence only;
+  `D:\wmv-10\step7\lutproof`): with `-wmvGradingLut=keep` it is byte-identical to p32a at the three cameras tested, and
+  p32a's bytes equal the forward 8-bit LUT applied to p32lut's within 1 step on 100 % of the pixels, so the LUT is the
+  only difference.
+
+| Camera (far clip) | Frozen verdict | The player's own W | The LUT undone | Diagnosis |
+|---|---|---|---|---|
+| the seven Southfury shots (7,000) | PASS: 0.99998-0.999993 within 2; fogged 0.9996-0.99997; visibility worst 0.012-0.015 | (the frozen W) | n185243 (rendered): terrain fogged mean render - model (-0.021, -0.103, -0.171) -> (-0.002, -0.006, -0.001) steps | -- |
+| T7 A 12:00 and 18:45 (7,000) | PASS (0.99796, 0.99846 within 2) | -- | -- | -- |
+| T7 A 12:00 (1,000) | FAIL: visibility 0.032 at 950-1,000 yd (no signed bias) | FAIL (visibility) | 0.0106 in the second code review's re-scoring of the p32a pictures (not rendered) | the LUT |
+| T7 A 18:45 (1,000) | FAIL: visibility worst 0.022; a signed bias growing from +0.0025 (300-350 yd) to +0.0206 (950-1,000) | FAIL (visibility 0.0224) | **PASS** with either W (rendered): worst 0.0141, the bias gone; terrain fogged mean (+0.085, -0.175, -0.180) -> (-0.014, +0.003, -0.009) | the LUT |
+| T7 B 12:00 (7,000), B 12:00 (1,000), B 18:45 (1,000) | FAIL (fogged 0.973, 0.985, 0.983) | **PASS** (0.99864, 0.99778, 0.99712 within 2) | -- | the raster's W |
+| T7 B 18:45 (7,000) | FAIL: fogged 0.9645; visibility 0.072 at 1,200-1,250 yd | FAIL: fogged 0.98419 (gate 0.99) | FAIL: fogged 0.98433; the terrain's G/B bias (-0.24, -0.32) -> (-0.007, -0.005); visibility worst 0.0110 -> 0.0053 | remaining: cliff rocks at 790-830 yd standing in the river (867 of 1,032 failing object px lie over the water, which is unfogged and whose High reflection differs between the arms); the rock pixels away from the river match |
+| the tile framing | FAIL: 0.9354 within 2, mean (0.10, 0.45, 1.47); the terrain alone passes (0.9996) | FAIL: 0.99248 (gate 0.995); the fogged subset passes; visibility 0.046 at 200-250 yd, objects only | not rendered (re-scoring: objects 0.0459 -> 0.0414) | remaining: tree instances at 461-826 yd; 760 object px move away from the fog target, which no fog mix does; the rig's tree geometry is the leading suspect, not proven; not the LUT |
+
+All seven deliberate mutations of the fog (density x 1.3, the plane's sign, hf forced to 0, a linear colour ramp, no end
+fade, the eye at the origin, a stale eye) are caught by B. The second code review found no defect in the step-7 diff. B as
+frozen passes at 9 of 16 cameras; with the player's own W at 12; with the LUT undone as well, T7 A 18:45 (1,000) passes
+when rendered and A 12:00 (1,000) in the re-scoring. The two failures that remain (the river rocks, the framing's trees)
+are attributed to the rig by the evidence; neither is proven.
+
+**Against the game** (8.6 C1; PTR 12.1.7 at `linear 0`: Retail's shader path, Retail's CPU side unverified; a re-scoring
+of references the research has seen, not a blind test). The frozen rule passes: at all four noon poses the fog moves every
+far band of 500 px or more towards the game, on every channel.
+
+| Noon far bands (27) | RMS | Mean signed (R, G, B) | Ratio RMS | Bands with the game more fogged |
+|---|---|---|---|---|
+| fog off (step 6) | 6.42 steps | (-8.57, -4.84, +3.52) | 0.0697 | 27 |
+| fog on | 2.73 steps | (-3.55, -2.41, +1.41) | 0.0293 | 27 |
+| the frozen prediction, fog on | 2.75 steps | (-3.58, -2.51, +1.29) | -- | -- |
+
+At dawn the RMS falls from 4.82 to 1.88 steps and at dusk from 5.10 to 2.52 (both carry the cast-shadow class). The verdict
+written before the render stands: "fog present and coloured as SkyFog; the game more fogged than the render in every far
+band; start and density not separately determined: class C (fog start and density), in-game test T7". C1 was scored on
+pictures that went through URP's grading LUT and is not re-scored with it undone; `out\fog.md` prints the spec's
+preliminary prediction (5.95 / 2.43 steps) instead of the frozen one. The tile framing and the Crossroads camera have no
+game reference.
+
+**The union lineage** (8.7: the owner's union player against the deployed build D, build64's host and player p31u; no
+deploy). p32u (p32a's sources with the owner's two-pass screenshot matte; Assembly-CSharp 1461EF88A366E695) and, for the
+fix round, p32v (p32b's sources with the matte; 13ECBA51CD69F877), each alternated with D under one install state, the
+union host in every arm:
+
+| Item | p32u | p32v |
+|---|---|---|
+| U1 Characters 2/2 | identical in all four pairings | identical in all four |
+| U2 the guild-tabard no-design cases | 9 of 9 pictures 08BF71CC, the matte path in the log | 9 of 9 08BF71CC |
+| U3 Buildings 6/6, Models 2/2 | identical | identical |
+| U4 self-test | 1,125 / 0 and 1,064 / 0, equal to p32a's, the same check lines | 1,127 / 0 and 1,064 / 0, equal to p32b's |
+| U5 life08, light on | tallies identical in all four pairings (70 / 0 / 0) | identical |
+| U6 the Maps view at hi06, light on | fog on = p32a (0 px); `-wmvFog=off` = D (0 px) | fog on = p32b (0 px); `-wmvFog=off` differs from D on 87.0 % of the viewport by at most 2 steps (the LUT undo); with `-wmvGradingLut=keep` = D (0 px) |
+| U7 the world views, default mode and `WMV_LIGHT=off` | 91 of 91 identical, both | 91 of 91, both |
+| U8 the FBX self-test | not needed: no host file changed | the same |
+| U9 (optional) a Save-As capture through the matte | not run: no headless route reaches it; U2 proves the matte | not run |
+
+Information: frames over 33 ms in the union's life08 runs were D 21 and 26 against p32u 28 and 25, a run-to-run spread
+larger than A8's +2 margin.
+
+**Budgets** (8.3; the step-7 spec's section 10).
+
+| Item | Budget | Result |
+|---|---|---|
+| GPU, fog and light | at most +0.15 ms a frame (+0.30 with the sky) | **not measured**: the machine was never quiet (2026-10-24 02:33-03:33: GPU 11-27 % busy at its idle clock, a remote-desktop host encoding the desktop; no game client ran). The arm set now exists (`D:\wmv-10\step7\impl\finish\perf\gate_perf_s7.ps1` and `gate_analyze_s7.py`: light off, step 6, fog off, fog on, sky off; the quiet rule checked before every run), not yet run |
+| GPU, light off | within noise of p31a | not measured (the same) |
+| Capped frame (life08) | frames over 33 ms at most p31a's + 2 a run | **not met, marginally**: three alternated pairs gave p31a 23, 21, 24 and p32a 26, 27, 24 (pair differences +3, +6, 0; pooled +3.0, +2.5 with A8's pair; p about 0.07), the excess on loads 8 and 9; the median frame unchanged (16.79-16.81 ms). p32b's own pair: 23 against 24. Deciding it needs about eight pairs or a pooled rule |
+| Player CPU | 0.05 ms a frame, no allocation | Pack 0.016 microseconds median, 0 bytes (runner R12); F15 SKIP in this runtime |
+| Render thread | reported | frame p95 median 16.81 ms, 95th percentile 18.99 ms, against p31a's 16.83 / 19.64; over three pairs the 95th percentile +0.27 ms |
+| Binding | a rebind at most 50 ms; the first lit frame against p31a's | longest 6.2 ms; binding totals +6 to +16 % a run; the first lit frame 19.4 ms against 22.1 (six more first entries: mean 21.5 against 21.1): met |
+| Per-set census | under 1 ms | 0.663 ms at Southfury, 0.138-0.745 ms in life08 |
+| GPU memory, host payload | unchanged | not measured; no host change |
+
+**The owner's pictures** (`D:\wmv-10\checkpoint\runs\p32a\out`, mirrored to `D:\wmv-10\checkpoint\out`). The untouched
+captures of p32a, built as the approved comparison: viewer panels as 1:1 crops, the game's screenshots by exact area
+averaging, captions in strips outside the pictures. The frozen scripts could not carry spec 8.9's captions, so a new
+composer (`D:\wmv-10\step7\impl\finish\labels\owner_sheets_s7.py`) uses the frozen construction and adds only the strips;
+every panel is byte-identical to the frozen sheets' (100 of 100 proof checks; alignment within 0.04 px).
+
+- `stage10_step7_owner_comparison.png` (6076 x 3159, with `_display.jpg` and one lossless PNG per row): the game, Stage 09,
+  step 6 and step 7 at noon, dawn and dusk, camera hi06.
+- `stage10_step7_farhill.png`: the far-left hill at 2x, with C1's band residuals per row.
+- `stage10_step7_tile_framing.png`: step 6 and step 7 at the tile framing (zone 142, LightParams 5951).
+- `stage10_step7_t7_viewer_2x.png` (new): T7 stands A and B at 12:00 and 18:45, step 7 at far clip 7,000 and 1,000 and
+  fog off: "viewer only; game shots pending (T7)".
+- The seven side-by-sides, and the two research pictures labelled "planning picture, not a render".
+
+Every caption names what is not compensated, the PTR label, "fog start and density: class C until T7", the players, and
+that every panel went through URP's grading LUT (p32b, which undoes it, is in none of these pictures); and one fog-kind
+line. The loaded set holds colour 14,014, black (additive) 298, white 1, grey 2, fade 2, unknown blend 0, world-model MOMT
+blend 2+ 0 and unfogged 38 batches. No blended pixel lies in the fogged set at hi06 or at the T7 cameras; at the tile
+framing 144 do, all fogged (88 additive at 901-1,452 yd: a bonfire, a hot-air balloon, lanterns, torches, braziers, a
+blue fire and a launch ramp; 56 alpha at 736-963 yd: a waterfall, a quill and fence posts), and 143 of them change, by up
+to 216 steps.
+
+**Documented, not compensated by the fog.** Cast shadows and SSAO (the follow-up milestone, D10); ground cover (11B);
+clouds (D8); the water and its fog (step 8: the river stays unfogged where the terrain around it fogs, at the tile framing
+and in T7's low arm; 2.4's "fog covers the water" applies from step 8); exterior MOCV (Stage 12); the streaming edge (D12:
+the fog does not hide it at far clip 7,000); interiors and their fog (Stage 12); particles (Stage 11); `_fogs.wdt` volumes
+and the volume composite (D4); the client's volumetric global fog; Classic Beta's volume-fog table (class C); fog layers
+1-3 and the interior record; the M2 programs' own grading LUT (WP 18).
+
+**Open, for the owner.**
+
+1. **T7** (`CAPTURE_T7.md` revision 3 with WmvRefNav 3.2, sent on 2026-10-23) is not captured. Until it is, the fog start
+   and the density are class C and WP 11's fit-set exit waits. Its frozen analysis (`t7_analysis.py`) then decides the
+   start rule, which changes one row of the packer in a follow-up commit.
+2. **The step-7 spec's questions 1-3** are not answered yet: proceed before T7 with the default start rule; approve the
+   labelled defaults of its 2.3a; T7's capture conditions. Step 7 is built with the recommended answers, every default
+   labelled in the log.
+3. **The grading LUT.** The prepared patch (not committed) undoes URP's LUT in the world view while the light is shown:
+   the frame then shows the client's arithmetic, and the proof arm removes the B residual the LUT caused. It is
+   pre-existing and touches every Stage 10 light-on picture, so it waits for the owner. Against step 6 it moves the light-on
+   frame by at most 2 steps, mostly +1, on 73-87 % of the viewport pixels (at hi06 the mean moves by (+0.01, +0.15, +0.70),
+   the terrain's G and B by +0.5 and +0.68), so "light on with `-wmvFog=off` = step 6" then holds only through
+   `-wmvGradingLut=keep`. Keep the undo as the default, or the LUT? The other remedy the review named (the main camera
+   skips uber post while the light is shown) is not built.
+4. **Rig corrections that need approval** (no frozen file is edited without it): W from the player's own arms at the tile
+   framing and the T7 cameras (the fix round renders those arms; the frozen `fogmetrics.py` still scores the raster); A11
+   cut to the viewport, as A3 and `compare.py` cut. Noted, not proposed: the 5-yd near-field margin is tighter than the
+   raster's distance accuracy at the start, and the own-W arms take in High-path water pixels.
+5. **The fix round's clean run is incomplete.** p32b's checkpoint run stopped at 2026-10-24 02:29 in step 5g (its process
+   gone; the stale viewer lock was removed after checking, and RandomLooks restored). Its steps 1-4 passed (above) and its
+   renders up to 5g exist, unscored; the restated A3 / A6 / A11, A4 and B with the player's own W, and the row-by-row
+   check of the logged record (`rig\fix2metrics.py`) have not run.
+6. **Logging the full fog record** ("fog record as published": the 14 rows, the eye and the plane, once per settled
+   view) is in the prepared patch, not in this commit, and not yet compared row by row with the rig's port (item 5).
+7. **A bit-identical early-out** for the near field is not built: the whole tail runs for every lit pixel, while about
+   93-95 % of the terrain pixels at Southfury lie nearer than the start. Measure the GPU budget first.
+8. **The capped-frame gate** (A8 and the budgets): more pairs or a pooled rule.
+9. **The tile framing's dark blue** comes from the light evaluated at the camera (T11). **Drawing beyond a low game far
+   clip** (the viewer draws its resident terrain fully fogged where the game draws none) is decided after T7. The
+   acceptance line "no GUI round over 50 ms" still needs its reading (13.2).
+10. **Not reached by any planned view:** a negative FogScaler (839 Retail keys), the height-coefficient fall-back (6,639
+    Retail keys; one shot at a stand the tables pick would cover it), kh := k, the end-fog colour ramp, the blend kinds 1-4
+    and NoFog / F_UNFOGGED in a fogged range in game, the M2 and world-model strength. Era, MoP and Beta stay unfogged until
+    T8 and the volume-fog table's meaning.
+11. **Deploy:** none; build64 still holds steps 1-6. After the owner's approval it follows the union approach (the
+    tabard fixes and the screenshot matte kept, a new backup, the existing backups and rollback kept).
 

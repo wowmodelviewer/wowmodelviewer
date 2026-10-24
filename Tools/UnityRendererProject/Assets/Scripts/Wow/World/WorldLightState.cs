@@ -13,7 +13,9 @@
 //                 half-minute -- every colour as the host rounds it (byte / 255 in the sample), every float linear, the
 //                 integers the earlier key's -- then each point light's day lerped over it by its weight (colours, floats
 //                 and Glow; the integers stay the base light's: how the client blends them is UNKNOWN). Named channel groups,
-//                 each VALID when the base light has keys and the client's layout carries one of its columns.
+//                 each VALID when the base light has keys and the client's layout carries one of its columns. Stage 10 step 7
+//                 appends the derived fog channels (WorldFog.DeriveKey, per key: the base day's at the half-minute, then each
+//                 point light's lerped over them with the same weights in the same order), which the ease eases with the rest.
 //   the ease      (WorldLightEase) Stage 09's (LiquidLightEase's constants, generalised to every channel): 1 - exp(-dt /
 //                 0.25 s) a frame; snapped on the first sample, another object, a change of validity, PINNED CLOCKS -- in
 //                 Stage 09's sense, -wmvAnimTime (WmvModelBuilder.Debug_.AnimTime >= 0), as LiquidLightFrame passes it to
@@ -31,9 +33,11 @@
 //                 in a shader: -wmvDoodadLight=off and -wmvWorldModelLight=off (doodads, world-model groups as Stage 09 draws
 //                 them), -wmvDoodadVariant=hemisphere|flat and -wmvWorldModelVariant=hemisphere|flat (the flat class, for
 //                 the record), -wmvInteriorLight=rig|outdoor (outdoor: interior groups and the doodads they list take the
-//                 outdoor light too, for the side-by-sides of plan 6.13) and the DIAGNOSTIC -wmvWorldLitView=albedo|normal
+//                 outdoor light too -- and from step 7 its fog --, for the side-by-sides of plan 6.13) and the DIAGNOSTIC -wmvWorldLitView=albedo|normal
 //                 (the world-lit variants draw the albedo, or 0.5 + 0.5 x the raw interpolated normal; valid on opaque and
-//                 alpha-keyed batches only).
+//                 alpha-keyed batches only); Stage 10 step 7 (WorldFog.cs): -wmvFog=off (no fog anywhere: step 6's picture) and
+//                 -wmvFogClassic=off|public|power36 (for the products the fog is off for -- Classic Era, MoP Classic, Classic
+//                 Beta, unlisted ones --, the D17 candidate rules for the side-by-sides, never compared with the game).
 
 using System;
 using System.Collections.Generic;
@@ -138,12 +142,15 @@ namespace Wmv.Wow.World
     public sealed class WorldLightSample
     {
         /// <summary>The channel layout: every colour column (WorldLightColumns.Colours) as r, g, b; then every float column;
-        /// then the LightParams' Glow.</summary>
+        /// then the LightParams' Glow; then (step 7) the derived fog channels, WorldFog.DerivedCount of them (colours byte / 255).</summary>
         public static readonly int FloatBase = 3 * WorldLightColumns.ColourCount;
         public static readonly int Glow = FloatBase + WorldLightColumns.FloatCount;
-        public static readonly int Count = Glow + 1;
+        public static readonly int FogBase = Glow + 1;
+        public static readonly int Count = FogBase + WorldFog.DerivedCount;
         public static int ColourAt(int column) { return 3 * column; }
         public static int FloatAt(int column) { return FloatBase + column; }
+        /// <summary>A derived fog channel (WorldFog.Derived*).</summary>
+        public static int FogAt(int channel) { return FogBase + channel; }
 
         /// <summary>The channel groups (Groups, a mask).</summary>
         public const int GroupSky = 1, GroupAmbient = 2, GroupDirect = 4, GroupSun = 8, GroupFog = 16, GroupFogColours = 32, GroupClouds = 64,
@@ -240,6 +247,7 @@ namespace Wmv.Wow.World
         readonly WorldLightSelection selection = new WorldLightSelection();
         readonly int[] rgb = new int[3 * WorldLightColumns.ColourCount];
         readonly double[] floats = new double[WorldLightColumns.FloatCount];
+        readonly double[] fog = new double[WorldFog.DerivedCount];
 
         /// <summary>The last evaluation's selection (its point lights in their order).</summary>
         public WorldLightSelection Selection { get { return selection; } }
@@ -287,6 +295,18 @@ namespace Wmv.Wow.World
                 for (int k = 0; k < floats.Length; k++)
                     s.V[WorldLightSample.FloatBase + k] += (floats[k] - s.V[WorldLightSample.FloatBase + k]) * w;
                 s.V[WorldLightSample.Glow] += (p.Item.Glow - s.V[WorldLightSample.Glow]) * w;
+            }
+            // Stage 10 step 7: the derived fog channels, the base day's, then each point light's over them by its weight, in
+            // the same order as above (as if lerped in the same loop).
+            selection.Day.Evaluate(t, rules.Clamp, null, null, null, fog);
+            for (int k = 0; k < fog.Length; k++)
+                s.V[WorldLightSample.FogBase + k] = WorldFog.SampleValue(k, fog[k]);
+            foreach (LightGeometry.Weighted<WorldLightParams> p in selection.Points)
+            {
+                set.DayAt(p.Item.Day).Evaluate(t, rules.Clamp, null, null, null, fog);
+                double w = p.W;
+                for (int k = 0; k < fog.Length; k++)
+                    s.V[WorldLightSample.FogBase + k] += (WorldFog.SampleValue(k, fog[k]) - s.V[WorldLightSample.FogBase + k]) * w;
             }
             s.Points = selection.Points.Count;
             int groups = WorldLightSample.GroupGlow;
@@ -392,18 +412,20 @@ namespace Wmv.Wow.World
         public bool WorldModelFlat;                       // -wmvWorldModelVariant=flat: the flat class (for the record)
         public bool InteriorOutdoor;                      // -wmvInteriorLight=outdoor: interiors take the outdoor light too
         public int WorldLitView;                          // -wmvWorldLitView: 0 none, WorldLitViewAlbedo, WorldLitViewNormal
+        public bool Fog = true;                           // -wmvFog=off: no fog anywhere (step 6's picture)
+        public WorldFogClassicArm FogClassic;             // -wmvFogClassic=public|power36: the D17 arms (products the fog is off for)
         public readonly List<string> Notes = new List<string>();
 
         /// <summary>-wmvWorldLitView's values (DIAGNOSTIC; _WmvWLModels.z).</summary>
         public const int WorldLitViewNone = 0, WorldLitViewAlbedo = 1, WorldLitViewNormal = 2;
 
-        /// <summary>The defaults of the sky, terrain, doodad and world-model switches (steps 4 to 6)?</summary>
+        /// <summary>The defaults of the sky, terrain, doodad, world-model and fog switches (steps 4 to 7)?</summary>
         public bool DrawDefaults
         {
             get
             {
                 return Sky && !SkyTableB && SkyEndFog && TerrainLight && !TerrainFlat && DoodadLight && WorldModelLight && !DoodadFlat &&
-                       !WorldModelFlat && !InteriorOutdoor && WorldLitView == WorldLitViewNone;
+                       !WorldModelFlat && !InteriorOutdoor && WorldLitView == WorldLitViewNone && Fog && FogClassic == WorldFogClassicArm.Off;
             }
         }
 
@@ -517,6 +539,14 @@ namespace Wmv.Wow.World
                         w.WorldLitView = a == "-wmvWorldLitView=albedo" ? WorldLitViewAlbedo : WorldLitViewNormal;
                     else if (a.StartsWith("-wmvWorldLitView=", StringComparison.Ordinal))
                         w.Notes.Add(a + " is not -wmvWorldLitView=albedo or =normal -- no diagnostic view");
+                    else if (OnOff(a, "-wmvFog", ref w.Fog, w.Notes))
+                    {
+                    }
+                    else if (a == "-wmvFogClassic=off" || a == "-wmvFogClassic=public" || a == "-wmvFogClassic=power36")
+                        w.FogClassic = a == "-wmvFogClassic=public" ? WorldFogClassicArm.Public
+                                     : a == "-wmvFogClassic=power36" ? WorldFogClassicArm.Power36 : WorldFogClassicArm.Off;
+                    else if (a.StartsWith("-wmvFogClassic=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvFogClassic=off, =public or =power36 -- refused, no arm");
                 }
             if (cmdOn && cmdOff)
                 w.Notes.Add("-wmvWorldLight=on and =off both given -- off");
@@ -551,9 +581,23 @@ namespace Wmv.Wow.World
                    DescribeObjects();
         }
 
-        /// <summary>What the doodads and the world models draw (step 6), and what is still Stage 09's: DescribeDraw's tail, and
-        /// the capture log line's (WmvWorldLight.Describe). Starts with "; ".</summary>
+        /// <summary>What the doodads and the world models draw (step 6), the fog (step 7) and what is still Stage 09's:
+        /// DescribeDraw's tail, and the capture log line's (WmvWorldLight.Describe). Without a light object's product the fog
+        /// clause gives the rule by product. Starts with "; ".</summary>
         public string DescribeObjects()
+        {
+            return DescribeObjects(null);
+        }
+
+        /// <summary>DescribeObjects for the light object of `product` (WorldLightSet.Product; null or empty: not known yet).</summary>
+        public string DescribeObjects(string product)
+        {
+            return DescribeObjects(product, null);
+        }
+
+        /// <summary>DescribeObjects for the light object of `product` whose layout lacks the fog columns `fogAbsent`
+        /// (WorldFog.AbsentColumns; null: none lacking): the fog clause then says that object draws no fog.</summary>
+        public string DescribeObjects(string product, string fogAbsent)
         {
             const string interiorLit = "lit too (-wmvInteriorLight=outdoor, for the side-by-sides)";
             return (DoodadLight ? "; doodads: outdoor lit (" + Variant(DoodadFlat, "-wmvDoodadVariant=flat") + "), interior " +
@@ -562,12 +606,47 @@ namespace Wmv.Wow.World
                    (WorldModelLight ? "; world models: exterior groups lit (" + Variant(WorldModelFlat, "-wmvWorldModelVariant=flat") + "), interior groups " +
                                       (InteriorOutdoor ? interiorLit : "on the preview rig until Stage 12")
                                     : "; world models as Stage 09 (-wmvWorldModelLight=off)") +
-                   "; exterior MOCV not drawn; fog and water as Stage 09" +
+                   "; exterior MOCV not drawn; water as Stage 09" + DescribeFog(product, fogAbsent) +
                    (WorldLitView == WorldLitViewAlbedo ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=albedo): the world-lit variants draw the albedo " +
                                                          "(light factor 1, no world-model gate factor), valid on opaque and alpha-keyed batches only"
                     : WorldLitView == WorldLitViewNormal ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=normal): the world-lit variants draw 0.5 + 0.5 x the raw " +
                                                            "interpolated normal (unlit), valid on opaque and alpha-keyed batches only"
                     : "");
+        }
+
+        /// <summary>The fog's clause (step 7; WorldFog.ModeFor): its rule and grade on the Retail pattern, OFF with -wmvFog=off, off
+        /// by product (D17/D18) with the arm -wmvFogClassic names. Starts with "; ".</summary>
+        public string DescribeFog(string product)
+        {
+            return DescribeFog(product, null);
+        }
+
+        /// <summary>DescribeFog for an object whose layout lacks the fog columns `fogAbsent` (WorldFog.AbsentColumns; null: none
+        /// lacking): off for that object, the columns named. -wmvInteriorLight=outdoor binds interior groups and the doodads
+        /// they list to the world-lit copies, which are fogged by their material flags alone (a copy is shared by every group
+        /// and instance drawing its original), so the clause then names them fogged too.</summary>
+        public string DescribeFog(string product, string fogAbsent)
+        {
+            const string what = "the client's per-pixel fog, layer 0, on the lit terrain, outdoor doodads and exterior groups";
+            const string rule = "start min(far clip, 3000) x FogScaler, density FogDensity x 0.0005, end the far clip: INFERRED (public)";
+            bool groups = InteriorOutdoor && WorldModelLight, doodads = InteriorOutdoor && DoodadLight;
+            string unfogged = !groups && !doodads ? "; interiors, water, sky and particles unfogged"
+                : "; " + (groups && doodads ? "interior groups and the doodads they list" : groups ? "interior groups" : "the doodads interior groups list") +
+                  " fogged too (-wmvInteriorLight=outdoor, for the side-by-sides); " +
+                  (groups && doodads ? "" : groups ? "the doodads they list, " : "interior groups, ") + "water, sky and particles unfogged";
+            if (!Fog)
+                return "; fog OFF (-wmvFog=off)";
+            string arm = FogClassic != WorldFogClassicArm.Off
+                ? " [ARM -wmvFogClassic=" + WorldFog.ArmName(FogClassic) + ": not compared with the game]" : "";
+            if (!string.IsNullOrEmpty(product) && fogAbsent != null)
+                return "; fog off for product " + product + " (fog columns absent: " + fogAbsent + ")" + arm;
+            if (string.IsNullOrEmpty(product))
+                return "; fog: " + what + " (product not known yet: Retail pattern for wow and wowt, " + rule + "; off for any other " +
+                       "product (D17/D18)" + arm + ")" + unfogged;
+            WorldFogMode mode = WorldFog.ModeFor(product, true, FogClassic);
+            if (mode == WorldFogMode.RetailPattern)
+                return "; fog: " + what + " (product " + product + ", Retail pattern; " + rule + ")" + unfogged;
+            return "; fog off for product " + product + " (D17/D18)" + arm + (mode != WorldFogMode.Off ? unfogged : "");
         }
 
         static string Variant(bool flat, string flag)

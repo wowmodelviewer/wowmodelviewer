@@ -28,9 +28,10 @@
 // bound counted apart), T12 a session's MDDF and MODD doodads by their contexts (and the load's context line; doodads placed
 // while bound), T13 _WmvWLModels, T14 ObjectsLit, the frame's binding and its driver's lines (the placements while shown,
 // the first lit frame, the overview, a fault; why the light is not shown);
-// T15 is in the liquids' tests. With WMV_LIGHT=off only the hard off is checked (nothing installed, nothing set, nothing
-// said, no normal stream, no variant loaded and no world renderer bound). The driver's state is put back to the switches'
-// start afterwards.
+// T15 is in the liquids' tests. Step 7 (OutdoorFogTests, cases F1-F15) is in WmvLifecycleSelfTestWorldFog.cs; T13 expects
+// _WmvWLModels.w to be the fog's state (0: these tests' object does not send the fog's columns). With WMV_LIGHT=off only the hard off is checked (nothing installed, nothing set,
+// nothing said, no normal stream, no variant loaded and no world renderer bound; step 7's F16: no fog global written, no copy
+// flagged). The driver's state is put back to the switches' start afterwards.
 
 using System;
 using System.Collections.Generic;
@@ -102,6 +103,7 @@ public static partial class WmvLifecycleSelfTest
         OutdoorSkyCameraTests(log);
         OutdoorBloomTests(log);
         OutdoorModelTests(log);         // step 6
+        OutdoorFogTests(log);           // step 7 (WmvLifecycleSelfTestWorldFog.cs)
     }
 
     static void OutdoorLightIpcTests(Action<string> log)
@@ -210,16 +212,25 @@ public static partial class WmvLifecycleSelfTest
     }
 
     /// <summary>WMV_LIGHT=off: Configure installs nothing and says nothing, Frame, Sky and setWorldLight set nothing, runtimeState
-    /// says off.</summary>
+    /// says off; step 7 (F16): the fog's globals keep what they held (sentinels) and no copy is flagged.</summary>
     static void OutdoorLightHardOffTests(Action<string> log)
     {
         object standIn = new object();
         var said = new List<string>();
         Action<string> savedLog = WmvWorldLight.Log;
+        // F16: sentinels in the fog record's first row and the eye before the hard-off frames
+        var sentinelRow = new Vector4(-7.25f, 3.5f, 9.75f, -1.5f);
+        var sentinelEye = new Vector4(123.5f, -45.25f, 6.75f, 0.5f);
+        Vector4 savedRow = Shader.GetGlobalVector(WmvWorldLight.FogRowIds[0]), savedEye = Shader.GetGlobalVector(WmvWorldLight.EyeId);
+        Shader.SetGlobalVector(WmvWorldLight.FogRowIds[0], sentinelRow);
+        Shader.SetGlobalVector(WmvWorldLight.EyeId, sentinelEye);
         WmvWorldLight.Configure(standIn, x => said.Add(x));
         int saidAtConfigure = said.Count;
         WorldLightSet s = WmvIpcClient.ParseWorldLight(WorldLightLine(""));
         WmvWorldLight.SetFromHost(new WmvIpcClient.WorldLightCommand { HasOn = true, On = true });
+        int saidAtFrames = said.Count;                         // the host's "on" is answered with its refusal (a line)
+        WmvWorldLight.SetEye(new Vector3(1225f, 80f, -3948f));
+        WmvWorldLight.Frame(-3000, 0.016, s, true, 1225, -3948, 20, 0, false);
         WmvWorldLight.Frame(-3000, 0.016, s, true, 1225, -3948, 20, 0, false);
         WmvWorldLight.Sky(Camera.main, true);
         var r = new WmvIpcClient.RuntimeReport();
@@ -232,6 +243,15 @@ public static partial class WmvLifecycleSelfTest
               "drawn or held (no sky, bloom untouched, no terrain normal stream); runtimeState off", log);
         try { OutdoorModelHardOffTests(log, said); }
         catch (Exception e) { Check(false, "outdoor models: the hard-off test threw " + e.GetType().Name + ": " + e.Message + " at " + e.StackTrace, log); }
+        Vector4 rowAfter = Shader.GetGlobalVector(WmvWorldLight.FogRowIds[0]), eyeAfter = Shader.GetGlobalVector(WmvWorldLight.EyeId);
+        Check(rowAfter == sentinelRow && eyeAfter == sentinelEye && WmvWorldLitMaterials.FogBatchesSet == 0 && WmvWorldLight.FogMode == WorldFogMode.Off &&
+              WmvWorldLight.FogRecord.Mode == WorldFogMode.Off && !WmvWorldLight.FogDrawn && said.Count == saidAtFrames,
+              "outdoor fog F16: WMV_LIGHT=off -- the values written into _WmvWLFogR0 and _WmvWLEye before the hard-off frames (an eye set, a " +
+              "Retail object, the host's \"on\", two frames, the world renderers asked to bind) are unchanged after them " + rowAfter + ", " +
+              eyeAfter + " (no fog global is written), no copy carries a fog vector (" + WmvWorldLitMaterials.FogBatchesSet + " set), no fog mode " +
+              "taken, no census or fog line said (" + (said.Count - saidAtFrames) + " line(s) after the host's refused \"on\")", log);
+        Shader.SetGlobalVector(WmvWorldLight.FogRowIds[0], savedRow);
+        Shader.SetGlobalVector(WmvWorldLight.EyeId, savedEye);
         WmvWorldLight.Log = savedLog;
     }
 
@@ -1970,13 +1990,17 @@ public static partial class WmvLifecycleSelfTest
             bool before = !WmvWorldLight.ObjectsLit;
             WmvWorldLight.Frame(F + 1, 0.016, s, true, x, y, zz, 0, false);
             bool lit = WmvWorldLight.ObjectsLit;
-            // T13: the globals
+            // T13: the globals (step 7: w the fog drawn -- the object's product "wow" takes the Retail pattern unless -wmvFog=off, but
+            // this object does not send the fog's columns, so it draws none: WorldFog.AbsentColumns; F13 draws it on a full object)
             WorldLightSwitches sw = WmvWorldLight.Switches;
-            var want = new Vector4(sw.DoodadFlat ? 1f : 0f, sw.WorldModelFlat ? 1f : 0f, sw.WorldLitView, 0f);
+            WorldFogMode fogMode = WorldFog.ModeFor(s.Product, sw.Fog, sw.FogClassic);
+            bool fogDrawn = fogMode != WorldFogMode.Off && WorldFog.AbsentColumns(s, fogMode) == null;
+            var want = new Vector4(sw.DoodadFlat ? 1f : 0f, sw.WorldModelFlat ? 1f : 0f, sw.WorldLitView, fogDrawn ? 1f : 0f);
             Vector4 models = Shader.GetGlobalVector(WmvWorldLight.ModelsId);
-            Check(models == want && WmvWorldLight.ModelsVector() == want && (!sw.DrawDefaults || models == Vector4.zero),
-                  "outdoor models T13: after a Frame _WmvWLModels is the switches' (" + models + ": the doodads' and the world models' flat arms, " +
-                  "-wmvWorldLitView, 0; all 0 by default)", log);
+            Check(models == want && WmvWorldLight.ModelsVector() == want && !fogDrawn && (!sw.DrawDefaults || models == Vector4.zero),
+                  "outdoor models T13: after a Frame _WmvWLModels is the switches' and the fog's (" + models + ": the doodads' and the world " +
+                  "models' flat arms, -wmvWorldLitView, the fog drawn -- step 7: none for this object of product \"" + s.Product + "\", which " +
+                  "does not send the fog's columns; all 0 by default)", log);
             WmvWorldLight.PinOff();
             bool pinned = WmvWorldLight.ObjectsLit && !WmvWorldLight.PublishedOn;
             WmvWorldLight.Unpin();

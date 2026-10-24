@@ -5,7 +5,8 @@
 // column map, the day -- the half-minute, the host's rounding, wrap and the clamp arm, single keys, floats linear, integers
 // from the earlier key --, the selection with Stage 09's rules and the debug arms, the slot fallback, invalid lights), the
 // clock (the half-minute from HH:MM:SS, running and wrapping, the map's override), the sample and its channel groups, the
-// ease, the switches and the graded hypothesis tables (Wow/World/WorldLightState.cs, WorldLightModel.cs). A small fixture of
+// ease, the switches (steps 3-7) and the graded hypothesis tables (Wow/World/WorldLightState.cs, WorldLightModel.cs; the fog's
+// rows and the derived fog channels in detail: WorldFogTests.cs). A small fixture of
 // the client's own rows (Retail 12.1.5 LightParams 5985, the Southfury stand's day) checks the values the plan names.
 //
 // With WMV_WORLD_LIGHT_FIXTURES naming the folder the offline generator wrote (<client>_map<m>.json in the spec's
@@ -384,10 +385,12 @@ namespace Wmv.Wow.Tests
                   "sample: invalid where the base light has no keys (no group valid); inside zone 139 with the point light at weight 0.5 every colour and " +
                   "float half-way (SkyMiddle G (226/255 + 1) / 2, FogDensity 6), Glow 0.5, the integers and BaseRgb the base light's; groups " +
                   WorldLightSample.DescribeGroups(smp.Groups) + " (the columns this object sends)");
-            Check(WorldLightSample.Count == 3 * 24 + 26 + 1 && WorldLightSample.GroupOfColour(WorldLightColumns.EndFogColor) == WorldLightSample.GroupFogColours &&
+            Check(WorldLightSample.Count == 3 * 24 + 26 + 1 + 17 && WorldLightSample.FogBase == 3 * 24 + 26 + 1 && WorldFog.DerivedCount == 17 &&
+                  WorldLightSample.GroupOfColour(WorldLightColumns.EndFogColor) == WorldLightSample.GroupFogColours &&
                   WorldLightSample.GroupOfFloat(WorldLightColumns.CloudDensity) == WorldLightSample.GroupClouds &&
                   WorldLightSample.GroupOfColour(WorldLightColumns.ShadowOpacity) == WorldLightSample.GroupShadow,
-                  "sample layout: 24 colours x 3, 26 floats, Glow (99 channels); EndFogColor a fog colour, CloudDensity a cloud channel, ShadowOpacity its own");
+                  "sample layout: 24 colours x 3, 26 floats, Glow, then (step 7) the 17 derived fog channels (116 channels); EndFogColor a fog colour, " +
+                  "CloudDensity a cloud channel, ShadowOpacity its own");
         }
 
         static void ClockTests()
@@ -538,13 +541,23 @@ namespace Wmv.Wow.Tests
                   "-wmvWorldLitView=albedo|normal each taken; a bad value a note (" + modelsBad.Notes.Count + ") and the default kept; the last of " +
                   "two values wins; DrawDefaults false with any of them");
             Check(dd.Contains("; doodads: outdoor lit (hemisphere variant), interior as Stage 09; world models: exterior groups lit (hemisphere " +
-                              "variant), interior groups on the preview rig until Stage 12; exterior MOCV not drawn; fog and water as Stage 09") &&
+                              "variant), interior groups on the preview rig until Stage 12; exterior MOCV not drawn; water as Stage 09; fog: the " +
+                              "client's per-pixel fog") &&
                   !dd.Contains("DIAGNOSTIC") && md.Contains("doodads as Stage 09 (-wmvDoodadLight=off)") &&
                   md.Contains("world models as Stage 09 (-wmvWorldModelLight=off)") && md.Contains("DIAGNOSTIC VIEW (-wmvWorldLitView=albedo)") &&
                   nd.Contains("DIAGNOSTIC VIEW (-wmvWorldLitView=normal)") && ld.Contains("FLAT variant (-wmvDoodadVariant=flat, for the record)") &&
                   WorldLightSwitches.Parse(new[] { "-wmvInteriorLight=outdoor" }, null).DescribeDraw().Contains("interior groups lit too (-wmvInteriorLight=outdoor") &&
                   d.Describe().Contains("doodads: outdoor lit"),
                   "DescribeDraw (step 6): \"" + dd + "\"; the switches' departures named (" + md + ")");
+
+            // Step 7: the fog's switches (Tests/WorldFogTests.cs R7 checks their texts).
+            WorldLightSwitches fog = WorldLightSwitches.Parse(new[] { "-wmvFog=off", "-wmvFogClassic=public" }, "on");
+            WorldLightSwitches fogBad = WorldLightSwitches.Parse(new[] { "-wmvFog=no", "-wmvFogClassic=yes" }, null);
+            Check(d.Fog && d.FogClassic == WorldFogClassicArm.Off && !fog.Fog && fog.FogClassic == WorldFogClassicArm.Public && !fog.DrawDefaults &&
+                  fog.Notes.Count == 0 && fogBad.Fog && fogBad.FogClassic == WorldFogClassicArm.Off && fogBad.Notes.Count == 2 && fogBad.DrawDefaults &&
+                  fog.Describe().Contains("fog OFF (-wmvFog=off)"),
+                  "switches (step 7): the fog on and no -wmvFogClassic arm by default; -wmvFog=off and -wmvFogClassic=public taken; a bad value a note (" +
+                  fogBad.Notes.Count + ") and the default kept");
         }
 
         static void ModelTests()
@@ -719,7 +732,7 @@ namespace Wmv.Wow.Tests
         /// <summary>SHA-256 of the offline fixtures' manifest.json (D:\wmv-10\step3\player\fixtures, written 2026-10-21 by
         /// gen_fixtures.py), which pins the generator, its inputs and every fixture file written: a regenerated fixture is a
         /// failure here until this pin is updated on purpose.</summary>
-        const string FixtureManifestSha256 = "5d1339442a4f7886d082473c91f0a2ab0b085e494c40b1c01103caf1967c994b";
+        internal const string FixtureManifestSha256 = "5d1339442a4f7886d082473c91f0a2ab0b085e494c40b1c01103caf1967c994b";
 
         static void FixtureTests(string folder)
         {

@@ -2,14 +2,16 @@
 // 6.6, 6.10, 6.15; Wow/World/ModelLight.cs is the CPU twin and holds the evidence).
 //
 // Included only by the world-lit variants' pass bodies, under WMV_WORLD_LIT (WmvOpaquePass.cginc, WmvWmoPass.cginc), so the
-// original programs declare none of this. Plain float HLSL with an include guard and no include of its own, so CG and HLSL
-// passes can both include it; step 7 adds the fog here.
+// original programs declare none of this. Plain float HLSL with an include guard, so CG and HLSL passes can both include it;
+// its one include is step 7: the fog (WmvWorldFog.hlsl, plain float HLSL with no include of its own), so the variants get it
+// under WMV_WORLD_LIT too.
 //
 // THE GLOBALS are WmvWorldLight's (Publish), the same the terrain's world-lit branch reads: GLOBALS, never properties (a
 // property of the same name would pin them). _WmvWLOn is above 0.5 only for the main camera's world view while the light is
 // shown (pinned 0 everywhere else); the colours are authored (the table's byte / 255); L points towards the light (Unity world,
 // unit). _WmvWLModels: x the doodads' flat arm, y the world models' flat arm (both for the record), z the diagnostic view
-// (0 none, 1 the albedo, 2 the raw normal: -wmvWorldLitView), w 0 (step 7).
+// (0 none, 1 the albedo, 2 the raw normal: -wmvWorldLitView), w the fog on (step 7: 1 while the fog is drawn, 0 with -wmvFog=off
+// or a client the fog is off for).
 //
 // THE LIGHT is the client's M2 and world-model hemisphere programs' common core (PROVEN_BYTES, executed; M2 combiners_opaque
 // 2977063 p_1, world model material3_wmo 5446718 p_1): H and the wrap on the NORMALISED normal, N.L not saturated in the wrap;
@@ -17,8 +19,10 @@
 // with no saturate. Stage 10 holds the client's inputs at their neutral values (below), so the colour is base x (A + D).
 #ifndef WMV_WORLD_LIGHT_HLSL
 #define WMV_WORLD_LIGHT_HLSL
+#include "WmvWorldFog.hlsl"
 float  _WmvWLOn;           // GLOBALS, never properties (a property of the same name would pin them)
-float4 _WmvWLModels;       // x doodads flat arm, y world models flat arm, z view (0 none, 1 albedo, 2 normal), w 0 (step 7)
+float4 _WmvWLModels;       // x doodads flat arm, y world models flat arm, z view (0 none, 1 albedo, 2 normal), w the fog on
+                           // (step 7: 1 while the fog is drawn, 0 with -wmvFog=off or a client the fog is off for)
 float4 _WmvWLLightDir;     // towards the light, Unity world, unit
 float4 _WmvWLAmbient, _WmvWLHorizonAmbient, _WmvWLGroundAmbient, _WmvWLDirect;   // authored byte / 255
 

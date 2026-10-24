@@ -30,6 +30,9 @@
 //                 per distinct original, destroyed with the prototype; otherwise, and always for an interior-interim doodad,
 //                 the prototype's own. A doodad placed while bound is bound at once, and counted and timed in
 //                 PlacedWhileShown (said by WmvWorldLitDriver); a rebind leaves a doodad already as asked alone.
+//                 Stage 10 step 7: a copy made gets its fog vector (WmvWorldLitMaterials.SetFogBatch) from its batch's
+//                 NoFog (WmvMaterialBinding, in step with Materials) and its blend state; each slot's fog code is kept
+//                 beside its blend class for the binding line.
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,6 +62,8 @@ public sealed class WmvDoodadPrototype
     /// without a variant (null for none). The copies, one per distinct original, are destroyed with the prototype.</summary>
     public Material[] WorldLit;
     public int[] WorldLitBlends;
+    /// <summary>Stage 10 step 7: each slot's fog code (WmvWorldLitMaterials.FogCode*; -1 for a slot left on its original).</summary>
+    public int[] WorldLitFogCodes;
     public bool WorldLitAny;
     public string WorldLitNoVariant;
     public readonly Dictionary<Material, Material> LitCopies = new Dictionary<Material, Material>();
@@ -602,15 +607,16 @@ public sealed class WmvWorldDoodads
             if (p.WorldLitAny)
             {
                 bind.Doodads++;
-                bind.AddBatches(p.WorldLitBlends);
+                bind.AddBatches(p.WorldLitBlends, p.WorldLitFogCodes);
             }
         }
         return p.WorldLitAny ? lit : p.Materials;
     }
 
     /// <summary>The prototype's world-lit materials (WmvDoodadPrototype.WorldLit), made the first time: each slot whose
-    /// original has a variant holds the prototype's copy of it (made now the first time, counted in the tallies), every other
-    /// slot its original, null kept null.</summary>
+    /// original has a variant holds the prototype's copy of it (made now the first time, counted in the tallies; step 7: its fog
+    /// vector set from slot k's NoFog, Runtime.Bindings[k] -- fogged when the binding is not there), every other slot its
+    /// original, null kept null.</summary>
     public Material[] WorldLitMaterials(WmvDoodadPrototype p, WmvWorldLitBind bind)
     {
         if (p.WorldLit != null)
@@ -618,11 +624,13 @@ public sealed class WmvWorldDoodads
         Material[] originals = p.Materials;
         var arr = new Material[originals.Length];
         var blends = new int[originals.Length];
+        var fog = new int[originals.Length];
         for (int k = 0; k < originals.Length; k++)
         {
             Material m = originals[k];
             arr[k] = m;
             blends[k] = -1;
+            fog[k] = -1;
             if (m == null)
                 continue;
             Shader variant = WmvWorldLitMaterials.ResolveVariant(true, m, WmvWorldLight.Log);
@@ -643,9 +651,12 @@ public sealed class WmvWorldDoodads
             }
             arr[k] = c;
             blends[k] = WmvWorldLitMaterials.BlendOf(c);
+            bool unfogged = p.Runtime != null && p.Runtime.Bindings != null && k < p.Runtime.Bindings.Length && p.Runtime.Bindings[k].NoFog;
+            fog[k] = made ? WmvWorldLitMaterials.SetFogBatch(c, unfogged) : WmvWorldLitMaterials.FogCodeOf(c);
             p.WorldLitAny = true;
         }
         p.WorldLitBlends = blends;
+        p.WorldLitFogCodes = fog;
         p.WorldLit = arr;
         return arr;
     }

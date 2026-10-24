@@ -16,7 +16,10 @@
 //   the sun path         (4.4) polar angle 100 deg at 06:00, 5 deg from 11:55 to 12:05, 100 deg at 19:00; a fixed azimuth
 //                        towards the north-west (INFERRED (public), one source). Linear between the listed keys (INFERRED);
 //                        before 06:00 and after 19:00 held at 100 deg, below the horizon (UNKNOWN: the plan lists no key there).
-//   the fog constants    (4.6) carried for the fog step, read by nothing yet.
+//   the fog              (4.6, 6.9; step 7: WorldFog.cs) every constant and rule of the fog's record, one row each, with its
+//                        grade, its state (applied, held, not applied: the data as read, or arm only: a -wmvFogClassic rule)
+//                        and, for a fall-back, its order (per key, or the sky's order for the sun tint's inputs). No row names
+//                        a map by number and none carries a list of values.
 //   the ring table       (4.3) the sky's colour dome (step 4): SkyDome.cs builds it; Rings lists each ring's elevation as
 //                        that construction gives it, with its grade.
 //   the sky              (4.0, 4.3) the sky program's constant and the hypotheses that feed it (SkyDome.cs).
@@ -29,23 +32,35 @@ using System.Collections.Generic;
 
 namespace Wmv.Wow.World
 {
-    /// <summary>One constant with its evidence grade and where it comes from.</summary>
+    /// <summary>One constant with its evidence grade and where it comes from; the fog's rows (step 7) also carry their state
+    /// and, for a fall-back, its order ("" elsewhere).</summary>
     public sealed class GradedValue
     {
         public readonly string Name, Grade, Source;
         public readonly double Value;
+        /// <summary>WorldLightModel.StateApplied, StateHeld, StateNotApplied or StateArmOnly ("" for the rows before step 7).</summary>
+        public readonly string State;
+        /// <summary>WorldLightModel.OrderPerKey or OrderSky for a fall-back ("" otherwise).</summary>
+        public readonly string Order;
 
-        public GradedValue(string name, double value, string grade, string source)
+        public GradedValue(string name, double value, string grade, string source) : this(name, value, grade, source, "", "")
+        {
+        }
+
+        public GradedValue(string name, double value, string grade, string source, string state, string order = "")
         {
             Name = name;
             Value = value;
             Grade = grade;
             Source = source;
+            State = state ?? "";
+            Order = order ?? "";
         }
 
         public override string ToString()
         {
-            return Name + " " + Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + " (" + Grade + ", " + Source + ")";
+            return Name + " " + Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + " (" + Grade + ", " + Source + ")" +
+                   (State.Length > 0 ? " [" + State + (Order.Length > 0 ? ", " + Order : "") + "]" : "");
         }
     }
 
@@ -89,16 +104,128 @@ namespace Wmv.Wow.World
         public const double DefaultFarClip = 7000.0;
         public const string DefaultFarClipGrade = ProvenBytes;
 
-        // ---- the fog constants (plan 4.6; read by nothing in step 3)
+        // ---- the fog (plan 4.6, 6.9; step 7: WorldFog.cs)
+
+        /// <summary>The fog rows' states: applied (drawn by default), held (an input of the program fed one value), not applied (the
+        /// data as read), arm only (a rule of -wmvFogClassic, never compared with the game).</summary>
+        public const string StateApplied = "applied", StateHeld = "held", StateNotApplied = "not applied", StateArmOnly = "arm only";
+        /// <summary>A fall-back's order: resolved on each key before the blend, or on the blended state as the sky resolves it.</summary>
+        public const string OrderPerKey = "per key", OrderSky = "the sky's order";
 
         public static readonly GradedValue[] Fog =
         {
-            new GradedValue("fog start cap (yd): start = min(far clip, cap) x FogScaler", 3000.0, InferredPublic, "plan 4.6, one source"),
-            new GradedValue("FogScaler clamp (start = ... x clamp(FogScaler, -1, 1))", 1.0, InferredPublic, "plan 4.6, one source"),
-            new GradedValue("FogDensity floor (k = max(FogDensity, floor) x scale)", 0.9, InferredPublic, "plan 4.6, one source"),
-            new GradedValue("FogDensity scale per yard", 0.0005, InferredPublic, "plan 4.6, one source"),
-            new GradedValue("end fade slope sat(slope (1 - d / end))", 1.4286, ProvenBytes, "plan 4.0, the client's terrain and M2 programs"),
-            new GradedValue("Era/MoP power fog: end = FogEnd / divisor", 36.0, Unknown, "plan 4.6: the public sources disagree (T8)"),
+            // the program's literals
+            new GradedValue("end fade slope sat(slope (1 - d / end))", WorldFog.EndFade, ProvenBytes,
+                            "terrain 2977247 p_1:190 (dx_6_0 literal 0x3FF6DB6DC0000000); the same tail in the M2 and world-model programs", StateApplied),
+            new GradedValue("polynomial path lead before the end ratio", WorldFog.ArtLead, ProvenBytes, "terrain 2977247 p_1:211", StateApplied),
+            new GradedValue("polynomial path fade slope", WorldFog.ArtFade, ProvenBytes, "terrain 2977247 p_1:225 (dx_6_0 literal 0x400AAAAAA0000000)",
+                            StateApplied),
+            // the record on the Retail pattern
+            new GradedValue("fog start cap (yd): start = min(far clip, cap) x FogScaler", WorldFog.StartCap, WorldFog.StartCapGrade,
+                            "plan 4.6, one source; the references' far bands fog more than this start predicts (MEASURED, preliminary; start and " +
+                            "density not separated); class C until in-game test T7", StateApplied),
+            new GradedValue("FogDensity scale per yard: k = FogDensity x scale", WorldFog.DensityScale, WorldFog.DensityScaleGrade,
+                            "plan 4.6, one source; not contradicted near a start of 300 yd (a start-density ridge, preliminary); class C until T7",
+                            StateApplied),
+            new GradedValue("fog end = the game far clip (1 = yes; FogEnd is not used on this pattern)", 1.0, InferredPublic,
+                            "plan 4.6; the low far clip of T7 measures it", StateApplied),
+            new GradedValue("keys without FogDensity and FogEnd as read: k 0, the end fade only (1 = yes)", 1.0, Inferred,
+                            "no derived density and no no-fog switch; counted per set", StateApplied),
+            new GradedValue("fog colour = SkyFogColor (1 = yes)", 1.0, InferredPublic,
+                            "plan 4.6; of the single table colours only SkyFogColor fits the far bands (MEASURED, preliminary)", StateApplied),
+            new GradedValue("the table colours uploaded as byte / 255 (1 = yes)", 1.0, Inferred,
+                            "the programs decode no fog colour (PROVEN_BYTES); step 1's light colours (MEASURED); T7 measures the fog colour",
+                            StateApplied),
+            new GradedValue("height plane: world height - FogHeight, FogHeight as read (1 = yes)", 1.0, InferredPublic, "plan 4.6", StateApplied),
+            new GradedValue("height cubic order: the stored coefficients reversed (1 = yes)", 1.0, Inferred,
+                            "the data's pattern: poly(0) near 0 on 92.2 % of the keys read constant first, 14.4 % reversed (census)", StateApplied),
+            // the fall-backs only the record uses: resolved per key (WorldFog.DeriveKey)
+            new GradedValue("colour fall-back: EndFogColor zero -> SkyFogColor (1 = applied)", 1.0, InferredPublic,
+                            "the public rule; 55.5 % of Retail keys store it zero (census)", StateApplied, OrderPerKey),
+            new GradedValue("colour fall-back: FogHeightColor zero -> SkyFogColor (1 = applied)", 1.0, InferredPublic,
+                            "the public rule; 54.3 % of Retail keys store it zero (census)", StateApplied, OrderPerKey),
+            new GradedValue("colour fall-back: EndFogHeightColor zero -> the key's resolved EndFogColor (1 = applied)", 1.0, InferredPublic,
+                            "the public rule; 76.2 % of Retail keys store it zero (census)", StateApplied, OrderPerKey),
+            new GradedValue("height-coefficient fall-back: all four zero -> u^3 (1 = applied)", 1.0, InferredPublic,
+                            "the public rule; bites on 6639 Retail keys, 307 of them without exponential fog as read (census); class C until a capture",
+                            StateApplied, OrderPerKey),
+            new GradedValue("height density fall-back: kh := FogDensity where FogHeightScaler is 0 (1 = applied)", 1.0, InferredPublic,
+                            "the public rule; acts on 21 Retail keys (census)", StateApplied, OrderPerKey),
+            new GradedValue("colour ramp length fall-back: EndFogColorDistance <= 0 -> the game far clip (1 = applied)", 1.0, InferredPublic,
+                            "the public rule simplified: no far-clip clamp, no per-map minima; acts on 356 Retail keys (census)", StateApplied,
+                            OrderPerKey),
+            new GradedValue("colour ramp length: the second public reading for EndFogColorDistance <= 0 (yd)", 1000.0, InferredPublic,
+                            "the public packing; recorded, not drawn", StateNotApplied),
+            new GradedValue("polynomial path switch: on iff a coefficient is set and MainFogEndDist > MainFogStartDist (1 = applied)", 1.0,
+                            InferredPublic, "the public rule; 34 Retail keys, 2 of them refused and drawn without the path (census)", StateApplied,
+                            OrderPerKey),
+            new GradedValue("polynomial path: a blended end not above its start is drawn without the path that frame (1 = applied)", 1.0, Inferred,
+                            "only while blending with a refused key; counted", StateApplied),
+            new GradedValue("polynomial path: the forced end-start separation (yd)", 0.001, InferredPublic,
+                            "the public rule; a key with end <= start draws without the path instead", StateNotApplied),
+            new GradedValue("coefficients: the zero epsilon of the public rule", 1.2e-7, InferredPublic,
+                            "the coefficients are tested exactly 0 as read", StateNotApplied),
+            // the sun tint's inputs: the sky's (SkyDome.SunTint)
+            new GradedValue("sun tint fall-back: SunFogColor zero -> threshold 1, no tint (1 = applied)", 1.0, InferredPublic,
+                            "the sky's rule since step 4 (SkyDome.SunTint), on the blended state", StateApplied, OrderSky),
+            new GradedValue("sun tint strength factor SunAngleBlend", SkyDome.SunAngleBlend, SkyDome.SunAngleBlendGrade,
+                            "the sky's (SkyDome.SunTint)", StateApplied, OrderSky),
+            new GradedValue("sun tint day curve: the sky's (1 = shared)", 1.0, SkyDome.DayCurveGrade, "SkyDome.DayCurve; in-game test T14",
+                            StateApplied, OrderSky),
+            new GradedValue("sun direction: the sky's sun path (1 = shared)", 1.0, SunPathGrade, "WorldLightModel.SunDirection; in-game tests T4, T14",
+                            StateApplied),
+            new GradedValue("LightParams flag 0x4: sun tint threshold", WorldFog.ParamsFlagTintAngle, InferredPublic,
+                            "the public rule; not applied, as the sky does not apply it; counted per set", StateNotApplied),
+            // the holds
+            new GradedValue("second start term (held)", 0.0, Unknown,
+                            "the program's neutral value; its source unknown (LightData Field 042 and 043 are candidates)", StateHeld),
+            new GradedValue("layer weight, one layer (held)", 1.0, Unknown, "neutral for one layer (plan 6.9: layer 0 only)", StateHeld),
+            new GradedValue("M2 and world-model fog strength cb0[23].z (held)", 1.0, Unknown,
+                            "the terrain's compiled-in value (2977247 p_1:234-235), not a neutral one; per material unknown", StateHeld),
+            new GradedValue("interior weight (held: the outdoor record)", 0.0, Inferred,
+                            "outdoor doodads and exterior groups; no MOCV stream is uploaded (Stage 12)", StateHeld),
+            new GradedValue("the two-record path and the fog-volume composite (held off)", 0.0, Unknown, "Stage 12 or later (D4)", StateHeld),
+            // the fog targets and the skip (the CPU's choices)
+            new GradedValue("fog target of additive batches: black, rgb x vis (kind 1)", 1.0, Inferred,
+                            "the contribution fades as the blend word 4 fades it; a fog-colour mix would add fog light", StateApplied),
+            new GradedValue("fog target of modulate batches: white (kind 2)", 1.0, InferredPublic,
+                            "the PTR's volume composite uses white for its fog-mode word 2 (PROVEN_BYTES); the mode-to-word map is not in the bytes",
+                            StateApplied),
+            new GradedValue("fog target of modulate 2x batches: grey (kind 3)", 0.5, InferredPublic,
+                            "the PTR's volume composite uses grey 0.5 for its fog-mode word 3 (PROVEN_BYTES)", StateApplied),
+            new GradedValue("fog of One / OneMinusSrcAlpha batches: rgba x vis (kind 4)", 1.0, Inferred,
+                            "the client's blend word 4 arithmetic exactly (2977063 p_1:586-589); which batches get the word is the CPU's", StateApplied),
+            new GradedValue("NoFog (M2 0x02) and F_UNFOGGED (MOMT 0x02) select the program's fog skip (1 = applied)", 1.0, InferredPublic,
+                            "the skip returns the lit colour (PROVEN_BYTES); which flag sets it is the public reading", StateApplied),
+            new GradedValue("fog mode by client: the Retail pattern for wow and wowt, off for every other product (1 = applied)", 1.0, Inferred,
+                            "D17, D18; the plan's 6.9 departure (c)", StateApplied),
+            // step 3's rows, kept: the data as read
+            new GradedValue("FogScaler clamp (start = ... x clamp(FogScaler, -1, 1))", 1.0, InferredPublic, "plan 4.6, one source; data as read",
+                            StateNotApplied),
+            new GradedValue("FogDensity floor (k = max(FogDensity, floor) x scale)", WorldFog.DensityFloor, InferredPublic,
+                            "plan 4.6, one source; data as read", StateNotApplied),
+            // the public arm (-wmvFogClassic=public; WorldFog.Public*)
+            new GradedValue("public arm rule 1: the density under Map Flags[2] 0x2", WorldFog.FlagDensity, InferredPublic, "one public source",
+                            StateArmOnly),
+            new GradedValue("public arm rule 2: the derived density of keys without FogDensity, its base", WorldFog.DerivedDensityBase, InferredPublic,
+                            "one public source: base + 5.5 (1 - diff / (min(far clip, 700) - 200)), diff = FogEnd - FogEnd x FogScaler", StateArmOnly),
+            new GradedValue("public arm rule 3: the density floor", WorldFog.DensityFloor, InferredPublic, "one public source", StateArmOnly),
+            new GradedValue("public arm rule 4: the FogScaler clamp to [-1, 1] and its floors -0.2 with FogDensity, 0 without", WorldFog.ScalerClamp,
+                            InferredPublic, "one public source; the floors not under Map Flags[2] 0x2", StateArmOnly),
+            new GradedValue("public arm rule 5: the FogEnd floor", WorldFog.FogEndFloor, InferredPublic, "one public source", StateArmOnly),
+            new GradedValue("public arm rule 6: FogHeight above the limit -> 0, below its negative -> the negative", WorldFog.FogHeightOffAbove,
+                            InferredPublic, "one public source", StateArmOnly),
+            new GradedValue("public arm rule 7: the far-clip clamp, its lower end (yd; upper 50000)", WorldFog.FarClipMin, InferredPublic,
+                            "one public source", StateArmOnly),
+            // the power36 arm (-wmvFogClassic=power36)
+            new GradedValue("power36 arm: end = FogEnd / divisor", WorldFog.PowerDivisor, WorldFog.PowerGrade,
+                            "plan 4.6: the public sources disagree (in-game test T8)", StateArmOnly),
+            new GradedValue("power36 arm: start = FogScaler x end (1 = yes)", 1.0, Unknown, "a public renderer", StateArmOnly),
+            new GradedValue("power36 arm: rate = the derived density of public arm rule 2 with end for FogEnd (1 = yes)", 1.0, Unknown,
+                            "a public renderer", StateArmOnly),
+            new GradedValue("power36 arm: SkyFogColor for all four colours, no tint (1 = yes)", 1.0, Unknown, "a public renderer",
+                            StateArmOnly),
+            new GradedValue("power36 arm: no fog where the end is not above the start (1 = yes)", 1.0, Unknown, "counted", StateArmOnly),
         };
 
         // ---- the colour dome's rings (plan 4.3; step 4: SkyDome.cs, table A, the construction's elevations)

@@ -32,7 +32,9 @@
 // THE DAY (WorldLightDay.Evaluate): on the integer half-minute t, the key at t, else linear between the last key before t
 // and the first after it, across midnight (wrap: INFERRED (public), two sources); colours per channel
 // floor(a + (b - a) f + 0.5) clamped to 0..255 -- exactly the host's LightCatalog::sample() -- floats linear, integers the
-// earlier key's; one key holds all day.
+// earlier key's; one key holds all day. Stage 10 step 7: each key's derived fog channels (WorldFog.DeriveKey: the fall-backs
+// only the fog record uses, resolved on the key itself) are made once with the day and blended with the same bracket and
+// share, their colours with the same rounding.
 // Thread safety: an instance is filled once (the reader thread) and then read on the main thread only.
 
 using System;
@@ -96,6 +98,8 @@ namespace Wmv.Wow.World
         public readonly int[] Colours;        // Keys x ColourCount, 0xRRGGBB
         public readonly double[] Floats;      // Keys x FloatCount, as sent
         public readonly long[] Ints;          // Keys x IntCount
+        /// <summary>Keys x WorldFog.DerivedCount: each key's derived fog channels (WorldFog.DeriveKey; the colours as bytes).</summary>
+        public readonly double[] Fog;
 
         public int Keys { get { return Times.Length; } }
 
@@ -105,6 +109,7 @@ namespace Wmv.Wow.World
             Colours = colours;
             Floats = floats;
             Ints = ints;
+            Fog = new double[times.Length * WorldFog.DerivedCount];
         }
 
         /// <summary>A day from the sent arrays (key-major, `colourCount` / `floatCount` / `intCount` columns per key), each
@@ -145,6 +150,8 @@ namespace Wmv.Wow.World
                     if (intMap[j] >= 0)
                         d.Ints[k * ic + intMap[j]] = i[k * ni + j];
             }
+            for (int k = 0; k < n; k++)
+                WorldFog.DeriveKey(d.Colours, k * cc, d.Floats, k * fc, d.Fog, k * WorldFog.DerivedCount);
             return d;
         }
 
@@ -188,8 +195,13 @@ namespace Wmv.Wow.World
         /// <summary>One channel of a colour between two keys, as the host rounds it: floor(a + (b - a) f + 0.5), 0..255.</summary>
         public static int Channel(int from, int to, int shift, double f)
         {
-            double va = (from >> shift) & 0xFF;
-            double vb = (to >> shift) & 0xFF;
+            return Round((from >> shift) & 0xFF, (to >> shift) & 0xFF, f);
+        }
+
+        /// <summary>A byte between two keys' bytes, as the host rounds it: floor(a + (b - a) f + 0.5), 0..255 (Channel's arithmetic,
+        /// also for the derived fog colours).</summary>
+        public static int Round(double va, double vb, double f)
+        {
             int v = (int)Math.Floor(va + (vb - va) * f + 0.5);
             return Math.Min(255, Math.Max(0, v));
         }
@@ -197,6 +209,14 @@ namespace Wmv.Wow.World
         /// <summary>The day at half-minute t: `rgb` (ColourCount x 3 bytes, r g b per column), `floats` (FloatCount, linear),
         /// `ints` (IntCount, the earlier key's). Arrays at least that long; nothing is allocated.</summary>
         public void Evaluate(int t, bool clamp, int[] rgb, double[] floats, long[] ints)
+        {
+            Evaluate(t, clamp, rgb, floats, ints, null);
+        }
+
+        /// <summary>Evaluate with the derived fog channels too (Stage 10 step 7): `fog` (WorldFog.DerivedCount) blended with the
+        /// same keys and share, channels 0-7 linearly and the colour bytes (WorldFog.DerivedColours on) with the host's rounding
+        /// (Round). Any output may be null.</summary>
+        public void Evaluate(int t, bool clamp, int[] rgb, double[] floats, long[] ints, double[] fog)
         {
             int a, b;
             double f;
@@ -219,6 +239,15 @@ namespace Wmv.Wow.World
             if (ints != null)
                 for (int j = 0; j < ic; j++)
                     ints[j] = Ints[a * ic + j];
+            if (fog != null)
+            {
+                int dc = WorldFog.DerivedCount;
+                for (int j = 0; j < dc; j++)
+                {
+                    double x = Fog[a * dc + j], y = Fog[b * dc + j];
+                    fog[j] = j < WorldFog.DerivedColours ? x + (y - x) * f : Round(x, y, f);
+                }
+            }
         }
 
         /// <summary>One colour column at half-minute t (r, g, b), as Evaluate gives it.</summary>

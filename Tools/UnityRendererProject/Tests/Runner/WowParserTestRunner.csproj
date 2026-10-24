@@ -42,6 +42,7 @@
     <Compile Include="..\WorldLightTests.cs" />
     <Compile Include="..\SkyTerrainLightTests.cs" />
     <Compile Include="..\WorldModelLightTests.cs" />
+    <Compile Include="..\WorldFogTests.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>

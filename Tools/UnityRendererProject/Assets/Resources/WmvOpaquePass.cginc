@@ -7,7 +7,8 @@
 //                          world view binds while the outdoor light is shown.
 // The hooks, each inside #ifdef WMV_WORLD_LIT: the world light's globals and WmvWorldModelShade (WmvWorldLight.hlsl) after the
 // uniforms; the outdoor-light branch before the preview rig; the unlit test before the emissive bypass; the lit combine
-// before the rig's. The pragmas stay in the .shader files (this file has none). The body's own comments moved with it.
+// before the rig's; step 7's per-copy fog vector (_WmvFogBatch) after the uniforms and the fog (WmvWorldFog.hlsl) after the
+// alpha, before the encode. The pragmas stay in the .shader files (this file has none). The body's own comments moved with it.
 
             struct appdata
             {
@@ -769,6 +770,7 @@
             fixed _VertexColour;
 #ifdef WMV_WORLD_LIT
             #include "WmvWorldLight.hlsl"
+            float4 _WmvFogBatch;   // per copy (WmvWorldLitMaterials.SetFogBatch): x 1 = unfogged, y the fog target kind
 #endif
 
             v2f vert (appdata v)
@@ -1311,6 +1313,13 @@
                 // taken before the viewport had a tone map to compare against, and neither had
                 // an OpenGL reference render to measure the top end against.
                 c.a = (_OpaqueAlpha > 0.5) ? 1.0 : a;
+#ifdef WMV_WORLD_LIT
+                // Stage 10 step 7: the client's per-pixel fog, layer 0 (WmvWorldFog.hlsl) -- its programs' last arithmetic, after
+                // the light, the lobes and the alpha (2977063 p_1:309-775). Not in the albedo view; not for NoFog batches.
+                [branch]
+                if (worldLit && _WmvWLModels.w > 0.5 && _WmvWLModels.z < 0.5 && _WmvFogBatch.x < 0.5)
+                    c = WmvWorldFog(c, i.wpos, _WmvFogBatch.y);
+#endif
 
                 // Authored domain -> linear here ONLY when the frame is not decoded as a whole
                 // (WMV_DISPLAY=fragment). See the block above frag(), and WmvFrameDecodePass for

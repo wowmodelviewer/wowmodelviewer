@@ -12,7 +12,9 @@
 // (WorldLightTests.cs) runs when WMV_WORLD_LIGHT_FIXTURES names the offline fixtures, and reads the host's own objects
 // from WMV_WORLD_LIGHT_HOST_DUMPS when that is set; the MCNR proof on the four Southfury tiles (SkyTerrainLightTests.cs) runs
 // when WMV_MCNR_TILES names the folder holding them. The world-model context census (WorldModelLightTests.cs) runs under the
-// corpus condition.
+// corpus condition. The fog's census on every key of five clients (WorldFogTests.cs R9) runs when WMV_FOG_KEYS names the key
+// export, its continuity on maps 0 and 1 when WMV_WORLD_LIGHT_FIXTURES is set, and WMV_FOG_PARITY_OUT has it write the rig's
+// parity grid (R10).
 
 using System;
 using System.Globalization;
@@ -124,6 +126,12 @@ static class Program
         // context rule; with WMV_WORLD_AUDIT_CORPUS the census of the client's world models.
         Console.WriteLine("== WorldModelLightTests (doodad and world-model light, the client's programs, the contexts; census when given)");
         failures += WorldModelLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 7: the client's per-pixel fog against its own terrain and M2 programs, the record from the client's keys, the
+        // derived fog channels, the modes, arms and switches; with WMV_FOG_KEYS the census on every key, with WMV_WORLD_LIGHT_FIXTURES
+        // the record's continuity on maps 0 and 1 of five clients.
+        Console.WriteLine("== WorldFogTests (the fog: the client's programs, the record, the derived channels, modes and arms; census when given)");
+        failures += WorldFogTests.RunAll(Console.WriteLine);
 
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))

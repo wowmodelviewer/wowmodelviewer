@@ -5,12 +5,14 @@
 // this shader (the copy carries the original's properties and keywords by name). The light is then the client's M2
 // hemisphere program (WmvWorldLight.hlsl; Wow/World/ModelLight.cs is the CPU twin and the evidence) in place of the preview
 // rig: base = the combiner x _Color as before, colour = base x (A + D) with Stage 10's holds, no saturate; unlit and additive
-// batches (_Emissive) keep the base. In every other state the world holds the original material, so this program's
-// else-branch (the rig, with _WmvWLOn 0) is drawn by no picture. Interior doodads and the Models and Characters viewers
-// never use it.
+// batches (_Emissive) keep the base. Step 7 ends it with the client's per-pixel fog (WmvWorldFog.hlsl) while _WmvWLModels.w
+// is set, towards the target _WmvFogBatch names, unless the batch is NoFog. In every other state the world holds the
+// original material, so this program's else-branch (the rig, with _WmvWLOn 0) is drawn by no picture. Interior doodads and
+// the Models and Characters viewers never use it.
 //
 // The Properties, tags, render state and pragmas are WmvOpaque.shader's and must stay identical to them (change both
-// together); read that file for everything else.
+// together), with one documented exception: _WmvFogBatch (step 7), the copy's fog vector, which WmvOpaque.shader does not
+// declare (its program has no fog); read that file for everything else.
 
 Shader "WMV/Opaque Textured (world)"
 {
@@ -86,6 +88,8 @@ Shader "WMV/Opaque Textured (world)"
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1  // One
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst blend", Float) = 0  // Zero
         [Toggle] _ZWrite ("ZWrite", Float) = 1
+        // Stage 10 step 7, this variant only (see the header): set per copy by WmvWorldLitMaterials.SetFogBatch.
+        _WmvFogBatch ("Stage 10 fog: x 1 = unfogged (NoFog / F_UNFOGGED), y the fog target kind", Vector) = (0, 0, 0, 0)
     }
 
     SubShader
@@ -110,7 +114,7 @@ Shader "WMV/Opaque Textured (world)"
             #pragma multi_compile_local _ _ALPHATEST_ON
             #include "UnityCG.cginc"
 
-            // The pass body of WmvOpaque.shader with the outdoor light's hooks compiled in.
+            // The pass body of WmvOpaque.shader with the outdoor light's and the fog's hooks compiled in.
             #define WMV_WORLD_LIT 1
             #include "WmvOpaquePass.cginc"
             ENDCG

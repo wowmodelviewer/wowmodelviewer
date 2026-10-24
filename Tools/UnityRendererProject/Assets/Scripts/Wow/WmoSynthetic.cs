@@ -430,14 +430,26 @@ namespace Wmv.Wow
         /// </summary>
         public static byte[] ContextRoot(uint[] groupFlags, uint firstGroupFileDataId, uint textureFileDataId, byte[][] moddRecords)
         {
+            return ContextRoot(groupFlags, firstGroupFileDataId, textureFileDataId, moddRecords, new[] { 0u, WmoMaterial.FlagCullDisabled });
+        }
+
+        /// <summary>
+        /// ContextRoot with one MOMT entry per `materialFlags` value (Stage 10 step 7: the fog's per-copy flags, F_UNFOGGED among
+        /// them): entry i has the flags materialFlags[i], shader 0 and the blend materialBlends[i] -- without `materialBlends`, entry
+        /// 1 blend 1 (alpha-keyed) and every other blend 0 --, entry 0 textureFileDataId as texture1, the others no texture. With
+        /// the flags { 0, FlagCullDisabled } and no blends the bytes are ContextRoot's above exactly.
+        /// </summary>
+        public static byte[] ContextRoot(uint[] groupFlags, uint firstGroupFileDataId, uint textureFileDataId, byte[][] moddRecords,
+                                         uint[] materialFlags, uint[] materialBlends = null)
+        {
             int groupCount = groupFlags.Length;
+            var materials = new byte[materialFlags.Length][];
+            for (int m = 0; m < materials.Length; m++)
+                materials[m] = Material(materialFlags[m], 0, materialBlends != null ? materialBlends[m] : m == 1 ? 1u : 0u,
+                                        m == 0 ? textureFileDataId : 0u);
             var spec = new RootSpec
             {
-                Materials = new[]
-                {
-                    Material(0, 0, 0, textureFileDataId),
-                    Material(WmoMaterial.FlagCullDisabled, 0, 1, 0),
-                },
+                Materials = materials,
                 GroupInfos = new byte[groupCount][],
                 GroupFileDataIDs = new uint[groupCount],
                 GroupNames = new string[groupCount],

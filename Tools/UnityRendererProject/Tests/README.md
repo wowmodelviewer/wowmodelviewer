@@ -134,6 +134,22 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   corpus and checks the Retail asset window (`<corpus>/assets/wow`, its file set checked against `corpus_hashes.json`
   first) against the plan's 2.2: 52 complete roots, 531 LOD0 groups (300 exterior, 231 interior), 11,470 MODD records
   listed, 6 by both kinds; otherwise that part is SKIPPED.
+- `WorldFogTests.cs`: Stage 10 step 7 (`docs/world-viewer/10-light-sky-fog.md` 4.0, 4.6, 6.9, 6.13;
+  `Assets/Scripts/Wow/World/WorldFog.cs`): the client's per-pixel fog against its own programs re-executed offline (the Retail
+  terrain program 2977247 p_1 on 59 one-record cases covering every regime, the M2 program 2977063 p_1 with blend words 0 and 4;
+  `WorldFog.Apply` within 2e-6), the record `WorldFog.Pack` fills from the light state against an independent Python port of the
+  mapping on the client's keys (LightParams 5985 at three times, 5951, 5944, 6033, a Z key) and on one key per fall-back, blends of
+  a key with and without each fall-back (every row continuous), the sky's shared tint inputs (`SkyDome.Inputs` equal to HEAD's), the
+  modes by client, the columns each needs and the `-wmvFogClassic` arms (each public rule switched off alone), the twin's invariants,
+  the switches and their texts, the graded table's fog rows, the census on a synthetic set, no allocation in `Pack`, the light
+  sample's existing channels equal to HEAD's evaluator with the derived block after them, and `WmoSynthetic.ContextRoot`'s old
+  bytes. The fixtures are embedded
+  (`D:\wmv-10\step7\impl\fixtures\make_fog_fixtures.py` wrote them; its inputs are named with their SHA-256 in the file). With
+  `WMV_FOG_KEYS` naming the key export of every client's LightData (`make_fog_keys.py`, written outside the repository from the
+  table extracts; its `manifest.json` pinned) it checks the census counts on every key; with `WMV_WORLD_LIGHT_FIXTURES` the
+  record's continuity across every half-minute of every day of maps 0 and 1 of the five clients and across an ease step (the
+  largest jumps reported); otherwise those parts are SKIPPED. `WMV_FOG_PARITY_OUT` names a file for the parity grid the rig
+  compares with its Python port.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

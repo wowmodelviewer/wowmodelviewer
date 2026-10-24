@@ -6,18 +6,28 @@
 // published as GLOBALS for the main camera in the world view only. Read by the sky (step 4: WmvWorldSky, Resources/WmvSky.shader),
 // the terrain (step 5: Resources/WmvTerrainTextured.shader's world-lit branch), and the exterior world-model groups and outdoor
 // doodads (step 6: Resources/WmvWorldLight.hlsl in the world-lit variants WmvOpaqueWorld.shader and WmvWmoWorld.shader, which
-// WmvWorldLitMaterials binds while ObjectsLit); fog and water read nothing of it yet. RenderSettings, the preview rig and the
-// shadow rig are never touched. The globals (colours authored 0..1 = the table's byte / 255, w 1; directions in Unity's world
-// frame, w 0):
+// WmvWorldLitMaterials binds while ObjectsLit); the same three end with the client's per-pixel fog (step 7: Resources/
+// WmvWorldFog.hlsl, its record packed here once a frame by Wow/World/WorldFog.cs); the water reads nothing of it yet.
+// RenderSettings, the preview rig and the shadow rig are never touched. The globals (colours authored 0..1 = the table's byte /
+// 255, w 1; directions in Unity's world frame, w 0):
 //   _WmvWLOn               1 while the main camera of the world view renders with a valid light; 0 at every other camera's
 //                          begin, at every camera's end, in WmvTerrainComposite's renders, in the self-test's fixtures, with no
 //                          scene, a scene without an outdoor light, an invalid light (its base light has no keys), in the
 //                          top-down overview (orthographic), while switched off -- and never set at all with WMV_LIGHT=off.
 //                          Written only when it changes, so outside the world view the per-camera handlers write nothing
-//   _WmvWLTerrain          (the terrain lit: 1, or 0 with -wmvTerrainLight=off; the flat variant: 1 with -wmvTerrainVariant=flat)
+//   _WmvWLTerrain          (the terrain lit: 1, or 0 with -wmvTerrainLight=off; the flat variant: 1 with -wmvTerrainVariant=flat;
+//                          the fog drawn: 1 -- step 7; 0)
 //   _WmvWLModels           (the doodads' flat arm: 1 with -wmvDoodadVariant=flat; the world models' flat arm: 1 with
 //                          -wmvWorldModelVariant=flat; the DIAGNOSTIC view of -wmvWorldLitView: 0 none, 1 the albedo, 2 the raw
-//                          normal; 0 -- step 7's fog)
+//                          normal; the fog drawn: 1, step 7). "The fog drawn": this frame's record is not off -- the light
+//                          object's product takes a fog mode (WorldFog.ModeFor: wow and wowt the Retail pattern; every other
+//                          product off, unless -wmvFogClassic names an arm), -wmvFog is not off and the object's layout has every
+//                          column the record is made of (WorldFog.AbsentColumns)
+//   _WmvWLFogR0 .. _WmvWLFogR13   (step 7, only while the fog is drawn) the 14 rows of the client's fog record, layer 0
+//                          (WorldFog.Pack, once a frame in Evaluate), R2.w the height plane's offset from the eye published
+//                          with them (WorldFog.PlaneOffset)
+//   _WmvWLEye              (step 7, only while the fog is drawn) the main camera's Unity position for this render (SetEye),
+//                          w 1: the fog position is camera-relative
 //   _WmvWLLightDir         towards the directional light (WorldLightModel: from the north-west, 37/20 deg by the hour -- the
 //                          public table, MEASURED within 2.5 deg at three times in step 1); it does not follow the sun
 //   _WmvWLSunDir           towards the sun (WorldLightModel's sun path, INFERRED (public); below the horizon at night)
@@ -50,8 +60,10 @@
 // sky's and terrain's -wmvSky, -wmvSkyTable, -wmvSkyEndFog, -wmvTerrainLight, -wmvTerrainVariant; the world models' and
 // doodads' -wmvDoodadLight, -wmvWorldModelLight, -wmvDoodadVariant, -wmvWorldModelVariant, -wmvInteriorLight and the diagnostic
 // -wmvWorldLitView (they act where the world's renderers are bound, WmvWorldLitMaterials, except the flat arms and the view,
-// which _WmvWLModels carries). The host switches it, its clock, its time and the far clip with setWorldLight (SetFromHost).
-// THE LOG: one line per load and per change of the base light (zone, Light, LightParams, time, valid), one per setWorldLight;
+// which _WmvWLModels carries); the fog's -wmvFog and -wmvFogClassic (step 7). The host switches it, its clock, its time and the
+// far clip with setWorldLight (SetFromHost).
+// THE LOG: one line per load and per change of the base light (zone, Light, LightParams, time, valid; step 7: this frame's fog
+// record or why it is off), one per setWorldLight, one fog census per new light object while the light is on (WorldFog.Census);
 // Describe() is the capture log line's field. None of it with WMV_LIGHT=off.
 
 using System;
@@ -79,6 +91,17 @@ public static class WmvWorldLight
                                FogHeightColorId = Shader.PropertyToID("_WmvWLFogHeightColor"),
                                EndFogHeightColorId = Shader.PropertyToID("_WmvWLEndFogHeightColor"), FrameId = Shader.PropertyToID("_WmvWLFrame"),
                                TerrainId = Shader.PropertyToID("_WmvWLTerrain"), ModelsId = Shader.PropertyToID("_WmvWLModels");
+    /// <summary>Stage 10 step 7: the fog record's rows (_WmvWLFogR0 .. _WmvWLFogR13, WorldFogRecord's) and the eye.</summary>
+    public static readonly int[] FogRowIds = FogRowNames();
+    public static readonly int EyeId = Shader.PropertyToID("_WmvWLEye");
+
+    static int[] FogRowNames()
+    {
+        var ids = new int[WorldFogRecord.Rows];
+        for (int k = 0; k < ids.Length; k++)
+            ids[k] = Shader.PropertyToID("_WmvWLFogR" + k.ToString(CultureInfo.InvariantCulture));
+        return ids;
+    }
 
     /// <summary>The colour globals in the order Publish sets them, with their column (WorldLightColumns).</summary>
     static readonly int[] ColourIds =
@@ -123,6 +146,15 @@ public static class WmvWorldLight
     static object saidSet;
     static bool saidValid, saidEvaluated;
     static int saidZone = int.MinValue, saidLight = int.MinValue, saidParams = int.MinValue;
+    // Stage 10 step 7, the fog: the last set's mode (WorldFog.ModeFor; Off when its layout lacks a column of the record, named
+    // in fogAbsent), the set its census was said for, this frame's record (Pack, in Evaluate; Off when nothing is shown), the eye
+    // Publish uploads (SetEye) and the sun direction Pack reads (Unity world, the sky's vector).
+    static WorldFogMode fogMode;
+    static string fogAbsent;
+    static object censusSet;
+    static readonly WorldFogRecord fogRecord = new WorldFogRecord();
+    static Vector3 eye;
+    static readonly double[] sunUnity = new double[3];
 
     /// <summary>The switches (parsed once: the command line, WMV_DEBUG's tokens, WMV_LIGHT).</summary>
     public static WorldLightSwitches Switches
@@ -173,6 +205,13 @@ public static class WmvWorldLight
     public static SkyInputs SkyState { get { return skyInputs; } }
     public static bool SkyDrawn { get { return skyDrawn; } }
     public static string LastLine { get { return lastLine; } }
+    /// <summary>Stage 10 step 7: the last set's fog mode, this frame's record (Mode Off when no fog is drawn) and the eye.</summary>
+    public static WorldFogMode FogMode { get { return fogMode; } }
+    public static WorldFogRecord FogRecord { get { return fogRecord; } }
+    public static Vector3 Eye { get { return eye; } }
+    /// <summary>The fog is drawn for the main camera now (_WmvWLTerrain.z and _WmvWLModels.w 1): shown, and this frame's record
+    /// not off.</summary>
+    public static bool FogDrawn { get { return Showing && fogRecord.Mode != WorldFogMode.Off; } }
 
     /// <summary>The switches' starting state: on or off, the clock pinned at -wmvGameTime (12:00:00), the far clip; the frame
     /// state forgotten. Configure takes it once; the self-test puts it back after its checks.</summary>
@@ -200,6 +239,9 @@ public static class WmvWorldLight
         skyDrawn = false;
         saidSet = null;
         saidZone = saidLight = saidParams = int.MinValue;
+        fogMode = WorldFogMode.Off;     // taken again from the next set (its census is not repeated: censusSet stays)
+        fogAbsent = null;
+        fogRecord.Clear();
     }
 
     /// <summary>The terrain session's setup (WmvMain): unless WMV_LIGHT=off (then nothing at all, not even a log line; only a
@@ -224,11 +266,21 @@ public static class WmvWorldLight
         SetOn(false);
         Say("world light: " + w.Describe() + "; light direction " + WorldLightModel.LightDirectionGrade + ", sun path " + WorldLightModel.SunPathGrade +
             ", game far clip default " + WorldLightModel.DefaultFarClipGrade + " (the reference sessions' setting); read by the sky, the " +
-            "terrain, exterior world-model groups and outdoor doodads (steps 4-6)");
+            "terrain, exterior world-model groups and outdoor doodads (steps 4-6) and fogged on the terrain, those groups and doodads (step 7)");
+    }
+
+    /// <summary>Stage 10 step 7: the main camera's Unity position for the render about to be drawn (WmvMain.WorldLightFrame, before
+    /// Frame): the fog's eye (_WmvWLEye) and, with the floating origin's game Z, the camera height of the fog's height plane
+    /// (R2.w), both taken by Publish from the eye it uploads -- so a second render of Camera.main in the same frame at another
+    /// pose publishes its own.</summary>
+    public static void SetEye(Vector3 position)
+    {
+        eye = position;
     }
 
     /// <summary>The terrain session's end (WmvMain.DisposeTerrain): removes the handlers when `who` installed them, and only then
-    /// (bloom put back, the sky's mesh and material destroyed). True when it removed them.</summary>
+    /// (bloom put back, the sky's mesh and material destroyed, the light object the census was said for let go: a new session
+    /// brings new objects). True when it removed them.</summary>
     public static bool Release(object who)
     {
         if (who == null || who != owner)
@@ -241,6 +293,7 @@ public static class WmvWorldLight
         WmvWorldSky.HoldBloom(false, Log);
         WmvWorldSky.DropResources();
         ForgetFrame();
+        censusSet = null;
         return true;
     }
 
@@ -266,6 +319,7 @@ public static class WmvWorldLight
     {
         ease.Reset();
         evaluated = false;
+        fogRecord.Clear();
         SetOn(false);
         skyDrawn = false;
         WmvWorldSky.DropResources();
@@ -303,7 +357,10 @@ public static class WmvWorldLight
         Publish();
     }
 
-    /// <summary>Frame's evaluation (the self-test calls it with a frame number of its own through Frame).</summary>
+    /// <summary>Frame's evaluation (the self-test calls it with a frame number of its own through Frame). Step 7: a new set
+    /// takes its fog mode (Off when its layout lacks a column of the record); while the light is on, a set not counted yet says
+    /// its fog census once; a shown state packs this frame's fog record (at the camera's game height `z`; Publish puts the eye's
+    /// own plane offset in) before the state line.</summary>
     static void Evaluate(WorldLightSet set, bool positioned, double x, double y, double z, double origin, double dt, bool animPinned)
     {
         if (!ReferenceEquals(set, lastSet))
@@ -311,13 +368,20 @@ public static class WmvWorldLight
             if (clock.UseMap(set))
                 clockJumped = true;
             lastSet = set;
+            fogMode = set != null ? WorldFog.ModeFor(set.Product, Switches.Fog, Switches.FogClassic) : WorldFogMode.Off;
+            fogAbsent = WorldFog.AbsentColumns(set, fogMode);
+            if (fogAbsent != null)
+                fogMode = WorldFogMode.Off;     // an absent column would be packed as 0 in every key: no fog rather than a wrong one
         }
+        if (Enabled && set != null && !ReferenceEquals(set, censusSet))
+            SayCensus(set);
         if (!Enabled || set == null || !positioned)
         {
             if (evaluated)
                 ease.Reset();
             evaluated = false;
             sample.Reset();
+            fogRecord.Clear();
             SayState(set);
             return;
         }
@@ -328,7 +392,23 @@ public static class WmvWorldLight
         originZ = origin;
         WorldLightModel.LightDirection(clock.Effective, out lightDir[0], out lightDir[1], out lightDir[2]);
         WorldLightModel.SunDirection(clock.Effective, out sunDir[0], out sunDir[1], out sunDir[2]);
+        // Stage 10 step 7: this frame's fog record, once a frame, from the eased state (the sun as the sky gets it); off while
+        // the state is not valid.
+        Vector4 sun = Direction(sunDir);
+        sunUnity[0] = sun.x;
+        sunUnity[1] = sun.y;
+        sunUnity[2] = sun.z;
+        WorldFog.Pack(ease.V, farClip, z, clock.HalfMinute, sunUnity, set.MapFlags, ease.Valid ? fogMode : WorldFogMode.Off, fogRecord);
         SayState(set);
+    }
+
+    /// <summary>Stage 10 step 7: the fog census of a light object (WorldFog.Census), said once per set while the light is on --
+    /// not again for the same set after ForgetFrame, an overview toggle or ApplySwitches.</summary>
+    static void SayCensus(WorldLightSet set)
+    {
+        censusSet = set;
+        WorldFogCensus c = WorldFog.Census(set);
+        Say("world light: " + c.Line(set.Map, set.Product, fogMode));
     }
 
     /// <summary>Is there a valid eased state to show for the main camera now (on, evaluated, valid, not pinned off)?</summary>
@@ -369,16 +449,35 @@ public static class WmvWorldLight
         Shader.SetGlobalVector(MainFogCoefId, Floats(v, m, m + 1, m + 2, m + 3));
         Shader.SetGlobalVector(HeightDensityCoefId, Floats(v, d, d + 1, d + 2, d + 3));
         Shader.SetGlobalVector(FrameId, new Vector4((float)farClip, (float)originZ, clock.HalfMinute, (float)clock.Effective));
-        Shader.SetGlobalVector(TerrainId, new Vector4(Switches.TerrainLight ? 1f : 0f, Switches.TerrainFlat ? 1f : 0f, 0f, 0f));
+        bool fog = fogRecord.Mode != WorldFogMode.Off;
+        if (fog)
+            PublishFog();
+        Shader.SetGlobalVector(TerrainId, new Vector4(Switches.TerrainLight ? 1f : 0f, Switches.TerrainFlat ? 1f : 0f, fog ? 1f : 0f, 0f));
         Shader.SetGlobalVector(ModelsId, ModelsVector());
         SetOn(true);
     }
 
-    /// <summary>_WmvWLModels from the switches: (doodads' flat arm, world models' flat arm, -wmvWorldLitView, 0).</summary>
+    /// <summary>Stage 10 step 7: this frame's fog record (WorldFog.Pack's 14 rows) and the eye of this render (SetEye), only while
+    /// the fog is drawn. R2.w is the height plane's offset for the camera height of the eye uploaded now, eye.y + originZ (Unity
+    /// y = game Z - originZ at scale 1, TerrainMesh), so the plane and the fog position share one camera. No allocation.</summary>
+    static void PublishFog()
+    {
+        double[] r = fogRecord.R;
+        for (int k = 0; k < WorldFogRecord.Rows; k++)
+        {
+            int at = 4 * k;
+            double w = k == 2 ? WorldFog.PlaneOffset(eye.y + originZ, fogRecord) : r[at + 3];
+            Shader.SetGlobalVector(FogRowIds[k], new Vector4((float)r[at], (float)r[at + 1], (float)r[at + 2], (float)w));
+        }
+        Shader.SetGlobalVector(EyeId, new Vector4(eye.x, eye.y, eye.z, 1f));
+    }
+
+    /// <summary>_WmvWLModels from the switches and the fog: (doodads' flat arm, world models' flat arm, -wmvWorldLitView, the fog
+    /// drawn -- step 7: 1 while this frame's record is not off).</summary>
     public static Vector4 ModelsVector()
     {
         WorldLightSwitches w = Switches;
-        return new Vector4(w.DoodadFlat ? 1f : 0f, w.WorldModelFlat ? 1f : 0f, w.WorldLitView, 0f);
+        return new Vector4(w.DoodadFlat ? 1f : 0f, w.WorldModelFlat ? 1f : 0f, w.WorldLitView, fogRecord.Mode != WorldFogMode.Off ? 1f : 0f);
     }
 
     /// <summary>The sky and bloom for this render of the main camera (WmvMain, after Frame): bloom held at 0 while the light is
@@ -534,9 +633,10 @@ public static class WmvWorldLight
             return "world light off";
         if (!evaluated)
             return "world light on: no outdoor light here (" + WorldClock.Format(clock.Effective) + ", " + clock.Source + ")";
+        WorldLightSet set = lastSet as WorldLightSet;
         return "world light on: " + StateText() + " -- drawn: " + (skyDrawn ? "the sky" : "no sky") + ", " +
                (Switches.TerrainLight ? "the terrain lit" + (Switches.TerrainFlat ? " (FLAT variant)" : "") : "the terrain unlit (-wmvTerrainLight=off)") +
-               Switches.DescribeObjects();
+               Switches.DescribeObjects(set != null ? set.Product : null, fogAbsent);
     }
 
     static string StateText()
@@ -549,9 +649,35 @@ public static class WmvWorldLight
         if (!sample.Valid)
             return string.Format(CultureInfo.InvariantCulture, "none -- {0}{1} (map {2}) at {3}", sample.Why,
                                  sample.Light > 0 ? " (" + from + " light " + sample.Light + ")" : "", map, when);
-        return string.Format(CultureInfo.InvariantCulture, "{0} light {1} params {2}{3} (map {4}) at {5}: valid, {6} point light(s); groups {7}",
+        return string.Format(CultureInfo.InvariantCulture, "{0} light {1} params {2}{3} (map {4}) at {5}: valid, {6} point light(s); groups {7}; {8}",
                              from, sample.Light, sample.Params, sample.SlotFellBack ? " (slot 0's: the slot has no keys)" : "", map, when, sample.Points,
-                             WorldLightSample.DescribeGroups(sample.Groups));
+                             WorldLightSample.DescribeGroups(sample.Groups), FogText(set));
+    }
+
+    /// <summary>Stage 10 step 7: the state line's fog clause, this frame's record (packed before the line is said): "fog: start S
+    /// yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes (the rig's parser reads them so), the power arm's
+    /// "fog: power path, ...", or "fog: off (reason)".</summary>
+    static string FogText(WorldLightSet set)
+    {
+        WorldFogRecord r = fogRecord;
+        if (r.Mode == WorldFogMode.Off)
+        {
+            string product = set != null && !string.IsNullOrEmpty(set.Product) ? set.Product : null;
+            return "fog: off (" + (!Switches.Fog ? "-wmvFog=off" : fogAbsent != null ? "fog columns absent: " + fogAbsent
+                                   : fogMode != WorldFogMode.Off ? "no valid light state"
+                                   : product != null ? "product " + product + ", D17/D18" : "no product") + ")";
+        }
+        string colour = string.Format(CultureInfo.InvariantCulture, "({0}, {1}, {2})", Math.Round(r.Colour[0] * 255.0), Math.Round(r.Colour[1] * 255.0),
+                                      Math.Round(r.Colour[2] * 255.0));
+        string arm = r.Mode != WorldFogMode.RetailPattern ? " [" + WorldFog.ModeName(r.Mode) + "]" : "";
+        if (r.Power)
+            return r.PowerRefused
+                ? "fog: power path refused (end not above start: no fog drawn), colour " + colour + arm
+                : string.Format(CultureInfo.InvariantCulture, "fog: power path, start {0:0.#} yd, end {1:0.#} yd, rate {2:0.###}, colour {3}{4}", r.Start, r.End,
+                                r.K, colour, arm);
+        return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}{6}", r.Start, r.K,
+                             r.End, colour, r.Artistic ? ", polynomial path mixed in" : "",
+                             r.ArtisticRefusedBlend ? ", polynomial path refused this frame (end not above start)" : "", arm);
     }
 
     /// <summary>The state line: only when the object, the evaluation, the validity or the base light changed (one per load and

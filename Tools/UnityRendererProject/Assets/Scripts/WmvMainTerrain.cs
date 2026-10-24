@@ -1037,7 +1037,8 @@ public partial class WmvMain
     /// for; otherwise the outdoor light is off for the frame. Its clock is its own (not -wmvAnimTime), but -wmvAnimTime snaps
     /// its ease as it snaps the water's. Then (Stage 10 step 6) the world models' and doodads' renderers bound to the world-lit
     /// variants while the light is shown and to their own materials otherwise (BindWorldLit), before this camera culls and
-    /// draws, so no frame draws a stale binding; then the sky and bloom for this render (WmvWorldLight.Sky). A fault here
+    /// draws, so no frame draws a stale binding; then the sky and bloom for this render (WmvWorldLight.Sky). Stage 10 step 7:
+    /// the camera's Unity position is the fog's eye for this render (WmvWorldLight.SetEye, before Frame publishes). A fault here
     /// switches the light off (WmvWorldLight.FailOff) and binds every world renderer to its own materials: the frame is drawn
     /// as Stage 09 draws it. Nothing with WMV_LIGHT=off.</summary>
     void WorldLightFrame(Camera cam)
@@ -1051,6 +1052,7 @@ public partial class WmvMain
             double x = 0.0, y = 0.0, z = 0.0, ox, oy, oz = 0.0;
             bool positioned = set != null && CameraWorldPosition(cam.transform.position, out x, out y, out z) &&
                               CameraWorldPosition(Vector3.zero, out ox, out oy, out oz);
+            WmvWorldLight.SetEye(cam.transform.position);
             WmvWorldLight.Frame(Time.frameCount, Time.deltaTime, set, positioned, x, y, z, oz, WmvModelBuilder.Debug_.AnimTime >= 0f);
             BindWorldLit(WmvWorldLight.ObjectsLit, cam, set, positioned);
             WmvWorldLight.Sky(cam, worldView);

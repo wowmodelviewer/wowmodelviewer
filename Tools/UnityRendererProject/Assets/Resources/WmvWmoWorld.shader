@@ -5,12 +5,14 @@
 // this shader (the copy carries the original's properties by name). The light is then the client's world-model hemisphere
 // program (WmvWorldLight.hlsl; Wow/World/ModelLight.cs is the CPU twin and the evidence) in place of the preview rig: base =
 // the albedo x (1, 0.99998, 1) (the gate-off vertex colour x 2; exterior MOCV deferred), colour = base x (A + D) with Stage
-// 10's holds, no saturate; F_UNLIT materials keep the albedo. In every other state the world holds the original material, so
-// this program's else-branch (the rig, with _WmvWLOn 0) is drawn by no picture. Interior groups and the Buildings viewer
-// never use it.
+// 10's holds, no saturate; F_UNLIT materials keep the albedo. Step 7 ends it with the client's per-pixel fog (WmvWorldFog.hlsl)
+// while _WmvWLModels.w is set, towards the target _WmvFogBatch names, unless the material is F_UNFOGGED. In every other state
+// the world holds the original material, so this program's else-branch (the rig, with _WmvWLOn 0) is drawn by no picture.
+// Interior groups and the Buildings viewer never use it.
 //
-// The Properties, tags, render state and pragmas are WmvWmo.shader's and must stay identical to them (change both together);
-// read that file for everything else.
+// The Properties, tags, render state and pragmas are WmvWmo.shader's and must stay identical to them (change both together),
+// with one documented exception: _WmvFogBatch (step 7), the copy's fog vector, which WmvWmo.shader does not declare (its
+// program has no fog); read that file for everything else.
 
 Shader "WMV/Map Object (world)"
 {
@@ -64,6 +66,8 @@ Shader "WMV/Map Object (world)"
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendA ("Src blend alpha", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendA ("Dst blend alpha", Float) = 0
         [Toggle] _ZWrite ("ZWrite", Float) = 1
+        // Stage 10 step 7, this variant only (see the header): set per copy by WmvWorldLitMaterials.SetFogBatch.
+        _WmvFogBatch ("Stage 10 fog: x 1 = unfogged (NoFog / F_UNFOGGED), y the fog target kind", Vector) = (0, 0, 0, 0)
     }
 
     SubShader
@@ -85,7 +89,7 @@ Shader "WMV/Map Object (world)"
             #pragma target 3.0
             #include "UnityCG.cginc"
 
-            // The pass body of WmvWmo.shader with the outdoor light's hooks compiled in.
+            // The pass body of WmvWmo.shader with the outdoor light's and the fog's hooks compiled in.
             #define WMV_WORLD_LIT 1
             #include "WmvWmoPass.cginc"
             ENDCG

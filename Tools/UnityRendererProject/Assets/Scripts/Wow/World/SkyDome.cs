@@ -31,7 +31,8 @@
 //                SunFogColor sets a = 1: no tint), C = SunFogColor, wAbove = wBelow = SunAngleBlend (1) x SunFogStrength x
 //                the day curve (0 before 06:30 and after 18:30, linear ramps over 06:30-07:00 and 18:00-18:30, 1 between; on
 //                the light's half-minute, as the step-1 measurement evaluated it), sun = the sun direction (WorldLightModel's
-//                sun path). The client's separate below-horizon strength is UNKNOWN: one value serves both.
+//                sun path). The client's separate below-horizon strength is UNKNOWN: one value serves both. The fog's tint
+//                takes the same inputs from the same function (SunTint; step 7, WorldFog.cs).
 // Thread safety: no mutable static state.
 
 using System;
@@ -240,16 +241,26 @@ namespace Wmv.Wow.World
                 for (int c = 0; c < 3; c++)
                     s.Colours[15 + c] += (v[e + c] - s.Colours[15 + c]) * w;
             }
-            int t = WorldLightSample.ColourAt(WorldLightColumns.SunFogColor);
-            s.Tint[0] = v[t];
-            s.Tint[1] = v[t + 1];
-            s.Tint[2] = v[t + 2];
-            bool tintZero = v[t] == 0.0 && v[t + 1] == 0.0 && v[t + 2] == 0.0;
-            s.Angle = tintZero ? 1.0 : v[WorldLightSample.FloatAt(WorldLightColumns.SunFogAngle)];
-            s.DayCurve = DayCurve(halfMinute);
-            double w2 = SunAngleBlend * v[WorldLightSample.FloatAt(WorldLightColumns.SunFogStrength)] * s.DayCurve;
+            double w2;
+            SunTint(v, halfMinute, s.Tint, 0, out s.Angle, out s.DayCurve, out w2);
             s.WeightAbove = w2;
             s.WeightBelow = w2;
+        }
+
+        /// <summary>The sun tint's inputs from a light state's channels at `halfMinute` (see the file header), shared by the sky
+        /// (Inputs) and the fog (WorldFog.Pack: R5 and R7.x), so the two cannot disagree: C = SunFogColor into
+        /// tint[tintAt .. tintAt + 2], the angle a (a zero SunFogColor gives 1: no tint), the day curve, and the strength
+        /// SunAngleBlend x SunFogStrength x the day curve. On the blended values: the sky's order since step 4.</summary>
+        public static void SunTint(double[] v, int halfMinute, double[] tint, int tintAt, out double angle, out double dayCurve, out double weight)
+        {
+            int t = WorldLightSample.ColourAt(WorldLightColumns.SunFogColor);
+            tint[tintAt] = v[t];
+            tint[tintAt + 1] = v[t + 1];
+            tint[tintAt + 2] = v[t + 2];
+            bool tintZero = v[t] == 0.0 && v[t + 1] == 0.0 && v[t + 2] == 0.0;
+            angle = tintZero ? 1.0 : v[WorldLightSample.FloatAt(WorldLightColumns.SunFogAngle)];
+            dayCurve = DayCurve(halfMinute);
+            weight = SunAngleBlend * v[WorldLightSample.FloatAt(WorldLightColumns.SunFogStrength)] * dayCurve;
         }
 
         /// <summary>The sky program (see the file header) on an interpolated colour v, dome position (dx, dy, dz) and raw table

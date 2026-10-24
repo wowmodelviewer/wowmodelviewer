@@ -38,6 +38,11 @@ public struct WmvMaterialBinding
     /// luminous mask, so it is never dropped; it keeps its own address mode like the others.</summary>
     public int ThirdSlot;
     public bool Unit2WrapX, Unit2WrapY;
+
+    /// <summary>Stage 10 step 7: the batch's material flag 0x02 ("unfogged", M2MaterialDef.NoFog). Data only: the world's
+    /// doodads read it for their world-lit copies' fog (WmvWorldDoodads.WorldLitMaterials); the Models, Characters and
+    /// Buildings paths do not.</summary>
+    public bool NoFog;
 }
 
 /// <summary>
@@ -1481,6 +1486,7 @@ public static class WmvModelBuilder
                 Unit1DropAlpha = unit1DropAlpha,
                 BaseWrapX = baseWrapX, BaseWrapY = baseWrapY,
                 Unit1WrapX = unit1WrapX, Unit1WrapY = unit1WrapY,
+                NoFog = mat.NoFog,
             });
             if (log != null && (unit0Env || baseWrapX || baseWrapY || unit1WrapX || unit1WrapY))
                 log(string.Format("batch: submesh {0} texture addressing -- unit 0 {1} ({2}), " +

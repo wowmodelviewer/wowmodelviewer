@@ -25,11 +25,16 @@
 //   placement     an instance placed while the light is shown (WmvWorldModels.Place, WmvWorldDoodads.Place) is bound at once,
 //                 and counted and timed in its manager's PlacedWhileShown -- with the light on from the start, as in every
 //                 capture, the frame's first bind meets no instance and every world model and doodad is bound here.
+//   the fog      (Stage 10 step 7, Wow/World/WorldFog.cs) a copy made also gets its fog vector, _WmvFogBatch (SetFogBatch;
+//                the variants' one property of their own): x 1 for a batch the client's material flags leave unfogged (M2
+//                NoFog 0x02, MOMT F_UNFOGGED), y the batch's fog target by its blend state (WorldFog.KindOf). The managers keep
+//                each bound slot's fog code (FogCode*) next to its blend class, so every binding line counts them.
 // THE BINDING LINE (WmvWorldLitBind.Describe, said by WmvWorldLitDriver): per rebind, what was bound, by blend mode of the
-// bound batches, the copies made, live and tinted, the renderers left on their own materials and why, and the time; and once
-// a frame passes without a new placement (or before a rebind), the same for what was bound at placement since, marked
-// "(placed while shown)", its time the binding's alone (the placements' own work is not in it). With WMV_LIGHT=off nothing
-// here is reached.
+// bound batches, the copies made, live and tinted, the renderers left on their own materials and why, the bound batches' fog
+// (unfogged, by fog target, unknown blends, world-model MOMT blend 2+: before the time, which the rig reads last), and the
+// time; and once a frame passes without a new placement (or before a rebind), the same for what was bound at placement since,
+// marked "(placed while shown)", its time the binding's alone (the placements' own work is not in it). With WMV_LIGHT=off
+// nothing here is reached.
 
 using System;
 using System.Collections.Generic;
@@ -47,6 +52,11 @@ public sealed class WmvWorldLitBind
     public int GroupRenderers, Placements, Doodads;
     /// <summary>The bound batches (material slots holding a copy) by blend class (WmvWorldLitMaterials.Blend*).</summary>
     public readonly int[] Batches = new int[WmvWorldLitMaterials.BlendKinds];
+    /// <summary>Stage 10 step 7: the bound batches' fog (their slots' fog codes, WmvWorldLitMaterials.SetFogBatch): unfogged
+    /// (NoFog / F_UNFOGGED), the others by fog target (WorldFog.Kind*) and the unknown blends among them (kind 0, counted);
+    /// the world-model batches whose MOMT blend is 2 or above (drawn One / Zero provisionally).</summary>
+    public int FogUnfogged, FogUnknownBlend, MomtBlend2;
+    public readonly int[] FogKinds = new int[WorldFog.Kinds];
     /// <summary>Copies made by this rebind.</summary>
     public int CopiesMade;
     /// <summary>Renderers left on their own materials: interior-interim, their kind's switch off, wanted but without a
@@ -81,6 +91,11 @@ public sealed class WmvWorldLitBind
         Doodads += o.Doodads;
         for (int k = 0; k < Batches.Length; k++)
             Batches[k] += o.Batches[k];
+        FogUnfogged += o.FogUnfogged;
+        FogUnknownBlend += o.FogUnknownBlend;
+        MomtBlend2 += o.MomtBlend2;
+        for (int k = 0; k < FogKinds.Length; k++)
+            FogKinds[k] += o.FogKinds[k];
         CopiesMade += o.CopiesMade;
         OwnMaterials += o.OwnMaterials;
         KindOff += o.KindOff;
@@ -114,6 +129,30 @@ public sealed class WmvWorldLitBind
                 Batches[b]++;
     }
 
+    /// <summary>The bound slots' blend classes and (Stage 10 step 7) their fog codes (WmvWorldLitMaterials.FogCode*; -1 for a
+    /// slot left on its original, as its blend class).</summary>
+    public void AddBatches(int[] blends, int[] fogCodes)
+    {
+        AddBatches(blends);
+        if (fogCodes == null)
+            return;
+        foreach (int f in fogCodes)
+        {
+            if (f < 0)
+                continue;
+            if ((f & WmvWorldLitMaterials.FogCodeUnfogged) != 0)
+                FogUnfogged++;
+            else
+            {
+                FogKinds[f & WmvWorldLitMaterials.FogCodeKindMask]++;
+                if ((f & WmvWorldLitMaterials.FogCodeUnknownBlend) != 0)
+                    FogUnknownBlend++;
+            }
+            if ((f & WmvWorldLitMaterials.FogCodeMomtBlend2) != 0)
+                MomtBlend2++;
+        }
+    }
+
     /// <summary>The binding line (the file header); `why` says why the light is not shown (a rebind to the originals).</summary>
     public string Describe(string why)
     {
@@ -137,6 +176,8 @@ public sealed class WmvWorldLitBind
             s.AppendFormat(CultureInfo.InvariantCulture, ", {0} on their own materials by -wmvDoodadLight=off or -wmvWorldModelLight=off", KindOff);
         if (Mismatched > 0)
             s.AppendFormat(CultureInfo.InvariantCulture, ", {0} instance(s) whose renderers are not their prototype's left on their own materials", Mismatched);
+        // Stage 10 step 7: the bound batches' fog, before the time (the rig takes the line's last "N ms" as its time).
+        s.Append(WorldFog.BindingClause(FogUnfogged, FogKinds, FogUnknownBlend, MomtBlend2));
         s.AppendFormat(CultureInfo.InvariantCulture, Placed ? "; {0:0.000} ms" : "; {0:0.0} ms", Ms);
         return s.ToString();
     }
@@ -151,9 +192,18 @@ public static class WmvWorldLitMaterials
     /// <summary>A variant's name is its original's plus this, and so is a copy's.</summary>
     public const string Suffix = " (world)";
 
-    /// <summary>A bound batch's blend class (the binding line): from the material's _SrcBlend / _DstBlend and its alpha test.</summary>
-    public const int BlendOpaque = 0, BlendAlphaKey = 1, BlendAlpha = 2, BlendAdditive = 3, BlendModulate = 4, BlendModulate2x = 5, BlendOther = 6,
-                     BlendKinds = 7;
+    /// <summary>A bound batch's blend class (the binding line): from the material's _SrcBlend / _DstBlend and its alpha test.
+    /// Defined once in Wow/World/WorldFog.cs (Stage 10 step 7: the fog target follows it); these alias it, values unchanged.</summary>
+    public const int BlendOpaque = WorldFog.BlendOpaque, BlendAlphaKey = WorldFog.BlendAlphaKey, BlendAlpha = WorldFog.BlendAlpha,
+                     BlendAdditive = WorldFog.BlendAdditive, BlendModulate = WorldFog.BlendModulate, BlendModulate2x = WorldFog.BlendModulate2x,
+                     BlendOther = WorldFog.BlendOther, BlendKinds = WorldFog.BlendKinds;
+
+    /// <summary>Stage 10 step 7: a copy's fog vector (the variants' _WmvFogBatch: x 1 unfogged, y the fog target kind).</summary>
+    public static readonly int FogBatchId = Shader.PropertyToID("_WmvFogBatch");
+    /// <summary>Stage 10 step 7: a bound slot's fog code (SetFogBatch; -1 for a slot left on its original): the fog target kind
+    /// (WorldFog.Kind*) in the low bits, and the flags unfogged (NoFog / F_UNFOGGED: the hook skips the batch), an unknown
+    /// blend (kind 0, counted, never faded silently) and, for a world-model slot, its material's MOMT blend 2 or above.</summary>
+    public const int FogCodeKindMask = 7, FogCodeUnfogged = 8, FogCodeUnknownBlend = 16, FogCodeMomtBlend2 = 32;
 
     static readonly int SrcBlendId = Shader.PropertyToID("_SrcBlend"), DstBlendId = Shader.PropertyToID("_DstBlend"),
                         AlphaTestId = Shader.PropertyToID("_AlphaTest"), ColorId = Shader.PropertyToID("_Color");
@@ -166,6 +216,8 @@ public static class WmvWorldLitMaterials
     /// <summary>Copies made by Copy over the whole player (the self-test's probes included). WmvMain watches it for the first
     /// lit frame's line.</summary>
     public static int CopiesMade { get; private set; }
+    /// <summary>Stage 10 step 7: fog vectors written by SetFogBatch over the whole player. The hard-off self-test reads it: 0.</summary>
+    public static int FogBatchesSet { get; private set; }
 
     /// <summary>The kind's switch: -wmvDoodadLight (doodads) or -wmvWorldModelLight (world-model groups). A renderer takes the
     /// copy of an original when KindOn, ContextOn and ResolveVariant all say so ("wanted", the file header); the managers ask
@@ -271,8 +323,8 @@ public static class WmvWorldLitMaterials
     /// 2x; anything else other.</summary>
     public static int BlendOf(Material m)
     {
-        int src = m.HasProperty(SrcBlendId) ? (int)m.GetFloat(SrcBlendId) : (int)UnityEngine.Rendering.BlendMode.One;
-        int dst = m.HasProperty(DstBlendId) ? (int)m.GetFloat(DstBlendId) : (int)UnityEngine.Rendering.BlendMode.Zero;
+        int src, dst;
+        BlendPair(m, out src, out dst);
         bool key = m.IsKeywordEnabled("_ALPHATEST_ON") || (m.HasProperty(AlphaTestId) && m.GetFloat(AlphaTestId) > 0.5f);
         const int One = (int)UnityEngine.Rendering.BlendMode.One, Zero = (int)UnityEngine.Rendering.BlendMode.Zero,
                   SrcAlpha = (int)UnityEngine.Rendering.BlendMode.SrcAlpha, OneMinusSrcAlpha = (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
@@ -288,6 +340,50 @@ public static class WmvWorldLitMaterials
         if (src == DstColor && dst == SrcColor)
             return BlendModulate2x;
         return BlendOther;
+    }
+
+    /// <summary>A material's blend pair (UnityEngine.Rendering.BlendMode values): _SrcBlend / _DstBlend, One / Zero without them.</summary>
+    static void BlendPair(Material m, out int src, out int dst)
+    {
+        src = m.HasProperty(SrcBlendId) ? (int)m.GetFloat(SrcBlendId) : (int)UnityEngine.Rendering.BlendMode.One;
+        dst = m.HasProperty(DstBlendId) ? (int)m.GetFloat(DstBlendId) : (int)UnityEngine.Rendering.BlendMode.Zero;
+    }
+
+    /// <summary>Stage 10 step 7: a copy's fog target (WorldFog.KindOf of its blend class and pair); `unknown` for a blend state
+    /// the rule does not know (kind 0, counted).</summary>
+    static int FogKindOf(Material copy, out bool unknown)
+    {
+        int src, dst;
+        BlendPair(copy, out src, out dst);
+        return WorldFog.KindOf(BlendOf(copy), src, dst, out unknown);
+    }
+
+    static int FogCode(bool unfogged, int kind, bool unknown)
+    {
+        return kind | (unfogged ? FogCodeUnfogged : 0) | (unknown ? FogCodeUnknownBlend : 0);
+    }
+
+    /// <summary>
+    /// Stage 10 step 7: a copy's fog vector, written once when the copy is made (one SetVector): _WmvFogBatch = (1 for a batch
+    /// the client's material flags leave unfogged -- M2 NoFog 0x02, MOMT F_UNFOGGED -- else 0, the fog target kind of the copy's
+    /// blend state (WorldFog.KindOf), 0, 0). Returns the slot's fog code (FogCode*) for the binding line.
+    /// </summary>
+    public static int SetFogBatch(Material copy, bool unfogged)
+    {
+        bool unknown;
+        int kind = FogKindOf(copy, out unknown);
+        copy.SetVector(FogBatchId, new Vector4(unfogged ? 1f : 0f, kind, 0f, 0f));
+        FogBatchesSet++;
+        return FogCode(unfogged, kind, unknown);
+    }
+
+    /// <summary>Stage 10 step 7: the fog code of a copy SetFogBatch flagged before (another slot drawing the same original):
+    /// its own vector's unfogged flag and its blend state's kind.</summary>
+    public static int FogCodeOf(Material copy)
+    {
+        bool unknown;
+        int kind = FogKindOf(copy, out unknown);
+        return FogCode(copy.HasProperty(FogBatchId) && copy.GetVector(FogBatchId).x > 0.5f, kind, unknown);
     }
 
     /// <summary>

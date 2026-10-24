@@ -7,8 +7,9 @@
 //                       view binds while the outdoor light is shown.
 // The hooks, each inside #ifdef WMV_WORLD_LIT: the world light's globals and WmvWorldModelShade (WmvWorldLight.hlsl) and the
 // world-model base factor after the uniforms; the outdoor-light branch before the preview rig; the unlit test before the
-// F_UNLIT bypass; the lit combine before the rig's. The pragmas stay in the .shader files (this file has none). The body's
-// own comments moved with it.
+// F_UNLIT bypass; the lit combine before the rig's; step 7's per-copy fog vector (_WmvFogBatch) after the uniforms and the
+// fog (WmvWorldFog.hlsl) after the alpha, before the encode. The pragmas stay in the .shader files (this file has none). The
+// body's own comments moved with it.
 
             struct appdata
             {
@@ -78,6 +79,7 @@
             // vertex 5446713 p_1:89, uber vertex 2977862 p_1:89) times the pixel program's 2 (5446718 p_1:146-147): albedo x (1,
             // 0.99998, 1). The constants PROVEN_BYTES; the gate being off for exterior batches INFERRED (ModelLight.cs).
             static const float3 WMV_WMO_GATE_OFF_BASE = float3(2.0 * 0.5, 2.0 * 0.49999, 2.0 * 0.5);
+            float4 _WmvFogBatch;   // per copy (WmvWorldLitMaterials.SetFogBatch): x 1 = unfogged, y the fog target kind
 #endif
 
             // Preview globals, set by WmvMain / WmvShadowRig. GLOBALS, never properties: a property of the
@@ -592,6 +594,14 @@
                 // fallback with blending off too: the client's blend row is logged, never applied (U-B2..U-B5,
                 // and U-B7 from 3).
                 c.a = 1.0;
+#ifdef WMV_WORLD_LIT
+                // Stage 10 step 7: the client's per-pixel fog, layer 0 (WmvWorldFog.hlsl) -- its programs' last arithmetic, after
+                // the light and the alpha (the M2 tail exactly, 5446718 p_1). F_UNLIT is fogged; not in the albedo view; not for
+                // F_UNFOGGED batches.
+                [branch]
+                if (worldLit && _WmvWLModels.w > 0.5 && _WmvWLModels.z < 0.5 && _WmvFogBatch.x < 0.5)
+                    c = WmvWorldFog(c, i.wpos, _WmvFogBatch.y);
+#endif
 
                 if (_WmvShaderEncode > 0.5)
                     c.rgb = WmvAuthoredToLinear(c.rgb);

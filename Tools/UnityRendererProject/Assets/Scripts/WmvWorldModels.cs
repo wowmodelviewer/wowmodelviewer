@@ -35,6 +35,9 @@
 //                 materials; the copies (one per distinct original) are made when first bound and destroyed with it. An
 //                 instance placed while bound is bound at once, by renderer index, and counted and timed in
 //                 PlacedWhileShown (said by WmvWorldLitDriver); a rebind leaves an instance already as asked alone.
+//                 Stage 10 step 7: a copy made gets its fog vector (WmvWorldLitMaterials.SetFogBatch) from its MOMT entry's
+//                 F_UNFOGGED (MaterialInfo by the original's MOMT index; FallbackMaterial, which has none, fogged); each slot's
+//                 fog code, with its MOMT blend 2 or above flagged, is kept beside its blend class for the binding line.
 //
 // The prototype's root data (WmoRoot, WmoGroup[]) stay with it: the session's floor and start-point queries read them.
 
@@ -73,6 +76,9 @@ public sealed class WmvWorldPrototype
     public int[] LitKinds;
     public Material[][] LitOriginals, LitArrays;
     public int[][] LitBlends;
+    /// <summary>Stage 10 step 7: each slot's fog code beside its blend class (WmvWorldLitMaterials.FogCode*; -1 for a slot left
+    /// on its original).</summary>
+    public int[][] LitFogCodes;
     public string[] LitNoVariant;
     /// <summary>The world-lit copies, one per distinct original (FallbackMaterial included), destroyed with the prototype.</summary>
     public readonly Dictionary<Material, Material> LitCopies = new Dictionary<Material, Material>();
@@ -441,7 +447,7 @@ public sealed class WmvWorldModels
             if (on)
             {
                 bind.GroupRenderers++;
-                bind.AddBatches(p.LitBlends[i]);
+                bind.AddBatches(p.LitBlends[i], p.LitFogCodes[i]);
                 any = true;
             }
             else
@@ -482,13 +488,15 @@ public sealed class WmvWorldModels
         p.LitKinds = kinds;
         p.LitArrays = new Material[n][];
         p.LitBlends = new int[n][];
+        p.LitFogCodes = new int[n][];
         p.LitNoVariant = new string[n];
         p.LitOriginals = originals;       // last: Bind reads it as "recorded"
     }
 
     /// <summary>Renderer i's array with the world-lit copies, made the first time: each slot whose original has a variant
-    /// holds the prototype's copy of it (made now the first time, counted in the tallies), every other slot its original;
-    /// the originals themselves when no slot has a variant.</summary>
+    /// holds the prototype's copy of it (made now the first time, counted in the tallies; step 7: its fog vector set from the
+    /// original's MOMT entry -- F_UNFOGGED skipped, FallbackMaterial fogged), every other slot its original; the originals
+    /// themselves when no slot has a variant.</summary>
     static Material[] LitArray(WmvWorldPrototype p, int i, WmvWorldLitBind bind)
     {
         if (p.LitArrays[i] != null)
@@ -496,12 +504,14 @@ public sealed class WmvWorldModels
         Material[] originals = p.LitOriginals[i];
         var arr = new Material[originals.Length];
         var blends = new int[originals.Length];
+        var fog = new int[originals.Length];
         bool any = false;
         for (int k = 0; k < originals.Length; k++)
         {
             Material m = originals[k];
             arr[k] = m;
             blends[k] = -1;
+            fog[k] = -1;
             if (m == null)
                 continue;
             Shader variant = WmvWorldLitMaterials.ResolveVariant(false, m, WmvWorldLight.Log);
@@ -522,11 +532,28 @@ public sealed class WmvWorldModels
             }
             arr[k] = c;
             blends[k] = WmvWorldLitMaterials.BlendOf(c);
+            fog[k] = FogCode(p, m, c, made);
             any = true;
         }
         p.LitArrays[i] = any ? arr : originals;
         p.LitBlends[i] = blends;
+        p.LitFogCodes[i] = fog;
         return p.LitArrays[i];
+    }
+
+    /// <summary>Stage 10 step 7: the slot's fog code for the copy `c` of `original` -- its vector set now when the copy was
+    /// `made` (WmvWorldLitMaterials.SetFogBatch: unfogged by the MOMT entry's F_UNFOGGED, rt.Materials and rt.MaterialInfo in step
+    /// by MOMT index; FallbackMaterial, index -1, fogged), else read back -- with the entry's MOMT blend 2 or above flagged.</summary>
+    static int FogCode(WmvWorldPrototype p, Material original, Material c, bool made)
+    {
+        WmvRuntimeMapObject rt = p.Runtime;
+        int id = rt != null ? System.Array.IndexOf(rt.Materials, original) : -1;
+        bool known = id >= 0 && id < rt.MaterialInfo.Length;
+        bool unfogged = known && (rt.MaterialInfo[id].Flags & WmoMaterialSemantics.FlagUnfogged) != 0;
+        int code = made ? WmvWorldLitMaterials.SetFogBatch(c, unfogged) : WmvWorldLitMaterials.FogCodeOf(c);
+        if (known && rt.MaterialInfo[id].Blend >= 2)
+            code |= WmvWorldLitMaterials.FogCodeMomtBlend2;
+        return code;
     }
 
     /// <summary>U = M R M^T as a Unity rotation: the quaternion whose z and y axes are U's third and second columns.</summary>
