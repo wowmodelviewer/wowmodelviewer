@@ -165,6 +165,9 @@ public partial class WmvMain
         // Stage 10 (protocol 20): the outdoor light's frame state and its per-camera handlers, owned by this WmvMain (nothing with
         // WMV_LIGHT=off); off until a switch or the host turns it on. The sky and the textured terrain read it (steps 4 and 5).
         WmvWorldLight.Configure(this, s => Debug.Log("WMV: [light] " + s));
+        // Stage 10 step 7 (log only): the main camera's anti-aliasing, said with each settled fog record (nothing with WMV_LIGHT=off).
+        if (!WmvWorldLight.HardOff)
+            WmvWorldLight.FrameDescription = () => AntiAliasingText(Camera.main);
         WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
             Debug.LogWarning("WMV: [terrain] " + note);
@@ -1529,6 +1532,26 @@ public partial class WmvMain
             // Stage 10 (protocol 20): the outdoor light state, a field of its own at the line's end (none with WMV_LIGHT=off: the
             // line stays Stage 09's).
             (WmvWorldLight.HardOff ? "" : "; " + WmvWorldLight.Describe()));
+    }
+
+    /// <summary>Stage 10 step 7 (log only): the main camera's anti-aliasing as a capture gets it: MSAA (the camera's allowMSAA and
+    /// the pipeline asset's sample count; a camera drawing into a texture takes the texture's) and URP's post anti-aliasing. Said
+    /// in the outdoor light's settled fog record line (WmvWorldLight.FrameDescription): the fog checks' pixel classes assume none.
+    /// Reads only.</summary>
+    internal static string AntiAliasingText(Camera cam)
+    {
+        if (cam == null)
+            return "anti-aliasing: no main camera";
+        var rp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+        int asset = rp != null ? rp.msaaSampleCount : 1;
+        int samples = cam.targetTexture != null ? cam.targetTexture.antiAliasing : cam.allowMSAA ? asset : 1;
+        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData data;
+        bool has = cam.TryGetComponent(out data);
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                             "anti-aliasing: MSAA {0} (camera allowMSAA {1}, pipeline asset {2} sample(s){3}), post anti-aliasing {4} (post-processing {5})",
+                             samples > 1 ? samples + "x" : "off", cam.allowMSAA ? "true" : "false", asset,
+                             cam.targetTexture != null ? ", target texture " + cam.targetTexture.antiAliasing : "",
+                             has ? data.antialiasing.ToString() : "unknown (no camera data)", has ? (data.renderPostProcessing ? "on" : "off") : "unknown");
     }
 
     // ---------------------------------------------------------------- -wmvTerrainDump

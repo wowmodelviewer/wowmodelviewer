@@ -152,22 +152,25 @@ namespace Wmv.Wow.World
             o.PowerRefused = PowerRefused;
         }
 
-        /// <summary>The state line's clause (WmvWorldLight): "fog: start S yd, k K /yd, end E yd, colour (r, g, b)" (the
-        /// colour in bytes), the power path's "fog: power path, start S yd, end E yd, rate R, colour (...)", or "fog: off".</summary>
+        /// <summary>The state line's clause, the one formatter the player says (WmvWorldLight.FogText) and the runner tests: "fog:
+        /// start S yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes (the rig's parser reads them so), the
+        /// power path's "fog: power path, start S yd, end E yd, rate R, colour (...)", an arm's mode in brackets at the end, or
+        /// "fog: off" (the player says why instead).</summary>
         public string Summary()
         {
             if (Mode == WorldFogMode.Off)
                 return "fog: off";
-            string colour = string.Format(CultureInfo.InvariantCulture, "({0:0.#}, {1:0.#}, {2:0.#})", Colour[0] * 255.0, Colour[1] * 255.0,
-                                          Colour[2] * 255.0);
+            string colour = string.Format(CultureInfo.InvariantCulture, "({0}, {1}, {2})", Math.Round(Colour[0] * 255.0), Math.Round(Colour[1] * 255.0),
+                                          Math.Round(Colour[2] * 255.0));
+            string arm = Mode != WorldFogMode.RetailPattern ? " [" + WorldFog.ModeName(Mode) + "]" : "";
             if (Power)
                 return PowerRefused
-                    ? "fog: power path refused (end not above start: no fog drawn), colour " + colour
-                    : string.Format(CultureInfo.InvariantCulture, "fog: power path, start {0:0.#} yd, end {1:0.#} yd, rate {2:0.###}, colour {3}",
-                                    Start, End, K, colour);
-            return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}",
+                    ? "fog: power path refused (end not above start: no fog drawn), colour " + colour + arm
+                    : string.Format(CultureInfo.InvariantCulture, "fog: power path, start {0:0.#} yd, end {1:0.#} yd, rate {2:0.###}, colour {3}{4}",
+                                    Start, End, K, colour, arm);
+            return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}{6}",
                                  Start, K, End, colour, Artistic ? ", polynomial path mixed in" : "",
-                                 ArtisticRefusedBlend ? ", polynomial path refused this frame (end not above start)" : "");
+                                 ArtisticRefusedBlend ? ", polynomial path refused this frame (end not above start)" : "", arm);
         }
     }
 

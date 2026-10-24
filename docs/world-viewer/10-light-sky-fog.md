@@ -899,8 +899,9 @@ models, doodads and the water's own surface terms (never a second time to the re
   marked "not applied" or "arm only". **No map-ID list and no per-map minima** exist anywhere.
 - **runtimeState carries no fog field** (protocol 20's field sequence is fixed): the mode, its label and the record's
   start, density, end and colour are said in the player's state line and the capture log line; the fields join WP 14 with
-  the host's reporting. Logging the whole published record (the 14 rows, the eye and the plane) is prepared but not in
-  this commit (13.3, open item 3).
+  the host's reporting. Since the follow-up commit after bfb5b9c4 the player also says the whole published record once
+  per settled view ("fog record as published": the 14 rows as uploaded, the eye, the camera's game Z, the origin and the
+  main camera's anti-aliasing); log only (13.3, open item 6).
 - **The world view's frame and URP's grading LUT** (found by the step-7 review; NOT in this commit; the owner decides,
   13.3). URP's uber post sends every frame through its internal 8-bit LDR grading LUT after the frame decode, which moves
   a value by up to about one step (bytes 40-75 by -0.6 to -1). It is pre-existing (every Stage 10 light-on picture went
@@ -1778,8 +1779,12 @@ and the volume composite (D4); the client's volumetric global fog; Classic Beta'
    gone; the stale viewer lock was removed after checking, and RandomLooks restored). Its steps 1-4 passed (above) and its
    renders up to 5g exist, unscored; the restated A3 / A6 / A11, A4 and B with the player's own W, and the row-by-row
    check of the logged record (`rig\fix2metrics.py`) have not run.
-6. **Logging the full fog record** ("fog record as published": the 14 rows, the eye and the plane, once per settled
-   view) is in the prepared patch, not in this commit, and not yet compared row by row with the rig's port (item 5).
+6. **Logging the full fog record** (done in the follow-up commit, log only): "fog record as published" (the 14 rows as
+   uploaded, the eye, the camera's game Z, the origin and the anti-aliasing), once per settled view. Its player p33a
+   (Assembly-CSharp CED45AC730540263) is pixel-identical to p32a (32 of 32 viewport shots, paired), the self-test counts
+   are p32a's, the runner gains one formatter check, and the logged rows equal the rig's `fogmodel.py` Pack at 18 of 18
+   B cameras to float precision (the framing's R2.w against the player's own eye). Taken from the fix round's patch
+   without its LUT undo, `-wmvGradingLut` or F17 (`D:\wmv-10\step7\verify\logging`).
 7. **A bit-identical early-out** for the near field is not built: the whole tail runs for every lit pixel, while about
    93-95 % of the terrain pixels at Southfury lie nearer than the start. Measure the GPU budget first.
 8. **The capped-frame gate** (A8 and the budgets): more pairs or a pooled rule.

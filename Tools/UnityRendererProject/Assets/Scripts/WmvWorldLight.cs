@@ -64,7 +64,9 @@
 // far clip with setWorldLight (SetFromHost).
 // THE LOG: one line per load and per change of the base light (zone, Light, LightParams, time, valid; step 7: this frame's fog
 // record or why it is off), one per setWorldLight, one fog census per new light object while the light is on (WorldFog.Census);
-// Describe() is the capture log line's field. None of it with WMV_LIGHT=off.
+// Describe() is the capture log line's field; one "fog record" line each time the published record and eye have held still for
+// RecordSettleFrames frames (FogRecordText, the whole record as the GPU gets it, for the rig's row-by-row check, with the main
+// camera's anti-aliasing). None of it with WMV_LIGHT=off.
 
 using System;
 using System.Collections.Generic;
@@ -155,6 +157,17 @@ public static class WmvWorldLight
     static readonly WorldFogRecord fogRecord = new WorldFogRecord();
     static Vector3 eye;
     static readonly double[] sunUnity = new double[3];
+    // Stage 10 step 7: the settled record's line (log only) -- this frame's published values (56 rows, R2.w as published, the
+    // eye, the mode), the last frame's, the frames they have held, and the values last said. No allocation until a line is said.
+    const int RecordSettleFrames = 30;
+    const int RecordValues = 4 * WorldFogRecord.Rows + 4;
+    static readonly double[] recordNow = new double[RecordValues], recordPrev = new double[RecordValues], recordSaid = new double[RecordValues];
+    static int recordHeld;
+    static bool recordSaidAny;
+
+    /// <summary>The main camera's anti-aliasing, said with each settled fog record (WmvMain sets it after Configure,
+    /// WmvMain.AntiAliasingText; null: not said).</summary>
+    public static Func<string> FrameDescription;
 
     /// <summary>The switches (parsed once: the command line, WMV_DEBUG's tokens, WMV_LIGHT).</summary>
     public static WorldLightSwitches Switches
@@ -242,6 +255,8 @@ public static class WmvWorldLight
         fogMode = WorldFogMode.Off;     // taken again from the next set (its census is not repeated: censusSet stays)
         fogAbsent = null;
         fogRecord.Clear();
+        recordHeld = 0;
+        recordSaidAny = false;
     }
 
     /// <summary>The terrain session's setup (WmvMain): unless WMV_LIGHT=off (then nothing at all, not even a log line; only a
@@ -353,8 +368,52 @@ public static class WmvWorldLight
             lastFrame = frame;
             clock.Advance(dt);
             Evaluate(set, positioned, x, y, z, originZ, dt, animPinned);
+            Publish();
+            WatchRecord();
+            return;
         }
         Publish();
+    }
+
+    /// <summary>Stage 10 step 7 (log only): once a frame, after the frame's first Publish -- when the fog record as published
+    /// (R2.w with this render's eye) and the eye have held for RecordSettleFrames frames and differ from the last record said,
+    /// says it once ("world light: fog record ..."): the record of a settled view, such as a capture's, for the rig's row-by-row
+    /// check. Reads only; nothing while the fog is not drawn.</summary>
+    static void WatchRecord()
+    {
+        if (!Showing || fogRecord.Mode == WorldFogMode.Off)
+        {
+            recordHeld = 0;
+            return;
+        }
+        double[] r = fogRecord.R;
+        for (int k = 0; k < 4 * WorldFogRecord.Rows; k++)
+            recordNow[k] = k == 11 ? WorldFog.PlaneOffset(eye.y + originZ, fogRecord) : r[k];
+        recordNow[56] = eye.x;
+        recordNow[57] = eye.y;
+        recordNow[58] = eye.z;
+        recordNow[59] = (double)fogRecord.Mode;
+        bool same = true;
+        for (int k = 0; k < RecordValues && same; k++)
+            same = recordNow[k] == recordPrev[k];
+        if (!same)
+        {
+            Array.Copy(recordNow, recordPrev, RecordValues);
+            recordHeld = 0;
+            return;
+        }
+        if (++recordHeld != RecordSettleFrames)
+            return;
+        bool said = recordSaidAny;
+        for (int k = 0; k < RecordValues && said; k++)
+            said = recordNow[k] == recordSaid[k];
+        if (said)
+            return;
+        Array.Copy(recordNow, recordSaid, RecordValues);
+        recordSaidAny = true;
+        string frameText = FrameDescription != null ? FrameDescription() : null;
+        Say("world light: " + FogRecordText() + " (held " + RecordSettleFrames.ToString(CultureInfo.InvariantCulture) + " frames)" +
+            (frameText != null ? "; " + frameText : ""));
     }
 
     /// <summary>Frame's evaluation (the self-test calls it with a frame number of its own through Frame). Step 7: a new set
@@ -654,9 +713,10 @@ public static class WmvWorldLight
                              WorldLightSample.DescribeGroups(sample.Groups), FogText(set));
     }
 
-    /// <summary>Stage 10 step 7: the state line's fog clause, this frame's record (packed before the line is said): "fog: start S
-    /// yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes (the rig's parser reads them so), the power arm's
-    /// "fog: power path, ...", or "fog: off (reason)".</summary>
+    /// <summary>Stage 10 step 7: the state line's fog clause, this frame's record (packed before the line is said): the record's
+    /// own WorldFogRecord.Summary ("fog: start S yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes -- the
+    /// rig's parser reads them so --, the power arm's "fog: power path, ...") or "fog: off (reason)". One formatter: the runner
+    /// tests the text the player says.</summary>
     static string FogText(WorldLightSet set)
     {
         WorldFogRecord r = fogRecord;
@@ -667,17 +727,36 @@ public static class WmvWorldLight
                                    : fogMode != WorldFogMode.Off ? "no valid light state"
                                    : product != null ? "product " + product + ", D17/D18" : "no product") + ")";
         }
-        string colour = string.Format(CultureInfo.InvariantCulture, "({0}, {1}, {2})", Math.Round(r.Colour[0] * 255.0), Math.Round(r.Colour[1] * 255.0),
-                                      Math.Round(r.Colour[2] * 255.0));
-        string arm = r.Mode != WorldFogMode.RetailPattern ? " [" + WorldFog.ModeName(r.Mode) + "]" : "";
-        if (r.Power)
-            return r.PowerRefused
-                ? "fog: power path refused (end not above start: no fog drawn), colour " + colour + arm
-                : string.Format(CultureInfo.InvariantCulture, "fog: power path, start {0:0.#} yd, end {1:0.#} yd, rate {2:0.###}, colour {3}{4}", r.Start, r.End,
-                                r.K, colour, arm);
-        return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}{6}", r.Start, r.K,
-                             r.End, colour, r.Artistic ? ", polynomial path mixed in" : "",
-                             r.ArtisticRefusedBlend ? ", polynomial path refused this frame (end not above start)" : "", arm);
+        return r.Summary();
+    }
+
+    /// <summary>Stage 10 step 7 (log only): the fog record exactly as published for the render now -- all 14 rows as the GPU gets
+    /// them (floats, round-trip; R2.w the plane offset of the eye uploaded, as PublishFog computes it), the eye in Unity, the
+    /// camera's and the floating origin's game Z and the plane's -- so the rig can compare the record row by row with its port
+    /// (fogmodel.pack). WatchRecord says it once per settled view. "fog record: none (...)" while the light is shown without
+    /// fog; null while nothing is shown and with WMV_LIGHT=off.</summary>
+    public static string FogRecordText()
+    {
+        if (HardOff || !Showing)
+            return null;
+        WorldFogRecord r = fogRecord;
+        if (r.Mode == WorldFogMode.Off)
+            return "fog record: none (" + FogText(lastSet as WorldLightSet) + ")";
+        var inv = CultureInfo.InvariantCulture;
+        var sb = new System.Text.StringBuilder(1400);
+        sb.Append("fog record as published: mode ").Append(WorldFog.ModeName(r.Mode));
+        for (int k = 0; k < WorldFogRecord.Rows; k++)
+        {
+            int at = 4 * k;
+            double w = k == 2 ? WorldFog.PlaneOffset(eye.y + originZ, r) : r.R[at + 3];
+            sb.Append("; R").Append(k.ToString(inv)).Append(" (").Append(((float)r.R[at]).ToString("R", inv)).Append(", ")
+              .Append(((float)r.R[at + 1]).ToString("R", inv)).Append(", ").Append(((float)r.R[at + 2]).ToString("R", inv)).Append(", ")
+              .Append(((float)w).ToString("R", inv)).Append(")");
+        }
+        sb.Append("; eye (").Append(eye.x.ToString("R", inv)).Append(", ").Append(eye.y.ToString("R", inv)).Append(", ")
+          .Append(eye.z.ToString("R", inv)).Append(") Unity; camera game Z ").Append((eye.y + originZ).ToString("R", inv))
+          .Append(", origin game Z ").Append(originZ.ToString("R", inv)).Append(", fog height ").Append(r.FogHeight.ToString("R", inv));
+        return sb.ToString();
     }
 
     /// <summary>The state line: only when the object, the evaluation, the validity or the base light changed (one per load and

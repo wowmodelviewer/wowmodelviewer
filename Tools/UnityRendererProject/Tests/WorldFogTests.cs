@@ -740,6 +740,25 @@ namespace Wmv.Wow.Tests
             Check(interiors, "R7 the fog clause under -wmvInteriorLight=outdoor names the interiors it fogs (\"" +
                              both.Substring(Math.Max(0, both.IndexOf("; fog:", StringComparison.Ordinal))) + "\"), and an object lacking fog columns " +
                              "draws none (\"" + lackingText.Substring(Math.Max(0, lackingText.IndexOf("; fog", StringComparison.Ordinal))) + "\")");
+
+            // One formatter (log only): the state line's clause is WorldFogRecord.Summary, the text the player says and the rig's
+            // foglog.py parses -- whole bytes, the arm in brackets.
+            var sr = new WorldFogRecord { Mode = WorldFogMode.RetailPattern, Start = 450.0, K = 0.00105, End = 7000.0 };
+            sr.Colour[0] = 113.0 / 255.0; sr.Colour[1] = 67.0 / 255.0; sr.Colour[2] = 57.6 / 255.0;
+            var sa = new WorldFogRecord();
+            sr.CopyTo(sa);
+            sa.Mode = WorldFogMode.ClassicPublic;
+            var sp = new WorldFogRecord { Mode = WorldFogMode.ClassicPower36, Power = true, Start = 706.0, End = 889.0, K = 4.99 };
+            var so = new WorldFogRecord();
+            string tr = sr.Summary(), ta = sa.Summary(), tp = sp.Summary();
+            var parser = new Regex(@"fog: start ([-\d.]+) yd, k ([-\d.eE]+) /yd, end ([-\d.]+) yd, colour \((\d+), (\d+), (\d+)\)");
+            Match pm = parser.Match(tr);
+            bool one = tr == "fog: start 450 yd, k 0.00105 /yd, end 7000 yd, colour (113, 67, 58)" && pm.Success && pm.Groups[6].Value == "58" &&
+                       ta == tr + " [" + WorldFog.ModeName(WorldFogMode.ClassicPublic) + "]" &&
+                       tp == "fog: power path, start 706 yd, end 889 yd, rate 4.99, colour (0, 0, 0) [" + WorldFog.ModeName(WorldFogMode.ClassicPower36) + "]" &&
+                       so.Summary() == "fog: off";
+            Check(one, "R7 one formatter: WorldFogRecord.Summary is the state line's clause in whole bytes that foglog.py parses (\"" + tr + "\" | \"" + ta +
+                       "\" | \"" + tp + "\")");
         }
 
         // ================================================================================== R8: the graded table
