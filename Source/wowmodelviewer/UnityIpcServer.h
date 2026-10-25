@@ -762,7 +762,8 @@ public:
   // No-op when the player is not connected.
   void sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing, int timeMs,
                                float speed, bool loop, bool explicitState,
-                               const RiderState * rider = nullptr, int load = 0);
+                               const RiderState * rider = nullptr, int load = 0,
+                               bool flight = false, float flightSpeed = 20.0f);
 
   // Runtime command: the displayed model's per-submesh display state changed (a Geosets
   // checkbox). Sends the WHOLE current state (UnityAssetAccess::displayedSubmeshVisibility), numbered

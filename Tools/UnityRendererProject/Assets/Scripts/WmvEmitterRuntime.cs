@@ -227,6 +227,8 @@ public class WmvEmitterRuntime : MonoBehaviour
         public Mesh Mesh;
         public Material Material;
         public MeshRenderer Renderer;
+        public bool OpaqueMaterial;
+        public bool BlendingOpacity;
 
         // A ring of edges, oldest at Head. Each edge is a point on the ribbon's spine plus the
         // "up" it was emitted with, both in MODEL space, and the animation time it was laid down.
@@ -253,6 +255,32 @@ public class WmvEmitterRuntime : MonoBehaviour
 
     Transform modelRoot;
     Camera billboardCamera;
+
+    public bool FlightEnabled { get; private set; }
+    public float FlightSpeed { get; private set; } = 20f;
+
+    public void SetFlight(bool enabled, float speed)
+    {
+        FlightEnabled = enabled;
+        FlightSpeed = float.IsNaN(speed) || float.IsInfinity(speed) ? 20f : Mathf.Clamp(speed, 0f, 200f);
+    }
+
+    // Spell projectile preview travels along native -X (Unity -Z), opposite the
+    // character-facing convention. Its trailing history therefore moves toward +Z.
+    // Simulate in the frame of a camera following that projectile.
+    // Rebase only existing world-space history, BEFORE spawning this step's particles.
+    // This is translation-equivalent to moving model + camera, without unbounded coordinates.
+    // DONOTTRAIL particles remain attached, exactly as their authored flag requests.
+    void AdvanceFlight(float dt)
+    {
+        if (!FlightEnabled || dt <= 0f || FlightSpeed <= 0f) return;
+        Vector3 offset = Vector3.forward * (FlightSpeed * dt);
+        foreach (var s in particles)
+            if (!s.BoneLocal)
+                for (int i = 0; i < s.Count; i++) s.Pos[i] += offset;
+        foreach (var s in ribbons)
+            for (int i = 0; i < s.Count; i++) s.EdgePos[(s.Head + i) % s.Capacity] += offset;
+    }
 
     /// <summary>Start/mid/end RGB per ParticleColor slot (index 0 for emitters whose
     /// ParticleColorIndex is 11, 1 for 12, 2 for 13), or null when the app supplied none.</summary>
@@ -296,6 +324,38 @@ public class WmvEmitterRuntime : MonoBehaviour
     }
 
     public bool HasAnything { get { return particles.Count > 0 || ribbons.Count > 0; } }
+
+    /// <summary>Frame effects without a surface mesh using their first second of geometry.
+    /// Reset both the simulation and pose afterwards; playback still starts at zero.</summary>
+    public Bounds MeasurePreviewBounds(Func<float, float> sequenceTimeAt, Action<float> poseAt)
+    {
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.one * 2f);
+        bool any = false;
+        ResetState();
+        try
+        {
+            for (int step = 1; step <= 60; step++)
+            {
+                float wall = step * (1000f / 60f);
+                float seq = sequenceTimeAt(wall);
+                poseAt(seq);
+                Advance(1f / 60f, seq, wall);
+                Build(seq, wall);
+                foreach (Mesh mesh in ownedMeshes)
+                {
+                    if (mesh.vertexCount == 0) continue;
+                    if (!any) { bounds = mesh.bounds; any = true; }
+                    else bounds.Encapsulate(mesh.bounds);
+                }
+            }
+            return bounds;
+        }
+        finally
+        {
+            ResetState();
+            poseAt(0f);
+        }
+    }
 
     // =========================================================================================
     // Build
@@ -465,6 +525,7 @@ public class WmvEmitterRuntime : MonoBehaviour
     {
         var s = new RibbonState();
         s.Def = def;
+        s.OpaqueMaterial = blend == 0;
         s.Bone = bone;
         s.BindPose = BindPoseFor(bone);
         s.Origin = ToUnity(def.Position);
@@ -740,6 +801,8 @@ public class WmvEmitterRuntime : MonoBehaviour
             return;
         if (dtSeconds < 0f)
             dtSeconds = -dtSeconds;      // a scrub backwards must not run the simulation backwards
+
+        AdvanceFlight(dtSeconds);
 
         Matrix4x4 rootInverse = modelRoot.worldToLocalMatrix;
 
@@ -1285,11 +1348,13 @@ public class WmvEmitterRuntime : MonoBehaviour
     void AdvanceRibbon(RibbonState s, Matrix4x4 boneMatrix, float dt)
     {
         Vector3 pos = boneMatrix.MultiplyPoint3x4(s.Origin);
-        // "Up" is the emitter's own +Z carried by the bone: the ribbon is a flat band standing
-        // on the spine, and this is which way it stands. WoW +Z is Unity +Y.
-        Vector3 up = boneMatrix.MultiplyVector(Vector3.up);
+        // Ribbon width follows native +Y (Unity -X), not native +Z, which is the
+        // longitudinal tangent. The latter collapses forward-facing missile ribbons
+        // into a line. The independent viewer uses matrix column 1 for the width
+        // and column 2 for the interpolation tangent (Uo.G/T in the reference).
+        Vector3 up = boneMatrix.MultiplyVector(Vector3.left);
         if (up.sqrMagnitude < 1e-12f)
-            up = Vector3.up;
+            up = Vector3.left;
         else
             up = up.normalized;
 
@@ -1353,6 +1418,21 @@ public class WmvEmitterRuntime : MonoBehaviour
             tint = new Color(c.X, c.Y, c.Z, 1f);
         }
         tint.a = s.Def.Opacity.HasData ? Sample(s.Def.Opacity, seqMs, globalMs, 1f) : 1f;
+        // Like opaque model batches, an opaque ribbon with authored opacity < 1
+        // must blend in place. Otherwise Frostbolt's second central layer paints
+        // a solid black rectangle and discards both the texture and track alpha.
+        if (s.OpaqueMaterial)
+        {
+            bool blending = tint.a < 1f;
+            if (blending != s.BlendingOpacity)
+            {
+                s.BlendingOpacity = blending;
+                s.Material.SetFloat("_SrcBlend", (float)(blending ? UnityEngine.Rendering.BlendMode.SrcAlpha
+                                                                : UnityEngine.Rendering.BlendMode.One));
+                s.Material.SetFloat("_DstBlend", (float)(blending ? UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha
+                                                                : UnityEngine.Rendering.BlendMode.Zero));
+            }
+        }
         float above = Sample(s.Def.Above, seqMs, globalMs, 0f);
         float below = Sample(s.Def.Below, seqMs, globalMs, 0f);
 

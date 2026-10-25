@@ -13,6 +13,7 @@
 
 #include <wx/collpane.h>
 #include <wx/timer.h>
+#include <wx/spinctrl.h>
 
 extern float animSpeed;
 
@@ -162,6 +163,8 @@ class AnimControl: public wxWindow
   wxSlider *speedSlider, *speedMouthSlider, *frameSlider;
   wxButton *btnAdd;
   wxCheckBox *lockAnims, *nextAnims;
+  wxCheckBox *flightCheck;
+  wxSpinCtrlDouble *flightSpeed;
   wxTextCtrl *lockText;
 
   wxButton *btnPlayPause, *btnStop, *btnClear, *btnPrev, *btnNext, *btnSpeedReset;
@@ -230,6 +233,9 @@ public:
   wxComboBox *skinList, *BLPSkinList1, *BLPSkinList2, *BLPSkinList3;
 
   void UpdateModel(WoWModel *m);
+  void SetFlight(bool enabled, double speed = 20.0);
+  bool FlightEnabled() const { return flightCheck->GetValue(); }
+  float FlightSpeed() const { return (float)flightSpeed->GetValue(); }
   void UpdateWMO(WMO *w, int group);
   // The model was deleted (FileControl::ClearCanvas): stop listing its animations and skins.
   void Forget();

@@ -231,6 +231,27 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
     playCol->Add(speed, 0, wxEXPAND);
   }
 
+  flightCheck = new wxCheckBox(this, wxID_ANY, _("Flight"));
+  flightCheck->SetName("modelFlight");
+  flightCheck->SetToolTip(_("Preview forward flight with a following camera; Play/Pause controls the flight"));
+  flightSpeed = new wxSpinCtrlDouble(this, wxID_ANY, "20.0", wxDefaultPosition,
+                                    wxSize(FromDIP(90), -1), wxSP_ARROW_KEYS, 0.0, 200.0, 20.0, 1.0);
+  flightSpeed->SetDigits(1);
+  flightSpeed->SetName("modelFlightSpeed");
+  flightSpeed->SetToolTip(_("Flight speed in model units per second at normal playback speed"));
+  flightSpeed->Enable(false);
+  wxBoxSizer * flight = new wxBoxSizer(wxHORIZONTAL);
+  flight->Add(flightCheck, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, sp);
+  flight->Add(new wxStaticText(this, wxID_ANY, _("Flight speed")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, xs);
+  flight->Add(flightSpeed, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, xs);
+  flight->Add(new wxStaticText(this, wxID_ANY, _("units/s")), 0, wxALIGN_CENTER_VERTICAL);
+  playCol->Add(flight, 0, wxEXPAND | wxTOP, sp);
+  flightCheck->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &) {
+    SetFlight(flightCheck->GetValue(), flightSpeed->GetValue());
+  });
+  flightSpeed->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent &) { PushAnimationState(); });
+  flightSpeed->Bind(wxEVT_TEXT, [this](wxCommandEvent &) { PushAnimationState(); });
+
   // ---- Queue & advanced (collapsed by default) -----------------------------------------------
   advancedScroll = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
   UiStyle::applyPanel(advancedScroll);
@@ -420,6 +441,9 @@ void AnimControl::UpdateModel(WoWModel *m)
 {
   if (!m)
     return;
+  flightCheck->SetValue(false);
+  flightSpeed->SetValue(20.0);
+  flightSpeed->Enable(false);
   PCRList.clear();
   CDIToTexGp.clear();
   singleSkinOverrides.clear();
@@ -640,6 +664,9 @@ void AnimControl::UpdateModel(WoWModel *m)
 // longer is). The next UpdateModel fills the lists again.
 void AnimControl::Forget()
 {
+  flightCheck->SetValue(false);
+  flightSpeed->SetValue(20.0);
+  flightSpeed->Enable(false);
   for (size_t i = 0; i < skinList->GetCount(); i++)
   {
     TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
@@ -2068,6 +2095,15 @@ void AnimControl::PushAnimationState()
     g_modelViewer->SendAnimationStateToUnity(true);
 }
 
+void AnimControl::SetFlight(bool enabled, double speed)
+{
+  if (!std::isfinite(speed)) speed = 20.0;
+  flightCheck->SetValue(enabled);
+  flightSpeed->SetValue((std::max)(0.0, (std::min)(200.0, speed)));
+  flightSpeed->Enable(enabled);
+  PushAnimationState();
+}
+
 void AnimControl::pickAnimationLikeUser(int index)
 {
   if (index < 0 || index >= (int)m_clips.size())
@@ -2251,6 +2287,9 @@ void AnimControl::RefreshPlaybackState()
   // of the models on the canvas.
   WoWModel * m = ModelInspector::IsLiveModel(g_selModel) ? g_selModel : nullptr;
   const bool has = m && m->animManager && !m->anims.empty();
+  const bool canFly = has && !(g_modelViewer && g_modelViewer->canvasShowsMountedCharacter());
+  flightCheck->Enable(canFly);
+  flightSpeed->Enable(canFly && flightCheck->GetValue());
 
   for (wxWindow * w : { (wxWindow *)btnPrev, (wxWindow *)btnPlayPause, (wxWindow *)btnStop,
                         (wxWindow *)btnNext, (wxWindow *)frameSlider })
