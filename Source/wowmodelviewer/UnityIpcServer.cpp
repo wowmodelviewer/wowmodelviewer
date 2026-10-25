@@ -1226,7 +1226,7 @@ void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int
 
 void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing,
                                              int timeMs, float speed, bool loop, bool explicitState,
-                                             const RiderState * rider, int load)
+                                             const RiderState * rider, int load, bool flight, float flightSpeed)
 {
   if (!m_client || !m_unityReady || sequenceIndex < 0)
     return;
@@ -1240,6 +1240,8 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   msg["speed"] = speed;
   msg["loop"] = loop;
   msg["explicitState"] = explicitState;
+  msg["flight"] = flight;
+  msg["flightSpeed"] = flightSpeed;
   // When these positions were sampled, on the clock the player reads too. The line can wait behind other traffic
   // before the player reads it -- a composited body image is megabytes, read and decoded first -- and a position
   // applied as sent after such a wait put the player back by the wait.

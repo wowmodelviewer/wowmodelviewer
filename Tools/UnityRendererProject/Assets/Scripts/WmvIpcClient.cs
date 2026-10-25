@@ -542,6 +542,8 @@ public class WmvIpcClient : MonoBehaviour
     /// </summary>
     public struct AnimationState
     {
+        public bool flight;
+        public float flightSpeed;
         public int fileDataID;
         public int sequenceIndex;
         public bool playing;
@@ -1418,6 +1420,7 @@ public class WmvIpcClient : MonoBehaviour
         public int timeMs;
         public float speed;
         public double sampledAtMs;    // modelAnimationState: when the host sampled it (ProjectFromSample)
+        public bool flight;
         public int revision;
         public bool hasSubmeshVisible;
         public int submeshCount;
@@ -1908,6 +1911,8 @@ public class WmvIpcClient : MonoBehaviour
             speed = msg.speed,
             loop = msg.loop,
             explicitState = msg.explicitState,
+            flight = msg.flight,
+            flightSpeed = (float)msg.flightSpeed,
             receivedSeconds = msg.receivedSeconds,
             load = msg.load,
             hasRider = msg.hasRider && msg.rider != null,

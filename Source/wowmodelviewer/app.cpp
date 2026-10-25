@@ -3949,6 +3949,29 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
 {
   QStringList bad;
   CharControl * cc = frame->charControl;
+  if (kind == "flight")
+  {
+    bool number = false;
+    const double speed = target.toDouble(&number);
+    if (!frame->animControl || (target != "off" && (!number || speed < 0 || speed > 200)))
+    {
+      why = "flight: takes off or a speed from 0 to 200";
+      return false;
+    }
+    frame->animControl->SetFlight(target != "off", target == "off" ? frame->animControl->FlightSpeed() : speed);
+    pumpTicking(ipc, 250);
+    wxWindow * check = wxWindow::FindWindowByName("modelFlight", frame->animControl);
+    wxWindow * field = wxWindow::FindWindowByName("modelFlightSpeed", frame->animControl);
+    const wxRect panel(wxPoint(0, 0), frame->animControl->GetClientSize());
+    if (!check || !field || !panel.Contains(check->GetRect()) || !panel.Contains(field->GetRect()) ||
+        field->IsEnabled() != (target != "off"))
+    {
+      why = "Flight controls clipped or enabled state incorrect";
+      return false;
+    }
+    what = "flight " + target;
+    return true;
+  }
   if (kind == "wait")
   {
     bool number = false;
@@ -4501,7 +4524,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
                                       kind == "ranim" || kind == "anim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
                                       kind == "reconnect" || kind == "wait" || kind == "screenshot" ||
-                                      kind == "background" || kind == "npc-equip");
+                                      kind == "background" || kind == "npc-equip" || kind == "flight");
     GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;
     const size_t reportsBefore = reports.size();
     const int serialBefore = frame->m_unityLoadSerial;

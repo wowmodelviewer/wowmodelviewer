@@ -919,11 +919,14 @@ static wxAuiPaneInfo buildBrowsePaneInfo(const wxWindow * frame)
          Left().Layer(2);
 }
 
-static wxAuiPaneInfo buildAnimationPaneInfo(const wxWindow * frame)
+static wxAuiPaneInfo buildAnimationPaneInfo(const ModelViewer * frame)
 {
+  const int height = frame->animControl && frame->animControl->GetSizer()
+                       ? frame->animControl->GetSizer()->GetMinSize().y : frame->FromDIP(180);
   return wxAuiPaneInfo().
          Name(wxT("animControl")).Caption(wxT("Animation")).
-         BestSize(frame->FromDIP(wxSize(700, 160))).MinSize(frame->FromDIP(wxSize(360, 128))).
+         BestSize(wxSize(frame->FromDIP(700), (std::max)(frame->FromDIP(180), height))).
+         MinSize(wxSize(frame->FromDIP(360), height)).
          FloatingSize(frame->FromDIP(wxSize(900, 220))).
          Bottom().Layer(1);
 }
@@ -1220,6 +1223,8 @@ void ModelViewer::LoadLayout()
         interfaceManager.GetPane(wxT("commandBar")).MinSize(bar.min_size).BestSize(bar.best_size).MaxSize(bar.max_size);
       }
       // Nor is the viewport: whatever the perspective says, the Unity viewport is the shown centre.
+      // A saved short Animation pane must still accommodate today's playback controls.
+      interfaceManager.GetPane(animControl).MinSize(buildAnimationPaneInfo(this).min_size);
       EnsureUnityViewportCentre();
 #ifndef  _LINUX // buggy
       interfaceManager.Update();
@@ -5229,7 +5234,9 @@ void ModelViewer::SendAnimationStateToUnity(bool force)
 
   unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
                                                     playing, timeMs, speed, true,
-                                                    /* explicitState */ force);
+                                                    /* explicitState */ force, nullptr, 0,
+                                                    animControl && animControl->FlightEnabled(),
+                                                    animControl ? animControl->FlightSpeed() : 20.0f);
 }
 
 // Menu button press events

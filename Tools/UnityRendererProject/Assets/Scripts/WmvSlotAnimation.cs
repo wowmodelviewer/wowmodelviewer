@@ -426,6 +426,8 @@ public class WmvSlotAnimation
         // will ask for it as soon as it knows what is playing.
         slot.LastAppState = s;
         slot.HaveAppState = true;
+        if (slot.Runtime.Emitters != null)
+            slot.Runtime.Emitters.SetFlight(s.flight, s.flightSpeed);
 
         if (s.sequenceIndex >= 0 && slot.Runtime.Animator.SequenceIndex != s.sequenceIndex)
         {
@@ -481,6 +483,8 @@ public class WmvSlotAnimation
             return 0f;
         }
         WmvIpcClient.AnimationState s = slot.LastAppState;
+        if (slot.Runtime.Emitters != null)
+            slot.Runtime.Emitters.SetFlight(s.flight, s.flightSpeed);
         float at = s.sequenceIndex == slot.Model.AnimatedSequence && s.receivedSeconds >= validFrom ? ProjectedTime(s) : 0f;
         animator.StartFromApp(s.playing, at, s.speed);
         return at;

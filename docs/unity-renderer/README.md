@@ -1881,3 +1881,8 @@ decode/length checks), so both the WMV-side host and the runtime asset access ca
 without any Unity install -- see the headless self-test in the IPC section. It is a test tool,
 not a viewer: it draws status text only, so installed as the player it shows no model, and a
 character or a WMO gets the out-of-date notice.
+
+### Flight preview
+
+The Animation panel offers manual Flight with a speed control below playback speed.
+See [Flight preview](flight-preview.md) for behavior, implementation and tests.
