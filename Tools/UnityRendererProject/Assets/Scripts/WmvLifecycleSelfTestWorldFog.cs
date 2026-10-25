@@ -18,9 +18,10 @@
 //       the originals read no fog global
 //   F12 the per-copy fog vectors and the binding line's fog counts through the real managers (a synthetic M2 of the nine
 //       blend modes with one NoFog batch as a doodad; a synthetic world model with an F_UNFOGGED and a MOMT blend 2 entry)
-//   F13 the driver (an object with every fog column sent): the published rows are WorldFog.Pack's, R2.w and the eye follow
-//       SetEye within one frame, a product the fog is off for writes no fog global, a null set, the census once per set, the
-//       capture line's fog clause; an object whose fog columns are not sent (the light tests' own) draws no fog and says why
+//   F13 the driver (an object with every fog column sent): the published rows are WorldFog.Pack's (the far clip and the
+//       horizonStart the driver holds), R2.w and the eye follow SetEye within one frame, a product the fog is off for writes no
+//       fog global, a null set, the census once per set, the capture line's fog clause and the state line's end E = min(0.933 x
+//       far clip, horizonStart); an object whose fog columns are not sent (the light tests' own) draws no fog and says why
 //   F14 the composite's pin: no light and no fog in a fixture whatever the fog globals hold
 //   F15 no allocation in Publish (where the runtime counts allocations per thread; otherwise SKIP)
 // Every global touched is saved and put back, and the driver is put back to the switches' start.
@@ -719,7 +720,8 @@ public static partial class WmvLifecycleSelfTest
             Vector4 sun = WmvWorldLight.Direction(new[] { sx, sy, sz });
             WorldFogMode mode = WorldFog.ModeFor(s.Product, sw.Fog, sw.FogClassic);
             var want = new WorldFogRecord();
-            WorldFog.Pack(smp.V, WmvWorldLight.FarClip, zz, WmvWorldLight.Clock.HalfMinute, new double[] { sun.x, sun.y, sun.z }, s.MapFlags, mode, want);
+            WorldFog.Pack(smp.V, WmvWorldLight.FarClip, WmvWorldLight.HorizonStart, zz, WmvWorldLight.Clock.HalfMinute, new double[] { sun.x, sun.y, sun.z },
+                          s.MapFlags, mode, want);
             bool fog = mode != WorldFogMode.Off;
             var wrongRows = new List<string>();
             Func<Vector3, bool> rowsEqual = eye =>
@@ -792,11 +794,20 @@ public static partial class WmvLifecycleSelfTest
             string eraCensus = census.Find(l => l.Contains("(product wow_classic_era)")) ?? "";
             string state = said.FindLast(l => l.StartsWith("world light: zone 139 light 204", StringComparison.Ordinal)) ?? "";
             string eraState = said.Find(l => l.StartsWith("world light: zone 139", StringComparison.Ordinal) && l.Contains("fog: off (")) ?? "";
-            string end = " /yd, end " + WmvWorldLight.FarClip.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " yd, colour (";
+            // Step 7 after in-game test T7: the end is E = min(0.933 x far clip, horizonStart) (this object draws no polynomial
+            // path), horizonStart the switch's, and the clause names the far clip, horizonStart and E.
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            double endE = WorldFog.EndOf(WmvWorldLight.FarClip, WmvWorldLight.HorizonStart);
+            string end = " /yd, end " + endE.ToString("0.#", inv) + " yd, colour (";
+            string endRule = ", E " + endE.ToString("0.#", inv) + " yd = min(" + WorldFog.EndFarClipFactor.ToString("0.###", inv) + " x far clip " +
+                             WmvWorldLight.FarClip.ToString("0.#", inv) + ", horizonStart " + WmvWorldLight.HorizonStart.ToString("0.#", inv) + ")";
+            bool endPacked = want.End == endE && want.EndRule == endE && want.FarClip == WmvWorldLight.FarClip &&
+                             want.HorizonStart == sw.HorizonStart && WmvWorldLight.HorizonStart == sw.HorizonStart && !want.Artistic;
             bool lines = censusBefore == 3 && census.Count == 3 &&
                          wowCensus.Contains("fog for map 1 (product wow): " + WorldFog.ModeName(mode) + "; keys: E 3, L 0, Z 0 ") &&
                          wowCensus.Contains("2 day(s), 3 key(s)") && eraCensus.Contains(": " + WorldFog.ModeName(eraMode) + "; ") &&
-                         (fog ? state.Contains("; fog: start ") && state.Contains(end) && describe.Contains("; fog: the client's per-pixel fog")
+                         (fog ? state.Contains("; fog: start ") && state.Contains(end) && state.Contains(endRule) && endPacked &&
+                                describe.Contains("; fog: the client's per-pixel fog") && describe.Contains("horizonStart) = min(")
                               : state.Contains("; fog: off (")) &&
                          (eraMode != WorldFogMode.Off || !sw.Fog || eraState.Contains("fog: off (product wow_classic_era, D17/D18)"));
             var problems = new List<string>();
@@ -807,7 +818,8 @@ public static partial class WmvLifecycleSelfTest
                   "outdoor fog F13: a null set (no scene) neither throws nor fails the light off and shows nothing; the fog census is said for " +
                   "each new object while the light is on (" + censusBefore + " line(s) for wow, Era, wow again; " + census.Count + " after ApplySwitches " +
                   "and the same object: \"" + wowCensus + "\"); " +
-                  "the state line carries this frame's fog (\"" + (state.IndexOf("; fog", StringComparison.Ordinal) >= 0
+                  "the state line carries this frame's fog, its end E = min(0.933 x far clip, horizonStart) with both inputs named and the " +
+                  "packed record's end E (\"" + (state.IndexOf("; fog", StringComparison.Ordinal) >= 0
                       ? state.Substring(state.IndexOf("; fog", StringComparison.Ordinal)) : state) + "\"); no fog line says warning, error or exception" +
                   (problems.Count > 0 ? " -- " + problems[0] : ""), log);
 

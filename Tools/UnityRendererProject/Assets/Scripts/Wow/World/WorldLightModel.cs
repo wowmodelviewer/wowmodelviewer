@@ -4,7 +4,9 @@
 // the client's bytes cannot give, held in one place with its evidence grade, so that each is measured in game or ships with
 // its label (runtimeState and the log say which). No value here comes from anywhere but the plan's own lists; none is an
 // artistic choice. Grades as in the plan: PROVEN_BYTES, PROVEN_SOURCE, MEASURED, INFERRED, INFERRED (public) (taken from
-// public documentation alone, not yet checked against the bytes or the game), UNKNOWN. Pure C#, no UnityEngine.
+// public documentation alone, not yet checked against the bytes or the game), UNKNOWN; and, from step 7's correction after
+// in-game test T7 (owner-approved 2026-10-25), ASSUMED: the behaviour as committed before T7, kept where the in-game evidence
+// says nothing (a labelled default, neither measured nor inferred). Pure C#, no UnityEngine.
 //
 // Directions are in the game's world frame (X north, Y west, Z up; WorldToUnity.Direction turns them into Unity's), unit
 // vectors pointing FROM the scene TOWARDS the light or the sun (the n . l convention).
@@ -67,7 +69,7 @@ namespace Wmv.Wow.World
     public static class WorldLightModel
     {
         public const string ProvenBytes = "PROVEN_BYTES", ProvenSource = "PROVEN_SOURCE", Measured = "MEASURED", Inferred = "INFERRED",
-                            InferredPublic = "INFERRED (public)", Unknown = "UNKNOWN";
+                            InferredPublic = "INFERRED (public)", Unknown = "UNKNOWN", Assumed = "ASSUMED";
 
         public const double SecondsPerDay = 86400.0;
 
@@ -103,6 +105,11 @@ namespace Wmv.Wow.World
         /// INFERRED. A setting of the game, not a rendering constant.</summary>
         public const double DefaultFarClip = 7000.0;
         public const string DefaultFarClipGrade = ProvenBytes;
+        /// <summary>The game's horizonStart the fog end reads (yards; -wmvGameHorizonStart): the T7 reference sessions' value at
+        /// graphicsViewDistance 6, as their settings files hold it (PROVEN_BYTES). Not a universal client default: the game sets it
+        /// with the view distance. A setting of the game, an input of the end rule (WorldFog.EndOf), never a rendering constant.</summary>
+        public const double DefaultHorizonStart = 1900.0;
+        public const string DefaultHorizonStartGrade = ProvenBytes;
 
         // ---- the fog (plan 4.6, 6.9; step 7: WorldFog.cs)
 
@@ -120,15 +127,46 @@ namespace Wmv.Wow.World
             new GradedValue("polynomial path lead before the end ratio", WorldFog.ArtLead, ProvenBytes, "terrain 2977247 p_1:211", StateApplied),
             new GradedValue("polynomial path fade slope", WorldFog.ArtFade, ProvenBytes, "terrain 2977247 p_1:225 (dx_6_0 literal 0x400AAAAAA0000000)",
                             StateApplied),
-            // the record on the Retail pattern
-            new GradedValue("fog start cap (yd): start = min(far clip, cap) x FogScaler", WorldFog.StartCap, WorldFog.StartCapGrade,
-                            "plan 4.6, one source; the references' far bands fog more than this start predicts (MEASURED, preliminary; start and " +
-                            "density not separated); class C until in-game test T7", StateApplied),
-            new GradedValue("FogDensity scale per yard: k = FogDensity x scale", WorldFog.DensityScale, WorldFog.DensityScaleGrade,
-                            "plan 4.6, one source; not contradicted near a start of 300 yd (a start-density ridge, preliminary); class C until T7",
+            // the record on the Retail pattern: in-game test T7 on the PTR 12.1.7 (stands A and B, post-data, exploratory,
+            // owner-approved 2026-10-25) measured the end, the start and the density; ASSUMED where it says nothing
+            new GradedValue("fog end E = min(b x far clip, horizonStart): the far clip's factor b", WorldFog.EndFarClipFactor, WorldFog.EndFarClipFactorGrade,
+                            "in-game test T7 on the PTR 12.1.7 (stands A and B, post-data, exploratory): b 0.9332 [0.9325, 0.9339] jointly at far clip " +
+                            "1000 ONLY, where a factor and an offset of -67 yd are one curve; FogEnd is not used on this pattern; Retail unverified",
                             StateApplied),
-            new GradedValue("fog end = the game far clip (1 = yes; FogEnd is not used on this pattern)", 1.0, InferredPublic,
-                            "plan 4.6; the low far clip of T7 measures it", StateApplied),
+            new GradedValue("fog end: b at far clips other than 1000 (1 = the same factor)", 1.0, Assumed,
+                            "not measured: 0.933 x F and F - 67 yd agree at the one measured far clip; with horizonStart 1900 b acts only below about " +
+                            "2040 yd", StateApplied),
+            new GradedValue("fog end E: horizonStart's factor", WorldFog.EndHorizonStartFactor, WorldFog.EndHorizonStartFactorGrade,
+                            "T7 on the PTR: 1.0001 [0.9988, 1.0013] jointly; the start at horizonStart 1000 and 1900 and the end at 1000 measured, a " +
+                            "cap of 1886 rejected out of sample; horizonStart is the input (-wmvGameHorizonStart), never a constant; Retail unverified",
+                            StateApplied),
+            new GradedValue("fog end at horizonStart 1900 = horizonStart (1 = yes)", 1.0, Assumed,
+                            "the rule's extrapolation from horizonStart 1000: the far-clip pairs bound that end only from below (about 1400 yd or more)",
+                            StateApplied),
+            new GradedValue("fog end at horizonStart above 1900 (1 = the same rule)", 1.0, Assumed,
+                            "not measured: T7 had horizonStart 1000 and 1900 only", StateApplied),
+            new GradedValue("fog end at a horizonClip other than 7000 (1 = the same rule)", 1.0, Assumed,
+                            "not measured: every T7 shot had horizonClip 7000; the viewer does not read it", StateApplied),
+            new GradedValue("fog start = FogScaler x factor x min(E, cap): the factor on E", WorldFog.StartFactor, WorldFog.StartFactorGrade,
+                            "T7 on the PTR: 284-285 yd at stand A and 378-380 at B (horizonStart 1900), 148.5-149.2 yd at horizonStart 1000 (FogScaler " +
+                            "0.15), FogScaler x E within about 1 %; Retail unverified", StateApplied),
+            new GradedValue("fog start cap (yd): start = FogScaler x min(E, cap)", WorldFog.StartCap, WorldFog.StartCapGrade,
+                            "plan 4.6, one source; kept where nothing measured it: it never binds at the default (E 1900); the public arm keeps " +
+                            "min(far clip, cap) x FogScaler", StateApplied),
+            new GradedValue("FogDensity scale per yard: k = FogDensity x scale", WorldFog.DensityScale, WorldFog.DensityScaleGrade,
+                            "T7 on the PTR: the multiplier 0.996-1.016 per pair, the same at two densities within 0.7 %; FogDensity as read; Retail " +
+                            "unverified", StateApplied),
+            new GradedValue("game horizonStart default (yd; -wmvGameHorizonStart)", DefaultHorizonStart, DefaultHorizonStartGrade,
+                            "the T7 reference sessions' settings files at graphicsViewDistance 6; a setting of the game, not a universal client default",
+                            StateApplied),
+            new GradedValue("colour ramp length on EndFogColorDistance <= 0: the far clip, not E (1 = as committed)", 1.0, Assumed,
+                            "whether the client feeds the ramp E is unmeasured: no T7 view reaches it", StateApplied),
+            new GradedValue("end row on keys with the polynomial path: the far clip, not E (1 = as committed)", 1.0, Assumed,
+                            "the path's end ratio reads the end row (PROVEN_BYTES, terrain 2977247 p_1:211); whether the client feeds it E is unmeasured (no polynomial path at " +
+                            "the T7 stands); per key, so a blend draws z E + (1 - z) far clip", StateApplied),
+            new GradedValue("Retail takes the pattern measured on the PTR (1 = yes)", 1.0, Assumed,
+                            "measured on the PTR; Retail unverified (D19); Classic Era, MoP Classic and Classic Beta stay unfogged (D17, D18)",
+                            StateApplied),
             new GradedValue("keys without FogDensity and FogEnd as read: k 0, the end fade only (1 = yes)", 1.0, Inferred,
                             "no derived density and no no-fog switch; counted per set", StateApplied),
             new GradedValue("fog colour = SkyFogColor (1 = yes)", 1.0, InferredPublic,

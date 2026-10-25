@@ -56,7 +56,8 @@
 // in it switches the light off (FailOff) and never costs the frame's culling.
 // THE SWITCHES (WorldLightSwitches, read once): WMV_LIGHT=off -- hard off, nothing installed, evaluated, set or logged (Stage 09
 // exactly); WMV_LIGHT=on or -wmvWorldLight=on -- on from the start (the default is off until the owner accepts the stage, D14);
-// -wmvGameTime=HH:MM[:SS] (pinned; 12:00:00 by default), -wmvGameFarclip=N; the debug arms -wmvLightRule, -wmvLightWrap; the
+// -wmvGameTime=HH:MM[:SS] (pinned; 12:00:00 by default), -wmvGameFarclip=N, -wmvGameHorizonStart=N (step 7: the fog end's
+// horizonStart, 1900 by default; the switch alone sets it); the debug arms -wmvLightRule, -wmvLightWrap; the
 // sky's and terrain's -wmvSky, -wmvSkyTable, -wmvSkyEndFog, -wmvTerrainLight, -wmvTerrainVariant; the world models' and
 // doodads' -wmvDoodadLight, -wmvWorldModelLight, -wmvDoodadVariant, -wmvWorldModelVariant, -wmvInteriorLight and the diagnostic
 // -wmvWorldLitView (they act where the world's renderers are bound, WmvWorldLitMaterials, except the flat arms and the view,
@@ -129,6 +130,7 @@ public static class WmvWorldLight
     static bool on;                           // asked for: the switches, then setWorldLight
     static readonly WorldClock clock = new WorldClock();
     static double farClip = WorldLightModel.DefaultFarClip;
+    static double horizonStart = WorldLightModel.DefaultHorizonStart;   // step 7: the fog end's input (-wmvGameHorizonStart)
     static readonly WorldLightEvaluator evaluator = new WorldLightEvaluator();
     static readonly WorldLightSample sample = new WorldLightSample();
     static readonly WorldLightEase ease = new WorldLightEase();
@@ -208,6 +210,8 @@ public static class WmvWorldLight
     public static bool PublishedOn { get { return publishedOn; } }
     public static WorldClock Clock { get { return clock; } }
     public static double FarClip { get { return farClip; } }
+    /// <summary>Stage 10 step 7: the game's horizonStart the fog end reads (WorldFog.EndOf), from -wmvGameHorizonStart.</summary>
+    public static double HorizonStart { get { return horizonStart; } }
     public static WorldLightSample Sample { get { return sample; } }
     public static WorldLightEase Ease { get { return ease; } }
     public static bool Evaluated { get { return evaluated; } }
@@ -226,8 +230,8 @@ public static class WmvWorldLight
     /// not off.</summary>
     public static bool FogDrawn { get { return Showing && fogRecord.Mode != WorldFogMode.Off; } }
 
-    /// <summary>The switches' starting state: on or off, the clock pinned at -wmvGameTime (12:00:00), the far clip; the frame
-    /// state forgotten. Configure takes it once; the self-test puts it back after its checks.</summary>
+    /// <summary>The switches' starting state: on or off, the clock pinned at -wmvGameTime (12:00:00), the far clip, the
+    /// horizonStart; the frame state forgotten. Configure takes it once; the self-test puts it back after its checks.</summary>
     public static void ApplySwitches()
     {
         WorldLightSwitches w = Switches;
@@ -236,6 +240,7 @@ public static class WmvWorldLight
         clock.Seconds = w.TimeSeconds;
         clock.MapOverrideMinutes = -1;
         farClip = w.FarClip;
+        horizonStart = w.HorizonStart;
         applied = true;
         lastLine = null;
         ForgetFrame();
@@ -281,7 +286,9 @@ public static class WmvWorldLight
         SetOn(false);
         Say("world light: " + w.Describe() + "; light direction " + WorldLightModel.LightDirectionGrade + ", sun path " + WorldLightModel.SunPathGrade +
             ", game far clip default " + WorldLightModel.DefaultFarClipGrade + " (the reference sessions' setting); read by the sky, the " +
-            "terrain, exterior world-model groups and outdoor doodads (steps 4-6) and fogged on the terrain, those groups and doodads (step 7)");
+            "terrain, exterior world-model groups and outdoor doodads (steps 4-6) and fogged on the terrain, those groups and doodads (step 7); " +
+            "game horizonStart default " + WorldLightModel.DefaultHorizonStartGrade + " (the T7 reference sessions' setting, not a universal client " +
+            "default), read by the fog end");
     }
 
     /// <summary>Stage 10 step 7: the main camera's Unity position for the render about to be drawn (WmvMain.WorldLightFrame, before
@@ -457,7 +464,7 @@ public static class WmvWorldLight
         sunUnity[0] = sun.x;
         sunUnity[1] = sun.y;
         sunUnity[2] = sun.z;
-        WorldFog.Pack(ease.V, farClip, z, clock.HalfMinute, sunUnity, set.MapFlags, ease.Valid ? fogMode : WorldFogMode.Off, fogRecord);
+        WorldFog.Pack(ease.V, farClip, horizonStart, z, clock.HalfMinute, sunUnity, set.MapFlags, ease.Valid ? fogMode : WorldFogMode.Off, fogRecord);
         SayState(set);
     }
 
@@ -695,7 +702,7 @@ public static class WmvWorldLight
         WorldLightSet set = lastSet as WorldLightSet;
         return "world light on: " + StateText() + " -- drawn: " + (skyDrawn ? "the sky" : "no sky") + ", " +
                (Switches.TerrainLight ? "the terrain lit" + (Switches.TerrainFlat ? " (FLAT variant)" : "") : "the terrain unlit (-wmvTerrainLight=off)") +
-               Switches.DescribeObjects(set != null ? set.Product : null, fogAbsent);
+               Switches.DescribeObjects(set != null ? set.Product : null, fogAbsent, farClip, horizonStart);
     }
 
     static string StateText()
@@ -755,7 +762,9 @@ public static class WmvWorldLight
         }
         sb.Append("; eye (").Append(eye.x.ToString("R", inv)).Append(", ").Append(eye.y.ToString("R", inv)).Append(", ")
           .Append(eye.z.ToString("R", inv)).Append(") Unity; camera game Z ").Append((eye.y + originZ).ToString("R", inv))
-          .Append(", origin game Z ").Append(originZ.ToString("R", inv)).Append(", fog height ").Append(r.FogHeight.ToString("R", inv));
+          .Append(", origin game Z ").Append(originZ.ToString("R", inv)).Append(", fog height ").Append(r.FogHeight.ToString("R", inv))
+          .Append("; far clip ").Append(r.FarClip.ToString("R", inv)).Append(", horizonStart ").Append(r.HorizonStart.ToString("R", inv))
+          .Append(", end rule E ").Append(r.EndRule.ToString("R", inv));
         return sb.ToString();
     }
 

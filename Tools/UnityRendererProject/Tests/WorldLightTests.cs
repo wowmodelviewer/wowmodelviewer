@@ -592,7 +592,7 @@ namespace Wmv.Wow.Tests
             bool graded = true;
             foreach (GradedValue v in WorldLightModel.Table())
                 graded &= v.Grade == "PROVEN_BYTES" || v.Grade == "PROVEN_SOURCE" || v.Grade == "MEASURED" || v.Grade == "INFERRED" ||
-                          v.Grade == "INFERRED (public)" || v.Grade == "UNKNOWN";
+                          v.Grade == "INFERRED (public)" || v.Grade == "UNKNOWN" || v.Grade == "ASSUMED";   // ASSUMED: step 7 after T7
             Check(graded && WorldLightModel.Table().Count == 5 + 4 + 1 + WorldLightModel.Fog.Length + WorldLightModel.Rings.Length + WorldLightModel.Sky.Length +
                   WorldLightModel.Terrain.Length + WorldLightModel.Models.Length && WorldLightModel.Rings.Length == 5 && WorldLightModel.DefaultFarClip == 7000,
                   "every constant of the model's table (light direction, sun path, far clip, fog, the dome's rings, the sky, the terrain light, the " +

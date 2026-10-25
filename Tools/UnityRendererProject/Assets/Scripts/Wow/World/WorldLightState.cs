@@ -25,7 +25,9 @@
 //   the switches  (WorldLightSwitches) WMV_LIGHT=off (hard off: nothing is evaluated or set, Stage 09 exactly; read once),
 //                 WMV_LIGHT=on or -wmvWorldLight=on (opt in: the default is off until the owner accepts the stage, D14),
 //                 -wmvWorldLight=off, -wmvGameTime=HH:MM[:SS] (the pinned time), -wmvGameFarclip=N (yards, default 7000),
-//                 the debug arms -wmvLightRule=weakest|strongest|farthest[+2d] and -wmvLightWrap=wrap|clamp; Stage 10 steps 4
+//                 -wmvGameHorizonStart=N (step 7's fog end, after in-game test T7: the game's horizonStart in yards, default
+//                 1900 = the T7 reference sessions' value at graphicsViewDistance 6, not a universal client default; read once
+//                 as the far clip; none of the switches acts with WMV_LIGHT=off), the debug arms -wmvLightRule=weakest|strongest|farthest[+2d] and -wmvLightWrap=wrap|clamp; Stage 10 steps 4
 //                 and 5: -wmvSky=off (no sky, the rest lit), -wmvSkyTable=a|b (the dome's public ring table, SkyDome.cs; a by
 //                 default), -wmvSkyEndFog=off (ring 5 plain SkyFogColor), -wmvTerrainLight=off (the sky kept, the terrain as
 //                 Stage 09 draws it) and -wmvTerrainVariant=hemisphere|flat (the client's flat class, for the record only;
@@ -400,6 +402,7 @@ namespace Wmv.Wow.World
         public double TimeSeconds = WorldClock.Noon;      // -wmvGameTime (pinned)
         public bool TimeGiven;
         public double FarClip = WorldLightModel.DefaultFarClip;
+        public double HorizonStart = WorldLightModel.DefaultHorizonStart;   // -wmvGameHorizonStart (the fog end's input, step 7)
         public WorldLightRules Rules;
         public bool Sky = true;                           // -wmvSky=off: no sky
         public bool SkyTableB;                            // -wmvSkyTable=b: the older public ring table
@@ -419,7 +422,9 @@ namespace Wmv.Wow.World
         /// <summary>-wmvWorldLitView's values (DIAGNOSTIC; _WmvWLModels.z).</summary>
         public const int WorldLitViewNone = 0, WorldLitViewAlbedo = 1, WorldLitViewNormal = 2;
 
-        /// <summary>The defaults of the sky, terrain, doodad, world-model and fog switches (steps 4 to 7)?</summary>
+        /// <summary>The defaults of the sky, terrain, doodad, world-model and fog switches (steps 4 to 7)? The game's far clip and
+        /// horizonStart (-wmvGameFarclip, -wmvGameHorizonStart) are settings of the game the fog reads, not draw switches: not part
+        /// of it.</summary>
         public bool DrawDefaults
         {
             get
@@ -487,6 +492,15 @@ namespace Wmv.Wow.World
                             w.FarClip = n;
                         else
                             w.Notes.Add(a + " is not a number of yards above 0 -- " + WorldLightModel.DefaultFarClip + " is used");
+                    }
+                    else if (a.StartsWith("-wmvGameHorizonStart=", StringComparison.Ordinal))
+                    {
+                        double n;
+                        string v = a.Substring("-wmvGameHorizonStart=".Length);
+                        if (double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out n) && LightGeometry.Finite(n) && n > 0.0)
+                            w.HorizonStart = n;
+                        else
+                            w.Notes.Add(a + " is not a number of yards above 0 -- " + WorldLightModel.DefaultHorizonStart + " is used");
                     }
                     else if (a.StartsWith("-wmvLightRule=", StringComparison.Ordinal))
                     {
@@ -561,11 +575,13 @@ namespace Wmv.Wow.World
 
         public string Describe()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}; clock pinned at {1}{2}; game far clip {3} yd{4}; {5}; {6}{7}",
+            return string.Format(CultureInfo.InvariantCulture, "{0}; clock pinned at {1}{2}; game far clip {3} yd{4}; game horizonStart {5} yd{6}; {7}; {8}{9}",
                                  HardOff ? "WMV_LIGHT=off: hard off (nothing evaluated or set: Stage 09 exactly)"
                                  : On ? "on (opted in)" : "off until the host or a switch turns it on (WMV_LIGHT=on, -wmvWorldLight=on)",
                                  WorldClock.Format(TimeSeconds), TimeGiven ? " (-wmvGameTime)" : "", FarClip,
-                                 FarClip != WorldLightModel.DefaultFarClip ? " (-wmvGameFarclip)" : "",
+                                 FarClip != WorldLightModel.DefaultFarClip ? " (-wmvGameFarclip)" : "", HorizonStart,
+                                 HorizonStart != WorldLightModel.DefaultHorizonStart ? " (-wmvGameHorizonStart)"
+                                 : " (the T7 reference sessions' value at graphicsViewDistance 6)",
                                  Rules.IsDefault ? "Stage 09's selection" : "DEBUG ARM: " + Rules, DescribeDraw(),
                                  Notes.Count > 0 ? "; " + string.Join("; ", Notes.ToArray()) : "");
         }
@@ -596,8 +612,16 @@ namespace Wmv.Wow.World
         }
 
         /// <summary>DescribeObjects for the light object of `product` whose layout lacks the fog columns `fogAbsent`
-        /// (WorldFog.AbsentColumns; null: none lacking): the fog clause then says that object draws no fog.</summary>
+        /// (WorldFog.AbsentColumns; null: none lacking): the fog clause then says that object draws no fog. The fog end's far
+        /// clip and horizonStart are the switches' (FarClip, HorizonStart).</summary>
         public string DescribeObjects(string product, string fogAbsent)
+        {
+            return DescribeObjects(product, fogAbsent, FarClip, HorizonStart);
+        }
+
+        /// <summary>DescribeObjects with the far clip and horizonStart the fog end reads now (WmvWorldLight's: the host may set
+        /// the far clip).</summary>
+        public string DescribeObjects(string product, string fogAbsent, double farClip, double horizonStart)
         {
             const string interiorLit = "lit too (-wmvInteriorLight=outdoor, for the side-by-sides)";
             return (DoodadLight ? "; doodads: outdoor lit (" + Variant(DoodadFlat, "-wmvDoodadVariant=flat") + "), interior " +
@@ -606,7 +630,7 @@ namespace Wmv.Wow.World
                    (WorldModelLight ? "; world models: exterior groups lit (" + Variant(WorldModelFlat, "-wmvWorldModelVariant=flat") + "), interior groups " +
                                       (InteriorOutdoor ? interiorLit : "on the preview rig until Stage 12")
                                     : "; world models as Stage 09 (-wmvWorldModelLight=off)") +
-                   "; exterior MOCV not drawn; water as Stage 09" + DescribeFog(product, fogAbsent) +
+                   "; exterior MOCV not drawn; water as Stage 09" + DescribeFog(product, fogAbsent, farClip, horizonStart) +
                    (WorldLitView == WorldLitViewAlbedo ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=albedo): the world-lit variants draw the albedo " +
                                                          "(light factor 1, no world-model gate factor), valid on opaque and alpha-keyed batches only"
                     : WorldLitView == WorldLitViewNormal ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=normal): the world-lit variants draw 0.5 + 0.5 x the raw " +
@@ -627,8 +651,22 @@ namespace Wmv.Wow.World
         /// and instance drawing its original), so the clause then names them fogged too.</summary>
         public string DescribeFog(string product, string fogAbsent)
         {
+            return DescribeFog(product, fogAbsent, FarClip, HorizonStart);
+        }
+
+        /// <summary>DescribeFog with the far clip F and horizonStart Hs the fog end reads: the Retail pattern's rule names F, Hs and
+        /// E = min(0.933 F, Hs) (WorldFog.EndOf) with their grades.</summary>
+        public string DescribeFog(string product, string fogAbsent, double farClip, double horizonStart)
+        {
             const string what = "the client's per-pixel fog, layer 0, on the lit terrain, outdoor doodads and exterior groups";
-            const string rule = "start min(far clip, 3000) x FogScaler, density FogDensity x 0.0005, end the far clip: INFERRED (public)";
+            string rule = string.Format(CultureInfo.InvariantCulture,
+                                        "end E = min({0:0.###} x far clip, horizonStart) = min({0:0.###} x {1:0.#}, {2:0.#}) = {3:0.#} yd, start FogScaler x " +
+                                        "min(E, {4:0.#}), density FogDensity x {5:0.####}: MEASURED on the PTR 12.1.7 (post-data; the factor {0:0.###} at " +
+                                        "far clip 1000 only; the end at horizonStart 1000 only, above it ASSUMED), Retail unverified; the cap {4:0.#} " +
+                                        "INFERRED (public); the colour ramp and the polynomial path " +
+                                        "read the far clip (ASSUMED)",
+                                        WorldFog.EndFarClipFactor, farClip, horizonStart, WorldFog.EndOf(farClip, horizonStart), WorldFog.StartCap,
+                                        WorldFog.DensityScale);
             bool groups = InteriorOutdoor && WorldModelLight, doodads = InteriorOutdoor && DoodadLight;
             string unfogged = !groups && !doodads ? "; interiors, water, sky and particles unfogged"
                 : "; " + (groups && doodads ? "interior groups and the doodads they list" : groups ? "interior groups" : "the doodads interior groups list") +

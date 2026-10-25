@@ -32,16 +32,26 @@
 //                terrain's; per material UNKNOWN); the interior weight 0 (the outdoor record: INFERRED for outdoor doodads and
 //                exterior groups); the two-record path and the fog-volume composite off.
 //   the record   (Pack, the Retail pattern; every row's value INFERRED (public), D1, unless stated; WorldLightModel.Fog lists
-//                each rule with its grade and state). F the game far clip, v the eased light state (WorldLightSample's
-//                layout with the per-key derived channels below), colours byte / 255 (the CPU's upload INFERRED):
-//                  R0   (min(F, 3000) x FogScaler, F, FogDensity x 0.0005, 0)   FogScaler and FogDensity as read; the start and
-//                                                                              the density are class C until in-game test T7
+//                each rule with its grade and state). F the game far clip, Hs the game's horizonStart (the input, never a
+//                constant: -wmvGameHorizonStart, 1900 by default), v the eased light state (WorldLightSample's layout with the
+//                per-key derived channels below), colours byte / 255 (the CPU's upload INFERRED):
+//                  R0   (FogScaler x min(E, 3000), the end, FogDensity x 0.0005, 0) with E = min(0.933 x F, Hs)
+//                       FogScaler and FogDensity as read. MEASURED in in-game test T7 on the PTR 12.1.7 (stands A and B,
+//                       post-data, exploratory; Retail unverified): the end E, its far-clip factor 0.933 at far clip 1000
+//                       ONLY (a factor and an offset of -67 yd are one curve there; at other far clips ASSUMED), horizonStart
+//                       unscaled (MEASURED at 1000 and 1900; the end at 1900 extrapolated from 1000, Hs above 1900 and
+//                       horizonClip other than 7000 ASSUMED), the start FogScaler x E and the density. The cap 3000 is the
+//                       public rule's, kept where nothing measured it (INFERRED (public)): it never binds at the default.
+//                       The end row: E on a key without the polynomial path, the far clip on a key with it (as committed:
+//                       whether the client feeds that path E is unmeasured, ASSUMED), resolved per key and blended like the
+//                       derived channels -- z E + (1 - z) F with the polynomial switch z drawn this frame
 //                  R1   0                                                      the power path: the power36 arm only
 //                  R2   (0, 1, 0, camera Z - FogHeight)                        the plane in Unity world axes (PlaneOffset)
 //                  R3   (SkyFogColor, FogHeightScaler)
 //                  R4   (kh x 0.0005, EndFogColor)                             derived: kh and the colour's fall-back
 //                  R5   (a, SunFogColor)                                       the sky's tint inputs (SkyDome.SunTint)
 //                  R6   (FogHeightColor, the colour ramp's length)             derived: the colour's fall-back, the length
+//                                                                              (its fall-back the far clip, not E: ASSUMED)
 //                  R7   (SunAngleBlend x SunFogStrength x the day curve, 0, 0, 0)   the sky's (SkyDome.SunTint)
 //                  R8   (the sun direction, FogZScalar)                        the sky's sun path (WorldLightModel)
 //                  R9   the height cubic                                       derived: reversed, all zero -> u^3
@@ -68,7 +78,8 @@
 //   the modes    (ModeFor; by client, D17 and D18: the plan's 6.9 departure (c)) wow and wowt take the Retail pattern; every
 //                other product (Classic Era, MoP Classic, Classic Beta, an unlisted one) is off, unless -wmvFogClassic names
 //                an arm for the side-by-sides, never compared with the game before in-game test T8: "public" = the record
-//                above plus the seven rules of PublicRules, each its own row; "power36" (UNKNOWN) = the power path with end
+//                above with R0 as committed before T7 (min(F, 3000) x FogScaler, F, FogDensity x 0.0005, 0; Hs not read) plus
+//                the seven rules of PublicRules, each its own row; "power36" (UNKNOWN) = the power path with end
 //                FogEnd / 36, start FogScaler x end, rate the derived density with that end, SkyFogColor for all four
 //                colours and no tint (a key whose end is not above its start draws no fog: PowerRefused). A light object
 //                whose layout lacks a column the record is made of, or that did not send it (AbsentColumns), draws no fog
@@ -119,6 +130,10 @@ namespace Wmv.Wow.World
         /// <summary>For the log: the start (R0.x; the power path's start), the end (R0.y; its end), k per yard (R0.z; its
         /// rate) and the fog colour (R3.xyz, authored 0..1).</summary>
         public double Start, End, K;
+        /// <summary>The end rule's inputs and result on the Retail pattern: the game far clip F, horizonStart Hs and E = min(0.933
+        /// F, Hs) (WorldFog.EndOf; R0.y is E on a frame without the polynomial path). The arms: F, Hs as given, E = F (their
+        /// committed end).</summary>
+        public double FarClip, HorizonStart, EndRule;
         public readonly double[] Colour = new double[3];
         /// <summary>The polynomial path mixed in (R12.z below 1); a blended state whose end is not above its start was drawn
         /// without it (z set to 1 this frame).</summary>
@@ -134,6 +149,7 @@ namespace Wmv.Wow.World
             Array.Clear(Colour, 0, Colour.Length);
             Mode = WorldFogMode.Off;
             FogHeight = Start = End = K = 0.0;
+            FarClip = HorizonStart = EndRule = 0.0;
             Artistic = ArtisticRefusedBlend = Power = PowerRefused = false;
         }
 
@@ -146,6 +162,9 @@ namespace Wmv.Wow.World
             o.Start = Start;
             o.End = End;
             o.K = K;
+            o.FarClip = FarClip;
+            o.HorizonStart = HorizonStart;
+            o.EndRule = EndRule;
             o.Artistic = Artistic;
             o.ArtisticRefusedBlend = ArtisticRefusedBlend;
             o.Power = Power;
@@ -153,7 +172,8 @@ namespace Wmv.Wow.World
         }
 
         /// <summary>The state line's clause, the one formatter the player says (WmvWorldLight.FogText) and the runner tests: "fog:
-        /// start S yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes (the rig's parser reads them so), the
+        /// start S yd, k K /yd, end E yd, colour (r, g, b)" with the colour in whole bytes (the rig's parser reads them so) -- on
+        /// the Retail pattern followed by the end rule's inputs, ", E X yd = min(0.933 x far clip F, horizonStart Hs)" --, the
         /// power path's "fog: power path, start S yd, end E yd, rate R, colour (...)", an arm's mode in brackets at the end, or
         /// "fog: off" (the player says why instead).</summary>
         public string Summary()
@@ -162,14 +182,20 @@ namespace Wmv.Wow.World
                 return "fog: off";
             string colour = string.Format(CultureInfo.InvariantCulture, "({0}, {1}, {2})", Math.Round(Colour[0] * 255.0), Math.Round(Colour[1] * 255.0),
                                           Math.Round(Colour[2] * 255.0));
-            string arm = Mode != WorldFogMode.RetailPattern ? " [" + WorldFog.ModeName(Mode) + "]" : "";
+            bool retail = Mode == WorldFogMode.RetailPattern;
+            string arm = !retail ? " [" + WorldFog.ModeName(Mode) + "]" : "";
             if (Power)
                 return PowerRefused
                     ? "fog: power path refused (end not above start: no fog drawn), colour " + colour + arm
                     : string.Format(CultureInfo.InvariantCulture, "fog: power path, start {0:0.#} yd, end {1:0.#} yd, rate {2:0.###}, colour {3}{4}",
                                     Start, End, K, colour, arm);
-            return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}{6}",
-                                 Start, K, End, colour, Artistic ? ", polynomial path mixed in" : "",
+            string rule = retail
+                ? string.Format(CultureInfo.InvariantCulture, ", E {0:0.#} yd = min({1:0.###} x far clip {2:0.#}, horizonStart {3:0.#})", EndRule,
+                                WorldFog.EndFarClipFactor, FarClip, HorizonStart)
+                : "";
+            return string.Format(CultureInfo.InvariantCulture, "fog: start {0:0.#} yd, k {1:0.######} /yd, end {2:0.#} yd, colour {3}{4}{5}{6}{7}",
+                                 Start, K, End, colour, rule,
+                                 Artistic ? (retail ? ", polynomial path mixed in (end row z E + (1 - z) far clip)" : ", polynomial path mixed in") : "",
                                  ArtisticRefusedBlend ? ", polynomial path refused this frame (end not above start)" : "", arm);
         }
     }
@@ -278,14 +304,39 @@ namespace Wmv.Wow.World
         public const double ArtFade = 1.0 / 0.3;
         public const string ProgramGrade = WorldLightModel.ProvenBytes;
 
-        // ---- the mapping's constants (INFERRED (public) unless stated; WorldLightModel.Fog)
+        // ---- the mapping's constants (WorldLightModel.Fog grades each). The Retail pattern's end, start and density were measured
+        // in in-game test T7 on the PTR client 12.1.7 (stands A and B, post-data and exploratory, owner-approved 2026-10-25):
+        // MEASURED there, Retail unverified. The far clip and horizonStart are the game's settings, Pack's inputs.
 
-        /// <summary>start = min(far clip, StartCap) x FogScaler. Class C until in-game test T7.</summary>
+        /// <summary>The fog end's far-clip factor b: E = min(b x far clip, horizonStart) (R0.y). MEASURED at far clip 1000 ONLY
+        /// (0.9332 [0.9325, 0.9339] jointly, every pair 0.9325-0.9338), where a factor 0.933 and an offset of -67 yd cannot be told
+        /// apart; at any other far clip ASSUMED (with horizonStart 1900 it acts only below about 2040 yd).</summary>
+        public const double EndFarClipFactor = 0.933;
+        public const string EndFarClipFactorGrade = WorldLightModel.Measured;
+        /// <summary>The fog end's horizonStart factor: 1, horizonStart enters unscaled. MEASURED at horizonStart 1000 and 1900
+        /// (1.0001 [0.9988, 1.0013] jointly); the end at 1900 is the rule's extrapolation from 1000, horizonStart above 1900 and a
+        /// horizonClip other than 7000 are ASSUMED.</summary>
+        public const double EndHorizonStartFactor = 1.0;
+        public const string EndHorizonStartFactorGrade = WorldLightModel.Measured;
+        /// <summary>The start's factor on E: start = FogScaler x StartFactor x min(E, StartCap). MEASURED (1: FogScaler x E within
+        /// about 1 % at horizonStart 1000 and 1900, and at far clip 1000).</summary>
+        public const double StartFactor = 1.0;
+        public const string StartFactorGrade = WorldLightModel.Measured;
+        /// <summary>start = FogScaler x min(E, StartCap): the public rule's cap, kept where nothing measured it (INFERRED (public));
+        /// it never binds at the default (E 1900). The public arm keeps min(far clip, StartCap) x FogScaler.</summary>
         public const double StartCap = 3000.0;
         public const string StartCapGrade = WorldLightModel.InferredPublic;
-        /// <summary>k = FogDensity x DensityScale per yard. Class C until in-game test T7.</summary>
+        /// <summary>k = FogDensity x DensityScale per yard: MEASURED (the multiplier 0.996-1.016 per pair, the same at two densities
+        /// within 0.7 %).</summary>
         public const double DensityScale = 0.0005;
-        public const string DensityScaleGrade = WorldLightModel.InferredPublic;
+        public const string DensityScaleGrade = WorldLightModel.Measured;
+
+        /// <summary>The fog end E = min(EndFarClipFactor x farClip, EndHorizonStartFactor x horizonStart) of the Retail pattern
+        /// (see EndFarClipFactor for what is measured).</summary>
+        public static double EndOf(double farClip, double horizonStart)
+        {
+            return Math.Min(EndFarClipFactor * farClip, EndHorizonStartFactor * horizonStart);
+        }
 
         // ---- the public arm's rules (PublicRules; "arm only": never applied on the Retail pattern)
 
@@ -541,18 +592,19 @@ namespace Wmv.Wow.World
         static double Float(double[] v, int column) { return v[WorldLightSample.FloatAt(column)]; }
 
         /// <summary>The frame's record (see the file header) from the eased state `v` (WorldLightSample's layout), the game far
-        /// clip, the camera's game height, the light's half-minute, the sun direction in Unity world axes (the vector the sky
-        /// gets), the map's three flag words and the mode. Off clears the record. Nothing is allocated.</summary>
-        public static void Pack(double[] v, double farClip, double cameraGameZ, int halfMinute, double[] sunUnity, long[] mapFlags, WorldFogMode mode,
-                                WorldFogRecord r)
+        /// clip, the game's horizonStart, the camera's game height, the light's half-minute, the sun direction in Unity world
+        /// axes (the vector the sky gets), the map's three flag words and the mode. Off clears the record. Nothing is
+        /// allocated.</summary>
+        public static void Pack(double[] v, double farClip, double horizonStart, double cameraGameZ, int halfMinute, double[] sunUnity, long[] mapFlags,
+                                WorldFogMode mode, WorldFogRecord r)
         {
-            Pack(v, farClip, cameraGameZ, halfMinute, sunUnity, mapFlags, mode, PublicAll, r);
+            Pack(v, farClip, horizonStart, cameraGameZ, halfMinute, sunUnity, mapFlags, mode, PublicAll, r);
         }
 
         /// <summary>Pack with the public arm's rules limited to `publicRules` (Public* bits; the tests switch each off in turn).
-        /// Every other mode ignores it.</summary>
-        public static void Pack(double[] v, double farClip, double cameraGameZ, int halfMinute, double[] sunUnity, long[] mapFlags, WorldFogMode mode,
-                                int publicRules, WorldFogRecord r)
+        /// Every other mode ignores it. Only the Retail pattern reads `horizonStart`.</summary>
+        public static void Pack(double[] v, double farClip, double horizonStart, double cameraGameZ, int halfMinute, double[] sunUnity, long[] mapFlags,
+                                WorldFogMode mode, int publicRules, WorldFogRecord r)
         {
             r.Clear();
             r.Mode = mode;
@@ -588,7 +640,28 @@ namespace Wmv.Wow.World
                     fogHeight = fogHeight > FogHeightOffAbove ? 0.0 : Math.Max(fogHeight, FogHeightFloor);
             }
             r.FogHeight = fogHeight;
-            Put(R, 0, Math.Min(far, StartCap) * scaler, far, density * DensityScale, 0.0);
+            double artEnd = Float(v, WorldLightColumns.MainFogEndDist), artStart = Float(v, WorldLightColumns.MainFogStartDist);
+            double z = v[fb + DerivedPolySwitch];
+            if (z < 1.0 && !(artEnd > artStart))
+            {
+                z = 1.0;                                // only while blending with a refused key: drawn without the path, said
+                r.ArtisticRefusedBlend = true;
+            }
+            r.FarClip = far;
+            r.HorizonStart = horizonStart;
+            if (mode == WorldFogMode.RetailPattern)
+            {
+                // T7's rule (see the file header): E = min(0.933 F, Hs), the start FogScaler x min(E, 3000); the end row E where
+                // the polynomial path is not drawn and the far clip where it is (per key: z E + (1 - z) F, exact at z 0 and 1).
+                double e = EndOf(far, horizonStart);
+                r.EndRule = e;
+                Put(R, 0, scaler * StartFactor * Math.Min(e, StartCap), z >= 1.0 ? e : z * e + (1.0 - z) * far, density * DensityScale, 0.0);
+            }
+            else
+            {
+                r.EndRule = far;                        // the arms: R0 as committed before T7
+                Put(R, 0, Math.Min(far, StartCap) * scaler, far, density * DensityScale, 0.0);
+            }
             Put(R, 2, 0.0, 1.0, 0.0, PlaneOffset(cameraGameZ, r));
             int sky = WorldLightSample.ColourAt(WorldLightColumns.SkyFogColor);
             Put(R, 3, v[sky], v[sky + 1], v[sky + 2], Float(v, WorldLightColumns.FogHeightScaler));
@@ -604,13 +677,6 @@ namespace Wmv.Wow.World
             int m = WorldLightSample.FloatAt(WorldLightColumns.MainFogCoefficients), hd = WorldLightSample.FloatAt(WorldLightColumns.HeightDensityFogCoeff);
             Put(R, 10, v[m + 3], v[m + 2], v[m + 1], v[m]);
             Put(R, 11, v[hd + 3], v[hd + 2], v[hd + 1], v[hd]);
-            double artEnd = Float(v, WorldLightColumns.MainFogEndDist), artStart = Float(v, WorldLightColumns.MainFogStartDist);
-            double z = v[fb + DerivedPolySwitch];
-            if (z < 1.0 && !(artEnd > artStart))
-            {
-                z = 1.0;                                // only while blending with a refused key: drawn without the path, said
-                r.ArtisticRefusedBlend = true;
-            }
             r.Artistic = z < 1.0;
             Put(R, 12, artEnd, artStart, z, 1.0);
             Put(R, 13, v[fb + DerivedEndHeightColour], v[fb + DerivedEndHeightColour + 1], v[fb + DerivedEndHeightColour + 2],

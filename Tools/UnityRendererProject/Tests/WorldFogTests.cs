@@ -3,7 +3,9 @@
 // Unit tests of Stage 10 step 7 (docs/world-viewer/10-light-sky-fog.md 4.0, 4.6, 6.9, 6.13): the client's per-pixel fog and the
 // table-to-record mapping (Assets/Scripts/Wow/World/WorldFog.cs), the light sample's derived fog channels (WorldLight.cs,
 // WorldLightState.cs), the sky's shared tint inputs (SkyDome.SunTint), the graded table (WorldLightModel.Fog) and the synthetic
-// world model's material flags (WmoSynthetic.ContextRoot). The step-7 runner cases R1-R14:
+// world model's material flags (WmoSynthetic.ContextRoot). The step-7 runner cases R1-R15 (after in-game test T7, R3, R5, R6,
+// R7 and R8 check the corrected end rule E = min(0.933 x far clip, horizonStart), start FogScaler x min(E, 3000), and R15 is
+// the rule itself):
 //
 //   R1   the client's terrain program as the target: WorldFog.Apply (kind 0) on the lit output of the Retail terrain program
 //        2977247 p_1, re-executed offline with its own fog skip, reproduces the program's fog-on output within 2e-6, on 59
@@ -12,7 +14,7 @@
 //        alpha), 16 cases; word 4's lit output carries the program's own premultiply (p_1:309-310) and kind 4 adds none
 //   R3   Pack on the client's own keys (LightParams 5985 at 06:49:56, 11:53:30 and 18:46:13; 5951, 5944 and 6033 at 12:00), a
 //        Retail Z key and one synthetic key per fall-back predicate, every row against an independent Python port of the
-//        spec's mapping (fogpack_ref.py), plus the values the spec's table names; and blends of a key with and a key without
+//        spec's mapping (fogpack_ref.py; R0.x and R0.y T7's rule instead), plus the values the spec's table names; and blends of a key with and a key without
 //        each predicate at f = 0, 1e-6, 0.5, 1 - 1e-6 and 1: every row but the sky's tint inputs is the blend of the two keys'
 //        rows (the per-key order: no jump at either end)
 //   R4   SkyDome.Inputs after the SunTint extraction equals HEAD's Inputs (a copy below) on every key of 5985, 5944 and 5951 at
@@ -22,6 +24,7 @@
 //        11:53 (start 2,382 yd, density 1 under Map Flags[2] 0x2 on Era, the derived 1.5 on MoP), the power36 arm (end 889,
 //        start 706, rate 4.99, visibility 0.27 at 748 yd); each of the public arm's seven rules switched off alone changes
 //        the record on a key that exercises it, and with all seven off the arm is the Retail record (no unlisted rule acts)
+//        but for R0.x and R0.y (T7's rule is the Retail pattern's; the arm keeps min(F, 3000) x FogScaler and F)
 //   R6   twin invariants: before the start visibility 1.0 and Apply returns the input itself; visibility non-increasing along
 //        a ray; 0 beyond the end; kinds 1-4; the eye (raw 0) and R5.x = 1 give the untinted colour; Sat(NaN) = 0
 //   R7   the switches -wmvFog and -wmvFogClassic, refused values as notes, DrawDefaults, the DescribeObjects texts (with
@@ -40,6 +43,10 @@
 //        at every half-minute, with and without point lights, and the derived block equals DeriveKey per key, then the blend
 //   R14  WmoSynthetic.ContextRoot's old overload gives HEAD's bytes (SHA-256 pinned) and the new one with HEAD's two
 //        materials the same bytes; other flags and blends are read back by the parser
+//   R15  T7's end rule: Pack at far clips 1000 and 7000 and horizonStart 1000, 1900, 2500 and 3500 (E, the start, the cap at
+//        3500, the end fade's zero at E); the colour ramp's and the polynomial path's far clip (ASSUMED, as committed) and the
+//        blend's z E + (1 - z) F; the arms and the products the fog is off for untouched by horizonStart; -wmvGameHorizonStart
+//        parsed, refused values as notes, the texts naming F, Hs and E; WMV_LIGHT=off untouched
 // The fixtures at the end of this file are generated (their generator and inputs are named there with their SHA-256); the
 // runner reads no file for them. Framework-free like the other suites: RunAll returns the failure count.
 
@@ -79,6 +86,9 @@ namespace Wmv.Wow.Tests
         static readonly double[] UpUnity = { 0.0, 1.0, 0.0 };
         static readonly long[] NoFlags = { 0, 0, 0 };
         const double Far = 7000.0, CameraZ = 40.0;
+        /// <summary>The game's horizonStart the records are packed with (the default, -wmvGameHorizonStart's): the fog end is
+        /// E = min(0.933 x Far, Hs) = 1900 on the Retail pattern.</summary>
+        const double Hs = WorldLightModel.DefaultHorizonStart;
 
         // ================================================================================== the fixtures' shapes
 
@@ -166,10 +176,10 @@ namespace Wmv.Wow.Tests
         }
 
         static WorldFogRecord PackOf(double[] v, int hm, double[] sun, WorldFogMode mode = WorldFogMode.RetailPattern, long[] flags = null,
-                                     double far = Far, int rules = WorldFog.PublicAll)
+                                     double far = Far, int rules = WorldFog.PublicAll, double hs = Hs)
         {
             var r = new WorldFogRecord();
-            WorldFog.Pack(v, far, CameraZ, hm, sun ?? new[] { 0.0, 1.0, 0.0 }, flags ?? NoFlags, mode, rules, r);
+            WorldFog.Pack(v, far, hs, CameraZ, hm, sun ?? new[] { 0.0, 1.0, 0.0 }, flags ?? NoFlags, mode, rules, r);
             return r;
         }
 
@@ -270,37 +280,59 @@ namespace Wmv.Wow.Tests
             return r[at] == red / 255.0 && r[at + 1] == green / 255.0 && r[at + 2] == blue / 255.0;
         }
 
+        /// <summary>T7's end rule as the tests state it, independently of WorldFog's constants: E = min(0.933 x far clip, horizonStart).</summary>
+        static double T7End(double far, double hs) { return Math.Min(0.933 * far, hs); }
+
         static void PackTests()
         {
-            int matched = 0;
+            // The port (fogpack_ref.py) was written for the rule committed before in-game test T7: R0 = (min(F, 3000) x FogScaler,
+            // F, ...). Every row but R0.x and R0.y is still the port's; those two are T7's rule, stated here from the case's own
+            // inputs: R0.x = FogScaler x min(E, 3000) with FogScaler the port's (its R0.x / 3000, checked against the sample's), R0.y
+            // = E on a record without the polynomial path and z E + (1 - z) F with it (z the port's R12.z).
+            int matched = 0, polynomial = 0;
             string firstDiff = null;
+            double e7 = T7End(Far, Hs);
             foreach (PackCase c in PackCases)
             {
                 WorldLightSample smp = SampleAt(SetOf("wow", NoFlags, c.Day), c.HalfMinute);
                 WorldFogRecord r = PackOf(smp.V, c.HalfMinute, c.Sun);
-                bool same = smp.Valid && Near(r.FogHeight, c.FogHeight, 1e-12) && Near(r.Start, c.Start, 1e-12) && Near(r.End, c.End, 1e-12) &&
-                            Near(r.K, c.K, 1e-12) && r.Artistic == c.Artistic && r.ArtisticRefusedBlend == c.Refused && r.Mode == WorldFogMode.RetailPattern;
+                double scaler = smp.Float(WorldLightColumns.FogScaler), zc = c.R[50];
+                double wantStart = scaler * Math.Min(e7, 3000.0), wantEnd = zc >= 1.0 ? e7 : zc * e7 + (1.0 - zc) * Far;
+                if (zc < 1.0)
+                    polynomial++;
+                bool port = Near(c.R[0], 3000.0 * scaler, 1e-12) && c.R[1] == Far && c.Start == c.R[0] && c.End == c.R[1];
+                bool same = smp.Valid && port && Near(r.FogHeight, c.FogHeight, 1e-12) && Near(r.Start, wantStart, 1e-12) && Near(r.End, wantEnd, 1e-12) &&
+                            Near(r.K, c.K, 1e-12) && r.Artistic == c.Artistic && r.ArtisticRefusedBlend == c.Refused && r.Mode == WorldFogMode.RetailPattern &&
+                            r.EndRule == e7 && r.FarClip == Far && r.HorizonStart == Hs;
                 for (int k = 0; k < 56; k++)
-                    if (!Near(r.R[k], c.R[k], 1e-12))
+                {
+                    double want = k == 0 ? wantStart : k == 1 ? wantEnd : c.R[k];
+                    if (!Near(r.R[k], want, 1e-12))
                     {
                         same = false;
-                        firstDiff = firstDiff ?? c.Name + " row " + k / 4 + "." + "xyzw"[k % 4] + ": " + F(r.R[k], "R") + " against " + F(c.R[k], "R");
+                        firstDiff = firstDiff ?? c.Name + " row " + k / 4 + "." + "xyzw"[k % 4] + ": " + F(r.R[k], "R") + " against " + F(want, "R");
                     }
+                }
                 if (same)
                     matched++;
                 else
-                    firstDiff = firstDiff ?? c.Name + ": the log fields";
+                    firstDiff = firstDiff ?? c.Name + ": the log fields" + (port ? "" : " (the port's R0 is not the pre-T7 rule)");
             }
-            Check(matched == PackCases.Length,
+            Check(matched == PackCases.Length && polynomial > 0,
                   "R3 Pack on the client's keys and the synthetic fall-back keys: every row of " + matched + " / " + PackCases.Length + " records equals " +
-                  "the independent Python port's (fogpack_ref.py) within 1e-12" + (firstDiff != null ? "; first difference " + firstDiff : ""));
+                  "the independent Python port's (fogpack_ref.py) within 1e-12, R0.x and R0.y T7's rule (start FogScaler x min(E, 3000), end E = " +
+                  "min(0.933 x " + F(Far) + ", " + F(Hs) + ") = " + F(e7) + "; the far clip on the " + polynomial + " record(s) with the polynomial path)" +
+                  (firstDiff != null ? "; first difference " + firstDiff : ""));
 
             // The values the spec's table names (5985; the state dump of the references' times).
             WorldLightSet sf = SetOf("wow", NoFlags, Day5985);
             WorldFogRecord dawn = PackOf(SampleAt(sf, 819).V, 819, NoonSun), noon = PackOf(SampleAt(sf, 1427).V, 1427, NoonSun),
                            dusk = PackOf(SampleAt(sf, 2252).V, 2252, NoonSun);
             WorldLightSample sNoon = SampleAt(sf, 1427);
-            bool r0 = noon.R[0] == 3000.0 * sNoon.Float(WorldLightColumns.FogScaler) && Math.Abs(noon.R[0] - 450.0) < 1e-3 && noon.R[1] == 7000.0 &&
+            // T7's rule at the default far clip 7000 and horizonStart 1900: E = min(0.933 x 7000, 1900) = 1900, the start
+            // FogScaler 0.15 x 1900 = 285 (the cap 3000 does not bind), the density as before.
+            bool r0 = noon.R[0] == sNoon.Float(WorldLightColumns.FogScaler) * 1900.0 && Math.Abs(noon.R[0] - 285.0) < 1e-3 && noon.R[1] == 1900.0 &&
+                      noon.EndRule == 1900.0 && noon.FarClip == 7000.0 && noon.HorizonStart == 1900.0 && dawn.R[1] == 1900.0 && dusk.R[1] == 1900.0 &&
                       noon.R[2] == sNoon.Float(WorldLightColumns.FogDensity) * 0.0005 && noon.R[3] == 0.0 &&
                       Math.Abs(dawn.R[2] - 0.001284) < 5e-7 && Math.Abs(noon.R[2] - 0.001495) < 5e-7 && Math.Abs(dusk.R[2] - 0.001049) < 5e-7;
             bool plane = noon.R[11] == CameraZ - 30.0 && Near(noon.R[15], 0.0025, 1e-7) && Near(noon.R[16], 0.0005, 1e-9) && noon.R[8] == 0.0 &&
@@ -315,21 +347,23 @@ namespace Wmv.Wow.Tests
             bool tint = dawn.R[20] == 0.0 && IsBytes(dawn.R, 21, 229, 166, 120) && Math.Abs(dawn.R[28] - 0.195) < 1e-4 && Near(noon.R[28], 0.3, 1e-7) &&
                         dusk.R[28] == 0.0 && noon.R[48] == 0.0 && noon.R[49] == 0.0 && noon.R[50] == 1.0 && noon.R[51] == 1.0 && !noon.Artistic;
             Check(r0 && plane && cubic && colours && ramp && tint,
-                  "R3 the spec's 5985 values: R0 = (3000 x FogScaler = " + F(noon.R[0], "0.####") + ", 7000, FogDensity x 0.0005 = " + F(dawn.R[2]) + " / " +
+                  "R3 the spec's 5985 values with T7's rule: R0 = (FogScaler x min(E, 3000) = " + F(noon.R[0], "0.####") + ", E = min(0.933 x 7000, " +
+                  "1900) = " + F(noon.R[1]) + ", FogDensity x 0.0005 = " + F(dawn.R[2]) + " / " +
                   F(noon.R[2]) + " / " + F(dusk.R[2]) + ", 0); the plane camera Z - 30, rate 0.0025, kh 0.0005; R9 (program order) at the three times; " +
                   "SkyFog " + Bytes(dawn.R, 12) + " " + Bytes(noon.R, 12) + " " + Bytes(dusk.R, 12) + ", EndFog, FogHeight and EndFogHeight as the " +
                   "dump; the ramp from 2100 (2190.22 at dusk) over 900; the tint a 0, weight 0.195 / 0.3 / 0; no polynomial path");
 
-            // The Z key: k 0, the end fade from 0.3 F only.
+            // The Z key: k 0, the end fade from 0.3 of the end only (T7: the end E = min(0.933 x F, horizonStart) = 1900).
             WorldFogRecord z = PackOf(SampleAt(SetOf("wow", NoFlags, DayZ), 1440).V, 1440, NoonSun);
+            double zEnd = T7End(Far, Hs);
             double vNear, vMid, vFar, vBeyond, hf;
-            WorldFog.Visibility(z, new[] { 0.29 * Far, 0.0, 0.0 }, UpUnity, out vNear, out hf);
-            WorldFog.Visibility(z, new[] { 0.299 * Far, 0.0, 0.0 }, UpUnity, out vMid, out hf);
-            WorldFog.Visibility(z, new[] { 0.65 * Far, 0.0, 0.0 }, UpUnity, out vFar, out hf);
-            WorldFog.Visibility(z, new[] { Far + 1.0, 0.0, 0.0 }, UpUnity, out vBeyond, out hf);
-            Check(z.R[2] == 0.0 && z.R[16] == 0.0 && vNear == 1.0 && vMid == 1.0 && Math.Abs(vFar - 0.5) < 1e-9 && vBeyond == 0.0,
-                  "R3 a Retail Z key (FogDensity 0, FogEnd 0): k 0 and kh 0; visibility exactly 1 below 0.3 F, " + F(vFar) + " at 0.65 F (the end fade), 0 " +
-                  "beyond F (0.29 F and 0.299 F exactly 1)");
+            WorldFog.Visibility(z, new[] { 0.29 * zEnd, 0.0, 0.0 }, UpUnity, out vNear, out hf);
+            WorldFog.Visibility(z, new[] { 0.299 * zEnd, 0.0, 0.0 }, UpUnity, out vMid, out hf);
+            WorldFog.Visibility(z, new[] { 0.65 * zEnd, 0.0, 0.0 }, UpUnity, out vFar, out hf);
+            WorldFog.Visibility(z, new[] { zEnd + 1.0, 0.0, 0.0 }, UpUnity, out vBeyond, out hf);
+            Check(z.R[2] == 0.0 && z.R[16] == 0.0 && z.R[1] == zEnd && vNear == 1.0 && vMid == 1.0 && Math.Abs(vFar - 0.5) < 1e-9 && vBeyond == 0.0,
+                  "R3 a Retail Z key (FogDensity 0, FogEnd 0): k 0 and kh 0; the end E = " + F(zEnd) + "; visibility exactly 1 below 0.3 E, " + F(vFar) +
+                  " at 0.65 E (the end fade), 0 beyond E (0.29 E and 0.299 E exactly 1)");
 
             // One synthetic key per fall-back predicate: what each rule puts in the record.
             WorldFogRecord[] x = new WorldFogRecord[Synthetic.Length];
@@ -355,7 +389,8 @@ namespace Wmv.Wow.Tests
             bool polyRefused = x[10].R[50] == 1.0 && !x[10].Artistic && !x[10].ArtisticRefusedBlend;
             Check(endZero && heightZero && endHeightZero && bothZero && rampZero && sunZero && coefficientsZero && scalerZero && polyOn && polyRefused,
                   "R3 one key per fall-back: EndFogColor zero -> SkyFogColor (" + Bytes(x[1].R, 17) + "); FogHeightColor zero -> SkyFogColor; " +
-                  "EndFogHeightColor zero -> the key's EndFogColor, and SkyFogColor when that is zero too; EndFogColorDistance 0 -> the far clip; " +
+                  "EndFogHeightColor zero -> the key's EndFogColor, and SkyFogColor when that is zero too; EndFogColorDistance 0 -> the far clip " +
+                  "(not E: as committed, ASSUMED); " +
                   "SunFogColor zero -> threshold 1; coefficients zero -> u^3 (1, 0, 0, 0); FogHeightScaler 0 -> kh = FogDensity; the polynomial " +
                   "path on (z 0, the coefficients reversed) and refused (z 1)");
 
@@ -558,7 +593,8 @@ namespace Wmv.Wow.Tests
                   F(ePow.Start, "0.#") + ", rate " + F(ePow.K, "0.###") + ", visibility 1 at 700 yd, " + F(v748, "0.###") + " at 748, 0 beyond 889; " +
                   "SkyFogColor for all four colours, no tint");
 
-            // Each rule of the public arm alone, on a state that exercises it; with all off the arm is the Retail record.
+            // Each rule of the public arm alone, on a state that exercises it; with all off the arm is the Retail record but for
+            // T7's end rule, which is the Retail pattern's alone: the arm keeps R0 = (min(F, 3000) x FogScaler, F) as committed.
             WorldLightSample basis = SampleAt(SetOf("wow", NoFlags, Synthetic[0]), 1440);
             int fFogEnd = WorldLightSample.FloatAt(WorldLightColumns.FogEnd), fScaler = WorldLightSample.FloatAt(WorldLightColumns.FogScaler),
                 fDensity = WorldLightSample.FloatAt(WorldLightColumns.FogDensity), fHeight = WorldLightSample.FloatAt(WorldLightColumns.FogHeight);
@@ -590,8 +626,12 @@ namespace Wmv.Wow.Tests
                 for (int k = 0; k < 56; k++)
                 {
                     differs |= all.R[k] != without.R[k];
-                    none &= noRules.R[k] == retail.R[k];
+                    if (k >= 2)
+                        none &= noRules.R[k] == retail.R[k];
                 }
+                double eRetail = T7End(st.Far, Hs);
+                none &= noRules.R[0] == Math.Min(st.Far, 3000.0) * st.Scaler && noRules.R[1] == st.Far && noRules.EndRule == st.Far &&
+                        retail.R[0] == st.Scaler * Math.Min(eRetail, 3000.0) && retail.R[1] == eRetail && retail.EndRule == eRetail;
                 each &= differs;
                 int bit = 0;
                 while ((1 << bit) != st.Rule)
@@ -600,7 +640,9 @@ namespace Wmv.Wow.Tests
             }
             Check(each && none && states.Length == 7 && WorldFog.PublicRuleNames.Length == 7,
                   "R5 the public arm's seven rules, each switched off alone, change the record on a state that exercises it (" +
-                  string.Join("; ", changed) + "); with all seven off the arm's record is the Retail pattern's (no unlisted rule acts)");
+                  string.Join("; ", changed) + "); with all seven off the arm's record is the Retail pattern's (no unlisted rule acts) but for R0.x " +
+                  "and R0.y: the arm's min(F, 3000) x FogScaler and F as committed, the Retail pattern's T7 rule FogScaler x min(E, 3000) and E = " +
+                  "min(0.933 F, horizonStart)");
         }
 
         // ================================================================================== R6: twin invariants
@@ -608,11 +650,11 @@ namespace Wmv.Wow.Tests
         static void TwinTests()
         {
             WorldFogRecord r = PackOf(SampleAt(SetOf("wow", NoFlags, Day5985), 1440).V, 1440, NoonSun);
-            double start = r.R[0];
+            double start = r.R[0], end = r.R[1];
             var lit = new[] { 0.31, 0.47, 0.22, 0.6 };
             var o = new double[4];
-            bool near = true;
-            foreach (double d in new[] { 0.0, 1.0, 100.0, 300.0, 449.9, start - 1e-6 })
+            bool near = start > 200.0;
+            foreach (double d in new[] { 0.0, 1.0, 100.0, 0.5 * start, start - 0.1, start - 1e-6 })
                 foreach (double h in new[] { -10.0, 0.0, 85.0 })
                 {
                     double vis, hf;
@@ -632,7 +674,7 @@ namespace Wmv.Wow.Tests
                     WorldFog.Visibility(r, new[] { d, h, 0.0 }, UpUnity, out vis, out hf);
                     monotone &= vis <= last;
                     last = vis;
-                    if (d > Far)
+                    if (d > end)
                         beyond &= vis == 0.0;
                 }
             }
@@ -681,7 +723,7 @@ namespace Wmv.Wow.Tests
                        WorldFog.Sat(-0.5) == 0.0 && WorldFog.Sat(0.25) == 0.25 && WorldFog.Sat(1.5) == 1.0;
             Check(near && monotone && beyond && k0 && k1 && k2 && k3 && k4 && eye && angleOne && sat,
                   "R6 the twin: before the start (" + F(start, "0.###") + " yd) visibility 1.0 and Apply returns the input itself; visibility " +
-                  "non-increasing along rays at three heights and 0 beyond the end; kind 0 mixes towards the fog colour, 1 = rgb x vis, 4 = rgba x vis, " +
+                  "non-increasing along rays at three heights and 0 beyond the end (" + F(end, "0.#") + " yd); kind 0 mixes towards the fog colour, 1 = rgb x vis, 4 = rgba x vis, " +
                   "2 / 3 white / grey at visibility 0; at the eye (raw 0) and with R5.x = 1 the colour is finite and untinted; Sat(NaN) = 0");
         }
 
@@ -706,8 +748,11 @@ namespace Wmv.Wow.Tests
                    eraArm = pub.DescribeObjects("wow_classic_era"), mopArm = pow.DescribeObjects("wow_classic"), unknown = d.DescribeObjects(),
                    fogOff = off.DescribeObjects("wow"), beta = d.DescribeObjects("wow_beta");
             bool texts = retail.Contains("; fog: the client's per-pixel fog, layer 0, on the lit terrain, outdoor doodads and exterior groups (product wow, " +
-                                         "Retail pattern; start min(far clip, 3000) x FogScaler, density FogDensity x 0.0005, end the far clip: INFERRED " +
-                                         "(public)); interiors, water, sky and particles unfogged") &&
+                                         "Retail pattern; end E = min(0.933 x far clip, horizonStart) = min(0.933 x 7000, 1900) = 1900 yd, start FogScaler x " +
+                                         "min(E, 3000), density FogDensity x 0.0005: MEASURED on the PTR 12.1.7 (post-data; the factor 0.933 at far clip 1000 " +
+                                         "only; the end at horizonStart 1000 only, above it ASSUMED), Retail unverified; the cap 3000 INFERRED (public); the " +
+                                         "colour ramp and the polynomial path read the far clip " +
+                                         "(ASSUMED)); interiors, water, sky and particles unfogged") &&
                          ptr.Contains("(product wowt, Retail pattern") && era.Contains("; fog off for product wow_classic_era (D17/D18)") && !era.Contains("ARM") &&
                          eraArm.Contains("; fog off for product wow_classic_era (D17/D18) [ARM -wmvFogClassic=public: not compared with the game]") &&
                          mopArm.Contains("product wow_classic (D17/D18) [ARM -wmvFogClassic=power36: not compared with the game]") &&
@@ -743,7 +788,8 @@ namespace Wmv.Wow.Tests
 
             // One formatter (log only): the state line's clause is WorldFogRecord.Summary, the text the player says and the rig's
             // foglog.py parses -- whole bytes, the arm in brackets.
-            var sr = new WorldFogRecord { Mode = WorldFogMode.RetailPattern, Start = 450.0, K = 0.00105, End = 7000.0 };
+            var sr = new WorldFogRecord { Mode = WorldFogMode.RetailPattern, Start = 285.0, K = 0.00105, End = 1900.0, FarClip = 7000.0, HorizonStart = 1900.0,
+                                          EndRule = 1900.0 };
             sr.Colour[0] = 113.0 / 255.0; sr.Colour[1] = 67.0 / 255.0; sr.Colour[2] = 57.6 / 255.0;
             var sa = new WorldFogRecord();
             sr.CopyTo(sa);
@@ -753,19 +799,22 @@ namespace Wmv.Wow.Tests
             string tr = sr.Summary(), ta = sa.Summary(), tp = sp.Summary();
             var parser = new Regex(@"fog: start ([-\d.]+) yd, k ([-\d.eE]+) /yd, end ([-\d.]+) yd, colour \((\d+), (\d+), (\d+)\)");
             Match pm = parser.Match(tr);
-            bool one = tr == "fog: start 450 yd, k 0.00105 /yd, end 7000 yd, colour (113, 67, 58)" && pm.Success && pm.Groups[6].Value == "58" &&
-                       ta == tr + " [" + WorldFog.ModeName(WorldFogMode.ClassicPublic) + "]" &&
+            const string clause = "fog: start 285 yd, k 0.00105 /yd, end 1900 yd, colour (113, 67, 58)";
+            bool one = tr == clause + ", E 1900 yd = min(0.933 x far clip 7000, horizonStart 1900)" && pm.Success && pm.Groups[6].Value == "58" &&
+                       pm.Groups[3].Value == "1900" && sa.FarClip == 7000.0 && sa.HorizonStart == 1900.0 && sa.EndRule == 1900.0 &&
+                       ta == clause + " [" + WorldFog.ModeName(WorldFogMode.ClassicPublic) + "]" &&
                        tp == "fog: power path, start 706 yd, end 889 yd, rate 4.99, colour (0, 0, 0) [" + WorldFog.ModeName(WorldFogMode.ClassicPower36) + "]" &&
                        so.Summary() == "fog: off";
-            Check(one, "R7 one formatter: WorldFogRecord.Summary is the state line's clause in whole bytes that foglog.py parses (\"" + tr + "\" | \"" + ta +
-                       "\" | \"" + tp + "\")");
+            Check(one, "R7 one formatter: WorldFogRecord.Summary is the state line's clause in whole bytes that foglog.py parses, the Retail pattern's " +
+                       "followed by its end rule's inputs (CopyTo carries them; the arms' text as committed) (\"" + tr + "\" | \"" + ta + "\" | \"" + tp + "\")");
         }
 
         // ================================================================================== R8: the graded table
 
         static void ModelTableTests()
         {
-            string[] grades = { "PROVEN_BYTES", "PROVEN_SOURCE", "MEASURED", "INFERRED", "INFERRED (public)", "UNKNOWN" };
+            // ASSUMED (step 7 after T7): the behaviour as committed, kept where the in-game evidence says nothing.
+            string[] grades = { "PROVEN_BYTES", "PROVEN_SOURCE", "MEASURED", "INFERRED", "INFERRED (public)", "UNKNOWN", "ASSUMED" };
             string[] states = { WorldLightModel.StateApplied, WorldLightModel.StateHeld, WorldLightModel.StateNotApplied, WorldLightModel.StateArmOnly };
             var mapNumber = new Regex(@"\bmaps?\s*(ids?\s*)?[0-9]", RegexOptions.IgnoreCase);
             var list = new Regex(@"-?[0-9][0-9.]*\s*,\s*-?[0-9][0-9.]*\s*,\s*-?[0-9]");
@@ -813,19 +862,47 @@ namespace Wmv.Wow.Tests
             var byName = new Dictionary<string, GradedValue>();
             foreach (GradedValue v in WorldLightModel.Fog)
                 byName[v.Name] = v;
-            GradedValue cap = byName["fog start cap (yd): start = min(far clip, cap) x FogScaler"];
+            GradedValue cap = byName["fog start cap (yd): start = FogScaler x min(E, cap)"];
             GradedValue scale = byName["FogDensity scale per yard: k = FogDensity x scale"];
             GradedValue floor = byName["FogDensity floor (k = max(FogDensity, floor) x scale)"];
             GradedValue clamp = byName["FogScaler clamp (start = ... x clamp(FogScaler, -1, 1))"];
             GradedValue fade = byName["end fade slope sat(slope (1 - d / end))"];
-            Check(cap.Value == WorldFog.StartCap && cap.State == WorldLightModel.StateApplied && cap.Grade == "INFERRED (public)" && scale.Value == 0.0005 &&
-                  scale.State == WorldLightModel.StateApplied && floor.Value == 0.9 && floor.State == WorldLightModel.StateNotApplied &&
-                  clamp.State == WorldLightModel.StateNotApplied && fade.Value == 1.0 / 0.7 && fade.Grade == "PROVEN_BYTES" &&
+            GradedValue b = byName["fog end E = min(b x far clip, horizonStart): the far clip's factor b"];
+            GradedValue hsFactor = byName["fog end E: horizonStart's factor"];
+            GradedValue startFactor = byName["fog start = FogScaler x factor x min(E, cap): the factor on E"];
+            GradedValue hsDefault = byName["game horizonStart default (yd; -wmvGameHorizonStart)"];
+            string[] assumedNames =
+            {
+                "fog end: b at far clips other than 1000 (1 = the same factor)", "fog end at horizonStart 1900 = horizonStart (1 = yes)",
+                "fog end at horizonStart above 1900 (1 = the same rule)", "fog end at a horizonClip other than 7000 (1 = the same rule)",
+                "colour ramp length on EndFogColorDistance <= 0: the far clip, not E (1 = as committed)",
+                "end row on keys with the polynomial path: the far clip, not E (1 = as committed)", "Retail takes the pattern measured on the PTR (1 = yes)",
+            };
+            bool assumed = true;
+            foreach (string n in assumedNames)
+                assumed &= byName.ContainsKey(n) && byName[n].Grade == WorldLightModel.Assumed && byName[n].State == WorldLightModel.StateApplied &&
+                           byName[n].Value == 1.0;
+            int assumedRows = 0;
+            foreach (GradedValue v in WorldLightModel.Fog)
+                if (v.Grade == WorldLightModel.Assumed)
+                    assumedRows++;
+            bool t7 = b.Value == 0.933 && b.Value == WorldFog.EndFarClipFactor && b.Grade == "MEASURED" && b.Source.Contains("1000 ONLY") &&
+                      hsFactor.Value == 1.0 && hsFactor.Grade == "MEASURED" && startFactor.Value == 1.0 && startFactor.Grade == "MEASURED" &&
+                      scale.Grade == "MEASURED" && hsDefault.Value == 1900.0 && hsDefault.Value == WorldLightModel.DefaultHorizonStart &&
+                      hsDefault.Grade == "PROVEN_BYTES" && hsDefault.Source.Contains("not a universal client default") &&
+                      b.Source.Contains("Retail unverified") && assumed && assumedRows == assumedNames.Length &&
+                      !byName.ContainsKey("fog end = the game far clip (1 = yes; FogEnd is not used on this pattern)");
+            Check(cap.Value == WorldFog.StartCap && cap.Value == 3000.0 && cap.State == WorldLightModel.StateApplied && cap.Grade == "INFERRED (public)" &&
+                  scale.Value == 0.0005 && scale.State == WorldLightModel.StateApplied && floor.Value == 0.9 && floor.State == WorldLightModel.StateNotApplied &&
+                  clamp.State == WorldLightModel.StateNotApplied && fade.Value == 1.0 / 0.7 && fade.Grade == "PROVEN_BYTES" && t7 &&
                   cap.ToString().EndsWith("[applied]", StringComparison.Ordinal) &&
                   byName["colour fall-back: EndFogColor zero -> SkyFogColor (1 = applied)"].ToString().EndsWith("[applied, per key]", StringComparison.Ordinal),
-                  "R8 the rows the packer reads: the start cap 3000 and the density scale 0.0005 applied (INFERRED (public)); step 3's density floor " +
-                  "and FogScaler clamp kept, not applied (data as read); the end fade 1/0.7 PROVEN_BYTES; the state and order in the log text (" +
-                  cap + ")");
+                  "R8 the rows the packer reads, after T7: the end's far-clip factor 0.933 (MEASURED at far clip 1000 only), horizonStart's factor 1, the " +
+                  "start's factor 1 on E and the density scale 0.0005 MEASURED (PTR, Retail unverified); the start cap 3000 applied, INFERRED (public); " +
+                  "the horizonStart default 1900 PROVEN_BYTES (not a universal client default); " + assumedRows + " ASSUMED rows (b elsewhere, the end " +
+                  "at 1900 and above, another horizonClip, the colour ramp and the polynomial path's far clip, Retail); the old \"end = the far clip\" " +
+                  "row gone; step 3's density floor and FogScaler clamp kept, not applied (data as read); the end fade 1/0.7 PROVEN_BYTES; the state " +
+                  "and order in the log text (" + cap + ")");
         }
 
         // ================================================================================== R9: census, continuity and order
@@ -1040,16 +1117,16 @@ namespace Wmv.Wow.Tests
                         for (int k = 0; k < n; k++)
                         {
                             DaySample(d, d.Times[k], v, rgb, fl, ints, fog);
-                            WorldFog.Pack(v, Far, CameraZ, d.Times[k], sun, NoFlags, WorldFogMode.RetailPattern, r0);
+                            WorldFog.Pack(v, Far, Hs, CameraZ, d.Times[k], sun, NoFlags, WorldFogMode.RetailPattern, r0);
                             keyRec[k] = (double[])r0.R.Clone();
                         }
                         DaySample(d, 0, v, rgb, fl, ints, fog);
-                        WorldFog.Pack(v, Far, CameraZ, 0, sun, NoFlags, WorldFogMode.RetailPattern, r0);
+                        WorldFog.Pack(v, Far, Hs, CameraZ, 0, sun, NoFlags, WorldFogMode.RetailPattern, r0);
                         for (int t = 0; t < WorldLightDay.Day; t++)
                         {
                             int t1 = (t + 1) % WorldLightDay.Day;
                             DaySample(d, t1, v, rgb, fl, ints, fog);
-                            WorldFog.Pack(v, Far, CameraZ, t1, sun, NoFlags, WorldFogMode.RetailPattern, r1);
+                            WorldFog.Pack(v, Far, Hs, CameraZ, t1, sun, NoFlags, WorldFogMode.RetailPattern, r1);
                             int a = -1, b = -1;
                             for (int k = 0; k < n; k++)
                                 if (d.Times[k] <= t)
@@ -1107,9 +1184,9 @@ namespace Wmv.Wow.Tests
                             DaySample(d, t, v, rgb, fl, ints, fog);
                             for (int k = 0; k < v.Length; k++)
                                 eased[k] = v[k] + (target[k] - v[k]) * easeFactor;
-                            WorldFog.Pack(v, Far, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, r0);
-                            WorldFog.Pack(target, Far, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, rt);
-                            WorldFog.Pack(eased, Far, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, re);
+                            WorldFog.Pack(v, Far, Hs, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, r0);
+                            WorldFog.Pack(target, Far, Hs, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, rt);
+                            WorldFog.Pack(eased, Far, Hs, CameraZ, t, sun, NoFlags, WorldFogMode.RetailPattern, re);
                             easeSteps++;
                             for (int j = 0; j < 56; j++)
                                 if (!TintRow(j) &&
@@ -1211,7 +1288,8 @@ namespace Wmv.Wow.Tests
         static void ParityGrid(string path)
         {
             var sb = new StringBuilder();
-            sb.Append("# WorldFogTests R10: far clip 7000, camera game Z 40, up (0, 1, 0); R lines: lp hm R0.x..R13.w FogHeight; P lines: lp hm h d vis hf r g b\n");
+            sb.Append("# WorldFogTests R10: far clip 7000, horizonStart 1900 (T7's end rule: R0.y = min(0.933 x 7000, 1900) = 1900, R0.x = FogScaler x " +
+                      "min(E, 3000)), camera game Z 40, up (0, 1, 0); R lines: lp hm R0.x..R13.w FogHeight; P lines: lp hm h d vis hf r g b\n");
             var lps = new[] { 5985, 5944, 5951, 6033 };
             var days = new[] { Day5985, Day5944, Day5951, Day6033 };
             var fc = new double[3];
@@ -1337,11 +1415,11 @@ namespace Wmv.Wow.Tests
             var lit = new[] { 0.3, 0.4, 0.5, 1.0 };
             var o = new double[4];
             var p = new[] { 800.0, 20.0, 300.0 };
-            WorldFog.Pack(v, Far, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
+            WorldFog.Pack(v, Far, Hs, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
             WorldFog.Apply(r, p, UpUnity, lit, WorldFog.KindColour, o);
             long before = GC.GetAllocatedBytesForCurrentThread();
             for (int k = 0; k < 10000; k++)
-                WorldFog.Pack(v, Far, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
+                WorldFog.Pack(v, Far, Hs, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
             long packBytes = GC.GetAllocatedBytesForCurrentThread() - before;
             before = GC.GetAllocatedBytesForCurrentThread();
             for (int k = 0; k < 10000; k++)
@@ -1352,7 +1430,7 @@ namespace Wmv.Wow.Tests
             {
                 Stopwatch w = Stopwatch.StartNew();
                 for (int k = 0; k < 500; k++)
-                    WorldFog.Pack(v, Far, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
+                    WorldFog.Pack(v, Far, Hs, CameraZ, 1427, NoonSun, NoFlags, WorldFogMode.RetailPattern, r);
                 times[b] = w.Elapsed.TotalMilliseconds * 1000.0 / 500.0;
             }
             Array.Sort(times);
@@ -1570,6 +1648,133 @@ namespace Wmv.Wow.Tests
 
         // ================================================================================== run
 
+        // ================================================================================== R15: the end rule after in-game test T7
+
+        static void EndRuleTests()
+        {
+            // The rule at the measured far clip (1000) and the default (7000), at the measured horizonStarts (1000, 1900) and two
+            // above them (2500; 3500, where the start cap 3000 binds): E and the start stated here (T7End, the cap 3000), the end
+            // fade's zero at E.
+            WorldLightSample basis = SampleAt(SetOf("wow", NoFlags, Day5985), 1427);
+            double scaler = basis.Float(WorldLightColumns.FogScaler);
+            var cells = new List<string>();
+            bool rule = scaler > 0.1 && scaler < 0.2;
+            foreach (double far in new[] { 1000.0, 7000.0 })
+                foreach (double hs in new[] { 1000.0, 1900.0, 2500.0, 3500.0 })
+                {
+                    WorldFogRecord r = PackOf(basis.V, 1427, NoonSun, WorldFogMode.RetailPattern, NoFlags, far, WorldFog.PublicAll, hs);
+                    double e = T7End(far, hs), start = scaler * Math.Min(e, 3000.0);
+                    double vInside, vBeyond, hf;
+                    WorldFog.Visibility(r, new[] { 0.99 * e, 0.0, 0.0 }, UpUnity, out vInside, out hf);
+                    WorldFog.Visibility(r, new[] { e + 0.5, 0.0, 0.0 }, UpUnity, out vBeyond, out hf);
+                    bool pinned = far == 1000.0 ? Math.Abs(e - 933.0) < 1e-9 : e == hs;
+                    bool cap = hs == 3500.0 && far == 7000.0 ? r.R[0] == scaler * 3000.0 && r.R[0] < scaler * e : r.R[0] == scaler * e;
+                    rule &= r.R[1] == e && r.R[0] == start && cap && pinned && r.EndRule == e && r.Start == r.R[0] && r.End == e && r.FarClip == far &&
+                            r.HorizonStart == hs && r.R[2] == basis.Float(WorldLightColumns.FogDensity) * 0.0005 && vInside > 0.0 && vBeyond == 0.0 &&
+                            !r.Artistic && r.Mode == WorldFogMode.RetailPattern;
+                    cells.Add("F " + F(far) + " Hs " + F(hs) + ": E " + F(e, "0.##") + ", start " + F(r.R[0], "0.##"));
+                }
+            Check(rule,
+                  "R15 T7's end rule on LightParams 5985 at 11:53:30 (FogScaler " + F(scaler, "0.####") + "): R0.y = E = min(0.933 x far clip, horizonStart), " +
+                  "R0.x = FogScaler x min(E, 3000), the density FogDensity x 0.0005, visibility above 0 at 0.99 E and 0 beyond E -- " +
+                  string.Join("; ", cells) + " (the cap binds at Hs 3500 only; the far clip's factor acts at F 1000 only)");
+
+            // ASSUMED, as committed: the colour ramp's far clip, and the polynomial path's end row (per key: the far clip on a key
+            // with the path, so a blend draws z E + (1 - z) F); the path's visibility is the committed record's exactly.
+            WorldLightSample ramp = SampleAt(SetOf("wow", NoFlags, Synthetic[5]), 1440), poly = SampleAt(SetOf("wow", NoFlags, Synthetic[9]), 1440),
+                              plain = SampleAt(SetOf("wow", NoFlags, Synthetic[0]), 1440);
+            bool assumed = true;
+            foreach (double far in new[] { 1000.0, 7000.0 })
+                foreach (double hs in new[] { 1000.0, 1900.0, 3500.0 })
+                {
+                    WorldFogRecord rr = PackOf(ramp.V, 1440, NoonSun, WorldFogMode.RetailPattern, NoFlags, far, WorldFog.PublicAll, hs);
+                    WorldFogRecord rp = PackOf(poly.V, 1440, NoonSun, WorldFogMode.RetailPattern, NoFlags, far, WorldFog.PublicAll, hs);
+                    double e = T7End(far, hs);
+                    assumed &= rr.R[27] == far && rr.R[1] == e && rp.R[50] == 0.0 && rp.Artistic && rp.R[1] == far && rp.EndRule == e &&
+                               rp.R[0] == poly.Float(WorldLightColumns.FogScaler) * Math.Min(e, 3000.0);
+                    // The record as committed before T7 (R0 = (min(F, 3000) x FogScaler, F)): with z 0 the path alone draws, so the
+                    // visibility is the same at every distance.
+                    var committed = new WorldFogRecord();
+                    rp.CopyTo(committed);
+                    committed.R[0] = Math.Min(far, 3000.0) * poly.Float(WorldLightColumns.FogScaler);
+                    committed.R[1] = far;
+                    for (double d = 0.0; d <= 9000.0; d += 50.0)
+                        foreach (double h in new[] { -20.0, 0.0, 120.0 })
+                        {
+                            double va, vb, ha, hb;
+                            WorldFog.Visibility(rp, new[] { d * 0.6, h, d * 0.8 }, UpUnity, out va, out ha);
+                            WorldFog.Visibility(committed, new[] { d * 0.6, h, d * 0.8 }, UpUnity, out vb, out hb);
+                            assumed &= va == vb && ha == hb;
+                        }
+                }
+            var vh = new double[WorldLightSample.Count];
+            for (int j = 0; j < vh.Length; j++)
+                vh[j] = plain.V[j] + (poly.V[j] - plain.V[j]) * 0.5;
+            WorldFogRecord half = PackOf(vh, 1440, NoonSun);
+            double eHalf = T7End(Far, Hs);
+            bool blend = half.R[50] == 0.5 && half.Artistic && Near(half.R[1], 0.5 * eHalf + 0.5 * Far, 1e-12) && half.EndRule == eHalf;
+            Check(assumed && blend,
+                  "R15 ASSUMED as committed: the colour ramp on EndFogColorDistance 0 reads the far clip (not E) and a key with the polynomial path keeps " +
+                  "the end row at the far clip at every far clip and horizonStart -- its visibility equals the committed record's exactly (rays to 9000 " +
+                  "yd at three heights) --; the start FogScaler x min(E, 3000) there too; a half blend of a plain and a polynomial key draws z E + " +
+                  "(1 - z) F = " + F(half.R[1], "0.##") + " (z " + F(half.R[50]) + ")");
+
+            // Classic Era, MoP Classic and Classic Beta stay unfogged by default; the arms do not read horizonStart (their records
+            // are the same at every horizonStart, R0 as committed) and their texts do not name it.
+            bool untouched = WorldFog.ModeFor("wow_classic_era", true, WorldFogClassicArm.Off) == WorldFogMode.Off &&
+                             WorldFog.ModeFor("wow_classic", true, WorldFogClassicArm.Off) == WorldFogMode.Off &&
+                             WorldFog.ModeFor("wow_classic_beta", true, WorldFogClassicArm.Off) == WorldFogMode.Off;
+            foreach (WorldFogMode arm in new[] { WorldFogMode.ClassicPublic, WorldFogMode.ClassicPower36 })
+            {
+                WorldFogRecord at1900 = PackOf(plain.V, 1440, NoonSun, arm, NoFlags, Far, WorldFog.PublicAll, 1900.0);
+                foreach (double hs in new[] { 1000.0, 2500.0, 3500.0 })
+                {
+                    WorldFogRecord other = PackOf(plain.V, 1440, NoonSun, arm, NoFlags, Far, WorldFog.PublicAll, hs);
+                    for (int k = 0; k < 56; k++)
+                        untouched &= other.R[k] == at1900.R[k];
+                    untouched &= other.Start == at1900.Start && other.End == at1900.End && other.K == at1900.K && other.EndRule == Far;
+                }
+                untouched &= at1900.R[1] == Far && at1900.R[0] == Math.Min(Far, 3000.0) * plain.Float(WorldLightColumns.FogScaler) &&
+                             !at1900.Summary().Contains("horizonStart");
+            }
+            WorldLightSwitches arms = WorldLightSwitches.Parse(new[] { "-wmvFogClassic=public", "-wmvGameHorizonStart=1000" }, "on");
+            untouched &= !arms.DescribeObjects("wow_classic_era").Contains("horizonStart") && !arms.DescribeObjects("wow_classic").Contains("horizonStart") &&
+                         !arms.DescribeObjects("wow_classic_beta").Contains("horizonStart");
+            Check(untouched,
+                  "R15 Classic Era, MoP Classic and Classic Beta untouched: unfogged by default; the public and power36 arms give the same record at " +
+                  "horizonStart 1000, 1900, 2500 and 3500 (R0 as committed: min(F, 3000) x FogScaler and F) and no text of theirs names horizonStart");
+
+            // -wmvGameHorizonStart: read once like -wmvGameFarclip, refused values are notes, a setting (not a draw switch).
+            WorldLightSwitches byDefault = WorldLightSwitches.Parse(new string[0], null);
+            WorldLightSwitches given =WorldLightSwitches.Parse(new[] { "-wmvGameHorizonStart=2500" }, "on");
+            WorldLightSwitches last = WorldLightSwitches.Parse(new[] { "-wmvGameHorizonStart=1000", "-wmvGameHorizonStart=2500.5" }, "on");
+            WorldLightSwitches far1000 = WorldLightSwitches.Parse(new[] { "-wmvGameFarclip=1000", "-wmvGameHorizonStart=2500" }, "on");
+            WorldLightSwitches bad = WorldLightSwitches.Parse(new[] { "-wmvGameHorizonStart=0", "-wmvGameHorizonStart=-5", "-wmvGameHorizonStart=abc",
+                                                                      "-wmvGameHorizonStart=NaN", "-wmvGameHorizonStart=Infinity", "-wmvGameHorizonStart=" }, "on");
+            bool switchOk = byDefault.HorizonStart == 1900.0 && byDefault.HorizonStart == WorldLightModel.DefaultHorizonStart && byDefault.Notes.Count == 0 &&
+                            byDefault.DrawDefaults &&
+                            byDefault.Describe().Contains("; game horizonStart 1900 yd (the T7 reference sessions' value at graphicsViewDistance 6); ") &&
+                            given.HorizonStart == 2500.0 && given.Notes.Count == 0 && given.DrawDefaults && given.FarClip == 7000.0 &&
+                            given.Describe().Contains("; game horizonStart 2500 yd (-wmvGameHorizonStart); ") &&
+                            given.DescribeObjects("wow").Contains("min(0.933 x 7000, 2500) = 2500 yd") && last.HorizonStart == 2500.5 &&
+                            far1000.DescribeObjects("wow").Contains("min(0.933 x 1000, 2500) = 933 yd") &&
+                            far1000.DescribeObjects("wow", null, 7000.0, 1000.0).Contains("min(0.933 x 7000, 1000) = 1000 yd") &&
+                            bad.HorizonStart == 1900.0 && bad.Notes.Count == 6 &&
+                            bad.Notes.TrueForAll(n => n.StartsWith("-wmvGameHorizonStart=", StringComparison.Ordinal) &&
+                                                      n.EndsWith(" is not a number of yards above 0 -- 1900 is used", StringComparison.Ordinal)) && bad.DrawDefaults;
+            Check(switchOk,
+                  "R15 -wmvGameHorizonStart: 1900 by default (the T7 reference sessions' value, said so), 2500 taken, the last of two wins (2500.5), " +
+                  "0, -5, abc, NaN, Infinity and an empty value refused as notes (\"" + (bad.Notes.Count > 0 ? bad.Notes[0] : "") + "\"), DrawDefaults " +
+                  "kept (a setting, not a draw switch); the fog clause names F, Hs and E (\"" +
+                  given.DescribeObjects("wow").Substring(Math.Max(0, given.DescribeObjects("wow").IndexOf("end E", StringComparison.Ordinal))) + "\")");
+
+            // WMV_LIGHT=off: hard off whatever the switch says; nothing is on.
+            WorldLightSwitches hard = WorldLightSwitches.Parse(new[] { "-wmvGameHorizonStart=1000", "-wmvWorldLight=on" }, "off");
+            Check(hard.HardOff && !hard.On && hard.Describe().StartsWith("WMV_LIGHT=off: hard off (nothing evaluated or set: Stage 09 exactly); ", StringComparison.Ordinal),
+                  "R15 WMV_LIGHT=off with -wmvGameHorizonStart=1000 and -wmvWorldLight=on: hard off, not on (the player evaluates, sets and says " +
+                  "nothing: self-test F16)");
+        }
+
         public static int RunAll(Action<string> output = null)
         {
             failures = 0;
@@ -1616,6 +1821,8 @@ namespace Wmv.Wow.Tests
             SampleTests();
             log.Add("World fog: R14 the synthetic world model's materials");
             WmoSyntheticTests();
+            log.Add("World fog: R15 the end rule after in-game test T7 and -wmvGameHorizonStart");
+            EndRuleTests();
             log.Add(string.Format("WorldFogTests: {0} failure(s)", failures));
             if (output != null)
                 foreach (string line in log)
