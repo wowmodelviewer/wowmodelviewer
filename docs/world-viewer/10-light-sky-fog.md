@@ -206,7 +206,9 @@ animated model in the world, which this stage keeps skybox-only so that Stage 11
   (PROVEN_BYTES geometry). The world's edge is visible today, and a drawn sky changes its contrast.
 - Whether the client's fog hides that edge is not settled: under the public modern fog equation (4.6) Retail's fog
   starts at min(far clip, 3000) x FogScaler, 450 yd at the Durotar stand; Era and MoP fog distances depend on FogEnd's
-  unit (yards or yards x 36, 4.6).
+  unit (yards or yards x 36, 4.6). T7 (13.4) measured the PTR's fog instead: end min(0.933 x far clip, horizonStart), start
+  FogScaler x that end, so 285 yd at the stand with the reference sessions' horizonStart 1,900; the fog end, 1,900 yd there,
+  lies beyond the resident terrain along most facings.
 - Two design rules keep Stage 13 free: the sky is drawn as a background at the far depth (never as geometry inside the
   far plane), and fog is computed from the view distance, not from depth-buffer fractions. Moving the far plane in
   Stage 13 then does not change Stage 10's picture.
@@ -568,7 +570,8 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
 
 - **The shape is PROVEN_BYTES** (4.0); the client's programs confirm the public equation's form, including the end fade
   from 30 % of the end distance. What stays INFERRED (public) is how the table's columns become the program's constants:
-- **Modern mapping** (INFERRED (public), one source): start = min(far clip, 3000) x FogScaler (clamped to [-1, 1]);
+- **Modern mapping** (INFERRED (public), one source; its start and end are superseded on the PTR by T7's measurement, 13.4):
+  start = min(far clip, 3000) x FogScaler (clamped to [-1, 1]);
   density k = max(FogDensity, 0.9) x 0.0005 per yard; visibility = min(exp(-k max(0, d - start)), sat(1.4286 (1 - d /
   far clip))), so a linear end fade from 30 % of the far clip; height fog from FogHeight, FogHeightScaler, the
   FogHeightCoefficients cubic (stored constant first: PROVEN_BYTES pattern, 94 % of rows rise from 0 to 1) and
@@ -599,9 +602,9 @@ CPU code that cannot be read (the executable's code is encrypted on disk) and st
 
 | Rule | As built | Grade |
 |---|---|---|
-| Start | min(far clip, 3000) x FogScaler, FogScaler as read (no clamp) | INFERRED (public); class C until T7 |
-| Density | FogDensity x 0.0005 per yard, as read (the 0.9 floor not applied) | INFERRED (public); class C until T7 |
-| End | the game far clip; the linear fade from 0.3 x the far clip | INFERRED (public); T7's low arm measures it |
+| Start | FogScaler x min(E, 3000), FogScaler as read (no clamp); E the end below (since 0a028642; before: min(far clip, 3000) x FogScaler) | MEASURED on the PTR 12.1.7 (T7, post-data, stands A and B; 13.4); the cap 3,000 INFERRED (public), it never binds at the default |
+| Density | FogDensity x 0.0005 per yard, as read (the 0.9 floor not applied) | MEASURED on the PTR 12.1.7 (T7, m 0.996-1.016 at two densities; 13.4); Retail unverified |
+| End | E = min(0.933 x far clip, horizonStart) (since 0a028642; before: the far clip); the linear fade from 0.3 x E | MEASURED on the PTR 12.1.7 at horizonStart 1,000 and far clip 1,000 (13.4); the factor 0.933 at other far clips and the end at horizonStart above 1,000 (so at the default 1,900) ASSUMED |
 | Fog colour | SkyFogColor as byte / 255 | INFERRED (public); of the single table colours only SkyFog fits the references' far bands (MEASURED, preliminary: RMS 1.54 steps against 4.3-8.5) |
 | Height fog, the end-fog and height colours, the colour ramp, the sun tint | the public rules; the zero-colour, height-curve, kh := k and ramp-length fall-backs resolved per key; the tint in the sky's order | INFERRED (public) |
 | Second start term, layers, strength, interior weight | 0; one layer; 1 (the terrain's compiled-in value); 0 (the outdoor record) | held: no table gives them |
@@ -951,9 +954,11 @@ their doodads, for the side-by-sides only); DIAGNOSTIC `-wmvWorldLitView=albedo|
 Step 7 (read once; a refused value is a Note; none acts with `WMV_LIGHT=off`): `-wmvFog=on|off` (default on; off: no fog
 anywhere, and the light-on picture is step 6's byte for byte); `-wmvFogClassic=off|public|power36`
 (default off; Classic Era, MoP Classic, Classic Beta and unlisted products only: the D17 candidate rules for side-by-sides,
-never compared with the game until T8). `-wmvGameFarclip=N` (default 7,000) is the far clip the fog uses. Under `-wmvInteriorLight=outdoor` the
-interiors that arm binds are fogged too, and the lines say so. There is no start-rule or density arm: T7 decides the start
-rule, which then changes one row of the packer in a commit the owner approves.
+never compared with the game until T8). `-wmvGameFarclip=N` (default 7,000) is the far clip the fog uses;
+`-wmvGameHorizonStart=N` (since 0a028642; default 1,900, the reference sessions' value at view distance 6, not a client
+default for every setting) is the horizonStart the fog's end and start read (13.4). Under `-wmvInteriorLight=outdoor` the
+interiors that arm binds are fogged too, and the lines say so. There is no start-rule or density arm: T7 decided the start
+rule (13.4), changed in 0a028642 with the owner's approval.
 
 ### 6.14 Stage 09 files that Stage 10 changes (in its own diff)
 
@@ -1348,7 +1353,7 @@ possible).
 | D16 | Classic Era and MoP Classic references (never run on this machine; MoP on the "us" branch; no sandbox) | please answer now; live passes if possible (only they settle the Era/MoP fog path), otherwise their exits are declared in advance as functional and data-driven, visual parity unverified |
 | D17 | Era/MoP/Beta fog before their tests | off by default, with the hypotheses (power path at FogEnd / 36, or exponential) switchable for side-by-sides |
 | D18 | Classic Beta's targets | sky colours, direct and ambient light and time of day (at a key without a LUT); fog and grading class C |
-| D19 | Retail parity (the PTR is a different engine branch, 4.0) | one live Retail pair at Southfury noon (P0a); otherwise Retail parity graded INFERRED with "PTR equivalence UNKNOWN" |
+| D19 (amended 2026-10-25: the fog rule's Retail side is graded ASSUMED, "measured on the PTR; Retail unverified", after T7) | Retail parity (the PTR is a different engine branch, 4.0) | one live Retail pair at Southfury noon (P0a); otherwise Retail parity graded INFERRED with "PTR equivalence UNKNOWN" |
 | D20 | Reference settings | the 2026-10-19 sandbox profile, the P0a pairs, contrast at its default, all recorded per shot |
 | D21 | Budgets | approve 8.3 |
 | D22 | The order of work | as section 7: the driver, then the sky as the first picture, then the shader foundation with its exactness gate, then terrain light, fog, world models, water |
@@ -1391,7 +1396,7 @@ possible).
 | `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs; the 2026-10-22 run in `runs\p30a` (13.1) |
 | `D:\wmv-10\step7` | step 7 (fog, 13.3): the research (`understand\`: `programs.md`, `mapping.md`, `player.md`, `validation.md`), the spec and its review (`spec\`, `review\`), the T7 page and WmvRefNav 3.2 (`capture\`, `refnav\`), the implementation notes, reviews, fix and finish rounds (`impl\`), the grading-LUT proof (`lutproof\`), the union lineage (`union\`, `union2\`); the runs `D:\wmv-10\checkpoint\runs\p32a` and `p32b`, the freeze `D:\wmv-10\checkpoint\frozen` |
 
-## 13. Progress (2026-10-21, updated 2026-10-24)
+## 13. Progress (2026-10-21, updated 2026-10-25)
 
 | Step | State | Evidence |
 |---|---|---|
@@ -1798,3 +1803,68 @@ and the volume composite (D4); the client's volumetric global fog; Classic Beta'
 11. **Deploy:** none; build64 still holds steps 1-6. After the owner's approval it follows the union approach (the
     tabard fixes and the screenshot matte kept, a new backup, the existing backups and rollback kept).
 
+### 13.4 T7 and the corrected fog rule (2026-10-24/25)
+
+**The captures.** The owner took T7 twice on the PTR sandbox with WmvRefNav 3.3, which sets the session's settings and takes
+each stand's shots by itself: 2026-10-24 14:15 (noon, stands A and B, 8 shots) and a retake 19:21 (noon and dusk, 13
+records), `D:\wmv-10\refs\ptr_t7` and `ptr_t7_r2`. The analysis was frozen before each capture; four amendments, each frozen
+before the capture it applies to, made it runnable on real captures (`D:\wmv-10\checkpoint\frozen\AMEND_T7W_step7.md`):
+capture windows the sandbox clock can set and the light at each pair's recorded time; a reader for the addon's real records;
+addon 3.3; and, owner-approved after the first capture, a terrain repeat control instead of the sky-band check that drifting
+clouds fail. The retake was analysed blind; its stand B failed the repeat control (grass moved near the camera: class E).
+
+**What T7 measured** (PTR 12.1.7.70493, horizonClip 7,000, stands A and B; the horizonStart analysis is post-data and
+exploratory, `D:\wmv-10\step7\hs`, two independent reviews):
+- The far clip and the client's **horizonStart** setting both limit the fog. The A-HS shot changes only horizonStart (1,900 to
+  1,000; every other recorded setting and the pose equal, in both captures): the start moves to 148.5-149.2 yd (0.15 x 1,000)
+  and an end appears at 1,000.6-1,001.9 yd. At far clip 1,000 the end is 933 yd and the start 0.15 x that end.
+- **The rule** that fits every pair, and, fitted on the far-clip pairs only, predicts both A-HS shots at the noise floor:
+  end E = min(0.933 x far clip, horizonStart); start = FogScaler x E; density = FogDensity x 0.0005 (measured within 1 %, at
+  two densities through the dusk pair). The frozen analysis' cap of 1,880-1,886 yd is its own small bias around 1,900 (the
+  difference is about 2 yd of start). The rule min(far clip, horizonStart) for both is rejected (the far clip needs 0.933).
+- **The fog colour** at stand A equals the record's within dE00 0.1-0.3, the height trend included.
+
+**Measured and assumed, by client** (this is how every grade reads):
+
+| | Retail 12.1.5 | PTR 12.1.7 | Classic Era | MoP Classic | Classic Beta |
+|---|---|---|---|---|---|
+| The fog shape (the client's programs) | PROVEN_BYTES | PROVEN_BYTES | PROVEN_BYTES (Retail's programs) | PROVEN_BYTES (Retail's programs) | PROVEN_BYTES (the PTR's branch) |
+| The start, FogScaler x E | ASSUMED (the PTR's CPU side; Retail unverified) | MEASURED at horizonStart 1,000 and 1,900 and at far clip 1,000 | not applied (unfogged by default, D17; arms only) | not applied (unfogged by default, D17; arms only) | not applied (volume fog, D18) |
+| The end, E | ASSUMED | MEASURED at horizonStart 1,000 (far clip 7,000) and at far clip 1,000 only | -- | -- | -- |
+| The factor 0.933 | ASSUMED | MEASURED at far clip 1,000 only (a factor and an offset of -67 yd fit equally) | -- | -- | -- |
+| The end at horizonStart 1,900 | ASSUMED | extrapolated from horizonStart 1,000 | -- | -- | -- |
+| horizonStart other than 1,000 and 1,900, horizonClip other than 7,000 | ASSUMED | not measured | -- | -- | -- |
+| Density x 0.0005 | ASSUMED | MEASURED (stand A; two densities) | -- | -- | -- |
+| The fog colour (SkyFog and the height colour by the public rules) | ASSUMED | MEASURED at stand A only (dE00 0.1-0.3); INFERRED (public) elsewhere | -- | -- | -- |
+| The colour ramp and the polynomial path reading the far clip | ASSUMED | not measured | -- | -- | -- |
+
+**Built** (0a028642): `WorldFog.EndOf` and `Pack` (R0.y = E, R0.x = FogScaler x min(E, 3000)), the switch
+`-wmvGameHorizonStart` (default 1,900), the graded rows, the fog clause naming the far clip, horizonStart and E with their
+grades; runner R15 (far clip 1,000 / 7,000 x horizonStart 1,000 / 1,900 / 2,500 / 3,500). The committed text is 1d1cb4ca
+(first committed as 0a028642, its message corrected). Validated with p34a, built from 24ce4a86 plus the change minus one
+sentence of the fog clause ("the end at horizonStart 1000 only, above it ASSUMED"; the runner passes 2,558 / 0 on the commit,
+no player was rebuilt from it), every pair against the committed p33a under one install state: WMV_LIGHT=off, default mode
+(139 of 166 items comparable on the install), -wmvFog=off, Buildings / Models / Characters, the overview and the interiors
+identical; the owner's union player p34u keeps Characters and the guild-tabard cases (08BF71CC) identical to the deployed
+build; self-test 1,125 / 0 and 1,064 / 0; the published record equals the rig's model at 18 of 18
+cameras. The full gate table: `D:\wmv-10\checkpoint\runs\p34a\out\fog_p34a.md`.
+
+**Against the game.** At Southfury the corrected rule (p34a) moves the far bands to 0.48 steps RMS of the game at noon
+(committed rule 2.73), 0.93 at dawn (1.88) and 0.84 at dusk (2.52); it is nearer the game in 108 of 117 far-band values
+(`D:\wmv-10\checkpoint\runs\p34a\out`, sheets in `out\sheets`). The Southfury references were seen before T7 but never used to
+fit horizonStart or the factor. The first capture's stand B WAS used in the fit; only the retake's stand B (class E: grass
+moved) was not. There is no fully independent blind holdout. The formal WP 11 metric is 0.0048 and 0.0053 on the fit set (T7
+stand A, the implemented viewer at the fitted cameras), under its 0.03 (the committed rule: 0.075-0.078) -- met IN-SAMPLE:
+the rule was fitted post-data on these pairs and pixels, so this shows the viewer reproduces the fit, not an independent
+validation. The only T7 pair outside the fit, the retake's stand B noon (class E, information only), gives 0.0335: the near
+bands where the grass moved, and a far-band miss at 900-950 yd (in the far-clip-1,000 end region, unrelated to the grass).
+
+**Still open (UNRESOLVED):** the render-against-model check (B, amendment 1, thresholds unchanged) fails at a1200_f1000 and
+a1845_f1000 (800-1,000 yd, 0.026 / 0.027) and, new with the corrected rule, in one band 950-1,000 yd at a1200_f7000 (0.0209
+against 0.02). Step 7 attributed similar dark-band residuals to URP's 8-bit grading LUT (13.3); that attribution was NOT tested
+for this player, so these stay unresolved, together with the retake-B 900-950 yd miss (one viewer-against-model gap near E at
+far clip 1,000). The tile framing passes B only with amendment 1's C6 exclusion (0.99249 without it; documented, unresolved).
+Classic MoP and Classic Beta were not comparable on the install (MoP's storage did not open; Beta left .build.info). The
+performance gate is open (the machine was never idle); life08 frames over 33 ms were 25 against 22 (p34a / p33a) and 21 against
+18 (the union pair), above the +2 line (information only); both players fail the same five harness steps under the install.
+The grading-LUT bypass waits for the owner (opt-in, not committed).

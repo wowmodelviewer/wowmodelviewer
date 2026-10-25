@@ -139,7 +139,9 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   terrain program 2977247 p_1 on 59 one-record cases covering every regime, the M2 program 2977063 p_1 with blend words 0 and 4;
   `WorldFog.Apply` within 2e-6), the record `WorldFog.Pack` fills from the light state against an independent Python port of the
   mapping on the client's keys (LightParams 5985 at three times, 5951, 5944, 6033, a Z key) and on one key per fall-back, blends of
-  a key with and without each fall-back (every row continuous), the sky's shared tint inputs (`SkyDome.Inputs` equal to HEAD's), the
+  a key with and without each fall-back (every row continuous), the end and start rule measured in T7 (R15: E = min(0.933 x far
+  clip, horizonStart) and start FogScaler x min(E, 3000) at far clip 1,000 / 7,000 and horizonStart 1,000 / 1,900 / 2,500 / 3,500;
+  `-wmvGameHorizonStart`), the sky's shared tint inputs (`SkyDome.Inputs` equal to HEAD's), the
   modes by client, the columns each needs and the `-wmvFogClassic` arms (each public rule switched off alone), the twin's invariants,
   the switches and their texts, the graded table's fog rows, the census on a synthetic set, no allocation in `Pack`, the light
   sample's existing channels equal to HEAD's evaluator with the derived block after them, and `WmoSynthetic.ContextRoot`'s old
