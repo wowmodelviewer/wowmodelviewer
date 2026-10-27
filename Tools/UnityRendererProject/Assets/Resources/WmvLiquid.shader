@@ -90,8 +90,51 @@
 // The frame: slice _Frame of the frame array, sampled at uv0 (water: world-planar coordinates on the game's axes; magma and
 // slime: the stored u/v or s/t scaled -- Wow/World/TerrainLiquidMesh.cs, Wow/WmoLiquid.cs), Repeat, trilinear. _Frame is set
 // on the shared material from the liquid clock once a frame (WmvLiquidRegistry.Tick).
-// UNLIT: no light rig, shadow or fog (stages 10-12); reflection and refraction only on the HIGH path. Culling off: a liquid
-// is one sheet, seen from above and below (its lower side: never the HIGH path).
+// UNLIT: no light rig or shadow (stages 11-12); reflection and refraction only on the HIGH path. Culling off: a liquid is one
+// sheet, seen from above and below (its lower side: never the HIGH path).
+//
+// WATER WITH THE LIGHT (Stage 10 step 8, docs/world-viewer/10-light-sky-fog.md 6.11, 13.3): taken only while the global _WmvWLOn
+// is above 0.5 -- set by WmvWorldLight for the main camera's world view alone while the outdoor light is shown, 0 for every other
+// camera, in WmvTerrainComposite's renders and the self-test's fixtures, never set with WMV_LIGHT=off --, each part a uniform
+// [branch] computed only inside it, so with the light off every path above runs Stage 09's instructions and arithmetic:
+//   the colours  the zone light's globals above, unchanged in name: with the light shown WmvLiquidLight fills them from the
+//                light's day at its half-minute (Wow/World/LiquidWaterDay.cs: Stage 09's selection, validity, alphas and every
+//                constant here; at 12:00 Stage 09's values bit for bit, proved on the host's dumps of five clients)
+//   the sky      HIGH: a reflection that misses the scene, and the sky share of a hit texel's uncovered part, take the sky dome's
+//                colour in the reflected direction R (after its clamp) -- WmvWaterSkyDir (WmvWaterSky.hlsl), converted with the
+//                encode as the Stage 09 sky is -- while _WmvWaterSkyOn is 1 (the sky drawn for this render, -wmvWaterSky=dome);
+//                otherwise _WmvReflectSky as above -- also for an interior group's liquid (_WmvLiquidUnfogged 1, below: interior
+//                groups keep today's look until Stage 12, so their liquids keep Stage 09's sky as well as staying unfogged).
+//                INFERRED: that the game's water reflects its sky (its procwater programs read a reflection target or a constant
+//                colour; what the target holds is UNKNOWN)
+//   the fog      the client's fog, layer 0 (WmvWorldFog.hlsl: WmvFogVisibility and WmvFogColour at p = positionWS - _WmvWLEye,
+//                kind 0, the fog colour converted with the encode, the domain of the mix), while _WmvWLModels.w (the fog drawn)
+//                and the arm _WmvWaterFog are set and the renderer's _WmvLiquidUnfogged is not (an interior group's liquid while
+//                the world-lit binding is on: unfogged until Stage 12, as interior groups; a MaterialPropertyBlock,
+//                WmvWorldModels). The client's water programs (procwaterabove/below, mediumwater, water, magma, procmagma) end
+//                with the terrain's fog tail as a general lerp towards the fog colour, the alpha carried (never x vis), on the
+//                WHOLE finished colour, the refraction sample included (PROVEN_BYTES). Where vis is 1 (inside the fog start) every
+//                path returns its Stage 09 value itself (a select, as WmvWorldFog's near field).
+//     HIGH, _WmvWaterFog 1 (surface, the default): Stage 09's output is
+//                W (1 - T)(1 - r) + bed T (1 - r) + rb reflB + rd reflS, r = rb + rd, reflX = hit ? sky (1 - fade aX) + fade cX : sky
+//              (cX, aX the grab's premultiplied texel, fade the edge fade); the SURFACE terms S = W (1 - T)(1 - r) + sky (rb sB +
+//              rd sS), sX = hit ? 1 - fade aX : 1, of weight wS = (1 - T)(1 - r) + rb sB + rd sS, go towards the fog colour, and
+//              the SCENE terms bed T (1 - r) + fade (rb cB + rd cS) -- the grab's copies, already fogged at their own distance --
+//              are never fogged twice: out = saturate(scene + vis S + (1 - vis) fogC wS). INFERRED: the owner's rule, a
+//              deliberate departure from the client's literal form (Wow/World/LiquidHigh.cs MixFogged is the CPU twin)
+//     HIGH, _WmvWaterFog 2 (composite, -wmvWaterFog=composite): the client's literal form, saturate(lerp(fogC, out, vis)) on
+//              the whole Stage 09 composite (the refraction and the reflected texels fogged again): an arm, not compared until
+//              the owner decides
+//     ZONE and FALLBACK (premultiplied): rgb' = vis rgb + (1 - vis) fogC srcAlpha, srcAlpha the output alpha (the zone's
+//              1 - _BedFactor (1 - a), the fallback's alpha, 1 for an opaque magma or slime: there lerp(fogC, rgb, vis), the
+//              client's magma programs carry the same fog), the alpha unchanged; the destination's share (the scene behind,
+//              fogged at its own distance) untouched (INFERRED)
+//     KNOWN LIMIT (WMV_DISPLAY=fragment only, _WmvShaderEncode 1): the water's output is already linear there, so its fog mixes
+//              in linear while the terrain and world models mix theirs in authored values and then encode -- at one vis the
+//              water's fog share differs from the terrain's beside it. The default display mode (encode 0) mixes all of them in
+//              authored values.
+// No new keyword or variant; every Stage 09 constant (_Hi*, _DepthFull, _ZoneHighlight*, _BedFactor, the gains, the neutral
+// sky) untouched.
 //
 // THE COLOUR DOMAIN, as the other world shaders (Wmv/TerrainTextured, Wmv/Particle): the frames are UNorm (never sRGB), the
 // fragment writes AUTHORED values -- the blend runs on them -- and the frame decode pass converts the finished frame once;
@@ -231,6 +274,16 @@ Shader "Wmv/Liquid"
             float _WmvLiquidTime;
             float4 _WmvReflectSky;
             float4 _WmvRippleOrigin;
+            // Stage 10 step 8 (WATER WITH THE LIGHT above): the outdoor light's switch and its fog flag (WmvWorldLight's globals),
+            // the water fog's arm (0 off, 1 the surface terms, 2 the whole composite), the per-renderer flag of an interior group's
+            // liquid (a MaterialPropertyBlock's value, never a global; 0 without one), the fog's record and eye
+            // (WmvWorldFog.hlsl) and the sky dome's inputs (WmvWaterSky.hlsl).
+            float _WmvWLOn;
+            float4 _WmvWLModels;           // w: the fog drawn (step 7)
+            float _WmvWaterFog;
+            float _WmvLiquidUnfogged;
+            #include "WmvWorldFog.hlsl"
+            #include "WmvWaterSky.hlsl"
 
             #define WMV_MARCH_STEPS 32
             #define WMV_MARCH_REFINE 5
@@ -337,6 +390,71 @@ Shader "Wmv/Liquid"
                 return -V.y > WMV_VIEW_DOWN;
             }
 
+            // Stage 10 step 8: is this fragment's water fogged (header: the light shown, the fog drawn, the arm, not an interior
+            // group's liquid)?
+            bool WmvWaterFogged()
+            {
+                return _WmvWLOn > 0.5 && _WmvWLModels.w > 0.5 && _WmvWaterFog > 0.5 && _WmvLiquidUnfogged < 0.5;
+            }
+
+            // Stage 10 step 8: the fog's visibility and colour (kind 0: the fog colour) at the water point, the colour in the
+            // output's domain (converted with the encode).
+            void WmvWaterFogAt(float3 wpos, bool encode, out float vis, out float3 fogC)
+            {
+                float3 p = wpos - _WmvWLEye.xyz;
+                float raw = length(p);
+                float hf;
+                WmvFogVisibility(p, raw, vis, hf);
+                fogC = WmvFogColour(p, raw, hf);
+                if (encode)
+                    fogC = WmvAuthoredToLinear(fogC);
+            }
+
+            // Stage 10 step 8: a premultiplied output (the zone and fallback paths) fogged: vis rgb + (1 - vis) fogC alpha, the
+            // alpha carried; vis 1: the input itself.
+            float4 WmvWaterFogPremultiplied(float4 c, float3 wpos, bool encode)
+            {
+                float vis;
+                float3 fogC;
+                WmvWaterFogAt(wpos, encode, vis, fogC);
+                float4 o = c;
+                o.rgb = vis < 1.0 ? c.rgb * vis + fogC * (c.a * (1.0 - vis)) : c.rgb;
+                return o;
+            }
+
+            // Stage 10 step 8: the HIGH output `o` (Stage 09's, saturated) fogged (header): the surface terms towards the fog
+            // colour and the scene terms as they are (_WmvWaterFog 1), or the whole composite (2); vis 1: `o` itself. The hit
+            // texels are read again here (an explicit lod: no derivative), so Stage 09's code above stays as it was.
+            float3 WmvHighWaterFog(float3 o, float3 P, bool encode, float3 W, float3 bed, float T, float3 sky, float rb, float rd, bool hit,
+                                   float2 hitUv)
+            {
+                float vis;
+                float3 fogC;
+                WmvWaterFogAt(P, encode, vis, fogC);
+                if (!(vis < 1.0))
+                    return o;
+                if (_WmvWaterFog > 1.5)
+                    return saturate(fogC + (o - fogC) * vis);
+                float sB = 1.0, sS = 1.0;
+                float3 cB = float3(0.0, 0.0, 0.0), cS = float3(0.0, 0.0, 0.0);
+                if (hit)
+                {
+                    float2 edge = min(hitUv, 1.0 - hitUv);
+                    float fade = saturate(min(edge.x, edge.y) / max(_HiReflMarch.w, 1e-4));
+                    float4 tb = SAMPLE_TEXTURE2D_LOD(_WmvSceneColorBlur, sampler_LinearClamp, hitUv, 0);
+                    float4 ts = SAMPLE_TEXTURE2D_LOD(_WmvSceneColorRefl, sampler_LinearClamp, hitUv, 0);
+                    sB = 1.0 - fade * saturate(tb.a);
+                    sS = 1.0 - fade * saturate(ts.a);
+                    cB = fade * tb.rgb;
+                    cS = fade * ts.rgb;
+                }
+                float r = rb + rd;
+                float wS = (1.0 - T) * (1.0 - r) + rb * sB + rd * sS;
+                float3 S = W * ((1.0 - T) * (1.0 - r)) + sky * (rb * sB + rd * sS);
+                float3 scene = bed * (T * (1.0 - r)) + rb * cB + rd * cS;
+                return saturate(scene + vis * S + (1.0 - vis) * fogC * wS);
+            }
+
             // The HIGH path (header). wxz: the water point's world xz; dx, dy: its screen derivatives (taken before any branch).
             float4 WmvHighWater(Varyings i, float2 uv, float3 nearP, float3 V, bool ocean, bool encode, float2 wxz, float2 dx, float2 dy)
             {
@@ -392,6 +510,15 @@ Shader "Wmv/Liquid"
                 // Reflection: a screen-space march over the grab's depth.
                 float3 R = reflect(V, normalize(lerp(float3(0.0, 1.0, 0.0), N, _HiReflBump)));
                 R = normalize(float3(R.x, max(R.y, 1e-3), R.z));
+                // Stage 10 step 8: with the light shown and the sky drawn, a miss and a hit texel's uncovered part take the sky
+                // dome in the reflected direction (header); never for an interior group's liquid.
+                [branch]
+                if (_WmvWLOn > 0.5 && _WmvWaterSkyOn > 0.5 && _WmvLiquidUnfogged < 0.5)
+                {
+                    sky = WmvWaterSkyDir(R);
+                    if (encode)
+                        sky = WmvAuthoredToLinear(sky);
+                }
                 uint2 px = (uint2)i.positionCS.xy & 3u;
                 float dither = (kWmvBayer4[px.y * 4u + px.x] + 0.5) / 16.0;
                 bool hit = false;
@@ -457,7 +584,12 @@ Shader "Wmv/Liquid"
                     rb /= rs;
                     rd /= rs;
                 }
-                return float4(saturate(refracted * (1.0 - rb - rd) + reflBlur * rb + reflSharp * rd), 1.0);
+                float4 high = float4(saturate(refracted * (1.0 - rb - rd) + reflBlur * rb + reflSharp * rd), 1.0);
+                // Stage 10 step 8: the client's fog on the surface terms (or the arm's form), with the light shown (header).
+                [branch]
+                if (WmvWaterFogged())
+                    high.rgb = WmvHighWaterFog(high.rgb, P, encode, W, bed, T, sky, rb, rd, hit, hitUv);
+                return high;
             }
 
             Varyings vert(Attributes v)
@@ -510,7 +642,12 @@ Shader "Wmv/Liquid"
                     float h = animated ? _ZoneHighlight * saturate((frame.a - _ZoneHighlightFloor) / (1.0 - _ZoneHighlightFloor)) : 0.0;
                     float3 hh = float3(h, h, h);
                     float3 rgb = encode ? a * WmvAuthoredToLinear(w) + WmvAuthoredToLinear(saturate(hh)) : a * w + hh;
-                    return float4(rgb, 1.0 - _BedFactor * (1.0 - a));
+                    float4 zoneOut = float4(rgb, 1.0 - _BedFactor * (1.0 - a));
+                    // Stage 10 step 8: the client's fog on the premultiplied output, the alpha carried (header).
+                    [branch]
+                    if (WmvWaterFogged())
+                        zoneOut = WmvWaterFogPremultiplied(zoneOut, i.positionWS, encode);
+                    return zoneOut;
                 }
                 // The fallback: the type's own colour as before, premultiplied (opaque: alpha 1, the colour as it is).
                 float3 colour;
@@ -523,7 +660,12 @@ Shader "Wmv/Liquid"
                 colour = saturate(colour);
                 if (encode)
                     colour = WmvAuthoredToLinear(colour);
-                return float4(colour * alpha, alpha);
+                float4 fallbackOut = float4(colour * alpha, alpha);
+                // Stage 10 step 8: the client's fog on the premultiplied output (an opaque one: alpha 1), the alpha carried (header).
+                [branch]
+                if (WmvWaterFogged())
+                    fallbackOut = WmvWaterFogPremultiplied(fallbackOut, i.positionWS, encode);
+                return fallbackOut;
             }
             ENDHLSL
         }

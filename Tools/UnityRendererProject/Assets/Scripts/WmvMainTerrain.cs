@@ -983,21 +983,31 @@ public partial class WmvMain
     /// every camera of the frame has moved, and for a capture's own aspect): WmvWorldModels.Cull, WmvWorldDoodads.Cull. First
     /// the liquids' zone light at that camera (LiquidLightFrame) and the ripple map's origin offset (RippleOriginFrame), in
     /// every view; after the culling the outdoor light (WorldLightFrame, Stage 10), so a fault in it can never cost the
-    /// frame's culling.</summary>
+    /// frame's culling. Stage 10 step 8: the liquids' light goes first only with WMV_LIGHT=off (Stage 09's order exactly);
+    /// otherwise WorldLightFrame samples it after the outdoor light's frame (LiquidLightFrame with the light's object), on its
+    /// fault path too, and WorldLightFrame runs even when the ripple origin or the culling throws (the fault still reaches the
+    /// pipeline), so the water is sampled once every frame as Stage 09 samples it before them.</summary>
     void CullWorldModels(UnityEngine.Rendering.ScriptableRenderContext context, Camera cam)
     {
         if (cam == null || cam != Camera.main)
             return;
-        LiquidLightFrame(cam);
-        RippleOriginFrame();
-        if (TerrainViewActive)
+        if (WmvWorldLight.HardOff)
+            LiquidLightFrame(cam);
+        try
         {
-            if (worldModels != null && worldModels.InstanceCount > 0)
-                worldModels.Cull(cam);
-            if (worldDoodads != null && worldDoodads.InstanceCount > 0)
-                worldDoodads.Cull(cam);
+            RippleOriginFrame();
+            if (TerrainViewActive)
+            {
+                if (worldModels != null && worldModels.InstanceCount > 0)
+                    worldModels.Cull(cam);
+                if (worldDoodads != null && worldDoodads.InstanceCount > 0)
+                    worldDoodads.Cull(cam);
+            }
         }
-        WorldLightFrame(cam);
+        finally
+        {
+            WorldLightFrame(cam);       // (never throws: its faults switch the light off)
+        }
     }
 
     /// <summary>Stage 09: the liquids' zone light at the main camera, once per rendered frame (WmvLiquidLight.Frame): the
@@ -1034,6 +1044,20 @@ public partial class WmvMain
         WmvLiquidLight.Frame(Time.frameCount, Time.deltaTime, lights, x, y, z, WmvModelBuilder.Debug_.AnimTime >= 0f);
     }
 
+    /// <summary>Stage 10 step 8: the liquids' light at the main camera after the outdoor light's frame (WorldLightFrame; never
+    /// with WMV_LIGHT=off): as LiquidLightFrame, through WmvLiquidLight.FrameAfterLight -- on the light's clock (the day of the
+    /// scene's worldLight object `set` at the half-minute the outdoor light used this frame, its clamp arm and its clock jump)
+    /// while the outdoor light is shown for this camera and -wmvWaterLight is clock; otherwise Stage 09's noon rows (a null
+    /// `set`: the fault path, which takes a frame stepped on the clock again on the noon rows).</summary>
+    void LiquidLightFrame(Camera cam, WorldLightSet set)
+    {
+        LiquidLights lights = TerrainViewActive && terrain != null ? terrain.SceneLights : null;
+        double x = 0.0, y = 0.0, z = 0.0;
+        if (lights != null && !CameraWorldPosition(cam.transform.position, out x, out y, out z))
+            lights = null;
+        WmvLiquidLight.FrameAfterLight(Time.frameCount, Time.deltaTime, lights, x, y, z, WmvModelBuilder.Debug_.AnimTime >= 0f, set);
+    }
+
     /// <summary>Stage 10 (protocol 20): the outdoor light at the main camera, once per rendered frame (WmvWorldLight.Frame): the
     /// scene's outdoor light -- a single tile's, a world's or a streaming session's entry's, in the terrain view only and never
     /// in the top-down overview (orthographic) -- at the camera's game position, with the game Z the floating origin stands
@@ -1043,7 +1067,11 @@ public partial class WmvMain
     /// draws, so no frame draws a stale binding; then the sky and bloom for this render (WmvWorldLight.Sky). Stage 10 step 7:
     /// the camera's Unity position is the fog's eye for this render (WmvWorldLight.SetEye, before Frame publishes). A fault here
     /// switches the light off (WmvWorldLight.FailOff) and binds every world renderer to its own materials: the frame is drawn
-    /// as Stage 09 draws it. Nothing with WMV_LIGHT=off.</summary>
+    /// as Stage 09 draws it. Stage 10 step 8: right after the outdoor light's frame the liquids' light (LiquidLightFrame with the
+    /// object: on the light's clock while it is shown), and on the fault path the liquids' light on Stage 09's noon rows -- taken
+    /// again when this frame's water was already stepped on the clock (or its clock step threw), so the faulting frame's water is
+    /// Stage 09's too and the water is sampled every frame. Nothing with WMV_LIGHT=off (CullWorldModels samples the water first
+    /// then).</summary>
     void WorldLightFrame(Camera cam)
     {
         if (WmvWorldLight.HardOff)
@@ -1057,6 +1085,7 @@ public partial class WmvMain
                               CameraWorldPosition(Vector3.zero, out ox, out oy, out oz);
             WmvWorldLight.SetEye(cam.transform.position);
             WmvWorldLight.Frame(Time.frameCount, Time.deltaTime, set, positioned, x, y, z, oz, WmvModelBuilder.Debug_.AnimTime >= 0f);
+            LiquidLightFrame(cam, set);   // Stage 10 step 8
             BindWorldLit(WmvWorldLight.ObjectsLit, cam, set, positioned);
             WmvWorldLight.Sky(cam, worldView);
         }
@@ -1064,6 +1093,15 @@ public partial class WmvMain
         {
             Debug.LogError("WMV: [light] the outdoor light's frame failed: " + e);
             WmvWorldLight.FailOff(e);
+            // Stage 10 step 8: the water on Stage 09's noon rows for this frame (the light is off now): sampled now, or taken again
+            // with 0 s when it was stepped on the clock before the fault (WmvLiquidLight.Frame); a no-op when it was on the noon rows.
+            try { LiquidLightFrame(cam, null); }
+            catch (System.Exception g)
+            {
+                if (!liquidLightFaultSaid)
+                    Debug.LogError("WMV: [light] the liquids' light after the outdoor light's fault failed (said once): " + g);
+                liquidLightFaultSaid = true;
+            }
             try { BindWorldLit(false, null, null, false); }
             catch (System.Exception f)
             {
@@ -1073,6 +1111,8 @@ public partial class WmvMain
             }
         }
     }
+
+    bool liquidLightFaultSaid;          // Stage 10 step 8: a fault of the liquids' light on the outdoor light's fault path, said once
 
     // Stage 10 step 6: the world's binding, frame by frame, and its lines.
     readonly WmvWorldLitDriver worldLit = new WmvWorldLitDriver(s => Debug.Log("WMV: [light] " + s));

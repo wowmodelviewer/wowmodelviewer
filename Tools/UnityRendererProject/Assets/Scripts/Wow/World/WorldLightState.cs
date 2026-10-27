@@ -39,7 +39,14 @@
 //                 (the world-lit variants draw the albedo, or 0.5 + 0.5 x the raw interpolated normal; valid on opaque and
 //                 alpha-keyed batches only); Stage 10 step 7 (WorldFog.cs): -wmvFog=off (no fog anywhere: step 6's picture) and
 //                 -wmvFogClassic=off|public|power36 (for the products the fog is off for -- Classic Era, MoP Classic, Classic
-//                 Beta, unlisted ones --, the D17 candidate rules for the side-by-sides, never compared with the game).
+//                 Beta, unlisted ones --, the D17 candidate rules for the side-by-sides, never compared with the game); Stage 10
+//                 step 8 (the water, LiquidWaterDay.cs, LiquidHigh.cs, Resources/WmvLiquid.shader): -wmvWaterLight=clock|noon
+//                 (clock by default: the water colours of the light's day at its half-minute; noon: Stage 09's noon values with
+//                 the light shown, an isolation arm), -wmvWaterSky=dome|stage09 (dome by default: a reflection that misses takes
+//                 the sky dome's colour; stage09: _WmvReflectSky as before, an isolation arm) and -wmvWaterFog=surface|composite|off
+//                 (surface by default: the client's fog on the water's surface terms, the refracted and reflected scene never
+//                 fogged twice; composite: the client's literal form on the whole composite, an arm not compared until the owner
+//                 decides; off: no water fog).
 
 using System;
 using System.Collections.Generic;
@@ -417,12 +424,15 @@ namespace Wmv.Wow.World
         public int WorldLitView;                          // -wmvWorldLitView: 0 none, WorldLitViewAlbedo, WorldLitViewNormal
         public bool Fog = true;                           // -wmvFog=off: no fog anywhere (step 6's picture)
         public WorldFogClassicArm FogClassic;             // -wmvFogClassic=public|power36: the D17 arms (products the fog is off for)
+        public bool WaterClock = true;                    // -wmvWaterLight=noon: Stage 09's noon values with the light shown (step 8)
+        public bool WaterSkyDome = true;                  // -wmvWaterSky=stage09: misses take _WmvReflectSky (step 8)
+        public int WaterFog = LiquidHighMath.WaterFogSurface;   // -wmvWaterFog=composite|off (step 8; LiquidHighMath.WaterFog*)
         public readonly List<string> Notes = new List<string>();
 
         /// <summary>-wmvWorldLitView's values (DIAGNOSTIC; _WmvWLModels.z).</summary>
         public const int WorldLitViewNone = 0, WorldLitViewAlbedo = 1, WorldLitViewNormal = 2;
 
-        /// <summary>The defaults of the sky, terrain, doodad, world-model and fog switches (steps 4 to 7)? The game's far clip and
+        /// <summary>The defaults of the sky, terrain, doodad, world-model, fog and water switches (steps 4 to 8)? The game's far clip and
         /// horizonStart (-wmvGameFarclip, -wmvGameHorizonStart) are settings of the game the fog reads, not draw switches: not part
         /// of it.</summary>
         public bool DrawDefaults
@@ -430,7 +440,8 @@ namespace Wmv.Wow.World
             get
             {
                 return Sky && !SkyTableB && SkyEndFog && TerrainLight && !TerrainFlat && DoodadLight && WorldModelLight && !DoodadFlat &&
-                       !WorldModelFlat && !InteriorOutdoor && WorldLitView == WorldLitViewNone && Fog && FogClassic == WorldFogClassicArm.Off;
+                       !WorldModelFlat && !InteriorOutdoor && WorldLitView == WorldLitViewNone && Fog && FogClassic == WorldFogClassicArm.Off &&
+                       WaterClock && WaterSkyDome && WaterFog == LiquidHighMath.WaterFogSurface;
             }
         }
 
@@ -561,6 +572,19 @@ namespace Wmv.Wow.World
                                      : a == "-wmvFogClassic=power36" ? WorldFogClassicArm.Power36 : WorldFogClassicArm.Off;
                     else if (a.StartsWith("-wmvFogClassic=", StringComparison.Ordinal))
                         w.Notes.Add(a + " is not -wmvFogClassic=off, =public or =power36 -- refused, no arm");
+                    else if (a == "-wmvWaterLight=clock" || a == "-wmvWaterLight=noon")
+                        w.WaterClock = a == "-wmvWaterLight=clock";
+                    else if (a.StartsWith("-wmvWaterLight=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvWaterLight=clock or =noon -- the light's clock");
+                    else if (a == "-wmvWaterSky=dome" || a == "-wmvWaterSky=stage09")
+                        w.WaterSkyDome = a == "-wmvWaterSky=dome";
+                    else if (a.StartsWith("-wmvWaterSky=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvWaterSky=dome or =stage09 -- the sky dome");
+                    else if (a == "-wmvWaterFog=surface" || a == "-wmvWaterFog=composite" || a == "-wmvWaterFog=off")
+                        w.WaterFog = a == "-wmvWaterFog=composite" ? LiquidHighMath.WaterFogComposite
+                                   : a == "-wmvWaterFog=off" ? LiquidHighMath.WaterFogOff : LiquidHighMath.WaterFogSurface;
+                    else if (a.StartsWith("-wmvWaterFog=", StringComparison.Ordinal))
+                        w.Notes.Add(a + " is not -wmvWaterFog=surface, =composite or =off -- the surface terms");
                 }
             if (cmdOn && cmdOff)
                 w.Notes.Add("-wmvWorldLight=on and =off both given -- off");
@@ -630,7 +654,7 @@ namespace Wmv.Wow.World
                    (WorldModelLight ? "; world models: exterior groups lit (" + Variant(WorldModelFlat, "-wmvWorldModelVariant=flat") + "), interior groups " +
                                       (InteriorOutdoor ? interiorLit : "on the preview rig until Stage 12")
                                     : "; world models as Stage 09 (-wmvWorldModelLight=off)") +
-                   "; exterior MOCV not drawn; water as Stage 09" + DescribeFog(product, fogAbsent, farClip, horizonStart) +
+                   "; exterior MOCV not drawn; " + DescribeWater() + DescribeFog(product, fogAbsent, farClip, horizonStart) +
                    (WorldLitView == WorldLitViewAlbedo ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=albedo): the world-lit variants draw the albedo " +
                                                          "(light factor 1, no world-model gate factor), valid on opaque and alpha-keyed batches only"
                     : WorldLitView == WorldLitViewNormal ? "; DIAGNOSTIC VIEW (-wmvWorldLitView=normal): the world-lit variants draw 0.5 + 0.5 x the raw " +
@@ -668,10 +692,12 @@ namespace Wmv.Wow.World
                                         WorldFog.EndFarClipFactor, farClip, horizonStart, WorldFog.EndOf(farClip, horizonStart), WorldFog.StartCap,
                                         WorldFog.DensityScale);
             bool groups = InteriorOutdoor && WorldModelLight, doodads = InteriorOutdoor && DoodadLight;
-            string unfogged = !groups && !doodads ? "; interiors, water, sky and particles unfogged"
+            // Step 8: the water is fogged (but interior groups' liquids, unless -wmvInteriorLight=outdoor), or not (-wmvWaterFog=off).
+            string water = WaterFog == LiquidHighMath.WaterFogOff ? "water, " : InteriorOutdoor ? "" : "interior groups' water, ";
+            string unfogged = !groups && !doodads ? "; interiors, " + water + "sky and particles unfogged"
                 : "; " + (groups && doodads ? "interior groups and the doodads they list" : groups ? "interior groups" : "the doodads interior groups list") +
                   " fogged too (-wmvInteriorLight=outdoor, for the side-by-sides); " +
-                  (groups && doodads ? "" : groups ? "the doodads they list, " : "interior groups, ") + "water, sky and particles unfogged";
+                  (groups && doodads ? "" : groups ? "the doodads they list, " : "interior groups, ") + water + "sky and particles unfogged";
             if (!Fog)
                 return "; fog OFF (-wmvFog=off)";
             string arm = FogClassic != WorldFogClassicArm.Off
@@ -685,6 +711,19 @@ namespace Wmv.Wow.World
             if (mode == WorldFogMode.RetailPattern)
                 return "; fog: " + what + " (product " + product + ", Retail pattern; " + rule + ")" + unfogged;
             return "; fog off for product " + product + " (D17/D18)" + arm + (mode != WorldFogMode.Off ? unfogged : "");
+        }
+
+        /// <summary>Stage 10 step 8: what the water draws with the light shown (DescribeObjects' water clause; no leading "; ").</summary>
+        public string DescribeWater()
+        {
+            return "water: " + (WaterClock ? "the light's clock (the water colours of each light's day at its half-minute; Stage 09's selection, " +
+                                             "validity, alphas and constants)"
+                                           : "Stage 09's noon values (-wmvWaterLight=noon, an isolation arm)") +
+                   (WaterSkyDome ? ", reflections that miss take the sky dome" : ", reflections that miss take Stage 09's sky (-wmvWaterSky=stage09, an isolation arm)") +
+                   (WaterFog == LiquidHighMath.WaterFogSurface ? ", the client's fog on its surface terms (the refracted and reflected scene not fogged twice)"
+                    : WaterFog == LiquidHighMath.WaterFogComposite ? ", the client's fog on the whole composite (-wmvWaterFog=composite: the client's literal " +
+                                                                     "form, an ARM not compared until the owner decides)"
+                    : ", no water fog (-wmvWaterFog=off)");
         }
 
         static string Variant(bool flat, string flag)

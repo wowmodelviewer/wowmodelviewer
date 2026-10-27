@@ -13,8 +13,11 @@
 //                 exactly the pixels nothing opaque covers and the water grab's coverage (0 at the far depth) is unchanged.
 //   the inputs    the vertex colours, the tint and the sun of SkyInputs as the material's own values (_WmvSkyColour0..5,
 //                 _WmvSkyTint, _WmvSkyWeights, _WmvSkySun), set before each enqueue: authored values as Vector4 (byte / 255,
-//                 never a Unity Color, which would be linearised).
-//   bloom         while the light is on in the world view every volume's Bloom intensity is overridden to 0 (URP's bloom is
+//                 never a Unity Color, which would be linearised). Stage 10 step 8: WmvWorldLight.Sky gives the SAME SkyInputs,
+//                 after an enqueue that drew the sky, to the High water as globals (WmvWorldLight.PublishWaterSky, _WmvWaterSkyOn:
+//                 Resources/WmvWaterSky.hlsl traces the dome in a reflected direction), so the sky and its reflection share one
+//                 source; nothing here changed for it.
+//   bloom        while the light is on in the world view every volume's Bloom intensity is overridden to 0 (URP's bloom is
 //                 not client data, plan D9); on leaving the world view, switching the light off or Release each is put back
 //                 to its own override state and value, exactly. WmvMain.ConfigureDisplayTransform edits the same profile
 //                 instances (Volume.profile) at start for Tonemapping and Vignette and never Bloom, so the two never write

@@ -174,6 +174,73 @@ namespace Wmv.Wow.World
             nx -= meanX * nz;
             ny -= meanY * nz;
         }
+
+        // ---------------------------------------------------------------- Stage 10 step 8: the water's fog
+
+        /// <summary>The water fog's arms (-wmvWaterFog; the shader's _WmvWaterFog): none, the surface terms (the default), the
+        /// client's literal form on the whole composite.</summary>
+        public const int WaterFogOff = 0, WaterFogSurface = 1, WaterFogComposite = 2;
+
+        /// <summary>One channel of a reflection's two shares on the HIGH path: of the sky, skyShare = 1 - fade sat(a) on a hit,
+        /// 1 on a miss; of the scene (the grab's premultiplied texel c), scene = fade c on a hit, 0 on a miss. The reflection is
+        /// sky skyShare + scene -- lerp(sky, c + sky (1 - sat(a)), fade), the shader's form, rearranged.</summary>
+        public static void ReflectionShares(bool hit, double fade, double premultiplied, double coverage, out double skyShare, out double scene)
+        {
+            skyShare = hit ? 1.0 - fade * Saturate(coverage) : 1.0;
+            scene = hit ? fade * premultiplied : 0.0;
+        }
+
+        /// <summary>
+        /// Stage 10 step 8: one channel of the HIGH output with the client's fog of visibility `vis` and colour `fogC` (the same
+        /// domain as the rest), arm `arm`. Stage 09's output is saturate(W (1 - T)(1 - r) + bed T (1 - r) + reflB rb + reflS rd),
+        /// r = rb + rd after LimitReflection, each reflection sky sX + fade cX on a hit (ReflectionShares), the sky on a miss.
+        ///   WaterFogSurface  the SURFACE terms -- S = W (1 - T)(1 - r) + sky (rb sB + rd sS), of weight wS = (1 - T)(1 - r) +
+        ///                    rb sB + rd sS -- go towards the fog colour, the SCENE terms -- bed T (1 - r) + rb fade cB + rd fade cS,
+        ///                    the grab's copies, already fogged at their own distance -- are never fogged again:
+        ///                    saturate(scene + vis S + (1 - vis) fogC wS) (INFERRED: the owner's rule, a deliberate departure from
+        ///                    the client, whose water programs fog the whole composite, PROVEN_BYTES)
+        ///   WaterFogComposite the client's literal form: saturate(lerp(fogC, Stage 09's output, vis)) (the refraction and the
+        ///                    reflected texels fogged again)
+        ///   WaterFogOff      Stage 09's output.
+        /// Where vis is 1 or more (inside the fog start) Stage 09's output itself, as the shader's select.
+        /// </summary>
+        public static double MixFogged(double water, double bed, double t, double sky, double rb, double rd, bool hit, double fade, double blurC,
+                                       double blurA, double sharpC, double sharpA, double vis, double fogC, int arm)
+        {
+            LimitReflection(ref rb, ref rd);
+            double sB, xB, sS, xS;
+            ReflectionShares(hit, fade, blurC, blurA, out sB, out xB);
+            ReflectionShares(hit, fade, sharpC, sharpA, out sS, out xS);
+            double reflB = hit ? sky + (Reflected(blurC, blurA, sky) - sky) * fade : sky;
+            double reflS = hit ? sky + (Reflected(sharpC, sharpA, sky) - sky) * fade : sky;
+            double stage09 = Saturate(Refracted(water, bed, t) * (1.0 - rb - rd) + reflB * rb + reflS * rd);
+            if (arm == WaterFogOff || !(vis < 1.0))
+                return stage09;
+            if (arm == WaterFogComposite)
+                return Saturate(fogC + (stage09 - fogC) * vis);
+            double r = rb + rd;
+            double wS = SurfaceWeight(t, rb, rd, sB, sS);
+            double surface = water * ((1.0 - t) * (1.0 - r)) + sky * (rb * sB + rd * sS);
+            double scene = bed * (t * (1.0 - r)) + rb * xB + rd * xS;
+            return Saturate(scene + vis * surface + (1.0 - vis) * fogC * wS);
+        }
+
+        /// <summary>The surface terms' weight wS = (1 - T)(1 - r) + rb sB + rd sS (rb, rd already limited; sX the reflections'
+        /// sky shares): the share of the HIGH output the fog colour takes at visibility 0.</summary>
+        public static double SurfaceWeight(double t, double rb, double rd, double skyShareB, double skyShareS)
+        {
+            return (1.0 - t) * (1.0 - (rb + rd)) + rb * skyShareB + rd * skyShareS;
+        }
+
+        /// <summary>Stage 10 step 8: one channel of a PREMULTIPLIED output (the zone and fallback paths, and an opaque liquid at
+        /// alpha 1) fogged: vis rgb + (1 - vis) fogC alpha -- the client's lerp towards the fog colour on the straight colour,
+        /// premultiplied by the output alpha, which the client carries through its fog (PROVEN_BYTES: never x vis); the
+        /// destination's share (the scene behind, fogged at its own distance) is untouched (INFERRED). Where vis is 1 or more the
+        /// input itself.</summary>
+        public static double FogPremultiplied(double rgb, double alpha, double vis, double fogC)
+        {
+            return !(vis < 1.0) ? rgb : rgb * vis + fogC * (alpha * (1.0 - vis));
+        }
     }
 
     /// <summary>One TUNABLE value: its -wmvWaterTune key, start value and the range a value must lie in.</summary>

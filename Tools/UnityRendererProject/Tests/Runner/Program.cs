@@ -133,6 +133,11 @@ static class Program
         Console.WriteLine("== WorldFogTests (the fog: the client's programs, the record, the derived channels, modes and arms; census when given)");
         failures += WorldFogTests.RunAll(Console.WriteLine);
 
+        // Stage 10 step 8: the water with the light -- its values on the light's clock, the ease's step-8 snaps, the sky dome's wedge
+        // twin, the fogged water's twin and the switches; with WMV_WORLD_LIGHT_HOST_DUMPS the 12:00 invariant on the host's own dumps.
+        Console.WriteLine("== LiquidWaterDayTests (the water on the light's clock, its sky and fog twins; the 12:00 invariant when given)");
+        failures += LiquidWaterDayTests.RunAll(Console.WriteLine);
+
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))
         {

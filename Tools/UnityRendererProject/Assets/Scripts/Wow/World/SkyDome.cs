@@ -33,6 +33,14 @@
 //                the light's half-minute, as the step-1 measurement evaluated it), sun = the sun direction (WorldLightModel's
 //                sun path). The client's separate below-horizon strength is UNKNOWN: one value serves both. The fog's tint
 //                takes the same inputs from the same function (SunTint; step 7, WorldFog.cs).
+//   the water    (Stage 10 step 8) a reflected ray of the High water that misses the scene takes the dome's colour in its
+//                direction: Resources/WmvWaterSky.hlsl traces it against the 10 triangles of the one 15-deg wedge the direction
+//                falls in (the dome is camera-centred and world-aligned, so its colour depends on the direction alone), and
+//                TraceWedge is its C# twin, equal to Trace (the runner proves it within 1e-9 on both tables; the self-test proves
+//                the GPU's within 3e-3, as the sky's own fixture). The inputs are the SkyInputs the sky is drawn with (WmvWorldLight
+//                publishes them once for both): the sky and its reflection cannot disagree. INFERRED: that the game's water
+//                reflects its sky (the client's procwater programs read a reflection target or a constant colour, never the sky
+//                program; what that target holds is UNKNOWN).
 // Thread safety: no mutable static state.
 
 using System;
@@ -347,6 +355,150 @@ namespace Wmv.Wow.World
             }
             Shade(cr, cg, cb, hx, hy, hz, hy, s, out r, out g, out b);
             return true;
+        }
+
+        // ---------------------------------------------------------------- Stage 10 step 8: the dome in a reflected direction
+
+        /// <summary>The wedge of longitude a direction (dx, dz) falls in: floor(longitude / 15 deg), the longitude from +x towards
+        /// +z in [0, 360) (Build's sense), 0..Segments-1.</summary>
+        public static int WedgeOf(double dx, double dz)
+        {
+            double lon = Math.Atan2(dz, dx);
+            if (lon < 0.0)
+                lon += 2.0 * Math.PI;
+            int j = (int)Math.Floor(lon / (2.0 * Math.PI / Segments));
+            return j < 0 ? 0 : j >= Segments ? Segments - 1 : j;
+        }
+
+        /// <summary>
+        /// Stage 10 step 8: the C# twin of Resources/WmvWaterSky.hlsl's WmvWaterSkyDir -- what SkyDome.Trace gives, found in one
+        /// longitude wedge instead of all 240 triangles: the ray from the dome's centre along (dx, dy, dz) against the 10
+        /// triangles of the 15-deg wedge it falls in (WedgeOf: the top fan's, ring 1-5's quads as two triangles each, the bottom
+        /// fan's; their vertices from the profile `radius` / `height` (Profile) at the wedge's two longitudes as Build makes them,
+        /// the float vertices included, in Build's order), the nearest hit's barycentric colour and position, then Shade. Where
+        /// no triangle of that wedge is met (only at its edges, by rounding) the two neighbouring wedges are tried; the final
+        /// fall-back (never met for a direction of finite length) is the colour of the profile point nearest in elevation,
+        /// unshaded. Each wedge's triangles cover exactly its longitudes (their edges between the wedge's two longitudes lie in
+        /// those planes or run between them), so the wedge holds the triangle Trace finds. False only for a zero direction.
+        /// </summary>
+        public static bool TraceWedge(double[] radius, double[] height, double dx, double dy, double dz, SkyInputs s, out double r, out double g,
+                                      out double b)
+        {
+            r = g = b = 0.0;
+            if (!(dx * dx + dy * dy + dz * dz > 0.0))
+                return false;
+            int j = WedgeOf(dx, dz);
+            double cr, cg, cb, hx, hy, hz;
+            if (Wedge(radius, height, j, dx, dy, dz, s, out cr, out cg, out cb, out hx, out hy, out hz) ||
+                Wedge(radius, height, (j + Segments - 1) % Segments, dx, dy, dz, s, out cr, out cg, out cb, out hx, out hy, out hz) ||
+                Wedge(radius, height, (j + 1) % Segments, dx, dy, dz, s, out cr, out cg, out cb, out hx, out hy, out hz))
+            {
+                Shade(cr, cg, cb, hx, hy, hz, hy, s, out r, out g, out b);
+                return true;
+            }
+            double e = Math.Atan2(dy, Math.Sqrt(dx * dx + dz * dz)) * 180.0 / Math.PI, best = double.PositiveInfinity;
+            int slot = 0;
+            for (int k = 0; k < ProfilePoints; k++)
+            {
+                double d = Math.Abs(ElevationDeg(radius[k], height[k]) - e);
+                if (d < best)
+                {
+                    best = d;
+                    slot = SlotOf[k];
+                }
+            }
+            r = s.Colours[3 * slot];
+            g = s.Colours[3 * slot + 1];
+            b = s.Colours[3 * slot + 2];
+            return true;
+        }
+
+        /// <summary>TraceWedge on table A or B's profile (made here: the tests' form).</summary>
+        public static bool TraceWedge(bool tableB, double dx, double dy, double dz, SkyInputs s, out double r, out double g, out double b)
+        {
+            var rad = new double[ProfilePoints];
+            var hgt = new double[ProfilePoints];
+            Profile(tableB, rad, hgt);
+            return TraceWedge(rad, hgt, dx, dy, dz, s, out r, out g, out b);
+        }
+
+        /// <summary>A profile point of wedge longitude index `j` as Build stores it (each coordinate a float).</summary>
+        static void Vertex(double[] radius, double[] height, int point, int j, out double x, out double y, out double z)
+        {
+            double lon = j * (2.0 * Math.PI / Segments);
+            bool pole = point == 0 || point == ProfilePoints - 1;
+            x = pole ? 0.0 : (float)(radius[point] * Math.Cos(lon));
+            y = (float)height[point];
+            z = pole ? 0.0 : (float)(radius[point] * Math.Sin(lon));
+        }
+
+        /// <summary>One wedge's ten triangles in Build's order and winding: the nearest hit's colour and position (false: none).</summary>
+        static bool Wedge(double[] radius, double[] height, int j, double dx, double dy, double dz, SkyInputs s, out double cr, out double cg,
+                          out double cb, out double hx, out double hy, out double hz)
+        {
+            int j1 = (j + 1) % Segments;
+            double bestT = double.PositiveInfinity;
+            cr = cg = cb = hx = hy = hz = 0.0;
+            bool any = false;
+            // (point, longitude index) of each triangle's corners: the top fan, the quads (a c b, b c d), the bottom fan.
+            for (int t = 0; t < 2 * RingCount; t++)
+            {
+                int p0, q0, p1, q1, p2, q2;
+                if (t == 0)
+                {
+                    p0 = 0; q0 = j; p1 = 1; q1 = j; p2 = 1; q2 = j1;
+                }
+                else if (t == 2 * RingCount - 1)
+                {
+                    p0 = RingCount; q0 = j; p1 = ProfilePoints - 1; q1 = j; p2 = RingCount; q2 = j1;
+                }
+                else
+                {
+                    int ring = 1 + (t - 1) / 2;
+                    if (((t - 1) & 1) == 0)
+                    {
+                        p0 = ring; q0 = j; p1 = ring + 1; q1 = j; p2 = ring; q2 = j1;          // a c b
+                    }
+                    else
+                    {
+                        p0 = ring; q0 = j1; p1 = ring + 1; q1 = j; p2 = ring + 1; q2 = j1;     // b c d
+                    }
+                }
+                double ax, ay, az, bx, by, bz, ex, ey, ez;
+                Vertex(radius, height, p0, q0, out ax, out ay, out az);
+                Vertex(radius, height, p1, q1, out bx, out by, out bz);
+                Vertex(radius, height, p2, q2, out ex, out ey, out ez);
+                // SkyDome.Trace's intersection, term for term.
+                double e1x = bx - ax, e1y = by - ay, e1z = bz - az;
+                double e2x = ex - ax, e2y = ey - ay, e2z = ez - az;
+                double px = dy * e2z - dz * e2y, py = dz * e2x - dx * e2z, pz = dx * e2y - dy * e2x;
+                double det = e1x * px + e1y * py + e1z * pz;
+                if (Math.Abs(det) < 1e-15)
+                    continue;
+                double inv = 1.0 / det;
+                double tx = -ax, ty = -ay, tz = -az;
+                double u = (tx * px + ty * py + tz * pz) * inv;
+                if (u < -1e-9 || u > 1.0 + 1e-9)
+                    continue;
+                double qx = ty * e1z - tz * e1y, qy = tz * e1x - tx * e1z, qz = tx * e1y - ty * e1x;
+                double w = (dx * qx + dy * qy + dz * qz) * inv;
+                if (w < -1e-9 || u + w > 1.0 + 1e-9)
+                    continue;
+                double dist = (e2x * qx + e2y * qy + e2z * qz) * inv;
+                if (dist <= 0.0 || dist >= bestT)
+                    continue;
+                bestT = dist;
+                any = true;
+                double w0 = 1.0 - u - w;
+                int s0 = SlotOf[p0], s1 = SlotOf[p1], s2 = SlotOf[p2];
+                hx = w0 * ax + u * bx + w * ex;
+                hy = w0 * ay + u * by + w * ey;
+                hz = w0 * az + u * bz + w * ez;
+                cr = w0 * s.Colours[3 * s0] + u * s.Colours[3 * s1] + w * s.Colours[3 * s2];
+                cg = w0 * s.Colours[3 * s0 + 1] + u * s.Colours[3 * s1 + 1] + w * s.Colours[3 * s2 + 1];
+                cb = w0 * s.Colours[3 * s0 + 2] + u * s.Colours[3 * s1 + 2] + w * s.Colours[3 * s2 + 2];
+            }
+            return any;
         }
     }
 }

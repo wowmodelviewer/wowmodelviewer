@@ -7,7 +7,9 @@
 // the terrain (step 5: Resources/WmvTerrainTextured.shader's world-lit branch), and the exterior world-model groups and outdoor
 // doodads (step 6: Resources/WmvWorldLight.hlsl in the world-lit variants WmvOpaqueWorld.shader and WmvWmoWorld.shader, which
 // WmvWorldLitMaterials binds while ObjectsLit); the same three end with the client's per-pixel fog (step 7: Resources/
-// WmvWorldFog.hlsl, its record packed here once a frame by Wow/World/WorldFog.cs); the water reads nothing of it yet.
+// WmvWorldFog.hlsl, its record packed here once a frame by Wow/World/WorldFog.cs); the water (step 8: Resources/WmvLiquid.shader)
+// reads _WmvWLOn, _WmvWLModels.w and the fog record, its colours come from the light's day through WmvLiquidLight (on this
+// clock's half-minute, ClockJumpedThisFrame snapping its ease, WaterOnClock deciding), and its reflections the sky's inputs below.
 // RenderSettings, the preview rig and the shadow rig are never touched. The globals (colours authored 0..1 = the table's byte /
 // 255, w 1; directions in Unity's world frame, w 0):
 //   _WmvWLOn               1 while the main camera of the world view renders with a valid light; 0 at every other camera's
@@ -44,6 +46,13 @@
 //   _WmvWLEndFogColor, _WmvWLSunFogColor, _WmvWLFogHeightColor, _WmvWLEndFogHeightColor   the fog colours
 //   _WmvWLFrame            (game far clip in yards -- -wmvGameFarclip, 7000 by default --, the game Z the floating origin
 //                          (Unity y 0) stands for, the half-minute, the time of day in seconds)
+//   _WmvWaterFog           (step 8, with the others) the water fog's arm: 0 off, 1 the surface terms (the default), 2 the whole
+//                          composite (-wmvWaterFog; LiquidHighMath.WaterFog*); the water is fogged only while _WmvWLModels.w is 1
+//   _WmvWaterSkyOn         (step 8, written on change by Sky) 1 only when the sky was enqueued for this render and -wmvWaterSky is
+//                          dome; then _WmvWaterSky0..5 (the six slot colours), _WmvWaterSkyTint (C, w the angle a),
+//                          _WmvWaterSkyWeights (above, below), _WmvWaterSkySun and the profile of the table drawn
+//                          (_WmvWaterSkyRadius0/1, _WmvWaterSkyHeight0/1: SkyDome.Profile) -- the SAME SkyInputs the sky's material
+//                          gets (one source), read by Resources/WmvWaterSky.hlsl for the High water's reflections that miss
 // The colours and floats are the client's own (PROVEN_BYTES per column), the host's rounding per channel at the half-minute
 // (WorldLightDay), the point lights lerped over the base light (Stage 09's rule, INFERRED), eased over frames (snapped when
 // -wmvAnimTime pins the clocks, on jumps over 60 yd and on clock jumps, as the water's zone light).
@@ -61,7 +70,8 @@
 // sky's and terrain's -wmvSky, -wmvSkyTable, -wmvSkyEndFog, -wmvTerrainLight, -wmvTerrainVariant; the world models' and
 // doodads' -wmvDoodadLight, -wmvWorldModelLight, -wmvDoodadVariant, -wmvWorldModelVariant, -wmvInteriorLight and the diagnostic
 // -wmvWorldLitView (they act where the world's renderers are bound, WmvWorldLitMaterials, except the flat arms and the view,
-// which _WmvWLModels carries); the fog's -wmvFog and -wmvFogClassic (step 7). The host switches it, its clock, its time and the
+// which _WmvWLModels carries); the fog's -wmvFog and -wmvFogClassic (step 7); the water's -wmvWaterLight (clock|noon: WaterOnClock),
+// -wmvWaterSky (dome|stage09: _WmvWaterSkyOn) and -wmvWaterFog (surface|composite|off: _WmvWaterFog) (step 8). The host switches it, its clock, its time and the
 // far clip with setWorldLight (SetFromHost).
 // THE LOG: one line per load and per change of the base light (zone, Light, LightParams, time, valid; step 7: this frame's fog
 // record or why it is off), one per setWorldLight, one fog census per new light object while the light is on (WorldFog.Census);
@@ -97,6 +107,17 @@ public static class WmvWorldLight
     /// <summary>Stage 10 step 7: the fog record's rows (_WmvWLFogR0 .. _WmvWLFogR13, WorldFogRecord's) and the eye.</summary>
     public static readonly int[] FogRowIds = FogRowNames();
     public static readonly int EyeId = Shader.PropertyToID("_WmvWLEye");
+    /// <summary>Stage 10 step 8: the water's globals (the file header): the fog's arm, the sky's switch and inputs.</summary>
+    public static readonly int WaterFogId = Shader.PropertyToID("_WmvWaterFog"), WaterSkyOnId = Shader.PropertyToID("_WmvWaterSkyOn"),
+                               WaterSkyTintId = Shader.PropertyToID("_WmvWaterSkyTint"), WaterSkyWeightsId = Shader.PropertyToID("_WmvWaterSkyWeights"),
+                               WaterSkySunId = Shader.PropertyToID("_WmvWaterSkySun"), WaterSkyRadius0Id = Shader.PropertyToID("_WmvWaterSkyRadius0"),
+                               WaterSkyRadius1Id = Shader.PropertyToID("_WmvWaterSkyRadius1"), WaterSkyHeight0Id = Shader.PropertyToID("_WmvWaterSkyHeight0"),
+                               WaterSkyHeight1Id = Shader.PropertyToID("_WmvWaterSkyHeight1");
+    public static readonly int[] WaterSkyColourIds =
+    {
+        Shader.PropertyToID("_WmvWaterSky0"), Shader.PropertyToID("_WmvWaterSky1"), Shader.PropertyToID("_WmvWaterSky2"),
+        Shader.PropertyToID("_WmvWaterSky3"), Shader.PropertyToID("_WmvWaterSky4"), Shader.PropertyToID("_WmvWaterSky5"),
+    };
 
     static int[] FogRowNames()
     {
@@ -166,6 +187,12 @@ public static class WmvWorldLight
     static readonly double[] recordNow = new double[RecordValues], recordPrev = new double[RecordValues], recordSaid = new double[RecordValues];
     static int recordHeld;
     static bool recordSaidAny;
+    // Stage 10 step 8: whether this frame's ease step took a clock jump (WmvLiquidLight's snap), the water globals as last written
+    // (_WmvWaterSkyOn and _WmvWaterFog: written on change) and the two tables' profiles (made once).
+    static bool clockJumpedFrame;
+    static bool waterSkyOn, waterSkyWritten;
+    static float waterFog = float.NaN;
+    static double[][] profileRadius, profileHeight;
 
     /// <summary>The main camera's anti-aliasing, said with each settled fog record (WmvMain sets it after Configure,
     /// WmvMain.AntiAliasingText; null: not said).</summary>
@@ -229,6 +256,14 @@ public static class WmvWorldLight
     /// <summary>The fog is drawn for the main camera now (_WmvWLTerrain.z and _WmvWLModels.w 1): shown, and this frame's record
     /// not off.</summary>
     public static bool FogDrawn { get { return Showing && fogRecord.Mode != WorldFogMode.Off; } }
+    /// <summary>Stage 10 step 8: this frame's ease step took a clock jump (the host set the time or the clock, or the map's override
+    /// came or went): WmvLiquidLight snaps the water with it ("clock"). False on a frame the light is not evaluated.</summary>
+    public static bool ClockJumpedThisFrame { get { return clockJumpedFrame; } }
+    /// <summary>Stage 10 step 8: the water takes its colours from the light's day now -- the light shown for the main camera
+    /// (after Frame) and -wmvWaterLight is clock; WmvMain also needs the scene's object.</summary>
+    public static bool WaterOnClock { get { return Showing && Switches.WaterClock; } }
+    /// <summary>Stage 10 step 8: _WmvWaterSkyOn as last written (the sky drawn for the last render and -wmvWaterSky=dome).</summary>
+    public static bool WaterSkyOn { get { return waterSkyOn; } }
 
     /// <summary>The switches' starting state: on or off, the clock pinned at -wmvGameTime (12:00:00), the far clip, the
     /// horizonStart; the frame state forgotten. Configure takes it once; the self-test puts it back after its checks.</summary>
@@ -312,6 +347,7 @@ public static class WmvWorldLight
         installed = false;
         owner = null;
         SetOn(false);
+        SetWaterSky(false);
         WmvWorldSky.HoldBloom(false, Log);
         WmvWorldSky.DropResources();
         ForgetFrame();
@@ -344,6 +380,7 @@ public static class WmvWorldLight
         fogRecord.Clear();
         SetOn(false);
         skyDrawn = false;
+        SetWaterSky(false);
         WmvWorldSky.DropResources();
     }
 
@@ -373,6 +410,7 @@ public static class WmvWorldLight
         if (frame != lastFrame)
         {
             lastFrame = frame;
+            clockJumpedFrame = false;
             clock.Advance(dt);
             Evaluate(set, positioned, x, y, z, originZ, dt, animPinned);
             Publish();
@@ -453,6 +491,7 @@ public static class WmvWorldLight
         }
         evaluator.Evaluate(set, x, y, z, clock.Effective, 0, Switches.Rules, sample);
         ease.Step(sample, set, x, y, z, dt, animPinned, clockJumped);
+        clockJumpedFrame = clockJumped;     // Stage 10 step 8: the water's snap takes the same jump
         clockJumped = false;
         evaluated = true;
         originZ = origin;
@@ -520,7 +559,56 @@ public static class WmvWorldLight
             PublishFog();
         Shader.SetGlobalVector(TerrainId, new Vector4(Switches.TerrainLight ? 1f : 0f, Switches.TerrainFlat ? 1f : 0f, fog ? 1f : 0f, 0f));
         Shader.SetGlobalVector(ModelsId, ModelsVector());
+        SetWaterFog(Switches.WaterFog);     // Stage 10 step 8: the water fog's arm (drawn only while _WmvWLModels.w is 1)
         SetOn(true);
+    }
+
+    /// <summary>Stage 10 step 8: _WmvWaterFog, written only when it changes (never with WMV_LIGHT=off).</summary>
+    static void SetWaterFog(int arm)
+    {
+        if (HardOff || waterFog == arm)
+            return;
+        waterFog = arm;
+        Shader.SetGlobalFloat(WaterFogId, arm);
+    }
+
+    /// <summary>Stage 10 step 8: _WmvWaterSkyOn, written only when it changes (the first write always; never with WMV_LIGHT=off).</summary>
+    static void SetWaterSky(bool value)
+    {
+        if (HardOff)
+            return;
+        if (waterSkyWritten && waterSkyOn == value)
+            return;
+        waterSkyOn = value;
+        waterSkyWritten = true;
+        Shader.SetGlobalFloat(WaterSkyOnId, value ? 1f : 0f);
+    }
+
+    /// <summary>Stage 10 step 8: the sky's inputs `s` for the water's reflections (the file header; the same object the sky's
+    /// material was given), with the profile of table A or B. No allocation after the first call.</summary>
+    public static void PublishWaterSky(SkyInputs s, bool tableB)
+    {
+        if (profileRadius == null)
+        {
+            profileRadius = new double[2][];
+            profileHeight = new double[2][];
+            for (int k = 0; k < 2; k++)
+            {
+                profileRadius[k] = new double[SkyDome.ProfilePoints];
+                profileHeight[k] = new double[SkyDome.ProfilePoints];
+                SkyDome.Profile(k == 1, profileRadius[k], profileHeight[k]);
+            }
+        }
+        double[] r = profileRadius[tableB ? 1 : 0], h = profileHeight[tableB ? 1 : 0];
+        for (int k = 0; k < SkyDome.ColourSlots; k++)
+            Shader.SetGlobalVector(WaterSkyColourIds[k], new Vector4((float)s.Colours[3 * k], (float)s.Colours[3 * k + 1], (float)s.Colours[3 * k + 2], 1f));
+        Shader.SetGlobalVector(WaterSkyTintId, new Vector4((float)s.Tint[0], (float)s.Tint[1], (float)s.Tint[2], (float)s.Angle));
+        Shader.SetGlobalVector(WaterSkyWeightsId, new Vector4((float)s.WeightAbove, (float)s.WeightBelow, 0f, 0f));
+        Shader.SetGlobalVector(WaterSkySunId, new Vector4((float)s.Sun[0], (float)s.Sun[1], (float)s.Sun[2], 0f));
+        Shader.SetGlobalVector(WaterSkyRadius0Id, new Vector4((float)r[0], (float)r[1], (float)r[2], (float)r[3]));
+        Shader.SetGlobalVector(WaterSkyRadius1Id, new Vector4((float)r[4], (float)r[5], (float)r[6], 0f));
+        Shader.SetGlobalVector(WaterSkyHeight0Id, new Vector4((float)h[0], (float)h[1], (float)h[2], (float)h[3]));
+        Shader.SetGlobalVector(WaterSkyHeight1Id, new Vector4((float)h[4], (float)h[5], (float)h[6], 0f));
     }
 
     /// <summary>Stage 10 step 7: this frame's fog record (WorldFog.Pack's 14 rows) and the eye of this render (SetEye), only while
@@ -557,13 +645,21 @@ public static class WmvWorldLight
         WmvWorldSky.HoldBloom(Enabled && worldView, Log);
         skyDrawn = false;
         if (!Showing || !Switches.Sky || (sample.Groups & WorldLightSample.GroupSky) == 0 || !WmvWorldSky.Wants(camera, worldView))
+        {
+            SetWaterSky(false);         // Stage 10 step 8: no sky drawn, so the water's misses keep Stage 09's sky
             return;
+        }
         SkyDome.Inputs(ease.V, clock.HalfMinute, farClip, Switches.SkyEndFog, skyInputs);
         Vector4 sun = Direction(sunDir);
         skyInputs.Sun[0] = sun.x;
         skyInputs.Sun[1] = sun.y;
         skyInputs.Sun[2] = sun.z;
         skyDrawn = WmvWorldSky.Enqueue(camera, worldView, skyInputs, Switches.SkyTableB, Log);
+        // Stage 10 step 8: the same inputs for the water's reflections that miss, only when the sky was enqueued for this render.
+        bool waterSky = skyDrawn && Switches.WaterSkyDome;
+        if (waterSky)
+            PublishWaterSky(skyInputs, Switches.SkyTableB);
+        SetWaterSky(waterSky);
     }
 
     /// <summary>A direction of the game's frame as the Unity vector Publish sets (WorldToUnity.Direction, w 0); the self-test

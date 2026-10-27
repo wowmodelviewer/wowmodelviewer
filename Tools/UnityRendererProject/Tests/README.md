@@ -152,6 +152,16 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   record's continuity across every half-minute of every day of maps 0 and 1 of the five clients and across an ease step (the
   largest jumps reported); otherwise those parts are SKIPPED. `WMV_FOG_PARITY_OUT` names a file for the parity grid the rig
   compares with its Python port.
+- `LiquidWaterDayTests.cs`: Stage 10 step 8 (`docs/world-viewer/10-light-sky-fog.md` 6.11, 13.3): the water's values on the light's
+  clock (`Assets/Scripts/Wow/World/LiquidWaterDay.cs`: rounding and interpolation between keys, the wrap past midnight, the clamp
+  arm, a one-key day, a light without water colours for a span, a point light skipped while it has none, the noon fall-backs, the
+  cache, no allocation in the steady state), the ease's clock-jump and source snaps (Stage 09's reasons unchanged), the sky dome's
+  wedge twin (`SkyDome.TraceWedge` against `SkyDome.Trace` on both tables within 1e-9), the CPU twin of the fogged water
+  (`LiquidHighMath.MixFogged`, `FogPremultiplied`) and the water switches with their texts. With `WMV_WORLD_LIGHT_HOST_DUMPS` it
+  proves the 12:00 invariant on the host's own dumps of maps 0 and 1 of the five clients (the table at half-minute 1440 equal to
+  Stage 09's rows, all 19 values bit-identical, and the selection equal at every zone's centroid and vertices, every point light's
+  position and falloff edges and the default) and sweeps the day every 30 minutes (validity never changes there); otherwise that part
+  is SKIPPED.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

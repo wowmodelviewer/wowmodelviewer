@@ -38,6 +38,11 @@
 //                 Stage 10 step 7: a copy made gets its fog vector (WmvWorldLitMaterials.SetFogBatch) from its MOMT entry's
 //                 F_UNFOGGED (MaterialInfo by the original's MOMT index; FallbackMaterial, which has none, fogged); each slot's
 //                 fog code, with its MOMT blend 2 or above flagged, is kept beside its blend class for the binding line.
+//                 Stage 10 step 8: a group's liquid is still never rebound, but while bound the liquid of a group that is not
+//                 OUTDOOR (ContextOn, the rule LitInterior follows) holds a MaterialPropertyBlock with _WmvLiquidUnfogged 1, so
+//                 the water's fog skips it, and its reflections keep Stage 09's sky, as step 7 leaves interior groups as they are
+//                 until Stage 12 (INFERRED); cleared at the
+//                 unbind (the light off, a fault) and gone with the instance; counted in LiveUnfoggedLiquids and the line.
 //
 // The prototype's root data (WmoRoot, WmoGroup[]) stay with it: the session's floor and start-point queries read them.
 
@@ -80,6 +85,9 @@ public sealed class WmvWorldPrototype
     /// on its original).</summary>
     public int[][] LitFogCodes;
     public string[] LitNoVariant;
+    /// <summary>Stage 10 step 8, recorded with LitKinds: per renderer, true for a group's liquid whose group is not OUTDOOR (by
+    /// WmvWorldLitMaterials.ContextOn: interior-interim, or a group whose file was not read) -- unfogged while bound.</summary>
+    public bool[] LitLiquidUnfogged;
     /// <summary>The world-lit copies, one per distinct original (FallbackMaterial included), destroyed with the prototype.</summary>
     public readonly Dictionary<Material, Material> LitCopies = new Dictionary<Material, Material>();
 
@@ -121,6 +129,7 @@ public sealed class WmvWorldInstance
     public bool Disposed;
     public bool LitMismatchSaid;                       // Stage 10 step 6: its renderers are not its prototype's (said once)
     public bool LitBound;                              // Stage 10 step 6: last bound to the light (it may hold copies)
+    public int UnfoggedLiquids;                        // Stage 10 step 8: its liquid renderers holding the unfogged block now
 }
 
 /// <summary>What a world scene holds beside its tile: its world models, its origin, and their geometry for the camera.</summary>
@@ -179,6 +188,25 @@ public sealed class WmvWorldModels
     public static long LiveGpuGeometryBytes, LiveGpuTextureBytes;
     /// <summary>Stage 10 step 6: the world-lit copies alive (counted in LiveMaterials too), and those with a non-white tint.</summary>
     public static int LiveCopies, LiveTintedCopies;
+    /// <summary>Stage 10 step 8: the liquid renderers of interior groups holding the unfogged block now (_WmvLiquidUnfogged 1: the
+    /// water fog and the dome sky skip them while the world-lit binding is on; 0 again after an unbind, a clear or a release).</summary>
+    public static int LiveUnfoggedLiquids;
+    public static readonly int LiquidUnfoggedId = Shader.PropertyToID("_WmvLiquidUnfogged");
+    static MaterialPropertyBlock unfoggedBlock;
+
+    /// <summary>Stage 10 step 8: the block an interior group's liquid renderer holds while bound (made once).</summary>
+    public static MaterialPropertyBlock UnfoggedBlock
+    {
+        get
+        {
+            if (unfoggedBlock == null)
+            {
+                unfoggedBlock = new MaterialPropertyBlock();
+                unfoggedBlock.SetFloat(LiquidUnfoggedId, 1f);
+            }
+            return unfoggedBlock;
+        }
+    }
 
     /// <summary>A renderer of a prototype's tree (LitKinds): a group's liquid (never rebound), its kind switched off
     /// (-wmvWorldModelLight=off), an interior group's (INTERIOR_INTERIM: today's look), an outdoor group's (bound while lit).</summary>
@@ -424,12 +452,21 @@ public sealed class WmvWorldModels
             return;
         }
         bool any = false;
+        int unfogged = 0;
         for (int i = 0; i < rs.Length; i++)
         {
             Renderer r = rs[i];
             if (r == null)
                 continue;
             int kind = p.LitKinds[i];
+            if (kind == LitLiquid && p.LitLiquidUnfogged != null && i < p.LitLiquidUnfogged.Length && p.LitLiquidUnfogged[i])
+            {
+                // Stage 10 step 8: an interior group's liquid stays unfogged while bound (its materials are never rebound).
+                r.SetPropertyBlock(on ? UnfoggedBlock : null);
+                if (on)
+                    unfogged++;
+                continue;
+            }
             if (kind != LitWanted)
             {
                 if (on && kind == LitInterior)
@@ -453,6 +490,9 @@ public sealed class WmvWorldModels
             else
                 bind.Unbound++;
         }
+        LiveUnfoggedLiquids += unfogged - inst.UnfoggedLiquids;   // Stage 10 step 8 (0 after an unbind)
+        inst.UnfoggedLiquids = unfogged;
+        bind.LiquidsUnfogged += unfogged;
         if (!on)
             inst.LitBound = false;        // after the loop: a throw in it leaves the instance to the next rebind
         if (any)
@@ -470,6 +510,7 @@ public sealed class WmvWorldModels
         int n = all.Length;
         var kinds = new int[n];
         var originals = new Material[n][];
+        var unfogged = new bool[n];
         bool kindOn = WmvWorldLitMaterials.KindOn(false);
         for (int i = 0; i < n; i++)
         {
@@ -477,6 +518,12 @@ public sealed class WmvWorldModels
             if (p.LiquidRendererMask != null && i < p.LiquidRendererMask.Length && p.LiquidRendererMask[i])
             {
                 kinds[i] = LitLiquid;
+                // Stage 10 step 8: the liquid's group (its object's parent, AddLiquids) by the context rule of LitInterior.
+                Transform parent = all[i].transform.parent;
+                int li = rt != null && parent != null ? System.Array.IndexOf(rt.GroupObjects, parent.gameObject) : -1;
+                WorldLightContext lc = li >= 0 && p.GroupContexts != null && li < p.GroupContexts.Length ? p.GroupContexts[li]
+                                     : WorldLightContext.InteriorInterim;
+                unfogged[i] = !WmvWorldLitMaterials.ContextOn(lc);
                 continue;
             }
             WorldLightContext c = WorldLightContext.InteriorInterim;
@@ -490,6 +537,7 @@ public sealed class WmvWorldModels
         p.LitBlends = new int[n][];
         p.LitFogCodes = new int[n][];
         p.LitNoVariant = new string[n];
+        p.LitLiquidUnfogged = unfogged;
         p.LitOriginals = originals;       // last: Bind reads it as "recorded"
     }
 
@@ -570,6 +618,8 @@ public sealed class WmvWorldModels
         if (inst == null || inst.Disposed)
             return;
         inst.Disposed = true;
+        LiveUnfoggedLiquids -= inst.UnfoggedLiquids;    // Stage 10 step 8: its renderers (and their blocks) go with it
+        inst.UnfoggedLiquids = 0;
         if (inst.Root != null)
             Object.Destroy(inst.Root);
         inst.Root = null;

@@ -65,6 +65,8 @@ public sealed class WmvWorldLitBind
     public readonly List<string> NoVariantShaders = new List<string>();
     /// <summary>Renderers set back to their originals (a rebind to the originals).</summary>
     public int Unbound;
+    /// <summary>Stage 10 step 8: interior groups' liquid renderers given the unfogged block (WmvWorldModels.Bind).</summary>
+    public int LiquidsUnfogged;
     public double Ms;
     /// <summary>What instances placed while the light was shown were bound to (a manager's PlacedWhileShown, Lit), not a
     /// rebind; Calls is how many placements it counts (WmvWorldLitDriver says it once no new one came for a frame).</summary>
@@ -105,13 +107,14 @@ public sealed class WmvWorldLitBind
             if (!NoVariantShaders.Contains(s))
                 NoVariantShaders.Add(s);
         Unbound += o.Unbound;
+        LiquidsUnfogged += o.LiquidsUnfogged;
         Ms += o.Ms;
         Calls += o.Calls;
     }
 
     /// <summary>Did the rebind look at any renderer (to the copies) or set any back (to the originals)? A rebind that touches
     /// none says nothing.</summary>
-    public bool Touched { get { return Lit ? Bound + OwnMaterials + KindOff + NoVariant + Mismatched > 0 : Unbound > 0; } }
+    public bool Touched { get { return Lit ? Bound + OwnMaterials + KindOff + NoVariant + Mismatched + LiquidsUnfogged > 0 : Unbound > 0; } }
 
     public void AddNoVariant(string shader)
     {
@@ -176,6 +179,8 @@ public sealed class WmvWorldLitBind
             s.AppendFormat(CultureInfo.InvariantCulture, ", {0} on their own materials by -wmvDoodadLight=off or -wmvWorldModelLight=off", KindOff);
         if (Mismatched > 0)
             s.AppendFormat(CultureInfo.InvariantCulture, ", {0} instance(s) whose renderers are not their prototype's left on their own materials", Mismatched);
+        if (LiquidsUnfogged > 0)       // Stage 10 step 8
+            s.AppendFormat(CultureInfo.InvariantCulture, ", {0} interior group liquid(s) kept unfogged", LiquidsUnfogged);
         // Stage 10 step 7: the bound batches' fog, before the time (the rig takes the line's last "N ms" as its time).
         s.Append(WorldFog.BindingClause(FogUnfogged, FogKinds, FogUnknownBlend, MomtBlend2));
         s.AppendFormat(CultureInfo.InvariantCulture, Placed ? "; {0:0.000} ms" : "; {0:0.0} ms", Ms);

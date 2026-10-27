@@ -37,6 +37,12 @@
 // turns the zone light off at once. The time constant and the jump distance are documented choices, not the game's.
 // The polygon test, the point weight and the order of the point lights are LightGeometry's (LightGeometry.cs, shared with the
 // outdoor light of Stage 10; moved there unchanged).
+// STAGE 10 STEP 8 (docs/world-viewer/10-light-sky-fog.md 6.11): with the outdoor light shown the player evaluates the same
+// selection on a table of the values at the light's half-minute (LiquidWaterDay.cs: the colours of each row's slot-0 day, the
+// alphas and the sky of the row) through Evaluate's table overload; the rows are enumerable (Rows) for it. Without a table the
+// selection reads the host's rows exactly as before (the overload on its own values). The ease takes two optional inputs the
+// step-8 driver gives: a clock jump of the outdoor light this frame snaps ("clock", as the outdoor light's ease does), and a
+// change between the host's noon rows and the clock's table snaps ("source"); without them the ease is Stage 09's.
 // Thread safety: an instance is filled once (the reader thread) and then read on the main thread only.
 
 using System;
@@ -121,6 +127,8 @@ namespace Wmv.Wow.World
         public int DroppedZones, DroppedPoints, DroppedValues;
 
         public int ValueCount { get { return values.Count; } }
+        /// <summary>Stage 10 step 8: the host's rows, one per light (LiquidWaterDay reads them; enumerating allocates nothing).</summary>
+        public Dictionary<int, LiquidLightValues>.ValueCollection Rows { get { return values.Values; } }
 
         static bool Finite(double d) { return LightGeometry.Finite(d); }
 
@@ -203,8 +211,18 @@ namespace Wmv.Wow.World
         /// <summary>Evaluate into `s`, without allocating (one thread at a time: the point-light list is reused).</summary>
         public void Evaluate(double x, double y, double z, LiquidLightSample s)
         {
+            Evaluate(x, y, z, s, values);
+        }
+
+        /// <summary>Stage 10 step 8: Evaluate on the light values `table` (light id -> values; LiquidWaterDay.Table) in place of
+        /// the host's rows -- the same selection, validity rule, point order, weights and sky rule, each light's values read from
+        /// the table (a light without an entry there has no values). On the host's rows themselves it is Evaluate.</summary>
+        public void Evaluate(double x, double y, double z, LiquidLightSample s, Dictionary<int, LiquidLightValues> table)
+        {
             if (s == null)
                 throw new ArgumentNullException("s");
+            if (table == null)
+                throw new ArgumentNullException("table");
             s.Valid = false;
             s.Light = 0;
             s.Zone = -1;
@@ -236,7 +254,7 @@ namespace Wmv.Wow.World
                 return;
             }
             LiquidLightValues b;
-            if (!values.TryGetValue(s.Light, out b))
+            if (!table.TryGetValue(s.Light, out b))
             {
                 s.Why = LiquidLightSample.WhyNoValues;
                 return;
@@ -254,7 +272,7 @@ namespace Wmv.Wow.World
                 double dx = x - p.X, dy = y - p.Y, dz = z - p.Z;
                 double w = p.Weight(Math.Sqrt(dx * dx + dy * dy + dz * dz));
                 LiquidLightValues pv;
-                if (w <= 0.0 || !values.TryGetValue(p.Light, out pv))
+                if (w <= 0.0 || !table.TryGetValue(p.Light, out pv))
                     continue;
                 LightGeometry.InsertInOrder(applied, w, w, pv.Light, pv);
             }
@@ -293,14 +311,17 @@ namespace Wmv.Wow.World
         /// <summary>A camera move of more than this many yards in one frame snaps (a teleport, not a flight: the free
         /// camera's top speed is 120 yd/s).</summary>
         public const double SnapDistance = 60.0;
-        /// <summary>Step's answers: the snap reasons, or "invalid" (nothing to show: the type colours at once).</summary>
+        /// <summary>Step's answers: the snap reasons, or "invalid" (nothing to show: the type colours at once). Stage 10 step 8:
+        /// "source" (the values switched between the host's noon rows and the light's clock table) and "clock" (the outdoor
+        /// light's clock jumped this frame; WorldLightEase.SnapClock's word).</summary>
         public const string SnapFirst = "first", SnapLights = "lights", SnapValidity = "validity", SnapPinned = "pinned", SnapJump = "jump",
-                            Invalid = "invalid";
+                            Invalid = "invalid", SnapSource = "source", SnapClock = "clock";
 
         public bool Has;                          // a sample was taken since the last Reset
         public bool Valid;                        // the last sample's validity
         public bool HasSky;                       // the last (valid) sample gave a sky colour
         public object Source;                     // the lights object of the last sample
+        public bool OnClock;                      // Stage 10 step 8: the last sample read the light's clock table
         public double X, Y, Z;                    // where it was taken
         public int Light, Zone, LightParams;      // the last sample's base light (not eased)
         public readonly double[] V = new double[LiquidLightSample.Count];
@@ -313,17 +334,24 @@ namespace Wmv.Wow.World
         }
 
         /// <summary>The snap reason for a sample of `source` with validity `valid` (and a sky or not) at (x, y, z) (null: it
-        /// eases).</summary>
-        public string SnapReason(object source, bool valid, double x, double y, double z, bool pinned, bool hasSky = false)
+        /// eases). Stage 10 step 8: `onClock` (the values are the light's clock table's, not the host's noon rows) changed since
+        /// the last sample snaps ("source", after "lights"); `clockJumped` (the outdoor light's clock jumped this frame) snaps
+        /// ("clock", after "pinned", in WorldLightEase's order). Both false: Stage 09's reasons exactly.</summary>
+        public string SnapReason(object source, bool valid, double x, double y, double z, bool pinned, bool hasSky = false, bool clockJumped = false,
+                                 bool onClock = false)
         {
             if (!Has)
                 return SnapFirst;
             if (!ReferenceEquals(source, Source))
                 return SnapLights;
+            if (onClock != OnClock)
+                return SnapSource;
             if (valid != Valid || (valid && hasSky != HasSky))
                 return SnapValidity;
             if (pinned)
                 return SnapPinned;
+            if (clockJumped)
+                return SnapClock;
             double dx = x - X, dy = y - Y, dz = z - Z;
             if (dx * dx + dy * dy + dz * dz > SnapDistance * SnapDistance)
                 return SnapJump;
@@ -332,14 +360,17 @@ namespace Wmv.Wow.World
 
         /// <summary>One frame: the sample `target` of lights `source` at (x, y, z), `dt` seconds after the last, the clock
         /// pinned or not. Returns null when the values eased, the snap reason when they snapped, or Invalid (the values are
-        /// kept, unused: an invalid sample shows the type colours at once).</summary>
-        public string Step(LiquidLightSample target, object source, double x, double y, double z, double dt, bool pinned)
+        /// kept, unused: an invalid sample shows the type colours at once). Stage 10 step 8: `clockJumped` and `onClock` as
+        /// SnapReason takes them (both false: Stage 09's step).</summary>
+        public string Step(LiquidLightSample target, object source, double x, double y, double z, double dt, bool pinned, bool clockJumped = false,
+                           bool onClock = false)
         {
             if (target == null)
                 throw new ArgumentNullException("target");
-            string snap = SnapReason(source, target.Valid, x, y, z, pinned, target.HasSky);
+            string snap = SnapReason(source, target.Valid, x, y, z, pinned, target.HasSky, clockJumped, onClock);
             Has = true;
             Source = source;
+            OnClock = onClock;
             Valid = target.Valid;
             HasSky = target.Valid && target.HasSky;
             X = x;
@@ -363,6 +394,7 @@ namespace Wmv.Wow.World
             Valid = false;
             HasSky = false;
             Source = null;
+            OnClock = false;
             Light = LightParams = 0;
             Zone = -1;
         }

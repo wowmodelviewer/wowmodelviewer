@@ -752,13 +752,13 @@ namespace Wmv.Wow.Tests
                                          "min(E, 3000), density FogDensity x 0.0005: MEASURED on the PTR 12.1.7 (post-data; the factor 0.933 at far clip 1000 " +
                                          "only; the end at horizonStart 1000 only, above it ASSUMED), Retail unverified; the cap 3000 INFERRED (public); the " +
                                          "colour ramp and the polynomial path read the far clip " +
-                                         "(ASSUMED)); interiors, water, sky and particles unfogged") &&
+                                         "(ASSUMED)); interiors, interior groups' water, sky and particles unfogged") &&
                          ptr.Contains("(product wowt, Retail pattern") && era.Contains("; fog off for product wow_classic_era (D17/D18)") && !era.Contains("ARM") &&
                          eraArm.Contains("; fog off for product wow_classic_era (D17/D18) [ARM -wmvFogClassic=public: not compared with the game]") &&
                          mopArm.Contains("product wow_classic (D17/D18) [ARM -wmvFogClassic=power36: not compared with the game]") &&
                          unknown.Contains("product not known yet") && fogOff.Contains("; fog OFF (-wmvFog=off)") && !fogOff.Contains("per-pixel") &&
-                         beta.Contains("fog off for product wow_beta") && retail.Contains("; exterior MOCV not drawn; water as Stage 09") &&
-                         !retail.Contains("fog and water as Stage 09") && d.DescribeDraw().Contains("product not known yet") &&
+                         beta.Contains("fog off for product wow_beta") && retail.Contains("; exterior MOCV not drawn; water: the light's clock") &&
+                         !retail.Contains("water as Stage 09") && d.DescribeDraw().Contains("product not known yet") &&
                          !Regex.IsMatch(retail + era + eraArm + mopArm + unknown + fogOff, @"\b(warning|error|exception)\b", RegexOptions.IgnoreCase);
             Check(texts, "R7 DescribeObjects names the product and the mode: \"" + retail + "\" | \"" + eraArm + "\" | \"" + fogOff + "\"");
 
@@ -773,11 +773,11 @@ namespace Wmv.Wow.Tests
             string eraInterior = WorldLightSwitches.Parse(new[] { "-wmvInteriorLight=outdoor", "-wmvFogClassic=public" }, "on")
                                                    .DescribeObjects("wow_classic_era");
             string lackingText = d.DescribeObjects("wow", "SkyFogColor, FogScaler"), unknownLacking = d.DescribeObjects(null, "SkyFogColor");
-            bool interiors = both.Contains("; interior groups and the doodads they list" + side + "water, sky and particles unfogged") &&
+            bool interiors = both.Contains("; interior groups and the doodads they list" + side + "sky and particles unfogged") &&
                              !both.Contains("interiors, water") &&
-                             groupsOnly.Contains("; interior groups" + side + "the doodads they list, water, sky and particles unfogged") &&
-                             doodadsOnly.Contains("; the doodads interior groups list" + side + "interior groups, water, sky and particles unfogged") &&
-                             neither.Contains("; interiors, water, sky and particles unfogged") &&
+                             groupsOnly.Contains("; interior groups" + side + "the doodads they list, sky and particles unfogged") &&
+                             doodadsOnly.Contains("; the doodads interior groups list" + side + "interior groups, sky and particles unfogged") &&
+                             neither.Contains("; interiors, sky and particles unfogged") &&
                              eraInterior.Contains("[ARM -wmvFogClassic=public: not compared with the game]; interior groups and the doodads they list" + side) &&
                              lackingText.Contains("; fog off for product wow (fog columns absent: SkyFogColor, FogScaler)") && !lackingText.Contains("per-pixel") &&
                              !lackingText.Contains("unfogged") && unknownLacking == d.DescribeObjects() && d.DescribeObjects("wow", null) == retail &&

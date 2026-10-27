@@ -95,6 +95,7 @@ public static partial class WmvLifecycleSelfTest
         if (WmvWorldLight.HardOff)
         {
             OutdoorLightHardOffTests(log);
+            OutdoorWaterHardOffTests(log);   // step 8 (WmvLifecycleSelfTestWaterLight.cs)
             return;
         }
         OutdoorLightDriverTests(log);
@@ -104,6 +105,7 @@ public static partial class WmvLifecycleSelfTest
         OutdoorBloomTests(log);
         OutdoorModelTests(log);         // step 6
         OutdoorFogTests(log);           // step 7 (WmvLifecycleSelfTestWorldFog.cs)
+        OutdoorWaterTests(log);         // step 8 (WmvLifecycleSelfTestWaterLight.cs)
     }
 
     static void OutdoorLightIpcTests(Action<string> log)

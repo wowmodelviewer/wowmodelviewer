@@ -541,7 +541,10 @@ namespace Wmv.Wow.Tests
                   "-wmvWorldLitView=albedo|normal each taken; a bad value a note (" + modelsBad.Notes.Count + ") and the default kept; the last of " +
                   "two values wins; DrawDefaults false with any of them");
             Check(dd.Contains("; doodads: outdoor lit (hemisphere variant), interior as Stage 09; world models: exterior groups lit (hemisphere " +
-                              "variant), interior groups on the preview rig until Stage 12; exterior MOCV not drawn; water as Stage 09; fog: the " +
+                              "variant), interior groups on the preview rig until Stage 12; exterior MOCV not drawn; " +
+                              "water: the light's clock (the water colours of each light's day at its half-minute; Stage 09's selection, " +
+                              "validity, alphas and constants), reflections that miss take the sky dome, the client's fog on its surface terms (the refracted " +
+                              "and reflected scene not fogged twice); fog: the " +
                               "client's per-pixel fog") &&
                   !dd.Contains("DIAGNOSTIC") && md.Contains("doodads as Stage 09 (-wmvDoodadLight=off)") &&
                   md.Contains("world models as Stage 09 (-wmvWorldModelLight=off)") && md.Contains("DIAGNOSTIC VIEW (-wmvWorldLitView=albedo)") &&
