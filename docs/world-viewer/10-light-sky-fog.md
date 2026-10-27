@@ -3,8 +3,9 @@
 Branch `world/10-light-sky-fog`, from `develop` 678071f0 (Stage 09, PR #127). **Status: the owner approved the
 direction on 2026-10-21 with the adjustments of section 0; implementation runs in the order of section 7. Steps 1-5 are
 done and the early visual checkpoint ran on 2026-10-22 with a built player (13.1); the owner approved them that day.
-Step 6 is done (13.2). Step 7 (fog) is implemented and validated against its own model (13.3); its fit-set exit waits
-for in-game test T7, and the owner reviews its pictures and the open decisions of 13.3 before step 8.** This document
+Step 6 is done (13.2). Step 7 (fog) is done, its rule corrected from in-game test T7 (13.3, 13.4); the owner accepted it
+provisionally on 2026-10-27. Step 8 (water) is implemented and validated (13.5); the owner reviews its pictures before
+step 9.** This document
 records the owner's decisions (section 0), the investigation (sections 1-5), the
 architecture and order of work (sections 6-8), the validation against in-game screenshots (section 9), the remaining
 decisions (section 10) and, as work lands, its results. The roadmap change that made this milestone 10 is `roadmap.md` 5.1.
@@ -931,6 +932,44 @@ measures them. No preview-rig front light, no 1.25 peak. Unlit world-model and d
 - **Light off:** Stage 09's host noon object and code path exactly. No water constant is retuned in Stage 10; the class B
   items are re-measured and any retune is a follow-up the owner approves.
 
+**As built (step 8, ca9b9314, 2026-10-27; 13.5).**
+
+- **The data.** With the light shown, the water keeps Stage 09's selection (`LiquidLights`: the zones in the host's order,
+  the default light, the point lights weakest first) and Stage 09's validity rule, evaluated at the light's clock instead
+  of 12:00: `LiquidWaterDay` takes, for every light with a Stage 09 row, the four water colours of its slot-0 day at the
+  half-minute the outdoor light used this frame (`WorldLightDay`: the host's `sample()` rounding), with the row's alphas
+  (time-independent LightParams columns, which only Stage 09's rows carry) and its sky slot. A light whose four colours
+  are 0 at that time is invalid for the water then; a point light without them is skipped. A census of every map of the
+  five clients (PROVEN_BYTES, `D:\wmv-10\step8\scout\census`) found no light that is coloured at some time but not at
+  12:00, so no alpha is missing; a few lights off maps 0 and 1 are all 0 for minutes (Retail and PTR maps 2285, 2361,
+  2373 and 2375 around 18:00; Era and Beta map 2835 around dawn), where the water shows its type colours, as Stage 09's
+  rule says. At 12:00 the water's 19 inputs equal Stage 09's bit for bit at every position (the runner, on the host's
+  dumps of maps 0 and 1 of five clients). A world light without one of the four columns keeps the noon rows (counted
+  and said). The ease is Stage 09's; a clock jump of the outdoor light, or a switch between the clock and the noon rows,
+  snaps it. With `WMV_LIGHT=off` the water is sampled first, exactly as Stage 09 samples it; otherwise right after the
+  outdoor light's frame (and again on the noon rows on its fault path).
+- **Reflection misses.** A reflected ray that leaves the screen or the depth range, and the uncovered share of a blurred
+  or sharp texel at a silhouette, take the sky dome's colour in the reflected direction (`WmvWaterSky.hlsl`: the ray
+  against the dome's triangles in its 15-degree wedge, then the sky program's tint; from the same `SkyInputs` the sky pass
+  draws, so the sky and its reflection cannot disagree; `SkyDome.TraceWedge` is its CPU twin and equals `SkyDome.Trace`).
+  Without a drawn sky (`-wmvSky=off`, no sky colours) a miss keeps Stage 09's colour. The client's own water programs
+  never evaluate a sky: their misses take a reflection texture or a constant (PROVEN_BYTES); what those hold is UNKNOWN.
+- **Fog.** The client's water programs (procwaterabove and below, mediumwater, water, magma; PROVEN_BYTES,
+  `D:\wmv-10\step8\scout\bytecode`) carry the terrain's fog tail and lerp the WHOLE finished colour towards the fog colour,
+  the refraction sample included, the alpha carried. The viewer follows the owner's rule instead (a deliberate,
+  documented departure): the water's own surface terms -- its colour share and the sky shares of its reflections -- take
+  the fog at the water point (kind 0, `WmvWorldFog`), while the scene copy it refracts and the scene texels it reflects,
+  already fogged at their own distance, are never fogged again. Where the visibility is 1 the Stage 09 expression itself
+  is drawn. The blended paths (Low, the High look's lower side and fall-back) take rgb' = vis rgb + (1 - vis) fogC alpha,
+  the alpha carried; opaque liquids lerp (INFERRED). Interior world-model groups' liquids keep no fog and no dome sky (as
+  their groups, until Stage 12): a MaterialPropertyBlock while the world-lit binding is on; they still take the clock's
+  colours, which are globals. Arms: `-wmvWaterFog=composite` (the client's literal whole-composite form), `=off`;
+  `-wmvWaterSky=stage09`; `-wmvWaterLight=noon`.
+- **Not changed:** every Stage 09 water constant; `WMV_LIGHT=off` (Stage 09's call order, path and globals); every camera
+  but the main camera's perspective world view; the Models, Buildings and Characters viewers. Known limit: with the
+  per-fragment display encode (`WMV_DISPLAY=fragment`) the water mixes its fog in linear values, the terrain beside it in
+  authored values.
+
 ### 6.12 Post (D9)
 
 With the light on, URP's bloom intensity is 0 in the world view (it is not client data, and both a noon sky and the
@@ -1396,7 +1435,7 @@ possible).
 | `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs; the 2026-10-22 run in `runs\p30a` (13.1) |
 | `D:\wmv-10\step7` | step 7 (fog, 13.3): the research (`understand\`: `programs.md`, `mapping.md`, `player.md`, `validation.md`), the spec and its review (`spec\`, `review\`), the T7 page and WmvRefNav 3.2 (`capture\`, `refnav\`), the implementation notes, reviews, fix and finish rounds (`impl\`), the grading-LUT proof (`lutproof\`), the union lineage (`union\`, `union2\`); the runs `D:\wmv-10\checkpoint\runs\p32a` and `p32b`, the freeze `D:\wmv-10\checkpoint\frozen` |
 
-## 13. Progress (2026-10-21, updated 2026-10-25)
+## 13. Progress (2026-10-21, updated 2026-10-27)
 
 | Step | State | Evidence |
 |---|---|---|
@@ -1407,7 +1446,8 @@ possible).
 | 5 Lit terrain with MCNR normals | done: 28b10e98 (the branch matches the client's hemisphere path; MCNR within 1.65 deg mean of the geometry, seams within 0.64 deg; the GPU branch equals its CPU twin within 0.0005 on five probes); at the checkpoint the render equals its offline model on 99.8 % of the lit terrain within 2 sRGB steps (13.1) | `D:\wmv-10\step45`, 13.1 |
 | Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner approved steps 1-5 on 2026-10-22 | `D:\wmv-10\checkpoint\runs\p30a` |
 | 6 Outdoor world models and doodads | done, the owner reviews its pictures before step 7: the world-lit variants by include split (6.6), the client's M2 and world-model hemisphere program; exterior groups and outdoor doodads lit while the light is shown, interior groups and their doodads on the builder's materials until Stage 12; exterior MOCV deferred; results in 13.2 | `D:\wmv-10\step6`, `D:\wmv-10\checkpoint\runs\p31a`, 13.2 |
-| 7 Fog | implemented and validated against its own model; the fit-set exit of WP 11 waits for T7 (not captured yet); the owner reviews the pictures and the open decisions of 13.3: the client's fog tail, layer 0, on the lit terrain, outdoor doodads and exterior groups; the Retail pattern for Retail and the PTR, off for Era, MoP and Beta (arms only); the near field identical to fog off; URP's grading LUT found to shift the world view by up to a step (a prepared undo, not committed, waits for the owner) | `D:\wmv-10\step7`, `D:\wmv-10\checkpoint\runs\p32a`, 13.3 |
+| 7 Fog | done, accepted provisionally by the owner on 2026-10-27: T7 captured and the start and end corrected from it (13.4; 1d1cb4ca, b8acdbf6); before that: implemented and validated against its own model; the client's fog tail, layer 0, on the lit terrain, outdoor doodads and exterior groups; the Retail pattern for Retail and the PTR, off for Era, MoP and Beta (arms only); the near field identical to fog off; URP's grading LUT found to shift the world view by up to a step (a prepared undo, not committed, waits for the owner) | `D:\wmv-10\step7`, `D:\wmv-10\checkpoint\runs\p32a`, 13.3, 13.4 |
+| 8 Water | done (ca9b9314), the owner reviews its pictures before step 9: the water on the light's clock with Stage 09's selection and validity, reflection misses on the drawn sky, the client's fog on the water's surface terms only; `WMV_LIGHT=off` byte-identical to Stage 09 (262 of 263 items; the 263rd is Stage 09's own one-pixel MoP magma variant); results in 13.5 | `D:\wmv-10\step8`, 13.5 |
 
 **Offline prediction (2026-10-21, before a player could be built; not a viewer render).** The Stage 09 light-off
 renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
@@ -1868,3 +1908,64 @@ Classic MoP and Classic Beta were not comparable on the install (MoP's storage d
 performance gate is open (the machine was never idle); life08 frames over 33 ms were 25 against 22 (p34a / p33a) and 21 against
 18 (the union pair), above the +2 line (information only); both players fail the same five harness steps under the install.
 The grading-LUT bypass waits for the owner (opt-in, not committed).
+
+### 13.5 Step 8: water with the new sky, light and fog (2026-10-27)
+
+**The owner's brief** (2026-10-27, after accepting step 7 provisionally): the water on Stage 10's evaluated light with
+Stage 09's selection and validity; the drawn sky for reflection misses; the client's fog on the water's surface terms,
+the refracted scene never fogged twice; every Stage 09 water constant kept, no adjustment for the Southfury comparisons;
+`WMV_LIGHT=off` byte-identical to Stage 09 (`WMV_WATER=low` included), Models, Buildings, Characters and the original
+shaders unaffected; the noon invariant, the time of day, reflections, transparency, fog, streaming and lifecycle
+validated; WoW / step 6 / step 7 / step 8 comparisons at noon, dawn and dusk with water close-ups and a visible water fog;
+step 7's renderer/model mismatches kept UNRESOLVED (a short isolated grading-bypass comparison allowed); the GPU gate,
+the independent fog holdout and the Classic validation carried into step 9; the tests on the exact committed source.
+
+**Built** (ca9b9314; 6.11 as built). Evidence and scripts: `D:\wmv-10\step8` (design, scouts, the census, the client's
+water programs, the review of 14 findings, 12 fixed before the commit). Every result below is from the player built from
+the commit's own archive, p35a (its Assembly-CSharp 36CBA239C8A6F879 equals the reviewed dev player's), against players
+built the same way from b8acdbf6 (step 7, p35s7) and f8265c6c (step 6, p35s6), and Stage 09's p30base, under one install
+state per unit (Retail 12.1.5.70575, PTR 12.1.7.70493, Era 1.15.9.70576, MoP 5.5.4.70579; Classic Beta is no longer
+installed).
+
+| Check | Result |
+|---|---|
+| The runner | 2,598 / 0 / 0 skipped; the 12:00 invariant on the host's dumps of maps 0 and 1 of five clients: the 19 inputs bit-identical at every row and position (16,236 positions), no noon fall-back; 48 half-hours: validity never changes there; the sky's wedge twin equals `SkyDome.Trace` within 1.1e-11 over 53,871 directions per table |
+| The self-test (p35a) | 1,138 / 0 (default mode) and 1,065 / 0 (`WMV_LIGHT=off`); against step 7 four check lines reworded by design, 17 new (the water-sky probe within 9e-7 of `SkyDome.Trace`; the High, zone and fall-back paths against their CPU twins, a reflection hit far in the fog, the encode; a pixel inside the fog start, the fog arm off, the fog not drawn and an interior liquid bit-identical to the light-off output; the driver on a pinned 09:00, a clock jump, the fault path, the light switched off; the interior liquids' block set while bound and released) |
+| `WMV_LIGHT=off` against Stage 09 (p30base) | 262 of 263 compared items identical under one install state (41 units, 91 min): tt 4/4, the light dumps 16/16, the regress pictures 48/48 and tallies 13/13, `WMV_WATER=low` pictures 47/48 and tallies 8/8, the views (High 39/39, Low 35/35, counts 17/17), Buildings 5/5, Models 2/2. The one item, a MoP magma terrain shot from above at `WMV_WATER=low`, differs in one pixel: Stage 09's own run-to-run variant (the baseline manifest's accepted alternative, five of ten Stage 09 runs give each value); the script's verdict reads DIFFERENT and stays so. Not guards: far3 (a free clock) and a Characters tabard on the reference side (host randomness), as before. MoP compared for the first time |
+| The guards (light on: Models, Buildings, Characters; the default mode) against step 7 | IDENTICAL: light on, Buildings 5/5, Models 2/2, Characters 2/2 (one Beta building has no picture on either side: not installed); the default mode 166 of 166 items, the full set for the first time (MoP and Era now render). Not guards, shared with the reference: far3, and life08b's geometry lines 165 against 166 (streaming timing; the same split in Stage 09's own baseline runs) |
+| life08, light on, against step 7 | PASS (harness 70 / 0 / 0 on both; every cleared-state tally identical, liquid tallies 0 after every Clear; longest binding 4.6 ms); the liquid-light lines extended by design; frames over 33 ms 24 against 22 (information) |
+| The time sweep (48 half-hours) | PASS (24 min): 48 half-hours at Southfury (hi06, hi11) and on the open sea, run twice: every picture (108 and 54) and light line identical, every sample at the time asked for; `-wmvWaterLight=noon` equals the clock at 12:00 (0 px: the noon invariant on pixels) and departs from it at every other time (at hi06 up to 32 levels darker at night, 18-37 lighter at dawn and dusk) |
+| Stage 09's water scores (the four High cameras, noon, light on) | against step 7 (p35s7): colour 4.51 -> 4.77, texture 1.93 -> 2.13, reflection 1.01 -> 1.21 (each worse by more than the 0.1 z of WP 13), bed 3.44 -> 3.45, sparkle 1.18 -> 1.19, distortion 3.45 -> 3.45 (Stage 09 frozen: 4.47, 2.33, 1.48, 23.86, 0.97, 3.44). The arms trace all three to the dome sky on reflection misses (`-wmvWaterSky=stage09` restores step 7 at three cameras exactly); the colours at the shot time move each family by 0.01 at most and the fog by 0 (the river lies inside the fog start, 285 yd). The game's noon sky there has a haze band the viewer does not draw (clouds, D8): Stage 09's own table classes sky and haze B, but whether that explains these moves is the owner's decision; NOT counted as passed |
+| Streaming and lifecycle (Stage 09's acceptance runs, light on and off) | PASS (72 min, 26 units paired with step 7): light on 13 of 13 and light off 13 of 13 after one paired repeat (a single 52.3 ms GUI round at one wait, 33.7 ms on the repeat: timing) -- Retail, the PTR, Era and MoP (MoP opens again); the harness counts equal the reference's, every liquid tally 0 after every Clear, no exception, error or liquid refusal, Stage 09's liquid-light lines unchanged (the clock's lines added) |
+| The owner's union player (p35u: the commit plus the screenshot matte) | p35u (built from the same archive with the owner's two-pass screenshot matte) against p35a and the deployed player p31u: self-test 1,138 / 0 and 1,065 / 0 on both; with fog on the union equals the clean player and its isolation arm (`-wmvFog=off` with the three water arms) equals the deployed picture, 0 px at four pairs (step 6's picture, now tested); the guild-tabard cases 9 of 9 = 08BF71CC; Buildings 5/5, Models 2/2, Characters 2/2 and light on 9/9 identical to the deployed player; the world views 91 of 91 (rerun: the MoP install updated to 5.5.4.70631 at 15:21 during the first try); life08: the liquid-light lines extended by design, one GUI round of 59.8 ms shared with the deployed player (56.8 ms at the same step) |
+| Performance (limited) | fxc: the water's pixel program 521 -> 1,635 slots (static; with the step-8 conditions false it compiles to the old program), the vertex program 12 as before; life08 frames over 33 ms 24 against 22 (within +2), stream frame p95 16.77 ms against 16.78, materials and meshes equal after every Clear, peak textures +5. The GPU pair is INCOMPLETE (the machine was not idle: a game client running): the full GPU gate goes to step 9 |
+
+**Against the game** (untouched aligned grids, WoW / step 6 / step 7 / step 8, `D:\wmv-10\step8\rig\sheets\final`;
+viewer minus game RMS on the water pixels in sRGB levels, numbers only, nothing tuned):
+- **Visible water fog** (T7 stand B, Liquid Detail High): at noon the water beyond 600 yd moves from 15.29 (step 7: the
+  river unfogged where the terrain around it fogs) to 11.53; at dusk the water at 667-1,127 yd from 47.81 to 38.06. The
+  arms at the same cameras: the client's literal whole-composite fog 12.09 and 38.98, no water fog 15.96 and 43.31 --
+  the surface-only rule is nearest the game in both (`D:\wmv-10\step8\rig\sheets\arms`).
+- **Southfury** (the river lies inside the fog start at every camera, so step 6 and step 7 water are identical): noon
+  (High) 20.33 -> 20.01; dawn (Low) 23.13 -> 23.29 (the water 25-60 yd 19.48 -> 17.78 and beyond 60 yd 16.66 -> 11.49, the
+  nearest 25 yd 23.70 -> 24.12; its mean moves from 4 levels darker to 6 lighter than the game); dusk (Low; a JPEG at
+  quality 3) 15.88 -> 19.42, lighter than the game at every distance. The close-ups: hi12 19.13 -> 19.01; hi11 17.95 ->
+  17.96, its water beyond 60 yd 19.62 -> 23.90: the dome sky in the reflected direction is darker than Stage 09's noon
+  SkyBand1Color, and the game's bright sheen there is not the dome's (its reflection source is UNKNOWN, 6.11).
+- The data drive these moves: the colours at the shot's time, the dome sky, the fog. They are reported, not compensated
+  (D5: any retune of Stage 09's water is a follow-up the owner approves).
+
+**The grading LUT (the owner's item 7, investigation only; nothing committed).** The opt-in bypass of 13.3 rebased onto
+b8acdbf6 (player p35byp, `D:\wmv-10\step8\byp`): without its switch every picture equals step 7's byte for byte; with it,
+under one install state and amendment 1's scorer with its thresholds, the three B failures of 13.4 pass (a1200_f7000's
+950-1,000 yd band 0.0209 -> 0.0106; a1200_f1000 and a1845_f1000 every band 800-1,000 yd 0.021-0.027 -> 0.007-0.014), both
+passing controls stay passes, and step 7's frame equals the LUT applied to the bypass frame within 1 step at every pixel.
+This ties those three render-against-model residuals to the LUT's 8-bit quantisation in dark, strongly fogged far bands;
+for the frame as committed they stay UNRESOLVED, and nothing else (the framing's C6, the retake's 0.0335, Southfury, the
+game) was tested this way.
+
+**Still open (UNRESOLVED or carried into step 9):** step 7's B failures at the three T7 cameras (above), the framing's C6
+and the retake's 0.0335; the full GPU performance gate (the machine was never idle); the independent fog holdout; Classic
+Era and MoP visual validation (no references) and Classic Beta (no longer installed); the client's own water reflection
+source and its below-surface fog (slot 1, WP 16); the Southfury dawn/dusk and hi11 moves above (class C until the
+client's water colour mapping, TEXCOORD1 and cb1[20]/[21], is measured).
