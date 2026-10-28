@@ -9,6 +9,8 @@
 // superseding one whose world-model root is out, and the late answer dropped; a tile's MODF records placed one per
 // uniqueId with one shared prototype, an unsupported record and the models budget; the world models' timeout; a missing
 // group file; a root that is not a root; a model load and a clear taking the world away -- and every tally back to 0.
+// Stage 10 step 6: the views' disposal destroys a prototype's world-lit copies at once too (WmvLifecycleSelfTestWorldLight.cs
+// binds these managers to the outdoor light).
 
 using System;
 using System.Collections.Generic;
@@ -64,6 +66,8 @@ public static partial class WmvLifecycleSelfTest
                 owned.Add(rt.FallbackMaterial);
                 owned.AddRange(rt.Textures);
             }
+            if (prototype != null)
+                owned.AddRange(prototype.WorldLitCopies);
             Models.DisposePrototype(prototype);
             foreach (UnityEngine.Object o in owned)
                 if (o != null) UnityEngine.Object.DestroyImmediate(o);
@@ -117,6 +121,7 @@ public static partial class WmvLifecycleSelfTest
                     owned.Add(p.Runtime.Root);
                     owned.Add(p.Runtime.Mesh);
                     owned.AddRange(p.Runtime.Materials);
+                    owned.AddRange(p.WorldLitCopies);
                 }
             if (scene.DoodadTextures != null)
                 foreach (Texture2D t in scene.DoodadTextures.All)
@@ -145,6 +150,7 @@ public static partial class WmvLifecycleSelfTest
                 owned.Add(p.Runtime.Root);
                 owned.Add(p.Runtime.Mesh);
                 owned.AddRange(p.Runtime.Materials);
+                owned.AddRange(p.WorldLitCopies);
             }
             if (Doodads != null)
                 Doodads.DisposePrototype(p, scene != null ? scene.DoodadTextures : null);

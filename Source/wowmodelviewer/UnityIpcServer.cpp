@@ -855,6 +855,10 @@ QString UnityIpcServer::RuntimeState::describe() const
            .arg(doodadGpuGeometryBytes).arg(doodadGpuTextureBytes).arg(doodadVisible).arg(doodadCulled) +
          QString(" liquidObjects=%1 liquidMeshes=%2 liquidMaterials=%3 liquidArrays=%4 liquidGpuBytes=%5")
            .arg(liquidObjects).arg(liquidMeshes).arg(liquidMaterials).arg(liquidArrays).arg(liquidGpuBytes) +
+         QString(" lightOn=%1").arg(lightOn) + " lightTime=" + (lightTime.isEmpty() ? QString("-") : lightTime) +
+         " lightTimeSource=" + (lightTimeSource.isEmpty() ? QString("-") : lightTimeSource) +
+         QString(" lightZone=%1 lightId=%2 lightParams=%3 lightValid=%4 gameFarclip=%5 skyOn=%6")
+           .arg(lightZone).arg(lightId).arg(lightParams).arg(lightValid).arg(gameFarclip).arg(skyOn) +
          QString(" liveGameObjects=%1 liveTexture2D=%2 liveMeshes=%3 liveMaterials=%4")
            .arg(liveGameObjects).arg(liveTexture2D).arg(liveMeshes).arg(liveMaterials);
 }
@@ -984,6 +988,16 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.liquidMaterials = count("liquidMaterials");
   s.liquidArrays = count("liquidArrays");
   s.liquidGpuBytes = count64("liquidGpuBytes");
+  // Protocol 20 (OUTDOOR LIGHT).
+  s.lightOn = count("lightOn");
+  s.lightTime = msg.value(QLatin1String("lightTime")).toString();
+  s.lightTimeSource = msg.value(QLatin1String("lightTimeSource")).toString();
+  s.lightZone = count("lightZone");
+  s.lightId = count("lightId");
+  s.lightParams = count("lightParams");
+  s.lightValid = count("lightValid");
+  s.gameFarclip = ms("gameFarclip");
+  s.skyOn = count("skyOn");
   s.liveGameObjects = count("liveGameObjects");
   s.liveTexture2D = count("liveTexture2D");
   s.liveMeshes = count("liveMeshes");
@@ -1070,6 +1084,63 @@ bool UnityIpcServer::sendViewportBackground(int r, int g, int b)
   m_stats.backgroundPushes++;
   m_stats.lastBackground = QString::asprintf("#%02X%02X%02X", r, g, b);
   LOG_INFO << "[unityipc] -> viewportBackground" << m_stats.lastBackground;
+  queueJson(msg);
+  return true;
+}
+
+QJsonObject UnityIpcServer::setWorldLightMessage(int on, const QString & clock, const QString & time, double farclip,
+                                                 QString * why)
+{
+  // A time is HH:MM:SS of one day (00:00:00 to 23:59:59): six ASCII digits (toInt alone would take a space or a sign).
+  bool timeOk = time.isEmpty();
+  if (!timeOk && time.size() == 8 && time[2] == ':' && time[5] == ':')
+  {
+    bool digits = true;
+    for (int k : {0, 1, 3, 4, 6, 7})
+      digits = digits && time[k] >= QLatin1Char('0') && time[k] <= QLatin1Char('9');
+    bool h = false, m = false, s = false;
+    const int hh = time.mid(0, 2).toInt(&h), mm = time.mid(3, 2).toInt(&m), ss = time.mid(6, 2).toInt(&s);
+    timeOk = digits && h && m && s && hh >= 0 && hh < 24 && mm >= 0 && mm < 60 && ss >= 0 && ss < 60;
+  }
+  QStringList bad;
+  if (on != -1 && on != 0 && on != 1)
+    bad << QString("on %1 (0 or 1)").arg(on);
+  if (!clock.isEmpty() && clock != "pinned" && clock != "running")
+    bad << "clock \"" + clock + "\" (pinned or running)";
+  if (!timeOk)
+    bad << "time \"" + time + "\" (HH:MM:SS)";
+  // A far clip given (any value not below 0; NaN counts as given) is a finite number of yards above 0.
+  if (!(farclip < 0.0) && !(std::isfinite(farclip) && farclip > 0.0))
+    bad << "farclip (a number of yards above 0)";
+  if (why)
+    *why = bad.join("; ");
+  if (!bad.isEmpty())
+    return QJsonObject();
+  QJsonObject msg;
+  msg["type"] = "setWorldLight";
+  if (on != -1)
+    msg["on"] = on;
+  if (!clock.isEmpty())
+    msg["clock"] = clock;
+  if (!time.isEmpty())
+    msg["time"] = time;
+  if (farclip >= 0.0)
+    msg["farclip"] = farclip;
+  return msg;
+}
+
+bool UnityIpcServer::sendSetWorldLight(int on, const QString & clock, const QString & time, double farclip)
+{
+  if (!playerDrawsWorldLight())
+    return false;
+  QString why;
+  const QJsonObject msg = setWorldLightMessage(on, clock, time, farclip, &why);
+  if (msg.isEmpty())
+  {
+    LOG_ERROR << "[unityipc] setWorldLight not sent:" << why;
+    return false;
+  }
+  LOG_INFO << "[unityipc] -> setWorldLight" << QJsonDocument(msg).toJson(QJsonDocument::Compact);
   queueJson(msg);
   return true;
 }
@@ -1445,8 +1516,8 @@ void UnityIpcServer::handleLine(const std::string & line)
                      " every load (below v9) fetches its files again, files travel as base64 text (below v10), an NPC on its"
                      " own model is shown without its weapons (below v11), no terrain tile is drawn (below v12), a"
                      " terrain tile is drawn without its textures (below v13), no world model is placed in the world"
-                     " (below v16), no doodad is placed (below v17), a world is not streamed (below v18), and no liquid"
-                     " is drawn (below v19)";
+                     " (below v16), no doodad is placed (below v17), a world is not streamed (below v18), no liquid"
+                     " is drawn (below v19), and no outdoor light (below v20)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1727,6 +1798,16 @@ QJsonObject UnityIpcServer::liquidOffer(const TerrainTileCommand & c)
   return l;
 }
 
+bool UnityIpcServer::putWorldLight(QJsonObject & msg, const TerrainTileCommand & c, bool toPlayer)
+{
+  // OUTDOOR LIGHT (protocol 20): a top-level key, only to a player that draws it and only when the load has the map's
+  // object (ok or unavailable); an older player is sent exactly the protocol-19 message.
+  if (!toPlayer || c.worldLight.isEmpty())
+    return false;
+  msg["worldLight"] = c.worldLight;
+  return true;
+}
+
 QString UnityIpcServer::describeLiquidOffer(const TerrainTileCommand & c)
 {
   // The catalogue in brief (its detail appended, never passed through arg()).
@@ -1754,6 +1835,8 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
   bool textures = false;
   const bool camera = putTerrainCommand(msg, c, textures);
   const bool liquids = putLiquids(msg, c);
+  // OUTDOOR LIGHT (protocol 20): the map's light state, a key of its own.
+  const bool worldLight = putWorldLight(msg, c, playerDrawsWorldLight());
   m_stats.terrainLoads++;
   LOG_INFO << "[unityipc] -> loadTerrainTile load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId
            << c.mapDirectory << "tile" << QString("%1_%2").arg(c.tileX).arg(c.tileY) << "wdtFileDataID=" << c.wdtFileDataID
@@ -1766,6 +1849,9 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
            << (liquids ? describeLiquidOffer(c)
                        : playerDrawsLiquids() ? QString("no liquids offered")
                                               : QString("no liquids (a protocol %1 player)").arg(m_playerProtocol))
+           << (worldLight ? wow::LightCatalog::describeWorldLight(c.worldLight)
+                          : playerDrawsWorldLight() ? QString("no outdoor light offered")
+                                                    : QString("no outdoor light (a protocol %1 player)").arg(m_playerProtocol))
            << (camera ? "camera: " + describeCamera(c.camera) : QString());
   queueJson(msg);
   return true;
@@ -1819,6 +1905,8 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
   }
   // LIQUIDS (protocol 19): the budgets and the catalogue, to a player that draws liquids.
   const bool liquids = putLiquids(msg, c);
+  // OUTDOOR LIGHT (protocol 20): the map's light state, a key of its own, to a player that draws it.
+  const bool worldLight = putWorldLight(msg, c, playerDrawsWorldLight());
   m_stats.terrainLoads++;
   m_stats.worldLoads++;
   LOG_INFO << "[unityipc] -> loadWorld load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId << c.mapDirectory
@@ -1842,6 +1930,9 @@ bool UnityIpcServer::sendLoadWorld(const TerrainTileCommand & c)
            << (liquids ? describeLiquidOffer(c)
                        : playerDrawsLiquids() ? QString("no liquids offered")
                                               : QString("no liquids (a protocol %1 player)").arg(m_playerProtocol))
+           << (worldLight ? wow::LightCatalog::describeWorldLight(c.worldLight)
+                          : playerDrawsWorldLight() ? QString("no outdoor light offered")
+                                                    : QString("no outdoor light (a protocol %1 player)").arg(m_playerProtocol))
            << (camera ? "camera: " + describeCamera(c.camera) : QString())
            << (streams ? QString("streaming: radius %1, kept within %2, at most %3 resident, %4 requests out")
                            .arg(STREAM_RADIUS).arg(STREAM_KEEP_RADIUS).arg(STREAM_MAX_RESIDENT_TILES).arg(STREAM_REQUEST_CREDIT)

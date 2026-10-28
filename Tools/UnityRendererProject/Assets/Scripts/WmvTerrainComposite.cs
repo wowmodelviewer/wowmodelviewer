@@ -74,7 +74,8 @@ public static class WmvTerrainComposite
     /// to `rows` (first row, row count, floats: rows x width x 4). validation: the validation sampling global;
     /// unclamped: the composite is not saturated. _WmvShaderEncode is 0 for the render and the globals are put back; so is
     /// _WmvWaterGrab (WmvWaterGrabPass: no grab exists for a command-buffer render -- the water's High path is off unless
-    /// `draw` itself sets it, as the self-test's synthetic grab does).
+    /// `draw` itself sets it, as the self-test's synthetic grab does), and so is _WmvWLOn (WmvWorldLight, Stage 10: the outdoor
+    /// light is the main camera's alone, never a fixture's; with WMV_LIGHT=off it is never touched).
     /// The target is R16G16B16A16_SFloat (the design's), or R32G32B32A32_SFloat with `float32` (the texel dump).
     /// `bandRows` (> 0) caps the rows of a band below what BandPixels allows (the self-test's banding check).
     /// </summary>
@@ -91,6 +92,8 @@ public static class WmvTerrainComposite
         float savedValidate = Shader.GetGlobalFloat(WmvTerrainMaterials.ValidateId);
         float savedUnclamped = Shader.GetGlobalFloat(WmvTerrainMaterials.UnclampedId);
         float savedGrab = Shader.GetGlobalFloat(WmvWaterGrabPass.WaterGrabId);
+        bool pinLight = !WmvWorldLight.HardOff;
+        float savedWorldLight = Shader.GetGlobalFloat(WmvWorldLight.OnId);
         var desc = new RenderTextureDescriptor(width, band, float32 ? GraphicsFormat.R32G32B32A32_SFloat : GraphicsFormat.R16G16B16A16_SFloat, 0)
         {
             msaaSamples = 1, useMipMap = false,
@@ -129,6 +132,8 @@ public static class WmvTerrainComposite
                 cmd.SetGlobalFloat(WmvTerrainMaterials.ValidateId, validation ? 1f : 0f);
                 cmd.SetGlobalFloat(WmvTerrainMaterials.UnclampedId, unclamped ? 1f : 0f);
                 cmd.SetGlobalFloat(WmvWaterGrabPass.WaterGrabId, 0f);
+                if (pinLight)
+                    cmd.SetGlobalFloat(WmvWorldLight.OnId, 0f);
                 cmd.SetViewProjectionMatrices(view, ortho);
                 cmd.SetGlobalMatrix(MatrixV, view);
                 cmd.SetGlobalMatrix(MatrixP, gpu);
@@ -138,6 +143,8 @@ public static class WmvTerrainComposite
                 cmd.SetGlobalFloat(WmvTerrainMaterials.ValidateId, savedValidate);
                 cmd.SetGlobalFloat(WmvTerrainMaterials.UnclampedId, savedUnclamped);
                 cmd.SetGlobalFloat(WmvWaterGrabPass.WaterGrabId, savedGrab);
+                if (pinLight)
+                    cmd.SetGlobalFloat(WmvWorldLight.OnId, savedWorldLight);
                 Graphics.ExecuteCommandBuffer(cmd);
                 RenderTexture.active = target;
                 readback.ReadPixels(new Rect(0, 0, width, count), 0, 0, false);
@@ -180,6 +187,8 @@ public static class WmvTerrainComposite
             Shader.SetGlobalFloat(WmvTerrainMaterials.ValidateId, savedValidate);
             Shader.SetGlobalFloat(WmvTerrainMaterials.UnclampedId, savedUnclamped);
             Shader.SetGlobalFloat(WmvWaterGrabPass.WaterGrabId, savedGrab);
+            if (pinLight)
+                Shader.SetGlobalFloat(WmvWorldLight.OnId, savedWorldLight);
             cmd.Release();
             UnityEngine.Object.DestroyImmediate(readback);
             target.Release();

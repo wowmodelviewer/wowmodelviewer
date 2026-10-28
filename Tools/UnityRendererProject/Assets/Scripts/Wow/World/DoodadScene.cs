@@ -49,6 +49,9 @@ namespace Wmv.Wow.World
         public double Scale = 1.0;
         /// <summary>Why this doodad cannot be placed (no FileDataID, a name table entry, an index past MODI), or null.</summary>
         public string Unsupported;
+        /// <summary>The light it takes (Stage 10 step 6, ModelLight.cs): Outdoor for MDDF (FromMddf); a WMO doodad's is set from
+        /// its world model's MODD contexts (WorldLightContexts.Modd). InteriorInterim (today's look) unless something sets it.</summary>
+        public WorldLightContext Context = WorldLightContext.InteriorInterim;
 
         /// <summary>A model-space point placed in the world.</summary>
         public WorldPoint ToWorld(double x, double y, double z)
@@ -135,6 +138,7 @@ namespace Wmv.Wow.World
                     Position = PlacementTransform.ToWorld(r.Position, frame),
                     Rotation = PlacementTransform.Rotation(r.Rotation),
                     Scale = r.Scale,
+                    Context = WorldLightContext.Outdoor,          // an outdoor doodad (plan 6.7)
                 };
                 if (r.NameKind != PlacementNameKind.FileDataId)
                     d.Unsupported = "the record names its model by a name-table entry (MDDF flag 0x40 clear), not by a FileDataID";

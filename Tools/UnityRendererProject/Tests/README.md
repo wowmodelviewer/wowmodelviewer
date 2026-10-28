@@ -90,6 +90,78 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   every reason a token is ignored, the log line) and which command-line and `WMV_DEBUG` tokens are its pairs, which side of a sheet
   the camera sees (the HIGH path by the triangle's facing: a sloped sheet rising above the eye, flat water, no normal), and the
   ripple map's unit-normal check with its slope spread, strength factor and mean slope (taken out: mean 0 after, the spread kept).
+- `WorldLightTests.cs`: Stage 10's outdoor light state (`docs/world-viewer/10-light-sky-fog.md` 6.4; `Assets/Scripts/Wow/World/`
+  `LightGeometry.cs`, `WorldLight.cs`, `WorldLightState.cs`, `WorldLightModel.cs`): the zone and point geometry shared with the
+  liquids (moved from `LiquidLights.cs` unchanged), the host's "worldLight" object as the player holds it (the column map, unknown
+  and absent columns, the 24-bit colour mask, refused days and params), the day on the integer half-minute (the host's
+  `LightCatalog::sample()` rounding floor(a + (b - a) f + 0.5) by hand, wrap past midnight against the clamp arm, a single key,
+  floats linear, integers from the earlier key), a small fixture of the client's rows (Retail LightParams 5985, the Southfury
+  stand's day: the plan's named values), the selection with Stage 09's rules (zone order and Z band, the default light, an invalid
+  light without keys, the slot fallback, copy rows -- two LightParams naming one day --, point lights weakest first and the
+  debug arms, on a case where all three orders differ), the sample's channels and groups, the clock (the half-minute from
+  HH:MM:SS, running and wrapping, the map's TimeOfDayOverride and its 16-bit -1), the ease, the switches (steps 3-6) and the
+  graded hypothesis tables (the light direction, the sun path, the dome's rings, the sky, the terrain light and the model light). With
+  `WMV_WORLD_LIGHT_FIXTURES` naming the offline fixtures (`<client>_map<m>.json` in the spec's format,
+  `parity_<client>_map<m>.json`, the survey's `spots.json` and `manifest.json`, whose SHA-256 is pinned in the test and which
+  pins every other file; written outside the repository from the extracted DB2s) it also checks, on maps 0 and 1 of the five
+  clients, byte parity of every light's slot-0 day with the generator's offline port of the host's `sample()` (not the host
+  itself) for its five colours (1440 among ten half-minutes) and the spot selections and every column of every light at
+  00:00, 06:00, 12:00 and 18:00 against the survey's dumps (otherwise SKIPPED); with `WMV_WORLD_LIGHT_HOST_DUMPS` naming a
+  folder of the host's own objects, each is read through the same path, checked against the host's own Stage 09 `sample()`
+  rows and compared with the fixture of its client and map.
+- `SkyTerrainLightTests.cs`: Stage 10 steps 4 and 5 (`docs/world-viewer/10-light-sky-fog.md` 4.3, 4.5, 6.8, 6.10;
+  `Assets/Scripts/Wow/World/SkyDome.cs`, `TerrainLight.cs`): the sky's colour dome (the cubic construction against the public
+  table A the spec lists and table B, 122 vertices and 240 triangles, each ring's elevation and horizon ramp, closed around its
+  centre), the day curve, the sky's inputs (the end-fog lean, the zero-colour rules), the sky program and its CPU twin (against
+  the profile's interpolation along a vertex longitude), the MCNR decode (on synthetic bytes and through the parser and the
+  mesh builder -- the bytes kept only when the build asks, and counted --, and the fallback to the geometry normals) and the
+  client's terrain light (the unsaturated wrap, the horizon and ground colours and their zero fallbacks, the normal used at
+  its own length, the flat variant). With `WMV_MCNR_TILES` naming a folder holding the four
+  Southfury root ADTs of Retail 12.1.5 (`786420.bin`, `786640.bin`, `786425.bin`, `786645.bin`: Kalimdor 39_29, 40_29, 39_30,
+  40_30, each pinned by its SHA-256) it proves the MCNR mapping again against the tiles' geometry normals (mean under 3 deg,
+  the best of the 48 axis orders and signs), measures the decoded lengths the light uses, and checks their four seams (under
+  1 deg: the data's continuity and the vertex match, not the decode); otherwise that part is SKIPPED.
+- `WorldModelLightTests.cs`: Stage 10 step 6 (`docs/world-viewer/10-light-sky-fog.md` 2.2, 6.6, 6.7, 6.15;
+  `Assets/Scripts/Wow/World/ModelLight.cs`): the outdoor light on doodads and exterior world-model groups against the client's
+  own M2 programs executed at the Southfury light (the hemisphere and the flat class, 54 rows each at 11:57, 06:49 and 18:46,
+  embedded to four decimals), the doodad light equal to the terrain's with a unit normal and to base x Factor with every hold
+  neutral, a raw interpolated normal shorter than 1 (H and the wrap normalised, the direct term raw), the zero-colour fallbacks,
+  N.L < 0, unlit, the shadow on the direct term only (not the terrain flat class's placement), AO, the local light's combine,
+  the world model's base albedo x (1, 0.99998, 1) and its flat arm; and the context rule on synthetic world models
+  (`WmoSynthetic.ContextRoot` / `ContextGroup`: exterior, interior, both and neither flags, MODD records listed by each kind,
+  by both, by none, an incomplete world model, MDDF, the census, MDDF doodads inside an interior under a turned, tilted and
+  scaled placement). With `WMV_WORLD_AUDIT_CORPUS` it prints the census of every client's world models in the world07
+  corpus and checks the Retail asset window (`<corpus>/assets/wow`, its file set checked against `corpus_hashes.json`
+  first) against the plan's 2.2: 52 complete roots, 531 LOD0 groups (300 exterior, 231 interior), 11,470 MODD records
+  listed, 6 by both kinds; otherwise that part is SKIPPED.
+- `WorldFogTests.cs`: Stage 10 step 7 (`docs/world-viewer/10-light-sky-fog.md` 4.0, 4.6, 6.9, 6.13;
+  `Assets/Scripts/Wow/World/WorldFog.cs`): the client's per-pixel fog against its own programs re-executed offline (the Retail
+  terrain program 2977247 p_1 on 59 one-record cases covering every regime, the M2 program 2977063 p_1 with blend words 0 and 4;
+  `WorldFog.Apply` within 2e-6), the record `WorldFog.Pack` fills from the light state against an independent Python port of the
+  mapping on the client's keys (LightParams 5985 at three times, 5951, 5944, 6033, a Z key) and on one key per fall-back, blends of
+  a key with and without each fall-back (every row continuous), the end and start rule measured in T7 (R15: E = min(0.933 x far
+  clip, horizonStart) and start FogScaler x min(E, 3000) at far clip 1,000 / 7,000 and horizonStart 1,000 / 1,900 / 2,500 / 3,500;
+  `-wmvGameHorizonStart`), the sky's shared tint inputs (`SkyDome.Inputs` equal to HEAD's), the
+  modes by client, the columns each needs and the `-wmvFogClassic` arms (each public rule switched off alone), the twin's invariants,
+  the switches and their texts, the graded table's fog rows, the census on a synthetic set, no allocation in `Pack`, the light
+  sample's existing channels equal to HEAD's evaluator with the derived block after them, and `WmoSynthetic.ContextRoot`'s old
+  bytes. The fixtures are embedded
+  (`D:\wmv-10\step7\impl\fixtures\make_fog_fixtures.py` wrote them; its inputs are named with their SHA-256 in the file). With
+  `WMV_FOG_KEYS` naming the key export of every client's LightData (`make_fog_keys.py`, written outside the repository from the
+  table extracts; its `manifest.json` pinned) it checks the census counts on every key; with `WMV_WORLD_LIGHT_FIXTURES` the
+  record's continuity across every half-minute of every day of maps 0 and 1 of the five clients and across an ease step (the
+  largest jumps reported); otherwise those parts are SKIPPED. `WMV_FOG_PARITY_OUT` names a file for the parity grid the rig
+  compares with its Python port.
+- `LiquidWaterDayTests.cs`: Stage 10 step 8 (`docs/world-viewer/10-light-sky-fog.md` 6.11, 13.3): the water's values on the light's
+  clock (`Assets/Scripts/Wow/World/LiquidWaterDay.cs`: rounding and interpolation between keys, the wrap past midnight, the clamp
+  arm, a one-key day, a light without water colours for a span, a point light skipped while it has none, the noon fall-backs, the
+  cache, no allocation in the steady state), the ease's clock-jump and source snaps (Stage 09's reasons unchanged), the sky dome's
+  wedge twin (`SkyDome.TraceWedge` against `SkyDome.Trace` on both tables within 1e-9), the CPU twin of the fogged water
+  (`LiquidHighMath.MixFogged`, `FogPremultiplied`) and the water switches with their texts. With `WMV_WORLD_LIGHT_HOST_DUMPS` it
+  proves the 12:00 invariant on the host's own dumps of maps 0 and 1 of the five clients (the table at half-minute 1440 equal to
+  Stage 09's rows, all 19 values bit-identical, and the selection equal at every zone's centroid and vertices, every point light's
+  position and falloff edges and the default) and sweeps the day every 30 minutes (validity never changes there); otherwise that part
+  is SKIPPED.
 - `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
   viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
   (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the

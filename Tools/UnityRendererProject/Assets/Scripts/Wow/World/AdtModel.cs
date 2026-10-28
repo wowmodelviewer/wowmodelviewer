@@ -35,8 +35,9 @@ namespace Wmv.Wow.World
 
         // ---- sub-chunks
         public float[] Heights;                   // MCVT, 145 floats relative to StoredPosition.C (z)
-        public sbyte[] NormalsRaw;                // MCNR, first 435 bytes as stored (145 triplets); component
-                                                  //   order/scale NOT established (audit U9) -- not decoded
+        public sbyte[] NormalsRaw;                // MCNR, first 435 bytes as stored (145 triplets); kept raw here --
+                                                  //   Stage 10 decodes them for the outdoor light (TerrainLight.cs,
+                                                  //   TerrainMcnr: game (X, Y, Z) / 127, MEASURED against the geometry)
         public byte[] NormalsTrailingRaw;         // MCNR bytes after the 435 (13 in every audited chunk)
         public byte[] VertexColorsRaw;            // MCCV, 145 x 4 bytes as stored, or null; channel order
                                                   //   NOT established -- not decoded

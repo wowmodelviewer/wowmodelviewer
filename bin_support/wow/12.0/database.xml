@@ -453,17 +453,21 @@
   <!-- The world map catalogue (wow::WorldMapCatalog, docs/world-viewer/02-map-catalog.md). Read only from a verified
        layout: dbd/Map.dbd places every column for each layout it lists, and a layout it does not list is not read,
        whatever the client (verifiedLayoutOnly). The positions below are Retail 12.1's and are never used on their own.
-       A column a layout lacks reads as absent (Classic Era and MoP Classic have no WdtFileDataID). -->
+       A column a layout lacks reads as absent (Classic Era and MoP Classic have no WdtFileDataID). TimeOfDayOverride and
+       Flags are the light catalogue's (its outdoor light, below): a time the map keeps (-1: none) and three words of
+       flags, in every layout. -->
   <table name="Map" verifiedLayoutOnly="yes">
     <field type="int32" name="ID" primary="yes" />
     <field type="text" name="Directory" pos="0" />
     <field type="text" name="MapName_lang" pos="1" />
     <field type="int8" name="MapType" pos="7" />
     <field type="int8" name="InstanceType" pos="8" />
+    <field type="int16" name="TimeOfDayOverride" pos="12" absentValue="-1" />
     <field type="int16" name="ParentMapID" pos="13" absentValue="-1" />
     <field type="int16" name="WorldCopyOfMapID" pos="14" absentValue="-1" />
     <field type="int16" name="LocationMapID" pos="17" absentValue="-1" />
     <field type="int32" name="WdtFileDataID" pos="21" />
+    <field type="uint32" name="Flags" arraySize="3" pos="24" />
   </table>
 
   <!-- The liquid catalogue (wow::LiquidCatalog, docs/world-viewer/09-liquids.md 1.4 and 1.6). Each table is read only
@@ -512,7 +516,13 @@
        ZoneLight.MapID / LightID in BA8274F0, 32 bits in 94CE95E0, both read whole as int32). Time is declared at 16 bits,
        which drops the constant bit 16 its pallet words carry in 360DA016; the colours are signed 25-bit values, so a few
        read back with the upper byte 0xFF: the catalogue's queries mask them with 0xFFFFFF. A LightParams copy row is a
-       row of its own ID (LightData keys most of them by the copy ID). -->
+       row of its own ID (LightData keys most of them by the copy ID).
+       The outdoor light (Stage 10, docs/world-viewer/10-light-sky-fog.md 6.2) names more columns: LightData's colours,
+       floats and colour-grading files, LightParams' glow, skybox, flags and sun overrides, ZoneLight.TransitionType and,
+       in table Map above, TimeOfDayOverride and Flags (names the public definitions', shapes checked against the bytes:
+       the dbd files). Their floats are declared uint32, so the database keeps each one's 32-bit pattern whole (a float
+       column keeps 6 significant digits) and the catalogue reads it back as the float the client stores; the floats
+       Stage 09 reads (Light's positions, the four alphas) stay float. -->
   <table name="Light" verifiedLayoutOnly="yes">
     <field type="int32" name="ID" primary="yes" />
     <field type="float" name="GameCoords" arraySize="3" pos="0" />
@@ -523,20 +533,65 @@
   </table>
   <table name="LightParams" verifiedLayoutOnly="yes">
     <field type="int32" name="ID" primary="yes" />
+    <field type="uint32" name="OverrideSunPosition" arraySize="3" pos="1" />
+    <field type="uint8" name="HighlightSky" pos="2" />
+    <field type="uint16" name="LightSkyboxID" pos="3" />
+    <field type="uint32" name="Glow" pos="5" />
     <field type="float" name="WaterShallowAlpha" pos="6" />
     <field type="float" name="WaterDeepAlpha" pos="7" />
     <field type="float" name="OceanShallowAlpha" pos="8" />
     <field type="float" name="OceanDeepAlpha" pos="9" />
+    <field type="uint32" name="Flags" pos="10" />
+    <field type="uint32" name="SunPolar" pos="12" />
+    <field type="uint32" name="SunAzimuth" pos="13" />
   </table>
   <table name="LightData" verifiedLayoutOnly="yes">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint16" name="LightParamID" pos="0" />
     <field type="uint16" name="Time" pos="1" />
+    <field type="uint32" name="DirectColor" pos="2" />
+    <field type="uint32" name="AmbientColor" pos="3" />
+    <field type="uint32" name="SkyTopColor" pos="4" />
+    <field type="uint32" name="SkyMiddleColor" pos="5" />
     <field type="uint32" name="SkyBand1Color" pos="6" />
+    <field type="uint32" name="SkyBand2Color" pos="7" />
+    <field type="uint32" name="SkySmogColor" pos="8" />
+    <field type="uint32" name="SkyFogColor" pos="9" />
+    <field type="uint32" name="SunColor" pos="10" />
+    <field type="uint32" name="CloudSunColor" pos="11" />
+    <field type="uint32" name="CloudEmissiveColor" pos="12" />
+    <field type="uint32" name="CloudLayer1AmbientColor" pos="13" />
+    <field type="uint32" name="CloudLayer2AmbientColor" pos="14" />
     <field type="uint32" name="OceanCloseColor" pos="15" />
     <field type="uint32" name="OceanFarColor" pos="16" />
     <field type="uint32" name="RiverCloseColor" pos="17" />
     <field type="uint32" name="RiverFarColor" pos="18" />
+    <field type="uint32" name="ShadowOpacity" pos="19" />
+    <field type="uint32" name="FogEnd" pos="20" />
+    <field type="uint32" name="FogScaler" pos="21" />
+    <field type="uint32" name="FogDensity" pos="22" />
+    <field type="uint32" name="FogHeight" pos="23" />
+    <field type="uint32" name="FogHeightScaler" pos="24" />
+    <field type="uint32" name="FogHeightDensity" pos="25" />
+    <field type="uint32" name="FogZScalar" pos="26" />
+    <field type="uint32" name="MainFogStartDist" pos="27" />
+    <field type="uint32" name="MainFogEndDist" pos="28" />
+    <field type="uint32" name="SunFogAngle" pos="29" />
+    <field type="uint32" name="CloudDensity" pos="30" />
+    <field type="uint32" name="ColorGradingFileDataID" pos="31" />
+    <field type="uint32" name="DarkerColorGradingFileDataID" pos="32" />
+    <field type="uint32" name="HorizonAmbientColor" pos="33" />
+    <field type="uint32" name="GroundAmbientColor" pos="34" />
+    <field type="uint32" name="EndFogColor" pos="35" />
+    <field type="uint32" name="EndFogColorDistance" pos="36" />
+    <field type="uint32" name="FogStartOffset" pos="37" />
+    <field type="uint32" name="SunFogColor" pos="38" />
+    <field type="uint32" name="SunFogStrength" pos="39" />
+    <field type="uint32" name="FogHeightColor" pos="40" />
+    <field type="uint32" name="EndFogHeightColor" pos="41" />
+    <field type="uint32" name="FogHeightCoefficients" arraySize="4" pos="44" />
+    <field type="uint32" name="MainFogCoefficients" arraySize="4" pos="45" />
+    <field type="uint32" name="HeightDensityFogCoeff" arraySize="4" pos="46" />
   </table>
   <table name="ZoneLight" verifiedLayoutOnly="yes">
     <field type="int32" name="ID" primary="yes" />
@@ -545,6 +600,7 @@
     <field type="int32" name="LightID" pos="2" />
     <field type="float" name="Zmin" pos="4" />
     <field type="float" name="Zmax" pos="5" />
+    <field type="int32" name="TransitionType" pos="6" />
     <field type="int32" name="PlayerConditionID" pos="7" />
   </table>
   <table name="ZoneLightPoint" verifiedLayoutOnly="yes">

@@ -29,7 +29,9 @@
 // streamTileAnswer, streamState, testFlight / testFlightDone and runtimeState's "light" and stream fields -- see
 // WmvTerrainSessionStream; 19 added liquids -- loadTerrainTile's and loadWorld's "liquids" (with its optional "lights",
 // the zone lights of the water colours), getMapAsset's role "liquidTexture", terrainTileLoaded's liquids, and
-// streamState's and runtimeState's liquid fields -- see WmvTerrainSessionLiquids, WmvLiquids and WmvLiquidLight).
+// streamState's and runtimeState's liquid fields -- see WmvTerrainSessionLiquids, WmvLiquids and WmvLiquidLight; 20 added
+// the outdoor light -- loadTerrainTile's and loadWorld's top-level "worldLight", setWorldLight, and runtimeState's light
+// fields -- see WmvWorldLight and Wow/World/WorldLight.cs).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -194,6 +196,12 @@
 //   runtimeState (protocol 19 adds) { liquidObjects, liquidMeshes, liquidMaterials, liquidArrays, liquidGpuBytes }
 //     the liquid objects and meshes alive (tiles' and world-model prototypes'), the liquid materials and frame arrays
 //     alive, and their GPU bytes (frames and geometry)
+//   runtimeState (protocol 20 adds) { lightOn, lightTime, lightTimeSource, lightZone, lightId, lightParams, lightValid,
+//                                     gameFarclip, skyOn }
+//     the outdoor light (WmvWorldLight): on (1: asked for and not WMV_LIGHT=off), the time it takes ("HH:MM:SS") and where
+//     the time comes from ("pinned", "running", "map": the map's TimeOfDayOverride), the zone (0: the map's default light),
+//     Light and LightParams of the last evaluation and whether it was valid (its base light has keys), the game far clip
+//     (yards) and whether the sky was drawn for the main camera's last render (WmvWorldSky). A number not available reads -1
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
@@ -278,6 +286,21 @@
 //     ocean colours and alphas follow the light at the camera (WmvLiquidLight). Absent (an older host) or not "ok": the
 //     liquids keep their type colours. An additive key of protocol 19: a player without it ignores it. "sky" (optional,
 //     additive): the light's sky colour at the same noon, which the High look's reflection misses take
+//   loadTerrainTile / loadWorld (protocol 20 adds) { worldLight:{ state:"ok"|"unavailable", detail, product, build, map,
+//                     branch, lightDataLayout, timeOverride, mapFlags:[3], defaultLight, defaultFrom,
+//                     zones:[{ zone, light, priority, zmin, zmax, conditional, poly:[x0,y0,...] }],
+//                     points:[{ light, x, y, z, start, end }], lights:[{ light, slots:[8] }],
+//                     params:[{ id, day, glow, skybox, flags, highlightSky, overrideSun:[3], sunPolar, sunAzimuth }],
+//                     colorColumns:[...], floatColumns:[...], intColumns:[...], absentColumns:[...],
+//                     days:[{ times:[...], c:[...], f:[...], i:[...] }] } }
+//     the outdoor light of the load's map (docs/world-viewer/10-light-sky-fog.md 6.3; Wow/World/WorldLight.cs): a top-level key,
+//     never inside "liquids", sent only to a player that announced 20; parsed on the reader thread (WorldLightFrom). A streaming
+//     session's tiles keep the entry's. Absent or not "ok": no outdoor light (the Stage 09 picture). Stage 09's
+//     "liquids.lights" stays the water's, unchanged
+//   setWorldLight { on:0|1, clock:"pinned"|"running", time:"HH:MM:SS", farclip }       (protocol 20)
+//     the outdoor light switched on or off, its clock pinned or running at 1x, set to a time of day, the game far clip in
+//     yards (optional, for the harness's farclip step); each field optional (absent: unchanged). The line's own keys say which
+//     are present (WorldLightCommandFrom), not JsonUtility's defaults
 //   inspectWorldModel { inspection, mapId, wmoFileDataID, assetEpoch, md5, wmoPosition, wmoRotation, wmoExtentsMin,
 //                       wmoExtentsMax, wmoFlags, wmoScale, wmoUniqueId, encoding:"binary", payloadBytes }
 //                     <payloadBytes raw WMO root bytes><newline>                     (protocol 16)
@@ -343,7 +366,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 19;
+    public const int ProtocolVersion = 20;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -370,6 +393,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<WorldModelRequest> OnInspectWorldModel;      // a WMO-only map's world model: its footprint (protocol 16)
     public Action<StreamTileAnswer> OnStreamTileAnswer;        // the tile loads the host opened, refused, closed (protocol 18)
     public Action<TestFlight> OnTestFlight;                    // TEST (protocol 18): the free camera flies a path itself
+    public Action<WorldLightCommand> OnSetWorldLight;          // the outdoor light on or off, its clock and time (protocol 20)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -631,6 +655,9 @@ public class WmvIpcClient : MonoBehaviour
         // Protocol 19 (docs/world-viewer/09-liquids.md 1.6): the load offers liquids -- the frames' budgets and the host's
         // catalogue of the client's liquid types. Null: not offered (an older host), and no liquid is drawn.
         public LiquidOffer Liquids;
+        // Protocol 20 (docs/world-viewer/10-light-sky-fog.md 6.3): the map's outdoor light, parsed on the reader thread; its
+        // State says "ok" or "unavailable" (with Detail). Null: the load carried none (an older host).
+        public Wmv.Wow.World.WorldLightSet WorldLight;
 
         /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
         public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
@@ -663,7 +690,31 @@ public class WmvIpcClient : MonoBehaviour
                                                    (Streaming != null ? "; " + Streaming : "")
                                             : "; no doodads offered")
                                      : World ? "; world models asked for, but no budget stated" : "") +
+                   // (Protocol 20's outdoor light before the liquids: the line still ends with the liquids, as Stage 09 left it; with
+                   // WMV_LIGHT=off nothing of it, so the line is Stage 09's.)
+                   (WmvWorldLight.HardOff ? ""
+                    : WorldLight == null ? "; no outdoor light offered"
+                    : WorldLight.State == "ok" ? "; outdoor light " + WorldLight.Summary()
+                    : "; outdoor light " + WorldLight.State + (WorldLight.Detail.Length > 0 ? ": " + WorldLight.Detail : "")) +
                    (Liquids != null ? "; " + Liquids : "; no liquids offered");
+        }
+    }
+
+    /// <summary>setWorldLight (protocol 20): what the host changes of the outdoor light; a field the line did not carry is
+    /// unchanged (Has* false).</summary>
+    public class WorldLightCommand
+    {
+        public bool HasOn, HasClock, HasTime, HasFarclip;
+        public bool On;
+        public string Clock = "";       // "pinned" | "running" (anything else is refused by WmvWorldLight)
+        public string Time = "";        // "HH:MM:SS" (or "HH:MM")
+        public double Farclip;          // yards (above 0, else refused by WmvWorldLight)
+
+        public override string ToString()
+        {
+            return "setWorldLight" + (HasOn ? " on " + (On ? 1 : 0) : "") + (HasClock ? " clock " + Clock : "") + (HasTime ? " time " + Time : "") +
+                   (HasFarclip ? " farclip " + Farclip.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) : "") +
+                   (!HasOn && !HasClock && !HasTime && !HasFarclip ? " (nothing to change)" : "");
         }
     }
 
@@ -1304,6 +1355,173 @@ public class WmvIpcClient : MonoBehaviour
         public MsgLights lights;
     }
 
+    // Protocol 20: loadTerrainTile's / loadWorld's top-level "worldLight" (WorldLightFrom): flat arrays, as JsonUtility reads them.
+    [Serializable] class MsgWorldLightZone
+    {
+        public int zone, light, priority, conditional;
+        public double zmin, zmax;
+        public double[] poly;
+    }
+
+    [Serializable] class MsgWorldLightPoint
+    {
+        public int light;
+        public double x, y, z, start, end;
+    }
+
+    [Serializable] class MsgWorldLightSlots
+    {
+        public int light;
+        public int[] slots;
+    }
+
+    // The table's floats are float32 in the client: read as float, the shortest decimal the host writes for one gives back its
+    // exact bits (and so does a longer one), which a double would not (0.05 is not the float 0.05's value).
+    [Serializable] class MsgWorldLightParams
+    {
+        public int id, day, skybox, highlightSky;
+        public long flags;
+        public float glow, sunPolar, sunAzimuth;
+        public float[] overrideSun;
+    }
+
+    [Serializable] class MsgWorldLightDay
+    {
+        public int[] times;
+        public int[] c;               // 0xRRGGBB, 24 bits
+        public float[] f;             // as read: float32
+        public long[] i;
+    }
+
+    static double[] Widen(float[] f)
+    {
+        if (f == null)
+            return null;
+        var d = new double[f.Length];
+        for (int k = 0; k < f.Length; k++)
+            d[k] = f[k];
+        return d;
+    }
+
+    [Serializable] class MsgWorldLight
+    {
+        public string state, detail, product, build, branch, lightDataLayout, defaultFrom;
+        public int map, timeOverride, defaultLight;
+        public long[] mapFlags;
+        public MsgWorldLightZone[] zones;
+        public MsgWorldLightPoint[] points;
+        public MsgWorldLightSlots[] lights;
+        public MsgWorldLightParams[] @params;
+        public string[] colorColumns, floatColumns, intColumns, absentColumns;
+        public MsgWorldLightDay[] days;
+    }
+
+    /// <summary>Does the JSON line carry the key (a quoted name, then a colon)? For the fields whose absence JsonUtility would
+    /// read as 0 (setWorldLight's "on"; "worldLight"'s "timeOverride", where 0 is midnight).</summary>
+    static bool HasKey(string line, string key)
+    {
+        if (string.IsNullOrEmpty(line))
+            return false;
+        string quoted = "\"" + key + "\"";
+        for (int at = line.IndexOf(quoted, StringComparison.Ordinal); at >= 0; at = line.IndexOf(quoted, at + 1, StringComparison.Ordinal))
+        {
+            int k = at + quoted.Length;
+            while (k < line.Length && (line[k] == ' ' || line[k] == '\t'))
+                k++;
+            if (k < line.Length && line[k] == ':')
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>The load's outdoor light (protocol 20), null when the line carries none (a nested object always parses, so its
+    /// state says whether it was sent); otherwise the set with its State and Detail -- filled only when "ok": the columns, then
+    /// the days, the params (which name days by index), the lights, zones and points (WorldLightSet's Add methods drop and
+    /// count what they refuse). `line` is the line it was parsed from: its "timeOverride" counts only when the line carries it.
+    /// Reader thread.</summary>
+    static Wmv.Wow.World.WorldLightSet WorldLightFrom(MsgWorldLight m, string line)
+    {
+        if (m == null || string.IsNullOrEmpty(m.state))
+            return null;
+        var s = new Wmv.Wow.World.WorldLightSet
+        {
+            State = m.state, Detail = m.detail ?? "", Product = m.product ?? "", Build = m.build ?? "", Branch = m.branch ?? "",
+            LightDataLayout = m.lightDataLayout ?? "", DefaultFrom = m.defaultFrom ?? "", Map = m.map, DefaultLight = m.defaultLight,
+            TimeOverride = HasKey(line, "timeOverride") ? m.timeOverride : -1,
+        };
+        if (m.mapFlags != null)
+            for (int k = 0; k < 3 && k < m.mapFlags.Length; k++)
+                s.MapFlags[k] = m.mapFlags[k];
+        if (m.state != "ok")
+            return s;
+        s.SetColumns(m.colorColumns, m.floatColumns, m.intColumns, m.absentColumns);
+        if (m.days != null)
+            foreach (MsgWorldLightDay d in m.days)
+                if (d != null)
+                    s.AddDay(d.times, d.c, Widen(d.f), d.i);
+                else
+                    s.AddDay(null, null, null, null);   // (kept by position, as no keys)
+        if (m.@params != null)
+            foreach (MsgWorldLightParams p in m.@params)
+                if (p != null)
+                    s.AddParams(p.id, p.day, p.glow, p.skybox, p.flags, p.highlightSky, Widen(p.overrideSun), p.sunPolar, p.sunAzimuth);
+                else
+                    s.DroppedParams++;
+        if (m.lights != null)
+            foreach (MsgWorldLightSlots l in m.lights)
+                if (l != null)
+                    s.AddLight(l.light, l.slots);
+                else
+                    s.DroppedLights++;
+        if (m.zones != null)
+            foreach (MsgWorldLightZone z in m.zones)
+                if (z != null)
+                    s.AddZone(z.zone, z.light, z.priority, z.zmin, z.zmax, z.conditional, z.poly);
+                else
+                    s.DroppedZones++;
+        if (m.points != null)
+            foreach (MsgWorldLightPoint p in m.points)
+                if (p != null)
+                    s.AddPoint(p.light, p.x, p.y, p.z, p.start, p.end);
+                else
+                    s.DroppedPoints++;
+        return s;
+    }
+
+    /// <summary>setWorldLight's fields (protocol 20), each present only when the line carries its key.</summary>
+    static WorldLightCommand WorldLightCommandFrom(Msg msg, string line)
+    {
+        return new WorldLightCommand
+        {
+            HasOn = HasKey(line, "on"), On = msg.on != 0, HasClock = HasKey(line, "clock"), Clock = msg.clock ?? "",
+            HasTime = HasKey(line, "time"), Time = msg.time ?? "", HasFarclip = HasKey(line, "farclip"), Farclip = msg.farclip,
+        };
+    }
+
+    /// <summary>One loadTerrainTile / loadWorld line's outdoor light, parsed exactly as the reader thread parses it; null when the
+    /// line carries none. For the lifecycle self-test.</summary>
+    public static Wmv.Wow.World.WorldLightSet ParseWorldLight(string line)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        return msg != null ? WorldLightFrom(msg.worldLight, line) : null;
+    }
+
+    /// <summary>One setWorldLight line, parsed as the reader thread and Dispatch parse it; false for any other line. For the
+    /// lifecycle self-test.</summary>
+    public static bool ParseSetWorldLight(string line, out WorldLightCommand command)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        bool ok = msg != null && IsSetWorldLight(msg);
+        command = ok ? WorldLightCommandFrom(msg, line) : null;
+        return ok;
+    }
+
+    /// <summary>A setWorldLight line: its "type" (the protocol's way), or -- the shared spec writes the message so -- its "cmd".</summary>
+    static bool IsSetWorldLight(Msg msg)
+    {
+        return msg.type == "setWorldLight" || (string.IsNullOrEmpty(msg.type) && msg.cmd == "setWorldLight");
+    }
+
     /// <summary>The load's liquid offer (protocol 19), null when the line carries none: a nested object always parses, so its
     /// catalogue's state says whether "liquids" was sent. Each type becomes a LiquidTypeView of the load's catalogue.</summary>
     static LiquidOffer LiquidsFrom(Msg msg)
@@ -1502,6 +1720,14 @@ public class WmvIpcClient : MonoBehaviour
         public int[] closed;
         // protocol 19: loadTerrainTile's / loadWorld's liquid offer and catalogue
         public MsgLiquids liquids;
+        // protocol 20: loadTerrainTile's / loadWorld's outdoor light (made into worldLightSet on the reader thread, then dropped),
+        // and setWorldLight's fields (which of them the line carries: setWorldLightCommand); "cmd" is the spec's name for "type"
+        public MsgWorldLight worldLight;
+        public int on;
+        public string clock;
+        public string time;
+        public double farclip;
+        public string cmd;
         public string detail;
         public double readMs;
         public string md5;
@@ -1513,6 +1739,8 @@ public class WmvIpcClient : MonoBehaviour
         [NonSerialized] public string decodeError;    // assetResponse: why there are no bytes (a base64 that did not
                                                       // decode, a binary answer without its payload)
         [NonSerialized] public bool fromCache;        // assetResponse: made here, from the asset cache
+        [NonSerialized] public Wmv.Wow.World.WorldLightSet worldLightSet;     // protocol 20: the load's outdoor light (reader thread)
+        [NonSerialized] public WorldLightCommand setWorldLightCommand;         // protocol 20: setWorldLight (reader thread)
     }
 
     int port = -1;
@@ -1722,15 +1950,16 @@ public class WmvIpcClient : MonoBehaviour
             byte[] payload = payloadBytes > 0 ? reader.ReadPayload(payloadBytes) : null;
             if (msg == null)
                 continue;
-            Prepare(msg, payload);
+            Prepare(msg, payload, line);
             return msg;
         }
         return null;
     }
 
     /// <summary>What the reader thread does with a parsed line and the payload it announced: stamped, projected, and a
-    /// characterImage's pixels or an assetResponse's bytes made ready (NextMessage and FeedLineForTest alike).</summary>
-    static void Prepare(Msg msg, byte[] payload)
+    /// characterImage's pixels or an assetResponse's bytes made ready (NextMessage and FeedLineForTest alike); protocol 20: a
+    /// load's outdoor light made into its set (the message object dropped), setWorldLight's present fields read from `line`.</summary>
+    static void Prepare(Msg msg, byte[] payload, string line)
     {
         msg.payload = payload;
         msg.receivedSeconds = NowSeconds;
@@ -1742,6 +1971,20 @@ public class WmvIpcClient : MonoBehaviour
         }
         else if (msg.type == "assetResponse")
             DecodeAsset(msg);
+        else if (msg.type == "loadTerrainTile" || msg.type == "loadWorld")
+        {
+            try { msg.worldLightSet = WorldLightFrom(msg.worldLight, line); }
+            catch (Exception e)     // a malformed object costs the outdoor light, never the load
+            {
+                msg.worldLightSet = new Wmv.Wow.World.WorldLightSet { State = "unavailable", Detail = "the player could not read it: " + e.Message };
+            }
+            msg.worldLight = null;
+        }
+        else if (IsSetWorldLight(msg))
+        {
+            msg.type = "setWorldLight";
+            msg.setWorldLightCommand = WorldLightCommandFrom(msg, line);
+        }
     }
 
     /// <summary>What NextMessage made of a message, for the self-test (Msg itself stays private).</summary>
@@ -2020,7 +2263,7 @@ public class WmvIpcClient : MonoBehaviour
                     WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.tileX, TileY = msg.tileY,
                     MaxAssetBytes = msg.maxAssetBytes, MaxTextureBytes = msg.maxTextureBytes,
                     MaxTextureBytesPerLoad = msg.maxTextureBytesPerLoad, MaxTexturesPerLoad = msg.maxTexturesPerLoad,
-                    Camera = CameraFrom(msg), Liquids = LiquidsFrom(msg),
+                    Camera = CameraFrom(msg), Liquids = LiquidsFrom(msg), WorldLight = msg.worldLightSet,
                 });
                 break;
 
@@ -2044,7 +2287,13 @@ public class WmvIpcClient : MonoBehaviour
                     MaxM2TextureBytes = msg.maxM2TextureBytes, MaxM2TextureBytesPerLoad = msg.maxM2TextureBytesPerLoad,
                     MaxM2ModelsPerLoad = msg.doodads ? msg.maxM2ModelsPerLoad : 0, MaxM2TexturesPerLoad = msg.maxM2TexturesPerLoad,
                     MaxDoodadInstancesPerLoad = msg.maxDoodadInstancesPerLoad, Streaming = StreamingFrom(msg), Liquids = LiquidsFrom(msg),
+                    WorldLight = msg.worldLightSet,
                 });
+                break;
+
+            // The outdoor light switched, its clock or its time (protocol 20); the fields the line carried (Prepare).
+            case "setWorldLight":
+                OnSetWorldLight?.Invoke(msg.setWorldLightCommand ?? new WorldLightCommand());
                 break;
 
             case "testFlight":
@@ -3156,6 +3405,14 @@ public class WmvIpcClient : MonoBehaviour
         // of those arrays and of the liquid geometry.
         public int LiquidObjects, LiquidMeshes, LiquidMaterials, LiquidArrays;
         public long LiquidGpuBytes;
+        // Protocol 20 (docs/world-viewer/10-light-sky-fog.md 6.3): the outdoor light (WmvWorldLight.Fill) -- on, its time and the
+        // time's source, the last evaluation's zone, Light, LightParams and validity (-1 / false when there is none), the game
+        // far clip and whether a sky is drawn. A report made by a test without them sends the defaults below.
+        public bool LightOn, LightValid, SkyOn;
+        public string LightTime, LightTimeSource;
+        public int LightZone, LightId, LightParams;
+        public double GameFarclip;
+        public bool LightFilled;                 // false: -1 for every number (no light state was asked for)
     }
 
     /// <summary>
@@ -3257,6 +3514,16 @@ public class WmvIpcClient : MonoBehaviour
              ",\"streamTexturesEvicted\":" + r.StreamTexturesEvicted +
              ",\"streamFilesAskedAgain\":" + r.StreamFilesAskedAgain +
              ",\"streamImagesShared\":" + r.StreamImagesShared +
+             // (Protocol 20's outdoor light before the liquids: the line still ends with the liquid counters, as Stage 09 left it.)
+             ",\"lightOn\":" + (r.LightFilled && r.LightOn ? 1 : 0) +
+             ",\"lightTime\":\"" + Escape(r.LightFilled ? r.LightTime : "") + "\"" +
+             ",\"lightTimeSource\":\"" + Escape(r.LightFilled ? r.LightTimeSource : "") + "\"" +
+             ",\"lightZone\":" + (r.LightFilled ? r.LightZone : -1) +
+             ",\"lightId\":" + (r.LightFilled ? r.LightId : -1) +
+             ",\"lightParams\":" + (r.LightFilled ? r.LightParams : -1) +
+             ",\"lightValid\":" + (r.LightFilled && r.LightValid ? 1 : 0) +
+             ",\"gameFarclip\":" + (r.LightFilled ? r.GameFarclip : -1.0).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+             ",\"skyOn\":" + (r.LightFilled && r.SkyOn ? 1 : 0) +
              ",\"liquidObjects\":" + r.LiquidObjects +
              ",\"liquidMeshes\":" + r.LiquidMeshes +
              ",\"liquidMaterials\":" + r.LiquidMaterials +
@@ -3343,7 +3610,7 @@ public class WmvIpcClient : MonoBehaviour
         Msg msg = JsonUtility.FromJson<Msg>(json);
         if (msg == null)
             return;
-        Prepare(msg, payload);
+        Prepare(msg, payload, json);
         Dispatch(msg);
     }
 

@@ -44,6 +44,16 @@
 //                       (WmvWaterGrabPass) is installed with the terrain session, unless WMV_WATER=low, and removed with it
 //                       by this WmvMain only (it owns it); once a rendered frame the ripple map's offset for the floating
 //                       origin (_WmvRippleOrigin, RippleOriginFrame) follows the scene
+//   "worldLight"     -> (protocol 20) a loadTerrainTile's or loadWorld's outdoor light: the scene's from its commit
+//                       (WmvTerrainSessionWorldLight), evaluated at the main camera once a rendered frame (WorldLightFrame,
+//                       WmvWorldLight: the frame state and its _WmvWL* globals, read by the sky -- WmvWorldSky, enqueued for
+//                       the world view's main camera --, the textured terrain's world-lit branch and, while the light is shown,
+//                       the exterior world-model groups and outdoor doodads, bound then to the world-lit variants by
+//                       BindWorldLit: WmvWorldLitDriver, WmvWorldLitMaterials); setWorldLight switches it,
+//                       its clock and its time (HandleSetWorldLight: WmvWorldLight.SetFromHost, and when it switches the light
+//                       on the resident tiles built without the terrain's normal stream are drawn again,
+//                       WmvTerrainSession.WorldLightOn). WmvWorldLight's per-camera handlers are installed with the terrain
+//                       session and removed with it by this WmvMain only (it owns them)
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -152,6 +162,12 @@ public partial class WmvMain
         WmvLiquidLight.Log = s => Debug.Log("WMV: [liquids] " + s);
         WmvLiquidLight.Off();
         WmvWaterGrabPass.Configure(this, s => Debug.Log("WMV: [liquids] " + s));
+        // Stage 10 (protocol 20): the outdoor light's frame state and its per-camera handlers, owned by this WmvMain (nothing with
+        // WMV_LIGHT=off); off until a switch or the host turns it on. The sky and the textured terrain read it (steps 4 and 5).
+        WmvWorldLight.Configure(this, s => Debug.Log("WMV: [light] " + s));
+        // Stage 10 step 7 (log only): the main camera's anti-aliasing, said with each settled fog record (nothing with WMV_LIGHT=off).
+        if (!WmvWorldLight.HardOff)
+            WmvWorldLight.FrameDescription = () => AntiAliasingText(Camera.main);
         WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
             Debug.LogWarning("WMV: [terrain] " + note);
@@ -176,6 +192,18 @@ public partial class WmvMain
         ipc.OnSetWorldCamera = HandleSetWorldCamera;
         ipc.OnInspectWorldModel = HandleInspectWorldModel;
         ipc.OnTestFlight = HandleTestFlight;
+        ipc.OnSetWorldLight = HandleSetWorldLight;
+    }
+
+    /// <summary>setWorldLight (protocol 20): WmvWorldLight.SetFromHost; when it switches the light on, the resident tiles built
+    /// while it was off -- they have no normal stream (WmvTerrainBuilder: it is uploaded only while the light is on) -- are drawn
+    /// again (WmvTerrainSession.WorldLightOn). Switching it off draws nothing again.</summary>
+    void HandleSetWorldLight(WmvIpcClient.WorldLightCommand c)
+    {
+        bool was = WmvWorldLight.Enabled;
+        WmvWorldLight.SetFromHost(c);
+        if (!was && WmvWorldLight.Enabled && terrain != null)
+            terrain.WorldLightOn();
     }
 
     // ---------------------------------------------------------------- the test flight (protocol 18, the harnesses only)
@@ -954,19 +982,32 @@ public partial class WmvMain
     /// <summary>The world models' group culling and the doodads' instance culling, for the main camera as it renders (after
     /// every camera of the frame has moved, and for a capture's own aspect): WmvWorldModels.Cull, WmvWorldDoodads.Cull. First
     /// the liquids' zone light at that camera (LiquidLightFrame) and the ripple map's origin offset (RippleOriginFrame), in
-    /// every view.</summary>
+    /// every view; after the culling the outdoor light (WorldLightFrame, Stage 10), so a fault in it can never cost the
+    /// frame's culling. Stage 10 step 8: the liquids' light goes first only with WMV_LIGHT=off (Stage 09's order exactly);
+    /// otherwise WorldLightFrame samples it after the outdoor light's frame (LiquidLightFrame with the light's object), on its
+    /// fault path too, and WorldLightFrame runs even when the ripple origin or the culling throws (the fault still reaches the
+    /// pipeline), so the water is sampled once every frame as Stage 09 samples it before them.</summary>
     void CullWorldModels(UnityEngine.Rendering.ScriptableRenderContext context, Camera cam)
     {
         if (cam == null || cam != Camera.main)
             return;
-        LiquidLightFrame(cam);
-        RippleOriginFrame();
-        if (!TerrainViewActive)
-            return;
-        if (worldModels != null && worldModels.InstanceCount > 0)
-            worldModels.Cull(cam);
-        if (worldDoodads != null && worldDoodads.InstanceCount > 0)
-            worldDoodads.Cull(cam);
+        if (WmvWorldLight.HardOff)
+            LiquidLightFrame(cam);
+        try
+        {
+            RippleOriginFrame();
+            if (TerrainViewActive)
+            {
+                if (worldModels != null && worldModels.InstanceCount > 0)
+                    worldModels.Cull(cam);
+                if (worldDoodads != null && worldDoodads.InstanceCount > 0)
+                    worldDoodads.Cull(cam);
+            }
+        }
+        finally
+        {
+            WorldLightFrame(cam);       // (never throws: its faults switch the light off)
+        }
     }
 
     /// <summary>Stage 09: the liquids' zone light at the main camera, once per rendered frame (WmvLiquidLight.Frame): the
@@ -1003,6 +1044,91 @@ public partial class WmvMain
         WmvLiquidLight.Frame(Time.frameCount, Time.deltaTime, lights, x, y, z, WmvModelBuilder.Debug_.AnimTime >= 0f);
     }
 
+    /// <summary>Stage 10 step 8: the liquids' light at the main camera after the outdoor light's frame (WorldLightFrame; never
+    /// with WMV_LIGHT=off): as LiquidLightFrame, through WmvLiquidLight.FrameAfterLight -- on the light's clock (the day of the
+    /// scene's worldLight object `set` at the half-minute the outdoor light used this frame, its clamp arm and its clock jump)
+    /// while the outdoor light is shown for this camera and -wmvWaterLight is clock; otherwise Stage 09's noon rows (a null
+    /// `set`: the fault path, which takes a frame stepped on the clock again on the noon rows).</summary>
+    void LiquidLightFrame(Camera cam, WorldLightSet set)
+    {
+        LiquidLights lights = TerrainViewActive && terrain != null ? terrain.SceneLights : null;
+        double x = 0.0, y = 0.0, z = 0.0;
+        if (lights != null && !CameraWorldPosition(cam.transform.position, out x, out y, out z))
+            lights = null;
+        WmvLiquidLight.FrameAfterLight(Time.frameCount, Time.deltaTime, lights, x, y, z, WmvModelBuilder.Debug_.AnimTime >= 0f, set);
+    }
+
+    /// <summary>Stage 10 (protocol 20): the outdoor light at the main camera, once per rendered frame (WmvWorldLight.Frame): the
+    /// scene's outdoor light -- a single tile's, a world's or a streaming session's entry's, in the terrain view only and never
+    /// in the top-down overview (orthographic) -- at the camera's game position, with the game Z the floating origin stands
+    /// for; otherwise the outdoor light is off for the frame. Its clock is its own (not -wmvAnimTime), but -wmvAnimTime snaps
+    /// its ease as it snaps the water's. Then (Stage 10 step 6) the world models' and doodads' renderers bound to the world-lit
+    /// variants while the light is shown and to their own materials otherwise (BindWorldLit), before this camera culls and
+    /// draws, so no frame draws a stale binding; then the sky and bloom for this render (WmvWorldLight.Sky). Stage 10 step 7:
+    /// the camera's Unity position is the fog's eye for this render (WmvWorldLight.SetEye, before Frame publishes). A fault here
+    /// switches the light off (WmvWorldLight.FailOff) and binds every world renderer to its own materials: the frame is drawn
+    /// as Stage 09 draws it. Stage 10 step 8: right after the outdoor light's frame the liquids' light (LiquidLightFrame with the
+    /// object: on the light's clock while it is shown), and on the fault path the liquids' light on Stage 09's noon rows -- taken
+    /// again when this frame's water was already stepped on the clock (or its clock step threw), so the faulting frame's water is
+    /// Stage 09's too and the water is sampled every frame. Nothing with WMV_LIGHT=off (CullWorldModels samples the water first
+    /// then).</summary>
+    void WorldLightFrame(Camera cam)
+    {
+        if (WmvWorldLight.HardOff)
+            return;
+        try
+        {
+            bool worldView = TerrainViewActive && !cam.orthographic;
+            WorldLightSet set = worldView && terrain != null ? terrain.SceneWorldLight : null;
+            double x = 0.0, y = 0.0, z = 0.0, ox, oy, oz = 0.0;
+            bool positioned = set != null && CameraWorldPosition(cam.transform.position, out x, out y, out z) &&
+                              CameraWorldPosition(Vector3.zero, out ox, out oy, out oz);
+            WmvWorldLight.SetEye(cam.transform.position);
+            WmvWorldLight.Frame(Time.frameCount, Time.deltaTime, set, positioned, x, y, z, oz, WmvModelBuilder.Debug_.AnimTime >= 0f);
+            LiquidLightFrame(cam, set);   // Stage 10 step 8
+            BindWorldLit(WmvWorldLight.ObjectsLit, cam, set, positioned);
+            WmvWorldLight.Sky(cam, worldView);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("WMV: [light] the outdoor light's frame failed: " + e);
+            WmvWorldLight.FailOff(e);
+            // Stage 10 step 8: the water on Stage 09's noon rows for this frame (the light is off now): sampled now, or taken again
+            // with 0 s when it was stepped on the clock before the fault (WmvLiquidLight.Frame); a no-op when it was on the noon rows.
+            try { LiquidLightFrame(cam, null); }
+            catch (System.Exception g)
+            {
+                if (!liquidLightFaultSaid)
+                    Debug.LogError("WMV: [light] the liquids' light after the outdoor light's fault failed (said once): " + g);
+                liquidLightFaultSaid = true;
+            }
+            try { BindWorldLit(false, null, null, false); }
+            catch (System.Exception f)
+            {
+                if (!worldLitBindFaultSaid)
+                    Debug.LogError("WMV: [light] binding the world's renderers to their own materials failed (said once): " + f);
+                worldLitBindFaultSaid = true;
+            }
+        }
+    }
+
+    bool liquidLightFaultSaid;          // Stage 10 step 8: a fault of the liquids' light on the outdoor light's fault path, said once
+
+    // Stage 10 step 6: the world's binding, frame by frame, and its lines.
+    readonly WmvWorldLitDriver worldLit = new WmvWorldLitDriver(s => Debug.Log("WMV: [light] " + s));
+    bool worldLitBindFaultSaid;
+
+    /// <summary>Stage 10 step 6: the world models' and doodads' renderers to the world-lit variants while the light is shown
+    /// (`lit`: WmvWorldLight.ObjectsLit) or to their own materials, with the lines that go with it (WmvWorldLitDriver: per
+    /// frame a few compares unless something changed): why the light is not shown comes from `cam`, `set` and `positioned`
+    /// (null cam: a fault; WmvWorldLitMaterials.WhyNotShown).</summary>
+    void BindWorldLit(bool lit, Camera cam, WorldLightSet set, bool positioned)
+    {
+        string why = lit ? null : WmvWorldLitMaterials.WhyNotShown(cam, WmvWorldLight.Enabled, TerrainViewActive, set, positioned);
+        if (worldLit.Frame(worldModels, worldDoodads, lit, why, Time.frameCount, Time.unscaledDeltaTime * 1000.0) != null)
+            worldLitBindFaultSaid = false;
+    }
+
     /// <summary>A tile world load's world models are settled (protocol 17: before its doodads): its camera now -- it stands on
     /// their floors -- and a camera asked for meanwhile no longer waits.</summary>
     void WorldModelsSettled(int load)
@@ -1016,6 +1142,7 @@ public partial class WmvMain
     {
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= CullWorldModels;
         WmvWaterGrabPass.Release(this);                  // only when this WmvMain installed it (Configure)
+        WmvWorldLight.Release(this);                     // likewise
         if (terrain != null)
             terrain.Dispose();
         PumpLaterDestroy(true);
@@ -1383,6 +1510,9 @@ public partial class WmvMain
         r.LiquidMaterials = WmvLiquidRegistry.LiveMaterials;
         r.LiquidArrays = WmvLiquidRegistry.LiveArrays;
         r.LiquidGpuBytes = WmvLiquidRegistry.LiveArrayBytes + WmvLiquidMeshes.LiveGeometryBytes;
+        // Protocol 20: the outdoor light (on, time and its source, the last evaluation, the game far clip, whether the sky was
+        // drawn).
+        WmvWorldLight.Fill(ref r);
         r.LiveMeshes = r.MeshObjects;
         r.LiveMaterials = r.MaterialObjects;
         r.WorldFrames = worldFrames;
@@ -1438,7 +1568,30 @@ public partial class WmvMain
                                     : string.Format(inv, "pivot ({0:F3}, {1:F3}, {2:F3}) yaw {3:0.##} pitch {4:0.##} distance {5:F3}",
                                                     orbit.pivot.x, orbit.pivot.y, orbit.pivot.z, orbit.yaw, orbit.pitch, orbit.distance),
             cam != null ? cam.fieldOfView : 0f, cam != null ? cam.aspect : 0f, cam != null ? cam.cullingMask : 0,
-            busy == null ? "" : "; taken while " + busy, what));
+            busy == null ? "" : "; taken while " + busy, what) +
+            // Stage 10 (protocol 20): the outdoor light state, a field of its own at the line's end (none with WMV_LIGHT=off: the
+            // line stays Stage 09's).
+            (WmvWorldLight.HardOff ? "" : "; " + WmvWorldLight.Describe()));
+    }
+
+    /// <summary>Stage 10 step 7 (log only): the main camera's anti-aliasing as a capture gets it: MSAA (the camera's allowMSAA and
+    /// the pipeline asset's sample count; a camera drawing into a texture takes the texture's) and URP's post anti-aliasing. Said
+    /// in the outdoor light's settled fog record line (WmvWorldLight.FrameDescription): the fog checks' pixel classes assume none.
+    /// Reads only.</summary>
+    internal static string AntiAliasingText(Camera cam)
+    {
+        if (cam == null)
+            return "anti-aliasing: no main camera";
+        var rp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+        int asset = rp != null ? rp.msaaSampleCount : 1;
+        int samples = cam.targetTexture != null ? cam.targetTexture.antiAliasing : cam.allowMSAA ? asset : 1;
+        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData data;
+        bool has = cam.TryGetComponent(out data);
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                             "anti-aliasing: MSAA {0} (camera allowMSAA {1}, pipeline asset {2} sample(s){3}), post anti-aliasing {4} (post-processing {5})",
+                             samples > 1 ? samples + "x" : "off", cam.allowMSAA ? "true" : "false", asset,
+                             cam.targetTexture != null ? ", target texture " + cam.targetTexture.antiAliasing : "",
+                             has ? data.antialiasing.ToString() : "unknown (no camera data)", has ? (data.renderPostProcessing ? "on" : "off") : "unknown");
     }
 
     // ---------------------------------------------------------------- -wmvTerrainDump

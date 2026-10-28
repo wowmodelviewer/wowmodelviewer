@@ -4370,6 +4370,22 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
                 : lights->status() != wow::LightCatalog::Status::Ready ? lights->statusDetail()
                                                                        : QString("the light catalogue is not the loaded client's"));
   }
+  // THE OUTDOOR LIGHT (protocol 20, docs/world-viewer/10-light-sky-fog.md 6.3): a player that draws it is sent the load's
+  // map's light state ("worldLight", a key of its own, never inside "liquids"), assembled on the map's first load from the
+  // day fragments the client load made, and kept; an older player's load is the protocol-19 one. A catalogue that is not
+  // the loaded client's, or whose outdoor light could not be read, goes as "unavailable" with why.
+  if (ipc->playerDrawsWorldLight())
+  {
+    const std::shared_ptr<wow::LightCatalog> lights = m_lightCatalog;
+    if (lights && lights->status() == wow::LightCatalog::Status::Ready && lights->belongsToActiveClient())
+      command.worldLight = lights->worldLightJson(mapId);
+    else
+      command.worldLight = wow::LightCatalog::worldLightUnavailableJson(
+        command.product, command.build, mapId,
+        !lights ? QString("there is no light catalogue")
+                : lights->status() != wow::LightCatalog::Status::Ready ? lights->statusDetail()
+                                                                       : QString("the light catalogue is not the loaded client's"));
+  }
   // What it loads goes into the viewport, which the overhead map covers until then: the player's window sized for it now,
   // without waiting for the player (so the overhead map's going does not wait for it either).
   unityRendererHost->sizePlayerAhead();
@@ -4459,7 +4475,14 @@ int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool g
            << (command.liquids ? QString("; liquids offered (protocol 19): %1 frame(s) and bump(s) of the catalogue "
                                          "servable; ").arg(liquidFrames ? liquidFrames->size() : 0) +
                                    wow::LightCatalog::describe(command.liquidLights)
-                               : QString("; no liquids (a protocol %1 player)").arg(ipc->playerProtocolVersion()));
+                               : QString("; no liquids (a protocol %1 player)").arg(ipc->playerProtocolVersion()))
+           << (!command.worldLight.isEmpty()
+                 ? "; " + wow::LightCatalog::describeWorldLight(command.worldLight) +
+                     (m_lightCatalog && m_lightCatalog->worldLightAssemblyMilliseconds(mapId) >= 0.0
+                        ? QString(" (assembled in %1 ms on the map's first load)")
+                            .arg(m_lightCatalog->worldLightAssemblyMilliseconds(mapId), 0, 'f', 2)
+                        : QString())
+                 : QString("; no outdoor light (a protocol %1 player)").arg(ipc->playerProtocolVersion()));
   UpdateUnityViewportState();
   return command.load;
 }
@@ -5694,6 +5717,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   m_mapCatalog = wow::WorldMapCatalog::build();
   m_liquidCatalog = wow::LiquidCatalog::build();
   m_lightCatalog = wow::LightCatalog::build();
+  m_lightCatalog->buildWorldLight();
   ComputeClientCapabilities();
   if (m_maps)
     m_maps->ClientLoaded();
@@ -6197,6 +6221,15 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.begin("light catalogue");
   m_lightCatalog = wow::LightCatalog::build();
   timeline.end("light catalogue", wow::LightCatalog::statusName(m_lightCatalog->status()));
+  // The outdoor light (docs/world-viewer/10-light-sky-fog.md 6.2): every named column of the light tables read whole and
+  // one fragment per LightParams day made, a stage of its own (budget 250 ms); a map's object is put together from them on
+  // the map's first load.
+  timeline.begin("outdoor light");
+  m_lightCatalog->buildWorldLight();
+  timeline.end("outdoor light", m_lightCatalog->worldLightReady()
+                                  ? QString("%1 days, %2 keys, %3 ms").arg(m_lightCatalog->worldCounts().days)
+                                      .arg(m_lightCatalog->worldCounts().keys).arg(m_lightCatalog->worldLightBuildMilliseconds(), 0, 'f', 1)
+                                  : m_lightCatalog->worldLightDetail());
 
   if (progress)
     progress->stage(_("Almost ready..."));

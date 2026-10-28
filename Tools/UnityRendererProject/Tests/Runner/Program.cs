@@ -8,7 +8,13 @@
 // terrain material corpus tests (TerrainMaterialCorpusTests.cs) run under the same condition. The
 // world-map contract check runs only when WMV_MAP_CONTRACT_DIR names a folder of WDTs the viewer's map
 // catalogue wrote (MapContractCheck.cs). The liquid corpus tests (LiquidCorpusTests.cs) run under the corpus condition
-// and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set.
+// and also read the MLIQ examples folder WMV_LIQUID_EXAMPLES names, when it is set. The outdoor light's fixture part
+// (WorldLightTests.cs) runs when WMV_WORLD_LIGHT_FIXTURES names the offline fixtures, and reads the host's own objects
+// from WMV_WORLD_LIGHT_HOST_DUMPS when that is set; the MCNR proof on the four Southfury tiles (SkyTerrainLightTests.cs) runs
+// when WMV_MCNR_TILES names the folder holding them. The world-model context census (WorldModelLightTests.cs) runs under the
+// corpus condition. The fog's census on every key of five clients (WorldFogTests.cs R9) runs when WMV_FOG_KEYS names the key
+// export, its continuity on maps 0 and 1 when WMV_WORLD_LIGHT_FIXTURES is set, and WMV_FOG_PARITY_OUT has it write the rig's
+// parity grid (R10).
 
 using System;
 using System.Globalization;
@@ -104,6 +110,33 @@ static class Program
         failures += LiquidLightTests.RunAll(Console.WriteLine);
         Console.WriteLine("== LiquidHighTests (the High water look: formulas, the water tune, the ripple map's check)");
         failures += LiquidHighTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 3: the outdoor light state -- the day, the selection, the clock, the ease, the switches, the graded model;
+        // with WMV_WORLD_LIGHT_FIXTURES the host's sample() parity and the survey's spots on five clients, with
+        // WMV_WORLD_LIGHT_HOST_DUMPS the host's own objects.
+        Console.WriteLine("== WorldLightTests (outdoor light: day, selection, clock, ease, switches, model; fixtures when given)");
+        failures += WorldLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 steps 4 and 5: the sky's colour dome and program, the MCNR decode and the terrain light; with WMV_MCNR_TILES the
+        // MCNR mapping proved again on the four Southfury tiles.
+        Console.WriteLine("== SkyTerrainLightTests (the sky dome and program, MCNR and the terrain light; Southfury tiles when given)");
+        failures += SkyTerrainLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 6: the outdoor light on doodads and exterior world-model groups against the client's own programs, and the
+        // context rule; with WMV_WORLD_AUDIT_CORPUS the census of the client's world models.
+        Console.WriteLine("== WorldModelLightTests (doodad and world-model light, the client's programs, the contexts; census when given)");
+        failures += WorldModelLightTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 7: the client's per-pixel fog against its own terrain and M2 programs, the record from the client's keys, the
+        // derived fog channels, the modes, arms and switches; with WMV_FOG_KEYS the census on every key, with WMV_WORLD_LIGHT_FIXTURES
+        // the record's continuity on maps 0 and 1 of five clients.
+        Console.WriteLine("== WorldFogTests (the fog: the client's programs, the record, the derived channels, modes and arms; census when given)");
+        failures += WorldFogTests.RunAll(Console.WriteLine);
+
+        // Stage 10 step 8: the water with the light -- its values on the light's clock, the ease's step-8 snaps, the sky dome's wedge
+        // twin, the fogged water's twin and the switches; with WMV_WORLD_LIGHT_HOST_DUMPS the 12:00 invariant on the host's own dumps.
+        Console.WriteLine("== LiquidWaterDayTests (the water on the light's clock, its sky and fog twins; the 12:00 invariant when given)");
+        failures += LiquidWaterDayTests.RunAll(Console.WriteLine);
 
         string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
         if (!string.IsNullOrEmpty(contract))

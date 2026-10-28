@@ -2598,6 +2598,7 @@ public static partial class WmvLifecycleSelfTest
         TerrainTests(log);
         TerrainHiddenModelTests(log);
         TerrainLateAnswerMainTests(log);
+        OutdoorLightTests(log);         // Stage 10 steps 3-5 (WmvLifecycleSelfTestWorldLight.cs)
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 
@@ -4884,6 +4885,8 @@ public static partial class WmvLifecycleSelfTest
         public readonly List<string[]> Sent = new List<string[]>();    // requestId, role, fileDataID, load, epoch
         public readonly WmvTerrainSession Session;
         public double Now = 1000.0;
+        /// <summary>Where the session's log lines go (null: nowhere, as before; Stage 10 step 6 reads its context line).</summary>
+        public Action<string> Log;
         int next;
 
         public TerrainHarness(double timeoutMs = WmvTerrainSession.DefaultTimeoutMs)
@@ -4893,7 +4896,7 @@ public static partial class WmvLifecycleSelfTest
                 string r = "t" + (++next);
                 Sent.Add(new[] { r, role, id.ToString(), load.ToString(), epoch.ToString() });
                 return r;
-            }, r => Reports.Add(r), null, a => a(), timeoutMs);
+            }, r => Reports.Add(r), s => { if (Log != null) Log(s); }, a => a(), timeoutMs);
         }
 
         public string Last(string role)
@@ -5498,9 +5501,9 @@ public static partial class WmvLifecycleSelfTest
             ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
-            Check(WmvIpcClient.ProtocolVersion == 19, "terrain ipc: the player speaks protocol 19 (13 added terrain textures, 14 the Maps viewer, " +
+            Check(WmvIpcClient.ProtocolVersion == 20, "terrain ipc: the player speaks protocol 20 (13 added terrain textures, 14 the Maps viewer, " +
                   "15 its overhead map and free camera, 16 world models in the world, 17 doodads, 18 streaming, 19 liquids -- the zone lights " +
-                  "inside the liquid offer are an additive key of 19)", log);
+                  "inside the liquid offer are an additive key of 19 --, 20 the outdoor light)", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +

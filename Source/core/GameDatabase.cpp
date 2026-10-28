@@ -186,7 +186,7 @@ namespace
 QString core::GameDatabase::cacheKey() const
 {
   // Bump SCHEMA_VERSION whenever the table layout in database.xml (or how we read it) changes.
-  static const int SCHEMA_VERSION = 22; // 22: LiquidType's six Texture templates (an array of strings, each element's offset from its own place) and LightData.SkyBand1Color. 21: Light, LightParams, LightData, ZoneLight and ZoneLightPoint (the light catalogue, each read only from a verified layout). 20: LiquidType, LiquidMaterial, LiquidObject and LiquidTypeXTexture (the liquid catalogue, each read only from a verified layout). 19: ChrCustomizationBoneSet for complete customization exports. 18: Map (the world map catalogue, read only from a verified layout), and the per-table readings kept with the database. 17: TransmogSet and TransmogSetItem (the transmog sets of the set picker, with their catalog group and class mask). 16: ChrModelAltVariant, ChrModelAltVariantOption, ChrModelAltVariantChoice (Classic Beta's two generations of a character model). 15: CreatureDisplayInfoExtra and CreatureDisplayInfoOption (a humanoid NPC's own race, sex, class, bakes and stored customization choices). 14: the key also names the product and the schema folder (a Classic
+  static const int SCHEMA_VERSION = 23; // 23: the outdoor light's columns (LightData's colours, floats and colour-grading files; LightParams' glow, skybox, flags and sun overrides; ZoneLight.TransitionType; Map.TimeOfDayOverride and Flags), their floats kept as their 32-bit patterns (uint32). 22: LiquidType's six Texture templates (an array of strings, each element's offset from its own place) and LightData.SkyBand1Color. 21: Light, LightParams, LightData, ZoneLight and ZoneLightPoint (the light catalogue, each read only from a verified layout). 20: LiquidType, LiquidMaterial, LiquidObject and LiquidTypeXTexture (the liquid catalogue, each read only from a verified layout). 19: ChrCustomizationBoneSet for complete customization exports. 18: Map (the world map catalogue, read only from a verified layout), and the per-table readings kept with the database. 17: TransmogSet and TransmogSetItem (the transmog sets of the set picker, with their catalog group and class mask). 16: ChrModelAltVariant, ChrModelAltVariantOption, ChrModelAltVariantChoice (Classic Beta's two generations of a character model). 15: CreatureDisplayInfoExtra and CreatureDisplayInfoOption (a humanoid NPC's own race, sex, class, bakes and stored customization choices). 14: the key also names the product and the schema folder (a Classic
                                         // product could share a build number with nothing, but a cache built
                                         // with one schema must never be read as another's); tables whose layout
                                         // the definitions cannot place are no longer read at base positions; a table's own layoutHash in database.xml is read (it never was). // 13: ChrCustomizationReq RaceMasks as its two uint32 (plus ReqType/RegionGroupMask/OverrideArchive), ChrCustomizationOption.Requirement, ChrRaces.PlayableRaceBit, ChrCustomizationReqChoice; bitpacked signed values sign-extended, pallet arrays read at the file's stride, short ids/values read without over-reading their bytes. 12: ItemDisplayInfoModelMatRes (retail's per-slot replaceable-material table, the authoritative source for M2 texture types beyond the type-2 skin). 11: ChrCustomizationReq adds ReqAchievementID/ReqQuestID/ReqItemModifiedAppearanceID (unlock-gate filter for customization choices). 10: corrected ItemSparse name-field positions (sparse-record string walk) for 12.0.7. 9: ChrCustomizationReq/ChrRaces/CreatureDisplayInfo/CreatureModelData. Bump forces a cache rebuild so the fix reaches installs upgraded over a prior build
@@ -400,6 +400,36 @@ sqlResult core::GameDatabase::sqlQuery(const QString & query)
   }
 
   return result;
+}
+
+bool core::GameDatabase::sqlQueryIntegers(const QString & query, const std::function<void(const qint64 *, int)> & row)
+{
+  sqlite3_stmt * stmt = nullptr;
+  if (!m_db || sqlite3_prepare_v2(m_db, query.toStdString().c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+  {
+    LOG_ERROR << "Querying in database" << query;
+    LOG_ERROR << "SQL error:" << (m_db ? sqlite3_errmsg(m_db) : "no database");
+    if (stmt)
+      sqlite3_finalize(stmt);
+    return false;
+  }
+  const int count = sqlite3_column_count(stmt);
+  std::vector<qint64> values((size_t)count);
+  int rc = SQLITE_ROW;
+  while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
+  {
+    for (int k = 0; k < count; k++)
+      values[k] = sqlite3_column_int64(stmt, k);
+    row(values.data(), count);
+  }
+  sqlite3_finalize(stmt);
+  if (rc != SQLITE_DONE)
+  {
+    LOG_ERROR << "Querying in database" << query;
+    LOG_ERROR << "SQL error:" << sqlite3_errmsg(m_db);
+    return false;
+  }
+  return true;
 }
 
 void core::GameDatabase::addTable(TableStructure * tbl)

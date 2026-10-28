@@ -12,7 +12,7 @@ int InstanceType // the code Difficulty.db2 gives the map's difficulties: suppor
 int Code9 // not established
 int AreaTableID // an AreaTable row standing for the map: supported
 int LoadingScreenID // a LoadingScreens.db2 row
-int Code12 // not established
+int TimeOfDayOverride // -1, or a time of day the map keeps (Retail: -1 on 1081 of 1187 maps, 0 to 1350 on 106; every value fits a day in minutes, [0, 1440): proven from the bytes); the name is the public definitions' (the only column of this file named so, docs/world-viewer/10-light-sky-fog.md 3.3), the unit (minutes) inferred
 int ParentMapID // when set, a map whose world space this map shares: supported (-1 is "not set", which does not mean "no parent")
 int WorldCopyOfMapID // Retail, Classic Era, MoP Classic: when set, a map part of whose world this map copies: supported (-1: not set)
 int BetaCode14 // Classic Beta: the WorldCopyOfMapID slot holds 2-bit codes there; their meaning is not established
@@ -30,9 +30,10 @@ int Code23 // not established (Retail)
 int BetaCode23 // not established (Classic Beta; the slot of Retail's Code22, its meaning not shown to be the same)
 int BetaCode24 // not established (Classic Beta; the slot of Retail's Code23, its meaning not shown to be the same)
 int EraMoPCode21 // not established (Classic Era and MoP Classic; the slot of Retail's Code22, its meaning not shown to be the same)
-int Flags // three words of flags: four bits of the first two are copies of WDT header (MPHD) bits (supported); the rest are not established
+int Flags // three words of flags: four bits of the first two are copies of WDT header (MPHD) bits (supported); bit 0x2 of the third is set on 49 of 59 Classic Era maps, 75 of 285 MoP Classic maps, 49 of 73 Classic Beta maps and no Retail or PTR map (proven from the bytes; its meaning not established); the rest are not established
 
-COMMENT Written for WoW Model Viewer's world map catalogue from the clients' own bytes; no outside definition was used.
+COMMENT Written for WoW Model Viewer's world map catalogue from the clients' own bytes; no outside definition was used, but
+COMMENT for one name: TimeOfDayOverride, the public definitions' name of the column (docs/world-viewer/10-light-sky-fog.md).
 COMMENT Every column of each layout is listed in file order, so the positions are right for the layouts below; only
 COMMENT the named columns the catalogue reads (database.xml, table Map) carry established meanings. A neutral name that
 COMMENT two layouts share means the same slot in the column order, not an established equal meaning. The evidence, and
@@ -54,7 +55,7 @@ InstanceType
 Code9
 AreaTableID
 LoadingScreenID
-Code12
+TimeOfDayOverride
 ParentMapID
 WorldCopyOfMapID
 Code15
@@ -84,7 +85,7 @@ InstanceType
 Code9
 AreaTableID
 LoadingScreenID
-Code12
+TimeOfDayOverride
 ParentMapID
 BetaCode14
 Code15
@@ -114,7 +115,7 @@ InstanceType
 Code9
 AreaTableID
 LoadingScreenID
-Code12
+TimeOfDayOverride
 ParentMapID
 WorldCopyOfMapID
 Code15

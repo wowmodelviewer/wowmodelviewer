@@ -11,7 +11,9 @@
 // a late frame answer dropped; a frame that arrives after its list settled (its data dropped); a load without "liquids"
 // (nothing drawn, "offered" false); a client switch (the old scene's liquids gone at the new commit); the colour by kind and
 // the blending by flag (a blended lava); the top-down clip range over a liquid above the terrain; a world model's MLIQ (its
-// prototype's child, cloned into every instance, culled by its own renderer, never counted as a group); a streaming session
+// prototype's child, cloned into every instance, culled by its own renderer, never counted as a group; Stage 10 step 6: bound
+// to the outdoor light, its group renderers take the world-lit copies and its liquid renderers keep the registry's material);
+// a streaming session
 // (frames asked once for two tiles and a world model, a type pooled when its tile closes, evicted with no pool budget, asked
 // again when it comes back; a frame array held only by a pooled prototype counted in the pool, its type evicted with the
 // prototype as last used when the prototype was); the IPC lines (the offer read, the report, streamState, runtimeState) --
@@ -610,10 +612,180 @@ public static partial class WmvLifecycleSelfTest
               "liquids: a group's liquid renderer is culled by its own box but never counted as a group -- 3 placements report 1 group drawn " +
               "of 1, the culling counts 3 groups (" + reportedOk + " placement(s) right, " + groupRenderers + " group and " + liquidRenderers +
               " liquid renderer(s), culling " + culledGroups + " = " + visibleGroups + " + " + outGroups + ")", log);
+        if (!WmvWorldLight.HardOff && scene != null && wmoWater != null && scene.Instances.Count > 0)
+            LiquidWorldLitTests(log, v, scene, wmoWater.Material);
         h.Session.Clear("test");
-        Check(clean() && WorldTallies() == "0/0/0/0/0" && h.Session.SceneLights == null,
+        Check(clean() && WorldTallies() == "0/0/0/0/0" && h.Session.SceneLights == null && WmvWorldModels.LiveCopies == 0 &&
+              WmvWorldModels.LiveUnfoggedLiquids == 0,
               "liquids: clearTerrain takes the world models' liquid away with their prototypes, and the scene's zone lights (" + LiquidTallies() +
-              ", world " + WorldTallies() + ")", log);
+              ", world " + WorldTallies() + ", unfogged liquids " + WmvWorldModels.LiveUnfoggedLiquids + ")", log);
+    }
+
+    /// <summary>
+    /// Stage 10 step 6 (T15 of the outdoor-light cases): the liquid world models bound to the outdoor light (WmvWorldModels.RebindWorldLit, the
+    /// test driving it): every group renderer holds a copy on "WMV/Map Object (world)", every liquid renderer -- a child of its
+    /// group's object, interleaved in the renderers' index order -- keeps the registry's material `liquid`; a clone placed
+    /// while bound holds what its prototype's first instance holds, renderer by renderer; RebindWorldLit(false) puts every
+    /// group renderer back on its original (the clear that follows returns every tally to its start).
+    /// </summary>
+    static void LiquidWorldLitTests(Action<string> log, TestWorldView v, WmvWorldScene scene, Material liquid)
+    {
+        var bind = new WmvWorldLitBind { Lit = true };
+        v.Models.RebindWorldLit(true, bind);
+        int groupsLit = 0, liquidsKept = 0, wrong = 0, interleaved = 0;
+        foreach (WmvWorldInstance i in scene.Instances)
+            for (int k = 0; k < i.Renderers.Length; k++)
+            {
+                Renderer rr = i.Renderers[k];
+                bool isLiquid = i.LiquidRenderers != null && i.LiquidRenderers[k];
+                if (isLiquid)
+                {
+                    if (rr.sharedMaterial == liquid) liquidsKept++;
+                    else wrong++;
+                    if (k > 0 && (i.LiquidRenderers == null || !i.LiquidRenderers[k - 1])) interleaved++;
+                }
+                else if (rr.sharedMaterial != null && rr.sharedMaterial.shader.name == WmvWorldLitMaterials.WorldModelShaderName + WmvWorldLitMaterials.Suffix)
+                    groupsLit++;
+                else
+                    wrong++;
+            }
+        WmvWorldInstance first = scene.Instances[0];
+        WmvWorldInstance clone = v.PlaceInstance(first.Prototype, first.Placement, scene.Origin, scene.Load);
+        bool sameByIndex = clone.Renderers.Length == first.Renderers.Length;
+        for (int k = 0; sameByIndex && k < clone.Renderers.Length; k++)
+        {
+            Material[] a = clone.Renderers[k].sharedMaterials, b = first.Renderers[k].sharedMaterials;
+            sameByIndex = a.Length == b.Length;
+            for (int m = 0; sameByIndex && m < a.Length; m++)
+                sameByIndex = a[m] == b[m];
+        }
+        v.DisposeInstance(clone);
+        var unbind = new WmvWorldLitBind { Lit = false };
+        v.Models.RebindWorldLit(false, unbind);
+        int backOnOwn = 0;
+        foreach (WmvWorldInstance i in scene.Instances)
+            for (int k = 0; k < i.Renderers.Length; k++)
+            {
+                bool isLiquid = i.LiquidRenderers != null && i.LiquidRenderers[k];
+                Material m = i.Renderers[k].sharedMaterial;
+                if (isLiquid ? m == liquid : m != null && m.shader.name == WmvWorldLitMaterials.WorldModelShaderName)
+                    backOnOwn++;
+            }
+        Check(groupsLit == 3 && liquidsKept == 3 && wrong == 0 && interleaved == 3 && sameByIndex && unbind.Unbound == 3 && backOnOwn == 6 &&
+              bind.GroupRenderers == 3 && WmvWorldModels.LiveCopies == 2,
+              "liquids T15: the liquid world models bound to the outdoor light -- the 3 group renderers hold copies on \"WMV/Map Object (world)\" " +
+              "(one per prototype: " + WmvWorldModels.LiveCopies + "), the 3 liquid renderers, each right after its group's in the index order, keep " +
+              "the registry's material; a clone placed while bound matches its prototype's first instance renderer by renderer; RebindWorldLit(false) " +
+              "puts the 3 group renderers back (" + groupsLit + " lit, " + liquidsKept + " liquids kept, " + wrong + " wrong, " + backOnOwn + " of 6 " +
+              "on their own after)", log);
+        LiquidWorldLitUnfoggedTests(log, v, scene, bind);
+    }
+
+    /// <summary>
+    /// Stage 10 step 8 (with T15): the interior groups' liquids kept unfogged through the real binding. The record follows the
+    /// context rule of LitInterior on each liquid's group (T15's groups are exterior: no block, nothing counted). Then each
+    /// liquid's group is given the interior context (what an interior MOGP flag gives it, WorldLightContexts.Group) and the
+    /// prototypes' records dropped, so the next bind records them again: the record finds each liquid's group (its object's
+    /// parent) and flags it with no help from the test; while bound each such liquid holds a MaterialPropertyBlock with
+    /// _WmvLiquidUnfogged 1 -- counted live, on the bind and in its line --, a clone placed while bound takes one too and gives
+    /// its count back when it is disposed still bound; none is left after RebindWorldLit(false), the count back at 0. The saved
+    /// contexts are put back and the records dropped again (recorded anew from them at the next bind).
+    /// </summary>
+    static void LiquidWorldLitUnfoggedTests(Action<string> log, TestWorldView v, WmvWorldScene scene, WmvWorldLitBind exteriorBind)
+    {
+        var protos = new List<WmvWorldPrototype>();
+        bool recorded = true;
+        foreach (WmvWorldInstance i in scene.Instances)
+        {
+            WmvWorldPrototype p = i.Prototype;
+            if (p == null || protos.Contains(p))
+                continue;
+            protos.Add(p);
+            Renderer[] all = p.Runtime.Root.GetComponentsInChildren<Renderer>(true);
+            for (int k = 0; k < all.Length; k++)
+            {
+                if (p.LitKinds[k] != WmvWorldModels.LitLiquid)
+                    continue;
+                int gi = System.Array.IndexOf(p.Runtime.GroupObjects, all[k].transform.parent.gameObject);
+                bool interior = !(gi >= 0 && WmvWorldLitMaterials.ContextOn(p.GroupContexts[gi]));
+                recorded &= p.LitLiquidUnfogged != null && p.LitLiquidUnfogged[k] == interior && !interior;
+            }
+        }
+        bool exteriorNone = exteriorBind.LiquidsUnfogged == 0 && WmvWorldModels.LiveUnfoggedLiquids == 0;
+        var savedContexts = new Dictionary<WmvWorldPrototype, WorldLightContext[]>();
+        foreach (WmvWorldPrototype p in protos)
+        {
+            savedContexts[p] = (WorldLightContext[])p.GroupContexts.Clone();
+            Renderer[] all = p.Runtime.Root.GetComponentsInChildren<Renderer>(true);
+            for (int k = 0; k < all.Length; k++)
+            {
+                if (p.LitKinds[k] != WmvWorldModels.LitLiquid)
+                    continue;
+                int gi = System.Array.IndexOf(p.Runtime.GroupObjects, all[k].transform.parent.gameObject);
+                if (gi >= 0)
+                    p.GroupContexts[gi] = WorldLightContext.InteriorInterim;
+            }
+            p.LitOriginals = null;            // recorded again at the next bind, from the interior contexts
+        }
+        var bind = new WmvWorldLitBind { Lit = true };
+        int held = 0, liquids = 0, liquidKinds = 0, flagged = 0, liveBound = -1, liveClone = -1, liveDisposed = -1;
+        var block = new MaterialPropertyBlock();
+        try
+        {
+            v.Models.RebindWorldLit(true, bind);
+            foreach (WmvWorldPrototype p in protos)
+                for (int k = 0; p.LitKinds != null && k < p.LitKinds.Length; k++)
+                    if (p.LitKinds[k] == WmvWorldModels.LitLiquid)
+                    {
+                        liquidKinds++;
+                        if (p.LitLiquidUnfogged != null && p.LitLiquidUnfogged[k])
+                            flagged++;
+                    }
+            foreach (WmvWorldInstance i in scene.Instances)
+                for (int k = 0; k < i.Renderers.Length; k++)
+                {
+                    if (i.LiquidRenderers == null || !i.LiquidRenderers[k])
+                        continue;
+                    liquids++;
+                    block.Clear();
+                    i.Renderers[k].GetPropertyBlock(block);
+                    if (i.Renderers[k].HasPropertyBlock() && block.GetFloat(WmvWorldModels.LiquidUnfoggedId) == 1f)
+                        held++;
+                }
+            liveBound = WmvWorldModels.LiveUnfoggedLiquids;
+            // A clone placed while bound holds the block too; disposed while still bound, its count goes with it.
+            WmvWorldInstance first = scene.Instances[0];
+            WmvWorldInstance clone = v.PlaceInstance(first.Prototype, first.Placement, scene.Origin, scene.Load);
+            liveClone = WmvWorldModels.LiveUnfoggedLiquids;
+            v.DisposeInstance(clone);
+            liveDisposed = WmvWorldModels.LiveUnfoggedLiquids;
+        }
+        finally
+        {
+            v.Models.RebindWorldLit(false, new WmvWorldLitBind { Lit = false });
+            foreach (WmvWorldPrototype p in protos)
+            {
+                WorldLightContext[] saved;
+                if (savedContexts.TryGetValue(p, out saved))
+                    System.Array.Copy(saved, p.GroupContexts, saved.Length);
+                p.LitOriginals = null;        // recorded again from the restored contexts at the next bind
+            }
+        }
+        int boundCount = bind.LiquidsUnfogged;
+        string line = bind.Describe(null);
+        int after = 0;
+        foreach (WmvWorldInstance i in scene.Instances)
+            for (int k = 0; k < i.Renderers.Length; k++)
+                if (i.LiquidRenderers != null && i.LiquidRenderers[k] && i.Renderers[k].HasPropertyBlock())
+                    after++;
+        Check(recorded && exteriorNone && liquidKinds > 0 && flagged == liquidKinds && liquids == 3 && held == 3 && boundCount == 3 && liveBound == 3 && liveClone == 4 &&
+              liveDisposed == 3 && line.Contains(", 3 interior group liquid(s) kept unfogged") && after == 0 && WmvWorldModels.LiveUnfoggedLiquids == 0,
+              "liquids T15 (step 8): the record marks a group's liquid unfogged by its group's context (exterior here: none, nothing counted); " +
+              "with each liquid's group given the interior context the record itself flags " + flagged + " of " + liquidKinds + " liquid renderer(s), " +
+              "and each holds _WmvLiquidUnfogged 1 in a MaterialPropertyBlock while bound (" + held + " of " + liquids + ", the line: \"" +
+              line.Substring(Math.Max(0, line.IndexOf(", 3 interior", StringComparison.Ordinal))) + "\"); a clone placed while bound counts too and " +
+              "gives it back disposed while bound (live " + liveBound + " -> " + liveClone + " -> " + liveDisposed + "); none after the unbind (" + after +
+              " left, live " + WmvWorldModels.LiveUnfoggedLiquids + ")", log);
     }
 
     /// <summary>The streaming map (StreamFiles) with liquid: tiles 32_50 and 33_50 water (type 1), 31_50 magma (type 19), the

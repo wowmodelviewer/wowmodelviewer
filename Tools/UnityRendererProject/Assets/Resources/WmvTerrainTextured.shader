@@ -68,6 +68,31 @@
 // _WmvLinearOut so the authored composite is converted here and displays as in the default mode (the composite dumps
 // set it to 0 for their render and put it back).
 //
+// THE OUTDOOR LIGHT (Stage 10 step 5, docs/world-viewer/10-light-sky-fog.md 4.5, 6.10, 6.15; Wow/World/TerrainLight.cs is the
+// CPU twin and the evidence): a branch taken only in the textured view (0, not the plain-weights diagnostic) while the global
+// _WmvWLOn is above 0.5 -- set by WmvWorldLight for the main camera's world view alone, 0 for every other camera, pinned 0 in
+// WmvTerrainComposite's renders and the self-test's fixtures, never set with WMV_LIGHT=off -- and _WmvWLTerrain.x is (not
+// -wmvTerrainLight=off). The path above is left as it is: the branch starts from the same composite (before the vertex
+// colour and the saturate) and replaces the colour; the saturate and the encode below then apply as before. In the branch,
+// the client's terrain program (Retail 2977247, the hemisphere variant; _WmvWLTerrain.y selects the flat class, for the
+// record only):
+//   albedo = composite x MCCV x 2 (the mesh carries MCCV / 127, so x 254/255 gives the client's 2 x byte / 255; 1 without
+//            MCCV: the client's 0.5 x 2), NOT saturated
+//   N      = the MCNR normal (TEXCOORD1: the builder's own stream, uploaded only while the light is on, so the geometry
+//            normals stay as they were) as interpolated, NOT normalised: the client's program uses the MCNR / 127 vector at
+//            its own length (median 0.994, MEASURED), so the /127 scale (INFERRED (public)) reaches the colour
+//   H      = N.y >= 0 ? lerp(Horizon, Ambient, N.y) : lerp(Horizon, Ground, -N.y), Horizon or Ground 0 -> Ambient
+//   A      = H x (0.7 + 0.4 x (0.5 + 0.5 x N.L)), N.L not saturated; D = Direct x max(N.L, 0) x attenuation x shadow
+//   colour = sqrt((albedo (A + D))^2 + albedo^2 x local) + specular + second light
+// with L = _WmvWLLightDir and the colours _WmvWLAmbient, _WmvWLHorizonAmbient, _WmvWLGroundAmbient, _WmvWLDirect (authored,
+// the table's byte / 255); attenuation 1, shadow 1, local 0, specular 0 and the second light 0 are held (graded in
+// TerrainLight.cs and WorldLightModel.Terrain).
+//
+// THE FOG (Stage 10 step 7; WmvWorldFog.hlsl, Wow/World/WorldFog.cs is the CPU twin and the evidence): inside the same branch,
+// while _WmvWLTerrain.z is set, the lit colour ends with the client's per-pixel fog, layer 0 (its terrain program's fog tail),
+// at the fragment's world position (positionWS, interpolated per vertex as the client interpolates its fog position; the
+// distance per pixel), before the saturate and the encode. Only that branch reads positionWS and the fog's globals.
+//
 // HLSLPROGRAM with URP's Core.hlsl, explicit float throughout, every switch a uniform (never a keyword: the player build
 // strips variants), every per-material value in the UnityPerMaterial CBUFFER and no MaterialPropertyBlock (the SRP
 // Batcher's conditions). No LightMode tag, as the other Wmv shaders: drawn by the ordinary pass. Opaque, alpha written 1.
@@ -191,6 +216,31 @@ Shader "Wmv/TerrainTextured"
             float _WmvTerrainValidate;
             float _WmvTerrainUnclamped;
 
+            // Stage 10: the outdoor light (WmvWorldLight's globals; see THE OUTDOOR LIGHT above).
+            float _WmvWLOn;
+            float4 _WmvWLTerrain;          // x: the terrain lit (not -wmvTerrainLight=off); y: the flat variant; z: the fog (step 7)
+            float4 _WmvWLLightDir;         // towards the light, Unity world
+            float4 _WmvWLAmbient;
+            float4 _WmvWLHorizonAmbient;
+            float4 _WmvWLGroundAmbient;
+            float4 _WmvWLDirect;
+            #include "WmvWorldFog.hlsl"            // Stage 10 step 7: the fog's globals and WmvWorldFog (see THE FOG above)
+
+            // The client's terrain program's constants (PROVEN_BYTES, 2977247; MEASURED in step 1) and the terms Stage 10
+            // holds neutral (TerrainLight.cs): the hemisphere wrap, the flat class's shadow mix, the albedo's vertex-colour
+            // conversion (the mesh's byte / 127 to the client's 2 x byte / 255).
+            #define WMV_WRAP_BASE       0.7
+            #define WMV_WRAP_SCALE      0.4
+            #define WMV_WRAP_HALF       0.5
+            #define WMV_FLAT_SHADOW_BASE  0.7
+            #define WMV_FLAT_SHADOW_SCALE 0.3
+            #define WMV_MCCV_TO_CLIENT  (254.0 / 255.0)
+            #define WMV_ATTENUATION     1.0
+            #define WMV_SHADOW          1.0
+            #define WMV_LOCAL           0.0
+            #define WMV_SPECULAR        0.0
+            #define WMV_SECOND_LIGHT    0.0
+
             // Wmv/Terrain's diagnostic light: toward the key, north-west and 45 degrees up (Unity x east, y up, z north).
             #define TERRAIN_KEY     float3(-0.5, 0.70710678, 0.5)
             #define TERRAIN_AMBIENT 0.30
@@ -201,6 +251,7 @@ Shader "Wmv/TerrainTextured"
                 float4 positionOS : POSITION;
                 float3 normalOS   : NORMAL;
                 float2 uv0        : TEXCOORD0;
+                float3 lightNormalOS : TEXCOORD1;   // Stage 10: the MCNR normal (WmvTerrainBuilder's own stream)
                 float4 color      : COLOR;
             };
 
@@ -210,6 +261,8 @@ Shader "Wmv/TerrainTextured"
                 float2 uv         : TEXCOORD0;   // cells
                 float3 normalWS   : TEXCOORD1;
                 float3 color      : TEXCOORD2;
+                float3 lightNormalWS : TEXCOORD3;   // Stage 10: the MCNR normal, not normalised (nor is it in the pixel)
+                float3 positionWS : TEXCOORD4;   // Stage 10 step 7: the fog position (world)
             };
 
             float3 WmvAuthoredToLinear(float3 c)
@@ -226,7 +279,28 @@ Shader "Wmv/TerrainTextured"
                 o.uv = v.uv0;
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.color = _WmvVertexColors > 0.5 ? v.color.rgb : float3(1.0, 1.0, 1.0);
+                o.lightNormalWS = TransformObjectToWorldDir(v.lightNormalOS, false);
+                o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
                 return o;
+            }
+
+            // Stage 10: the client's terrain light on an albedo (see THE OUTDOOR LIGHT above; TerrainOutdoorLight.Shade).
+            float3 WmvOutdoorLight(float3 albedo, float3 normalWS)
+            {
+                float3 n = normalWS;               // as the client: the interpolated MCNR / 127 vector, not normalised
+                float nl = dot(n, _WmvWLLightDir.xyz);
+                float lit = max(nl, 0.0);
+                if (_WmvWLTerrain.y > 0.5)
+                    return albedo * saturate(WMV_LOCAL + _WmvWLDirect.rgb * lit + _WmvWLAmbient.rgb) *
+                           (WMV_FLAT_SHADOW_BASE + WMV_FLAT_SHADOW_SCALE * WMV_SHADOW);
+                float nu = n.y;
+                float3 horizon = any(_WmvWLHorizonAmbient.rgb != 0.0) ? _WmvWLHorizonAmbient.rgb : _WmvWLAmbient.rgb;
+                float3 ground = any(_WmvWLGroundAmbient.rgb != 0.0) ? _WmvWLGroundAmbient.rgb : _WmvWLAmbient.rgb;
+                float3 h = nu >= 0.0 ? lerp(horizon, _WmvWLAmbient.rgb, nu) : lerp(horizon, ground, -nu);
+                float3 a = h * (WMV_WRAP_BASE + WMV_WRAP_SCALE * (WMV_WRAP_HALF + WMV_WRAP_HALF * nl));
+                float3 d = _WmvWLDirect.rgb * lit * WMV_ATTENUATION * WMV_SHADOW;
+                float3 x = albedo * (a + d);
+                return sqrt(x * x + albedo * albedo * WMV_LOCAL) + WMV_SPECULAR + WMV_SECOND_LIGHT;
             }
 
             // TerrainCompositor.TexelIndex: floor(s * size) wrapped into 0..size-1.
@@ -444,6 +518,7 @@ Shader "Wmv/TerrainTextured"
                     colour = weight[0] * layer[0];
                     [unroll] for (int k4 = 1; k4 < 8; k4++)
                         if (k4 < n) colour += weight[k4] * layer[k4];
+                    float3 composite = colour;
                     colour *= i.color;
                     if (_WmvTexturedView > 0.5 && _WmvTexturedView < 1.5)
                         colour *= Lambert(i.normalWS);
@@ -453,6 +528,17 @@ Shader "Wmv/TerrainTextured"
                         float hatch = frac((uv.x + uv.y) * 2.0);
                         if (hatch < 0.14)
                             colour = lerp(colour, float3(0.08, 0.08, 0.09), 0.65);
+                    }
+                    // Stage 10: the outdoor light (the world view's main camera only; see THE OUTDOOR LIGHT above). A real
+                    // branch on uniforms (no derivative inside): with the light off the pixel runs Stage 09's instructions only.
+                    [branch]
+                    if (_WmvWLOn > 0.5 && _WmvWLTerrain.x > 0.5 && _WmvTexturedView < 0.5 && !plain)
+                    {
+                        colour = WmvOutdoorLight(composite * (_WmvVertexColors > 0.5 ? i.color * WMV_MCCV_TO_CLIENT : float3(1.0, 1.0, 1.0)),
+                                                 i.lightNormalWS);
+                        [branch]
+                        if (_WmvWLTerrain.z > 0.5)      // Stage 10 step 7: the client's fog, before the clamp and the encode
+                            colour = WmvWorldFog(float4(colour, 1.0), i.positionWS, 0.0).rgb;
                     }
                 }
                 if (_WmvTerrainUnclamped < 0.5)
