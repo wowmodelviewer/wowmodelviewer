@@ -4,8 +4,11 @@ Branch `world/10-light-sky-fog`, from `develop` 678071f0 (Stage 09, PR #127). **
 direction on 2026-10-21 with the adjustments of section 0; implementation runs in the order of section 7. Steps 1-5 are
 done and the early visual checkpoint ran on 2026-10-22 with a built player (13.1); the owner approved them that day.
 Step 6 is done (13.2). Step 7 (fog) is done, its rule corrected from in-game test T7 (13.3, 13.4); the owner accepted it
-provisionally on 2026-10-27. Step 8 (water) is implemented and validated (13.5); the owner reviews its pictures before
-step 9.** This document
+provisionally on 2026-10-27. Step 8 (water) is implemented and validated (13.5); the owner accepted its implementation
+provisionally on 2026-10-27. Step 9 (final validation) ran on the exact committed source (13.6); the follow-up (13.7) and the final
+checks with the final acceptance table (13.8) ran on 2026-10-28, and the owner accepted their measurements as the final
+evidence the same day; the water reflection capture WR1 (13.8) was diagnostic, not a merge gate (the first capture
+invalid by its pitch, the retake valid, O-C; the source not established); the close-out summary is 13.9; the merge decision and the close-out are the owner's.** This document
 records the owner's decisions (section 0), the investigation (sections 1-5), the
 architecture and order of work (sections 6-8), the validation against in-game screenshots (section 9), the remaining
 decisions (section 10) and, as work lands, its results. The roadmap change that made this milestone 10 is `roadmap.md` 5.1.
@@ -969,6 +972,13 @@ measures them. No preview-rig front light, no 1.25 peak. Unlit world-model and d
   but the main camera's perspective world view; the Models, Buildings and Characters viewers. Known limit: with the
   per-fragment display encode (`WMV_DISPLAY=fragment`) the water mixes its fog in linear values, the terrain beside it in
   authored values.
+- **The client's reflection, as found in step 9 (13.6).** The client's water programs have no reflection miss: they blend a
+  separately rendered, screen-aligned reflection texture with a one-tap read of the screen copy along the reflected ray, or
+  the read with a constant (PROVEN_BYTES); which of them the High setting binds is UNKNOWN, and that it is the texture is
+  INFERRED (on the PTR the High value is named "Planar", from strings). The viewer's march with the dome (or Stage 09's
+  colour) on a miss is therefore a stand-in, a documented departure in structure as well as in colour; what the texture holds
+  at low elevations is not measured. The owner's capture WR1 (2026-10-28, 13.8; the retake valid, O-C) found modes 3, 2
+  and 1 indistinguishable at the hi11 close-up and did not establish the source or the permutation (DEFERRED).
 
 ### 6.12 Post (D9)
 
@@ -1435,7 +1445,7 @@ possible).
 | `D:\wmv-10\checkpoint` | the early visual checkpoint's one-command rig and its outputs; the 2026-10-22 run in `runs\p30a` (13.1) |
 | `D:\wmv-10\step7` | step 7 (fog, 13.3): the research (`understand\`: `programs.md`, `mapping.md`, `player.md`, `validation.md`), the spec and its review (`spec\`, `review\`), the T7 page and WmvRefNav 3.2 (`capture\`, `refnav\`), the implementation notes, reviews, fix and finish rounds (`impl\`), the grading-LUT proof (`lutproof\`), the union lineage (`union\`, `union2\`); the runs `D:\wmv-10\checkpoint\runs\p32a` and `p32b`, the freeze `D:\wmv-10\checkpoint\frozen` |
 
-## 13. Progress (2026-10-21, updated 2026-10-27)
+## 13. Progress (2026-10-21, updated 2026-10-28)
 
 | Step | State | Evidence |
 |---|---|---|
@@ -1447,7 +1457,8 @@ possible).
 | Checkpoint | ran 2026-10-22 with player p30a (13.1); the owner approved steps 1-5 on 2026-10-22 | `D:\wmv-10\checkpoint\runs\p30a` |
 | 6 Outdoor world models and doodads | done, the owner reviews its pictures before step 7: the world-lit variants by include split (6.6), the client's M2 and world-model hemisphere program; exterior groups and outdoor doodads lit while the light is shown, interior groups and their doodads on the builder's materials until Stage 12; exterior MOCV deferred; results in 13.2 | `D:\wmv-10\step6`, `D:\wmv-10\checkpoint\runs\p31a`, 13.2 |
 | 7 Fog | done, accepted provisionally by the owner on 2026-10-27: T7 captured and the start and end corrected from it (13.4; 1d1cb4ca, b8acdbf6); before that: implemented and validated against its own model; the client's fog tail, layer 0, on the lit terrain, outdoor doodads and exterior groups; the Retail pattern for Retail and the PTR, off for Era, MoP and Beta (arms only); the near field identical to fog off; URP's grading LUT found to shift the world view by up to a step (a prepared undo, not committed, waits for the owner) | `D:\wmv-10\step7`, `D:\wmv-10\checkpoint\runs\p32a`, 13.3, 13.4 |
-| 8 Water | done (ca9b9314), the owner reviews its pictures before step 9: the water on the light's clock with Stage 09's selection and validity, reflection misses on the drawn sky, the client's fog on the water's surface terms only; `WMV_LIGHT=off` byte-identical to Stage 09 (262 of 263 items; the 263rd is Stage 09's own one-pixel MoP magma variant); results in 13.5 | `D:\wmv-10\step8`, 13.5 |
+| 8 Water | done (ca9b9314), accepted provisionally by the owner on 2026-10-27 (the surface-only water fog accepted as a documented departure): the water on the light's clock with Stage 09's selection and validity, reflection misses on the drawn sky, the client's fog on the water's surface terms only; `WMV_LIGHT=off` byte-identical to Stage 09 (262 of 263 items; the 263rd is Stage 09's own one-pixel MoP magma variant); results in 13.5 | `D:\wmv-10\step8`, 13.5 |
+| 9 Validation | done on the exact committed source (player from ca9b9314's archive; the host rebuilt from 77873b47's archive is the rigs' host in code, light dumps and pictures), no code change: the regression, cross-client, mode-switch (re-run), zone, clock and Stage 07 batteries pass; the GPU light-on budget met (the PASS kept with the clock qualification: its tile-framing line was never clock-checked), GPU memory and lifecycle met; the client's water programs found to blend a separate screen-aligned texture with a one-tap screen read, or the read with a constant (which one High binds and what the texture holds UNKNOWN; WR1, 13.8, did not establish it); step 7's B failures traced to the grading LUT; FAIL: the capped frames light on (one run), step 7's B as frozen, A4 by one pixel at two T7 cameras, the GUI round and mode switch (as in Stage 09), the water scores (explicitly unresolved, not an exception); UNDECIDED: the GPU sub-budgets; UNRESOLVED: C6, the player CPU budgets, the in-game holdouts; the acceptance table in 13.6; the owner's follow-up (2026-10-28, no merge yet): B passes with the grading LUT in the model, the A4 pixels are a comparison artefact, no capped-frame optimisation is justified, the GUI failures are Stage 09's; the merge checklist in 13.7; final checks (2026-10-28): the G4 warm-up replicate NOT MET again (no first-launch effect), the focused GPU repeat UNDECIDED a third time; the final acceptance table in 13.8; the owner's ruling (2026-10-28, evening): these measurements are final, 2h and 2b-2d proposed merge exceptions (not passes); WR1: the first capture invalid (pitch), the retake valid O-C, the reflection source not established; the close-out summary in 13.9 | `D:\wmv-10\step9`, 13.6, 13.7, 13.8, 13.9 |
 
 **Offline prediction (2026-10-21, before a player could be built; not a viewer render).** The Stage 09 light-off
 renders at the seven fitted Southfury cameras, lit per pixel by an offline port of the player's own formulas (the client's hemisphere terrain light with MCNR
@@ -1897,13 +1908,14 @@ moved) was not. There is no fully independent blind holdout. The formal WP 11 me
 stand A, the implemented viewer at the fitted cameras), under its 0.03 (the committed rule: 0.075-0.078) -- met IN-SAMPLE:
 the rule was fitted post-data on these pairs and pixels, so this shows the viewer reproduces the fit, not an independent
 validation. The only T7 pair outside the fit, the retake's stand B noon (class E, information only), gives 0.0335: the near
-bands where the grass moved, and a far-band miss at 900-950 yd (in the far-clip-1,000 end region, unrelated to the grass).
+bands where the grass moved, and a far-band miss at 900-950 yd (in the far-clip-1,000 end region, unrelated to the grass;
+corrected in 13.6: with the pixels that moved between the game's own repeat shots left out, that band agrees too).
 
 **Still open (UNRESOLVED):** the render-against-model check (B, amendment 1, thresholds unchanged) fails at a1200_f1000 and
 a1845_f1000 (800-1,000 yd, 0.026 / 0.027) and, new with the corrected rule, in one band 950-1,000 yd at a1200_f7000 (0.0209
 against 0.02). Step 7 attributed similar dark-band residuals to URP's 8-bit grading LUT (13.3); that attribution was NOT tested
 for this player, so these stay unresolved, together with the retake-B 900-950 yd miss (one viewer-against-model gap near E at
-far clip 1,000). The tile framing passes B only with amendment 1's C6 exclusion (0.99249 without it; documented, unresolved).
+far clip 1,000; both investigated in 13.6: the LUT, and the game picture moving). The tile framing passes B only with amendment 1's C6 exclusion (0.99249 without it; documented, unresolved).
 Classic MoP and Classic Beta were not comparable on the install (MoP's storage did not open; Beta left .build.info). The
 performance gate is open (the machine was never idle); life08 frames over 33 ms were 25 against 22 (p34a / p33a) and 21 against
 18 (the union pair), above the +2 line (information only); both players fail the same five harness steps under the install.
@@ -1969,3 +1981,901 @@ and the retake's 0.0335; the full GPU performance gate (the machine was never id
 Era and MoP visual validation (no references) and Classic Beta (no longer installed); the client's own water reflection
 source and its below-surface fog (slot 1, WP 16); the Southfury dawn/dusk and hi11 moves above (class C until the
 client's water colour mapping, TEXCOORD1 and cb1[20]/[21], is measured).
+
+### 13.6 Step 9: final validation (2026-10-27/28)
+
+**The owner's brief** (2026-10-27, after accepting step 8's implementation provisionally): keep the dome sky and the Stage 09
+fallback switch, no water retune and no default change from the Southfury cameras; (1) investigate the water reflection source
+and the shader permutation of the game's High water, with one independent clear-horizon reference if possible; (2) profile step
+8's water program on the GPU and investigate any failed gate before proposing optimisations; (3) complete the regression,
+lifecycle, streaming and cross-client checks; (4) investigate step 7's fog-model failures, the grading-LUT bypass kept apart
+unless approved; (5) keep the documented exceptions (the water accuracy regressions, independent fog validation, Classic visual
+parity, unverified shader behaviour); (6) the exact committed source, every result PASS, FAIL, UNRESOLVED or DEFERRED. No
+rendering change was made in step 9 (evidence `D:\wmv-10\step9`).
+
+**The exact source (the owner's item 6).** The player p35a is ca9b9314's own git archive (108 of 108 blobs; Assembly-CSharp
+36CBA239C8A6F879); the HEAD 77873b47 adds only this document (PROVEN_SOURCE). No step 9 work changed code, so p35a is the
+committed source. The rigs' host is `D:\wmv-10\checkpoint\run` (wowmodelviewer.exe 82FA6B22), built 2026-10-21 21:30:51 from the
+working copy six minutes before host commit 063943e0; `git diff 063943e0 HEAD` outside the player project and the docs is empty
+(PROVEN_SOURCE); R1 below rebuilds the host from the archive and compares the code.
+
+**Carried from step 8 (run on p35a, the exact source, 2026-10-27; 13.5):** the runner 2,598 / 0 / 0 on the archive; the
+self-test 1,138 / 0 and 1,065 / 0; `WMV_LIGHT=off` against Stage 09 (against the frozen manifest every item that does not depend
+on the install is identical, the terraintile counts apart, which grew with the host's new checks; the MoP magma shot by its
+accepted alternative key; the pair's "DIFFERENT" was p30base's own run-to-run variant); the guards light on (Buildings 5 / 5,
+Models 2 / 2, Characters 2 / 2) and the default mode (166 / 166) against step 7; life08 70 / 0 / 0; the 48 half-hour sweep twice
+(identical); acceptance, streaming and lifecycle on four clients light on and off (every tally 0 after every Clear, no
+exception); the owner's union player (Characters, guild tabard 08BF71CC, world views 91 / 91).
+
+**The installs now** (Retail 12.1.5.70575, PTR 12.1.7.70493, Era 1.15.9.70576, MoP 5.5.4.70631, Classic Beta not installed): the
+host's pinned light checks name the audited builds, so on these builds they skip by design; the light tables of all four
+installs are byte-identical to the audited builds' (Light, LightParams, LightData, ZoneLight, ZoneLightPoint, Map, LightSkybox,
+LiquidType; PROVEN_BYTES), and the light dumps of the exact host equal the audited dumps apart from the build string
+(PROVEN_RUNTIME), so the pins' values hold (INFERRED from equal bytes and a deterministic reader).
+
+**The client's water reflection (the owner's item 1; `D:\wmv-10\step9\refl`, checked independently in
+`D:\wmv-10\step9\vrefl`).**
+- **The programs (PROVEN_BYTES).** Each procwaterabove permutation is a 96-byte header (+20 the render-target count, +56 the
+  texture mask, +72 the sampler mask, +80 the constant-buffer mask, +88 the program size) and the program. The 54 Retail
+  programs factor as shadow + 3 x reflection + 9 x ripple + 27 x second target, the 108 PTR programs as a binary digit (step 8
+  read it as a fog pair) + 2 x shadow + 6 x reflection + 18 x ripple + 54 x second target, with the reflection digit in the
+  order A, B, C on Retail and C, A, B on the PTR; so no setting can be read off the index, and which family the CPU binds is
+  UNKNOWN. Family A blends a texture t1 with a one-tap read t3 of the screen copy 128 yd along the reflected ray, by a weight
+  that is 0 for rays steeper than 60 deg and fades at the screen edges; family B reads t1 alone (at the pixel's exact position);
+  family C blends t3 with the constant cb1[31]. t1 is addressed in screen space with its own full extent (family A: bent by the
+  normal's horizontal part): a screen-aligned image of the whole view, not a direction lookup (no water program declares a cube
+  texture); that this is the pixel's own position needs cb1[16..19] to be the camera's view-projection (INFERRED, strongly). The
+  reflection then enters as lerp(base, 0.4 refl + 0.6 water + sun, 0.1 + 0.5 (1 - N.V)^2). No program evaluates a sky.
+- **The executables (PROVEN_BYTES as strings, meanings INFERRED).** The PTR's (12.1.7.70493) names the setting's values "0 =
+  None, 1 = SSR, No Sky, 2 = SSR, 3 = Planar" and carries reflection-view passes for the sky, the sky fog, the clouds and the
+  planets, and a no-reflection flag on map objects; Retail's (12.1.5.70575) reads "0 = screen space, 1 = sky, 2 = sky/terrain, 3
+  = sky/terrain/wmo" (its build has no debug strings, so the absence of the pass names says nothing). The records of every
+  reference session show the value 3 with Liquid Detail High (PROVEN_RUNTIME, the addon records). So the references most likely
+  used a separately rendered, screen-aligned reflection texture (INFERRED: the strings are from 12.1.7.70493, the Southfury
+  references from 70424, and which family the CPU binds is UNKNOWN); that it is a planar mirror render holding the sky and
+  clouds is INFERRED from the strings; whether it holds terrain at Southfury is UNKNOWN.
+- **The images.** At hi11 (25.5 deg down) the client's tap weight is 0 at every reflected elevation of 4 deg and more (MEASURED
+  from the formula and the fitted pose; above 9 deg also under 3-degree ripple tilts), so that water shows the texture alone.
+  The same world points seen from hi10 and hi11 (one stand, 9 s apart) differ by +10 to +12 sRGB levels where hi10's tap weight
+  is high and by 0 where both weights are 0, and within a band the difference falls with hi10's edge fade: the tap is active on
+  the PTR's High path (MEASURED; quantitatively the bytes' fade is too narrow by a factor the images cannot pin, UNKNOWN). Where
+  it is well determined the texture's colour is bright and sky-like (luma 140-200 against the drawn sky's 221 and the drawn
+  terrain's 61-113); where open sky is mirrored it equals the sky. That it follows the mirrored hills was not established (the
+  agreement of two image pairs is what a uniform colour gives too). No existing reference shows open water reflecting open sky
+  near the horizon (41 frames in the first check, 76 in the independent one).
+- **What this means for the viewer (INFERRED).** The client's water programs have no notion of a reflection miss: the one tap
+  reads whatever the screen shows, and everything else comes from the reflection texture or a constant. The viewer marches the
+  depth over 128 yd and takes the dome (or Stage 09's colour) on a miss. Both of the viewer's options are therefore stand-ins,
+  and the march-plus-sky structure is itself a documented departure from the client, not only its colours. 13.5's regression was
+  located at reflected elevations of 0-10 deg (step 8's sky check), where the viewer's march misses only 0-35 % of the rays (the
+  rest reaches the dome through edge fades and silhouette shares); what the client shows there is not measured.
+- **What was expected to settle it** (a capture page for the owner,
+  `D:\wmv-10\step9\capture\CAPTURE_step9_water_reflection.txt`; run on 2026-10-28 as WR1, 13.8: the retake valid, O-C, the
+  source not established): the
+  hi11 pose at reflection modes 3, 2 and 1 (the tap weight is 0 there, so the pairs isolate the texture), and an open-sea stand
+  with a clear horizon (Bladefist Bay, Durotar, `!tele 1120 -5126 10 1`, facing 246: no land or object in the view or the mirror
+  out to 2,900 yd, the same light as Southfury; Ratchet was rejected: docks and ships in both).
+
+**The water program's size (the owner's item 2; MEASURED offline with the compiler U6 used, the commits' own archives;
+`D:\wmv-10\step9\gpu\fxc`).** Step 8's pixel program, as committed: 1,635 static slots, 30 temporaries, 17 texture reads, 398
+integer/select instructions, three wedge loops of 128 instructions each plus the reflection march (227 instructions, 7 texture
+reads per iteration, up to 32 iterations). With the dome branch closed: 991 slots, 16 temporaries; with all water fog closed:
+1,167 and 27; with both closed: 521 and 14, instruction for instruction step 7's (Stage 09's) program. The dome accounts for 644
+of the 1,114 added slots and most of the register pressure (14 -> 27-28 temporaries); 74 of the wedge loop's 128 instructions
+are integer and select instructions (52 conditional moves of the lookups by index), 41 float arithmetic. Per High water pixel on
+the common path that is about 1,480 more executed instructions for the dome (an upper bound, INFERRED); the GPU numbers below
+measure what it costs.
+
+**The GPU gate (plan 8.3; `D:\wmv-10\step9\gpu`, registration `PREREG_gpu9_20261027_2126.txt`, 30 of 30 runs valid, none voided;
+`out\decision.txt`).** Ten arms (Stage 09's player light off; p35a light off, on, without the sky pass, with Stage 09's
+reflection colour, with the noon water, without the water fog, with all three water switches; step 7's player light on and off)
+in three blocks forward / reversed / reversed, eight pieces of 15 s at fixed cameras (the tile framing twice, hi06, hi10, hi11,
+hi12, a no-water view, T7 stand B), uncapped, the light's and the animation clocks pinned (the GPU clocks free, 1,770-2,745 MHz,
+logged), on the RTX 4090 under Direct3D 12; the measure is the player's own 3D-engine running time per frame (the sampler), with
+the GPU clocks logged every 0.5 s. The GPU is busy 25-35 % of each frame (MEASURED); whether these
+costs reach the frame time is not shown (corrected 2026-10-28: the earlier "CPU-bound, so these costs do not reach the frame
+time" is withdrawn; at the framing the frame interval grew with fog and light, 13.8). Before each run the machine had to be idle: no game client, no viewer, CPU quiet, and the
+other processes' 3D-engine share under 2 %; the protocol first asked every GPU-utilisation sample to be under 5 %, which this
+machine's idle desktop never meets (3-6 % at the lowest clock while the other processes' 3D work is 0.5 %), so before any
+counted run it was amended to: the other processes' 3D share under 2 % and every utilisation sample at most 10 % (the lead's
+decision, registered; the owner may ask for the stricter rule). Per gate piece the paired-by-block delta, n 3, 95 % interval;
+MET when the upper bound is within the budget:
+
+| Gate | Tile framing | hi06 | hi11 (1.2 M water px) | T7 stand B | Verdict |
+|---|---|---|---|---|---|
+| Light on - light off, at most +0.30 ms | +0.117 [+0.069, +0.165] | +0.012 [-0.064, +0.088] | +0.004 [-0.021, +0.029] | +0.006 [-0.096, +0.108] | MET at every piece |
+| Sky pass, at most +0.08 ms | +0.027 [-0.140, +0.195] | +0.050 [-0.071, +0.171] | 0.000 [-0.025, +0.025] | +0.033 [-0.071, +0.137] | MET at hi11, UNDECIDED elsewhere |
+| Fog and light, at most +0.15 ms | +0.069 [-0.179, +0.317] | +0.014 [-0.067, +0.095] | +0.006 [-0.012, +0.024] | +0.015 [-0.064, +0.093] | MET except the framing (UNDECIDED) |
+| Light off - Stage 09, at most +0.05 ms (margin proposed) | +0.011 [-0.173, +0.194] | +0.022 [-0.042, +0.085] | +0.006 [-0.001, +0.013] | +0.005 [-0.033, +0.042] | MET at hi11 and T7 B, UNDECIDED elsewhere |
+
+The registered gate's decision is UNDECIDED (not met): no piece is NOT MET, every mean is inside its budget, and the undecided
+pieces need more repetitions than the plan's three; pieces flagged clock-confounded keep their verdict when normalised (corrected 2026-10-28: the tile framing, the last piece,
+was never clock-checked, because the clock logger is stopped with its unflushed rows lost; the check by a proxy is in 13.8). A level
+shift around 22:00 (the runs before it 0.10-0.20 ms per frame lower at five pieces, clocks, power and scene equal; cause
+UNKNOWN) and a runner killed and resumed from its ledger after two runs (a 14-minute gap in block 1) widen block 1. An earlier
+unregistered batch under the weaker idle rule (information only, `D:\wmv-10\step9\gpunow`) had point means over budget at the
+noisy pieces (sky pass at T7 B +0.092 and at the framing +0.199, fog and light at the framing +0.266, each about +-0.3-0.6).
+**Step 8's water costs nothing measurable in GPU time** (reported, not gates; hi11, the water-heavy view): step 8 against step 7
+light on -0.010 ms [-0.027, +0.007]; the dome lookup -0.002 [-0.040, +0.037]; the water fog -0.001 [-0.013, +0.011]; the larger
+program with its new branches closed (identical frames) -0.002 [-0.018, +0.015], light off -0.001 [-0.013, +0.012]; over the six
+water views the slope is +0.03 ms per million water pixels with an interval through 0; the null arm (identical frames) +0.007
+[-0.013, +0.028]. So the 1,114 added static slots, whose executed share is skipped by uniform branches when unused, cost under
+about 0.04 ms at 1.2 M water pixels on this GPU, inside the method's noise. In cycles (ms x the logged clock) the work is
+resolved: at hi11 the dome +0.145 M cycles a frame [+0.040, +0.249] and step 8 against step 7 +0.182 [+0.098, +0.265], with the
+arms that draw the dome at higher clocks (2,220 against 1,770-1,875 MHz) and power; the cost shows as clock and power, not as
+GPU time (INFERRED). A separately registered replicate of the five gate arms (`out_repA`, 15 of 15 valid, labelled, beside the
+registered verdict, which stands): light on - light off MET at every piece again (+0.013 to +0.202 ms); the sky pass MET at the
+framing and hi11, UNDECIDED at hi06 (+0.019 [-0.051, +0.090]) and T7 B; light off against Stage 09 MET at three pieces, and at T7 B
+in ms only (clock-confounded and UNDECIDED once normalised, so UNRESOLVED by the analyser's rule; corrected 2026-10-28); fog and light at the tile framing +0.190 ms [+0.123, +0.258] against 0.15, UNDECIDED with the
+mean over the budget (the registered run read +0.069 there): INFERRED: the light and fog over a whole framing of terrain are the
+one GPU item that may exceed its sub-budget (the water's share there is unknown; these arms cannot separate light from fog; the
+unregistered batch points to the light); whether it reaches the frame time is not shown (corrected 2026-10-28: "the frame is
+CPU-bound" is withdrawn; 13.8).
+
+**Memory, lifecycle and capped frames (plan 8.3; `D:\wmv-10\step9\gpu\g3`, `g4`; same idle rule).** GPU memory (three blocks,
+Stage 09's player against p35a light off and on, five Clear/enter cycles a run): light on against Stage 09 -0.7 MB [-18.7,
++17.3] on entry, -1.6 [-14.4, +11.3] settled, -5.2 [-27.7, +17.3] at peak, against at most +32 MB: MET (the terrain normals add
+5 MB of geometry, inside the noise of the texture pool). Lifecycle: every tally 0 at all 45 Clears and the player back to
+349-360 MB at each: MET (reading "about 350" as 350 +- 32 MB, proposed for the owner to confirm). Capped frames (life08 three
+times per setting, p35a against Stage 09's player): the frame p95 is unchanged (16.71 ms in both settings, -0.001 ms [-0.020,
++0.018]); frames over 33 ms light off +1, +1, +1 (MET), light on +7, +2, +2 against at most +2 a run: **NOT MET** in the first
+run (a labelled pooled variant +3.67 [-3.51, +10.84], UNDECIDED). Where (logs only, checked independently;
+`D:\wmv-10\step9\g4why`, `g4why_verify`): every one of those frames falls in a load segment where Stage 09's player has long
+frames too; the light adds no new kind of slow frame and nothing measurable to a steady frame. It adds main-thread work on load
+frames: about 0.76 ms [+0.72, +0.80] on the frame that builds world model 321999 and binds its 53 exterior group renderers to
+their world-lit material copies (a 29-34 ms frame, median 30-32 ms, the recurring frame nearest the 33.4 ms line), and about
+0.46 ms [+0.03, +0.89] per terrain tile build (the MCNR normals and their vertex stream). Taking those away removes 3 of the
+first run's 7 extra frames (4 counting a borderline tile frame; 13.7), and those 3 crossed only because that run's builds of
+the model were unusually slow (28.5 ms against 25.7, in the G4 runner's first p35a launch, declining over its next launches in
+both settings; cause UNKNOWN; corrected 2026-10-28: it was NOT the session's first p35a launch, as first written here, since
+the memory and lifecycle runs had launched p35a six times from 00:10 with normal builds of the model, 23.0-29.6 ms); of the other 4,
+one is a long build, one a frame with 10-15 ms outside the stream work (cause UNKNOWN) and two fall in the 3.4-5.0 s load band,
+which p35a shows identically with the light off. The cost has been there since step 6 (p33a), not step 8. The pipeline-state
+creation on the first lit frame (15-24 ms) never crosses 33 ms. No optimisation is proposed here; the binding at placement and
+the normals' decode are where a later change would act.
+
+**The regression runs of step 9 (p35a, the exact source; `D:\wmv-10\step9\regress`; every check re-run from the lead's shell
+where the detached driver could not load its picture libraries, the raw runs unchanged):**
+- **Four clients' own checks (R2).** `-terraintile` on Retail, PTR, Era, MoP and (as Retail) the Beta slot: Retail 328 / 0 / 10,
+  Era 327 / 0 / 11, MoP 5.5.4.70631 328 / 0 / 10, the PTR included; the 20 light dumps equal the audited builds' apart from the
+  build string. MoP 70631's first schema-23 cache build took 5.9 s. PASS.
+- **MoP Classic 5.5.4.70631 (R3).** `WMV_LIGHT=off` against Stage 09's player on its four MoP units: 24 items, 0 not identical,
+  every one also identical to the frozen manifest (one by its accepted variant); streaming and lifecycle on and off against step
+  7: PASS.
+- **The mode-switch round (R5, R5b).** The round world -> Models (bear) -> Buildings (108631) -> world on Stage 09's player and
+  p35a light off and on. As first written (R5) it fails by construction: leaving Maps unloads the world view in every arm, Stage
+  09's included, and the way back does not re-enter it, so the last world shot could not show the light; and its Models cut took
+  in the host's animation panel, whose clock label differs from run to run. Re-run with the world re-entered (R5b; recorded
+  beside R5, not replacing it): after the round the world picture equals the one before it in every arm and the light state is
+  restored (light 204, zone 139, LightParams 5985 in the on arm); the Models and Buildings views are identical in all three
+  arms. PASS (R5b). The switch times: click to repaint 35-44 ms for Models, 69-83 ms for Maps, 373-397 ms for Buildings (a
+  308-350 ms GUI round loading the building); 10 of 12 switches over 50 ms, the same in Stage 09's player; the light changes
+  neither.
+- **The zone sweeps (R6).** The ZB transect (36 points across the Durotar/Barrens border) and the RW radial line (7 points) on
+  Retail, PTR, Era and MoP, light on at 12:00: at all 172 camera positions the player's zone, light and LightParams equal the
+  offline prediction from each client's own dump (the hard switch from zone 139 to 153 at Y -3823 on Retail, PTR and MoP; Era's
+  point light). PASS.
+- **The free clock (R7).** Running from 11:59:15, the light's clock advances 31 s of game time in 30.99 s of real time between
+  samples; pinned runs at the same half-minutes log the same state (zone, light, LightParams); the pictures within 1 sRGB step
+  (water and animation phase). PASS.
+- **The Stage 07 battery (R4).** The battery Stage 07 left (six geometry dumps, 98 composite dumps over eleven runs, the bear
+  and building pictures) on Stage 09's player, p35a light off and p35a in the default mode: identical in all three arms (98 /
+  98, 6 / 6, both pictures); against Stage 09's own battery of 2026-10-18 77 of 98, Stage 09's player today giving the same as
+  p35a (the installs changed since). PASS.
+- **The light-on guards against Stage 09 directly (R9).** Buildings, Models and Characters with the light on, p35a against Stage
+  09's player itself (not through step 7): 9 of 9 items identical. PASS.
+- **The host from the exact source (R1).** The host built from a git archive of 77873b47 on D: with the rig build's flags
+  differs from the rigs' 82FA6B22 only where the build path is compiled into names: string-literal symbols carry __FILE__ and
+  MSVC names lambdas by a hash of the source path, so 594 lambdas of the exe and 74 of wow.dll carry other names with identical
+  bodies, and one function's disassembly differs in what looks like a jump table decoded as code (89 against 91 decoded
+  instructions, INFERRED); core.dll and the plugins are code-identical (PROVEN_BYTES of the masked instruction streams; the
+  comparison tool's own verdict, without these maskings, reads CODE DIFFERS; tools\disasm_cmp2.py, disasm_lambdas.py). Run as a
+  runtime of its own (run_exact): -terraintile PASS on the five installs with the same counts, the 20 light dumps byte-identical
+  to the rigs' host's, and the pictures of light off, light on (step 8) and step 7 at five views identical (15 of 15). PASS: the
+  rigs' results stand for the exact committed host.
+
+**Step 7's fog-model failures (the owner's item 4; `D:\wmv-10\step9\fog7`, checked independently in `D:\wmv-10\step9\vfog7`;
+every number below that is not a frozen verdict is a labelled re-score; no threshold changed).**
+- **The three B failures** (render against its model: a1200_f7000 950-1,000 yd 0.0209; a1200_f1000 and a1845_f1000 800-1,000 yd
+  0.021-0.027; threshold 0.02): caused by URP's 8-bit LDR grading LUT, which the render passes through and the model does not.
+  URP's source writes the LUT as 8-bit nodes k/31 read with linear interpolation (PROVEN_SOURCE); over 119 M values step 7's
+  committed frame and the opt-in bypass frame differ by at most 2 steps, and of 18 candidate tables the 32-node one fits by far
+  best (log-likelihood -0.62 per value against -1.55 or worse; 1.06 % of values it cannot produce) (MEASURED, step 7's and the
+  bypass player's frames). In the failing bands the model's visibility is 0.0-0.46 and the denominator small (21-31 steps), so
+  the render there is close to the LUT's image of the fog colour, where the table sits 0.8-0.9 steps low in green and blue. With
+  the LUT applied to the model, or undone on both pictures, all three pass and the two passing controls stay passes; 8-bit
+  rounding alone gives 0.007-0.011 there. The re-score alone is not node-count specific (any table about 0.5-0.9 steps low at
+  those bytes passes); the specificity comes from the transfer test. The frozen verdict stays FAIL, the cause is the
+  comparison's, not the fog model's. Rendered again on p35a (the exact source) at the five cameras, the frozen verdicts and
+  their worst bands equal step 7's exactly (FAIL 0.0209, 0.0260, 0.0267; PASS 0.0137, 0.0122; the pictures differ from step 7's
+  mostly on the water, about 96 %, the rest at its edges and in pixels the rig cannot place; at a1845_f7000 and b1845_f7000 the
+  near-field check A4 now fails by one pixel of one step each, where step 7 passed: INFERRED, a water-edge pixel, as step 8
+  makes the water change with the fog), and the re-scores pass the same way.
+- **The framing's C6** (the tile framing fails B without amendment 1's exclusion, 0.99249 against 0.995): 96.4 % of the failing
+  card pixels match a fogged surface behind the card (a hole the raster lacks, or an underestimated card distance: the two look
+  the same). The control that called this far above chance (2.0 %) understated chance: with matched depths chance is 51-56 %.
+  The hole premise holds for the clear failures (more than 4 steps: 90 % against 21-29 %) and is not shown for the marginal half
+  (2-3 steps). On p35a the framing reads 0.99254 before C6 and 0.99929 with it (step 7: 0.99249 and 0.99924). C6 stands for the
+  clear failures; the rest is UNRESOLVED.
+- **The retake's 0.0335** (stand B, the only T7 pair outside the fit; class E; information only): with the pixels that changed
+  between the game's own repeat shots dropped it reads 0.011 (random drops of the same count: 0.034-0.036), so the excess is the
+  game picture moving: foreground plant fronds over the distant terrain and cloud drift at the far silhouette. 13.4's "a
+  far-band miss at 900-950 yd unrelated to the grass" is corrected: with the mask that band agrees (game 0.052, viewer 0.052,
+  model 0.060), and the viewer's remaining gap to the model near the end is the 8-bit rounding of a nearly flat signal.
+
+**Acceptance (the owner's six items and the plan's checks):**
+
+| Requirement | Result (exact source unless said) | Class |
+|---|---|---|
+| 1 The game's High water reflection source and permutation | the client's water programs blend a separate screen-aligned reflection texture with a one-tap screen read, or a constant (PROVEN_BYTES); which family High binds is UNKNOWN; the PTR names the High value "Planar", with reflection-view passes for sky, fog, clouds and planets (strings; meaning INFERRED); at Southfury its colour is bright and sky-like; whether it holds terrain UNKNOWN; the capture was designed (it ran on 2026-10-28 as WR1, 13.8: diagnostic, the retake O-C, the source not established) | DEFERRED (unverified shader behaviour; WR1 did not settle it, 13.8) |
+| 2 GPU: all of Stage 10, light on, at most +0.30 ms | MET at all four gate views (+0.004 to +0.117 ms; the labelled replicate +0.013 to +0.202) | PASS (qualified 2026-10-28: its tile-framing line was never clock-checked; 13.8 2a) |
+| 2 GPU: sky pass 0.08, fog and light 0.15, light off against Stage 09 0.05 (proposed) | registered gate UNDECIDED (not met): sky pass MET at hi11, UNDECIDED at three views; fog and light MET at three views, UNDECIDED at the framing; light off MET at hi11 and T7 B, UNDECIDED at two; no view NOT MET. Labelled replicate (beside it): sky pass UNDECIDED at hi06 and T7 B; light off MET at three views, T7 B UNRESOLVED (MET in ms, UNDECIDED clock-normalised; corrected 2026-10-28); fog and light at the framing +0.190 ms [+0.123, +0.258] against 0.15, UNDECIDED with the mean over | UNDECIDED (not passed: the total's PASS passes no sub-budget; 13.7) |
+| 2 Step 8's water program on the GPU | no measurable GPU time (step 8 - step 7 at 1.2 M water px -0.010 ms [-0.027, +0.007]); in cycles resolved (+0.18 M a frame at hi11), shown as clock and power (INFERRED) | PASS (reported, not a gate) |
+| GPU memory at most +32 MB | -0.7 / -1.6 / -5.2 MB (entry / settled / peak) | PASS |
+| Lifecycle: five Clear/enter cycles back to about 350 MB, every tally 0 | 45 of 45 Clears tally 0; 349-360 MB (reading 350 +- 32 MB proposed) | PASS (the reading the owner's to confirm) |
+| Capped frames: p95 16.66 ms unchanged; frames over 33 ms at most the baseline's + 2 a run | p95 unchanged; light off +1 x 3; light on +7, +2, +2 (pooled +3.67 [-3.51, +10.84]); the light adds about 0.76 ms to one heavy load frame and 0.46 ms per tile build (since step 6), deciding 3 of the 7 in a run whose builds were slow | FAIL (light on, run 1; 13.7: no optimisation justified) |
+| 3 `WMV_LIGHT=off` identical to Stage 09 (`WMV_WATER=low` included) | step 8's U1 against the frozen manifest; MoP 70631 re-run 24 / 24 | PASS |
+| 3 Guards light on / off; the default mode | Buildings, Models, Characters identical (also directly against Stage 09, R9 9 / 9); 166 / 166 | PASS |
+| 3 Mode-switch round, light restored | R5 as first written FAIL by construction (world not re-entered; GUI in the cut); R5b, a corrected re-run: PASS | PASS (R5b) |
+| 3 Four clients' checks; catalogue against the offline implementation | R2: five installs PASS, dumps equal; the pinned light checks skip on the current builds, their values hold by equal table bytes and dumps (INFERRED); runner 2,598 / 0 | PASS |
+| 3 Runner; self-test; player build | 2,598 / 0 / 0; 1,138 / 0 and 1,065 / 0; 0 errors, the same warnings as step 7's player (step 8's exact build) | PASS |
+| 3 Acceptance, streaming, lifecycle on four clients, light on and off | step 8's U5 and R3 | PASS |
+| 3 The 48-half-hour sweep twice; zone sweeps; free clock | identical; 172 / 172 positions; 1:1 and equal to pinned | PASS |
+| 3 The Stage 07 battery | 98 / 98 composite and 6 / 6 geometry dumps and both pictures identical in three arms | PASS |
+| 3 Host budgets: catalogue +250 ms, per-map object, payload, database, live toggle | carried (step 3 and step 8 logs, not re-measured): 7.8-107 ms; 0.44-2.15 ms assembly for maps 0 and 1, 0.033 ms at the smallest maps (cap 50; corrected 2026-10-28 from 0.45-1.73, which came from earlier step 3 runs and missed the rigs' host's 2.15 ms and step 8's 1.74 and 2.05 ms); 384,487 B; 2.1-24.9 s; 1.6-2.6 ms | PASS |
+| 3 No GUI round over 50 ms; mode switch under 50 ms | 3 of 226 step-8 runs one round 51-55 ms; 10 of 12 switches over 50 ms (Maps 69-83 ms, Buildings 373-397 ms); Stage 09's player the same | FAIL (pre-existing in Stage 09; 13.7: no Stage 10 increment) |
+| 3 Player CPU: light 0.05 ms a frame, offer commit 2 ms, parse 20 ms | no measurement path without instrumentation (a code change) | UNRESOLVED |
+| 4 Step 7's fog render against its model (B) | FAIL at a1200_f7000, a1200_f1000, a1845_f1000 as frozen, on p35a exactly as on step 7; cause: URP's 8-bit grading LUT, which the model lacks (all pass with it modelled) | FAIL (cause identified; 13.7's labelled LUT re-score sits beside this verdict, 13.8 4a) |
+| 4 The near field identical to fog off (A4) at the T7 cameras | p35a: a1845_f7000 and b1845_f7000 one pixel of one step each (step 7 passed); INFERRED a water-edge pixel (step 8's water changes with the fog) | FAIL (1 px, 1 step; 13.7: shown, a comparison artefact) |
+| 4 The framing (B with amendment 1's C6) | passes with C6 (0.99929; without 0.99254); the hole premise holds for the clear failures, not shown for the marginal half | UNRESOLVED |
+| 4 The retake's 0.0335 | the game picture moving between its shots (0.011 without); the retake is class E | DEFERRED (the independent fog holdout) |
+| 5 Stage 09's water scores (colour, texture, reflection) | worse than step 7 by 0.20-0.26 z; located (reflected rays 0-10 deg up), not explained | FAIL (documented exception as frozen; since 2026-10-28 explicitly unresolved, not an exception: 13.8 5a, 13.9) |
+| 5 Independent fog validation | no clean holdout capture | DEFERRED (exception as frozen; since 2026-10-28 explicitly deferred, not an exception) |
+| 5 Classic Era / MoP visual parity; Classic Beta | no references; Beta not installed | DEFERRED (exception as frozen; since 2026-10-28 explicitly deferred, not an exception) |
+| 9.6's other in-game holdouts (sky, outdoor light, time of day, transitions) | not captured; transitions checked against the data (R6) only | UNRESOLVED (owner: capture or defer) |
+| 6 The exact committed source | player p35a = ca9b9314's archive; host built from 77873b47's archive: the same code once path-hashed names are masked (INFERRED for one jump table), the same light dumps (20 / 20) and pictures (15 / 15, the viewport) as the rigs' host | PASS |
+
+### 13.7 Step 9 follow-up: the owner's seven items (2026-10-28)
+
+The owner reviewed 13.6 and did not approve the merge; the follow-up covers only the remaining actionable items. Nothing was
+rendered, run or built again; no code, threshold or frozen verdict changed; every corrected figure below is a labelled re-score
+beside its frozen verdict, from the pictures and logs 13.6 used (`D:\wmv-10\step9\followup`, `D:\wmv-10\step9\fog7\a4px`).
+
+- **1 The capped frames (G4): no optimisation is justified (MEASURED, from 13.6's G4 logs).** Taking the light's whole measured
+  load cost away (the 0.76 ms on world model 321999's frame and the 0.46 ms per tile build) removes 4 of run 1's extra frames: 3
+  on 321999's frame and one borderline tile frame. Run 1 would still read 25 against 22, +3 against at most +2: NOT MET. The
+  remaining +3 is not the light's:
+  - two frames are in the 3.4-5.0 s load band, where p35a counts the same with the light off (16, 16, 15 in both settings);
+  - one 321999 frame crosses even without the delta, because that run's builds were slow (mean 28.5 ms against 25.7 ms, in
+    the G4 runner's first p35a launch; corrected 2026-10-28: not the night's first p35a launch, see 13.6 and 13.8).
+
+  At ordinary build lengths the 0.76 ms decides about 0.1 frames a run (added to the 72 non-light frames it makes
+  one new crossing in nine runs). The near-threshold frame is the 20-31 ms single build of 321999, which predates Stage 10.
+  The candidates do not qualify as small and safe:
+  - **the binding** (the prototype's first bind: its material copies and 53 renderer arrays) cannot leave that frame without
+    the model drawing unlit for a frame or being placed a frame later, a visible change; making the copies cheaper is unmeasured
+    and needs timing code to measure;
+  - **the normals' decode** (`TerrainMcnr.Fill`) could move to the worker, but the upload stays, and a tile frame (about 10 ms)
+    never crosses 33.4 ms on its own.
+
+  The verdict stays FAIL. The routes are an owner-approved exception, or a pre-registered G4 replicate with warm-up launches
+  (run 1's slowdown followed the G4 runner's launch order; 13.8), its frozen verdict kept beside it. Splitting the world-model build
+  over frames is streaming work for a later stage.
+- **2 Step 7's fog against its model, with URP's grading LUT in the model (labelled re-score V1; the frozen verdicts stay
+  FAIL).**
+  - **The LUT model is from the source, not fitted.** URP's 8-bit table is 32 nodes k/31 read with linear interpolation
+    (`WmvMain.ClearChannel`, `lutcheck.py`; PROVEN_SOURCE). It is applied to the frozen model's colour, with the model's
+    pre-grading colour taken as the inverse LUT of the fog-off picture.
+  - **Results on p35a.** At the five T7 cameras every band passes: worst 0.0128, 0.0131, 0.0142, 0.0136 and 0.0057, against
+    frozen FAIL 0.0209, 0.0260 and 0.0267 and frozen PASS 0.0137 and 0.0122. The two cameras that passed still pass.
+  - **The transfer control.** The bypass player's frames, which carry no LUT, pass as frozen. The same frames through the LUT
+    model reproduce 4 of the 5 frozen verdicts (corrected 2026-10-28; first written as all failing "in the same bands"):
+    - they fail at the three failing cameras (worst 0.0203, 0.0299 and 0.0286; at a1845_f1000 from 700 yd, where the frozen
+      render fails from 800 yd), with every far band within 0.002-0.0074 of the committed frames' frozen bands;
+    - they pass at a1845_f7000, as frozen;
+    - they also fail at b1845_f7000, where the committed frame passes. This is on the fogged subset's mean: blue -0.67 against
+      the 0.5 limit, the committed frame -0.459. The CPU model there acts on an 8-bit frame, where the real table reads the
+      16-bit float one.
+  - **The framing is not the LUT's.** With the LUT the framing reads 0.99177 before C6 (frozen 0.99254), so C6 stays as in 13.6.
+  - **Not modified:** the renderer's colour grading. Chart: `fig_fog7_lut.png`.
+- **3 The two A4 pixels: a comparison artefact, not a water-fog defect (MEASURED).** The pixels are (x 122, y 925) at
+  a1845_f7000 and (x 167, y 873) at b1845_f7000, in viewport-crop coordinates.
+  - **Where they are.** Both are terrain inside the near field (276.8 yd against a 280-yd gate, 360.0 yd against 375 yd), 1.4
+    and 1.0 px from the water. They lie 0.013 and 0.038 yd under the river's surface. The frozen classifier calls terrain WATER
+    only when it is more than 0.05 yd under it (`fogpredict.py` line 207), so the river drawn over them is classed as terrain.
+  - **The water is drawn on them.** Step 8 changed both with the fog off (85, 54, 35 -> 84, 53, 36; 126, 83, 52 -> 126, 82,
+    50), and step 8 changed only the water. The player draws with MSAA off and no post anti-aliasing (its log), so nothing
+    else mixes into them.
+  - **The fog's +1 in blue is the water's.** The neighbouring water pixels at the same distance do not change, so it is not the
+    water's own fog, which is zero inside the fog start. INFERRED: the pixel's own reflection read of the fogged far scene,
+    which is why A4 excludes water by design.
+  - **Step 7 passed by chance.** Its object arms happened to differ by one step there, which made the pixels "object without
+    distance".
+  - **A zero-margin re-score** (labelled: terrain under the river's surface by any amount counted as water) passes A4 at all
+    five cameras in both arms. It relabels 126-333 px a camera and creates no new failure.
+  - **Proposed:** no renderer change. The zero margin, if wanted, is a harness amendment for the owner. Crops (raw pixels,
+    ticks outside): `fig_a4_pixels.png`.
+- **4 The GPU sub-budgets stay UNDECIDED.** The total's PASS (at most +0.30 ms) passes no sub-budget; the class in 13.6 now
+  says so.
+- **5 The water** (its shader, the sky fallback and the defaults) is unchanged until the owner's reflection capture is
+  reviewed. (WR1 then ran, 13.8: the water stays unchanged and the source was not established.)
+- **6 The GUI budgets: pre-existing, no Stage 10 increment (MEASURED; `gui_split.txt`, existing runs on host 82FA6B22).**
+  - **The frozen thresholds** (a switch at most 50 ms, no GUI round over 50 ms) stay FAIL.
+  - **Every Maps switch fails in both stages:** Stage 09's player 59 of 59 (median 76 ms); p35a light off 62 of 62 (81),
+    light on 29 of 29 (90), default mode 31 of 31 (75).
+  - **Every Buildings switch fails in both:** Stage 09 409-426 ms; p35a 377-458 ms.
+  - **Models switches mostly pass in both:** about 43 ms; Stage 09 2 of 9 over (62, 68 ms), p35a light on 1 of 6 (54 ms).
+  - **GUI rounds over 50 ms:** Stage 09 2 of 50 runs; p35a light off 3 of 56, light on 2 of 23, default 1 of 30. The 300-350 ms
+    rounds are the Buildings switch, Stage 09's 308 and 320 ms included.
+  - **The light-on Maps median.** Unmatched it reads +14 ms [-4, +19], because the runs come from different units. Matched by
+    unit and by the switch's place in it (14 pairs: the scores, G4, R5 and R5b), light on minus Stage 09 is +0 ms [-16, +8].
+  - **The exception needing approval:** carrying both thresholds as a known Stage 09 limitation, not passing them.
+
+**Merge readiness (2026-10-28).** Blocking until the owner rules (each needs a yes, or the named work):
+
+| Item | Frozen verdict | Route |
+|---|---|---|
+| G4 capped frames, light on | FAIL (run 1 +7 against +2) | exception, or a registered replicate with a warm-up launch (ran 2026-10-28: NOT MET again; 13.8 2h) |
+| GPU sub-budgets | UNDECIDED (registered gate: fog and light at the framing +0.069 [-0.179, +0.317] against 0.15; the labelled replicate +0.190 [+0.123, +0.258] beside it) | exception, or more registered repeats (one focused repeat ran 2026-10-28: UNDECIDED, registered as the last before the merge decision; 13.8 2c) |
+| The docs (13.6, 13.7) | uncommitted | commit on the owner's word |
+
+Proposed owner-approved exceptions (the frozen verdict stays as recorded):
+- **Step 7's B at three cameras:** FAIL as frozen; the labelled re-score with the grading LUT in the model passes.
+- **A4 at two cameras:** FAIL by 1 px; a classifier-margin artefact; the labelled zero-margin re-score passes.
+- **GUI round and mode switch:** FAIL in Stage 09 and Stage 10 alike, no increment.
+- **C6 at the framing:** UNRESOLVED for the marginal half. (Superseded 2026-10-28: the owner kept it explicitly
+  unresolved, not an exception; 13.8 4c, 13.9.)
+- **Smaller confirmations:**
+  - the GPU idle rule I5';
+  - the 0.05 ms light-off margin;
+  - the 350 +- 32 MB lifecycle reading;
+  - (the water scores, 5a: listed here until 2026-10-28; the owner then kept them explicitly unresolved, not an
+    exception; 13.8 5a, 13.9).
+
+Deferred to later work:
+- **The water's reflection source:** the owner's capture, then the shader, fallback and default decision. (WR1 ran on
+  2026-10-28 and did not establish it; DEFERRED, the shader, fallback and defaults unchanged; 13.8.)
+- **Fog and parity holdouts:** the independent fog holdout and the retake; Classic Era / MoP visual parity and Classic Beta.
+- **Measurements not yet possible (frozen UNRESOLVED; deferral proposed, the owner's to confirm):** 9.6's in-game
+  holdouts; the player CPU budgets (they need timing code).
+- **Performance work:** splitting the heavy world-model build over frames; the normals' decode on the worker; the Maps and
+  Buildings switch times.
+- **The grading LUT** itself (a renderer decision, not made here).
+
+### 13.8 Final checks and the final acceptance table (2026-10-28)
+
+**The owner's rulings (2026-10-28).**
+- Accepted, kept as justified exceptions or corrected comparison results, not as passes; the frozen verdicts stay:
+  - the fog LUT explanation;
+  - the two A4 water-classification artefacts;
+  - the pre-existing GUI and mode-switch delays.
+- No speculative loading optimisation.
+- The water reflection implementation stays unchanged until the owner's Part 1 PTR capture. (It ran that evening as
+  WR1; the implementation stays unchanged.)
+- C6, water accuracy, unverified Classic parity and the other documented limitations stay explicitly classified (not
+  accepted).
+- Asked for: one pre-registered G4 warm-up replicate, and, if practical, a focused repeat of the undecided fog-and-light GPU
+  sub-budget at the terrain framing.
+- No rendering work, deployment, commit, push, merge or Stage 11.
+
+**What ran.** Both measurements were registered before any of their runs:
+- the G4 replicate: `D:\wmv-10\step9\final\PREREG_g4w_20261028_0735.txt`;
+- the GPU repeat: `D:\wmv-10\step9\gpu\PREREG_gpu9_20261028_0734.txt`.
+
+Before any counted run, an independent adversarial review attacked each registration, and the fixes went in as dated
+addenda (PREREG_g4w ADDENDUM 1, 07:57; PREREG_gpu9 AMENDMENT 1, 07:59).
+
+The chain (`D:\wmv-10\step9\final\chain_final.ps1`) ran the harness files unchanged:
+- an uncounted warm-up block;
+- the 12 counted G4 runs;
+- the 16 GPU runs.
+
+One interruption: the chain stopped at 08:07, during an idle wait in the uncounted warm-up block, with no run in progress. It
+left no error record, no leftover process and no lock. It was restarted from the ledgers at 08:38.
+
+**Corrections made on the way (marked in 13.6 and 13.7):**
+- **G4 run 1's slow builds** came in the G4 runner's first p35a launch, not the session's. The memory and lifecycle runs had
+  launched p35a six times from 00:10, with normal builds of model 321999.
+- **The LUT transfer control** reproduces 4 of the 5 frozen verdicts: it also fails at b1845_f7000, and at a1845_f1000 it
+  fails from 700 yd, not "in the same bands" as first written.
+- **The tile framing (pF2) was never clock-checked.** The clock logger is stopped with Kill() and loses its last rows, and
+  pF2 is the last piece.
+- **The host assembly range** is 0.44-2.15 ms for maps 0 and 1 (0.033 ms at the smallest client maps), from step 3's last
+  runs on the rigs' host (`D:\wmv-10\step3\hostfix\tt\log_*_i.txt`) and step 8's logs; 13.6 said 0.45-1.73, from earlier
+  step 3 runs. All far inside the 50 ms cap.
+- **"CPU-bound, so the GPU cost does not reach the frame time"** (13.6) is withdrawn: at the framing the frame interval was
+  longer with fog and light (+0.144 ms [+0.089, +0.199], unregistered).
+- **The replicate's light-off line at T7 B** is UNRESOLVED by the analyser's rule (MET in ms, clock-confounded, UNDECIDED
+  normalised), not MET as 13.6 read it.
+- **G4's light-only share of run 1:** 3 of the extra frames, or 4 counting a borderline tile frame.
+
+**G4 warm-up replicate (labelled; reported beside the frozen FAIL, not pooled; `D:\wmv-10\step9\final\g4w`).**
+- **Result:** 12 of 12 counted runs VALID, no voids, the install state unchanged, and all 14 registered files as registered.
+- **Light on: +0, +6, +2 = NOT MET** (plan wording). Labelled pooled variant +2.67 [-4.92, +10.26], UNDECIDED. Frame p95
+  +0.003 ms [-0.013, +0.019].
+- **Light off: -1, 0, +2 = MET.** Frame p95 +0.001 ms [-0.005, +0.006].
+- **Independent recomputation:** an independent parser of the raw results reproduces every count, and on the original gives
+  +7, +2, +2 again.
+- **Reading (registered addendum A2 (b); the event-level split is the adversarial check's, post-hoc):**
+  - The original's slow first p35a launch did not recur. The chain's first p35a launch was its fastest (24.86 ms for model
+    321999), and the first counted one had no build of 29.2 ms or more (mean 27.51 ms, the second-highest of the 12) and a
+    pair delta of 0. A first-launch slowdown does not account for the replicate's failure.
+  - Slow builds did recur later: the failing run (r2, the fourth counted p35a launch) had the highest counted mean, 27.56 ms,
+    with two builds of 30.6 ms. A2 (b)'s contrast therefore does not separate cleanly: slow 321999 builds and 1.4-3.4 s
+    crossings recur in p35a alongside the reference's shortfall in the 3.4-5.0 s band.
+  - By the registered S2 bands the failing pair's +6 is +5 in 3.4-5.0 s and +1 in the Era load. Two of those five are the
+    reference's load-1 heavy pair, stamped at 3.399 s, 1 ms before the band edge. Counted by event (post-hoc), the +6 has
+    two sources of similar size:
+    - +3: the Stage 09 reference got fewer of the two heavy frames each load produces at about 4.3 s (13 against 14-16 in
+      its other eleven runs; no fault was found in that run);
+    - +2: model 321999's frame crossed 33 ms three times in p35a against once in the reference, two of the three on the
+      30.6 ms builds;
+    - +1: the Era load.
+  - The light's measured cost on that frame replicated (+0.74 ms against +0.76) but decides only one of the six.
+- **Post-hoc, unregistered:** p35a with itself, light on minus light off, reads +2.0 frames a run [-0.6, +4.6] over both
+  replicates. The data show neither that the light's effect is zero nor that it exceeds +2.
+- **Registration notes:**
+  - every counted run's foreign CPU (1.4-1.9 %) was below the original's 2.4-3.0 %, so all pairs are flagged, on the low side;
+  - the voided warm-up launch is missing from the secondary script's launch-order line, and adding it changes nothing.
+- **Verdict:** G4 stays FAIL. The evidence justifies no code change; the route is the owner's exception or later work on the
+  load frame (streaming).
+
+**The focused GPU repeat (labelled; reported beside the two earlier results, not pooled; `D:\wmv-10\step9\final\g3f`).**
+- **The repeat.** Fog and light without the sky (NOSKY - OFF8) at the tile framing (pF2), at most +0.15 ms a frame. Two arms,
+  8 blocks in Thue-Morse order.
+- **Integrity.** 16 of 16 runs VALID with no voids; the install state, the player and runtime manifests, the driver and every
+  registered file as registered; an independent recomputation from each run's own files agrees.
+- **The three registered measurements, all UNDECIDED (not passed):**
+
+  | Measurement | Blocks | ms a frame [95 %] | Clock-normalised by the pF proxy [95 %] |
+  |---|---|---|---|
+  | Registered gate (evening) | 3 | +0.069 [-0.179, +0.317] | +0.229 [+0.055, +0.402] |
+  | Labelled replicate (night) | 3 | +0.190 [+0.123, +0.258] | +0.256 [+0.042, +0.470] |
+  | Focused repeat (morning) | 8 | +0.166 [+0.035, +0.296] | +0.308 [+0.098, +0.518] |
+
+- **What they show.**
+  - In ms the three straddle the budget, every interval contains +0.15, and two exclude zero. There is a real cost close to
+    the budget, neither shown to fit nor shown to exceed it.
+  - The two arms ran at GPU clocks 3-7 % apart at the first framing. If GPU time scaled fully with the clock, the estimates
+    would be the normalised ones, still UNDECIDED; these runs do not test that assumption.
+  - Within the repeat, the per-block delta rises with the clock gap (r +0.77). The light-off arm's clock seems to follow its
+    lighter load. The cause of the wider spread this morning is UNKNOWN: no order effect was resolved (OFF8-first blocks
+    +0.222 against NOSKY-first +0.110 ms, Welch t 1.0), no drift, and the foreign load was no higher than at night.
+- **Not shown to be hidden behind the CPU.** The GPU is busy about a third of each frame there, yet the frame interval was
+  longer with fog and light (+0.144 ms [+0.089, +0.199] this morning; unregistered reading). These runs cannot tell whether
+  that came from the GPU or the CPU. 13.6's earlier "CPU-bound, so these costs do not reach the frame time" is not supported
+  by these runs and is withdrawn there (corrected 2026-10-28).
+- **The total budget's framing line.** All of Stage 10, at most +0.30 ms, printed MET at all four pieces in both earlier
+  batches (framing +0.117 and +0.202 ms), but its framing line was never clock-checked either. By the same proxy
+  (unregistered), the registered batch's framing line reads +0.303 [+0.155, +0.451] normalised, which would make it
+  UNRESOLVED; the replicate's stays MET. The frozen PASS stands, with this noted.
+- **Verdict.** As registered, there is no fourth repeat before the merge decision. The sub-budget stays UNDECIDED (not
+  passed) and needs the owner's decision: an exception, a revised sub-budget, or a change that lowers the cost.
+
+#### The final acceptance table
+
+Basis: 13.6's frozen verdicts, unchanged; the labelled re-scores of 13.6 and 13.7, each beside its frozen verdict; the
+owner's rulings of 2026-10-27 (keep the documented limitations) and 2026-10-28 (the fog LUT explanation, the two A4 artefacts
+and the pre-existing GUI and mode-switch delays accepted as exceptions or corrected comparison results, not as passes; no
+speculative loading optimisation; the water reflection implementation unchanged; C6, water accuracy, unverified
+Classic parity and the other documented limitations kept explicitly classified, not accepted; in the evening: 2h and 2b-2d
+proposed merge exceptions, C6 and the visual-parity limits 4d and 5a-5d explicitly unresolved or deferred, not
+exceptions). No code, threshold or frozen verdict
+changed. The class of 13.6's sub-budget row read UNRESOLVED in the step 9 report and was re-worded by the follow-up to the
+registered decision file's UNDECIDED (not met); neither is a pass, and 2b-2d quote the decision file. Two registered runs (the G4 warm-up replicate and the focused GPU repeat) ran on 2026-10-28 and are reported in 2h and 2c, beside the frozen verdicts. Row ids follow the
+plan's six items; 13.6's sub-budget row is split into 2b-2d, and its unnumbered rows sit under 2 (memory, lifecycle, capped
+frames) and 5 (9.6's holdouts).
+
+| # | Requirement | Frozen verdict (as recorded, with its key number) | Corrected or additional analysis (labelled; "-" if none) | Proposed merge treatment |
+|---|---|---|---|---|
+| 1 | The game's High water reflection source and shader permutation | DEFERRED (unverified shader behaviour; capture pending, as frozen; the capture ran on 2026-10-28 as WR1 and did not establish the source): the 54 Retail and 108 PTR water programs blend a separate screen-aligned reflection texture with a one-tap screen read, or a constant (PROVEN_BYTES); which family High binds UNKNOWN; the PTR names value 3 "Planar" (meaning INFERRED) | WR1 (2026-10-28, diagnostic, not a merge gate): the first capture INVALID (pitch -5.97 deg against hi11's -25.534); the retake VALID, registered O-C: reflectionMode 3, 2 and 1 indistinguishable at the hi11 close-up (fallback region -0.18 and -0.01 levels; power 0.80-0.87 for one reach against the calibrated null, 0.13-0.19 for O-A's full rule). The source and the permutation NOT established. Owner, 2026-10-28: the water implementation unchanged | DEFERRED (unverified shader behaviour), explicitly, not accepted; the shader, sky fallback, constants and defaults unchanged |
+| 2a | GPU: all of Stage 10, light on, at most +0.30 ms | PASS: MET at all four gate views, +0.004 to +0.117 ms (registered gate; the gate as a whole read UNDECIDED through 2b-2d) | Labelled replicate: MET again, +0.013 to +0.202 ms. 13.8 (labelled, unregistered): the tile-framing line was never clock-checked (the clock log loses its last rows); by the pF clock proxy the registered batch's framing line reads +0.303 [+0.155, +0.451] clock-normalised, which would make it UNRESOLVED; the replicate's stays MET (clocks within 3 %). The total's PASS passes no sub-budget | PASS kept as recorded (owner, 2026-10-28), with the clock-verification qualification: its tile-framing line was never clock-checked |
+| 2b | GPU sub-budget: the sky pass at most +0.08 ms | UNDECIDED (registered, n 3; not passed): MET at hi11 0.000 [-0.025, +0.025] ms; UNDECIDED at the framing +0.027 [-0.140, +0.195], hi06 +0.050 [-0.071, +0.171], T7 B +0.033 [-0.071, +0.137]; no view NOT MET | Labelled replicate (beside, not pooled): MET at the framing -0.009 [-0.059, +0.040] and at hi11; UNDECIDED at hi06 +0.019 [-0.051, +0.090] and T7 B +0.012 [-0.110, +0.133]. Every mean inside 0.08 ms. Not repeated: the owner asked for a focused repeat of the fog and light sub-budget only, not the entire GPU suite | proposed exception, awaiting the owner |
+| 2c | GPU sub-budget: fog and light at most +0.15 ms | UNDECIDED (registered; not passed): the tile framing +0.069 [-0.179, +0.317] ms; MET at hi06, hi11 and T7 B | Labelled replicate: the framing +0.190 [+0.123, +0.258], UNDECIDED. FOCUSED REPEAT (registered, PREREG_gpu9_20261028_0734 with amendment 1; the third and last measurement before the merge decision; labelled, not pooled): n 8 +0.166 [+0.035, +0.296], UNDECIDED; clock-checked by the registered pF proxy: ratio 1.070, normalised +0.308 [+0.098, +0.518], also UNDECIDED, so the result stands UNDECIDED. In ms the three straddle the budget, every interval contains +0.15 and two exclude zero: a real cost close to the budget, neither shown to fit nor shown to exceed it. Not shown to be hidden behind the CPU: the frame interval at the framing was longer with fog and light (+0.144 [+0.089, +0.199] ms, unregistered reading) | proposed merge exception (owner, 2026-10-28: the UNDECIDED verdicts kept, not a pass; the measurements final, no further repetition and no optimisation); approval at the merge decision |
+| 2d | GPU sub-budget: light off against Stage 09 at most +0.05 ms (margin proposed) | UNDECIDED (registered; not passed): MET at hi11 +0.006 [-0.001, +0.013] and T7 B +0.005 [-0.033, +0.042]; UNDECIDED at the framing +0.011 [-0.173, +0.194] and hi06 +0.022 [-0.042, +0.085] | Labelled replicate: MET at the framing, hi06 and hi11; at T7 B -0.034 [-0.050, -0.017] ms, MET in ms but clock-confounded with a differing normalised verdict (UNDECIDED), so UNRESOLVED by the analyser's rule (the replicate's gate line: "UNDECIDED (not met) -- UNRESOLVED: G4 pT7B clock-confounded"). The 0.05 ms margin itself awaits the owner (confirmations below) | proposed exception, awaiting the owner |
+| 2e | Step 8's water program on the GPU (reported, not a gate) | PASS (reported): step 8 - step 7 at hi11 (1.2 M water px) -0.010 ms [-0.027, +0.007]; in cycles +0.182 M a frame [+0.098, +0.265], shown as clock and power (INFERRED) | - | none needed (PASS) |
+| 2f | GPU memory at most +32 MB | PASS: light on - Stage 09 -0.7 / -1.6 / -5.2 MB (entry / settled / peak) | - | none needed (PASS) |
+| 2g | Lifecycle: five Clear/enter cycles back to about 350 MB, every tally 0 | PASS: 45 of 45 Clears tally 0; 349-360 MB at every Clear | Reading "about 350 MB" as 350 +- 32 MB is proposed, not yet confirmed | none needed (PASS); the reading awaits the owner's confirmation |
+| 2h | Capped frames: p95 16.66 ms unchanged; frames over 33 ms at most the baseline's +2 a run | FAIL (light on, run 1): 29 against 22, +7; runs 2 and 3 +2, +2; light off +1, +1, +1 (MET); light-on p95 unchanged, -0.001 ms [-0.020, +0.018] | 13.7 (MEASURED, 13.6's logs): removing the light's whole load cost leaves run 1 at +3: still NOT MET; no optimisation justified (owner agreed). WARM-UP REPLICATE (registered, PREREG_g4w_20261028_0735 with addendum 1; labelled; not pooled): light on +0, +6, +2 = NOT MET (labelled pooled variant +2.67 [-4.92, +10.26], UNDECIDED; p95 +0.003 ms); light off -1, 0, +2 = MET (p95 +0.001 ms). The original's slow first p35a launch did not recur. The failing pair's +6: by the registered S2 bands +5 in 3.4-5.0 s and +1 in the Era load; counted by event (post-hoc; two reference frames lie 1 ms before the band edge) +3 from the Stage 09 reference getting fewer heavy load frames than usual, +2 from model 321999's frame crossing 3 times against once (two on 30.6 ms builds, in the fourth counted p35a launch), +1 in the Era load. The light's measured cost replicated (+0.74 against +0.76 ms) but decides 1 of the 6. Post-hoc and unregistered, p35a light on minus off: +2.0 frames a run [-0.6, +4.6] (both replicates) | proposed merge exception (owner, 2026-10-28: the frozen FAIL and the replicate's NOT MET kept, not a pass; the measurements final, no further repetition and no optimisation); approval at the merge decision |
+| 3a | `WMV_LIGHT=off` identical to Stage 09 (`WMV_WATER=low` included) | PASS: step 8's U1 262 of 263 items identical (the 263rd is Stage 09's own MoP magma variant, accepted by the frozen manifest; the pair script's own verdict DIFFERENT kept beside); MoP 70631 re-run (R3) 24 of 24 | - | none needed (PASS) |
+| 3b | Guards light on / off; the default mode | PASS: Buildings, Models, Characters identical; against Stage 09 directly (R9) 9 of 9; default mode 166 of 166 | - | none needed (PASS) |
+| 3c | Mode-switch round, light restored | PASS (R5b, a corrected re-run): the world after the round equals the one before in all three arms; the on arm's light 204, zone 139, LightParams 5985 restored. R5 as first written FAIL by construction, kept beside | - | none needed (PASS) |
+| 3d | Four clients' checks; the catalogue against the offline implementation | PASS (R2): -terraintile Retail, PTR and the Beta slot 328 / 0 / 10, Era 327 / 0 / 11, MoP 328 / 0 / 10; 20 of 20 light dumps equal the audited builds' but the build string | The pinned light checks skip on the current builds; their values hold by equal table bytes and dumps (INFERRED) | none needed (PASS) |
+| 3e | Runner; self-test; player build | PASS: runner 2,598 / 0 / 0; self-test 1,138 / 0 and 1,065 / 0 (light off); 0 errors (step 8's exact build) | - | none needed (PASS) |
+| 3f | Acceptance, streaming, lifecycle on four clients, light on and off | PASS: step 8's U5; R3 on MoP 70631, light on and off, harness 37 / 0 / 0 each | - | none needed (PASS) |
+| 3g | The 48-half-hour sweep twice; zone sweeps; free clock | PASS: the sweep identical twice; 172 of 172 positions (4 clients x 43); 31 s of game time in 30.99 s of real time, equal to pinned | - | none needed (PASS) |
+| 3h | The Stage 07 battery | PASS: 98 of 98 composite and 6 of 6 geometry dumps and both pictures identical in three arms | Information: against Stage 09's own battery of 2026-10-18, 77 of 98 (the installs changed since) | none needed (PASS) |
+| 3i | Host budgets: catalogue +250 ms, per-map object, payload, database, live toggle | PASS (carried from step 3 and step 8 logs, not re-measured): e.g. the largest map object 384,487 B within 1,048,576 B | - | none needed (PASS) |
+| 3j | No GUI round over 50 ms; mode switch under 50 ms | FAIL (pre-existing in Stage 09): 10 of 12 switches over 50 ms (Maps 69-83 ms, Buildings 373-397 ms, click to repaint); 3 of 226 step-8 runs one round of 51-55 ms | 13.7 (labelled, existing runs; the switch time, click to repainted switch, not 13.6's click-to-repaint ranges): every Maps switch over 50 ms in both stages (Stage 09 59 of 59, median 76 ms; p35a light on 29 of 29, 90 ms); same-unit pairs, light on - Stage 09: +0 ms [-16, +8] (14 pairs): no Stage 10 increment | owner-accepted exception (2026-10-28): carried as a known Stage 09 limitation; the thresholds stay FAIL |
+| 3k | Player CPU: light 0.05 ms a frame, offer commit 2 ms, parse 20 ms | UNRESOLVED: no measurement path without instrumentation (a code change) | - | proposed deferral to a later change that adds player timing code (13.7; awaiting the owner); the frozen UNRESOLVED kept |
+| 4a | Step 7's fog render against its model (B), threshold 0.02 | FAIL at a1200_f7000 0.0209, a1200_f1000 0.0260, a1845_f1000 0.0267 (p35a exactly as step 7); a1845_f7000 0.0137 and b1845_f7000 0.0122 PASS | V1 (labelled re-score; the 8-bit grading LUT, 32 nodes k/31 from the source, applied to the model): all five cameras pass, worst 0.0128, 0.0131, 0.0142, 0.0136, 0.0057. Transfer control: the bypass frames through the LUT fail at the same three cameras (worst 0.0203, 0.0299, 0.0286; at a1845_f1000 from 700 yd, frozen from 800 yd) and pass at a1845_f7000, but also fail at b1845_f7000 (the fogged subset's mean, blue -0.67 against 0.5; the committed frame -0.459, frozen PASS). The renderer's grading unchanged | owner-accepted exception (2026-10-28): a corrected comparison result; the frozen FAIL kept |
+| 4b | The near field identical to fog off (A4) at the T7 cameras | FAIL: a1845_f7000 and b1845_f7000, one pixel of one step each (step 7 passed) | 13.7 (MEASURED): pixels (122, 925) and (167, 873) are terrain 0.013 and 0.038 yd under the river's surface, inside the frozen classifier's 0.05-yd water margin, so the river drawn on them counts as terrain. Labelled zero-margin re-score: PASS at all five cameras in both arms (126-333 px relabelled, no new failure). A harness amendment only if the owner wants it | owner-accepted exception (2026-10-28): a water-classification artefact; the frozen FAIL kept |
+| 4c | The framing: B with amendment 1's C6 (gate 0.995 within 2 steps) | UNRESOLVED: 0.99929 with C6, 0.99254 without; the hole premise holds for the clear failures, not shown for the marginal half | Independent check (labelled; on step 7's framing pictures): clear failures (over 4 steps) match a surface behind in 90.0 % against 20.7-28.7 % for matched placebos; marginal ones (2-3 steps) 100 % against 71.1-72.7 %. Not the LUT's: with it the framing reads 0.99177 before C6 | kept explicitly UNRESOLVED (owner, 2026-10-28), not accepted and not an exception; merging despite it needs the owner's explicit approval (13.9, list B) |
+| 4d | The retake's 0.0335 (stand B, class E, information only) | DEFERRED (the independent fog holdout) | With the pixels that changed between the game's own repeat shots dropped: 0.011 (random drops of the same count 0.034-0.036): the game picture moving | DEFERRED to the independent fog holdout (5b); explicitly deferred, not accepted (owner, 2026-10-28) |
+| 5a | Water accuracy: Stage 09's water scores (colour, texture, reflection) | FAIL (documented exception as frozen on 2026-10-27; since 2026-10-28 explicitly unresolved, not an exception): worse than step 7 by 0.20-0.26 z (colour +0.26, texture +0.20, reflection +0.20) | Located (reflected rays 0-10 deg up), not explained; what the client shows there is not measured | explicitly UNRESOLVED, carried as a known limitation, not accepted and not a proposed exception (owner, 2026-10-28); the frozen FAIL kept |
+| 5b | Independent fog validation | DEFERRED (exception as frozen; since 2026-10-28 explicitly deferred, not an exception): no clean holdout capture | - | explicitly DEFERRED, not accepted (owner, 2026-10-28); the frozen DEFERRED kept; the holdout capture deferred |
+| 5c | Classic Era / MoP visual parity; Classic Beta | DEFERRED (exception as frozen; since 2026-10-28 explicitly deferred, not an exception): no references; Beta not installed | R2 and R6 (and R3 for MoP) check Era and MoP functionally, not their visual parity | explicitly DEFERRED, not accepted (owner, 2026-10-28); the frozen DEFERRED kept |
+| 5d | 9.6's other in-game holdouts (sky, outdoor light, time of day, transitions) | UNRESOLVED (owner: capture or defer): not captured; transitions checked against the data (R6) only | - | explicitly UNRESOLVED, not accepted (owner, 2026-10-28); proposed deferral to a later in-game capture session; the frozen UNRESOLVED kept |
+| 6 | The exact committed source | PASS: player p35a = ca9b9314's archive (Assembly-CSharp 36CBA239C8A6F879); the host built from 77873b47's archive equals the rigs' host 82FA6B22 in code once path-hashed names are masked (594 + 74 renamed lambdas, bodies identical; one jump table INFERRED), light dumps 20 of 20, pictures 15 of 15 | - | none needed (PASS) |
+
+**Merge decision checklist**
+
+Blocking, as written before the close-out (13.9's final merge checklist supersedes this list; items 1 and 2 updated by the
+owner's ruling of 2026-10-28 evening, below):
+1. 2h, capped frames light on: FAIL as frozen, and NOT MET again in the registered warm-up replicate (+0, +6, +2). The
+   first-launch explanation is not supported (slow builds recurred, but in a later launch, the failing one); counted by
+   event, the excess is split between the reference's run-to-run variation, model 321999's load frame and one Era-load
+   frame, with the light's own measured cost deciding a minority (1 of the 6). Owner, 2026-10-28 evening: a proposed
+   merge exception, not a pass; the measurements are final; approval at the merge decision.
+2. 2c, fog and light at the tile framing: UNDECIDED in all three registered measurements (+0.069, +0.190, +0.166 ms;
+   clock-normalised also UNDECIDED). No fourth repeat before the merge decision (amendment 1 B7). Owner, 2026-10-28
+   evening: a proposed merge exception, not a pass; the measurements are final; approval at the merge decision.
+3. The owner's yes, or the named work, on every exception below.
+(Row 1 was never a merge gate: WR1 ran on 2026-10-28 as a diagnostic, below; the source and the permutation not
+established; row 1 stays DEFERRED.)
+
+Exceptions needing the owner's yes (as written before the close-out; 13.9's list A is final):
+- 2b, the sky pass: UNDECIDED at up to three views, no view NOT MET.
+- 2d, light off against Stage 09: UNDECIDED at two views (registered); in the replicate MET at three views and
+  UNRESOLVED at T7 B (MET in ms, UNDECIDED clock-normalised); with the 0.05 ms margin.
+- 2h (FAIL, replicate NOT MET) and 2c (UNDECIDED three times): each goes to the owner beside its frozen verdict; neither
+  is a pass.
+
+Deferred (target; status):
+- 1, the water reflection source and permutation: not established by WR1 (2026-10-28); DEFERRED; the shader, sky
+  fallback, constants and defaults unchanged (owner, 2026-10-28).
+- 4d and 5b, the independent fog holdout, the retake with it (explicitly deferred, not accepted; owner, 2026-10-28).
+- 5c, Classic Era / MoP visual parity: references needed; Classic Beta: not installed (explicitly deferred, not accepted;
+  owner, 2026-10-28).
+- 5a, water accuracy: FAIL, explicitly unresolved, carried as a known limitation (owner, 2026-10-28).
+- 4c, C6 at the framing: explicitly UNRESOLVED for the marginal half; not accepted, not an exception (13.9, list B).
+- 5d, 9.6's in-game holdouts: UNRESOLVED; a later capture session (proposed); not an exception (13.9, list B).
+- 3k, the player CPU budgets: UNRESOLVED; later work with timing code (proposed); not an exception (13.9, list B).
+- Performance work: splitting world model 321999's build over frames (later streaming work), the normals' decode on the
+  worker, the Maps and Buildings switch times (owner, 2026-10-28: no speculative optimisation).
+- The grading LUT itself: a renderer decision, not made in Stage 10.
+
+Noted, not an exception (the frozen PASS stands; no yes needed): 2a, the total: its tile-framing line was never
+clock-checked (by the proxy, unregistered, the registered batch's line would read UNRESOLVED; the replicate's MET stands);
+the owner ruled on 2026-10-28: the PASS kept with this qualification.
+
+Already ruled, for the record: 3j, 4a and 4b accepted by the owner on 2026-10-28 (the frozen FAILs kept); 5a, 5b, 5c and
+row 1's unverified shader behaviour kept as documented limitations on 2026-10-27, and on 2026-10-28 kept explicitly
+unresolved or deferred, not accepted (13.9).
+
+**Smaller confirmations still open**
+- The GPU idle rule I5' (the other processes' 3D share under 2 % and every utilisation sample at most 10 %, in place of the
+  registered I5's both under 5 %): the lead's registered amendment, used by step 9's counted GPU, memory and capped-frame
+  runs and by both 2026-10-28 registered runs; the owner may ask for the stricter rule (a re-run).
+- The 0.05 ms light-off margin of 2d (proposed at registration).
+- The lifecycle reading "about 350 MB" as 350 +- 32 MB (2g; measured 349-360 MB).
+- (5a, the water scores, was listed here until 2026-10-28; the owner then kept it explicitly unresolved, not as an
+  exception: 13.9.)
+- The documentation: 13.6, 13.7 and this table stay uncommitted until the owner's word; no push, merge, deployment or
+  Stage 11.
+
+**The owner's ruling on 13.8 (2026-10-28, evening).**
+- 13.8's measurements are the final evidence for this review: no further performance repetitions, no speculative
+  optimisation, no further investigations or new features.
+- 2h (G4 FAIL; the replicate NOT MET) and the GPU sub-budgets (2b-2d, UNDECIDED) keep their verdicts: proposed merge
+  exceptions, not passes.
+- 3j, 4a and 4b stay accepted as exceptions (the frozen FAILs kept).
+- 2a keeps its recorded PASS with the clock-verification qualification.
+- The water shader, the sky fallback, the rendering constants and the defaults stay unchanged.
+- C6 (4c) and the remaining visual parity limitations (4d, 5a-5d) stay explicitly unresolved.
+- Next: the owner's four-shot PTR water reflection capture (row 1), then a concise final recommendation: merge with
+  explicitly approved exceptions, or an issue the reflection results show must be addressed first. (WR1 was then
+  registered with every outcome mapped to a merge with exceptions, so it was diagnostic, not a gate: below.)
+- 13.6-13.8 stay uncommitted until the owner authorises close-out; no deployment, push, merge or Stage 11.
+
+**WR1, the water reflection capture (2026-10-28, evening): diagnostic, not a merge gate.**
+
+WR1 asked one question. At Stage 09's hi11 close-up, does the client's High reflection fallback carry mirrored off-screen
+terrain that modes 2 and 1 lack? (High sets reflectionMode 3; the PTR's strings name that value "Planar", a meaning
+graded INFERRED.)
+
+The evaluation was registered before any shot existed:
+- `D:\wmv-10\step9\wr1\PREREG_wr1_rev2_20261028_1739.txt`, frozen at 18:37 (hashes in `FROZEN_wr1_rev2.txt`);
+- revised after two adversarial reviews and six dry runs of its controls;
+- amendments 1 (19:19) and 1a (19:27).
+
+Every registered outcome mapped to the same recommendation: merge with explicitly approved exceptions, with a terrain
+result recorded as a documented departure. (An O-U or UNDECIDED from a transient check led first to a retake.) WR1
+therefore could not change the merge decision. It was diagnostic and does
+not show merge readiness. The merge proposal (13.9) rests on this table and the owner's rulings.
+
+- **The setup.** The first capture page was wrong in two ways:
+  - it said to type `/wmvref t7`, whose list points at the T7 hilltops (facing 105 and 180);
+  - it put the stand at the teleport point.
+
+  The original hi11 shot (`WoWScrnShot_101926_185734.jpg`: its addon record and Stage 09's camera fit) stood at
+  X 1261.107, Y -3947.586 on map 1, facing 80.49, pitch -25.534. That is 0.43 yd forward of `!tele 1261 -3948 20 1`.
+  The line itself is right: every recorded landing on 2026-10-19 and 2026-10-24 came down on its numbers, X then Y, map 1.
+
+  The helper addon (WmvRefNav 3.4, data and labels only, `D:\wmv-10\step9\wr1\refnav34`; offline 4,795 and 22 checks
+  pass) has a list `/wmvref wr1`. It gives the hi11 stand with a guided last step, the facing, a pitch mark (the far
+  waterline at 0.0942 of the screen height), and the four shots at reflectionMode 3, 2, 1, 3. Each shot counts only 10 s
+  after a mode change.
+- **The first capture (18:50-18:51, `D:\wmv-10\refs\ptr_wr1`): INVALID, by the pitch.**
+  - As registered: the position (0.11 yd from the hi11 point), the facing (80.55), the character (the female Zandalari
+    Troll, first person) and the four modes.
+  - Not as registered: the camera pitch was -5.97 deg against hi11's -25.534, a mismatch of 19.6 deg (the independent
+    recompute's fit, 292 land blocks at 0.26 px).
+  - The frozen evaluation's printed O-C (`D:\wmv-10\step9\wr1\result`) is INVALID. Its pose check V5 failed with 0 land
+    blocks, and its regions were drawn at the hi11 pose.
+  - The independent recompute's O-U (`D:\wmv-10\step9\wr1\indep`) is diagnostic only.
+  - Neither is a result. Both outputs are kept unchanged.
+  - A defect found here: the frozen rules let O-C fire with V5 failed. Amendment 1 made a failed V5 give O-U before the
+    retake.
+- **The alignment (19:17-19:27).**
+  - An alignment guide (`D:\wmv-10\step9\wr1\sheets\align_guide.png`) puts the original hi11 beside the first capture's
+    S1, with the far waterline, the dark bush at the palm clump's foot and the hi11 frame's top edge. These landmarks were
+    carried between the frames through the two fitted cameras.
+  - One alignment shot (`D:\wmv-10\refs\ptr_wr1_align`) was checked by `verify_align.py`, which fits the camera two ways:
+    the evaluation's own V5, and a search plus block fit. To pass, the pitch must be within 0.5 deg of -25.534 and the yaw
+    within 0.5 deg of 279.51. The first fit must be accepted (residual median at most 1 px at 2560, |roll| at most
+    0.3 deg), and the two fits must agree within 0.2 deg.
+  - The first run printed NOT ALIGNED: the second fit's wide search locked on a wrong optimum (pitch -30, 0 blocks).
+    Amendment 1a added a re-search within 3 deg of the target; the acceptance rules are unchanged.
+  - The rerun was ALIGNED: pitch -25.511 and -25.529, yaw 279.674 and 279.689, a fit-free vertical shift of 0 px.
+- **The retake (19:29:08-19:30:00, `D:\wmv-10\refs\ptr_wr1b`): VALID, registered outcome O-C.**
+  - The shots: all four counted at reflectionMode 3, 2, 1, 3. After the alignment shot the character had moved 0.3 yd and
+    turned 0.42 deg. W3a was checked again: ALIGNED, pitch -25.488 and -25.499, yaw 279.325 and 279.327.
+  - The evaluation: the frozen script as amended (SHA-256 76301281...), `D:\wmv-10\step9\wr1\result_retake`. V1, V2, V3
+    and V5 pass; on land the shots differ from W3a by a median of 0.02-0.05 levels. The retake's General.log was empty (not
+    flushed), so only the addon records show the modes.
+  - In the fallback region (reflected 9-45 deg, the one-tap weight 0, 108 blocks), mode 2 and mode 1 differ from mode 3
+    by -0.18 [-0.94, +0.46] and -0.01 [-0.66, +0.26] levels.
+  - Unregistered, for information: over the whole frame (land included) they differ by -0.11 and +0.04; in the one-tap
+    region (w > 0.05, 6,827 px), by -0.09 and +0.38.
+  - Every b lies inside its calibrated null: b(D2) -1.0 and -6.3, b(D1) -9.5 and -8.5, against a central 95 % of about
+    +-26 to +-28 levels of fallback colour. The sky check passes.
+  - Power for a terrain contrast at the low end of the expected size (40 levels of fallback colour):
+    - one reach against the calibrated null: 80-87 % (the calibration);
+    - with the column-shift threshold added: 68-75 % per reach (the independent recompute);
+    - with both reaches required, as O-A demands: 13-19 % (the independent recompute; rule (i) alone 18-26 %).
+    - Such an effect would almost never produce O-C (0.5-2 %), so the O-C is informative about an effect of that size.
+  - Three blocks in the bright sheen are flagged (D2 about -7) and reported, not excluded. The amplified difference images
+    show the sheen changing between every pair of shots, the two mode-3 shots included (N there -3.3, +4.6, -1.8 levels),
+    and no object in the water.
+  - **The independent recompute of the retake agrees: O-C** (its own code, blind to the main run;
+    `D:\wmv-10\step9\wr1\indep_retake`).
+    - Its pose: pitch -25.499, yaw 279.327, 407 land blocks at 0.43 px.
+    - Its means: D2 -0.115 [-0.44, +0.20], D1 +0.069 [-0.38, +0.39] levels.
+    - b(D2) +0.45 near and -5.9 far; b(D1) -8.4 and -9.2; all inside its own null. The sky check passes. It flags three
+      neighbouring sheen blocks (one at 9-13 deg, two at 13-18 deg) and finds no object.
+- **What WR1 did not establish.**
+  - WR1 did NOT establish the client's actual High water reflection source, nor the shader permutation the client binds.
+    The three modes produced no measurable difference at the hi11 close-up, both where only the fallback shows and where
+    the one-tap read is active.
+  - Two readings remain, and WR1 cannot tell them apart: these modes draw this water alike, or a live `/console
+    reflectionMode` change does not switch its drawing. The records confirm only that the setting changed.
+  - The byte findings of 13.6 stand as they were: three families of water programs, and the PTR's mode names.
+  - Row 1 stays DEFERRED (unverified shader behaviour). No Stage 10 change follows; the water shader, sky fallback,
+    constants and defaults are unchanged.
+
+### 13.9 Close-out summary (2026-10-28; the documentation committed locally on the owner's word; nothing pushed, merged or deployed)
+
+**State.**
+- **The branch:** `world/10-light-sky-fog`, 16 code and documentation commits on Stage 09's `develop` 678071f0. The last two
+  are ca9b9314 (step 8 code) and 77873b47 (step 8 documentation). Against `develop`, 74 files change (31 added,
+  43 modified): +25,059 / -2,256 lines.
+- **The documentation commit:** this document's step-9 and close-out edits, committed locally on 2026-10-28 on the owner's
+  word; not pushed. They cover 6.11's step-9 note, 13.4's note, 13.6-13.9, the status header and the progress row.
+- **Versions:** IPC protocol 20, database schema 23.
+- **The new outdoor light is off by default.**
+  - Opt in with `WMV_LIGHT=on` (or the player's `-wmvWorldLight=on`).
+  - `WMV_LIGHT=off` overrides every switch and matches Stage 09: 262 of 263 compared items are identical, and the 263rd is
+    Stage 09's own one-pixel MoP variant.
+  - D14's "on once the owner accepts the stage" is a default change, not made. It stays off (owner, 2026-10-28).
+
+**Proposed merge exceptions** (each needs the owner's explicit approval; the frozen verdicts stay; none is a pass):
+1. **2h, capped frames, light on** (p95 unchanged; frames over 33 ms at most the baseline's +2 a run):
+   - FAIL: run 1 +7, runs 2 and 3 +2 each.
+   - The registered warm-up replicate: NOT MET again (+0, +6, +2).
+   - Light off: MET in both.
+2. **2c, GPU sub-budget, fog and light at the tile framing**, at most +0.15 ms:
+   - UNDECIDED in three registered measurements: +0.069 [-0.179, +0.317], +0.190 [+0.123, +0.258] and
+     +0.166 [+0.035, +0.296] ms.
+   - Clock-normalised: also UNDECIDED.
+   - A real cost close to the budget, neither shown to fit nor shown to exceed it.
+3. **2b, GPU sub-budget, the sky pass**, at most +0.08 ms: UNDECIDED at up to three views; no view NOT MET; every mean
+   inside 0.08 ms.
+4. **2d, GPU sub-budget, light off against Stage 09**, at most +0.05 ms (the margin is itself proposed):
+   - UNDECIDED at two views (registered).
+   - In the replicate, UNRESOLVED at T7 B.
+
+**Confirmations needed** (not exceptions; no verdict changes):
+- the GPU idle rule I5';
+- the 0.05 ms light-off margin of 2d;
+- the lifecycle reading "about 350 MB" as 350 +- 32 MB. 2g's PASS rests on this reading.
+
+**Exceptions already approved by the owner** (2026-10-28; the frozen FAILs kept):
+- 3j, the GUI round and mode switch (pre-existing in Stage 09);
+- 4a, step 7's fog render against its model (the 8-bit grading LUT);
+- 4b, A4's two pixels (a water-classification artefact).
+
+**Recorded verdicts that are not exceptions.**
+- **2a, all of Stage 10 on the GPU, at most +0.30 ms:** PASS as recorded, with the clock qualification. Its tile-framing
+  line was never clock-checked; by an unregistered proxy the registered batch's line would read UNRESOLVED. The owner kept
+  the PASS with this qualification on 2026-10-28.
+- **Passed** (13.8's table): 2e, 2f, 2g (with the confirmation above), 3a-3i and 6.
+
+**Carried explicitly FAILED, UNRESOLVED or DEFERRED.** These are not accepted and not resolved, and their verdicts are
+unchanged. Merging without correcting them needs the owner's explicit approval to merge despite each (list B below).
+- **5a, water accuracy: FAIL.** A genuine failed requirement. Against step 7 at the four High cameras:
+  - colour +0.26, texture +0.20, reflection +0.20 z;
+  - located at reflected 0-10 deg, not explained;
+  - `-wmvWaterSky=stage09` restores step 7's water exactly at three cameras (an existing switch; the default unchanged).
+- **4c, C6 at the framing:** UNRESOLVED for the marginal half.
+- **4d, the retake's 0.0335,** and **5b, the independent fog holdout:** DEFERRED (no clean holdout capture).
+- **5c, visual parity:** Classic Era and MoP not compared with the game (no references); Classic Beta not installed.
+  DEFERRED.
+- **5d, 9.6's in-game holdouts** (sky, outdoor light, time of day, transitions): UNRESOLVED; a later capture session is
+  proposed.
+- **3k, the player CPU budgets:** UNRESOLVED. There is no measurement path without timing code; deferral proposed.
+- **1, the High water reflection source and permutation:** DEFERRED. WR1 did not establish them (13.8).
+- **Also deferred** (later work, not requirements of this stage's table):
+  - performance work: world model 321999's load frame, the normals' decode on the worker, the Maps and Buildings switch
+    times;
+  - the grading LUT (a renderer decision);
+  - clouds (D8);
+  - cast shadows (a later stage);
+  - exterior MOCV (Stage 12);
+  - terrain ground cover (stage 11B).
+
+**Final merge checklist** (owner, 2026-10-28). The kinds of approval are kept apart. No verdict changes, and nothing is
+treated as passed or resolved.
+
+A. **Proposed merge exceptions.** Each requirement was measured and missed, or not decided. Merging needs the owner's
+   explicit approval of each as an exception:
+   - 2h, capped frames, light on: FAIL (and NOT MET in the replicate).
+   - 2c, the fog-and-light GPU sub-budget at the tile framing: UNDECIDED, three times.
+   - 2b, the sky-pass GPU sub-budget: UNDECIDED.
+   - 2d, light off against Stage 09: UNDECIDED (registered); UNRESOLVED at T7 B in the replicate.
+
+A2. **Confirmations** (the owner's yes; not exceptions):
+   - the idle rule I5';
+   - the 0.05 ms margin;
+   - the 350 +- 32 MB reading.
+
+B. **Requirements that stay FAILED, UNRESOLVED or DEFERRED.** Stage 10 does not correct them. Merging without correcting
+   them means merging despite a failed or open requirement, which needs the owner's explicit approval of each, with its
+   verdict unchanged:
+   - 5a, water accuracy: **FAIL**. A genuine failed requirement: Stage 09's water scores are worse than step 7 by
+     0.20-0.26 z. It is not passed, not resolved and not reclassified.
+   - 4c, C6 at the framing: UNRESOLVED.
+   - 4d and 5b, the independent fog holdout and the retake with it: DEFERRED (not captured).
+   - 5c, Classic Era and MoP visual parity (not compared with the game) and Classic Beta (not installed): DEFERRED.
+   - 5d, 9.6's in-game holdouts (sky, outdoor light, time of day, transitions): UNRESOLVED.
+   - 3k, the player CPU budgets: UNRESOLVED (not measured).
+   - 1, the High water reflection source and permutation: DEFERRED (WR1 did not establish them).
+
+C. **Already decided by the owner** (no further approval; the frozen verdicts stay):
+   - 3j, 4a and 4b accepted as exceptions on 2026-10-28.
+   - 2a's PASS kept with the clock qualification.
+
+D. **Passed:** 2e, 2f, 2g (with A2's reading), 3a-3i and 6 (13.8's table).
+
+**Changed files** (against `develop` 678071f0: 31 added, 43 modified; the full list with status is in
+`D:\wmv-10\step9\final\closeout_changed_files.txt`):
+- **Host (C++), modified:**
+  - `Source/core/GameDatabase.cpp`, `.h`;
+  - `Source/games/wow/LightCatalog.cpp`, `.h`;
+  - `Source/wowmodelviewer/UnityIpcServer.cpp`, `.h`;
+  - `Source/wowmodelviewer/app.cpp`, `modelviewer.cpp`.
+- **Client-data definitions, modified:**
+  - `bin_support/dbd/LightData.dbd`, `LightParams.dbd`, `Map.dbd`, `ZoneLight.dbd`;
+  - `bin_support/wow/12.0/database.xml`.
+- **Player shaders** (`Tools/UnityRendererProject/Assets/Resources`):
+  - modified: `WmvLiquid.shader`, `WmvTerrainTextured.shader`;
+  - modified: `WmvOpaque.shader` and `WmvWmo.shader`, their passes moved into the new `WmvOpaquePass.cginc` and
+    `WmvWmoPass.cginc`;
+  - new: `WmvOpaqueWorld.shader`, `WmvWmoWorld.shader`, `WmvSky.shader`, `WmvWaterSky.hlsl`, `WmvWaterSkyProbe.shader`,
+    `WmvWorldFog.hlsl`, `WmvWorldLight.hlsl`.
+- **Player scripts** (`Assets/Scripts`):
+  - modified: `WmvIpcClient.cs`, `WmvLiquidLight.cs`, `WmvMainTerrain.cs`, `WmvModelBuilder.cs`, `WmvTerrainBuilder.cs`,
+    `WmvTerrainComposite.cs`, `WmvTerrainSession.cs`, `WmvTerrainSessionDoodads.cs`, `WmvTerrainSessionStream.cs`,
+    `WmvTerrainSessionWorld.cs`, `WmvWorldDoodads.cs`, `WmvWorldModels.cs`, `Wow/WmoSynthetic.cs`;
+  - new: `WmvTerrainSessionWorldLight.cs`, `WmvWorldLight.cs`, `WmvWorldLitMaterials.cs`, `WmvWorldSky.cs`;
+  - `Wow/World`, modified: `AdtModel.cs`, `DoodadScene.cs`, `LiquidHigh.cs`, `LiquidLights.cs`, `TerrainMesh.cs`;
+  - `Wow/World`, new: `LightGeometry.cs`, `LiquidWaterDay.cs`, `ModelLight.cs`, `SkyDome.cs`, `TerrainLight.cs`,
+    `WorldFog.cs`, `WorldLight.cs`, `WorldLightModel.cs`, `WorldLightState.cs`.
+- **The player's self-tests:**
+  - modified: `WmvLifecycleSelfTest.cs`, `...Liquids.cs`, `...WorldModels.cs`;
+  - new: `...WaterLight.cs`, `...WorldFog.cs`, `...WorldLight.cs`.
+- **Offline tests** (`Tools/UnityRendererProject/Tests`):
+  - modified: `README.md`, `Runner/Program.cs`, `Runner/WowParserTestRunner.csproj`;
+  - new: `LiquidWaterDayTests.cs`, `SkyTerrainLightTests.cs`, `WorldFogTests.cs`, `WorldLightTests.cs`,
+    `WorldModelLightTests.cs`.
+- **Documentation and notices:**
+  - `docs/world-viewer/10-light-sky-fog.md` (new);
+  - `docs/world-viewer/roadmap.md`, `THIRD-PARTY-NOTICES.txt` (modified).
+
+**Pre-merge check (2026-10-28, 19:42-19:47; read-only: a fetch and tree-only merges).**
+- **`develop`:** fetched; still 678071f0, unchanged since 2026-10-21. The branch descends from it, so the merge is a
+  fast-forward with no conflicts. A tree-only merge gives exactly the branch's tree. The merged `develop` would be the
+  tested commits (ca9b9314, 77873b47) plus this documentation commit. The repository runs no CI, so the merged commit is
+  verified by hand.
+- **The open pull requests against `develop`** (all by mubilla, 2026-10-23/25, unmerged):
+  - #128 Orc posture export;
+  - #129 standalone equipment export (it contains #128);
+  - #131 native animation events (it contains #128);
+  - #130 particle-only and ribbon-only effects;
+  - #132 flight preview (it contains #130).
+  None is on `develop`, so none conflicts with this merge today. Whichever lands second must be reconciled with the
+  other:
+  - **#128, #129, #131 against Stage 10.** They conflict textually in `Source/core/GameDatabase.cpp`. They also set
+    `SCHEMA_VERSION = 23` for a different change (conditional customization body models), a schema collision: two builds
+    with one number and different tables. The second to land must take 24, with both layouts in `database.xml` (it merges
+    as text) and both comments.
+  - **#130 and #132 against Stage 10.** They merge cleanly as text but change files Stage 10 changes:
+    - `WmvModelBuilder.cs` and `WmvLifecycleSelfTest.cs`;
+    - for #132 also `UnityIpcServer.cpp`, `.h`, `app.cpp`, `modelviewer.cpp` and `WmvIpcClient.cs`.
+    No protocol bump was found in their diffs.
+  - **Regression testing when Stage 10 lands first.** Those pull requests rebase onto it; the #128 family takes schema
+    24. They rerun their own tests and Stage 10's guards: the offline runner, the self-test in both modes, `WMV_LIGHT=off`
+    against Stage 09, and the Models, Buildings and Characters guards.
+  - **Regression testing when any of them lands first.** Stage 10 merges `develop` again; after #128, it takes 24. It
+    reruns its checks against the new `develop`:
+    - the offline runner;
+    - the self-test in both modes;
+    - `WMV_LIGHT=off` identity;
+    - the guards and the Stage 07 battery;
+    - life08, light on and off.
+
+**Deployment risks.**
+1. **The owner's build is a union, and is preserved.**
+   - build64's host (exe 238F8D67) is step 6 (246ad137) plus two uncommitted tabard patches. Its player (p31u, 1678BFAE)
+     is step 6 plus the owner's unmerged screenshot matte.
+   - A clean deploy of the merged commit would drop both, so none is made.
+   - A later deploy, with the owner's approval only, rebuilds the union on the merged commit: the tabard patches in the
+     host, and the matte in the player, as p35u (step 8 plus the matte, built and tested in 13.5).
+   - Before replacing anything it takes a new backup and keeps the existing ones. The rollback target today is
+     `Release\_backup_stage09_before_stage10_2026-10-23_1055`.
+   - The owner's viewer must be closed for the copy: a running viewer locks the exe.
+2. **build64 is still step 6.** Deploying brings steps 7 and 8 (fog; water on the light's clock with the dome sky) into the
+   owner's viewer for the first time. With the light on, that includes 5a's water-score regression.
+3. **The default and the launcher.**
+   - Merged as is, the light stays opt-in; `WMV_LIGHT` stays off by default (owner, 2026-10-28).
+   - The launcher `wowmodelviewer (Stage 10 light).cmd` that sets `WMV_LIGHT=on` exists only in build64. It is not in the
+     repository and does not ship with the merge.
+4. **Schema 23.**
+   - Users of `develop` rebuild every client's database once on first start (about 20 s on Retail), even with the light
+     off, and old caches are pruned.
+   - The owner's build has run schema 23 since 2026-10-23.
+   - The schema collision with #128 (above) is the real risk: two different layouts must never share a number.
+5. **Protocol 20.**
+   - The host and the player must be deployed together.
+   - build64 already runs protocol 20 on both halves, so the log's protocol line cannot reveal a stale half.
+   - After a deploy, the hashes of `wowmodelviewer.exe`, `core.dll`, `wow.dll` and the player's `Assembly-CSharp.dll`
+     are the check.
+6. **Performance.**
+   - 2h: frames over 33 ms on a heavy load frame, light on.
+   - 2c's cost is close to its budget; 2b and 2d are UNDECIDED, with means inside their budgets.
+   - The player's CPU cost is unmeasured (3k).
+   - The GUI round and mode switch already exceed 50 ms in Stage 09 (3j).
+7. **Visual parity.**
+   - Retail is judged through the PTR, a different engine branch, so Retail parity is graded INFERRED.
+   - Classic Era and MoP have not been compared with the game; Classic Beta is untested.
+   - Water accuracy FAILs (5a), and the reflection source is unknown (1).
+   - The grading LUT quantises the far, dark fog bands (4a).
+   - C6 at the framing is unresolved (4c).
+8. **The open pull requests** (the pre-merge check above): the schema collision and the shared player and IPC files.
+9. **The build environment.**
+   - The Unity batch build needs a valid licence; it exits 198 when the cached licence lapses. The cached licence was
+     renewed; its next update date reads 2026-11-23.
+   - F: is short of space, so builds and runtimes go on D:. A build on D: needs the listfile copied, since a hard link
+     cannot cross volumes, and the wxWidgets 3.3 junction.
+10. **Install-state flakes.** A WoW client update during a test changes pictures; comparisons stay under one install state.
+
+**Waiting for the owner's word.**
+- Done on 2026-10-28: the documentation committed locally; `develop` fetched; the merge and the open pull requests
+  checked (above).
+- Not done:
+  - the owner's approvals of lists A, A2 and B;
+  - the order against the open pull requests (the schema-24 rule above);
+  - pushing the branch and opening the pull request;
+  - the merge and the verification of the merged commit;
+  - the union deploy with a backup (the owner's approval; never a clean deploy);
+  - Stage 11.
