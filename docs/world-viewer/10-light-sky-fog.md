@@ -8,7 +8,8 @@ provisionally on 2026-10-27. Step 8 (water) is implemented and validated (13.5);
 provisionally on 2026-10-27. Step 9 (final validation) ran on the exact committed source (13.6); the follow-up (13.7) and the final
 checks with the final acceptance table (13.8) ran on 2026-10-28, and the owner accepted their measurements as the final
 evidence the same day; the water reflection capture WR1 (13.8) was diagnostic, not a merge gate (the first capture
-invalid by its pitch, the retake valid, O-C; the source not established); the close-out summary is 13.9; the merge decision and the close-out are the owner's.** This document
+invalid by its pitch, the retake valid, O-C; the source not established); the close-out summary is 13.9; the owner approved the merge exceptions on 2026-10-28 and pull request #133 is open;
+merging and deployment are the owner's to authorise.** This document
 records the owner's decisions (section 0), the investigation (sections 1-5), the
 architecture and order of work (sections 6-8), the validation against in-game screenshots (section 9), the remaining
 decisions (section 10) and, as work lands, its results. The roadmap change that made this milestone 10 is `roadmap.md` 5.1.
@@ -2654,14 +2655,15 @@ not show merge readiness. The merge proposal (13.9) rests on this table and the 
   - Row 1 stays DEFERRED (unverified shader behaviour). No Stage 10 change follows; the water shader, sky fallback,
     constants and defaults are unchanged.
 
-### 13.9 Close-out summary (2026-10-28; the documentation committed locally on the owner's word; nothing pushed, merged or deployed)
+### 13.9 Close-out summary (2026-10-28; committed and pushed on the owner's word, pull request #133; not merged or deployed)
 
 **State.**
 - **The branch:** `world/10-light-sky-fog`, 16 code and documentation commits on Stage 09's `develop` 678071f0. The last two
   are ca9b9314 (step 8 code) and 77873b47 (step 8 documentation). Against `develop`, 74 files change (31 added,
   43 modified): +25,059 / -2,256 lines.
-- **The documentation commit:** this document's step-9 and close-out edits, committed locally on 2026-10-28 on the owner's
-  word; not pushed. They cover 6.11's step-9 note, 13.4's note, 13.6-13.9, the status header and the progress row.
+- **The documentation commits:** this document's step-9 and close-out edits, committed on 2026-10-28 on the owner's word
+  (a72b7cc1) and pushed with the branch for pull request #133. They cover 6.11's step-9 note, 13.4's note, 13.6-13.9, the
+  status header and the progress row. The owner's approval record below follows in its own commit.
 - **Versions:** IPC protocol 20, database schema 23.
 - **The new outdoor light is off by default.**
   - Opt in with `WMV_LIGHT=on` (or the player's `-wmvWorldLight=on`).
@@ -2795,7 +2797,7 @@ D. **Passed:** 2e, 2f, 2g (with A2's reading), 3a-3i and 6 (13.8's table).
 **Pre-merge check (2026-10-28, 19:42-19:47; read-only: a fetch and tree-only merges).**
 - **`develop`:** fetched; still 678071f0, unchanged since 2026-10-21. The branch descends from it, so the merge is a
   fast-forward with no conflicts. A tree-only merge gives exactly the branch's tree. The merged `develop` would be the
-  tested commits (ca9b9314, 77873b47) plus this documentation commit. The repository runs no CI, so the merged commit is
+  tested commits (ca9b9314, 77873b47) plus the documentation commits. The repository runs no CI, so the merged commit is
   verified by hand.
 - **The open pull requests against `develop`** (all by mubilla, 2026-10-23/25, unmerged):
   - #128 Orc posture export;
@@ -2869,13 +2871,39 @@ D. **Passed:** 2e, 2f, 2g (with A2's reading), 3a-3i and 6 (13.8's table).
      cannot cross volumes, and the wxWidgets 3.3 junction.
 10. **Install-state flakes.** A WoW client update during a test changes pictures; comparisons stay under one install state.
 
-**Waiting for the owner's word.**
-- Done on 2026-10-28: the documentation committed locally; `develop` fetched; the merge and the open pull requests
-  checked (above).
-- Not done:
-  - the owner's approvals of lists A, A2 and B;
-  - the order against the open pull requests (the schema-24 rule above);
-  - pushing the branch and opening the pull request;
-  - the merge and the verification of the merged commit;
-  - the union deploy with a backup (the owner's approval; never a clean deploy);
+**The owner's merge approvals (2026-10-28, evening, after the pre-merge report; recorded on the owner's word).**
+- **Proceed:** toward the Stage 10 merge with the documented limitations.
+- **List A, approved explicitly as merge exceptions:** 2h, 2c, 2b and 2d. Their original FAIL, UNDECIDED and UNRESOLVED
+  verdicts remain unchanged.
+- **List A2, the three methodological confirmations, approved:**
+  - the GPU idle rule I5';
+  - the 0.05 ms light-off margin;
+  - the 350 +- 32 MB lifecycle interpretation.
+
+  They establish no new performance passes.
+- **List B, approved explicitly to proceed despite each remaining failed or open requirement:**
+  - 5a, the genuine water-accuracy FAIL;
+  - 4c;
+  - 4d and 5b;
+  - 5c;
+  - 5d;
+  - 3k;
+  - item 1, the unresolved reflection source.
+
+  None of these is considered fixed, passed or verified.
+- **List C:** the previously accepted exceptions remain as recorded.
+- **Unchanged:** `WMV_LIGHT` stays off by default, and the Stage 10 code stays as it is, without further rendering
+  changes.
+- **Merge order:** Stage 10 should merge before pull requests #128-#132. The schema collision (those branches take 24) and
+  the necessary regression tests are handled when those branches are integrated.
+- **Done on the owner's word:** the branch pushed (head a72b7cc1); pull request #133 opened against `develop`
+  (https://github.com/wowmodelviewer/wowmodelviewer/pull/133). Its description carries:
+  - the original verdicts;
+  - the approved exceptions;
+  - the unresolved requirements;
+  - the deployment risks.
+- **Not authorised yet:**
+  - merging the pull request and verifying the merged commit;
+  - any deployment: build64 stays untouched, with the owner's tabard fixes and screenshot matte;
+  - Stage 10A;
   - Stage 11.
