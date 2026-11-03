@@ -278,7 +278,30 @@ bool CharDetails::customizationCatalog(QJsonObject & catalog, QString & reason) 
               return fail(QString("Choice %1, material %2 has unresolved texture variants.").arg(c).arg(r[4]));
             v[4] = QString::number(selectedFile);
           }
-          for (const auto & cell : v) if (cell.isEmpty()) return fail("Incomplete customization texture layer.");
+          // Some accessories use an intrinsic M2 texture (type 0 / TXID), not a
+          // replaceable texture layer. Dwarf earrings and piercings are examples.
+          // Accept only a wholly absent layer whose exact file is already bound
+          // to an intrinsic slot on this body; partial recipes remain errors.
+          const bool noLayer = std::all_of(v.begin(), v.begin() + 4,
+            [](const QString & cell) { return cell.isEmpty(); });
+          if (noLayer && v[4].toInt() > 0)
+          {
+            int intrinsicSlot = -1;
+            for (uint16 slot = 0; slot < std::min<uint32>(model_->header.nTextures, TEXTURE_MAX); ++slot)
+              if (model_->textureTypeForSlot(slot) == 0 &&
+                  model_->fileDataIdForGLTexture(model_->getGLTexture(slot)) == v[4].toInt())
+              { intrinsicSlot = (int)slot; break; }
+            if (intrinsicSlot >= 0)
+            {
+              // The FBX material already carries this resource. Do not invent
+              // a body-skin layer or overwrite a different replaceable texture.
+              e["intrinsicTexture"] = QJsonObject{{"fileId", v[4].toInt()}, {"slot", intrinsicSlot}};
+              effects.append(e);
+              continue;
+            }
+          }
+          for (const auto & cell : v) if (cell.isEmpty())
+            return fail(QString("Incomplete customization texture layer (choice %1, material %2).").arg(c).arg(r[4]));
           const int mask = v[1].toInt();
           if (mask != -1 && mask != 0 && (mask < 0 || (mask & (mask-1)))) return fail("Unsupported multi-region texture layer.");
           const int region = mask == 1 ? 0 : bitMaskToSectionType(mask);
