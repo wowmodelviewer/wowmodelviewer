@@ -1,5 +1,36 @@
 # FBX customization packages
 
+### Intrinsic accessory textures
+
+When a customization material has no `ChrModelTextureLayer` for this body's
+layout, the exporter accepts it only if its resolved, positive FileDataID is
+already bound to an intrinsic (type 0) texture slot on the same body. The whole
+layer recipe must be absent; partially missing recipes and unmatched files
+remain errors. This covers ordinary Dwarf male/female earrings and piercings
+in Retail 12.1.5.70391 without omitting their choices or inventing skin layers.
+
+Such effects contain additive `intrinsicTexture: {fileId, slot}` provenance.
+The texture remains in the ordinary FBX/material catalog, bound to type 0
+geometry. Consumers retain that material as before; `slot` is the source M2
+texture slot, not a replacement texture type. Choice geoset rules remain active.
+
+Regression: `scripts/tests/customization-intrinsic-textures/verify-package.py`
+compares both Dwarf packages with independently extracted M2/TXID and BLP data.
+Export each with `-fbxcustomizations -fbxincludeequipment 0 -fbxclips 0,1,2`,
+then reimport the FBX to check geometry, bones, materials and takes. The verifier
+checks all 12 jewelry alternatives per sex, native texture identities, exported
+image content (bounded RGB565 decoder quantization; identical alpha), and event
+take counts when the independent native-event extension is present. Keep the
+original game files and generated packages outside Git.
+
+Negative checks must use a disposable runtime and cache copy, never the user's
+active database. Change material 18313's `MaterialResourcesID` to 680246 (the
+female jewelry texture, absent from the male body's intrinsic slots): male
+export must fail without publishing a package. Restore it, then set `Layer` to
+NULL on the first skin layer (`TextureType=1`) in layout 107: export must also
+fail. Restore the database after each case. A female Night Elf customization
+export retains 137 choices, nine bone sets and three selected clips.
+
 The FBX dialog's **Appearance** row is a capability extension point. **Current
 appearance** is the default and uses the existing export path. **All customization
 options** writes `<chosen-name>.fbx.customization/`, containing the FBX geometry
