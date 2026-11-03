@@ -145,6 +145,7 @@ public class WmvM2Animator : MonoBehaviour
     /// and then left alone across sequence changes.
     /// </summary>
     Transform[] billboardBones = new Transform[0];
+    uint[] billboardFlags = new uint[0];
     Camera billboardCamera;
     readonly Dictionary<int, int> globalCountBySequence = new Dictionary<int, int>();
     uint[] globalSequences = new uint[0];
@@ -300,7 +301,7 @@ public class WmvM2Animator : MonoBehaviour
         {
             convertedBySequence.Clear();
             cachedFor = boneTransforms;
-            billboardBones = CollectBillboards(model, boneTransforms, log);
+            billboardBones = CollectBillboards(model, boneTransforms, log, out billboardFlags);
         }
 
         AnimatedBone[] already;
@@ -675,20 +676,19 @@ public class WmvM2Animator : MonoBehaviour
     /// afterwards would carry its child round with it and undo the child's own facing. Depth
     /// ordering costs one pass over the bone array and removes the question entirely.
     ///
-    /// ONLY 0x08 -- the spherical billboard -- is collected. The cylindrical bits (0x10/0x20/0x40,
-    /// one per locked axis) are a different construction, and the legacy viewport implements
-    /// neither: Bone::calcMatrix tests MODELBONE_BILLBOARD (= 8) alone and carries the cylindrical
-    /// case only as a commented-out line (Bone.cpp:39-53). Guessing at them here would put
-    /// untested geometry on screen, so they keep the behaviour they have always had.
+    /// Spherical (0x08) and native-X-locked cylindrical (0x10) billboards are supported.
+    /// Frostbolt's central ribbons inherit the latter from their parent. The other
+    /// cylindrical modes remain outside this implementation.
     /// </summary>
     static Transform[] CollectBillboards(M2ParsedModel model, Transform[] boneTransforms,
-                                         Action<string> log)
+                                         Action<string> log, out uint[] flags)
     {
         int n = Math.Min(model.Bones.Length, boneTransforms.Length);
         var found = new List<int>();
         for (int i = 0; i < n; i++)
-            if (model.Bones[i].Billboard && boneTransforms[i] != null)
+            if ((model.Bones[i].Flags & 0x18) != 0 && boneTransforms[i] != null)
                 found.Add(i);
+        flags = new uint[found.Count];
         if (found.Count == 0)
             return new Transform[0];
 
@@ -704,9 +704,12 @@ public class WmvM2Animator : MonoBehaviour
 
         var result = new Transform[found.Count];
         for (int i = 0; i < found.Count; i++)
+        {
             result[i] = boneTransforms[found[i]];
+            flags[i] = model.Bones[found[i]].Flags;
+        }
         if (log != null)
-            log(string.Format("anim: {0} of {1} bone(s) are billboarded (flag 0x08) and are turned "
+            log(string.Format("anim: {0} of {1} bone(s) are billboarded (flags 0x08/0x10) and are turned "
                               + "to face the camera every frame", found.Count, n));
         return result;
     }
@@ -749,7 +752,22 @@ public class WmvM2Animator : MonoBehaviour
         Quaternion facing = Quaternion.LookRotation(-cam.forward, cam.up);
         for (int i = 0; i < billboardBones.Length; i++)
             if (billboardBones[i] != null)
-                billboardBones[i].rotation = facing;
+            {
+                Transform bone = billboardBones[i];
+                bone.rotation = (billboardFlags[i] & 0x08) != 0 ? facing :
+                    XLockedFacing(bone.parent != null ? bone.parent.rotation : Quaternion.identity, -cam.forward);
+            }
+    }
+
+    internal static Quaternion XLockedFacing(Quaternion parent, Vector3 viewDirection)
+    {
+        // Native X is Unity Z. Preserve that axis in the parent's frame, and turn
+        // native Y (Unity -X, the ribbon width) perpendicular to the viewing ray.
+        // Use the parent's pose, never last frame's billboard rotation: no drift.
+        Vector3 axis = parent * Vector3.forward;
+        Vector3 right = Vector3.Cross(viewDirection, axis);
+        if (right.sqrMagnitude < 1e-10f) return parent;
+        return Quaternion.LookRotation(axis, Vector3.Cross(axis, right.normalized));
     }
 
     /// <summary>Put every animated bone back exactly where the bind pose expects it.</summary>

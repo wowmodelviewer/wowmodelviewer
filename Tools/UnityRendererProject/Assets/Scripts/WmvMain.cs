@@ -1449,6 +1449,8 @@ public partial class WmvMain : MonoBehaviour
             {
                 currentSlot.LastAppState = loadState;
                 currentSlot.HaveAppState = true;
+                if (currentSlot.Runtime.Emitters != null)
+                    currentSlot.Runtime.Emitters.SetFlight(loadState.flight, loadState.flightSpeed);
                 int playingSeq = currentSlot.Model.AnimatedSequence;
                 if (loadState.sequenceIndex < 0 || loadState.sequenceIndex == playingSeq)
                 {
@@ -2903,8 +2905,10 @@ public partial class WmvMain : MonoBehaviour
         if (a == null)
             return what + ": not animated";
         return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                             "{0}: sequence {1} (animID {2}) at {3:F0} of {4:F0} ms, {5} x{6:0.##}", what, a.SequenceIndex, a.AnimId,
-                             a.TimeMs, a.LengthMs, a.IsPlaying ? "playing" : "paused", a.Speed);
+                             "{0}: sequence {1} (animID {2}) at {3:F0} of {4:F0} ms, {5} x{6:0.##}, flight {7} at {8:0.##} units/s", what, a.SequenceIndex, a.AnimId,
+                             a.TimeMs, a.LengthMs, a.IsPlaying ? "playing" : "paused", a.Speed,
+                             slot.Runtime.Emitters != null && slot.Runtime.Emitters.FlightEnabled ? "on" : "off",
+                             slot.Runtime.Emitters != null ? slot.Runtime.Emitters.FlightSpeed : 0f);
     }
 
     /// <summary>

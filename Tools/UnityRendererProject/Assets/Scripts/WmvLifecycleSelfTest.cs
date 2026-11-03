@@ -254,6 +254,206 @@ public static partial class WmvLifecycleSelfTest
     }
 
 
+    static void EmitterOnlyTests(Action<string> log)
+    {
+        byte[] raw = M2Synthetic.EmitterModel(0);
+        for (int mode = 0; mode < 3; mode++)
+        {
+            var model = M2Parser.Parse(raw, 0);
+            model.Vertices = new M2Vertex[0];
+            if (mode == 1) model.RibbonEmitters = new M2RibbonEmitterDef[0];
+            if (mode == 2) model.ParticleEmitters = new M2ParticleEmitterDef[0];
+            var rt = WmvModelBuilder.Build(model, new M2ParsedSkin(), EmitterTextures(),
+                                           "EmitterOnlyTest", log);
+            try
+            {
+                Check(rt.VertexCount == 0 && rt.TriangleCount == 0 && rt.Emitters != null,
+                      "emitter-only: empty surface accepted, mode " + mode, log);
+                Check(rt.Animator != null && rt.Bones.Length > 0,
+                      "emitter-only: retains clock and skeleton", log);
+                Check(rt.Bounds.size.sqrMagnitude > 0 && !float.IsNaN(rt.Bounds.center.x),
+                      "emitter-only: finite nonempty preview bounds", log);
+                Check(rt.Emitters.LiveParticleCount == 0 && rt.Emitters.RibbonSegmentCount == 0,
+                      "emitter-only: framing did not advance playback", log);
+                WmvModelBuilder.PoseAt(rt, 1000f);
+                Check(mode == 2 || rt.Emitters.LiveParticleCount > 0,
+                      "emitter-only: particles emit", log);
+                Check(mode == 1 || rt.Emitters.RibbonSegmentCount > 1,
+                      "emitter-only: ribbons emit", log);
+                int live = rt.Emitters.LiveParticleCount;
+                int segments = rt.Emitters.RibbonSegmentCount;
+                rt.Emitters.Advance(0f, 1000f, 1000f);
+                Check(rt.Emitters.LiveParticleCount == live && rt.Emitters.RibbonSegmentCount == segments,
+                      "emitter-only: pause preserves simulation", log);
+                M2Parser.ReadAnimationInto(raw, 1, model);
+                if (mode == 1) model.RibbonEmitters = new M2RibbonEmitterDef[0];
+                if (mode == 2) model.ParticleEmitters = new M2ParticleEmitterDef[0];
+                Check(WmvModelBuilder.ApplySequence(rt, model, log),
+                      "emitter-only: changes animation", log);
+            }
+            finally { rt.Dispose(); }
+            Check(rt.Root == null && rt.Emitters == null, "emitter-only: disposed", log);
+        }
+        var empty = M2Parser.Parse(raw, 0);
+        empty.Vertices = new M2Vertex[0];
+        empty.ParticleEmitters = new M2ParticleEmitterDef[0];
+        empty.RibbonEmitters = new M2RibbonEmitterDef[0];
+        bool rejected = false;
+        try { WmvModelBuilder.Build(empty, new M2ParsedSkin(), EmitterTextures(), "EmptyTest", log).Dispose(); }
+        catch (WowParseException) { rejected = true; }
+        Check(rejected, "emitter-only: truly empty models still rejected", log);
+    }
+
+    static Vector3 FirstParticlePosition(WmvEmitterRuntime runtime)
+    {
+        var list = (System.Collections.IList)typeof(WmvEmitterRuntime)
+            .GetField("particles", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(runtime);
+        var state = list[0];
+        return ((Vector3[])state.GetType().GetField("Pos").GetValue(state))[0];
+    }
+
+    static void RibbonWidthTests(Action<string> log)
+    {
+        foreach (Quaternion parent in new[] { Quaternion.identity, Quaternion.Euler(20f, 35f, 17f) })
+        {
+            Vector3 axis = parent * Vector3.forward;
+            foreach (Vector3 view in new[] { Vector3.left, Vector3.up, new Vector3(1f, 2f, 3f).normalized, axis })
+            {
+                Quaternion facing = WmvM2Animator.XLockedFacing(parent, view);
+                Check((facing * Vector3.forward - axis).sqrMagnitude < 1e-8f,
+                      "ribbon: cylindrical billboard preserves the parent flight axis", log);
+                if (Vector3.Cross(view, axis).sqrMagnitude > 1e-10f)
+                    Check(Mathf.Abs(Vector3.Dot(facing * Vector3.left, view)) < 1e-4f,
+                          "ribbon: cylindrical width is visible across camera angles", log);
+                else Check(Quaternion.Angle(facing, parent) < .01f,
+                           "ribbon: axial camera has a stable finite fallback", log);
+            }
+        }
+        var model = M2Parser.Parse(M2Synthetic.EmitterModel(0), 0);
+        model.ParticleEmitters = new M2ParticleEmitterDef[0];
+        model.Bones[0].Flags |= 0x10;
+        model.Materials[model.RibbonEmitters[0].MaterialIndex].BlendMode = 0;
+        model.RibbonEmitters[0].Opacity = new M2Track<float> {
+            GlobalSequence = -1, Times = new uint[] { 0, 100, 200 }, Values = new float[] { .5f, 1f, 0f }
+        };
+        var rt = WmvModelBuilder.Build(model, M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin()),
+                                      EmitterTextures(), "RibbonWidth", log);
+        try
+        {
+            var list = (System.Collections.IList)typeof(WmvEmitterRuntime)
+                .GetField("ribbons", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(rt.Emitters);
+            var state = list[0];
+            var bone = (Transform)state.GetType().GetField("Bone").GetValue(state);
+            // Missile-like orientation: native +Z lies along the flight path. Using
+            // it as the width produces zero-area triangles despite a nonzero length.
+            bone.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            rt.Emitters.ResetState();
+            rt.Emitters.SetFlight(true, 20f);
+            for (int i = 0; i < 60; i++) rt.Emitters.Advance(1f / 60f, 0f, 0f);
+            rt.Emitters.Build(0f, 0f);
+            var mesh = (Mesh)state.GetType().GetField("Mesh").GetValue(state);
+            var material = (Material)state.GetType().GetField("Material").GetValue(state);
+            foreach (float time in new[] { 0f, 100f, 200f, 0f })
+            {
+                rt.Emitters.Build(time, time);
+                bool blend = time != 100f;
+                Check(material.GetFloat("_SrcBlend") == (float)(blend ? UnityEngine.Rendering.BlendMode.SrcAlpha : UnityEngine.Rendering.BlendMode.One)
+                      && material.GetFloat("_DstBlend") == (float)(blend ? UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha : UnityEngine.Rendering.BlendMode.Zero),
+                      "ribbon: opaque material follows half/full/zero opacity and restores on replay", log);
+            }
+            var vertices = mesh.vertices;
+            var indices = mesh.triangles;
+            float area = 0f;
+            for (int i = 0; i < indices.Length; i += 3)
+                area += Vector3.Cross(vertices[indices[i + 1]] - vertices[indices[i]],
+                                      vertices[indices[i + 2]] - vertices[indices[i]]).magnitude * .5f;
+            Check(area > 1f, "ribbon: forward-facing missile has a surface, not a line", log);
+            Check(Mathf.Abs(mesh.bounds.size.x - .6f) < 1e-4f,
+                  "ribbon: authored width stays transverse to travel", log);
+            rt.Emitters.Advance(0f, 0f, 0f); rt.Emitters.Build(0f, 0f);
+            Check(mesh.vertices.Length == vertices.Length && mesh.vertices[0] == vertices[0],
+                  "ribbon: pause preserves the ribbon surface", log);
+            var cameraObject = new GameObject("RibbonCameraTest");
+            try
+            {
+                var camera = cameraObject.AddComponent<Camera>(); camera.enabled = false;
+                typeof(WmvM2Animator).GetField("billboardCamera", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .SetValue(rt.Animator, camera);
+                foreach (float yaw in new[] { 0f, 45f, 90f, 180f })
+                {
+                    camera.transform.rotation = Quaternion.Euler(15f, yaw, 0f);
+                    rt.Animator.ApplyPose(0f);
+                    Check(Mathf.Abs(Vector3.Dot(bone.right, camera.transform.forward)) < 1e-4f,
+                          "ribbon: flag 0x10 is applied by the animator at yaw " + yaw, log);
+                    Quaternion first = bone.rotation;
+                    rt.Animator.ApplyPose(0f);
+                    Check(Quaternion.Angle(first, bone.rotation) < .01f,
+                          "ribbon: repeated paused pose does not accumulate rotation", log);
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(cameraObject); }
+        }
+        finally { rt.Dispose(); }
+    }
+
+    static void FlightTests(Action<string> log)
+    {
+        WmvIpcClient.AnimationState message;
+        Check(WmvIpcClient.ParseAnimationState("{\"type\":\"modelAnimationState\",\"flight\":true,\"flightSpeed\":37.5}", out message)
+              && message.flight && message.flightSpeed == 37.5f, "flight: IPC fields decoded", log);
+        WmvIpcClient.ParseAnimationState("{\"type\":\"modelAnimationState\"}", out message);
+        Check(!message.flight, "flight: older host defaults to off", log);
+        foreach (bool local in new[] { false, true })
+        {
+            var model = M2Parser.Parse(M2Synthetic.EmitterModel(0), 0);
+            model.ParticleEmitters[0].Flags = local ? model.ParticleEmitters[0].Flags | 0x10 : model.ParticleEmitters[0].Flags & ~0x10;
+            var skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+            var stationary = WmvModelBuilder.Build(model, skin, EmitterTextures(), "Stationary", log);
+            var flying = WmvModelBuilder.Build(model, skin, EmitterTextures(), "Flying", log);
+            try
+            {
+                Check(!flying.Emitters.FlightEnabled && flying.Emitters.FlightSpeed == 20f, "flight: new model resets defaults", log);
+                foreach (float speed in new[] { 0f, 20f, 40f })
+                {
+                    stationary.Emitters.ResetState(); flying.Emitters.ResetState();
+                    stationary.Emitters.Advance(.1f, 0f, 0f); flying.Emitters.Advance(.1f, 0f, 0f);
+                    flying.Emitters.SetFlight(true, speed);
+                    stationary.Emitters.Advance(.01f, 0f, 0f); flying.Emitters.Advance(.01f, 0f, 0f);
+                    Vector3 delta = FirstParticlePosition(flying.Emitters) - FirstParticlePosition(stationary.Emitters);
+                    // A projectile has moved down native -X / Unity -Z. A free particle's
+                    // WORLD displacement must stay unchanged; in the following camera's
+                    // frame it is behind (+Z), never ahead of the projectile's nose.
+                    Vector3 projectileDisplacement = new Vector3(0f, 0f, -speed * .01f);
+                    Check((delta + (local ? Vector3.zero : projectileDisplacement)).sqrMagnitude < 1e-8f,
+                          "flight: translation speed " + speed + ", attached=" + local, log);
+                    Vector3 paused = FirstParticlePosition(flying.Emitters);
+                    flying.Emitters.Advance(0f, 0f, 0f);
+                    Check(FirstParticlePosition(flying.Emitters) == paused, "flight: pause freezes history", log);
+                }
+                flying.Emitters.ResetState(); stationary.Emitters.ResetState();
+                flying.Emitters.SetFlight(true, 20f);
+                for (int i = 0; i < 60; i++)
+                {
+                    flying.Emitters.Advance(1f / 60f, 0f, 0f);
+                    stationary.Emitters.Advance(1f / 60f, 0f, 0f);
+                }
+                flying.Emitters.Build(0f, 0f); stationary.Emitters.Build(0f, 0f);
+                float flyingSpan = 0f, stationarySpan = 0f;
+                foreach (var mesh in flying.Root.GetComponentsInChildren<MeshFilter>()) flyingSpan = Mathf.Max(flyingSpan, mesh.sharedMesh.bounds.size.z);
+                foreach (var mesh in stationary.Root.GetComponentsInChildren<MeshFilter>()) stationarySpan = Mathf.Max(stationarySpan, mesh.sharedMesh.bounds.size.z);
+                Check(flyingSpan > stationarySpan + 1f, "flight: stationary emitter now leaves an extended ribbon", log);
+                flying.Emitters.SetFlight(false, 20f);
+                Check(!flying.Emitters.FlightEnabled, "flight: switch off", log);
+                flying.Emitters.SetFlight(true, float.NaN);
+                Check(flying.Emitters.FlightSpeed == 20f, "flight: invalid speed rejected", log);
+                flying.Emitters.SetFlight(true, 1000f);
+                Check(flying.Emitters.FlightSpeed == 200f, "flight: speed bounded", log);
+            }
+            finally { stationary.Dispose(); flying.Dispose(); }
+            Check(flying.Root == null && flying.Emitters == null, "flight: unload clears runtime", log);
+        }
+    }
+
     // ---------------------------------------------------------------- viewport zoom
 
     /// <summary>
@@ -2587,6 +2787,9 @@ public static partial class WmvLifecycleSelfTest
         SubmeshVisibilityTests(log);
         OutputGateTests(log);
         EmitterTests(log);
+        EmitterOnlyTests(log);
+        FlightTests(log);
+        RibbonWidthTests(log);
         CharacterTests(log);
         NpcEquipmentTests(log);
         MountTests(log);
