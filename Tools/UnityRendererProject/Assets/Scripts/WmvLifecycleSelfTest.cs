@@ -254,6 +254,56 @@ public static partial class WmvLifecycleSelfTest
     }
 
 
+    static void EmitterOnlyTests(Action<string> log)
+    {
+        byte[] raw = M2Synthetic.EmitterModel(0);
+        for (int mode = 0; mode < 3; mode++)
+        {
+            var model = M2Parser.Parse(raw, 0);
+            model.Vertices = new M2Vertex[0];
+            if (mode == 1) model.RibbonEmitters = new M2RibbonEmitterDef[0];
+            if (mode == 2) model.ParticleEmitters = new M2ParticleEmitterDef[0];
+            var rt = WmvModelBuilder.Build(model, new M2ParsedSkin(), EmitterTextures(),
+                                           "EmitterOnlyTest", log);
+            try
+            {
+                Check(rt.VertexCount == 0 && rt.TriangleCount == 0 && rt.Emitters != null,
+                      "emitter-only: empty surface accepted, mode " + mode, log);
+                Check(rt.Animator != null && rt.Bones.Length > 0,
+                      "emitter-only: retains clock and skeleton", log);
+                Check(rt.Bounds.size.sqrMagnitude > 0 && !float.IsNaN(rt.Bounds.center.x),
+                      "emitter-only: finite nonempty preview bounds", log);
+                Check(rt.Emitters.LiveParticleCount == 0 && rt.Emitters.RibbonSegmentCount == 0,
+                      "emitter-only: framing did not advance playback", log);
+                WmvModelBuilder.PoseAt(rt, 1000f);
+                Check(mode == 2 || rt.Emitters.LiveParticleCount > 0,
+                      "emitter-only: particles emit", log);
+                Check(mode == 1 || rt.Emitters.RibbonSegmentCount > 1,
+                      "emitter-only: ribbons emit", log);
+                int live = rt.Emitters.LiveParticleCount;
+                int segments = rt.Emitters.RibbonSegmentCount;
+                rt.Emitters.Advance(0f, 1000f, 1000f);
+                Check(rt.Emitters.LiveParticleCount == live && rt.Emitters.RibbonSegmentCount == segments,
+                      "emitter-only: pause preserves simulation", log);
+                M2Parser.ReadAnimationInto(raw, 1, model);
+                if (mode == 1) model.RibbonEmitters = new M2RibbonEmitterDef[0];
+                if (mode == 2) model.ParticleEmitters = new M2ParticleEmitterDef[0];
+                Check(WmvModelBuilder.ApplySequence(rt, model, log),
+                      "emitter-only: changes animation", log);
+            }
+            finally { rt.Dispose(); }
+            Check(rt.Root == null && rt.Emitters == null, "emitter-only: disposed", log);
+        }
+        var empty = M2Parser.Parse(raw, 0);
+        empty.Vertices = new M2Vertex[0];
+        empty.ParticleEmitters = new M2ParticleEmitterDef[0];
+        empty.RibbonEmitters = new M2RibbonEmitterDef[0];
+        bool rejected = false;
+        try { WmvModelBuilder.Build(empty, new M2ParsedSkin(), EmitterTextures(), "EmptyTest", log).Dispose(); }
+        catch (WowParseException) { rejected = true; }
+        Check(rejected, "emitter-only: truly empty models still rejected", log);
+    }
+
     // ---------------------------------------------------------------- viewport zoom
 
     /// <summary>
@@ -2587,6 +2637,7 @@ public static partial class WmvLifecycleSelfTest
         SubmeshVisibilityTests(log);
         OutputGateTests(log);
         EmitterTests(log);
+        EmitterOnlyTests(log);
         CharacterTests(log);
         NpcEquipmentTests(log);
         MountTests(log);
