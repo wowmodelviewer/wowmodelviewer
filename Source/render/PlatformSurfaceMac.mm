@@ -1,5 +1,7 @@
 // The macOS surface: the canvas's NSView, made layer-hosting with a CAMetalLayer that MoltenVK draws into.
 
+#define VK_USE_PLATFORM_METAL_EXT
+#include <vulkan/vulkan.h>
 #include "PlatformSurface.h"
 
 #import <AppKit/AppKit.h>

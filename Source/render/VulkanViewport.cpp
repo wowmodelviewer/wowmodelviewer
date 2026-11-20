@@ -11,7 +11,7 @@
 #include "VulkanViewport.h"
 #include <memory>
 
-#include "PlatformSurface.h" // before anything else: it sets the Vulkan platform
+#include "PlatformSurface.h"
 #include "RenderList.h"
 #include "Texture.h"
 #include "TextureManager.h"

@@ -1,6 +1,8 @@
 // The Linux surface: the canvas's X11 drawing window. Under Wayland the viewer runs through XWayland
 // (the app sets GDK_BACKEND=x11 before GTK starts), so this is always an X11 window.
 
+#define VK_USE_PLATFORM_XLIB_KHR
+#include <vulkan/vulkan.h>
 #include "PlatformSurface.h"
 
 #include <gtk/gtk.h>

@@ -12,13 +12,8 @@
 #include <string>
 #include <vector>
 
-#if defined(__APPLE__)
-#  define VK_USE_PLATFORM_METAL_EXT
-#elif defined(_WIN32)
-#  define VK_USE_PLATFORM_WIN32_KHR
-#else
-#  define VK_USE_PLATFORM_XLIB_KHR
-#endif
+// The core API only: each PlatformSurface*.cpp turns its platform's surface extension on itself (VK_USE_PLATFORM_*),
+// so windows.h and Xlib.h -- whose macros break Qt's headers -- never reach the renderer.
 #include <vulkan/vulkan.h>
 
 namespace wmv

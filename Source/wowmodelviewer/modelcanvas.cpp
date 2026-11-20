@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 namespace
 {
   // Milliseconds of a steady clock (what timeGetTime gave the animation clock on Windows).
-  unsigned long timeGetTime()
+  unsigned long wmvMillis()
   {
     using namespace std::chrono;
     static const steady_clock::time_point start = steady_clock::now();
@@ -66,9 +66,9 @@ ModelCanvas::ModelCanvas(wxWindow *parent)
   init = false;
 
   // Init time related stuff
-  srand((unsigned)timeGetTime());
+  srand((unsigned)wmvMillis());
   time = 0;
-  lastTime = timeGetTime();
+  lastTime = wmvMillis();
 
   // Set all our pointers to null
   skyModel = nullptr;    // SkyBox Model
@@ -772,7 +772,7 @@ void ModelCanvas::displayDebugInfos() const
   static int frameCount = 0;
 
   static DWORD previousTime = 0;
-  const auto currentTime = timeGetTime();
+  const auto currentTime = wmvMillis();
   const auto elapsedTime = (currentTime - previousTime) / 1000.0;
 
   if(elapsedTime > 0.25) // update 4 times per second
@@ -818,8 +818,8 @@ void ModelCanvas::tick()
 
   // Time stuff
   //time = float();
-  ddt = (timeGetTime() - lastTime);// * animSpeed;
-  lastTime = timeGetTime();
+  ddt = (wmvMillis() - lastTime);// * animSpeed;
+  lastTime = wmvMillis();
   AnimManager::StartTick();
   // --
 
