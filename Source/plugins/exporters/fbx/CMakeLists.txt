@@ -34,6 +34,7 @@ use_wow()
 set(NAME fbxexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
+wmv_plugin_output(${NAME})
 
 if(WMV_X64)
   set(FBX_SDK_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/fbx_x64/lib/libfbxsdk.lib)
@@ -48,6 +49,6 @@ target_link_libraries(${NAME} Qt5::Core ${extralibs} ${FBX_SDK_LIB} ${wxWidgets_
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/plugins/")
 
 if(WIN32)
-  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR} LIBRARY DESTINATION ${BIN_DIR})
   install(FILES "${FBX_SDK_DLL}" DESTINATION "${CMAKE_SOURCE_DIR}/bin")
 endif(WIN32)

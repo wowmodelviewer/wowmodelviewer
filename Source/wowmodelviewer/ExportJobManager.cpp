@@ -62,7 +62,7 @@ class ExportProcess : public wxProcess
 {
   public:
     ExportProcess(ExportJobManager * mgr, ExportJob * job)
-      : wxProcess(NULL), m_mgr(mgr), m_job(job)
+      : wxProcess((wxEvtHandler *)nullptr), m_mgr(mgr), m_job(job)
     {
       Redirect();
     }

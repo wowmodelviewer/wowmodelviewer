@@ -7,6 +7,7 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
+#include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
 #include <QSettings>
@@ -15,9 +16,15 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
+#ifdef _WIN32
 #include <windows.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#else
+#include <QDesktopServices>
+#include <QProcess>
+#include <QUrl>
+#endif
 
 #include "util.h"
 #include "logger/Logger.h"
@@ -96,7 +103,7 @@ namespace TextureExport
     // A name for a test file or folder that nothing else uses.
     QString testName()
     {
-      return QString("wmv-write-test-%1-%2").arg((qulonglong)GetCurrentProcessId()).arg(QDateTime::currentMSecsSinceEpoch());
+      return QString("wmv-write-test-%1-%2").arg((qulonglong)QCoreApplication::applicationPid()).arg(QDateTime::currentMSecsSinceEpoch());
     }
   }
 
@@ -306,14 +313,19 @@ namespace TextureExport
       explorerHook(file, true);
       return;
     }
+    bool shown = false;
+#if defined(_WIN32)
     // Explorer's own way: the folder opened (or brought up) with the file selected in it.
     const std::wstring native = display(file).toStdWString();
-    bool shown = false;
     if (PIDLIST_ABSOLUTE item = ILCreateFromPathW(native.c_str()))
     {
       shown = SUCCEEDED(SHOpenFolderAndSelectItems(item, 0, nullptr, 0));
       ILFree(item);
     }
+#elif defined(__APPLE__)
+    // Finder's own way: its window brought up with the file selected.
+    shown = QProcess::startDetached(QStringLiteral("/usr/bin/open"), { QStringLiteral("-R"), QFileInfo(file).absoluteFilePath() });
+#endif
     if (!shown)
     {
       LOG_WARNING << "[texexport] could not select" << file << "in Explorer; opening its folder";
@@ -329,7 +341,11 @@ namespace TextureExport
       return;
     }
     QDir().mkpath(folderPath);
+#if defined(_WIN32)
     const std::wstring native = display(folderPath).toStdWString();
     ShellExecuteW(nullptr, L"open", native.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#else
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folderPath).absoluteFilePath()));
+#endif
   }
 }

@@ -68,6 +68,7 @@ class TextureExportNotice;
 class wxAuiToolBar;
 class wxCheckBox;
 
+class UiButton;
 class TextureView : public wxPanel
 {
 public:
@@ -231,10 +232,10 @@ private:
   wxStaticText * m_name = nullptr;
   wxStaticText * m_path = nullptr;
   wxStaticText * m_facts = nullptr;
-  wxButton * m_copyPath = nullptr;
-  wxButton * m_copyId = nullptr;
-  wxButton * m_exportPng = nullptr;
-  wxButton * m_exportBlp = nullptr;
+  UiButton * m_copyPath = nullptr;
+  UiButton * m_copyId = nullptr;
+  UiButton * m_exportPng = nullptr;
+  UiButton * m_exportBlp = nullptr;
   wxCheckBox * m_quickExport = nullptr;
   TextureExportNotice * m_notice = nullptr;   // made by the first export
 

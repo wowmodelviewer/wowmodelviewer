@@ -6,6 +6,7 @@ message(STATUS "Building wow library")
 set(src animated.cpp
       AnimManager.cpp
       Attachment.cpp
+      BlockDecode.cpp
       Bone.cpp
       CASCFile.cpp
       CASCFolder.cpp
@@ -60,6 +61,7 @@ set(src animated.cpp
 set(headers animated.h
       AnimManager.h
       Attachment.h
+      BlockDecode.h
       Bone.h
       CASCChunks.h
       CASCFile.h

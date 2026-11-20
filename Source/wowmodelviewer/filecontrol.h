@@ -20,7 +20,6 @@ namespace wow { struct MapEntry; class WorldMapCatalog; }
 class wxSearchCtrl;
 class wxStaticText;
 class TextureBrowse;
-class MapTilePanel;
 
 #include "metaclasses/Container.h"
 
@@ -173,7 +172,6 @@ public:
   bool ShowsMaps() const;
   // THE MAPS VIEWER (docs/world-viewer/05-maps-viewer-ui.md): the tile grid under the map list, and MapsViewer's state
   // changed (its onChanged): the grid follows.
-  MapTilePanel * mapPanel() const { return m_mapPanel; }
   // The panel made ahead, hidden (the frame's construction): made at the first entry into Maps it took 27-32 ms of
   // that switch.
   void PrepareMaps();
@@ -319,9 +317,7 @@ private:
   bool mainTreeCurrent(const QString & content);
   // The map tree still lists what InitMaps would: the same catalogue, search and map picked.
   bool mapTreeCurrent(const QString & content) const;
-  void addMapPanel();
   // THE MAPS VIEWER's tile grid (made ahead: PrepareMaps), and its listing's cost.
-  MapTilePanel * m_mapPanel = nullptr;
   // What the map tree was listed for: the search, the map picked then, and the line under the tree.
   QString m_mapsListedContent;
   int m_mapsListedPicked = -1;

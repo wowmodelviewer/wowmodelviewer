@@ -25,11 +25,11 @@
 #include "UiControls.h"
 #include "UiStyle.h"
 
+#ifdef __WXMSW__
 #include <commctrl.h>
-#include "UnityAssetAccess.h"
+#endif
+#include "ClientState.h"
 #include "LoadTimeline.h"
-#include "MapsViewer.h"
-#include "MapTilePanel.h"
 #include "WorldMapCatalog.h"
 #include "WoWFolder.h"
 
@@ -80,16 +80,12 @@ bool FileControl::isWmoGroupFile(const QString & path, const std::map<QString, G
 void beautifyFileName(QString & file)
 {
   file = file.toLower().replace('/','\\');
-  QString firstLetter = file[0];
-  firstLetter = firstLetter.toUpper();
-  file[0] = firstLetter[0];
+  if (file.isEmpty())
+    return;
+  file[0] = file[0].toUpper();
   int ret = file.indexOf('\\');
-  if (ret>-1)
-  {
-    firstLetter = file[ret+1];
-    firstLetter = firstLetter.toUpper();
-    file[ret+1] = firstLetter[0];
-  }
+  if (ret > -1 && ret + 1 < file.size())
+    file[ret+1] = file[ret+1].toUpper();
 }
 
 namespace
@@ -105,6 +101,7 @@ namespace
   // its freeze is for: a tree frozen with the frame for a viewer-mode switch, its rows left as they were (its parent's
   // freeze keeps it from being drawn), is not measured again at the thaw -- 12-15 ms of a switch with the Retail maps
   // (docs/world-viewer/08-streaming.md, section 8.8).
+#ifdef __WXMSW__
   class BrowseTree : public wxTreeCtrl
   {
   public:
@@ -222,6 +219,16 @@ namespace
     bool m_redrawOff = false;
     std::vector<wxTreeItemId> m_ensureVisible;
   };
+#else
+  // The generic tree of macOS and GTK has no per-row measuring at the thaw to put off.
+  class BrowseTree : public wxTreeCtrl
+  {
+  public:
+    using wxTreeCtrl::wxTreeCtrl;
+    bool rowsUnsettled() const { return false; }
+    void settleRows() {}
+  };
+#endif
 }
 
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
@@ -260,10 +267,12 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
       t->SetDoubleBuffered(true);
       t->SetBackgroundColour(UiStyle::palette().panelBackground);
       t->SetForegroundColour(UiStyle::palette().text);
+#ifdef __WXMSW__
       const HWND tree = (HWND)t->GetHWND();
       const int row = FromDIP(UiStyle::TreeRowHeight) & ~1;   // an even height: Windows rounds odd ones down
       if (TreeView_GetItemHeight(tree) < row)
         TreeView_SetItemHeight(tree, row);
+#endif
       // An arrow key held down in the texture tree: the rows it passes wait to be decoded until it is let
       // go (TextureView::setKeysRepeating). Focus leaving the tree lets go too: the key-up goes elsewhere.
       t->Bind(wxEVT_KEY_DOWN, [this](wxKeyEvent & e) { KeysRepeating(e.IsAutoRepeat()); e.Skip(); });
@@ -350,6 +359,7 @@ namespace
   // Emptying the tree hands it the keyboard: the Windows tree control takes the focus while its rows are
   // deleted, from the search box too. Typing on in the search box must not land in the tree, so whatever
   // had the keyboard before the tree was refilled has it again afterwards.
+#ifdef __WXMSW__
   class KeepFocusOffTree
   {
   public:
@@ -369,6 +379,13 @@ namespace
     HWND m_tree;
     HWND m_before;
   };
+#else
+  class KeepFocusOffTree
+  {
+  public:
+    explicit KeepFocusOffTree(wxWindow *) {}
+  };
+#endif
 }
 
 void FileControl::Init(ModelViewer* mv)
@@ -1264,10 +1281,6 @@ void FileControl::SelectWMOFile(GameFile * file)
   // build) purely for the hidden OpenGL canvas, and a metadata-only root has no groups to build.
   modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
 
-  // The Unity player is told before the viewport decides (UpdateInterface), as ModelViewer::LoadModel
-  // does for a model; with no player ready yet, onUnityReady sends it.
-  modelviewer->SendLoadToUnity();
-
   UpdateInterface();
 }
 
@@ -1392,16 +1405,8 @@ bool FileControl::FollowViewerMode(ViewerMode mode, bool listNow)
     fileTree = tree;
     fileTree->Show();
   }
-  // THE MAPS VIEWER's facts and controls, under the list in Maps only (the overhead map is in the viewport's place).
-  if (mode == ViewerMode::Maps)
-    addMapPanel();
-  if (m_mapPanel)
-    m_mapPanel->Show(mode == ViewerMode::Maps);
-  if (swapped || m_mapPanel)
+  if (swapped)
     Layout();
-  // What changed while another viewer had Browse (a client switch, a load) shows at once.
-  if (m_mapPanel && mode == ViewerMode::Maps)
-    m_mapPanel->Refresh2();
   UpdateSearchHint();
   // The tree as it was left, when it still lists what Init would: nothing listed again.
   const QString content = QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed();
@@ -1473,30 +1478,14 @@ bool FileControl::mainTreeCurrent(const QString & content)
 bool FileControl::mapTreeCurrent(const QString & content) const
 {
   if (!m_mapsCatalog || !g_modelViewer || g_modelViewer->mapCatalog() != m_mapsCatalog ||
-      !UnityAssetAccess::hasActiveClient() || content != m_mapsListedContent || !m_mapTree->GetRootItem().IsOk())
+      !ClientState::hasActiveClient() || content != m_mapsListedContent || !m_mapTree->GetRootItem().IsOk())
     return false;
-  // The map picked is still the row picked (or has no row, as when it was listed).
-  MapsViewer * maps = g_modelViewer->maps();
-  const int picked = maps ? maps->mapId() : -1;
-  const wxTreeItemId row = m_mapTree->GetSelection();
-  FileTreeData * data = row.IsOk() ? dynamic_cast<FileTreeData *>(m_mapTree->GetItemData(row)) : nullptr;
-  const int selected = data ? data->mapId : -1;
-  return selected == picked || (selected < 0 && picked == m_mapsListedPicked);
-}
-
-void FileControl::addMapPanel()
-{
-  if (m_mapPanel || !g_modelViewer || !g_modelViewer->maps())
-    return;
-  // As tall as its controls, under the list of maps (which takes the rest); shown in Maps only.
-  m_mapPanel = new MapTilePanel(this, g_modelViewer->maps());
-  m_mapPanel->Hide();
-  GetSizer()->Insert(3, m_mapPanel, 0, wxEXPAND);
+  // (No map is picked until the world viewer returns: the listing is the same while its search is.)
+  return true;
 }
 
 void FileControl::PrepareMaps()
 {
-  addMapPanel();
 }
 
 bool FileControl::ShowsMaps() const
@@ -1506,14 +1495,10 @@ bool FileControl::ShowsMaps() const
 
 void FileControl::MapsChanged()
 {
-  if (m_mapPanel && m_mode == ViewerMode::Maps)
-    m_mapPanel->Refresh2();
 }
 
 void FileControl::MapsStreamChanged()
 {
-  if (m_mapPanel && m_mode == ViewerMode::Maps)
-    m_mapPanel->StreamChanged();
 }
 
 namespace
@@ -1561,7 +1546,7 @@ void FileControl::InitMaps(const QString & content)
   m_mapGroups.clear();
   m_mapsCatalog.reset();
   m_mapsListedContent = content;
-  if (!catalog || !UnityAssetAccess::hasActiveClient())
+  if (!catalog || !ClientState::hasActiveClient())
   {
     fileTree->Thaw();
     SetSearchStatus(_("Load a World of Warcraft client to browse its maps."));
@@ -1615,8 +1600,7 @@ void FileControl::InitMaps(const QString & content)
   }
   const wxTreeItemId root = fileTree->AddRoot(wxT("Maps"));
   wxTreeItemId select;
-  MapsViewer * maps = g_modelViewer->maps();
-  const int picked = maps ? maps->mapId() : -1;
+  const int picked = -1; // the world viewer, which picks a map, returns in a later version
   m_mapsListedPicked = picked;
   if (pinned)
   {
@@ -1698,12 +1682,9 @@ wxTreeItemId FileControl::FillMapGroup(wxTreeItemId group, int picked)
   return pickedRow;
 }
 
-void FileControl::SelectMapRow(wxTreeItemId item)
+void FileControl::SelectMapRow(wxTreeItemId WXUNUSED(item))
 {
-  FileTreeData * data = item.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(item)) : nullptr;
-  if (!data || data->mapId < 0 || !g_modelViewer || !g_modelViewer->maps())
-    return;
-  g_modelViewer->maps()->SelectMap(data->mapId);
+  // A map's row names it; the world viewer that opens one returns in a later version (the viewport says so).
 }
 
 void FileControl::PickedRowFollowsLoad()
@@ -1955,7 +1936,7 @@ void FileControl::InitTextures()
   {
     m_textures->clear();
     m_applied[slot(ViewerMode::Textures)].Clear();
-    SetSearchStatus(UnityAssetAccess::isClientLoading() ? _("Loading the game client...")
+    SetSearchStatus(ClientState::isClientLoading() ? _("Loading the game client...")
                                                          : _("Load a World of Warcraft client to browse its files."));
     return;
   }
@@ -2040,7 +2021,7 @@ void FileControl::TexturesClientLoadStarting()
 
 void FileControl::TexturesClientLoaded()
 {
-  if (UnityAssetAccess::isClientLoading())
+  if (ClientState::isClientLoading())
     return;
   m_texturesLoadWatch.Stop();
   core::LoadTimeline::Stage stage("ui refresh");

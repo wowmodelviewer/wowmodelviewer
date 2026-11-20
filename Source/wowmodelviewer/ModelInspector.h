@@ -13,7 +13,7 @@
  * It owns no model state. The controls on the Appearance page belong to AnimControl and
  * CharControl, which still drive them exactly as before; this class only arranges them and
  * decides which sections apply. The geoset checkboxes write the same display flags the old geoset
- * tree toggled, and push them to the Unity viewport through the same skin message every other
+ * tree toggled, which the viewport draws on its next frame, as every other
  * geoset change uses.
  */
 
@@ -30,7 +30,6 @@
 #include <utility>
 #include <vector>
 
-#include "UnityIpcServer.h"
 
 class AnimControl;
 class CharControl;
@@ -92,12 +91,7 @@ public:
   // update the checkboxes without rebuilding the tree.
   void UpdateGeosetSelection();
 
-  // The Unity player's answer to a geoset state (UnityIpcServer::onGeosetsApplied): keeps the
-  // checkboxes on what it actually draws.
-  void OnUnityGeosetsApplied(const UnityIpcServer::GeosetAck & ack);
-  // The Unity player (re)announced itself: states sent to an earlier player will never be answered.
-  void UnityPlayerRestarted();
-  // The Unity viewport put up, changed or cleared its notice: the Geosets tab's standing note follows.
+  // The viewport put up, changed or cleared its notice: the Geosets tab's standing note follows.
   void ViewportNoticeChanged();
 
   void ShowPage(Page page);
@@ -179,25 +173,6 @@ private:
   wxTimer m_watch;
   bool m_updatingChecks = false;
 
-  // Geoset states sent to the Unity viewport and not yet answered, oldest first. Each keeps the
-  // flags its click replaced, for the case where the renderer rejects it and never confirmed any
-  // state for this model that the checkboxes could fall back to.
-  struct PendingGeosetChange
-  {
-    int revision = 0;
-    int fileDataID = 0;
-    long long sentAtMs = 0;
-    bool acknowledged = false;                          // answered "pending": the model is loading
-    bool resync = false;                                // sent because an answer disagreed, not a click
-    std::vector<std::pair<size_t, bool> > undo;         // submesh index -> flag before the click, oldest first
-  };
-  std::vector<PendingGeosetChange> m_pendingGeosets;
-  std::vector<bool> m_unityConfirmed;                   // what the renderer last said it switches on
-  int m_unityConfirmedFileDataID = 0;
-  int m_lastSettledRevision = 0;                        // newest revision answered applied or rejected
-  bool m_noticeIsUnconfirmed = false;                   // the notice shows UnconfirmedNotice()
-  void ForgetUnityGeosetState();
-  static wxString UnconfirmedNotice();
 
   wxDECLARE_EVENT_TABLE();
 };

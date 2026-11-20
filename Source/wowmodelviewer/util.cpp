@@ -1,4 +1,7 @@
 #include "util.h"
+#include "AppPaths.h"
+
+#include <QFile>
 #ifdef _WINDOWS
 #include <windows.h>
 #include <wx/msw/winundef.h>
@@ -108,26 +111,56 @@ wxString getGamePath(bool noSet)
     newPath.Append(SLASH);
   if(!newPath.EndsWith(wxString(L"Data\\")))
     newPath.Append(wxString(L"Data\\"));
-#elif _MAC // Mac OS X
-  newPath = wxT("/Applications/World of Warcraft/");
-  if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) )
-    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
-  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
+#else
+  // macOS and Linux: the folder chooser, from the last folder used or the platform's usual install place (on Linux,
+  // ClientInstallations finds the Wine and Proton prefixes; this is the manual way).
+  wxString newPath;
+  wxString start = gamePath;
+  if (start.IsEmpty())
+  {
+#if defined(__APPLE__)
+    start = wxT("/Applications/World of Warcraft/");
+#else
+    start = wxGetHomeDir();
+#endif
+  }
+  newPath = wxDirSelector(_("Please select your World of Warcraft folder:"), start);
+  if (newPath.IsEmpty())  // user probably hit cancel
+    return newPath;
+  if (newPath.Last() != SLASH)
     newPath.Append(SLASH);
-  newPath.Append(wxT("Data/"));
-#else // Linux
-  newPath = wxT(".")+SLASH;
-  if (!wxFileExists(newPath+wxT("Wow.exe")))
-    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
-  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
-    newPath.Append(SLASH);
-  newPath.Append(wxT("Data/"));
+  if (!newPath.EndsWith(wxT("Data/")))
+    newPath.Append(wxT("Data/"));
 #endif
   if (!noSet)
     gamePath = newPath;
   return newPath;
 }
 
+
+#ifndef _WINDOWS
+// The Windows build's .rc resources (wmv.rc), here read from the program's resource folder by the same names.
+wxBitmap* createBitmapFromResource(const wxString& t_name, long type, int width, int height)
+{
+  const QString dir = AppPaths::resourceDir() + "/";
+  QString file;
+  if (t_name == wxT("ICON3"))
+    file = "WMW-Midnight-26-256x256.png";
+  else if (t_name == wxT("ABOUTICON"))
+    file = "wmv.xpm";
+  else if (t_name == wxT("SPLASH") || t_name == wxT("SPLASH2"))
+    file = "Splash-006-Midnight.png";
+  if (file.isEmpty() || !QFile::exists(dir + file))
+    return nullptr;
+  wxImage image;
+  if (!image.LoadFile(QString(dir + file).toStdWString(), file.endsWith(".xpm") ? wxBITMAP_TYPE_XPM : wxBITMAP_TYPE_PNG))
+    return nullptr;
+  (void)type;
+  if (width > 0 && height > 0)
+    image.Rescale(width, height, wxIMAGE_QUALITY_HIGH);
+  return new wxBitmap(image);
+}
+#endif
 
 #ifdef _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
@@ -170,7 +203,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 #endif
 
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height)
+wxBitmap* getBitmapFromMemory(const char* t_data, const unsigned long t_size, long type, int width, int height)
 {
   wxMemoryInputStream a_is(t_data, t_size);
 

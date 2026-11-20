@@ -4,7 +4,7 @@
  * Reading, checking, decoding and saving one BLP texture for the Texture Viewer, with the app's
  * own pieces only:
  *
- *  - the bytes come from UnityAssetAccess::readByPath / readByFileDataID, the reader the Unity
+ *  - the bytes come from ClientState::readByPath / readByFileDataID, the reader the Unity
  *    viewport is served from: it refuses a file another part of the app holds open and reports a
  *    file it cannot read completely (encrypted, not downloaded);
  *  - BlpInfo checks the header and mip table against the bytes, so the decoder is only ever given

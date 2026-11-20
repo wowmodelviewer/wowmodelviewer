@@ -364,7 +364,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
 bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const
 {
-  std::map<std::wstring, GLuint> texToExport;
+  std::map<std::wstring, TextureID> texToExport;
 
   for (size_t i=0; i<model->passes.size(); i++)
   {

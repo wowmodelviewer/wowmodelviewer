@@ -26,6 +26,8 @@
 
 #define _PLUGINMANAGER_CPP_
 #include "PluginManager.h"
+
+#include <QLibrary>
 #undef _PLUGINMANAGER_CPP_
 
 // Includes / class Declarations
@@ -76,7 +78,7 @@ PluginManager::PluginManager()
    QStringList plugins = pluginDir.entryList(QDir::Files);
    for (int i=0;i<plugins.size();i++)
    {
-     if (plugins.at(i).contains(".dll") == false) continue;   // Skip non-plugin files
+     if (!QLibrary::isLibrary(plugins.at(i))) continue;   // Skip non-plugin files (.dll, .dylib, .so)
      Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),GLOBALSETTINGS, core::Game::instance());
      if(newPlugin)
        addChild(newPlugin);

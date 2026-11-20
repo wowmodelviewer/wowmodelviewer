@@ -34,6 +34,7 @@ public:
   int w, h;
   TextureID id;
   bool compressed;    // the source was block-compressed (DXT); kept for the texture info panels
+  unsigned int sourceFormat; // what it was encoded as, by its OpenGL enum (DXT1/3/5, or 0x8058 RGBA8)
   GameFile * file;
 
   std::vector<std::vector<unsigned char>> mips; // RGBA8, level 0 first

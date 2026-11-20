@@ -122,7 +122,9 @@ namespace UiStyle
   void fixSessionTheme(bool dark, bool locked);
   bool restartWanted();
   // wxWidgets' dark mode settings in the palette's colours, for wxApp::MSWEnableDarkMode (which owns it).
+#ifdef __WXMSW__
   wxDarkModeSettings * newDarkModeSettings();
+#endif
 
   // ---- Type roles: one family (the system UI font), hierarchy by weight, size and colour.
   enum class Type

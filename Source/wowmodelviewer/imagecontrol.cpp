@@ -61,13 +61,14 @@ void ImageControl::OnShow(wxAuiManager *m)
   //locked = false;
   lockAspect->SetValue(locked);
 
-  int screenSize[4]{ };
-  glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);
+  // The viewport's size in pixels, and the largest capture the renderer can make.
+  const wxSize px = cc ? cc->pixelSize() : wxSize(1024, 768);
+  int screenSize[4] = { 0, 0, px.x > 0 ? px.x : 1024, px.y > 0 ? px.y : 768 };
 
   x = screenSize[2];
   y = screenSize[3];
 
-  glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*)&maxSize); 
+  maxSize = (cc && cc->renderer()) ? cc->renderer()->maxCaptureSize() : 8192;
 
   maxsize->SetLabel(wxString::Format(wxT("Max Size: %i"), maxSize));
 
@@ -105,7 +106,6 @@ void ImageControl::OnButton(wxCommandEvent &event)
     manager->Update();
     cc->Screenshot(filename->GetValue(), x ,y);
     ssCounter++;
-    cc->InitView();
     video.render = true;
 
   } else if (event.GetId() == ID_IMAGE_CANCEL) {

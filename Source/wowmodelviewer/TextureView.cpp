@@ -26,7 +26,7 @@
 #include "UiArt.h"
 #include "UiControls.h"
 #include "UiStyle.h"
-#include "UnityAssetAccess.h"
+#include "ClientState.h"
 #include "util.h"
 #include "video.h"
 #include "logger/Logger.h"
@@ -276,7 +276,7 @@ void TextureView::saveSettings()
 
 bool TextureView::clientReady() const
 {
-  return !m_shutdown && UnityAssetAccess::hasActiveClient() && !UnityAssetAccess::isClientLoading();
+  return !m_shutdown && ClientState::hasActiveClient() && !ClientState::isClientLoading();
 }
 
 bool TextureView::decoderReady() const
@@ -602,9 +602,9 @@ void TextureView::sharpen(int side)
 
 void TextureView::emptyState()
 {
-  if (UnityAssetAccess::isClientLoading())
+  if (ClientState::isClientLoading())
     m_preview->setMessage(_("Loading the game client") + Ellipsis);
-  else if (!UnityAssetAccess::hasActiveClient())
+  else if (!ClientState::hasActiveClient())
     m_preview->setMessage(_("No game client loaded"), wxEmptyString,
                           _("File > Load World of Warcraft, or click Textures, loads one."));
   else

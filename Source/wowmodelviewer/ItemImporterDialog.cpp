@@ -111,7 +111,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
   }
   else
   {
-    QString url = m_URLname->GetValue().utf8_str();
+    QString url = QString::fromUtf8(m_URLname->GetValue().utf8_str().data());
 
     for(PluginManager::iterator it = PLUGINMANAGER.begin();
         it != PLUGINMANAGER.end() ;

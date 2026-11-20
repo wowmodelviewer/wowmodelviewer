@@ -89,6 +89,8 @@ namespace wmv
     bool unlit = false;
     bool textured = true;                // false: colour only (GL_TEXTURE_2D off)
     bool wireframe = false;
+    bool twoSided = true;                // light a back face with its flipped normal (cloth, leaves, capes)
+    bool screenSpace = false;            // the draw's transform is already in clip space (backgrounds, overlays)
 
     glm::vec4 color = glm::vec4(1.0f);   // glColor / material diffuse; .w is the pass opacity
     glm::vec4 emissive = glm::vec4(0.0f); // GL_EMISSION

@@ -14,12 +14,14 @@
 #include <wx/access.h>
 #include <wx/dcbuffer.h>
 #include <wx/graphics.h>
+#ifdef __WXMSW__
 #include <wx/msw/wrapwin.h>
 #include <oleacc.h>
 #include <uxtheme.h>
 #include <vssym32.h>
 
 #pragma comment(lib, "uxtheme.lib")
+#endif
 
 #include "UiStyle.h"
 
@@ -46,19 +48,29 @@ namespace
   // Whether Windows shows focus cues in this window now (they appear once the keyboard is used).
   bool focusCuesShown(const wxWindow * w)
   {
+#ifdef __WXMSW__
     const LRESULT state = ::SendMessage((HWND)w->GetHWND(), WM_QUERYUISTATE, 0, 0);
     return (state & UISF_HIDEFOCUS) == 0;
+#else
+    (void)w;
+    return true; // the platform shows a focus ring whenever a control has the keyboard
+#endif
   }
 
   // The keyboard was used on a control that takes its own keys: show focus cues from now on, as the dialog
   // navigation does for the keys it handles.
   void showFocusCues(wxWindow * w)
   {
+#ifdef __WXMSW__
     if (wxWindow * top = wxGetTopLevelParent(w))
       ::SendMessage((HWND)top->GetHWND(), WM_CHANGEUISTATE, MAKEWPARAM(UIS_CLEAR, UISF_HIDEFOCUS), 0);
+#else
+    (void)w;
+#endif
   }
 
   // A name for a screen reader; the rest is the standard object's.
+#if wxUSE_ACCESSIBILITY
   class NamedAccessible : public wxAccessible
   {
   public:
@@ -74,12 +86,17 @@ namespace
   private:
     wxString m_name;
   };
+#endif
 }
 
 void UiSetAccessibleName(wxWindow * window, const wxString & name)
 {
   if (window)
+#if wxUSE_ACCESSIBILITY
     window->SetAccessible(new NamedAccessible(window, name));
+#else
+    (void)window; (void)name;
+#endif
 }
 
 // ========================================================================================= button
@@ -87,9 +104,17 @@ void UiSetAccessibleName(wxWindow * window, const wxString & name)
 UiButton::UiButton(wxWindow * parent, wxWindowID id, const wxString & label, Kind kind, UiIcon icon, long style)
   : m_kind(kind), m_icon(icon)
 {
+#ifdef __WXMSW__
   Create(parent, id, label, wxDefaultPosition, wxDefaultSize, style | wxBORDER_NONE);
   // Painted here from now on (MSWOnDraw); everything else stays the native button's.
   MakeOwnerDrawn();
+#else
+  // The label stays the button's name (a screen reader's, and DoGetBestSize's); the native button shows the faces.
+  Create(parent, id, label, wxDefaultPosition, wxDefaultSize, style | wxBORDER_NONE | wxBU_NOTEXT);
+  Bind(wxEVT_SIZE, [this](wxSizeEvent & e) { if (e.GetSize() != m_facesFor) makeFaces(); e.Skip(); });
+  Bind(wxEVT_SET_FOCUS, [this](wxFocusEvent & e) { makeFaces(); e.Skip(); });
+  Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { makeFaces(); e.Skip(); });
+#endif
   SetFont(UiStyle::font(kind == Kind::Primary ? UiStyle::Type::Strong : UiStyle::Type::Normal));
   Bind(wxEVT_ENTER_WINDOW, [this](wxMouseEvent & e) {
     m_hot = true;
@@ -161,6 +186,7 @@ wxSize UiButton::DoGetBestSize() const
   return wxSize(width, height);
 }
 
+#ifdef __WXMSW__
 bool UiButton::MSWOnDraw(WXDRAWITEMSTRUCT * item)
 {
   const DRAWITEMSTRUCT * dis = reinterpret_cast<const DRAWITEMSTRUCT *>(item);
@@ -177,6 +203,37 @@ bool UiButton::MSWOnDraw(WXDRAWITEMSTRUCT * item)
   }
   return true;
 }
+#else
+void UiButton::makeFaces()
+{
+  const wxSize size = GetClientSize();
+  if (size.x <= 0 || size.y <= 0)
+    return;
+  m_facesFor = size;
+  const double scale = GetContentScaleFactor();
+  auto face = [&](bool pressed, bool hot, bool focus, bool disabled) {
+    wxBitmap bitmap;
+    bitmap.CreateWithDIPSize(size, scale, 32);
+    {
+      wxMemoryDC mem(bitmap);
+      paint(mem, size, pressed, hot, focus, disabled);
+    }
+    return wxBitmapBundle(bitmap);
+  };
+  const bool focus = HasFocus();
+  SetBitmap(face(false, false, focus, false));
+  SetBitmapCurrent(face(false, true, focus, false));
+  SetBitmapPressed(face(true, true, focus, false));
+  SetBitmapDisabled(face(false, false, false, true));
+  SetBitmapFocus(face(false, false, true, false));
+}
+
+void UiButton::Refresh(bool eraseBackground, const wxRect * rect)
+{
+  makeFaces();
+  wxButton::Refresh(eraseBackground, rect);
+}
+#endif
 
 void UiButton::paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, bool focusRing, bool disabled)
 {
@@ -267,8 +324,15 @@ UiColourSwatch::UiColourSwatch(wxWindow * parent, wxWindowID id, const wxColour 
                                const wxString & accessibleName)
   : m_colour(colour), m_sizeDip(sizeDip)
 {
+#ifdef __WXMSW__
   Create(parent, id, accessibleName, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
   MakeOwnerDrawn();
+#else
+  Create(parent, id, accessibleName, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxBU_NOTEXT);
+  Bind(wxEVT_SIZE, [this](wxSizeEvent & e) { if (e.GetSize() != m_facesFor) makeFaces(); e.Skip(); });
+  Bind(wxEVT_SET_FOCUS, [this](wxFocusEvent & e) { makeFaces(); e.Skip(); });
+  Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { makeFaces(); e.Skip(); });
+#endif
   Bind(wxEVT_ENTER_WINDOW, [this](wxMouseEvent & e) {
     m_hot = true;
     Refresh(false);
@@ -303,6 +367,7 @@ wxSize UiColourSwatch::DoGetBestSize() const
   return FromDIP(m_sizeDip);
 }
 
+#ifdef __WXMSW__
 bool UiColourSwatch::MSWOnDraw(WXDRAWITEMSTRUCT * item)
 {
   const DRAWITEMSTRUCT * dis = reinterpret_cast<const DRAWITEMSTRUCT *>(item);
@@ -319,6 +384,37 @@ bool UiColourSwatch::MSWOnDraw(WXDRAWITEMSTRUCT * item)
   }
   return true;
 }
+#else
+void UiColourSwatch::makeFaces()
+{
+  const wxSize size = GetClientSize();
+  if (size.x <= 0 || size.y <= 0)
+    return;
+  m_facesFor = size;
+  const double scale = GetContentScaleFactor();
+  auto face = [&](bool pressed, bool hot, bool focus, bool disabled) {
+    wxBitmap bitmap;
+    bitmap.CreateWithDIPSize(size, scale, 32);
+    {
+      wxMemoryDC mem(bitmap);
+      paint(mem, size, pressed, hot, focus, disabled);
+    }
+    return wxBitmapBundle(bitmap);
+  };
+  const bool focus = HasFocus();
+  SetBitmap(face(false, false, focus, false));
+  SetBitmapCurrent(face(false, true, focus, false));
+  SetBitmapPressed(face(true, true, focus, false));
+  SetBitmapDisabled(face(false, false, false, true));
+  SetBitmapFocus(face(false, false, true, false));
+}
+
+void UiColourSwatch::Refresh(bool eraseBackground, const wxRect * rect)
+{
+  makeFaces();
+  wxButton::Refresh(eraseBackground, rect);
+}
+#endif
 
 void UiColourSwatch::paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, bool focusRing, bool disabled)
 {
@@ -439,6 +535,7 @@ namespace
 class UiColourPickerPart;
 
 // What a screen reader gets for a part: a slider, its name and its value.
+#if wxUSE_ACCESSIBILITY
 class UiColourPickerPartAccessible : public wxAccessible
 {
 public:
@@ -450,6 +547,7 @@ public:
 private:
   UiColourPickerPart * m_part;
 };
+#endif
 
 // One part of the picker: the square (Field) or the strip (Strip). Owner-drawn, takes the keyboard (the arrows too).
 class UiColourPickerPart : public wxWindow
@@ -463,7 +561,9 @@ public:
       m_owner(owner), m_kind(kind), m_sizeDip(sizeDip)
   {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
+#if wxUSE_ACCESSIBILITY
     SetAccessible(new UiColourPickerPartAccessible(this));
+#endif
     SetToolTip(kind == Kind::Field ? _("Saturation (across) and brightness (up): click, drag or use the arrow keys")
                                    : _("Hue: click, drag or use the arrow keys"));
     Bind(wxEVT_PAINT, &UiColourPickerPart::OnPaint, this);
@@ -517,6 +617,7 @@ public:
   }
 
   bool AcceptsFocusFromKeyboard() const wxOVERRIDE { return IsEnabled(); }
+#ifdef __WXMSW__
   WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE
   {
     // The arrow keys are this part's (moving the colour), not the dialog navigation's; Tab still moves on.
@@ -524,6 +625,7 @@ public:
       return DLGC_WANTARROWS;
     return wxWindow::MSWWindowProc(message, wParam, lParam);
   }
+#endif
 
   bool dragging() const { return m_dragging; }
 
@@ -749,6 +851,7 @@ private:
   double m_cacheHue = -1.0;
 };
 
+#if wxUSE_ACCESSIBILITY
 UiColourPickerPartAccessible::UiColourPickerPartAccessible(UiColourPickerPart * part) : wxAccessible(part), m_part(part) {}
 
 wxAccStatus UiColourPickerPartAccessible::GetName(int childId, wxString * name)
@@ -774,6 +877,8 @@ wxAccStatus UiColourPickerPartAccessible::GetValue(int childId, wxString * value
   *value = m_part->valueText();
   return wxACC_OK;
 }
+
+#endif
 
 UiColourPicker::UiColourPicker(wxWindow * parent, wxWindowID id, const wxSize & fieldSizeDip,
                                const wxString & accessibleName)
@@ -838,8 +943,10 @@ void UiColourPicker::partChanged(bool settled)
   m_sent = colour;
   // A screen reader hears the new value of the part that moved, and of the other when it follows (the square's
   // colours follow the hue).
+#if wxUSE_ACCESSIBILITY
   for (wxWindow * part : { (wxWindow *)m_field, (wxWindow *)m_strip })
     wxAccessible::NotifyEvent(wxACC_EVENT_OBJECT_VALUECHANGE, part, wxOBJID_CLIENT, wxACC_SELF);
+#endif
   wxCommandEvent e(settled ? UI_EVT_COLOUR_CHANGED : UI_EVT_COLOUR_CHANGING, GetId());
   e.SetEventObject(this);
   ProcessWindowEvent(e);
@@ -931,6 +1038,7 @@ void UiSearchFrame::OnPaint(wxPaintEvent & WXUNUSED(event))
 // What a screen reader sees of the strip: a page tab list whose children are the tabs, named by their
 // pages, the shown one selected (and focused while the strip has the keyboard), as the native tab
 // control reported them.
+#if wxUSE_ACCESSIBILITY
 class UiTabBarAccessible : public wxAccessible
 {
 public:
@@ -1048,6 +1156,7 @@ private:
 
   UiTabBar * m_bar;
 };
+#endif
 
 UiTabBar::UiTabBar(wxWindow * parent, wxBookCtrlBase * book)
   : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE | wxBORDER_NONE),
@@ -1055,7 +1164,9 @@ UiTabBar::UiTabBar(wxWindow * parent, wxBookCtrlBase * book)
 {
   SetBackgroundStyle(wxBG_STYLE_PAINT);
   SetFont(UiStyle::font(UiStyle::Type::Normal));
+#if wxUSE_ACCESSIBILITY
   SetAccessible(new UiTabBarAccessible(this));
+#endif
   Bind(wxEVT_PAINT, &UiTabBar::OnPaint, this);
   Bind(wxEVT_LEFT_DOWN, &UiTabBar::OnMouse, this);
   Bind(wxEVT_MOTION, &UiTabBar::OnMouse, this);
@@ -1086,12 +1197,14 @@ UiTabBar::UiTabBar(wxWindow * parent, wxBookCtrlBase * book)
   SetInitialSize();
 }
 
+#ifdef __WXMSW__
 WXLRESULT UiTabBar::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
   if (message == WM_GETDLGCODE)
     return DLGC_WANTARROWS;
   return wxWindow::MSWWindowProc(message, wParam, lParam);
 }
+#endif
 
 void UiTabBar::Sync()
 {
@@ -1104,10 +1217,12 @@ void UiTabBar::pageChanged()
   Refresh(false);
   if (!m_book || m_book->GetSelection() == wxNOT_FOUND)
     return;
+#if wxUSE_ACCESSIBILITY
   const int child = m_book->GetSelection() + 1;
   wxAccessible::NotifyEvent(wxACC_EVENT_OBJECT_SELECTION, this, wxOBJID_CLIENT, child);
   if (HasFocus())
     wxAccessible::NotifyEvent(wxACC_EVENT_OBJECT_FOCUS, this, wxOBJID_CLIENT, child);
+#endif
 }
 
 std::vector<wxRect> UiTabBar::layout(wxDC & dc, int * padOut) const
@@ -1287,6 +1402,7 @@ void UiTabBar::select(int page)
 
 // ======================================================================= dark run: slider, status bar
 
+#ifdef __WXMSW__
 bool UiSlider::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result)
 {
   const NMHDR * header = reinterpret_cast<const NMHDR *>(lParam);
@@ -1312,11 +1428,13 @@ bool UiSlider::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result)
   }
   return wxSlider::MSWOnNotify(idCtrl, lParam, result);
 }
+#endif
 
 namespace
 {
   // What Windows' own status bar tells a screen reader: a status bar whose parts are its fields, each
   // named by its text.
+#if wxUSE_ACCESSIBILITY
   class StatusBarAccessible : public wxAccessible
   {
   public:
@@ -1379,11 +1497,14 @@ namespace
   private:
     wxStatusBar * m_bar;
   };
+#endif
 }
 
 void UiEquipGenericStatusBar(wxStatusBar * bar)
 {
+#if wxUSE_ACCESSIBILITY
   bar->SetAccessible(new StatusBarAccessible(bar));
+#endif
   bar->Bind(wxEVT_MOTION, [bar](wxMouseEvent & e) {
     e.Skip();
     wxString tip;
@@ -1403,6 +1524,7 @@ void UiEquipGenericStatusBar(wxStatusBar * bar)
 
 // ==================================================================================== dark run: menu bar
 
+#ifdef __WXMSW__
 // A title's item data. MSAA reads an owner-drawn item's name from an MSAAMENUINFO at the start of it.
 struct UiMenuBarTitles::Title
 {
@@ -1579,6 +1701,15 @@ bool UiMenuBarTitles::handle(WXUINT message, WXWPARAM wParam, WXLPARAM lParam, W
   }
   return false;
 }
+
+#else
+// Elsewhere the menu bar is the system's own (the macOS menu bar, GTK's), in the system's appearance.
+struct UiMenuBarTitles::Title {};
+UiMenuBarTitles::UiMenuBarTitles() = default;
+UiMenuBarTitles::~UiMenuBarTitles() = default;
+void UiMenuBarTitles::attach(wxFrame *) {}
+void UiMenuBarTitles::detach() {}
+#endif
 
 // ---- UiProgressBar -------------------------------------------------------------------------------------------------
 

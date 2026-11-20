@@ -167,7 +167,9 @@
   typedef unsigned long long ULONGLONG;
   typedef unsigned long long *PULONGLONG;
   typedef void         * HANDLE;
+  #ifndef TCHAR // CxImage (ximadef.h) defines it as a macro for char: the same type
   typedef char           TCHAR;
+  #endif
   typedef unsigned int   LCID;
   typedef LONG         * PLONG;
   typedef DWORD        * PDWORD;

@@ -22,9 +22,10 @@ use_wow()
 set(NAME objexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
+wmv_plugin_output(${NAME})
 
 target_link_libraries(${NAME} Qt5::Core ${extralibs})
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/plugins/")
 
-install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR} LIBRARY DESTINATION ${BIN_DIR})

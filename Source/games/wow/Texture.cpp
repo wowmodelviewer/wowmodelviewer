@@ -9,42 +9,30 @@
 #include <algorithm>
 #include <cstring>
 
-#include "ddslib.h"
+#include "BlockDecode.h"
 
 namespace
 {
-  enum DxtFormat { DXT1_RGB, DXT1_RGBA, DXT3, DXT5 };
-
-  // The ddslib decoders walk whole 4x4 blocks only, so a level smaller than a block (the 2x2 and 1x1 tail of a
-  // mip chain) decodes into a block-aligned scratch image that is then cropped.
-  void decodeDxt(DxtFormat format, unsigned int width, unsigned int height, unsigned char * src,
-                 std::vector<unsigned char> & out)
+  // The GL enums each BLP encoding used to be uploaded as: what the texture info panels name it by.
+  unsigned int glFormatOf(wmv::BlockFormat f)
   {
-    const unsigned int pw = (width + 3) & ~3u, ph = (height + 3) & ~3u;
-    std::vector<unsigned char> scratch((size_t)pw * ph * 4, 0);
-    switch (format)
+    switch (f)
     {
-    case DXT1_RGB:
-    case DXT1_RGBA: DDSDecompressDXT1(src, (int)pw, (int)ph, scratch.data()); break;
-    case DXT3:      DDSDecompressDXT3(src, (int)pw, (int)ph, scratch.data()); break;
-    case DXT5:      DDSDecompressDXT5(src, (int)pw, (int)ph, scratch.data()); break;
+    case wmv::BLOCK_DXT1_RGB:  return 0x83F0; // GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+    case wmv::BLOCK_DXT1_RGBA: return 0x83F1; // GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+    case wmv::BLOCK_DXT3:      return 0x83F2; // GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+    default:                   return 0x83F3; // GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
     }
-    out.resize((size_t)width * height * 4);
-    for (unsigned int y = 0; y < height; y++)
-      std::memcpy(&out[(size_t)y * width * 4], &scratch[(size_t)y * pw * 4], (size_t)width * 4);
-    if (format == DXT1_RGB) // no alpha in the format: what GL's RGB DXT1 upload showed
-      for (size_t i = 3; i < out.size(); i += 4)
-        out[i] = 0xff;
   }
 }
 
 Texture::Texture(GameFile * f)
-: ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f), generation(0)
+: ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), sourceFormat(0x8058), file(f), generation(0)
 {
 }
 
 Texture::Texture(const QString & name)
-: ManagedItem(name), w(0), h(0), id(0), compressed(false), file(nullptr), generation(0)
+: ManagedItem(name), w(0), h(0), id(0), compressed(false), sourceFormat(0x8058), file(nullptr), generation(0)
 {
 }
 
@@ -168,31 +156,32 @@ void Texture::load()
       The image data are formatted using DXT5 compression.
       */
       // encoding 2, directx compressed
-      DxtFormat format = DXT1_RGBA;
+      wmv::BlockFormat format = wmv::BLOCK_DXT1_RGBA;
       int blocksize = 8;
 
       // guesswork here :(
       // new alpha bit depth == 4 for DXT3, alfred 2008/10/11
       if (attr[1] == 8 || attr[1] == 4) 
       {
-        format = DXT3;
+        format = wmv::BLOCK_DXT3;
         blocksize = 16;
       }
      
       if(attr[1] == 0 && attr[2] == 0)
 	  {
-        format = DXT1_RGB;
+        format = wmv::BLOCK_DXT1_RGB;
       }
       
 
       // Fix to the BLP2 format required in WoW 2.0 thanks to Linghuye (creator of MyWarCraftStudio)
       if (attr[1] == 8 && attr[2] == 7) 
       {
-        format = DXT5;
+        format = wmv::BLOCK_DXT5;
         blocksize = 16;
       }
 
       compressed = true;
+      sourceFormat = glFormatOf(format);
 
       unsigned char *buf = new unsigned char[sizes[0]];
 
@@ -210,8 +199,8 @@ void Texture::load()
           if (size > (size_t)sizes[i])
             break; // a truncated level: keep the ones before it
 
-          mips.emplace_back();
-          decodeDxt(format, width, height, buf, mips.back());
+          mips.emplace_back((size_t)width * height * 4);
+          wmv::decodeBlocks(format, buf, width, height, mips.back().data());
 
         }
         else

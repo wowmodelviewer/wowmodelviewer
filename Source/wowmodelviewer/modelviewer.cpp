@@ -7,9 +7,6 @@
 #include "ArmoryImportDialog.h"
 #include "itemselection.h"   // ChoiceDialog: the item chooser a viewer switch puts away
 #include "TextureView.h"
-#include "MapOverview.h"
-#include "MapTilePanel.h"
-#include "MapsViewer.h"
 #include "AnimManager.h"
 
 #include <chrono>
@@ -73,10 +70,10 @@
 #include "UiControls.h"
 #include "UiStyle.h"
 #include "WinTheme.h"
-#include "UnityAssetAccess.h"
-#include "UnityCharacterScene.h"
-#include "UnityIpcServer.h"
-#include "UnityRendererHost.h"
+#include "ClientState.h"
+#include "AppPaths.h"
+#include "CascLib.h" // the error codes a CASC open reports
+#include "ViewportHost.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -104,8 +101,6 @@
 
 #include <fstream>
 #include <memory>
-
-
 
 namespace
 {
@@ -179,7 +174,6 @@ EVT_MENU(ID_SHOW_FILE_LIST, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_ANIM, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
-EVT_MENU(ID_VIEW_UNITY_RESTART, ModelViewer::OnRestartUnityRenderer)
 EVT_MENU(ID_VIEW_BACKGROUND_COLOR, ModelViewer::OnBackgroundColor)
 EVT_UPDATE_UI(ID_VIEW_BACKGROUND_COLOR, ModelViewer::OnUpdateCommandUI)
 EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
@@ -347,7 +341,7 @@ ModelViewer::ModelViewer()
 // Transparency in interfaceManager crashes with Linux compositing
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
 #else
-// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the Unity player's window at
+// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the viewport's swapchain at
 // every mouse move. (Without live resizing wxAuiManager::Update locks the frame, which on MSW freezes only the frame's
 // windows -- wxTopLevelWindowMSW::DoFreeze does nothing -- and it draws its parts straight to the screen through a client
 // DC: a viewer switch holds that drawing back itself, ViewerSwitchFilter.) (It also drops the docking hint's fade-in,
@@ -356,83 +350,18 @@ ModelViewer::ModelViewer()
 #endif
 {
   m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
-  m_playerContentPoll.Bind(wxEVT_TIMER, &ModelViewer::OnPlayerContentPoll, this);
-  m_keyboardHandoff.Bind(wxEVT_TIMER, [this](wxTimerEvent &) {
-    // The player's thread still sizing its window (a viewer switch's resize on a thread of this process's own): the
-    // handoff, which waits on that thread too, waits for it a turn at a time -- at most KeyboardHandoffWaitMs.
-    if (unityRendererHost && unityRendererHost->aheadMoveInFlight() && m_keyboardHandoffClock.Time() < KeyboardHandoffWaitMs)
-    {
-      m_keyboardHandoff.StartOnce(UnityRendererHost::KeyboardHandoffDelayMs);
-      return;
-    }
-    std::function<void()> handoff;
-    handoff.swap(m_keyboardHandoffDo);
-    if (handoff)
-      handoff();
-  });
   // THE VIEWER SWITCH IN TURNS: its turns' timer (and the turns after a switch), the idle check that arms it, and the gap's
   // filter.
   m_switchTimer.Bind(wxEVT_TIMER, &ModelViewer::OnViewerSwitchTimer, this);
   Bind(wxEVT_IDLE, &ModelViewer::OnViewerSwitchIdle, this);
   m_switchFilter.reset(new ViewerSwitchFilter(this));
   wxEvtHandler::AddFilter(m_switchFilter.get());
-  PLUGINMANAGER.init("./plugins");
+  PLUGINMANAGER.init(AppPaths::pluginDir().toStdString());
   // Until a client loads, the map catalogue says there is none (mapCatalog() is never null); so do the liquid and light
   // catalogues.
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
   m_liquidCatalog = wow::LiquidCatalog::noClient("no client is loaded");
   m_lightCatalog = wow::LightCatalog::noClient("no client is loaded");
-  // THE MAP ASSET WORKER: made now, its thread started by its first read (docs/world-viewer/04b-asset-serving.md).
-  m_mapAssetWorker = std::make_shared<MapAssetWorker>();
-  // THE MAPS VIEWER: what it shows changes the tile grid, the viewport's notice and the title.
-  m_maps.reset(new MapsViewer(this));
-  m_maps->onChanged = [this]() {
-    QElapsedTimer t;
-    t.start();
-    // (Not while a viewer switch leaves the Maps viewer, in its first turn: Browse's map panel goes with it, 2-6 ms of a
-    // refresh no one sees; FollowViewerMode refreshes it when Maps comes back.)
-    if (fileControl && !(m_switch && m_switch->phase == ViewerSwitch::Phase::Building && m_switch->previous == ViewerMode::Maps))
-      fileControl->MapsChanged();
-    if (mapOverview && isMapsMode())
-      mapOverview->Refresh2();
-    const double panelMs = t.nsecsElapsed() / 1e6;
-    if (isMapsMode())
-    {
-      UpdateUnityViewportState();
-      UpdateCommandLabel();
-      UpdateTitle();
-    }
-    const double ms = t.nsecsElapsed() / 1e6;
-    m_maps->noteUiUpdate(ms);
-    if (ms > 8.0)
-      LOG_INFO << "[maps] a GUI update took" << ms << "ms (the panel and the overhead map" << panelMs << "ms, the viewport, its "
-                  "notice and the labels" << ms - panelMs << "ms)";
-  };
-  // STREAMING (protocol 18): the session's state (four times a second at most): the streaming line and the overhead map's
-  // streamed tiles, timed as onChanged is.
-  // It follows on a short timer -- at most one update in STREAM_UI_MS, never in the GUI round the streamState arrived
-  // in (at Enter world the session's first one lands in the click's own repaint).
-  m_streamUiTimer.Bind(wxEVT_TIMER, [this](wxTimerEvent &) {
-    QElapsedTimer t;
-    t.start();
-    if (fileControl)
-      fileControl->MapsStreamChanged();
-    if (mapOverview && isMapsMode())
-      mapOverview->StreamChanged();
-    const double ms = t.nsecsElapsed() / 1e6;
-    m_maps->noteUiUpdate(ms);
-    if (ms > 8.0)
-      LOG_INFO << "[maps] a streaming update took" << ms << "ms";
-  });
-  m_maps->onStreamChanged = [this]() {
-    if (!m_streamUiTimer.IsRunning())
-      m_streamUiTimer.StartOnce(STREAM_UI_MS);
-  };
-  // A minimap picture came: the overhead map repaints, nothing else.
-  m_maps->onImagesChanged = [this]() {
-    if (mapOverview && isMapsMode())
-      mapOverview->ImagesChanged();
-  };
   // our main class objects
   animControl = nullptr;
   canvas = NULL;
@@ -442,8 +371,7 @@ ModelViewer::ModelViewer()
   modelControl = NULL;
   modelInspector = NULL;
   settingsControl = NULL;
-  unityRendererHost = NULL;
-  m_lastAnimStatePush = 0;
+  viewportHost = NULL;
   fileControl = NULL;
 
   //wxWidget objects
@@ -465,7 +393,12 @@ ModelViewer::ModelViewer()
   // create our main frame
   if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) 
   {
+#ifdef __WXMSW__
     SetIcon(wxICON(IDI_ICON1));
+#elif !defined(__WXOSX__)
+    // (macOS takes the bundle's icon.)
+    SetIcon(wxIcon(QString(AppPaths::resourceDir() + "/WMW-Midnight-26-256x256.png").toStdWString(), wxBITMAP_TYPE_PNG));
+#endif
     SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 #ifndef  _LINUX // buggy
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
@@ -510,10 +443,6 @@ ModelViewer::ModelViewer()
     video.GetAvailableMode(); // Get first available display mode that supports the current desktop colour bitdepth
     }
     */
-
-    LOG_INFO << "Setting OpenGL render state...";
-    SetStatusText(wxT("Setting OpenGL render state..."));
-    video.InitGL();
 
     SetStatusText(wxEmptyString);
 
@@ -573,11 +502,6 @@ void ModelViewer::InitMenu()
   }
   m_exportMenuEnd = subMenuId;
   fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), ExportMenu);
-
-
-
-
-
 
   fileMenu->AppendSeparator();
   fileMenu->Append(ID_FILE_RESETLAYOUT, _("Reset Layout"));
@@ -691,13 +615,11 @@ void ModelViewer::InitMenu()
     charMenu->Enable(ID_CHAR_RANDOMISE, false);
     charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 
-
     // Options menu
     optMenu = new wxMenu;
     // ("Always show default doodads in WMOs" is gone: only the archived OpenGL viewport drew WMOs, and
     // the Unity viewport shows a notice for one. Default doodads stay included, as the item defaulted.)
     optMenu->Append(ID_SHOW_SETTINGS, _("Settings..."));
-
 
     wxMenu *aboutMenu = new wxMenu;
     aboutMenu->Append(ID_KEYBOARD_SHORTCUTS, _("Keyboard Shortcuts..."));
@@ -752,12 +674,6 @@ void ModelViewer::InitObjects()
   settingsControl->Show(false);
 
   canvas = new ModelCanvas(this);
-
-  if (video.secondPass) {
-    canvas->Destroy();
-    video.Release();
-    canvas = new ModelCanvas(this);
-  }
 
   g_modelViewer = this;
   // The Maps viewer's panel made now, hidden: made at the first entry into Maps, it took 27-32 ms of that switch's turn.
@@ -1037,8 +953,8 @@ void ModelViewer::InitDocking()
   // saved perspective, reset or pane toggle can ever put it on screen -- and nothing may call
   // GetPane(canvas): for a window the manager does not know, wx hands back one shared, writable
   // "null" pane, and a Show() on that would change the answer to every later unknown lookup.
-  CreateUnityViewport();
-  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
+  CreateViewport();
+  interfaceManager.AddPane(viewportHost, viewportPaneInfo());
 
   interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this));
   interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this));
@@ -1071,14 +987,14 @@ void ModelViewer::ResetLayout()
   m_workspaceLayout.Clear();
   interfaceManager.DetachPane(commandBar);
   interfaceManager.DetachPane(fileControl);
-  interfaceManager.DetachPane(unityRendererHost);
+  interfaceManager.DetachPane(viewportHost);
   interfaceManager.DetachPane(animControl);
   interfaceManager.DetachPane(modelInspector);
   interfaceManager.DetachPane(modelControl);
   interfaceManager.DetachPane(settingsControl);
 
   interfaceManager.AddPane(commandBar, buildCommandBarPaneInfo(this));
-  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
+  interfaceManager.AddPane(viewportHost, viewportPaneInfo());
 
   interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this).Show(true));
   interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this).Show(true));
@@ -1096,7 +1012,6 @@ void ModelViewer::ResetLayout()
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
 }
-
 
 void ModelViewer::LoadSession()
 {
@@ -1220,7 +1135,7 @@ void ModelViewer::LoadLayout()
         interfaceManager.GetPane(wxT("commandBar")).MinSize(bar.min_size).BestSize(bar.best_size).MaxSize(bar.max_size);
       }
       // Nor is the viewport: whatever the perspective says, the Unity viewport is the shown centre.
-      EnsureUnityViewportCentre();
+      EnsureViewportCentre();
 #ifndef  _LINUX // buggy
       interfaceManager.Update();
 #endif
@@ -1248,6 +1163,7 @@ void ModelViewer::SaveLayout()
   wxPoint pos = GetPosition();
   if (IsMaximized() || IsFullScreen())
   {
+#ifdef __WXMSW__
     WINDOWPLACEMENT placement = {};
     placement.length = sizeof(placement);
     if (::GetWindowPlacement((HWND)GetHWND(), &placement))
@@ -1256,13 +1172,13 @@ void ModelViewer::SaveLayout()
       const wxPoint offset = display.GetClientArea().GetPosition() - display.GetGeometry().GetPosition();
       pos = wxPoint(placement.rcNormalPosition.left + offset.x, placement.rcNormalPosition.top + offset.y);
     }
+#endif
   }
   config.setValue("Session/PositionX", pos.x);
   config.setValue("Session/PositionY", pos.y);
 
   LOG_INFO << "GUI Layout was saved.";
 }
-
 
 void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 {
@@ -1465,33 +1381,11 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   modelControl->UpdateModel(modelAtt);
   modelControl->RefreshModel(canvas->root);
 
-  // Embedded Unity renderer (if open): the load itself goes out FIRST. AnimControl::UpdateModel
-  // below pushes the skin, the default animation and its playback state for the new model, and
-  // the player judges every push by the model it names -- so the player has to know which model
-  // is coming before those arrive, or it drops them as being about a different model and starts
-  // the new animation unsynchronised. Sending the load first is also what a player that is not
-  // open yet gets on connect (onUnityReady -> SendCurrentModelToUnity), so the two paths agree.
-  SendLoadToUnity();
-  // ... and, for a character, what it looks like: refresh() has already run (charControl above), so
-  // the scene the body load waits for goes out with it. An import that dresses the character further
-  // holds this until it is done (SceneHold); later changes follow from the canvas tick.
-  SendCharacterSceneToUnity(true);
-
-  // Update the animations / skins. This is where the skin and animation pushes happen, once,
-  // from the choices the control makes; nothing re-sends them afterwards.
+  // Update the animations / skins: the control's choices are what the canvas draws.
   animControl->UpdateModel(m);
 
-  // WHAT THE MODEL DISPLAYS, always. AnimControl::SetSkin pushes the skin -- which carries the
-  // displayed geosets and the particle colour, not just textures -- but only for a model that
-  // HAS a skin group in the database. A creature with none (felreavergolem, the cinematic
-  // models) pushed nothing, so the player never learned which submeshes the app is drawing and
-  // fell back to "geoset 0 only": parts the host displays were missing in the Unity
-  // viewport. Pushing here covers both cases; a model whose skin was already pushed simply gets the
-  // same answer twice, which the player treats as the state it already has.
-  SendCurrentSkinToUnity();
-
   // The Model panel, the command bar, the status bar and the viewport (the model, or a notice when
-  // the Unity viewport cannot draw it yet) follow the new model -- a character rebuilt on its other model generation
+  // the viewport cannot draw it) follow the new model -- a character rebuilt on its other model generation
   // once it is dressed, at the end of SwitchCharacterVariant, not here as well.
   if (m_variantSwitching == 0)
     DisplayedContentChanged();
@@ -1553,7 +1447,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   isModel = true;
   isChar = false;
   isWMO = false;
-
 
   QString query = QString("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
                           "CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3, "
@@ -1895,11 +1788,6 @@ void ModelViewer::LoadItem(unsigned int id)
   }
   catch (...) {}
 
-  // applyItemComponentGeosets set this component's flags AFTER LoadModel's skin push went out, and
-  // a skin push follows only when the display resolves a skin (SetSkinByDisplayID). Send the state
-  // the host decided, so the Unity viewport draws the item the way the Geosets tab lists it.
-  SendCurrentGeosetsToUnity();
-
   DisplayedContentChanged();
   CommitLayoutIfChanged();
 }
@@ -1941,7 +1829,11 @@ bool ModelViewer::canCloseNow() const
   // Not from a modal dialog's loop (it disables the window; closing would delete the window under the
   // dialog) nor from inside a yield (code further up the stack still uses the window).
   const wxEventLoopBase * loop = wxEventLoopBase::GetActive();
+#ifdef __WXMSW__
   return ::IsWindowEnabled((HWND)GetHWND()) && !(loop && loop->IsYielding());
+#else
+  return IsEnabled() && !(loop && loop->IsYielding());
+#endif
 }
 
 void ModelViewer::Relaunch()
@@ -1965,7 +1857,7 @@ void ModelViewer::Relaunch()
     if (inBuildTree && cand.FileExists()) { relaunchBat = cand.GetFullPath(); break; }
   }
 
-  if (!relaunchBat.IsEmpty())
+  if (!relaunchBat.IsEmpty() && wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_WINDOWS)
     wxExecute(wxString::Format(wxT("cmd /c \"\"%s\" %lu\""), relaunchBat, wxGetProcessId()), wxEXEC_ASYNC);
   else
   {
@@ -1975,6 +1867,7 @@ void ModelViewer::Relaunch()
     for (int i = 1; i < wxTheApp->argc; i++)
       if (wxTheApp->argv[i] == wxT("-console"))
         command += wxT(" -console");
+#ifdef __WXMSW__
     STARTUPINFOW startup = {};
     startup.cb = sizeof(startup);
     PROCESS_INFORMATION process = {};
@@ -1991,6 +1884,14 @@ void ModelViewer::Relaunch()
     ::AllowSetForegroundWindow(process.dwProcessId);
     ::CloseHandle(process.hThread);
     ::CloseHandle(process.hProcess);
+#else
+    if (wxExecute(command, wxEXEC_ASYNC) <= 0)
+    {
+      LOG_ERROR << "Restart: could not start" << QString::fromWCharArray(command.wc_str());
+      wxMessageBox(_("The viewer could not be started again, so it stays open."), _("Restart"), wxOK | wxICON_ERROR, this);
+      return;
+    }
+#endif
   }
 
   // Tear down like File > Exit; OnClose saves the session as usual before the process exits.
@@ -2029,8 +1930,6 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 
 ModelViewer::~ModelViewer()
 {
-  if (testShutdownProbe)
-    testShutdownProbe(*this, ShutdownPoint::Begin);
   // THE VIEWER SWITCH: none left on its way (OnClose finishes one; a frame deleted without being closed -- the harness's
   // end, a fatal exception -- drops it without its repaint), no later turn left, and the filter out of the program's list
   // (not inside its walk: the frame is deleted by idle-time deletion or the application's clean-up).
@@ -2039,34 +1938,7 @@ ModelViewer::~ModelViewer()
   m_later.clear();
   if (m_switchFilter)
     wxEvtHandler::RemoveFilter(m_switchFilter.get());
-  // THE IPC SERVER DETACHED FIRST (docs/world-viewer/04b-asset-serving.md 18.1): from here on no poll serves -- no player
-  // message handled, no map callback into this half-destroyed viewer, nothing sent -- whatever runs it (the server's
-  // timer, a wake the worker queued, wx's message hook during the player's shutdown pump below), and no result the worker
-  // makes from now on (the read stop() lets finish) posts a wake. The player is still closed by shutdown() below.
-  if (unityRendererHost && unityRendererHost->ipc())
-    unityRendererHost->ipc()->detachForShutdown();
-  // The Maps viewer tells nothing any more: the windows it would repaint go below.
-  if (m_maps)
-  {
-    m_maps->onChanged = nullptr;
-    m_maps->onStreamChanged = nullptr;
-    m_maps->onImagesChanged = nullptr;
-  }
   LOG_INFO << "Shutting down the program...";
-
-  if (testShutdownProbe)
-    testShutdownProbe(*this, ShutdownPoint::BeforeWorkerStop);
-  // THE MAP ASSET WORKER first: what waits is cancelled, a read under way finishes (reads are whole), the worker lets go
-  // of its storage reference and its thread is joined -- before anything it could have read from goes.
-  if (m_mapAssetWorker)
-  {
-    const MapAssetWorker::Stats before = m_mapAssetWorker->stats();
-    m_mapAssetWorker->stop();
-    const MapAssetWorker::Stats after = m_mapAssetWorker->stats();
-    LOG_INFO << "[unity-terrain] map asset worker stopped:" << after.submitted << "read(s) given," << after.read << "read,"
-             << (after.stopped - before.stopped) << "left unread at the stop; storage references taken"
-             << after.leasesGranted << ", released" << after.leasesReleased;
-  }
 
   // Not closed through OnClose: the background window still goes before anything it reads.
   if (m_backgroundDialog)
@@ -2098,23 +1970,13 @@ ModelViewer::~ModelViewer()
   if (!batchMode)
     SaveLayout();
 
-  // Shut the embedded Unity player down (if one was ever opened) BEFORE the AUI teardown
-  // destroys its host panel, so the child process never outlives -- or paints into -- a
-  // dead window.
-  if (testShutdownProbe)
-    testShutdownProbe(*this, ShutdownPoint::BeforePlayerShutdown);
-  if (unityRendererHost)
-    unityRendererHost->shutdown();
-  if (testShutdownProbe)
-    testShutdownProbe(*this, ShutdownPoint::AfterPlayerShutdown);
-
   // wxAUI stuff (teardown, always run)
   interfaceManager.UnInit();
 
   if (!batchMode)
     SaveSession();
 
-  // The texture view decodes through the canvas's GL context: stop it before that goes (the window
+  // The texture view decodes in the background: stop it before the client and canvas go (the window
   // itself goes with the viewport's host, after the canvas).
   if (textureView)
     textureView->shutdown();
@@ -2161,9 +2023,9 @@ ModelViewer::~ModelViewer()
     modelInspector = NULL;
   }
 
-  if (unityRendererHost) {
-    unityRendererHost->Destroy();
-    unityRendererHost = NULL;
+  if (viewportHost) {
+    viewportHost->Destroy();
+    viewportHost = NULL;
   }
 
   if (enchants) {
@@ -2471,148 +2333,44 @@ wxString ModelViewer::userPerspective()
 
 // The Unity viewport's docking setup, shared by InitDocking, ResetLayout and LoadLayout. A centre
 // pane has no caption and no close button, so the user cannot close it; nothing else docks there.
-wxAuiPaneInfo ModelViewer::unityViewportPaneInfo() const
+wxAuiPaneInfo ModelViewer::viewportPaneInfo() const
 {
   return wxAuiPaneInfo().
-         Name(wxT("unityRenderer")).Caption(wxT("Viewport")).
+         Name(wxT("viewport")).Caption(wxT("Viewport")).
          CenterPane().Show(true);
 }
 
-void ModelViewer::CreateUnityViewport()
+void ModelViewer::CreateViewport()
 {
-  if (unityRendererHost)
+  if (viewportHost)
     return;
-  unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
-  // Under the player while it starts, and on its command line, so the first frame is already this colour.
-  unityRendererHost->setBackdrop(m_viewportBackground);
+  viewportHost = new ViewportHost(this, ID_UNITY_FRAME);
+  viewportHost->setBackdrop(m_viewportBackground);
+
+  // The scene's view, in the host panel (it shows it whenever no notice or content covers it).
+  if (canvas)
+  {
+    canvas->Reparent(viewportHost);
+    viewportHost->setCanvas(canvas);
+  }
 
   // A texture picked in Browse is shown in the viewport's place.
-  textureView = new TextureView(unityRendererHost, this);
-  unityRendererHost->setContent(textureView);
-  // The Maps viewer's overhead map takes the same place until a world is entered (MapOverview).
-  mapOverview = new MapOverview(unityRendererHost, m_maps.get());
-  mapOverview->Hide();
+  textureView = new TextureView(viewportHost, this);
+  viewportHost->setContent(textureView);
   textureView->onLookupResolved = [this](int fileDataId, const QString & indexName) {
     if (fileControl)
       fileControl->TextureLookupResolved(fileDataId, indexName);
   };
-
-  // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
-  unityRendererHost->ipc()->onUnityReady = [this]() {
-    // A (re)started player knows nothing of the states sent to the one before it; the model push
-    // below carries the current state, and its build answers for it.
-    if (modelInspector)
-      modelInspector->UnityPlayerRestarted();
-    m_sceneAwaitingRevision = 0;
-    // ... nor could the one before it build a character this one never tried: a player rebuilt or
-    // restarted after a failed build is given the character again.
-    m_unityCharacterFailed = 0;
-    m_unityCharacterFailReason.clear();
-    // ... nor a world model (it is loaded again below, and the new player answers for it).
-    m_unityWmoFailed = 0;
-    m_unityWmoFailReason.clear();
-    // A new player shows nothing yet, and no answer from the one before it is awaited any more. Nor does it hold any
-    // asset file: the character's other model is hinted again once it is on screen.
-    m_playerContent = PlayerContent::Nothing;
-    m_assetHintLoad = 0;
-    m_mapObjectAwaited = 0;
-    m_uncoverFence = 0;
-    m_modelAwaited = 0;
-    m_modelAwaitedFailed = 0;
-    m_playerContentPoll.Stop();
-    // ... nor a terrain tile: no load of the player before it is answered or served any more.
-    ResetTerrainRequests();
-    // The background before the model: a player started before the colour last changed has an older one from its
-    // command line, and a restarted one may have been started by another run's settings.
-    m_viewportBackgroundSent = wxColour();
-    pushViewportBackground();
-    // Ready after the colour: its window is shown then, so its first frames have it (setPlayerReady).
-    if (unityRendererHost)
-      unityRendererHost->setPlayerReady(true);
-    SendCurrentModelToUnity();
-    // The Maps viewer's view and tile table, again, to a player that did not have them.
-    if (m_maps)
-      m_maps->OnPlayerReady();
-    // What the player announced may change what the viewport can show: a character gets a notice
-    // when the player is an older build that cannot dress it. With nothing loaded, the empty
-    // viewer's prompt simply stays.
-    UpdateUnityViewportState();
-    // The character panel's Model selector depends on the player too (characterVariantState).
-    if (charControl)
-      charControl->SyncModelVariant();
-  };
-  unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
-    OnCharacterSceneApplied(ack);
-  };
-  unityRendererHost->ipc()->onMapObjectLoaded = [this](const UnityIpcServer::MapObjectReport & report) {
-    OnMapObjectLoaded(report);
-  };
-  // ... and what it shows, while a model built after a world model is awaited (OnPlayerContentPoll).
-  unityRendererHost->ipc()->onRuntimeState = [this](const UnityIpcServer::RuntimeState & state) {
-    OnPlayerRuntimeState(state);
-  };
-  // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
-  unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
-    if (modelInspector)
-      modelInspector->OnUnityGeosetsApplied(ack);
-  };
-  // ... and what became of a screenshot, for the status bar.
-  unityRendererHost->ipc()->onScreenshotSaved = [this](const UnityIpcServer::ScreenshotResult & result) {
-    OnUnityScreenshotSaved(result);
-  };
-  // THE TERRAIN TILE: the map files it asks for -- decided here, read by the map asset worker, checked again here when
-  // read --, and what became of each load.
-  unityRendererHost->ipc()->setMapAssetWorker(m_mapAssetWorker);
-  unityRendererHost->ipc()->wakeOnMapResults();
-  unityRendererHost->ipc()->onDispatchMapAsset = [this](const QJsonObject & request) { return DispatchMapAsset(request); };
-  unityRendererHost->ipc()->onCompleteMapAsset = [this](const QJsonObject & request, MapAssetWorker::Result & result) {
-    return CompleteMapAsset(request, result);
-  };
-  unityRendererHost->ipc()->onMapAssetStale = [this](const QJsonObject & request) { return MapAssetStaleReason(request); };
-  unityRendererHost->ipc()->onMapAssetWait = [this]() { return MapAssetWait(); };
-  unityRendererHost->ipc()->onTerrainTileLoaded = [this](const UnityIpcServer::TerrainTileReport & report) {
-    OnTerrainTileLoaded(report);
-  };
-  // THE MAPS VIEWER: its WDT reads (the worker's, taken back by the server's polls), the player's tile tables and views.
-  unityRendererHost->ipc()->onViewerMapRead = [this](MapAssetWorker::Result & result) {
-    if (m_maps)
-      m_maps->OnWdtRead(result);
-  };
-  unityRendererHost->ipc()->onMapTilesInspected = [this](const UnityIpcServer::MapTilesInspection & inspection) {
-    if (m_maps)
-      m_maps->OnTilesInspected(inspection);
-  };
-  unityRendererHost->ipc()->onTerrainViewApplied = [this](const UnityIpcServer::TerrainViewApplied & applied) {
-    if (m_maps)
-      m_maps->OnTerrainViewApplied(applied);
-  };
-  unityRendererHost->ipc()->onWorldCameraApplied = [this](const UnityIpcServer::WorldCameraApplied & applied) {
-    if (m_maps)
-      m_maps->OnWorldCameraApplied(applied);
-  };
-  // WORLD MODELS IN THE WORLD (protocol 16): a world load's scene on screen, its progress, and a WMO-only map's footprint.
-  unityRendererHost->ipc()->onWorldShown = [this](const UnityIpcServer::WorldShown & shown) { OnWorldShown(shown); };
-  unityRendererHost->ipc()->onWorldProgress = [this](const UnityIpcServer::WorldProgress & progress) {
-    if (m_maps)
-      m_maps->OnWorldProgress(progress);
-  };
-  // STREAMING (protocol 18): the player's tile loads, and its state of the session.
-  unityRendererHost->ipc()->onStreamTile = [this](const QJsonObject & msg) { return OnStreamTile(msg); };
-  unityRendererHost->ipc()->onStreamState = [this](const UnityIpcServer::StreamState & state) { OnStreamState(state); };
-  unityRendererHost->ipc()->onWorldModelInspected = [this](const UnityIpcServer::WorldModelInspection & inspection) {
-    if (m_maps)
-      m_maps->OnWorldModelInspected(inspection);
-  };
 }
 
-bool ModelViewer::EnsureUnityViewportCentre()
+bool ModelViewer::EnsureViewportCentre()
 {
-  if (!unityRendererHost)
+  if (!viewportHost)
     return false;
-  if (isUnityViewportCentre())
+  if (isViewportCentre())
     return false;
-  interfaceManager.DetachPane(unityRendererHost);
-  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
+  interfaceManager.DetachPane(viewportHost);
+  interfaceManager.AddPane(viewportHost, viewportPaneInfo());
   return true;
 }
 
@@ -2621,33 +2379,12 @@ void ModelViewer::OnBackgroundColor(wxCommandEvent & WXUNUSED(event))
   if (!m_backgroundDialog)
   {
     m_backgroundDialog = new BackgroundColorDialog(this);
-    if (unityRendererHost)
-      m_backgroundDialog->placeBeside(unityRendererHost->GetScreenRect());
+    if (viewportHost)
+      m_backgroundDialog->placeBeside(viewportHost->GetScreenRect());
   }
   m_backgroundDialog->Show();
   m_backgroundDialog->Raise();
   m_backgroundDialog->opened();
-}
-
-void ModelViewer::OnRestartUnityRenderer(wxCommandEvent & WXUNUSED(event))
-{
-  RestartUnityRenderer();
-}
-
-void ModelViewer::RestartUnityRenderer()
-{
-  if (!unityRendererHost)
-    return;
-  LOG_INFO << "Restarting the Unity renderer.";
-  // A player that is still running (frozen, disconnected, or simply asked to restart) is closed first:
-  // launch() is a no-op while a process is alive.
-  unityRendererHost->shutdown();
-  StartUnityRenderer();
-  // The notice follows at once: the restart's own outcome (a missing build is reported again), or the
-  // content state. The player, once connected, is sent the current model by onUnityReady.
-  UpdateUnityViewportState();
-  if (charControl)
-    charControl->SyncModelVariant();
 }
 
 void ModelViewer::setViewportBackground(const wxColour & colour, bool persist)
@@ -2679,30 +2416,13 @@ wxColour ModelViewer::viewportBackgroundShown() const
 bool ModelViewer::pushViewportBackground()
 {
   const wxColour shown = viewportBackgroundShown();
-  if (!shown.IsOk() || !unityRendererHost)
+  if (!shown.IsOk() || !viewportHost)
     return false;
-  // Under the player and on the command line of one started later, whatever is sent.
-  unityRendererHost->setBackdrop(shown);
-  // A player not ready yet gets it on connect (onUnityReady); one older than protocol 7 keeps its own default.
-  if (m_viewportBackgroundSent.IsOk() && ViewportBackground::sameColour(shown, m_viewportBackgroundSent))
-    return false;
-  if (!unityRendererHost->ipc() || !unityRendererHost->ipc()->isUnityReady())
-    return false;
-  if (!unityRendererHost->ipc()->sendViewportBackground(shown.Red(), shown.Green(), shown.Blue()))
-    return false;
-  m_viewportBackgroundSent = shown;
-  return true;
-}
-
-bool ModelViewer::StartUnityRenderer(bool selfTest)
-{
-  if (!unityRendererHost)
-    return false;
-  if (unityRendererHost->isRunning())
-    return true;
-  // The host panel is already laid out as the centre pane, so the player parents itself to a window
-  // of the right size from its first frame.
-  return unityRendererHost->launch(selfTest);
+  const bool changed = !viewportHost->backdrop().IsOk() || !ViewportBackground::sameColour(shown, viewportHost->backdrop());
+  viewportHost->setBackdrop(shown);
+  if (canvas)
+    canvas->vecBGColor = glm::vec3(shown.Red() / 255.0f, shown.Green() / 255.0f, shown.Blue() / 255.0f);
+  return changed;
 }
 
 // The half of the viewer-first startup that touches NO player and NO IPC: take the screen. Runs
@@ -2721,35 +2441,6 @@ void ModelViewer::ApplyViewerStartupLayout()
   // Take the screen, as a window: maximised, with its title bar, so it can be minimised, restored
   // and moved like any other (View > Fullscreen still gives the borderless mode).
   Maximize(true);
-}
-
-// Start the player, at launch, before any client is loaded.
-//
-// It used to be created and launched by the first model load that wanted it, which meant the user
-// picked a creature and then watched a game engine boot -- process start, engine init and the
-// player's own splash -- with the model appearing only afterwards. None of that has anything to do
-// with the model, so none of it belongs in front of one. Done here it happens while the user is
-// still looking at an empty app, and by the time a creature is picked the player is already
-// connected and waiting.
-//
-// Nothing it does needs game data: it talks to WMV over the local IPC channel and is told what to
-// show, so with nothing loaded it simply sits connected and idle behind the empty viewer's prompt.
-//
-// Loading a client afterwards, with the player already running, is the normal case and was
-// verified as such -- unityReady lands in the middle of CASC and database initialisation and the
-// load completes untroubled. (The launch crash this branch had along the way was a double client
-// load, and it reproduced with no player running at all.)
-//
-// A player build that is missing or will not start is not a dialog: the viewport's notice says why
-// and offers a restart.
-void ModelViewer::WarmStartUnityViewport()
-{
-  if (batchMode)
-    return;
-  if (!StartUnityRenderer())
-    LOG_INFO << "Unity viewport not started:" << QString::fromWCharArray(unityRendererHost ?
-                                                   unityRendererHost->playerProblem().c_str() : L"no host");
-  UpdateUnityViewportState();
 }
 
 // Borderless fullscreen, keeping the MENU BAR.
@@ -2819,7 +2510,7 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
 // player exists, and a player that then turns out older gets the notice when it announces itself
 // (onUnityReady). Nothing loaded is not drawable either, but has no notice of its own here: the
 // empty viewer's prompt is the caller's (unityViewportNotice).
-bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
+bool ModelViewer::canDrawCurrentModel(ViewportNotice * notice) const
 {
   ViewportNotice ignored;
   ViewportNotice & out = notice ? *notice : ignored;
@@ -2838,40 +2529,12 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   if (isWMO && canvas->wmo)
   {
     const WMO * w = canvas->wmo;
-    const wxString name = fileName(wxString(const_cast<WMO *>(w)->itemName().toStdWString()));
-    // The host reads the same root the player would fetch: one it cannot open or that is not a root is
-    // not worth a load the player can only fail.
     if (!w->ok)
     {
+      const wxString name = fileName(wxString(const_cast<WMO *>(w)->itemName().toStdWString()));
       out.title = _("World model cannot be read");
       out.detail = wxString::Format(_("%s could not be read as a world model (WMO) root, so there is nothing "
                                       "to show."), name);
-      return false;
-    }
-    if (w->fileDataID == 0)
-    {
-      out.title = _("Legacy client world model");
-      out.detail = wxString::Format(_("%s has no FileDataID (it comes from a legacy client). The Unity viewport "
-                                      "can only show world models that have one."), name);
-      return false;
-    }
-    if (m_unityWmoFailed != 0 && m_unityWmoFailed == (int)w->fileDataID && m_unityWmoFailedLoad == m_unityLoadSerial)
-    {
-      out.title = _("World model could not be built");
-      out.detail = m_unityWmoFailReason.isEmpty()
-        ? wxString::Format(_("The Unity viewport could not build %s."), name)
-        : wxString::Format(_("The Unity viewport could not build %s (%s)."), name,
-                           wxString(m_unityWmoFailReason.toStdWString()));
-      return false;
-    }
-    // As for characters: a player not known yet is assumed current, and one that announces an older
-    // protocol gets this notice when it does (onUnityReady decides again).
-    const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
-    if (playerKnown && !unityRendererHost->ipc()->playerDrawsMapObjects())
-    {
-      out.title = _("Unity renderer out of date");
-      out.detail = wxString::Format(_("The Unity renderer build in use cannot show world models. Rebuild the player "
-                                      "from Tools\\UnityRendererProject to show %s."), name);
       return false;
     }
     return true;
@@ -2879,58 +2542,10 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   if (!canvas->model())
     return false;   // nothing loaded: the empty viewer, not a notice about content
   const WoWModel * m = canvas->model();
-  wxString name = m->gamefile ? fileName(wxString(m->gamefile->fullname().toStdWString()))
-                              : wxString(const_cast<WoWModel *>(m)->name().toStdWString());
   if (!m->gamefile)
   {
     out.title = _("Model cannot be shown");
-    out.detail = wxString::Format(_("%s has no game file the Unity viewport can load."), name);
-    return false;
-  }
-  if (isChar && !m->charModelDetails.isChar)
-  {
-    // A MOUNTED CHARACTER. As for characters and world models, a player not known yet is assumed current, and
-    // one that announces an older protocol gets this notice when it does (onUnityReady decides again).
-    const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
-    if (!canvasShowsMountedCharacter() || (playerKnown && !unityRendererHost->ipc()->playerRidesMounts()))
-    {
-      out.title = _("Mounted character");
-      out.detail = _("The character is riding a mount. The Unity viewport cannot show mounted characters yet; "
-                     "dismount to see the character again.");
-      return false;
-    }
-    // From here on the question is about the rider, which is what the player is loaded with and dresses; its
-    // mount travels in the rider's scene.
-    m = riderModel();
-    name = fileName(wxString(m->gamefile->fullname().toStdWString()));
-  }
-  if (m->gamefile->fileDataId() <= 0)
-  {
-    out.title = _("Legacy client model");
-    out.detail = wxString::Format(_("%s has no FileDataID (it comes from a legacy client). The Unity viewport "
-                                    "can only show models that have one."), name);
-    return false;
-  }
-  if (!isChar)
-    return true;
-  // From here m is the character: a model, its game file, isChar, a character model -- the canvas model, or
-  // the rider of a mount when the player is not known to be too old to seat it -- and a FileDataID were all
-  // established above.
-  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)m->gamefile->fileDataId())
-  {
-    out.title = _("Character could not be built");
-    out.detail = m_unityCharacterFailReason.isEmpty()
-      ? wxString::Format(_("The Unity viewport could not build %s."), name)
-      : wxString::Format(_("The Unity viewport could not build %s (%s)."), name,
-                         wxString(m_unityCharacterFailReason.toStdWString()));
-    return false;
-  }
-  const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
-  if (playerKnown && !unityRendererHost->ipc()->playerDressesCharacters())
-  {
-    out.title = _("Unity renderer out of date");
-    out.detail = wxString::Format(_("The Unity renderer build in use cannot dress characters. Rebuild the player "
-                                    "from Tools\\UnityRendererProject to show %s."), name);
+    out.detail = wxString::Format(_("%s has no game file to read."), wxString(const_cast<WoWModel *>(m)->name().toStdWString()));
     return false;
   }
   return true;
@@ -2939,42 +2554,25 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
 // THE WHOLE VIEWPORT DECISION, most fundamental first: a platform with no player, texture services
 // that never started (nothing can be prepared for the player then), a player that is missing or has
 // stopped, content the player cannot draw yet, and finally nothing loaded (the empty viewer's prompt).
-bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
+// THE WHOLE VIEWPORT DECISION, most fundamental first: a renderer that could not start, the Maps viewer (not
+// available yet), content that cannot be drawn, and finally nothing loaded (the empty viewer's prompt).
+bool ModelViewer::viewportNotice(ViewportNotice & notice) const
 {
   notice = ViewportNotice();
-#ifndef _WINDOWS
-  notice.title = _("Unity viewport unavailable");
-  notice.detail = _("The Unity viewport is not available on this platform.");
-  return true;
-#else
-  if (!canvas || !video.render || !canvas->init)
+  if (canvas && !canvas->rendererError().IsEmpty())
   {
-    notice.title = _("Textures cannot be decoded");
-    notice.detail = _("The OpenGL services this viewer decodes textures with did not start, so nothing can be "
-                      "prepared for the Unity viewport. Check the graphics driver, then restart the application.");
+    notice.title = _("The viewport could not start");
+    notice.detail = canvas->rendererError() + wxT("\n") +
+                    _("WoW Model Viewer draws with Vulkan (MoltenVK on macOS). Update your graphics driver, then restart the viewer.");
     return true;
   }
-  if (unityRendererHost && !unityRendererHost->playerProblem().IsEmpty())
-  {
-    notice.title = _("The Unity renderer is not running");
-    notice.detail = unityRendererHost->playerProblem();
-    notice.actionLabel = _("Restart Unity renderer");
-    notice.actionId = ID_VIEW_UNITY_RESTART;
-    return true;
-  }
-  // A terrain tile on show (THE TERRAIN TILE): the player shows it in front of whatever the canvas holds, and nothing
-  // is put over it -- a notice would park the player's frame.
-  if (m_playerContent == PlayerContent::Terrain)
-    return false;
-  // THE MAPS VIEWER: until a tile is on show, what its state says (no map, the tile grid being read, a tile that cannot
-  // be loaded, one being loaded) -- never what the canvas holds, which is the other viewers'.
   if (isMapsMode())
   {
-    QString title, detail;
-    if (!m_maps || !m_maps->viewportNotice(title, detail))
-      return false;
-    notice.title = wxString(title.toStdWString());
-    notice.detail = wxString(detail.toStdWString());
+    notice.title = _("Maps are not available yet");
+    notice.detail = _("The world viewer is being rebuilt for the native viewport and returns in a later version. "
+                      "Models, textures and buildings are available.");
+    notice.actionLabel = _("Browse models");
+    notice.actionId = ID_UI_MODELS;
     return true;
   }
   // The viewer's own kind of content only: a model in Models, a world model in Buildings. What the canvas holds
@@ -2983,36 +2581,8 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
   if (canvasHoldsModesContent())
   {
     ViewportNotice content;
-    if (unityCanDrawCurrentModel(&content))
-    {
-      // Drawable -- unless the player is still building it after showing the other viewer's kind, which must
-      // not pass for it meanwhile (PlayerContent).
-      const WoWModel * shownModel = buildings ? nullptr : canvas->model();
-      const QString name = buildings ? canvas->wmo->itemName()
-                         : shownModel ? (shownModel->gamefile ? shownModel->gamefile->fullname() : shownModel->name())
-                                      : QString();
-      const wxString shortName = wxString(name.toStdWString()).AfterLast('/').AfterLast('\\');
-      if (buildings && m_mapObjectAwaited != 0 && m_mapObjectAwaited == m_unityLoadSerial)
-      {
-        notice.title = _("Loading building");
-        notice.detail = wxString::Format(_("The Unity viewport is building %s."), shortName);
-        return true;
-      }
-      if (!buildings && m_modelAwaited != 0)
-      {
-        notice.title = _("Loading model");
-        notice.detail = wxString::Format(_("The Unity viewport is building %s."), shortName);
-        return true;
-      }
-      if (!buildings && m_modelAwaitedFailed != 0 && shownModel && shownModel->gamefile &&
-          (int)shownModel->gamefile->fileDataId() == m_modelAwaitedFailed)
-      {
-        notice.title = _("Model could not be built");
-        notice.detail = wxString::Format(_("The Unity viewport could not build %s."), shortName);
-        return true;
-      }
+    if (canDrawCurrentModel(&content))
       return false;
-    }
     if (!content.title.IsEmpty())
     {
       notice = content;
@@ -3020,7 +2590,7 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
     }
   }
   // Nothing of the mode's kind loaded: the empty viewer's prompt, which depends on whether a client is loaded yet.
-  const bool client = UnityAssetAccess::hasActiveClient();
+  const bool client = isWoWLoaded;
   if (buildings)
   {
     notice.title = _("No building selected");
@@ -3043,7 +2613,6 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
   }
   notice.actionId = ID_UI_MODELS;
   return true;
-#endif
 }
 
 // The scene and the player's asset requests both address files by FileDataID, so a character with
@@ -3086,39 +2655,20 @@ bool ModelViewer::canvasShowsMountedCharacter() const
          riderMount() != nullptr;
 }
 
-bool ModelViewer::unityPlayerRidesMounts() const
+WoWModel * ModelViewer::equipmentOwner() const
 {
-  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerRidesMounts();
-}
-
-WoWModel * ModelViewer::unityCharacter() const
-{
+  // A character: the canvas model when it is the character, the rider while it rides a mount.
   if (canvasShowsCharacter())
     return const_cast<WoWModel *>(canvas->model());
-  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
+  if (canvasShowsMountedCharacter())
     return riderModel();
-  return nullptr;
-}
-
-bool ModelViewer::unityPlayerDressesCharacters() const
-{
-  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
-}
-
-WoWModel * ModelViewer::unityEquipmentOwner() const
-{
-  if (WoWModel * character = unityCharacter())
-    return character;
-  if (!unityRendererHost || !unityRendererHost->ipc() ||
-      !unityRendererHost->ipc()->playerAttachesNpcEquipment() || isWMO ||
-      !canvas || !canvas->model() || !charControl)
+  if (isWMO || !canvas || !canvas->model() || !charControl)
     return nullptr;
   WoWModel * model = const_cast<WoWModel *>(canvas->model());
   // SetHandsOnly supplies equipment controls for exclusive NPCs. Require the live
   // canvas model and its own node, never a stale character or a rider's parent.
   if (model->charModelDetails.isChar || charControl->model != model ||
-      !model->attachment || charControl->charAtt != model->attachment ||
-      !model->gamefile || model->gamefile->fileDataId() <= 0)
+      !model->attachment || charControl->charAtt != model->attachment || !model->gamefile)
     return nullptr;
   return model;
 }
@@ -3161,35 +2711,29 @@ bool ModelViewer::CommitLayoutIfChanged()
   return changed;
 }
 
-// What the viewport shows is decided here and nowhere else. It is not a routing: the Unity viewport
-// is the only viewport, and the archived OpenGL canvas behind it still loads the model, owns the
-// animation clock and is what every Send*ToUnity call reads from -- it is simply never shown. Content
-// the player cannot draw yet stays loaded (the panels, exports and Info keep working on it) and the
-// viewport paints a notice in its place instead -- the player is only taken off screen (its frame parked), not
-// closed -- so the next drawable model is on screen as soon as it is built.
+// What the viewport shows is decided here and nowhere else: the canvas, a notice in its place, or the texture
+// view. Content that cannot be drawn stays loaded (the panels, exports and Info keep working on it).
 //
 // Cheap, and safe from the canvas tick: it launches nothing and opens no dialog, and setting the
 // notice already on screen again repaints nothing.
-void ModelViewer::UpdateUnityViewportState()
+void ModelViewer::UpdateViewportState()
 {
-  // Recorded for the tick, which compares against it to notice a mount or a dismount
-  // (SendCharacterSceneToUnity). Recorded before any early return: a load decides here, and the tick
+  // Recorded for the tick, which compares against it to notice a mount or a dismount.
+  // Recorded before any early return: a load decides here, and the tick
   // that follows it must not decide it again.
   m_lastShowsCharacter = canvasShowsCharacter();
   m_lastShowsMountedCharacter = canvasShowsMountedCharacter();
-  if (!unityRendererHost)
+  if (!viewportHost)
     return;
 
-  // A texture picked in Browse: the texture view covers the viewport. It needs no player, so nothing
-  // about the player -- missing, stopped, still starting -- is said over it.
+  // A texture picked in Browse: the texture view covers the viewport.
   if (isTextureMode() && textureView)
   {
-    const bool changed = !unityRendererHost->isShowingContent() || unityRendererHost->content() != textureView;
-    unityRendererHost->setContent(textureView);
-    unityRendererHost->showContent(true);
-    unityRendererHost->clearNotice();
-    // The model's panels go once the texture covers the viewport, so the player is never seen
-    // resized to the larger area.
+    const bool changed = !viewportHost->isShowingContent() || viewportHost->content() != textureView;
+    viewportHost->setContent(textureView);
+    viewportHost->showContent(true);
+    viewportHost->clearNotice();
+    // The model's panels go once the texture covers the viewport.
     applyWorkspace(workspacePanes(ViewerMode::Textures));
     if (changed)
     {
@@ -3200,2059 +2744,38 @@ void ModelViewer::UpdateUnityViewportState()
     return;
   }
 
-  // THE MAPS VIEWER'S OVERHEAD MAP: until a world is entered, and after Back to map, it covers the viewport as the texture
-  // view does; the player, and any world it holds, is only taken off screen.
-  if (isMapsMode() && mapOverview && m_maps && m_maps->showsOverview())
-  {
-    const bool changed = !unityRendererHost->isShowingContent() || unityRendererHost->content() != mapOverview;
-    unityRendererHost->setContent(mapOverview);
-    unityRendererHost->showContent(true);
-    unityRendererHost->clearNotice();
-    applyWorkspace(workspacePanes(ViewerMode::Maps));
-    if (changed)
-    {
-      LOG_INFO << "[viewport] showing the overhead map";
-      mapOverview->Refresh2();
-    }
-    return;
-  }
-
   ViewportNotice notice;
-  bool changed = unityRendererHost->isShowingContent();
+  bool changed = viewportHost->isShowingContent();
   if (changed)
-    LOG_INFO << "[viewport] the" << (unityRendererHost->content() == mapOverview ? "overhead map" : "texture view") << "is put away";
-  if (unityViewportNotice(notice))
+    LOG_INFO << "[viewport] the texture view is put away";
+  if (viewportNotice(notice))
   {
-    const bool newNotice = !unityRendererHost->hasNotice() || unityRendererHost->noticeTitle() != notice.title;
+    const bool newNotice = !viewportHost->hasNotice() || viewportHost->noticeTitle() != notice.title;
     if (newNotice)
       LOG_INFO << "[viewport] notice:" << QString::fromWCharArray(notice.title.c_str()) << "--"
                << QString::fromWCharArray(notice.detail.c_str());
     changed = changed || newNotice;
-    unityRendererHost->setNotice(notice.title, notice.detail, notice.actionLabel, notice.actionId);
+    viewportHost->setNotice(notice.title, notice.detail, notice.actionLabel, notice.actionId);
   }
   else
   {
-    if (unityRendererHost->hasNotice() || unityRendererHost->isShowingContent())
+    if (viewportHost->hasNotice() || viewportHost->isShowingContent())
     {
       LOG_INFO << "[viewport] showing the model";
       changed = true;
     }
-    unityRendererHost->clearNotice();
+    viewportHost->clearNotice();
   }
   // The mode's panels come back (or go) first, while the texture view still covers the viewport, so the
-  // player is uncovered at its final size; then it is put away, after the notice is decided, so the
-  // player's window is not shown for a moment between.
+  // canvas is uncovered at its final size; then it is put away, after the notice is decided.
   applyWorkspace(workspacePanes(m_viewerMode));
   if (m_layoutBatch > 0)
     m_uncoverPending = true;   // put away after the batch's layout (commitLayoutBatchNow)
   else
-    unityRendererHost->showContent(false);
-  // The Geosets tab says whether the viewport shows the model; a stopped or restarted player changes
-  // that without a load, so the tab is told here rather than only on content changes.
+    viewportHost->showContent(false);
+  // The Geosets tab says whether the viewport shows the model.
   if (changed && modelInspector)
     modelInspector->ViewportNoticeChanged();
-}
-
-// Just the load. LoadModel sends this before the animation control initialises, so that the
-// selection and state the control then pushes are about a model the player already expects.
-void ModelViewer::SendLoadToUnity()
-{
-  FinishViewerSwitch("a load");
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
-    return;
-  if (isWMO && canvas && canvas->wmo)
-  {
-    // A WORLD MODEL: its root, by FileDataID, and nothing after it -- no skin, animation or geoset push
-    // exists for a WMO. Only to a player that has said it draws them; a player not ready yet is sent
-    // this by onUnityReady, and an older one gets the out-of-date notice instead.
-    WMO * w = canvas->wmo;
-    UnityIpcServer * ipc = unityRendererHost->ipc();
-    if (!ipc->playerDrawsMapObjects() || !w->ok || w->fileDataID == 0)
-    {
-      LOG_INFO << "[unity-wmo] not sending" << w->itemName() << "to the player:"
-               << (!ipc->isUnityReady() ? "the player has not announced itself yet"
-                   : !ipc->playerDrawsMapObjects() ? "the player is older than protocol 4"
-                   : !w->ok ? "the root could not be read" : "the root has no FileDataID");
-      return;
-    }
-    // Its colour first (viewportBackgroundShown): the player draws it on that from its first frame. And, parked, the
-    // viewport's size: it frames what it builds by its own aspect.
-    const bool recoloured = pushViewportBackground();
-    unityRendererHost->sizePlayerForLoad();
-    const int load = ++m_unityLoadSerial;
-    ipc->sendLoadWoWModel(w->itemName(), (int)w->fileDataID, QStringLiteral("active"), false, load,
-                          QStringLiteral("wmo"));
-    m_unityLoadedFileDataID = (int)w->fileDataID;
-    m_unityLoadedCharacter = false;
-    // Until it is built the player shows what it had: awaited, unless that is known to be a world model too
-    // (PlayerContent); what the player shows is then uncertain until this load is answered.
-    // (Nor while what it shows has just been re-coloured: that is not on screen before the new one is built.)
-    // (Nor while an earlier answer's fence is pending: what it shows is not known to be on screen yet.)
-    const bool sameKind = m_playerContent == PlayerContent::MapObject && m_modelAwaited == 0 && !recoloured &&
-                          m_uncoverFence == 0;
-    m_mapObjectAwaited = sameKind ? 0 : load;
-    m_uncoverFence = 0;
-    if (!sameKind)
-      m_playerContent = PlayerContent::Unknown;
-    m_modelAwaited = 0;
-    m_modelAwaitedFailed = 0;
-    m_playerContentPoll.Stop();
-    // Whatever a character scene was waiting for belongs to a load the player now drops.
-    m_lastSceneSignature = 0;
-    m_sceneAwaitingRevision = 0;
-    m_unityCharacterFailed = 0;
-    // The player leaves the terrain view for it (a terrain load in flight is superseded): no terrain request is current.
-    ResetTerrainRequests();
-    return;
-  }
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
-    return;
-  // A CHARACTER RIDING A MOUNT is loaded as the character -- the rider, not the canvas model -- when the player
-  // seats characters on mounts (protocol 5): the mount travels in the rider's scene. An older player is sent the
-  // canvas model, the mount, as before, behind the mounted-character notice.
-  const bool riding = canvasShowsMountedCharacter() && unityRendererHost->ipc()->playerRidesMounts();
-  WoWModel * m = riding ? riderModel() : const_cast<WoWModel *>(canvas->model());
-  GameFile * gf = m->gamefile;
-  const bool character = (riding || canvasShowsCharacter()) && unityRendererHost->ipc()->playerDressesCharacters();
-  const int fileDataID = gf->fileDataId() > 0 ? (int)gf->fileDataId() : 0;
-  // Its colour first (viewportBackgroundShown): the player draws it on that from its first frame. And, parked, the
-  // viewport's size: it frames what it builds by its own aspect.
-  const bool recoloured = pushViewportBackground();
-  unityRendererHost->sizePlayerForLoad();
-  // Answers about any earlier load are told apart from answers about this one by this number.
-  const int load = ++m_unityLoadSerial;
-  // A file opened by its FileDataID alone goes to the player by FileDataID alone: its made-up name ("FileXXXXXXXX.unk",
-  // for a file the listfile does not name, or one the client's file enumeration missed) is no path it could ask for.
-  QString path = gf->fullname();
-  if (fileDataID > 0 &&
-      static_cast<wow::WoWFolder &>(GAMEDIRECTORY).fileName(fileDataID).compare(path, Qt::CaseInsensitive) != 0)
-    path.clear();
-  // A character rebuilt on its other model generation keeps the view the user had (SwitchCharacterVariant).
-  const bool keepView = character && m_variantSwitching > 0 && unityRendererHost->ipc()->playerKeepsView();
-  unityRendererHost->ipc()->sendLoadWoWModel(path, fileDataID, QStringLiteral("active"), character, load,
-                                             QStringLiteral("m2"), keepView);
-  m_unityLoadedFileDataID = fileDataID;
-  m_unityLoadedCharacter = character;
-  // A model built after a world model: awaited, the player asked what it shows until it has the model
-  // (PlayerContent). After anything else, the model replaces what was there as models always have.
-  m_mapObjectAwaited = 0;
-  m_modelAwaitedFailed = 0;
-  // (And a model whose colour has just changed under what the player shows, or sent while an earlier answer's fence
-  // is pending: neither is on screen before it is built. Nor after a terrain tile: the player leaves the terrain view
-  // for this load, and shows the model it had until this one is built.)
-  const bool mayShowOther = m_playerContent == PlayerContent::MapObject || m_playerContent == PlayerContent::Unknown ||
-                            m_playerContent == PlayerContent::Terrain || recoloured || m_uncoverFence != 0;
-  // ... and no terrain request is current any more (a terrain load in flight is superseded).
-  ResetTerrainRequests();
-  m_uncoverFence = 0;
-  if (mayShowOther && fileDataID > 0 && unityRendererHost->ipc()->playerDrawsMapObjects())
-  {
-    m_playerContent = PlayerContent::Unknown;
-    m_modelAwaited = fileDataID;
-    m_modelAwaitedClock.Start();
-    m_playerContentQuery = 0;
-    m_playerContentPoll.Start(POLL_MS);
-  }
-  else
-  {
-    m_modelAwaited = 0;
-    m_playerContentPoll.Stop();
-    m_playerContent = PlayerContent::Model;
-  }
-  // A new load is dressed from scratch: the next tick sends this character's scene even when its
-  // fingerprint happens to equal the previous one (the same character loaded again), and it does not
-  // wait for an answer about the previous model's scene -- the player drops that one for this load.
-  m_lastSceneSignature = 0;
-  m_sceneAwaitingRevision = 0;
-  if (!character || (int)gf->fileDataId() != m_unityCharacterFailed)
-    m_unityCharacterFailed = 0;
-}
-
-// The load AND what is showing: for a player that connects while a model is already up
-// (onUnityReady), which missed the pushes LoadModel's own path would have made.
-void ModelViewer::SendCurrentModelToUnity()
-{
-  SendLoadToUnity();
-  SendCharacterSceneToUnity(true);
-  // ... its skin -- the display's textures, geosets and particle colour, as the animation
-  // control pushes them on a load -- so a player that connects with a model already up shows
-  // the geosets the file-list path would give it. After the load, which is what the player's
-  // guard for the model being loaded requires.
-  // (Not for a character: its scene carries every texture and geoset, and follows on the next tick. Nor for the
-  // mount a character rides, to a player that seats it: the rider's scene carries the mount's too.)
-  if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
-      canvas && canvas->model() && canvas->model()->gamefile && !canvasShowsCharacter() &&
-      !(canvasShowsMountedCharacter() && unityPlayerRidesMounts()))
-    unityRendererHost->ipc()->sendModelSkin((int)canvas->model()->gamefile->fileDataId());
-  // ... and which animation it is showing, so the player starts on the app's selection instead of
-  // picking its own idle and being corrected a moment later.
-  SendCurrentAnimationToUnity();
-}
-
-// The displayed skin changed (dropdown, or the default picked on model load). The Unity viewport
-// renders the same model from the same data, so it has to follow the same selection -- otherwise
-// it shows whatever the database happens to call the model's default while the canvas shows what
-// the user picked. Texture only: the mesh it already built is unchanged.
-void ModelViewer::SendCurrentSkinToUnity()
-{
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
-    return;
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
-    return;
-  // A character's textures and geosets travel in its scene (SendCharacterSceneToUnity), which the
-  // host's own refresh keeps current; a skin push would only repeat part of it. So do those of the mount a
-  // character rides, to a player that seats it (the scene's "mount"): one channel for its display state.
-  if (canvasShowsCharacter() || (canvasShowsMountedCharacter() && unityPlayerRidesMounts()))
-    return;
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
-}
-
-namespace
-{
-  // The mount the rider rides, as a character scene describes it: the model on the rider node's parent, the
-  // node's attachment id, and CharControl's serial and display id for it. model is null when none is ridden.
-  UnityCharacterScene::Mount riddenMount(const ModelViewer * viewer)
-  {
-    UnityCharacterScene::Mount mount;
-    mount.model = viewer->riderMount();
-    if (mount.model)
-    {
-      mount.attachmentId = viewer->charControl->charAtt->id;
-      mount.serial = viewer->charControl->mountSerial;
-      mount.displayId = viewer->charControl->mountDisplayId;
-    }
-    return mount;
-  }
-
-  // One line about a scene's "mount" (UnityCharacterScene::buildMount), for the [unity-mount] log. The animation
-  // ids of the two sequences are looked up for the reader; the scene itself carries only the indices.
-  QString describeMount(const QJsonObject & o, const WoWModel * mount, const WoWModel * rider)
-  {
-    const auto animId = [](const WoWModel * m, int index) {
-      return (m && index >= 0 && index < (int)m->anims.size()) ? QString::number(m->anims[index].animID)
-                                                                 : QString("-");
-    };
-    const QJsonArray p = o.value("position").toArray();
-    const int sequence = o.value("sequenceIndex").toInt(-1);
-    const int riderSequence = o.value("riderSequenceIndex").toInt(-1);
-    // Concatenated rather than passed through arg(): a path is free text.
-    return o.value("key").toString() + " " + o.value("path").toString() +
-           QString(" fileDataID=%1 displayID=%2 attachmentId=%3 bone=%4 position=(%5, %6, %7) riderScale=%8")
-             .arg(o.value("fileDataID").toInt()).arg(o.value("displayID").toInt()).arg(o.value("attachmentId").toInt())
-             .arg(o.value("bone").toInt()).arg(p.at(0).toDouble(), 0, 'g', 6).arg(p.at(1).toDouble(), 0, 'g', 6)
-             .arg(p.at(2).toDouble(), 0, 'g', 6).arg(o.value("riderScale").toDouble(), 0, 'g', 6) +
-           QString(" textures=%1 submeshes=%2 particleColorSets=%3 sequenceIndex=%4 (animID %5) "
-                   "riderSequenceIndex=%6 (animID %7)")
-             .arg(o.value("textures").toArray().size()).arg(o.value("submeshCount").toInt())
-             .arg(o.contains("particleColorSets") ? "yes" : "no").arg(sequence).arg(animId(mount, sequence))
-             .arg(riderSequence).arg(animId(rider, riderSequence));
-  }
-}
-
-void ModelViewer::SendCharacterSceneToUnity(bool force)
-{
-  // Mounting puts the mount on the canvas and dismounting takes it off again, with no load: the
-  // viewport follows here, where every tick passes. Only a change the viewport has not already followed
-  // counts -- UpdateUnityViewportState records what it decided -- so a load is not decided twice. Swapping
-  // one mount for another changes neither: the scene below describes the new mount.
-  const bool showsCharacter = canvasShowsCharacter();
-  const bool showsMounted = canvasShowsMountedCharacter();
-  if (!force && (showsCharacter != m_lastShowsCharacter || showsMounted != m_lastShowsMountedCharacter))
-  {
-    m_lastShowsCharacter = showsCharacter;
-    m_lastShowsMountedCharacter = showsMounted;
-    if (isChar)
-    {
-      // The character is in front of the player again: dismounted, or mounted with a player that seats it on
-      // the mount (protocol 5) and so keeps the character it was loaded with. The player may not have THIS
-      // character loaded -- one that connected while the character rode a mount it could not seat was sent
-      // the mount -- and it refuses a scene for a model it is not building, so the character's load goes out
-      // again before the notice is taken down. A player that has it loaded is not sent it again: mounting,
-      // dismounting and swapping load nothing on the host either.
-      const WoWModel * character = unityCharacter();
-      if (character && unityPlayerReady())
-      {
-        const bool dresses = unityRendererHost->ipc()->playerDressesCharacters();
-        if (m_unityLoadedFileDataID != (int)character->gamefile->fileDataId() || m_unityLoadedCharacter != dresses)
-          SendCurrentModelToUnity();
-      }
-      // Mounting puts the mounted-character notice up for a player that cannot seat the character; dismounting
-      // takes it down. Nothing here launches or opens a dialog, so it is safe inside the canvas timer.
-      UpdateUnityViewportState();
-    }
-  }
-
-  // THE MOUNT IN THE LOG: each mount model the character rides is described once, as a scene would carry it,
-  // whatever the player can do with it.
-  if (showsMounted)
-  {
-    const UnityCharacterScene::Mount mount = riddenMount(this);
-    if (mount.model != m_loggedMount || mount.serial != m_loggedMountSerial)
-    {
-      m_loggedMount = mount.model;
-      m_loggedMountSerial = mount.serial;
-      const WoWModel * rider = riderModel();
-      LOG_INFO << "[unity-mount] the character" << rider->gamefile->fullname() << "rides"
-               << describeMount(UnityCharacterScene::buildMount(riderModel(), mount), mount.model, rider)
-               << (unityPlayerRidesMounts() ? "-- described in the character's scene"
-                   : unityPlayerReady() ? "-- the player cannot seat it (older than protocol 5): mounted-character notice"
-                                        : "-- no player ready yet");
-    }
-  }
-  else if (m_loggedMount)
-  {
-    LOG_INFO << "[unity-mount] no mount is ridden any more (was" << QString("M%1").arg(m_loggedMountSerial).toLatin1().constData()
-             << ")";
-    m_loggedMount = nullptr;
-  }
-
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerDressesCharacters())
-    return;
-  // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  WoWModel * m = unityEquipmentOwner();
-  if (!m || m_sceneHold > 0)
-    return;
-  // The player reported it could not build this character from the load on display, and the canvas has
-  // it: another scene would only be refused again, with the composited body image sent for nothing. A
-  // later load of the same body model is another attempt, whose build waits for its scene -- held back,
-  // that load would never finish, never answer, and the character would stay on the canvas for good.
-  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)m->gamefile->fileDataId() &&
-      m_unityCharacterFailedLoad == m_unityLoadSerial)
-    return;
-  const unsigned long now = timeGetTime();
-  if (!force)
-  {
-    if (m_lastSceneCheck != 0 && (now - m_lastSceneCheck) < SCENE_CHECK_MS)
-      return;
-    m_lastSceneCheck = now;
-  }
-  if (m_sceneAwaitingRevision != 0 && (now - m_sceneSentAt) < SCENE_ACK_TIMEOUT_MS)
-  {
-    // The previous scene is still being applied. Whatever changes meanwhile goes out when it is
-    // answered (OnCharacterSceneApplied); a forced send is remembered by clearing the fingerprint.
-    if (force)
-      m_lastSceneSignature = 0;
-    return;
-  }
-  if (m_sceneAwaitingRevision != 0)
-  {
-    // No answer in time. The wait ends HERE, once: left in place, every tick after this one would find
-    // the same expired wait and log it again, twenty times a second, while nothing changed. The current
-    // state goes out once more, and the next wait is timed from now.
-    LOG_ERROR << "[unity-character] no answer to scene revision" << m_sceneAwaitingRevision << "after"
-              << (now - m_sceneSentAt) << "ms -- sending the current state";
-    m_sceneAwaitingRevision = 0;
-    m_sceneSentAt = now;
-    m_lastSceneSignature = 0;
-  }
-
-  // The rider's mount goes in its scene: m is the rider, not the canvas model, only while it rides one the player
-  // seats (unityCharacter).
-  const UnityCharacterScene::Mount mount = riddenMount(this);
-  const UnityCharacterScene::Mount * ridden = (m != canvas->model() && mount.model) ? &mount : nullptr;
-  const quint64 signature = UnityCharacterScene::signature(m, ridden);
-  if (!force && signature == m_lastSceneSignature)
-    return;
-  m_lastSceneSignature = signature;
-
-  QElapsedTimer clock;
-  clock.start();
-  UnityIpcServer * ipc = unityRendererHost->ipc();
-  UnityCharacterScene::Summary summary;
-  QJsonObject scene = UnityCharacterScene::build(
-    m, [ipc](const QString & kind, const QImage & image) { return ipc->shareCharacterImage(kind, image); },
-    summary, ridden, !m->charModelDetails.isChar);
-  scene["load"] = m_unityLoadSerial;
-  const int revision = ++m_sceneRevision;
-  if (ipc->sendCharacterScene((int)m->gamefile->fileDataId(), revision, scene))
-  {
-    m_sceneAwaitingRevision = revision;
-    m_sceneSentAt = now;
-  }
-  if (m_sceneAwaitingRevision == revision)
-  {
-    LOG_INFO << "[unity-character] scene revision" << revision << "for" << m->gamefile->fullname() << ":"
-             << summary.bodyTextures << "body texture(s)," << summary.images << "composited image reference(s),"
-             << summary.merged << "merged," << summary.attachments << "attached; built and queued in"
-             << clock.elapsed() << "ms";
-    if (summary.mount)
-      LOG_INFO << "[unity-mount] scene revision" << revision << "load" << m_unityLoadSerial << "mount"
-               << describeMount(scene.value("mount").toObject(), mount.model, m);
-  }
-}
-
-bool ModelViewer::unityPlayerReady() const
-{
-  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
-         unityRendererHost->ipc()->isUnityReady();
-}
-
-bool ModelViewer::unityPlayerSwitchesSubmeshes() const
-{
-  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerSwitchesSubmeshes();
-}
-
-int ModelViewer::SendCurrentGeosetsToUnity()
-{
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
-    return 0;
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile || !unityCanDrawCurrentModel())
-    return 0;
-  // A character's geosets -- its own, its merged parts' and its items' -- reach the player in its
-  // scene, which the signature sends on the next tick. One channel: a modelGeosets for the body
-  // would race the scene that also carries the body's flags. The same holds for the mount a character
-  // rides: the canvas model is then the mount, and its flags travel in the rider's scene.
-  if (canvasShowsCharacter() || canvasShowsMountedCharacter())
-    return 0;
-  const int revision = ++m_geosetRevision;
-  return unityRendererHost->ipc()->sendModelGeosets((int)canvas->model()->gamefile->fileDataId(), revision)
-           ? revision : 0;
-}
-
-void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
-{
-  if (ack.status == "pending")
-    return;   // the body is still building; the final answer follows
-  // Revisions are numbered across loads, so the wait for one ends with its answer whichever load that
-  // answer names.
-  const bool endsWait = ack.revision != 0 && ack.revision == m_sceneAwaitingRevision;
-  if (endsWait)
-    m_sceneAwaitingRevision = 0;
-
-  // AN ANSWER ABOUT AN EARLIER LOAD SAYS NOTHING ABOUT THIS ONE. The player answers for the scene a new
-  // load made it drop, and a failed build reports after the next load may already have gone out -- as
-  // often as not of the same body model (NPCs of one race and sex share it), so the fileDataID alone
-  // took either for news about the character on display: a false notice in the Geosets tab, or a
-  // character that builds fine kept behind a notice. Load 0 is a scene the player could tie to no load at
-  // all (the serial sent is never 0). "superseded" is a scene dropped for a newer scene or a new load,
-  // which is answered in its own right: no failure either.
-  if (ack.load == 0 || ack.load != m_unityLoadSerial || ack.status == "superseded")
-  {
-    if (endsWait)
-    {
-      m_lastSceneCheck = 0;
-      SendCharacterSceneToUnity(false);
-    }
-    return;
-  }
-
-  // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  const WoWModel * character = unityEquipmentOwner();
-  const bool current = character && (int)character->gamefile->fileDataId() == ack.fileDataID;
-  // On screen now: its other model generation is fetched by the player while nothing waits for it, so a switch to it
-  // finds its files there. Decided here, not at the load: an NPC is known as one only once its load returned.
-  if (current && ack.status == "applied" && m_assetHintLoad != m_unityLoadSerial)
-    HintVariantPartner();
-  // THE MOUNT (protocol 5) is answered in the same ack but is not the character: a mount the player could not
-  // build leaves the character built and on screen, so it is logged here and changes no notice.
-  if (current && ack.mountStatus == "failed")
-    LOG_ERROR << "[unity-mount] the Unity viewport could not build mount" << ack.mountKey << "of scene revision"
-              << ack.revision << "(" << ack.mountReason << ") -- the character is shown without it";
-  else if (current && (!ack.mountKey.isEmpty() || (!ack.mountStatus.isEmpty() && ack.mountStatus != "none")))
-    LOG_INFO << "[unity-mount] scene revision" << ack.revision << "load" << ack.load << "mount"
-             << (ack.mountKey.isEmpty() ? QString("-") : ack.mountKey) << ack.mountStatus;
-  if (current && ack.status == "applied" && m_unityCharacterFailed == ack.fileDataID)
-  {
-    // A later load of the model whose build failed (another NPC on the same body, say) was dressed, so
-    // the notice comes down and the viewport shows the character.
-    m_unityCharacterFailed = 0;
-    m_unityCharacterFailReason.clear();
-    UpdateUnityViewportState();
-  }
-  if (current && ack.status == "rejected")
-  {
-    if (ack.reason.startsWith("load failed"))
-    {
-      // The player could not build this character at all and is still holding whatever it showed
-      // before. The viewport says so, in front of it, until something else is loaded.
-      LOG_ERROR << "[unity-character] the Unity viewport could not build" << character->gamefile->fullname()
-                << "(" << ack.reason << ") -- showing a notice instead";
-      m_unityCharacterFailed = ack.fileDataID;
-      m_unityCharacterFailedLoad = ack.load;
-      m_unityCharacterFailReason = ack.reason;
-      UpdateUnityViewportState();
-      return;
-    }
-    // A scene the player refused as a whole (a submesh list that does not fit, say): the Geosets tab
-    // says so rather than implying the checkboxes are on screen.
-    if (modelInspector)
-    {
-      UnityIpcServer::GeosetAck geo;
-      geo.fileDataID = ack.fileDataID;
-      geo.revision = 0;
-      geo.status = "rejected";
-      geo.reason = ack.reason;
-      modelInspector->OnUnityGeosetsApplied(geo);
-    }
-  }
-  if (current && !ack.missing.isEmpty())
-    LOG_ERROR << "[unity-character] scene revision" << ack.revision << "applied without" << ack.missing.join(", ");
-
-  // Whatever changed while this scene was being applied goes out now.
-  m_lastSceneCheck = 0;
-  SendCharacterSceneToUnity(false);
-}
-
-void ModelViewer::OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & report)
-{
-  // A world model built for the latest load is what the player shows now. (One built for an earlier load says
-  // nothing certain: a later load may already have replaced it, or be about to -- PlayerContent stays Unknown.)
-  if (report.status == "built" && report.load != 0 && report.load == m_unityLoadSerial)
-    m_playerContent = PlayerContent::MapObject;
-  // The wait for a world model ends with any answer about its load -- once a failure is recorded below, so the
-  // viewport goes from "Loading building" straight to the failure's notice, never uncovering what the player had.
-  bool update = false;
-  if (m_mapObjectAwaited != 0 && report.load == m_mapObjectAwaited && m_uncoverFence == 0)
-  {
-    // Built: shown once the player has answered the fence (THE UNCOVER FENCE), in later frames.
-    if (!(report.status == "built" && startUncoverFence()))
-    {
-      m_mapObjectAwaited = 0;
-      update = true;
-    }
-  }
-  // Only an answer about the load on display says anything about the WMO on display: a "superseded"
-  // report, or any report naming an earlier serial, is about a load the player was told to drop.
-  const bool current = isWMO && canvas && canvas->wmo && report.load != 0 && report.load == m_unityLoadSerial &&
-                       (int)canvas->wmo->fileDataID == report.fileDataID;
-  if (!current)
-  {
-    if (update)
-      UpdateUnityViewportState();
-    return;
-  }
-  if (report.status == "built")
-  {
-    LOG_INFO << "[unity-wmo] the Unity viewport built" << canvas->wmo->itemName() << ":" << report.groups << "group(s),"
-             << report.submeshes << "submesh(es)," << report.materials << "material(s) ("
-             << report.unresolvedMaterials << "unresolved)," << report.texturesDecoded << "/" << report.texturesReferenced
-             << "texture(s) in" << report.totalMs << "ms; doodads, liquids and lights are not drawn yet";
-    if (report.groups >= 0 && report.groups != (int)canvas->wmo->nGroups)
-      LOG_ERROR << "[unity-wmo] the player built" << report.groups << "group(s) but the root's header names"
-                << canvas->wmo->nGroups;
-  }
-  else if (report.status == "failed")
-  {
-    // The player is still showing whatever it had before, which must not pass for this WMO.
-    LOG_ERROR << "[unity-wmo] the Unity viewport could not build" << canvas->wmo->itemName() << "(" << report.reason
-              << ") -- showing a notice instead";
-    m_unityWmoFailed = report.fileDataID;
-    m_unityWmoFailedLoad = report.load;
-    m_unityWmoFailReason = report.reason;
-    update = true;
-  }
-  if (update)
-    UpdateUnityViewportState();
-}
-
-// THE TERRAIN TILE (protocol 12). The host names the tile and the map's WDT; the player asks for the WDT and the tile's
-// root ADT (getMapAsset), parses both and builds the tile; DispatchMapAsset and CompleteMapAsset answer for the current
-// load only.
-
-bool ModelViewer::terrainCatalogueBelongs() const
-{
-  if (!m_mapCatalog || m_mapCatalog->status() != wow::WorldMapCatalog::Status::Ready || !m_mapCatalog->belongsToActiveClient())
-    return false;
-  // A catalogue of the same client built again (the client loaded again) is another storage: not the one the load named.
-  return m_terrainRequest.load == 0 || m_mapCatalog->client().storageGeneration == m_terrainRequest.catalogueGeneration;
-}
-
-ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current,
-                                                                 int epochNow, bool catalogueBelongs, bool clientLoading)
-{
-  MapAssetDecision d;
-  const auto refused = [&d](const QString & detail) {
-    d.state = "refused";
-    d.detail = detail;
-    return d;
-  };
-  // Nothing is read while a client is being loaded: its storage and its catalogue are being replaced.
-  if (clientLoading)
-    return refused("a client is being loaded");
-  const int load = request.value("load").toInt(0);
-  if (load <= 0)
-    return refused("the request names no terrain load (load must be > 0)");
-  // A request about anything the host has moved on from -- no terrain load, another one, another client, a catalogue
-  // that is not the loaded client's -- is stale, every reason that holds named.
-  QStringList stale;
-  const int epoch = request.value("assetEpoch").toInt(0);
-  if (!current || current->load <= 0)
-    stale << QString("no terrain load is current (request load %1)").arg(load);
-  else if (load != current->load)
-    stale << QString("request load %1, current %2").arg(load).arg(current->load);
-  else if (current->ended)
-    // The player has answered the load: whatever it still asks for is read for nobody.
-    stale << QString("load %1 was reported %2").arg(load).arg(current->endedStatus);
-  if (epoch != epochNow)
-    stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
-  if (!catalogueBelongs)
-    stale << "the map catalogue the load was sent under is not the loaded client's";
-  if (!stale.isEmpty())
-  {
-    d.state = "stale";
-    d.detail = stale.join("; ");
-    return d;
-  }
-  // The current load's own files, and only them: its WDT, then the one root ADT it asks for once the WDT was served;
-  // with textures (protocol 13), the one tex0 ADT once the WDT was served, then textures once the tex0 was. (The host
-  // parses no WDT and no tex0, so it cannot tell whether that root, tex0 or texture is one they name: the player checks
-  // the tile; the host vouches for the client, the load, the order, the kind and the limits.)
-  const QString role = request.value("role").toString();
-  const int fileDataID = request.value("fileDataID").toInt(0);
-  const bool worldRole = role == "obj0Adt" || role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture";
-  const bool doodadRole = role == "m2Model" || role == "m2Skin" || role == "m2Texture";
-  const bool liquidRole = role == "liquidTexture";
-  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture" && !worldRole && !doodadRole && !liquidRole)
-    return refused("unknown role \"" + role + "\" (wdt, rootAdt, tex0Adt, texture, obj0Adt, wmoRoot, wmoGroup, wmoTexture, "
-                   "m2Model, m2Skin, m2Texture or liquidTexture)");
-  if (fileDataID <= 0)
-    return refused(QString("FileDataID %1 names no file").arg(fileDataID));
-  // WORLD MODELS (protocol 16): a world load's files only; a WMO-only map's load has no tile.
-  if (worldRole && !current->world)
-    return refused(QString("load %1 is not a world load: no %2 is served for it").arg(load).arg(role));
-  if (current->globalWmo && (role == "rootAdt" || role == "tex0Adt" || role == "texture" || role == "obj0Adt"))
-    return refused(QString("load %1 is a WMO-only map's: it has no tile, so no %2 is served").arg(load).arg(role));
-  if (role == "obj0Adt" && !current->wdtServed)
-    return refused(QString("load %1's WDT has not been served, so no obj0 ADT is").arg(load));
-  if (role == "obj0Adt" && current->obj0Asked)
-    return refused(QString("load %1 has asked for its obj0 ADT (%2) already: one obj0 ADT per load, asked once (this request: %3)")
-                     .arg(load).arg(current->obj0FileDataID).arg(fileDataID));
-  if (role == "wmoRoot")
-  {
-    if (current->globalWmo && !current->wdtServed)
-      return refused(QString("load %1's WDT has not been served, so no world-model root is").arg(load));
-    if (!current->globalWmo && !current->obj0Served)
-      return refused(QString("load %1's obj0 ADT has not been served, so no world-model root is").arg(load));
-    if (current->globalWmo && current->globalWmoFileDataID > 0 && fileDataID != current->globalWmoFileDataID)
-      return refused(QString("load %1 is a WMO-only map's: its world model is FileDataID %2, not %3")
-                       .arg(load).arg(current->globalWmoFileDataID).arg(fileDataID));
-    if (std::find(current->wmoRootIds.begin(), current->wmoRootIds.end(), fileDataID) != current->wmoRootIds.end())
-      return refused(QString("load %1 has asked for world-model root %2 before: each root once per load").arg(load).arg(fileDataID));
-    if ((int)current->wmoRootIds.size() >= current->maxWmoModelsPerLoad)
-      return refused(QString("load %1 has asked for %2 world-model roots: at most %3 per load, not %4")
-                       .arg(load).arg(current->wmoRootIds.size()).arg(current->maxWmoModelsPerLoad).arg(fileDataID));
-  }
-  if (role == "wmoGroup" || role == "wmoTexture")
-  {
-    const bool group = role == "wmoGroup";
-    const std::vector<int> & ids = group ? current->wmoGroupIds : current->wmoTextureIds;
-    const int most = group ? current->maxWmoGroupsPerLoad : current->maxWmoTexturesPerLoad;
-    const QString what = group ? "world-model group file" : "world-model texture";
-    if (current->wmoRootsServed <= 0 && current->sessionWmoRootsServed <= 0)
-      return refused(QString("load %1 has been served no world-model root, so no %2 is").arg(load).arg(what));
-    if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
-      return refused(QString("load %1 has asked for %2 %3 before: each once per load").arg(load).arg(what).arg(fileDataID));
-    if ((int)ids.size() >= most)
-      return refused(QString("load %1 has asked for %2 %3s: at most %4 per load, not %5")
-                       .arg(load).arg(ids.size()).arg(what).arg(most).arg(fileDataID));
-  }
-  // DOODADS (protocol 17): a load that carries doodad budgets only (one sent to an older player, or a loadTerrainTile,
-  // carries none). A model once the load's obj0 or one of its world-model roots was served -- a WMO-only map's doodads
-  // come from its world model's sets alone --; a skin or a texture once a model was served. (The host parses no MDDF, no
-  // MODD and no M2, so it cannot tell whether a model, skin or texture is one they name: as for groups, it vouches for the
-  // order, the kind, each id once and the budgets.)
-  if (doodadRole)
-  {
-    if (current->maxM2ModelsPerLoad <= 0)
-      return refused(QString("load %1 was sent without doodads: no %2 is served for it").arg(load).arg(role));
-    const bool model = role == "m2Model", skin = role == "m2Skin";
-    const std::vector<int> & ids = model ? current->m2ModelIds : skin ? current->m2SkinIds : current->m2TextureIds;
-    const int most = model || skin ? current->maxM2ModelsPerLoad : current->maxM2TexturesPerLoad;
-    const QString what = model ? "doodad model" : skin ? "doodad skin" : "doodad texture";
-    if (model && !current->obj0Served && current->wmoRootsServed <= 0 && !current->sessionObj0Served &&
-        current->sessionWmoRootsServed <= 0)
-      return refused(QString("load %1's obj0 ADT or world-model root has not been served, so no doodad model is").arg(load));
-    if (!model && current->m2ModelsServed <= 0 && current->sessionM2ModelsServed <= 0)
-      return refused(QString("load %1 has been served no doodad model, so no %2 is").arg(load).arg(what));
-    if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
-      return refused(QString("load %1 has asked for %2 %3 before: each once per load").arg(load).arg(what).arg(fileDataID));
-    if ((int)ids.size() >= most)
-      return refused(QString("load %1 has asked for %2 %3s: at most %4 per load, not %5")
-                       .arg(load).arg(ids.size()).arg(what).arg(most).arg(fileDataID));
-  }
-  // LIQUIDS (protocol 19): a load that carries a liquids offer only (one sent to an older player carries none), once its
-  // WDT was served (a tile's root and a WMO-only map's world model come after it alike), and only the frames and bumps
-  // of the liquid catalogue the load was sent with: the host parses no MH2O and no MLIQ, so it cannot tell which types a
-  // tile uses, but it vouches that the file is a frame or the bump of one of the client's liquid types -- and no other
-  // file is served under the role.
-  if (liquidRole)
-  {
-    if (current->maxLiquidTexturesPerLoad <= 0)
-      return refused(QString("liquids not offered: load %1 was sent without them, so no liquid texture is served for it").arg(load));
-    if (!current->wdtServed)
-      return refused(QString("load %1's WDT has not been served, so no liquid texture is").arg(load));
-    if (!current->liquidFrames || !std::binary_search(current->liquidFrames->begin(), current->liquidFrames->end(), fileDataID))
-      return refused(QString("FileDataID %1 is not a liquid texture: no liquid type of the catalogue load %2 was sent with "
-                             "names it as a frame or its bump").arg(fileDataID).arg(load));
-    const std::vector<int> & ids = current->liquidTextureIds;
-    if (std::find(ids.begin(), ids.end(), fileDataID) != ids.end())
-      return refused(QString("load %1 has asked for liquid texture %2 before: each once per load").arg(load).arg(fileDataID));
-    if ((int)ids.size() >= current->maxLiquidTexturesPerLoad)
-      return refused(QString("load %1 has asked for %2 liquid textures: at most %3 per load, not %4")
-                       .arg(load).arg(ids.size()).arg(current->maxLiquidTexturesPerLoad).arg(fileDataID));
-  }
-  if (role == "wdt" && fileDataID != current->wdtFileDataID)
-    return refused(QString("load %1's WDT is FileDataID %2, not %3").arg(load).arg(current->wdtFileDataID).arg(fileDataID));
-  if (role == "rootAdt" && !current->wdtServed)
-    return refused(QString("load %1's WDT has not been served, so no root ADT is").arg(load));
-  if (role == "rootAdt" && current->rootFileDataID > 0 && fileDataID != current->rootFileDataID)
-    return refused(QString("load %1 has asked for root ADT %2: one root ADT per load, not %3")
-                     .arg(load).arg(current->rootFileDataID).arg(fileDataID));
-  const bool textures = role == "tex0Adt" || role == "texture";
-  if (textures && current->maxTextureBytes <= 0)
-    return refused(QString("load %1 was sent without terrain textures (the player does not draw them), so no %2 is served")
-                     .arg(load).arg(role == "texture" ? "texture" : "tex0 ADT"));
-  if (role == "tex0Adt" && !current->wdtServed)
-    return refused(QString("load %1's WDT has not been served, so no tex0 ADT is").arg(load));
-  if (role == "tex0Adt" && current->tex0Asked)
-    return refused(QString("load %1 has asked for its tex0 ADT (%2) already: one tex0 ADT per load, asked once (this "
-                           "request: %3)").arg(load).arg(current->tex0FileDataID).arg(fileDataID));
-  if (role == "texture")
-  {
-    if (!current->tex0Served)
-      return refused(QString("load %1's tex0 ADT has not been served, so no texture is").arg(load));
-    if (std::find(current->textureIds.begin(), current->textureIds.end(), fileDataID) != current->textureIds.end())
-      return refused(QString("load %1 has asked for texture %2 before: each texture once per load").arg(load).arg(fileDataID));
-    if ((int)current->textureIds.size() >= current->maxTexturesPerLoad)
-      return refused(QString("load %1 has asked for %2 textures: at most %3 per load, not %4")
-                       .arg(load).arg(current->textureIds.size()).arg(current->maxTexturesPerLoad).arg(fileDataID));
-  }
-  // However the roles add up, a load reads at most its WDT, root and tex0 and one file per texture id; a world load also
-  // its obj0 and one file per world-model root, group and texture id; one that carries doodad budgets also one file per
-  // doodad model, skin and texture id; one that carries a liquids offer also one file per liquid texture id. The four are
-  // capped apart, so no family's allowance lets the terrain roles be read again past theirs (a WDT asked for over and
-  // over), nor another family's.
-  if (worldRole)
-  {
-    const int worldAllowed = 1 + std::max(0, current->maxWmoModelsPerLoad) + std::max(0, current->maxWmoGroupsPerLoad) +
-                             std::max(0, current->maxWmoTexturesPerLoad);
-    if (current->worldReads >= worldAllowed)
-      return refused(QString("load %1 has read %2 world-model files: at most %3 per load (1 obj0 + %4 roots + %5 groups + %6 "
-                             "textures)")
-                       .arg(load).arg(current->worldReads).arg(worldAllowed).arg(std::max(0, current->maxWmoModelsPerLoad))
-                       .arg(std::max(0, current->maxWmoGroupsPerLoad)).arg(std::max(0, current->maxWmoTexturesPerLoad)));
-  }
-  else if (doodadRole)
-  {
-    const int models = std::max(0, current->maxM2ModelsPerLoad), textures = std::max(0, current->maxM2TexturesPerLoad);
-    const int doodadAllowed = 2 * models + textures;
-    if (current->doodadReads >= doodadAllowed)
-      return refused(QString("load %1 has read %2 doodad files: at most %3 per load (%4 models + %5 skins + %6 textures)")
-                       .arg(load).arg(current->doodadReads).arg(doodadAllowed).arg(models).arg(models).arg(textures));
-  }
-  else if (liquidRole)
-  {
-    const int liquidAllowed = std::max(0, current->maxLiquidTexturesPerLoad);
-    if (current->liquidReads >= liquidAllowed)
-      return refused(QString("load %1 has read %2 liquid textures: at most %3 per load")
-                       .arg(load).arg(current->liquidReads).arg(liquidAllowed));
-  }
-  else
-  {
-    const int terrainReads = current->reads - current->worldReads - current->doodadReads - current->liquidReads;
-    const int readsAllowed = 3 + std::max(0, current->maxTexturesPerLoad);
-    if (terrainReads >= readsAllowed)
-      return refused(QString("load %1 has read %2 files: at most %3 per load (3 + %4 textures)")
-                       .arg(load).arg(terrainReads).arg(readsAllowed).arg(std::max(0, current->maxTexturesPerLoad)));
-  }
-  d.maxBytes = current->maxAssetBytes;
-  if (role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture")
-  {
-    // The load's world-model bytes, as its terrain textures' (below): the reads in flight count with their limits.
-    const bool texture = role == "wmoTexture";
-    const qint64 read = texture ? current->wmoTextureBytesRead : current->wmoBytesRead;
-    const qint64 reserved = texture ? current->wmoTextureBytesReserved : current->wmoBytesReserved;
-    const qint64 budget = texture ? current->maxWmoTextureBytesPerLoad : current->maxWmoBytesPerLoad;
-    const QString what = texture ? "world-model textures" : "world-model roots and groups";
-    if (read + reserved >= budget)
-      return refused(reserved > 0 ? QString("load %1 has read %2 bytes of %3 and reserved %4 for reads in flight: at most %5 per load")
-                                      .arg(load).arg(read).arg(what).arg(reserved).arg(budget)
-                                  : QString("load %1 has read %2 bytes of %3: at most %4 per load").arg(load).arg(read).arg(what).arg(budget));
-    d.maxBytes = std::min(texture ? current->maxWmoTextureBytes : current->maxWmoFileBytes, budget - read - reserved);
-  }
-  if (doodadRole)
-  {
-    // The load's doodad bytes, as its world models' (above): models and skins on one budget, textures on another, the
-    // reads in flight counted with their limits.
-    const bool texture = role == "m2Texture";
-    const qint64 read = texture ? current->m2TextureBytesRead : current->m2BytesRead;
-    const qint64 reserved = texture ? current->m2TextureBytesReserved : current->m2BytesReserved;
-    const qint64 budget = texture ? current->maxM2TextureBytesPerLoad : current->maxM2BytesPerLoad;
-    const QString what = texture ? "doodad textures" : "doodad models and skins";
-    if (read + reserved >= budget)
-      return refused(reserved > 0 ? QString("load %1 has read %2 bytes of %3 and reserved %4 for reads in flight: at most %5 per load")
-                                      .arg(load).arg(read).arg(what).arg(reserved).arg(budget)
-                                  : QString("load %1 has read %2 bytes of %3: at most %4 per load").arg(load).arg(read).arg(what).arg(budget));
-    d.maxBytes = std::min(texture ? current->maxM2TextureBytes : current->maxM2FileBytes, budget - read - reserved);
-  }
-  if (liquidRole)
-  {
-    // The load's liquid texture bytes, as its doodads' (above): the reads in flight counted with their limits.
-    const qint64 read = current->liquidTextureBytesRead, reserved = current->liquidTextureBytesReserved;
-    const qint64 budget = current->maxLiquidTextureBytesPerLoad;
-    if (read + reserved >= budget)
-      return refused(reserved > 0 ? QString("load %1 has read %2 bytes of liquid textures and reserved %3 for reads in flight: "
-                                            "at most %4 per load").arg(load).arg(read).arg(reserved).arg(budget)
-                                  : QString("load %1 has read %2 bytes of liquid textures: at most %3 per load")
-                                      .arg(load).arg(read).arg(budget));
-    d.maxBytes = std::min(current->maxLiquidTextureBytes, budget - read - reserved);
-  }
-  if (role == "texture")
-  {
-    // The texture bytes a load may read: refused once they are spent, otherwise a read that cannot overrun them (a file
-    // over the limit is not read; the answer names the limit applied). The reads still in flight count with what they
-    // may read (their limits, reserved until their results come: THE MAP ASSET WORKER), so the reads together never
-    // overrun the load's budget.
-    const qint64 spent = current->textureBytesRead + current->textureBytesReserved;
-    if (spent >= current->maxTextureBytesPerLoad)
-      return refused(current->textureBytesReserved > 0
-                       ? QString("load %1 has read %2 bytes of textures and reserved %3 for reads in flight: at most %4 per "
-                                 "load").arg(load).arg(current->textureBytesRead).arg(current->textureBytesReserved)
-                           .arg(current->maxTextureBytesPerLoad)
-                       : QString("load %1 has read %2 bytes of textures: at most %3 per load")
-                           .arg(load).arg(current->textureBytesRead).arg(current->maxTextureBytesPerLoad));
-    d.maxBytes = std::min(current->maxTextureBytes, current->maxTextureBytesPerLoad - spent);
-  }
-  return d;
-}
-
-void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject & request)
-{
-  const QString role = request.value("role").toString();
-  const int fileDataID = request.value("fileDataID").toInt(0);
-  current.reads++;
-  if (role == "obj0Adt" || role == "wmoRoot" || role == "wmoGroup" || role == "wmoTexture")
-    current.worldReads++;
-  else if (role == "m2Model" || role == "m2Skin" || role == "m2Texture")
-    current.doodadReads++;
-  else if (role == "liquidTexture")
-    current.liquidReads++;
-  // The first root ADT the load asks for is the only one it may have; the tex0 is asked for once, whatever comes of it;
-  // a texture id once.
-  if (role == "rootAdt")
-    current.rootFileDataID = fileDataID;
-  else if (role == "tex0Adt")
-  {
-    current.tex0Asked = true;
-    current.tex0FileDataID = fileDataID;
-  }
-  else if (role == "texture")
-    current.textureIds.push_back(fileDataID);
-  else if (role == "obj0Adt")
-  {
-    current.obj0Asked = true;
-    current.obj0FileDataID = fileDataID;
-  }
-  else if (role == "wmoRoot")
-    current.wmoRootIds.push_back(fileDataID);
-  else if (role == "wmoGroup")
-    current.wmoGroupIds.push_back(fileDataID);
-  else if (role == "wmoTexture")
-    current.wmoTextureIds.push_back(fileDataID);
-  else if (role == "m2Model")
-    current.m2ModelIds.push_back(fileDataID);
-  else if (role == "m2Skin")
-    current.m2SkinIds.push_back(fileDataID);
-  else if (role == "m2Texture")
-    current.m2TextureIds.push_back(fileDataID);
-  else if (role == "liquidTexture")
-    current.liquidTextureIds.push_back(fileDataID);
-}
-
-void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available)
-{
-  if (role == "texture")
-    current.textureBytesRead += std::max<qint64>(0, bytesRead);
-  else if (role == "wdt" && available)
-    current.wdtServed = true;
-  else if (role == "tex0Adt" && available)
-    current.tex0Served = true;
-  else if (role == "obj0Adt" && available)
-    current.obj0Served = true;
-  else if (role == "wmoRoot" || role == "wmoGroup")
-  {
-    current.wmoBytesRead += std::max<qint64>(0, bytesRead);
-    if (role == "wmoRoot" && available)
-      current.wmoRootsServed++;
-  }
-  else if (role == "wmoTexture")
-    current.wmoTextureBytesRead += std::max<qint64>(0, bytesRead);
-  else if (role == "m2Model" || role == "m2Skin")
-  {
-    current.m2BytesRead += std::max<qint64>(0, bytesRead);
-    if (role == "m2Model" && available)
-      current.m2ModelsServed++;
-  }
-  else if (role == "m2Texture")
-    current.m2TextureBytesRead += std::max<qint64>(0, bytesRead);
-  else if (role == "liquidTexture")
-    current.liquidTextureBytesRead += std::max<qint64>(0, bytesRead);
-}
-
-QString ModelViewer::mapAssetBudgetRefusal(const TerrainRequest & load, const QString & role, qint64 fileSize, qint64 readLimit)
-{
-  // The role's limit per file and the budget family decideMapAssetRequest cuts the read to.
-  qint64 perFile = 0, perLoad = 0;
-  QString what;
-  if (role == "texture")
-  {
-    perFile = load.maxTextureBytes;
-    perLoad = load.maxTextureBytesPerLoad;
-    what = "terrain textures";
-  }
-  else if (role == "wmoRoot" || role == "wmoGroup")
-  {
-    perFile = load.maxWmoFileBytes;
-    perLoad = load.maxWmoBytesPerLoad;
-    what = "world-model roots and groups";
-  }
-  else if (role == "wmoTexture")
-  {
-    perFile = load.maxWmoTextureBytes;
-    perLoad = load.maxWmoTextureBytesPerLoad;
-    what = "world-model textures";
-  }
-  else if (role == "m2Model" || role == "m2Skin")
-  {
-    perFile = load.maxM2FileBytes;
-    perLoad = load.maxM2BytesPerLoad;
-    what = "doodad models and skins";
-  }
-  else if (role == "m2Texture")
-  {
-    perFile = load.maxM2TextureBytes;
-    perLoad = load.maxM2TextureBytesPerLoad;
-    what = "doodad textures";
-  }
-  else if (role == "liquidTexture")
-  {
-    perFile = load.maxLiquidTextureBytes;
-    perLoad = load.maxLiquidTextureBytesPerLoad;
-    what = "liquid textures";
-  }
-  if (perFile <= 0 || fileSize <= 0 || readLimit < 0 || fileSize <= readLimit || readLimit >= perFile || fileSize > perFile)
-    return QString();
-  return QString("it is %1 bytes, more than the %2 bytes left of load %3's %4 budget (%5 per load, the reads in flight "
-                 "reserved), within the %6-byte limit per file: refused for this load's budget, not the file's failure")
-           .arg(fileSize).arg(readLimit).arg(load.load).arg(what).arg(perLoad).arg(perFile);
-}
-
-QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray & bytes)
-{
-  // Four-character codes as they stand in the file, readable where they are printable, with their bytes in hex.
-  const auto code = [&bytes](int at) {
-    const QByteArray c = bytes.mid(at, 4);
-    QString text;
-    for (char ch : c)
-      text += (ch >= 0x20 && ch < 0x7f) ? QLatin1Char(ch) : QLatin1Char('?');
-    return text + " (hex " + QString::fromLatin1(c.toHex(' ')) + ")";
-  };
-  if (role == "tex0Adt")
-  {
-    // MVER ("REVM" in file byte order) at 0, its size at 4; MAMP ("PMAM") right after it. Every tex0 of Retail, Classic
-    // Era and Classic Beta read for the census (44,577) has that form, and no other kind of map file does.
-    if (bytes.size() < 8 || !bytes.startsWith("REVM"))
-      return "not a tex0 ADT: first chunk " + (bytes.size() < 4 ? QString("missing (%1 bytes)").arg(bytes.size()) : code(0)) +
-             ", not MVER (REVM)";
-    quint32 size = 0;
-    for (int i = 3; i >= 0; i--)
-      size = (size << 8) | (unsigned char)bytes[4 + i];
-    const qint64 second = 8 + (qint64)size;
-    if (second + 4 > bytes.size())
-      return QString("not a tex0 ADT: the MVER chunk (size %1) leaves no second chunk in %2 bytes").arg(size).arg(bytes.size());
-    if (bytes.mid((int)second, 4) != "PMAM")
-      return "not a tex0 ADT: second chunk " + code((int)second) + ", not MAMP (PMAM)";
-    return QString();
-  }
-  if (role == "texture" || role == "wmoTexture" || role == "m2Texture" || role == "liquidTexture")
-  {
-    if (!bytes.startsWith("BLP2"))
-      return "not a BLP2 texture: it starts with " + (bytes.size() < 4 ? QString("%1 bytes only").arg(bytes.size()) : code(0));
-    return QString();
-  }
-  // DOODADS (protocol 17): an M2's ids stand in reading order ("MD21", unlike the reversed ADT and WMO ids). A doodad model
-  // is the chunked form -- its chunk table opens with MD21, whose payload, the model, opens with MD20 at byte 8 -- and a
-  // bare MD20 (the older, unchunked form) is refused: the player asks for a model's skin and textures by the FileDataIDs
-  // of its SFID and TXID chunks, which only the chunked form carries. A skin opens with SKIN.
-  if (role == "m2Model")
-  {
-    if (bytes.size() < 4)
-      return QString("not an M2 model: it starts with %1 bytes only").arg(bytes.size());
-    if (bytes.startsWith("MD20"))
-      return "not an M2 model: it starts with " + code(0) + ", a bare MD20 model, not the MD21 chunk";
-    if (!bytes.startsWith("MD21"))
-      return "not an M2 model: it starts with " + code(0) + ", not MD21";
-    if (bytes.size() < 12)
-      return QString("not an M2 model: its MD21 chunk leaves no MD20 header in %1 bytes").arg(bytes.size());
-    if (bytes.mid(8, 4) != "MD20")
-      return "not an M2 model: its MD21 chunk starts with " + code(8) + ", not MD20";
-    return QString();
-  }
-  if (role == "m2Skin")
-  {
-    if (!bytes.startsWith("SKIN"))
-      return "not an M2 skin: it starts with " + (bytes.size() < 4 ? QString("%1 bytes only").arg(bytes.size()) : code(0)) +
-             ", not SKIN";
-    return QString();
-  }
-  // WORLD MODELS (protocol 16): MVER, then the chunk every file of the kind opens with -- an obj0 ADT's MDDF, a WMO root's
-  // MOHD, a WMO group's MOGP (docs/world-viewer/06-world-models-in-world.md section 6; every obj0 of the audit's windows
-  // opens MVER MDDF, docs/world-viewer/00-audit.md 4.4).
-  const char * second = role == "obj0Adt" ? "FDDM" : role == "wmoRoot" ? "DHOM" : role == "wmoGroup" ? "PGOM" : nullptr;
-  if (second)
-  {
-    const QString kind = role == "obj0Adt" ? "an obj0 ADT" : role == "wmoRoot" ? "a world-model root" : "a world-model group";
-    const QString want = role == "obj0Adt" ? "MDDF (FDDM)" : role == "wmoRoot" ? "MOHD (DHOM)" : "MOGP (PGOM)";
-    if (bytes.size() < 8 || !bytes.startsWith("REVM"))
-      return "not " + kind + ": first chunk " + (bytes.size() < 4 ? QString("missing (%1 bytes)").arg(bytes.size()) : code(0)) +
-             ", not MVER (REVM)";
-    quint32 size = 0;
-    for (int i = 3; i >= 0; i--)
-      size = (size << 8) | (unsigned char)bytes[4 + i];
-    const qint64 at = 8 + (qint64)size;
-    if (at + 4 > bytes.size())
-      return QString("not %1: the MVER chunk (size %2) leaves no second chunk in %3 bytes").arg(kind).arg(size).arg(bytes.size());
-    if (bytes.mid((int)at, 4) != second)
-      return "not " + kind + ": second chunk " + code((int)at) + ", not " + want;
-    return QString();
-  }
-  return QString();
-}
-
-bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command,
-                                     QString & why, bool wdtInspected, bool noTile)
-{
-  why.clear();
-  command = UnityIpcServer::TerrainTileCommand();
-  const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
-  const auto refuse = [&why](const QString & reason) {
-    why = reason;
-    return false;
-  };
-  const std::shared_ptr<wow::WorldMapCatalog> catalog = m_mapCatalog;
-  if (m_clientLoading || UnityAssetAccess::isClientLoading())
-    return refuse("a client is being loaded");
-  if (!UnityAssetAccess::hasActiveClient())
-    return refuse("no client is loaded");
-  if (!catalog || catalog->status() != wow::WorldMapCatalog::Status::Ready)
-    return refuse(catalog ? "the map catalogue is not ready (" + wow::WorldMapCatalog::statusName(catalog->status()) +
-                              (catalog->statusDetail().isEmpty() ? QString() : ": " + catalog->statusDetail()) + ")"
-                          : QString("there is no map catalogue"));
-  if (!catalog->belongsToActiveClient())
-    return refuse("the map catalogue is not the loaded client's");
-  if (noTile)
-    tileX = tileY = -1;
-  else if (tileX < 0 || tileX > 63 || tileY < 0 || tileY > 63)
-    return refuse("tile " + tile + " is outside a map's 64 x 64 tile grid");
-  const wow::MapEntry * entry = catalog->find(mapId);
-  if (!entry)
-    return refuse(QString("map %1 is not in this client's Map.db2").arg(mapId));
-  if (entry->wdt.kind == wow::WdtReference::Kind::Unresolved)
-    return refuse(QString("map %1 has no WDT: ").arg(mapId) + entry->wdt.why);
-  // The WDT is read through the storage now, whichever way the client names it: one that cannot be read is refused here,
-  // with the inspection's reason, rather than sent to fail in the player. A path client's FileDataID comes from it too.
-  // The Maps viewer's own inspection -- the same read, made by the map asset worker for this client -- stands for it.
-  const bool known = wdtInspected && entry->inspection.state == wow::WdtAvailability::Available;
-  if (!known && !catalog->inspect(mapId))
-    return refuse(catalog->lastRefusal());
-  if (entry->inspection.state != wow::WdtAvailability::Available)
-    return refuse(QString("map %1's WDT is %2: ").arg(mapId).arg(wow::WorldMapCatalog::availabilityName(entry->inspection.state)) +
-                  entry->inspection.detail);
-  const bool byId = entry->wdt.kind == wow::WdtReference::Kind::FileDataId;
-  // A path client's WDT goes by the FileDataID its storage root gives that path (never one made up).
-  const int wdtFileDataID = byId ? entry->wdt.fileDataId : entry->inspection.storageFileDataId;
-  if (wdtFileDataID <= 0)
-    return refuse("the storage lists the WDT path but gives it no FileDataID");
-  command.mapId = mapId;
-  command.mapDirectory = entry->directory;
-  command.product = catalog->client().product;
-  command.build = catalog->client().build;
-  command.wdtFileDataID = wdtFileDataID;
-  command.wdtResolvedBy = byId ? "fileDataID" : "path";
-  if (!byId)
-    command.wdtPath = entry->wdt.path;
-  command.tileX = tileX;
-  command.tileY = tileY;
-  command.maxAssetBytes = UnityIpcServer::MAX_MAP_ASSET_BYTES;
-  return true;
-}
-
-int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected,
-                                    const UnityIpcServer::WorldCamera * camera)
-{
-  return RequestLoad(mapId, tileX, tileY, false, false, 0, why, wdtInspected, camera);
-}
-
-int ModelViewer::RequestWorld(int mapId, int tileX, int tileY, bool globalWmo, int globalWmoFileDataID, QString & why,
-                              bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming)
-{
-  return RequestLoad(mapId, tileX, tileY, true, globalWmo, globalWmoFileDataID, why, wdtInspected, camera, streaming);
-}
-
-int ModelViewer::RequestLoad(int mapId, int tileX, int tileY, bool world, bool globalWmo, int globalWmoFileDataID, QString & why,
-                             bool wdtInspected, const UnityIpcServer::WorldCamera * camera, bool streaming)
-{
-  FinishViewerSwitch("a world load");   // (before its sizePlayerAhead, which a hold would skip)
-  why.clear();
-  const bool noTile = world && globalWmo;
-  const QString tile = noTile ? QString("(its world model)") : QString("%1_%2").arg(tileX).arg(tileY);
-  const auto refuse = [&why, mapId, &tile](const QString & reason) {
-    why = reason;
-    LOG_WARNING << "[unity-terrain] map" << mapId << "tile" << tile << "not requested:" << reason;
-    return 0;
-  };
-  UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
-  if (!ipc || !ipc->isUnityReady())
-    return refuse("the Unity player is not connected");
-  if (!ipc->playerDrawsTerrain())
-    return refuse(QString("the Unity player speaks protocol %1, and drawing terrain needs protocol 12")
-                    .arg(ipc->playerProtocolVersion()));
-  if (world && !ipc->playerPlacesWorldModels())
-    return refuse(QString("the Unity player speaks protocol %1, and placing world models needs protocol 16")
-                    .arg(ipc->playerProtocolVersion()));
-  UnityIpcServer::TerrainTileCommand command;
-  QString unresolved;
-  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved, wdtInspected, noTile))
-    return refuse(unresolved);
-  command.load = m_terrainLoadSerial + 1;
-  command.assetEpoch = UnityAssetAccess::clientEpoch();
-  // TERRAIN TEXTURES (protocol 13): a player that draws them is offered the tile's tex0 and textures, within these limits;
-  // an older one is offered none, and its load is served the WDT and the root alone.
-  if (ipc->playerDrawsTerrainTextures())
-  {
-    command.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
-    command.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
-    command.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
-  }
-  if (camera)
-    command.camera = *camera;
-  // WORLD MODELS (protocol 16): the budgets are the command's defaults (UnityIpcServer::MAX_WMO_*).
-  command.world = world;
-  command.globalWmo = noTile;
-  // DOODADS (protocol 17): a world load offers them to a player that places them, within the command's defaults
-  // (UnityIpcServer::MAX_M2_*); an older player's load is the protocol-16 one, and no doodad file is served for it.
-  command.doodads = world && ipc->playerPlacesDoodads();
-  // STREAMING (protocol 18): a tile map's world load to a player that streams, when asked for.
-  command.streaming = streaming && world && !noTile && command.doodads && ipc->playerStreams();
-  // LIQUIDS (protocol 19): a player that draws them is offered the client's liquid catalogue, its frames and bumps, within
-  // the command's defaults (UnityIpcServer::MAX_LIQUID_*), whether the load is a tile's or a world's; an older player's
-  // load is the protocol-18 one, and no liquid texture is served for it. A catalogue that is not the loaded client's, or
-  // could not be built, goes as "unavailable" with why, and its load serves no frame.
-  std::shared_ptr<const std::vector<int>> liquidFrames;
-  command.liquids = ipc->playerDrawsLiquids();
-  if (command.liquids)
-  {
-    const std::shared_ptr<wow::LiquidCatalog> liquids = m_liquidCatalog;
-    if (liquids && liquids->status() == wow::LiquidCatalog::Status::Ready && liquids->belongsToActiveClient())
-    {
-      command.liquidCatalog = liquids->toJson();
-      liquidFrames = liquids->textureIds();
-    }
-    else
-      command.liquidCatalog = wow::LiquidCatalog::unavailableJson(
-        command.product, command.build,
-        !liquids ? QString("there is no liquid catalogue")
-                 : liquids->status() != wow::LiquidCatalog::Status::Ready ? liquids->statusDetail()
-                                                                          : QString("the liquid catalogue is not the loaded client's"));
-    if (!liquidFrames)
-      liquidFrames = std::make_shared<const std::vector<int>>();
-    // THE ZONE LIGHT (inside the same offer, "lights"): the load's map's lights from the client's light catalogue, made on
-    // the map's first load; a catalogue that is not the loaded client's, or could not be built, goes as "unavailable" with
-    // why (the player then draws the liquid catalogue's colours).
-    const std::shared_ptr<wow::LightCatalog> lights = m_lightCatalog;
-    if (lights && lights->status() == wow::LightCatalog::Status::Ready && lights->belongsToActiveClient())
-      command.liquidLights = lights->mapJson(mapId);
-    else
-      command.liquidLights = wow::LightCatalog::unavailableJson(
-        command.product, command.build, mapId,
-        !lights ? QString("there is no light catalogue")
-                : lights->status() != wow::LightCatalog::Status::Ready ? lights->statusDetail()
-                                                                       : QString("the light catalogue is not the loaded client's"));
-  }
-  // THE OUTDOOR LIGHT (protocol 20, docs/world-viewer/10-light-sky-fog.md 6.3): a player that draws it is sent the load's
-  // map's light state ("worldLight", a key of its own, never inside "liquids"), assembled on the map's first load from the
-  // day fragments the client load made, and kept; an older player's load is the protocol-19 one. A catalogue that is not
-  // the loaded client's, or whose outdoor light could not be read, goes as "unavailable" with why.
-  if (ipc->playerDrawsWorldLight())
-  {
-    const std::shared_ptr<wow::LightCatalog> lights = m_lightCatalog;
-    if (lights && lights->status() == wow::LightCatalog::Status::Ready && lights->belongsToActiveClient())
-      command.worldLight = lights->worldLightJson(mapId);
-    else
-      command.worldLight = wow::LightCatalog::worldLightUnavailableJson(
-        command.product, command.build, mapId,
-        !lights ? QString("there is no light catalogue")
-                : lights->status() != wow::LightCatalog::Status::Ready ? lights->statusDetail()
-                                                                       : QString("the light catalogue is not the loaded client's"));
-  }
-  // What it loads goes into the viewport, which the overhead map covers until then: the player's window sized for it now,
-  // without waiting for the player (so the overhead map's going does not wait for it either).
-  unityRendererHost->sizePlayerAhead();
-  if (!(world ? ipc->sendLoadWorld(command) : ipc->sendLoadTerrainTile(command)))
-    return refuse("the load could not be sent to the player");
-  // Raised only now that the load is out: the serial counts the loads the player was sent.
-  m_terrainLoadSerial = command.load;
-  TerrainRequest request;
-  request.load = command.load;
-  request.epoch = command.assetEpoch;
-  request.mapId = mapId;
-  request.tileX = tileX;
-  request.tileY = tileY;
-  request.wdtFileDataID = command.wdtFileDataID;
-  request.catalogueGeneration = m_mapCatalog->client().storageGeneration;
-  request.maxAssetBytes = command.maxAssetBytes;
-  request.maxTextureBytes = command.maxTextureBytes;
-  request.maxTextureBytesPerLoad = command.maxTextureBytesPerLoad;
-  request.maxTexturesPerLoad = command.maxTexturesPerLoad;
-  if (world)
-  {
-    request.world = true;
-    request.globalWmo = noTile;
-    request.globalWmoFileDataID = noTile ? globalWmoFileDataID : 0;
-    request.maxWmoFileBytes = command.maxWmoFileBytes;
-    request.maxWmoBytesPerLoad = command.maxWmoBytesPerLoad;
-    request.maxWmoTextureBytes = command.maxWmoTextureBytes;
-    request.maxWmoTextureBytesPerLoad = command.maxWmoTextureBytesPerLoad;
-    request.maxWmoTexturesPerLoad = command.maxWmoTexturesPerLoad;
-    request.maxWmoModelsPerLoad = command.maxWmoModelsPerLoad;
-    request.maxWmoGroupsPerLoad = command.maxWmoGroupsPerLoad;
-  }
-  if (command.doodads)
-  {
-    request.maxM2FileBytes = command.maxM2FileBytes;
-    request.maxM2BytesPerLoad = command.maxM2BytesPerLoad;
-    request.maxM2TextureBytes = command.maxM2TextureBytes;
-    request.maxM2TextureBytesPerLoad = command.maxM2TextureBytesPerLoad;
-    request.maxM2ModelsPerLoad = command.maxM2ModelsPerLoad;
-    request.maxM2TexturesPerLoad = command.maxM2TexturesPerLoad;
-    request.maxDoodadInstancesPerLoad = command.maxDoodadInstancesPerLoad;
-  }
-  if (command.liquids)
-  {
-    request.maxLiquidTexturesPerLoad = command.maxLiquidTexturesPerLoad;
-    request.maxLiquidTextureBytes = command.maxLiquidTextureBytes;
-    request.maxLiquidTextureBytesPerLoad = command.maxLiquidTextureBytesPerLoad;
-    request.liquidFrames = liquidFrames;
-  }
-  ResetTerrainRequests();
-  m_terrainRequest = request;
-  m_streamSession = command.streaming;
-  ipc->setStreaming(command.streaming);
-  // The player drops the model or world model it was building for this (the latest command wins; the one it shows stays,
-  // hidden), so the waits for either end here. A model dropped so is one the player finished without, and what it shows
-  // instead must not pass for it (m_modelAwaitedFailed; a tile on show needs no notice): a record kept, as one already
-  // made is, until the next model or world-model load.
-  m_mapObjectAwaited = 0;
-  if (m_modelAwaited != 0)
-    m_modelAwaitedFailed = m_modelAwaited;
-  m_modelAwaited = 0;
-  m_uncoverFence = 0;
-  m_uncoverFenceRounds = 0;
-  m_playerContentPoll.Stop();
-  // Until the tile is built the player shows what it had: still terrain after a tile, otherwise not known here.
-  if (m_playerContent != PlayerContent::Terrain)
-    m_playerContent = PlayerContent::Unknown;
-  // With the time this thread spent reading the WDT whole before the load went out (ResolveTerrainTile's inspection).
-  const wow::MapEntry * entry = m_mapCatalog->find(mapId);
-  LOG_INFO << "[unity-terrain] load" << command.load << ": map" << mapId << command.mapDirectory << "tile" << tile
-           << (world ? (noTile ? QString("-- a WMO-only map's world model (WMO %1)").arg(globalWmoFileDataID)
-                               : QString("with its world models")) +
-                         (command.doodads ? QString(" and doodads") : QString(" (no doodads: a protocol %1 player)")
-                                                                        .arg(ipc->playerProtocolVersion()))
-                     : QString())
-           << "WDT"
-           << command.wdtFileDataID
-           << (command.wdtResolvedBy == "path" ? "(the storage root's FileDataID for " + command.wdtPath + ")"
-                                               : QString("(Map.db2's FileDataID)"))
-           << (wdtInspected ? QString("; the WDT read whole by the map asset worker for the tile grid (%1 ms), none on this "
-                                      "thread").arg(entry ? entry->inspection.milliseconds : -1.0)
-                            : QString("; the WDT read whole on this thread first, in %1 ms")
-                                .arg(entry ? entry->inspection.milliseconds : -1.0))
-           << (command.streaming ? QString("; a streaming session: the tiles within %1 of the camera's (protocol 18)")
-                                     .arg(UnityIpcServer::STREAM_RADIUS)
-                                 : QString())
-           << (command.liquids ? QString("; liquids offered (protocol 19): %1 frame(s) and bump(s) of the catalogue "
-                                         "servable; ").arg(liquidFrames ? liquidFrames->size() : 0) +
-                                   wow::LightCatalog::describe(command.liquidLights)
-                               : QString("; no liquids (a protocol %1 player)").arg(ipc->playerProtocolVersion()))
-           << (!command.worldLight.isEmpty()
-                 ? "; " + wow::LightCatalog::describeWorldLight(command.worldLight) +
-                     (m_lightCatalog && m_lightCatalog->worldLightAssemblyMilliseconds(mapId) >= 0.0
-                        ? QString(" (assembled in %1 ms on the map's first load)")
-                            .arg(m_lightCatalog->worldLightAssemblyMilliseconds(mapId), 0, 'f', 2)
-                        : QString())
-                 : QString("; no outdoor light (a protocol %1 player)").arg(ipc->playerProtocolVersion()));
-  UpdateUnityViewportState();
-  return command.load;
-}
-
-ModelViewer::TerrainRequest * ModelViewer::terrainRequestFor(int load)
-{
-  if (load > 0 && load == m_terrainRequest.load)
-    return &m_terrainRequest;
-  auto it = m_streamLoads.find(load);
-  return it != m_streamLoads.end() ? &it->second : nullptr;
-}
-
-const ModelViewer::TerrainRequest * ModelViewer::terrainRequestFor(int load) const
-{
-  if (load > 0 && load == m_terrainRequest.load)
-    return &m_terrainRequest;
-  auto it = m_streamLoads.find(load);
-  return it != m_streamLoads.end() ? &it->second : nullptr;
-}
-
-void ModelViewer::ResetTerrainRequests()
-{
-  if (m_streamSession || !m_streamLoads.empty())
-    LOG_INFO << "[unity-stream] the streaming session of load" << m_terrainRequest.load << "ends:" << (int)m_streamLoads.size()
-             << "tile load(s) closed with it (" << m_streamTilesOpened << "opened," << m_streamTilesClosed << "closed,"
-             << m_streamTilesRefused << "refused in all)";
-  m_terrainRequest = TerrainRequest();
-  m_streamLoads.clear();
-  m_streamState = UnityIpcServer::StreamState();
-  if (m_streamSession)
-  {
-    m_streamSession = false;
-    UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
-    if (ipc)
-      ipc->setStreaming(false);
-  }
-}
-
-QJsonObject ModelViewer::OnStreamTile(const QJsonObject & msg)
-{
-  QJsonObject reply;
-  reply["type"] = "streamTileAnswer";
-  const int load = msg.value("load").toInt(0);
-  reply["load"] = load;
-  QJsonArray opened, refused, closed;
-  const bool session = m_streamSession && load > 0 && load == m_terrainRequest.load;
-  const bool loading = MapAssetWait();
-  // Closed first: their places go to the tiles opened in the same message.
-  for (const QJsonValue & v : msg.value("close").toArray())
-  {
-    const int tileLoad = v.toInt(0);
-    if (!session)
-      continue;
-    if (tileLoad == m_terrainRequest.load)
-    {
-      // The entry tile left the region: whatever its load still asks for is stale.
-      if (!m_terrainRequest.ended)
-      {
-        m_terrainRequest.ended = true;
-        m_terrainRequest.endedStatus = "closed by the streaming session";
-      }
-      closed.append(tileLoad);
-      m_streamTilesClosed++;
-      continue;
-    }
-    auto it = m_streamLoads.find(tileLoad);
-    if (it == m_streamLoads.end())
-      continue;
-    LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(it->second.tileX).arg(it->second.tileY)
-             << "closed (tile load" << tileLoad << ", read" << it->second.reads << "file(s))";
-    m_streamLoads.erase(it);
-    closed.append(tileLoad);
-    m_streamTilesClosed++;
-  }
-  for (const QJsonValue & v : msg.value("open").toArray())
-  {
-    const QJsonObject o = v.toObject();
-    const int x = o.value("x").toInt(-1), y = o.value("y").toInt(-1);
-    QJsonObject answer;
-    answer["x"] = x;
-    answer["y"] = y;
-    QString why;
-    if (!session)
-      why = QString("load %1 is not the current streaming session (current %2%3)").arg(load).arg(m_terrainRequest.load)
-              .arg(m_streamSession ? "" : ", not streaming");
-    else if (loading)
-      why = "a client is being loaded";
-    else if (m_terrainRequest.ended && x == m_terrainRequest.tileX && y == m_terrainRequest.tileY)
-      why.clear();   // the entry tile opened again: a load of its own, as any
-    if (why.isEmpty() && session && !loading)
-    {
-      for (const auto & kv : m_streamLoads)
-        if (kv.second.tileX == x && kv.second.tileY == y)
-          why = QString("tile %1_%2 is open already as load %3").arg(x).arg(y).arg(kv.first);
-      if (why.isEmpty() && !m_terrainRequest.ended && m_terrainRequest.tileX == x && m_terrainRequest.tileY == y)
-        why = QString("tile %1_%2 is the session's entry tile, load %3").arg(x).arg(y).arg(m_terrainRequest.load);
-      if (why.isEmpty() && (int)m_streamLoads.size() >= UnityIpcServer::STREAM_MAX_TILE_LOADS)
-        why = QString("%1 tile loads are open, at most %2").arg(m_streamLoads.size()).arg(UnityIpcServer::STREAM_MAX_TILE_LOADS);
-    }
-    UnityIpcServer::TerrainTileCommand command;
-    if (why.isEmpty())
-    {
-      // A tile of the session's map that the client has (the WDT's own check, from the map catalogue's inspection: no
-      // read on this thread).
-      QString unresolved;
-      if (!ResolveTerrainTile(m_terrainRequest.mapId, x, y, command, unresolved, true, false))
-        why = unresolved;
-      else if (command.wdtFileDataID != m_terrainRequest.wdtFileDataID)
-        why = QString("the tile's WDT %1 is not the session's %2").arg(command.wdtFileDataID).arg(m_terrainRequest.wdtFileDataID);
-    }
-    if (!why.isEmpty())
-    {
-      answer["refused"] = why;
-      refused.append(answer);
-      m_streamTilesRefused++;
-      LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(x).arg(y) << "not opened:" << why;
-      continue;
-    }
-    // A load of its own, from the serial every load comes from (a later loadWorld never takes its number).
-    // A fresh request: the entry's map, client, catalogue and budgets, nothing had yet (fields added to TerrainRequest
-    // later start empty here: a budget left out reads 0, which serves nothing).
-    const TerrainRequest & e = m_terrainRequest;
-    TerrainRequest t;
-    t.load = ++m_terrainLoadSerial;
-    t.epoch = e.epoch;
-    t.mapId = e.mapId;
-    t.tileX = x;
-    t.tileY = y;
-    t.wdtFileDataID = e.wdtFileDataID;
-    t.wdtServed = true;               // the session's WDT, which the player has
-    t.catalogueGeneration = e.catalogueGeneration;
-    t.maxAssetBytes = e.maxAssetBytes;
-    t.maxTextureBytes = e.maxTextureBytes;
-    t.maxTextureBytesPerLoad = e.maxTextureBytesPerLoad;
-    t.maxTexturesPerLoad = e.maxTexturesPerLoad;
-    t.world = e.world;
-    t.maxWmoFileBytes = e.maxWmoFileBytes;
-    t.maxWmoBytesPerLoad = e.maxWmoBytesPerLoad;
-    t.maxWmoTextureBytes = e.maxWmoTextureBytes;
-    t.maxWmoTextureBytesPerLoad = e.maxWmoTextureBytesPerLoad;
-    t.maxWmoTexturesPerLoad = e.maxWmoTexturesPerLoad;
-    t.maxWmoModelsPerLoad = e.maxWmoModelsPerLoad;
-    t.maxWmoGroupsPerLoad = e.maxWmoGroupsPerLoad;
-    t.maxM2FileBytes = e.maxM2FileBytes;
-    t.maxM2BytesPerLoad = e.maxM2BytesPerLoad;
-    t.maxM2TextureBytes = e.maxM2TextureBytes;
-    t.maxM2TextureBytesPerLoad = e.maxM2TextureBytesPerLoad;
-    t.maxM2ModelsPerLoad = e.maxM2ModelsPerLoad;
-    t.maxM2TexturesPerLoad = e.maxM2TexturesPerLoad;
-    t.maxDoodadInstancesPerLoad = e.maxDoodadInstancesPerLoad;
-    t.maxLiquidTexturesPerLoad = e.maxLiquidTexturesPerLoad;
-    t.maxLiquidTextureBytes = e.maxLiquidTextureBytes;
-    t.maxLiquidTextureBytesPerLoad = e.maxLiquidTextureBytesPerLoad;
-    t.liquidFrames = e.liquidFrames;
-    t.sessionObj0Served = e.sessionObj0Served;
-    t.sessionWmoRootsServed = e.sessionWmoRootsServed;
-    t.sessionM2ModelsServed = e.sessionM2ModelsServed;
-    m_streamLoads[t.load] = t;
-    m_streamTilesOpened++;
-    answer["tileLoad"] = t.load;
-    opened.append(answer);
-    LOG_INFO << "[unity-stream] load" << load << ": tile" << QString("%1_%2").arg(x).arg(y) << "opened as load" << t.load << "("
-             << (int)m_streamLoads.size() << "tile load(s) open)";
-  }
-  reply["opened"] = opened;
-  reply["refused"] = refused;
-  reply["closed"] = closed;
-  reply["assetEpoch"] = m_terrainRequest.epoch;
-  return reply;
-}
-
-void ModelViewer::noteStreamSessionServed(const TerrainRequest & own, const QString & role, bool available)
-{
-  if (!m_streamSession || !available || (role != "obj0Adt" && role != "wmoRoot" && role != "m2Model"))
-    return;
-  if (own.load != m_terrainRequest.load && m_streamLoads.find(own.load) == m_streamLoads.end())
-    return;
-  const auto note = [&role](TerrainRequest & t) {
-    if (role == "obj0Adt")
-      t.sessionObj0Served = true;
-    else if (role == "wmoRoot")
-      t.sessionWmoRootsServed++;
-    else
-      t.sessionM2ModelsServed++;
-  };
-  note(m_terrainRequest);
-  for (auto & kv : m_streamLoads)
-    note(kv.second);
-}
-
-void ModelViewer::OnStreamState(const UnityIpcServer::StreamState & state)
-{
-  if (!m_streamSession || state.load != m_terrainRequest.load)
-    return;
-  m_streamState = state;
-  if (m_maps)
-    m_maps->OnStreamState(state);
-}
-
-bool ModelViewer::ClearTerrain(const QString & reason)
-{
-  UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
-  if (!ipc || !ipc->playerDrawsTerrain())   // (sendClearTerrain's only refusal)
-    return false;
-  // THE COMMAND BAR'S SWITCH leaving the Maps viewer, in its first turn, the player on screen at the click: it is told with
-  // the switch's repaint -- told now, it would drop the terrain inside the old workspace. Parked (behind the overhead map or
-  // a notice), it is told now, off screen, so its put-back in turn B does not show the world. What the viewport shows is
-  // decided now.
-  if (m_switch && m_switch->split && m_switch->phase == ViewerSwitch::Phase::Building && m_switch->playerWasOnScreen)
-    m_switch->clearTerrainReason = reason;
-  else
-    ipc->sendClearTerrain(reason);
-  ResetTerrainRequests();
-  if (m_playerContent == PlayerContent::Terrain)
-  {
-    // The player leaves the terrain view for whatever it held under it.
-    m_playerContent = PlayerContent::Unknown;
-    UpdateUnityViewportState();
-  }
-  return true;
-}
-
-bool ModelViewer::MapAssetWait() const
-{
-  return m_clientLoading || UnityAssetAccess::isClientLoading();
-}
-
-QString ModelViewer::MapAssetStaleReason(const QJsonObject & request) const
-{
-  // decideMapAssetRequest's staleness, asked again of a read in flight (and of its result): every reason that holds. A
-  // client being loaded is not one: the IPC server does not ask while it lasts (MapAssetWait) -- the load replaces the
-  // client (the epoch moves on: stale then) or fails (the client stays: the read stands).
-  QStringList stale;
-  const bool loading = MapAssetWait();
-  const int load = request.value("load").toInt(0);
-  const int epoch = request.value("assetEpoch").toInt(0);
-  const TerrainRequest * own = terrainRequestFor(load);
-  if (m_terrainRequest.load <= 0)
-    stale << QString("no terrain load is current (request load %1)").arg(load);
-  else if (!own)
-    stale << QString("request load %1, current %2").arg(load).arg(m_terrainRequest.load) +
-               (m_streamSession ? QString(" (a streaming session: not one of its %1 open tile load(s))").arg(m_streamLoads.size())
-                                : QString());
-  else if (own->ended)
-    stale << QString("load %1 was reported %2").arg(load).arg(own->endedStatus);
-  const int epochNow = UnityAssetAccess::clientEpoch();
-  if (epoch != epochNow)
-    stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
-  // (Not asked while a client loads: the client is half replaced.)
-  if (!loading && !terrainCatalogueBelongs())
-    stale << "the map catalogue the load was sent under is not the loaded client's";
-  return stale.join("; ");
-}
-
-UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject & request)
-{
-  UnityIpcServer::MapAssetDispatch d;
-  QElapsedTimer step;
-  step.start();
-  const bool loading = m_clientLoading || UnityAssetAccess::isClientLoading();
-  // The request's own load: the entry's or one of the streaming session's tile loads (STREAMING); for any other the
-  // decision compares it with the entry's and answers stale.
-  TerrainRequest * own = terrainRequestFor(request.value("load").toInt(0));
-  const TerrainRequest * current = own ? own : (m_terrainRequest.load > 0 ? &m_terrainRequest : nullptr);
-  // (Not asked while a client loads: the decision refuses first, and the client is half replaced.)
-  const bool belongs = !loading && terrainCatalogueBelongs();
-  const int epochNow = UnityAssetAccess::clientEpoch();
-  const MapAssetDecision decision = decideMapAssetRequest(request, current, epochNow, belongs, loading);
-  d.answer.timings["decideMs"] = step.nsecsElapsed() / 1e6;
-  if (!decision.state.isEmpty())
-  {
-    d.answer.state = decision.state;
-    d.answer.detail = decision.detail;
-    return d;
-  }
-  if (!m_mapAssetWorker || m_mapAssetWorker->stopped())
-  {
-    d.answer.state = "refused";
-    d.answer.detail = "the map asset worker is not running";
-    return d;
-  }
-  // The worker reads under a reference of its own to the storage the load was sent under (EnsureMapAssetLease).
-  const quint64 generation = m_mapCatalog->client().storageGeneration;
-  if (!EnsureMapAssetLease(epochNow, generation))
-  {
-    // As the catalogue's own read answers a storage that is not open: nothing was checked.
-    d.answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::NotChecked);
-    d.answer.detail = "the client's storage is not open: nothing was checked";
-    return d;
-  }
-  // Accounted before the read, whatever comes of it: the read itself is what the load's limits count. A texture's
-  // limit is held against the load's budget until its result comes (decideMapAssetRequest).
-  TerrainRequest & owner = *own;    // (the decision passed: the request's load is current)
-  noteMapAssetRead(owner, request);
-  const QString role = request.value("role").toString();
-  if (role == "texture")
-    owner.textureBytesReserved += decision.maxBytes;
-  else if (role == "wmoRoot" || role == "wmoGroup")
-    owner.wmoBytesReserved += decision.maxBytes;
-  else if (role == "wmoTexture")
-    owner.wmoTextureBytesReserved += decision.maxBytes;
-  else if (role == "m2Model" || role == "m2Skin")
-    owner.m2BytesReserved += decision.maxBytes;
-  else if (role == "m2Texture")
-    owner.m2TextureBytesReserved += decision.maxBytes;
-  else if (role == "liquidTexture")
-    owner.liquidTextureBytesReserved += decision.maxBytes;
-  d.read = true;
-  d.fileDataID = request.value("fileDataID").toInt(0);
-  d.maxBytes = decision.maxBytes;
-  d.epoch = epochNow;
-  d.generation = generation;
-  return d;
-}
-
-bool ModelViewer::EnsureMapAssetLease(int epochNow, quint64 generation)
-{
-  // Granted once per client epoch and storage; dropped when the client is replaced (ResetClientState). Asked only after
-  // the decision found no client loading and the map catalogue the loaded client's and the load's: the folder holds
-  // that storage now, and this thread holds the folder's reference while the worker's is taken (CASCFolder::shareStorage).
-  if (m_mapAssetLeaseEpoch == epochNow && m_mapAssetLeaseGeneration == generation)
-    return true;
-  wow::WoWFolder & folder = static_cast<wow::WoWFolder &>(GAMEDIRECTORY);
-  MapAssetWorker::Lease lease;
-  lease.epoch = epochNow;
-  lease.generation = generation;
-  if (folder.storageGeneration() == generation)
-    lease.storage = folder.shareStorage();
-  if (!lease.storage.open())
-    return false;
-  m_mapAssetWorker->grantLease(lease);
-  m_mapAssetLeaseEpoch = epochNow;
-  m_mapAssetLeaseGeneration = generation;
-  LOG_INFO << "[unity-terrain] map asset worker: reads the storage of client epoch" << epochNow << "(storage"
-           << (qulonglong)generation << ") through a reference of its own";
-  return true;
-}
-
-MapAssetWorker::Result ModelViewer::TestReadThroughWorker(int fileDataID, qint64 maxBytes, bool corrupt,
-                                                         bool cancelledBefore, bool otherStorage)
-{
-  MapAssetWorker::Result result;
-  result.outcome = MapAssetWorker::Result::Outcome::Stopped;
-  const int epochNow = UnityAssetAccess::clientEpoch();
-  const quint64 generation = m_mapCatalog->client().storageGeneration;
-  if (m_clientLoading || UnityAssetAccess::isClientLoading() || !m_mapCatalog->belongsToActiveClient() ||
-      !m_mapAssetWorker || m_mapAssetWorker->stopped() || !EnsureMapAssetLease(epochNow, generation))
-  {
-    result.detail = "no worker read: no client loaded, its catalogue not its own, or no storage";
-    return result;
-  }
-  MapAssetWorker::Job job;
-  job.fileDataID = fileDataID;
-  job.maxBytes = maxBytes;
-  job.epoch = epochNow;
-  job.generation = otherStorage ? generation + 1000000 : generation;
-  job.role = "test";
-  job.cancelled = std::make_shared<std::atomic<bool>>(cancelledBefore);
-  job.testCorrupt = corrupt;
-  const quint64 ticket = m_mapAssetWorker->submit(job);
-  if (ticket == 0 || !m_mapAssetWorker->waitResult(ticket, 120000, result))
-  {
-    result = MapAssetWorker::Result();
-    result.outcome = MapAssetWorker::Result::Outcome::Stopped;
-    result.detail = "no result from the map asset worker within 120 s";
-  }
-  return result;
-}
-
-std::function<void(ModelViewer &, ModelViewer::ShutdownPoint)> ModelViewer::testShutdownProbe;
-
-quint64 ModelViewer::TestHoldReadForShutdown(int fileDataID)
-{
-  const int epochNow = UnityAssetAccess::clientEpoch();
-  const quint64 generation = m_mapCatalog->client().storageGeneration;
-  if (m_clientLoading || UnityAssetAccess::isClientLoading() || !m_mapCatalog->belongsToActiveClient() ||
-      !m_mapAssetWorker || m_mapAssetWorker->stopped() || !EnsureMapAssetLease(epochNow, generation))
-    return 0;
-  MapAssetWorker::Job job;
-  job.fileDataID = fileDataID;
-  job.maxBytes = 64 * 1024 * 1024;
-  job.epoch = epochNow;
-  job.generation = generation;
-  job.role = "test";
-  job.cancelled = std::make_shared<std::atomic<bool>>(false);
-  job.testHold = true;
-  return m_mapAssetWorker->submit(job);
-}
-
-UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject & request, MapAssetWorker::Result & result)
-{
-  UnityIpcServer::MapAssetAnswer answer;
-  const QString role = request.value("role").toString();
-  const int fileDataID = request.value("fileDataID").toInt(0);
-  // A texture's reservation is released by its own load, whatever came of the read (a load replaced since took its
-  // accounting with it).
-  // (STREAMING: the request's own load, the entry's or an open tile load's; a load closed since took its accounting with it.)
-  TerrainRequest * own = terrainRequestFor(request.value("load").toInt(0));
-  const bool currentLoad = own != nullptr;
-  if (currentLoad && role == "texture")
-    own->textureBytesReserved = std::max<qint64>(0, own->textureBytesReserved - result.maxBytes);
-  else if (currentLoad && (role == "wmoRoot" || role == "wmoGroup"))
-    own->wmoBytesReserved = std::max<qint64>(0, own->wmoBytesReserved - result.maxBytes);
-  else if (currentLoad && role == "wmoTexture")
-    own->wmoTextureBytesReserved = std::max<qint64>(0, own->wmoTextureBytesReserved - result.maxBytes);
-  else if (currentLoad && (role == "m2Model" || role == "m2Skin"))
-    own->m2BytesReserved = std::max<qint64>(0, own->m2BytesReserved - result.maxBytes);
-  else if (currentLoad && role == "m2Texture")
-    own->m2TextureBytesReserved = std::max<qint64>(0, own->m2TextureBytesReserved - result.maxBytes);
-  else if (currentLoad && role == "liquidTexture")
-    own->liquidTextureBytesReserved = std::max<qint64>(0, own->liquidTextureBytesReserved - result.maxBytes);
-  const bool wasRead = result.outcome == MapAssetWorker::Result::Outcome::Read;
-  const wow::WdtInspection & inspection = result.inspection;
-  if (wasRead)
-  {
-    answer.readMs = inspection.milliseconds;
-    answer.bytesRead = inspection.readBytes;
-    answer.timings["rootMs"] = inspection.rootMs;
-    answer.timings["openMs"] = inspection.read.openMs;
-    answer.timings["sizeMs"] = inspection.read.sizeMs;
-    answer.timings["allocMs"] = inspection.read.allocMs;
-    answer.timings["cascReadMs"] = inspection.read.readMs;
-    answer.timings["keyMs"] = inspection.read.keyMs;
-    answer.timings["closeMs"] = inspection.read.closeMs;
-    answer.timings["md5Ms"] = inspection.read.md5Ms;
-  }
-  // Checked again, here, before any byte is queued: a read whose load, client or catalogue has gone since its dispatch
-  // is answered stale -- the bytes of another client's storage never reach the stream (section D of the document).
-  const QString stale = MapAssetStaleReason(request);
-  if (!stale.isEmpty())
-  {
-    answer.state = "stale";
-    answer.detail = stale;
-    return answer;
-  }
-  if (!wasRead)
-  {
-    // Nothing read: out of memory is the file's read failing; the rest (cancelled, stopped, another storage) means the
-    // host has moved on from the request.
-    answer.state = result.outcome == MapAssetWorker::Result::Outcome::Failed
-                     ? wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable)
-                     : QString("stale");
-    answer.detail = QString("FileDataID %1 was not read: ").arg(fileDataID) + result.detail;
-    if (currentLoad)
-      noteMapAssetResult(*own, role, 0, false);
-    return answer;
-  }
-  answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
-  answer.detail = inspection.detail;
-  // A read cut to what was left of its load's budget that found the file larger than that: the load's refusal, as one
-  // decided before the read would be -- the streaming player hands the file on to another tile's load rather than take
-  // it as the file's failure for the session (docs/world-viewer/08-streaming.md 5.4). A file over its per-file limit
-  // stays "unreadable": no load reads it. (Nothing was read; the reservation was given back above.)
-  if (own && inspection.state == wow::WdtAvailability::Unreadable && inspection.tooLargeSize > 0)
-  {
-    const QString refusal = mapAssetBudgetRefusal(*own, role, inspection.tooLargeSize, result.maxBytes);
-    if (!refusal.isEmpty())
-    {
-      answer.state = "refused";
-      answer.detail = QString("FileDataID %1 was not read: ").arg(fileDataID) + refusal + " (" + inspection.detail + ")";
-    }
-  }
-  bool available = inspection.state == wow::WdtAvailability::Available;
-  if (available)
-  {
-    // What the bytes are, for the roles that say (TERRAIN TEXTURES): four characters at known places, not a parse.
-    QElapsedTimer step;
-    step.start();
-    const QString kind = mapAssetKindProblem(role, result.bytes);
-    answer.timings["kindMs"] = step.nsecsElapsed() / 1e6;
-    if (!kind.isEmpty())
-    {
-      available = false;
-      answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable);
-      answer.detail = QString("FileDataID %1 was read, but it is ").arg(fileDataID) + kind;
-    }
-    else if (inspection.contentKey.size() != 32)
-    {
-      // An available read always carries the key it was checked against (CASCFolder::readWholeFile): its absence is a
-      // fault of this viewer, answered as one, never covered by hashing the bytes here.
-      available = false;
-      answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable);
-      answer.detail = QString("internal error: FileDataID %1 was read as available without its content key").arg(fileDataID);
-      LOG_ERROR << "[unity-terrain]" << answer.detail;
-    }
-    else
-    {
-      answer.bytes = std::move(result.bytes);
-      answer.md5 = inspection.contentKey;
-    }
-  }
-  result.bytes = QByteArray();   // a file not served is freed here
-  if (own)
-  {
-    noteMapAssetResult(*own, role, answer.bytesRead, available);
-    noteStreamSessionServed(*own, role, available);
-  }
-  return answer;
-}
-
-UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAssetAndWait(const QJsonObject & request)
-{
-  const UnityIpcServer::MapAssetDispatch d = DispatchMapAsset(request);
-  if (!d.read)
-    return d.answer;
-  MapAssetWorker::Job job;
-  job.fileDataID = d.fileDataID;
-  job.maxBytes = d.maxBytes;
-  job.epoch = d.epoch;
-  job.generation = d.generation;
-  job.role = request.value("role").toString();
-  job.cancelled = std::make_shared<std::atomic<bool>>(false);
-  const quint64 ticket = m_mapAssetWorker->submit(job);
-  MapAssetWorker::Result result;
-  if (ticket == 0 || !m_mapAssetWorker->waitResult(ticket, 120000, result))
-  {
-    result = MapAssetWorker::Result();
-    result.outcome = MapAssetWorker::Result::Outcome::Stopped;
-    result.detail = "no result from the map asset worker within 120 s";
-    result.maxBytes = d.maxBytes;
-  }
-  UnityIpcServer::MapAssetAnswer answer = CompleteMapAsset(request, result);
-  for (auto it = d.answer.timings.begin(); it != d.answer.timings.end(); ++it)
-    answer.timings[it.key()] = it.value();
-  return answer;
-}
-
-void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report)
-{
-  // The Maps viewer follows its own loads, after this has taken the report (below).
-  struct TellMaps
-  {
-    ModelViewer * mv;
-    const UnityIpcServer::TerrainTileReport & r;
-    ~TellMaps()
-    {
-      if (mv->m_maps)
-        mv->m_maps->OnTerrainTileLoaded(r);
-    }
-  } tellMaps{ this, report };
-  // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared. (A
-  // streaming session's tile load ends with its report; what the player shows is the entry's.)
-  if (report.load != 0 && report.load != m_terrainRequest.load)
-  {
-    TerrainRequest * tileLoad = terrainRequestFor(report.load);
-    if (tileLoad && !tileLoad->ended)
-    {
-      tileLoad->ended = true;
-      tileLoad->endedStatus = report.status;
-    }
-    return;
-  }
-  if (report.load == 0)
-    return;
-  // The player has answered the load: anything it still asks for this load is answered stale, unread (TERRAIN TEXTURES).
-  if (!m_terrainRequest.ended)
-  {
-    m_terrainRequest.ended = true;
-    m_terrainRequest.endedStatus = report.status;
-  }
-  if (report.status != "built" && (m_streamSession || !m_streamLoads.empty()))
-  {
-    // STREAMING: the player ends a session with an entry that was not built (it failed before its tile, or was cleared):
-    // so does the host -- its tile loads closed (what they still have waiting answered stale), the queue and the reads a
-    // single load's again.
-    LOG_INFO << "[unity-stream] the streaming session of load" << report.load << "ends with its entry (" << report.status << "):"
-             << (int)m_streamLoads.size() << "tile load(s) closed with it";
-    m_streamLoads.clear();
-    m_streamState = UnityIpcServer::StreamState();
-    if (m_streamSession)
-    {
-      m_streamSession = false;
-      if (UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr)
-        ipc->setStreaming(false);
-    }
-  }
-  const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
-  // Protocol 19: the liquids' outcome, when the load offered them (a protocol-18 player reports none: no liquids drawn).
-  const bool liquids = report.hasLiquids && report.liquidsOffered;
-  const QString liquidPart = liquids ? QString("liquids: %1 quad(s) of %2 instance(s), %3 type(s), %4 of %5 texture(s) loaded")
-                                         .arg(report.liquidQuads).arg(report.liquidInstances).arg(report.liquidTypesSent)
-                                         .arg(report.liquidTexturesLoaded).arg(report.liquidTexturesRequested)
-                                     : QString();
-  // Protocol 17: the doodads' outcome, when the load offered them (the player's state name appended, never through arg()).
-  const bool doodads = report.hasDoodads && report.doodadState != "notOffered";
-  const QString doodadPart = doodads ? "; doodads " + report.doodadState +
-                                         QString(": %1 of %2 placed, %3 of %4 model(s) built")
-                                           .arg(report.doodadPlaced).arg(report.doodadInstances)
-                                           .arg(report.doodadModelsBuilt).arg(report.doodadModels) +
-                                         (liquids ? "; " + liquidPart + "; no lighting" : QString("; no liquids or lighting"))
-                                     : liquids ? "; no doodads; " + liquidPart + "; no lighting"
-                                               : QString("; no doodads, liquids or lighting");
-  if (report.status == "built")
-  {
-    if (report.hasWorld && report.worldKind == "globalWmo")
-      LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "(its world model, no tile) in" << report.totalMs
-               << "ms; world" << report.worldState << ":" << report.worldPlaced << "of" << report.worldPlacements
-               << "placement(s) placed" + doodadPart;
-    else
-      LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "tile" << tile << ":" << report.chunksBuilt
-               << "of" << report.chunks << "chunks," << report.triangles << "triangles," << report.holeCells << "hole cells in"
-               << report.totalMs << "ms;"
-               << (report.hasMaterial ? "material " + report.materialState +
-                                          (report.materialReason.isEmpty() ? QString() : " (" + report.materialReason + ")")
-                                      : QString("geometry only (the player reports no material)"))
-               << (report.hasWorld ? QString("-- world models %1: %2 of %3 placement(s) placed, %4 failed, %5 unsupported, %6 not "
-                                             "requested")
-                                       .arg(report.worldState).arg(report.worldPlaced).arg(report.worldPlacements)
-                                       .arg(report.worldFailed).arg(report.worldUnsupported).arg(report.worldNotRequested) +
-                                       doodadPart
-                                   : liquids ? "-- " + liquidPart + "; no doodads or buildings"
-                                             : QString("-- no liquids, doodads or buildings"));
-    m_playerContent = PlayerContent::Terrain;
-    UpdateUnityViewportState();
-  }
-  else if (report.status == "failed")
-  {
-    LOG_ERROR << "[unity-terrain] the Unity viewport could not build map" << report.mapId << "tile" << tile << "("
-              << report.reason << ") -- it shows what it showed before";
-    // What it showed before may be an earlier tile the host never heard was built (adopted, then answered "superseded"
-    // by this load): a tile still alive is on show, in the terrain view (only that view holds one).
-    if (report.liveTerrainTiles > 0 && m_playerContent != PlayerContent::Terrain)
-    {
-      m_playerContent = PlayerContent::Terrain;
-      UpdateUnityViewportState();
-    }
-  }
-}
-
-void ModelViewer::OnWorldShown(const UnityIpcServer::WorldShown & shown)
-{
-  // The current world load's scene is on screen (the tile, or a WMO-only map's world model): the player shows terrain from
-  // now on, whatever comes of the world models still loading. An earlier load's is not what the player shows.
-  if (shown.load != 0 && shown.load == m_terrainRequest.load && !m_terrainRequest.ended && m_playerContent != PlayerContent::Terrain)
-  {
-    m_playerContent = PlayerContent::Terrain;
-    UpdateUnityViewportState();
-  }
-  if (m_maps)
-    m_maps->OnWorldShown(shown);
-}
-
-void ModelViewer::TerrainTestRaiseLoadWithoutSending()
-{
-  m_terrainRequest.load = ++m_terrainLoadSerial;
-  m_terrainRequest.ended = false;
-  m_terrainRequest.endedStatus.clear();
-  LOG_INFO << "[unity-terrain] test: load serial raised to" << m_terrainLoadSerial << "without sending a load";
-}
-
-// The animation on display changed (the dropdown, or the default picked on model load). Same
-// reasoning as the skin: the Unity viewport draws the same model from the same data, so it has to
-// play what the canvas is playing rather than the idle it would choose for itself.
-//
-// The animation manager is asked what is PLAYING rather than the control being asked what is
-// selected, so a default chosen during model load and a dropdown choice both report the same way.
-void ModelViewer::SendCurrentAnimationToUnity()
-{
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
-    return;
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
-    return;
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  // A CHARACTER RIDING A MOUNT the player seats (protocol 5): two models animate, and the Animation panel acts on
-  // one of them -- g_selModel, the mount after the mount choice, the rider once View > Attachments picked it --
-  // so the push is about that model and says which of the two it is. Its FileDataID cannot say: a mount model
-  // can also be a playable race's body. Any other pick there (an item model) is nothing the player animates on
-  // its own, and is not pushed.
-  QString role;
-  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
-  {
-    if (g_selModel && g_selModel == riderMount())
-      role = QStringLiteral("mount");
-    else if (g_selModel && g_selModel == riderModel())
-      role = QStringLiteral("rider");
-    else
-      return;
-    m = g_selModel;
-    if (!m->gamefile)
-      return;
-  }
-  if (!m->animManager || m->anims.empty())
-    return;
-
-  const int index = (int)m->animManager->GetAnim();
-  if (index < 0 || index >= (int)m->anims.size())
-    return;
-  unityRendererHost->ipc()->sendModelAnimation((int)m->gamefile->fileDataId(), index,
-                                               m->anims[index].animID, (int)m->anims[index].length,
-                                               true, role, role.isEmpty() ? 0 : m_unityLoadSerial);
-  // A new selection restarts at frame 0 and keeps whatever play/pause and speed were in force;
-  // send that alongside so the renderer does not briefly run an animation the app has paused.
-  SendAnimationStateToUnity(true);
-}
-
-// Whether the animation is running, how fast, and where it is.
-//
-// This one has NO single funnel, unlike the skin and the animation choice. Play, pause, stop,
-// clear, the two step buttons, the speed slider and the frame slider all change it, and the time
-// advances every frame with no control involved at all. So it is pushed two ways: forced from each
-// of those controls, and on a slow heartbeat from the canvas tick while something is playing.
-//
-// The heartbeat exists because two renderers timing themselves independently drift apart; it is
-// the channel that corrects that. It is deliberately slow, and the PLAYER decides whether a given
-// timestamp is worth snapping to -- only it knows where its own clock is, and snapping on every
-// message would trade drift for jitter.
-void ModelViewer::SendAnimationStateToUnity(bool force)
-{
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
-    return;
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
-    return;
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  if (!m->animManager || m->anims.empty())
-    return;
-
-  const int index = (int)m->animManager->GetAnim();
-  if (index < 0 || index >= (int)m->anims.size())
-    return;
-
-  const bool playing = !m->animManager->IsPaused();
-  const float speed = m->animManager->GetSpeed();
-  // The position now, not at the last canvas tick: a state forced in the middle of a UI-thread wait (a choice made
-  // while the mount's model loads) would otherwise send the viewport back by the wait (AnimManager::GetFrameNow).
-  const int timeMs = (int)m->animManager->GetFrameNow(playing);
-
-  if (!force)
-  {
-    // Heartbeat. A paused model cannot drift, so it needs none; and the interval is long enough
-    // that this is a rounding error next to the asset traffic the same channel already carries.
-    if (!playing)
-      return;
-    const unsigned long now = timeGetTime();
-    if (m_lastAnimStatePush != 0 && (now - m_lastAnimStatePush) < ANIM_STATE_HEARTBEAT_MS)
-      return;
-    m_lastAnimStatePush = now;
-  }
-  else
-  {
-    m_lastAnimStatePush = timeGetTime();
-  }
-
-  // A CHARACTER RIDING A MOUNT the player seats (protocol 5): the fields above stay the canvas model's, the
-  // mount's, and the rider's clock rides along, sampled in this same call so the player can apply both at once.
-  // Both advance by the same tick but on their own clocks (ModelCanvas::tick -> Attachment::tick). The rider's
-  // "playing" is the MOUNT's: the tick stops the time of the whole tree when the canvas model is paused and never
-  // reads the rider's own flag -- which the mount choice leaves set by stopping the rider (AnimManager::Stop)
-  // while its time keeps advancing (AnimManager::Tick does not read it).
-  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
-  {
-    WoWModel * rider = riderModel();
-    const int riderIndex = (rider->animManager && !rider->anims.empty()) ? (int)rider->animManager->GetAnim() : -1;
-    if (riderIndex >= 0 && riderIndex < (int)rider->anims.size())
-    {
-      UnityIpcServer::RiderState state;
-      state.sequenceIndex = riderIndex;
-      state.playing = playing;
-      state.timeMs = (int)rider->animManager->GetFrameNow(playing);
-      state.speed = rider->animManager->GetSpeed();
-      state.loop = true;
-      unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
-                                                        playing, timeMs, speed, true,
-                                                        /* explicitState */ force, &state, m_unityLoadSerial);
-      return;
-    }
-  }
-
-  unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
-                                                    playing, timeMs, speed, true,
-                                                    /* explicitState */ force);
 }
 
 // Menu button press events
@@ -5552,7 +3075,6 @@ static bool refreshCommunityListfile(const QString & localPath, ClientLoadProgre
   return false; // no answer, or a list that could not be put in place: asked again next load
 }
 
-
 // Refresh the TACT encryption keys on EVERY launch. CASC needs these to decrypt encrypted content
 // -- both whole encrypted files and the encrypted DB2 sections that hold brand-new / unreleased
 // records (recent raid bosses etc.). New keys get published frequently while a patch is on the PTR,
@@ -5629,7 +3151,6 @@ static bool refreshTactKeys(const QString & localPath, ClientLoadProgress * prog
   return false;
 }
 
-
 namespace
 {
   // The loading page of the load under way (ModelViewer::m_loadProgress), for the steps that report from outside
@@ -5662,7 +3183,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
     return 0;
   }
   ClientLoadingFlag loadingFlag(m_clientLoading);
-  UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
+  ClientState::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
   TexturesClientLoadStarting();
 
@@ -5704,7 +3225,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
   CallAfter([this]() {
-    UpdateUnityViewportState();
+    UpdateViewportState();
     TexturesClientLoaded();
     if (isMapsMode() && fileControl)
       fileControl->Init(this);
@@ -5719,8 +3240,6 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   m_lightCatalog = wow::LightCatalog::build();
   m_lightCatalog->buildWorldLight();
   ComputeClientCapabilities();
-  if (m_maps)
-    m_maps->ClientLoaded();
   LOG_INFO << "[mpq] legacy client ready: storage=MPQ, provider ready, archives=" << archives
            << " -- load models from the file browser (no DBC/customization/equipment yet).";
   return archives;
@@ -5795,53 +3314,26 @@ void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
 }
 
 // What a CASC open error means for the person who asked for it.
+// (CascLib's error codes: the Windows ones on Windows, errno values elsewhere, where some coincide -- so an if chain.)
 static wxString clientOpenProblem(int error)
 {
-  switch (error)
-  {
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_PATH_NOT_FOUND:
-      return _("Its game data is not on this computer. The Battle.net app may not have downloaded it yet: start "
-               "the game once from Battle.net, or let its installation finish, and try again.");
-    case ERROR_FILE_CORRUPT:
-      return _("Its game data could not be read: it is incomplete or damaged. Battle.net's Scan and Repair "
-               "can restore it.");
-    case ERROR_INVALID_PARAMETER:
-      return _("It has no language this viewer can open.");
-    default:
-      return _("The installation could not be opened.");
-  }
+  if (error == (int)ERROR_FILE_NOT_FOUND || error == (int)ERROR_PATH_NOT_FOUND)
+    return _("Its game data is not on this computer. The Battle.net app may not have downloaded it yet: start "
+             "the game once from Battle.net, or let its installation finish, and try again.");
+  if (error == (int)ERROR_FILE_CORRUPT)
+    return _("Its game data could not be read: it is incomplete or damaged. Battle.net's Scan and Repair "
+             "can restore it.");
+  if (error == (int)ERROR_INVALID_PARAMETER)
+    return _("It has no language this viewer can open.");
+  return _("The installation could not be opened.");
 }
 
 // The client-derived state a newly opened client replaces: what is on screen, and every cache filled from the previous
 // client's files or database. (The file tree, database, races, NPC and item lists are refilled by the load itself.)
 void ModelViewer::ResetClientState()
 {
-  // THE MAP ASSET WORKER: its reads in flight are the previous client's (cancelled; one under way finishes on that
-  // client's storage, which its own reference keeps alive, and is answered stale), and it lets go of that storage, on
-  // its own thread, after the read it is on. The next read of the new client grants it the new one.
-  if (unityRendererHost && unityRendererHost->ipc())
-    unityRendererHost->ipc()->cancelMapReads("the client was replaced");
-  if (m_mapAssetWorker)
-    m_mapAssetWorker->dropLease();
-  m_mapAssetLeaseEpoch = 0;
-  m_mapAssetLeaseGeneration = 0;
-  // The same FileDataID is another file in the next client: the Unity player's asset cache starts over (protocol 9).
-  UnityAssetAccess::noteClientReplaced();
-  // ... and the host's record of which map files it has read is the previous client's: forgotten now.
-  if (unityRendererHost && unityRendererHost->ipc())
-    unityRendererHost->ipc()->noteClientReplaced(UnityAssetAccess::clientEpoch());
-  // A terrain tile of the previous client, being built or on show, is taken away (THE TERRAIN TILE): its map files are
-  // that client's, and the requests still out for them are answered stale.
-  if (m_terrainRequest.load != 0 || m_playerContent == PlayerContent::Terrain)
-  {
-    UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
-    if (ipc && ipc->playerDrawsTerrain())
-      ipc->sendClearTerrain("the client was replaced");
-    ResetTerrainRequests();
-    if (m_playerContent == PlayerContent::Terrain)
-      m_playerContent = PlayerContent::Unknown;
-  }
+  // The same FileDataID is another file in the next client: caches keyed by it start over.
+  ClientState::noteClientReplaced();
   // ChrModel IDs are one client's.
   m_variantSession.clear();
   m_shownAsCreatureDisplay = false;
@@ -5869,9 +3361,6 @@ void ModelViewer::ResetClientState()
   m_mapCatalog = wow::WorldMapCatalog::noClient("a client is being loaded");
   m_liquidCatalog = wow::LiquidCatalog::noClient("a client is being loaded");
   m_lightCatalog = wow::LightCatalog::noClient("a client is being loaded");
-  // The Maps viewer forgets the old client's map, tiles and terrain (its read cancelled above with the server's).
-  if (m_maps)
-    m_maps->ClientReplaced();
 }
 
 bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgress * progress)
@@ -5890,7 +3379,7 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.begin("installation");
 
   wxStopWatch total, step;
-  UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
+  ClientState::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   if (gamePath.IsEmpty() || !wxDirExists(gamePath))
     getGamePath();
   const QString dataPath = QString::fromWCharArray(gamePath.c_str());
@@ -6236,8 +3725,6 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.begin("capabilities");
   ComputeClientCapabilities();
   timeline.end("capabilities");
-  if (m_maps)
-    m_maps->ClientLoaded();
   timeline.begin("remember client");
   RememberLoadedClient(config);
   timeline.end("remember client");
@@ -6248,7 +3735,7 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   // returned, since the client does not count as active while it is still inside it.
   CallAfter([this]() {
     core::LoadTimeline::Stage stage("final ui (deferred)");
-    UpdateUnityViewportState();
+    UpdateViewportState();
     TexturesClientLoaded();
     // The Maps viewer's list of the new catalogue (built after Browse was listed; listed only once the client counts
     // as active, which it does not inside the load). Another viewer on, the maps are listed at the next entry into Maps,
@@ -6282,7 +3769,7 @@ void ModelViewer::FreeDetachedWhenIdle()
 void ModelViewer::OnIdleFreeDetached(wxIdleEvent & event)
 {
   event.Skip();
-  if (m_clientLoading || UnityAssetAccess::isClientLoading())
+  if (m_clientLoading || ClientState::isClientLoading())
     return; // a load is under way (a yield inside it): wait for it to finish
   // NOT IN A VIEWER SWITCH'S ROUNDS: while one is on its way, and at the idle of a round a switch's turn or a turn after it
   // ran in (m_turnSerial). A share asked for more is run again at once by the event loop, and a switch turn due meanwhile
@@ -6320,7 +3807,7 @@ void ModelViewer::OnIdleAfterLoad(wxIdleEvent & event)
   event.Skip();
   Unbind(wxEVT_IDLE, &ModelViewer::OnIdleAfterLoad, this);
   m_interactivePending = false;
-  if (m_clientLoading || UnityAssetAccess::isClientLoading())
+  if (m_clientLoading || ClientState::isClientLoading())
     return; // a load is still under way (a yield inside it): the refresh after it notes the moment
   core::LoadTimeline::instance().mark("interactive");
   core::LoadTimeline::instance().finish("interactive");
@@ -7024,37 +4511,34 @@ void ModelViewer::OnAbout(wxCommandEvent & WXUNUSED(event))
   dialog.ShowModal();
 }
 
-bool ModelViewer::isUnityViewportCentre()
+bool ModelViewer::isViewportCentre()
 {
-  if (!unityRendererHost)
+  if (!viewportHost)
     return false;
   // The host is always managed (InitDocking), so this lookup never lands on wx's shared null pane.
-  wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
+  wxAuiPaneInfo & up = interfaceManager.GetPane(viewportHost);
   return up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER;
 }
 
-bool ModelViewer::isUnityViewportShowingModel()
+bool ModelViewer::isViewportShowingModel()
 {
-  if (!unityRendererHost || !canvas || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+  if (!viewportHost || !canvas)
     return false;
-  // A terrain tile in front of it is not the model (and the screenshot, which renders the model, is refused).
-  if (m_playerContent == PlayerContent::Terrain)
-    return false;
-  return !unityRendererHost->hasNotice() && !unityRendererHost->isShowingContent() && unityCanDrawCurrentModel();
+  return !viewportHost->hasNotice() && !viewportHost->isShowingContent() && canDrawCurrentModel();
 }
 
-bool ModelViewer::unityViewportHasNotice() const
+bool ModelViewer::viewportHasNotice() const
 {
-  return !unityRendererHost || unityRendererHost->hasNotice() || unityRendererHost->isShowingContent();
+  return !viewportHost || viewportHost->hasNotice() || viewportHost->isShowingContent();
 }
 
 // The size of the viewport, which is the Unity viewport's host panel (the archived canvas is hidden and
 // has no meaningful size). Called by the host whenever it is resized.
 void ModelViewer::UpdateCanvasStatus()
 {
-  if (!unityRendererHost || !GetStatusBar())
+  if (!viewportHost || !GetStatusBar())
     return;
-  const wxSize size = unityRendererHost->GetClientSize();
+  const wxSize size = viewportHost->GetClientSize();
   SetStatusText(wxString::Format(wxT("Viewport %i \u00D7 %i"), size.x, size.y), 3);
 }
 
@@ -7135,16 +4619,6 @@ void ModelViewer::UpdateCommandLabel()
     else if (isModelsMode() && canvasHasModel())
       path = canvas->model()->gamefile ? canvas->model()->gamefile->fullname().toStdWString()
                                        : const_cast<WoWModel *>(canvas->model())->name().toStdWString();
-    else if (isMapsMode() && m_maps && m_maps->mapId() >= 0)
-    {
-      // The map, and the tile on screen of it.
-      const QString name = m_maps->mapName().isEmpty() ? m_maps->mapDirectory() : m_maps->mapName();
-      path = wxString((name + QString(" [%1]").arg(m_maps->mapId()) +
-                       (m_maps->shownTileX() >= 0 && m_maps->shownMap() == m_maps->mapId()
-                          ? QString("  tile %1_%2").arg(m_maps->shownTileX()).arg(m_maps->shownTileY()) : QString()))
-                        .toStdWString());
-      tip = wxString((m_maps->mapDirectory() + " -- " + m_maps->wdtDescription()).toStdWString());
-    }
     wxString name = path;
     if (!isMapsMode())
     {
@@ -7166,12 +4640,12 @@ void ModelViewer::DisplayedContentChanged()
     return;
 
   // The viewport first: the model, the empty viewer, or a notice for what it cannot draw yet.
-  UpdateUnityViewportState();
+  UpdateViewportState();
   // The colour for what is loaded (viewportBackgroundShown): the panel's backdrop and the command line of a player
   // started later follow it, with or without a player. The player itself is sent it only with a load it gets
   // (SendLoadToUnity): a load that failed, or a world model that cannot be read, leaves it drawing what it had.
-  if (unityRendererHost)
-    unityRendererHost->setBackdrop(viewportBackgroundShown());
+  if (viewportHost)
+    viewportHost->setBackdrop(viewportBackgroundShown());
 
   // The Animation panel drives the model: greyed in the other viewers (put away there, too).
   if (animControl)
@@ -7241,8 +4715,8 @@ void ModelViewer::commitLayoutBatchNow()
   if (m_uncoverPending)
   {
     m_uncoverPending = false;
-    if (unityRendererHost)
-      unityRendererHost->showContent(false);
+    if (viewportHost)
+      viewportHost->showContent(false);
   }
 }
 
@@ -7392,13 +4866,6 @@ void ModelViewer::OnParkedIdle(wxIdleEvent & event)
     unpark(w);
 }
 
-void ModelViewer::handKeyboardSoon(std::function<void()> handoff)
-{
-  m_keyboardHandoffDo = std::move(handoff);
-  m_keyboardHandoffClock.Start();
-  m_keyboardHandoff.StartOnce(UnityRendererHost::KeyboardHandoffDelayMs);
-}
-
 void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
 {
   // In one call: every caller goes on to work that needs the switch made (a load sizes the player and lays out at once; a
@@ -7445,22 +4912,11 @@ bool ModelViewer::BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paint
   s.split = split;
   s.loop = wxEventLoopBase::GetActive();
   const bool textures = mode == ViewerMode::Textures;
-  UnityRendererHost * host = unityRendererHost;
-  // A handoff the last switch left waiting is this one's to make.
-  m_keyboardHandoff.Stop();
-  m_keyboardHandoffDo = nullptr;
   m_viewerMode = mode;
   LOG_INFO << "[viewport] viewer mode:"
            << (mode == ViewerMode::Textures ? "Textures" : mode == ViewerMode::Buildings ? "Buildings"
                : mode == ViewerMode::Maps ? "Maps" : "Models")
            << (split ? "(in turns)" : "");
-  // THE HOLD first: every notice or content change below applies the player's visibility.
-  if (host)
-  {
-    s.playerWasOnScreen = host->playerOnScreen();
-    host->holdPlayer();
-    s.held = true;
-  }
   // THE FREEZE: the frame frozen -- wx freezes its windows, hidden ones too, and one made meanwhile as it is added
   // (wxWindowBase::AddChild); on MSW the top-level window's own freeze does nothing (wxTopLevelWindowMSW::DoFreeze), so the
   // frame stays visible and hit-testable, as ApplyTheme relies on -- and its own drawing held back until the thaw.
@@ -7474,13 +4930,6 @@ bool ModelViewer::BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paint
     commandBar->ToggleTool(textures ? ID_UI_TEXTURES : mode == ViewerMode::Buildings ? ID_UI_BUILDINGS
                            : mode == ViewerMode::Maps ? ID_UI_MAPS : ID_UI_MODELS,
                            true);
-  // THE MAPS VIEWER: its terrain goes when it is left -- its request state now (the viewport is decided on it below), a
-  // player on screen at the click told with the repaint in a split switch (ClearTerrain); entered, the grid comes back as it
-  // was left, its minimap reads after the repaint in a split switch (PumpAfterEntry).
-  if (m_maps && s.previous == ViewerMode::Maps)
-    m_maps->Left();
-  if (m_maps && mode == ViewerMode::Maps)
-    m_maps->Entered(!split);
   if (textureView)
   {
     if (textures)
@@ -7537,13 +4986,9 @@ bool ModelViewer::BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paint
     s.steps.push_back(ViewerSwitch::Step::Listing);
   else if (split && fileControl && fileControl->RowsToSettle() > 0)
     s.steps.push_back(ViewerSwitch::Step::SettleRows);
-  if (split && mode == ViewerMode::Maps && mapOverview && mapOverview->grid() && mapOverview->grid()->picturesWaiting())
-    s.steps.push_back(ViewerSwitch::Step::Mosaic);
-  // THE LAYOUT now -- its drawing held back -- unless the player is on screen: then with the repaint (a layout moves or cuts
-  // an on-screen player's frame at once, frozen or not -- assumed until measured: WMV_SWITCH_LAYOUT).
+  // THE LAYOUT now -- its drawing held back (WMV_SWITCH_LAYOUT=b puts it with the repaint instead).
   const wxString & rule = viewerSwitchLayoutRule();
-  s.layoutInB = split && (rule == wxT("b") ||
-                          (rule != wxT("a") && s.playerWasOnScreen && (rule != wxT("grow") || layoutMovesViewport())));
+  s.layoutInB = split && rule == wxT("b");
   if (!s.layoutInB)
   {
     commitLayoutBatchNow();   // the batch stays open: what is asked for meanwhile is laid out in turn B
@@ -7555,20 +5000,11 @@ bool ModelViewer::BeginViewerSwitch(ViewerMode mode, bool openBrowse, bool paint
     commandBar->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
   DoMenuUpdates();
   // THE KEYBOARD OFF A WINDOW THE SWITCH PUTS AWAY, now (split): a key pressed before the repaint finishes the switch first,
-  // but Windows has already given it to the window with the keyboard. (Asked of the player first: FindFocus would wait on
-  // its thread.)
-  if (split && fileControl && fileControl->txtContent && !(host && host->playerHasKeyboard()))
+  // but the system has already given it to the window with the keyboard.
+  if (split && fileControl && fileControl->txtContent)
     if (wxWindow * focus = wxWindow::FindFocus())
-      if (focus != fileControl->txtContent && !(host && focus == host->playerFrame()) && !willBeShownOnScreen(focus) &&
-          willBeShownOnScreen(fileControl->txtContent))
+      if (focus != fileControl->txtContent && !willBeShownOnScreen(focus) && willBeShownOnScreen(fileControl->txtContent))
         fileControl->txtContent->SetFocus();
-  // A PARKED PLAYER THE REPAINT PUTS BACK: sized for the new viewport now, off screen, by a thread (waited for between the
-  // turns, at most ViewerSwitchSizeWaitMs).
-  if (split && !s.layoutInB && host && host->sizeParkedPlayerAhead())
-  {
-    s.presized = true;
-    s.presizeClock.Start();
-  }
   viewerSwitchTurnDone(turn.TimeInMicro().ToDouble() / 1000.0);
   return true;
 }
@@ -7580,9 +5016,6 @@ void ModelViewer::viewerSwitchTurnDone(double ms)
   s.phase = ViewerSwitch::Phase::Waiting;
   s.timerArmed = false;
   s.sinceTurn.Start();
-  // The player's messages: the next poll a whole interval from now, not at once after this turn in the same busy stretch.
-  if (s.split && unityRendererHost && unityRendererHost->ipc())
-    unityRendererHost->ipc()->deferNextPoll();
 }
 
 double ModelViewer::viewerSwitchStepEstimateMs(ViewerSwitch::Step step) const
@@ -7594,9 +5027,7 @@ double ModelViewer::viewerSwitchStepEstimateMs(ViewerSwitch::Step step) const
     case ViewerSwitch::Step::SettleRows:
       return fileControl ? fileControl->RowsToSettle() * 0.02 : 0.0;   // ~20 us a row (BrowseTree, filecontrol.cpp)
     case ViewerSwitch::Step::Mosaic:
-      // At most MosaicPaintBudgetMs of pictures, then the grid's own picture drawn again with them (6.5-9 ms,
-      // MapTileGrid::prepareMosaic).
-      return MapTileGrid::MosaicPaintBudgetMs + 9.0;
+      return 0.0;
   }
   return 1e9;
 }
@@ -7620,8 +5051,6 @@ void ModelViewer::runViewerSwitchStep(ViewerSwitch::Step step)
         fileControl->SettleRows();
       break;
     case ViewerSwitch::Step::Mosaic:
-      if (mapOverview && mapOverview->grid())
-        mapOverview->grid()->prepareMosaic();
       break;
   }
 }
@@ -7669,7 +5098,6 @@ void ModelViewer::FinishViewerSwitch(const char * why)
   m_switchTimer.Stop();
   m_turnSerial++;
   wxStopWatch turn;
-  UnityRendererHost * host = unityRendererHost;
   const bool textures = s.mode == ViewerMode::Textures;
   // Finished before the steps' turns came (input, a load, another switch, closing): their work now, in this turn.
   queueLateViewerSwitchSteps();
@@ -7677,11 +5105,6 @@ void ModelViewer::FinishViewerSwitch(const char * why)
   // THE LAYOUT when it waited for this turn, and what was asked for since turn A: the batch closes -- one
   // wxAuiManager::Update at most, its drawing still held back, the floating panels held as they are (commitLayoutBatchNow).
   endLayoutBatch();
-  // A NOTICE ENDING THE SWITCH: the player's frame off screen here, at the end of the freeze -- the old workspace stayed
-  // whole until now. (Not for the texture view: it is painted before the player goes.)
-  bool parkedNow = false;
-  if (!textures && host && host->hasNotice())
-    parkedNow = host->coverPlayerNow();
   // What this switch leaves hidden stays frozen past the thaw below.
   parkHidden();
   // The floating panels' panes back to what is due (their windows change after the repaint), and the toggles that show it.
@@ -7705,77 +5128,26 @@ void ModelViewer::FinishViewerSwitch(const char * why)
 #else
   Refresh(false);
 #endif
-  // Where the player was, plain dark at once (a load that made this switch goes on before the repaint).
-  if (parkedNow)
-    host->paintPlainNow();
   // THE KEYBOARD before the repaint, so what a focus change repaints is painted with the rest -- not while a modal window has
-  // the program (a split switch's turn can come inside its loop; the keyboard is its). Taken from the player it waits on the
-  // player's thread for one of its frames: after the repaint, on a turn of its own (handKeyboardSoon).
+  // the program (a split switch's turn can come inside its loop; the keyboard is its).
   const bool takesInput = !s.split || frameTakesInputNow();
-  const bool playerKeyboard = host && host->playerHasKeyboard();
-  std::function<void()> handoff;
   if (takesInput)
   {
-    // A window that had the keyboard and was put away while frozen keeps it (a hidden window's hide moves the focus away
-    // only when Windows sees it hidden, and frozen it already reads so): the keyboard to Browse's search box, or the frame.
-    // Not the player's window (seen here as its frame): it keeps the keyboard, and taking it away would wait on its thread.
-    if (wxWindow * focus = playerKeyboard ? nullptr : wxWindow::FindFocus())
-      if (!focus->IsShownOnScreen() && !(host && focus == host->playerFrame()))
+    // A window that had the keyboard and was put away while frozen keeps it: the keyboard to Browse's search box, or the
+    // frame.
+    if (wxWindow * focus = wxWindow::FindFocus())
+      if (!focus->IsShownOnScreen())
       {
         if (fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen())
           fileControl->txtContent->SetFocus();
         else
           SetFocus();
       }
-    const ViewerMode mode = s.mode;
     if (s.focusBrowse)
-    {
-      // The command bar's: the keyboard to Browse (its tree when a row is picked there, else its search box).
-      if (playerKeyboard)
-        handoff = [this, mode]() { focusBrowseFor(mode); };
-      else
-        focusBrowseFor(mode);
-    }
-    else if (s.previous == ViewerMode::Maps && !textures && playerKeyboard)
-    {
-      // THE MAPS VIEWER'S WORLD VIEW left for Models or Buildings: the keyboard its free camera took comes back to Browse's
-      // search box, as those viewers have it (their player does not fly; the app's own keys must work again).
-      handoff = [this, mode]() {
-        if (m_viewerMode != mode || !unityRendererHost)
-          return;
-        wxWindow * to = fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen()
-                          ? (wxWindow *)fileControl->txtContent : (wxWindow *)this;
-        unityRendererHost->takeKeyboardFromPlayer(to);
-      };
-    }
-  }
-  // Into Maps, the overhead map keeps its picture as it was left -- or as the Mosaic step drew it: minimap pictures that came
-  // since are drawn in at its next repaint (MapTileGrid::SetSwitchPaint), through the switch's paints below.
-  MapTileGrid * grid = s.paintNow && s.mode == ViewerMode::Maps && mapOverview ? mapOverview->grid() : nullptr;
-  if (grid)
-    grid->SetSwitchPaint(true);
-  // THE CONTENT WINDOW over a player still on screen (the texture view, the overhead map): painted first -- raised above it,
-  // it is no cover while the player is on screen -- and the player goes once it is.
-  if (s.paintNow && host && host->isShowingContent() && host->playerOnScreen() && host->content())
-    paintTree(host->content());
-  // THE PLAYER LET GO: put back (sized ahead in turn A), parked, or -- on screen at another size -- sized; a split switch's
-  // resize by a thread, not waited for in this turn (UnityRendererHost::releasePlayer).
-  if (s.held)
-  {
-    s.held = false;
-    host->releasePlayer(s.split && !viewerSwitchSizeWaits());
-  }
-  // The Maps viewer left with the player on screen at the click: told now, as the screen changes (ClearTerrain).
-  if (!s.clearTerrainReason.isEmpty())
-  {
-    if (UnityIpcServer * ipc = host ? host->ipc() : nullptr)
-      ipc->sendClearTerrain(s.clearTerrainReason);
-    s.clearTerrainReason.clear();
+      focusBrowseFor(s.mode);   // the command bar's: the keyboard to Browse
   }
   if (s.paintNow)
     PaintNow();
-  if (grid)
-    grid->SetSwitchPaint(false);
   // AFTER THE REPAINT, what is outside the frame's client area: the caption, the floating panels' windows, the tool windows.
   s.titleHeld = false;
   UpdateTitle();
@@ -7818,25 +5190,15 @@ void ModelViewer::FinishViewerSwitch(const char * why)
     else
       charControl->ClearItemDialog();
   }
-  if (handoff)
-    handKeyboardSoon(std::move(handoff));   // its delay counts from the end of this turn's work
   // THE TURNS AFTER THE SWITCH: what would lengthen its rounds.
   if (s.split)
   {
-    if (m_maps && s.mode == ViewerMode::Maps)
-      runOnLaterTurn([this]() {
-        if (m_maps && isMapsMode())
-          m_maps->PumpAfterEntry();
-        return false;
-      });
     if (textureView && textures)
       runOnLaterTurn([this]() {
         if (textureView)
           textureView->resumeDecode();
         return false;
       });
-    if (host && host->ipc())
-      host->ipc()->deferNextPoll();
   }
   s.turnMs.push_back(turn.TimeInMicro().ToDouble() / 1000.0);
   m_lastSwitch = ViewerSwitchReport();
@@ -7878,11 +5240,6 @@ void ModelViewer::AbortViewerSwitch()
     Thaw();
   }
   s.drawHeld = false;
-  if (s.held && unityRendererHost)
-  {
-    s.held = false;
-    unityRendererHost->dropHold();
-  }
   if (s.backgroundAway && m_backgroundDialog)
     m_backgroundDialog->Enable();
   if (s.itemDialogAway && charControl && charControl->itemDialog)
@@ -7944,11 +5301,6 @@ void ModelViewer::OnViewerSwitchTimer(wxTimerEvent & WXUNUSED(event))
       viewerSwitchTurnDone(turn.TimeInMicro().ToDouble() / 1000.0);
       return;
     }
-    // A parked player being sized for its put-back: waited for a turn at a time (armed again at the next idle), so turn B
-    // does not wait on the player's thread -- at most ViewerSwitchSizeWaitMs.
-    if (s.presized && unityRendererHost && unityRendererHost->aheadMoveInFlight() &&
-        s.presizeClock.Time() < ViewerSwitchSizeWaitMs)
-      return;
     FinishViewerSwitch("its turn");
     return;
   }
@@ -8127,7 +5479,7 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // A client load yields to the event loop (its progress dialog), so this can be clicked in the middle
       // of one; switching Browse's lists then, or starting another load, is not safe. The selector goes
       // back to the mode at the next idle update.
-      if (UnityAssetAccess::isClientLoading())
+      if (ClientState::isClientLoading())
         return;
       // From the id only, never the tool's checked state: a click on the active radio tool, a double-click
       // and the empty viewer's posted command all arrive unchecked.
@@ -8138,12 +5490,12 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // A switch the last click left on its way is finished first (a click before its repaint).
       FinishViewerSwitch("another viewer-mode click");
       // Browse (closed) opens in the same layout as the switch, when there is a client to list in it.
-      const bool openBrowse = UnityAssetAccess::hasActiveClient() && !interfaceManager.GetPane(fileControl).IsShown();
+      const bool openBrowse = ClientState::hasActiveClient() && !interfaceManager.GetPane(fileControl).IsShown();
       // WITH A CLIENT, IN TURNS OF ITS OWN (BeginViewerSwitch): made behind the freeze now, the screen changed on a later
       // turn, where the keyboard then goes to Browse. Not without an event loop to run its turns, nor while a modal window
       // has the program (its loop would run them), nor while a panel it changes floats (floatedPanelChanges), nor for the
       // one-turn comparison runs (WMV_SWITCH_TURNS=1). Browse, opened in the switch, needs no layout here.
-      if (UnityAssetAccess::hasActiveClient() && !viewerSwitchOneTurn() && wxEventLoopBase::GetActive() &&
+      if (ClientState::hasActiveClient() && !viewerSwitchOneTurn() && wxEventLoopBase::GetActive() &&
           frameTakesInputNow() && !floatedPanelChanges() && BeginViewerSwitch(mode, openBrowse, true, true))
       {
         m_switch->focusBrowse = true;
@@ -8152,11 +5504,11 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // Without a client -- made whole now, before the prompt (its modal loop would run the turns behind it) -- or the mode
       // already this one: in one call, as before.
       SetViewerMode(mode, openBrowse, true);
-      if (!UnityAssetAccess::hasActiveClient())
+      if (!ClientState::hasActiveClient())
       {
         PromptAndLoadClient();
-        UpdateUnityViewportState();
-        if (!UnityAssetAccess::hasActiveClient())
+        UpdateViewportState();
+        if (!ClientState::hasActiveClient())
           return;
       }
       wxAuiPaneInfo & browse = interfaceManager.GetPane(fileControl);
@@ -8165,16 +5517,12 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
         browse.Show(true);
         interfaceManager.Update();
       }
-      // The keyboard to Browse (focusBrowseFor). Taken from the player, it waits on the player's thread for one of its
-      // frames: on a turn of its own.
-      if (unityRendererHost && unityRendererHost->playerHasKeyboard())
-        handKeyboardSoon([this, mode]() { focusBrowseFor(mode); });
-      else
-        focusBrowseFor(mode);
+      // The keyboard to Browse (focusBrowseFor).
+      focusBrowseFor(mode);
       break;
     }
     case ID_UI_SCREENSHOT:
-      SaveUnityScreenshot();
+      SaveScreenshot();
       break;
   }
 }
@@ -8207,73 +5555,46 @@ wxString ModelViewer::DefaultScreenshotName() const
   return safe + wxT("_") + wxDateTime::Now().Format(wxT("%Y-%m-%d_%H%M%S")) + wxT(".png");
 }
 
-void ModelViewer::SaveUnityScreenshot()
+void ModelViewer::SaveScreenshot()
 {
-  if (m_screenshotRequest != 0)
-    return;
   wxFileDialog dialog(this, _("Save screenshot"), wxEmptyString, DefaultScreenshotName(), _("PNG Image (*.png)|*.png"),
                       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   if (dialog.ShowModal() != wxID_OK)
     return;
   wxString why;
-  RequestUnityScreenshot(dialog.GetPath(), why);
+  RequestScreenshot(dialog.GetPath(), why);
 }
 
-int ModelViewer::RequestUnityScreenshot(const wxString & requested, wxString & why)
+bool ModelViewer::RequestScreenshot(const wxString & requested, wxString & why)
 {
   why.clear();
   wxFileName file(requested);
   if (!file.GetExt().IsSameAs(wxT("png"), false))
     file.SetFullName(file.GetFullName() + wxT(".png"));
-  if (m_screenshotRequest != 0)
-    why = _("a screenshot is already being saved");
-  else if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isUnityReady())
-    why = _("the Unity viewport is not running");
-  else if (!unityRendererHost->ipc()->playerTakesScreenshots())
-    why = _("the Unity viewport player is too old to take screenshots; rebuild it");
-  else if (!isUnityViewportShowingModel())
+  if (!canvas)
+    why = _("there is no viewport");
+  else if (!isViewportShowingModel())
     why = _("nothing is shown in the viewport");
   else if (!file.IsAbsolute() || file.GetName().IsEmpty())
     why = _("not a full file name: ") + requested;
   else if (!file.DirExists())
     why = _("the folder does not exist: ") + file.GetPath();
+
+  // A transparent PNG at the screenshot size: the same matte as an image sequence's frames.
+  if (why.IsEmpty() && !canvas->CaptureSequenceFrame(file.GetFullPath(), SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, 0, true))
+    why = _("the frame could not be drawn or written");
+
   if (!why.IsEmpty())
   {
     LOG_ERROR << "Screenshot not taken:" << QString::fromWCharArray(why.wc_str());
     if (GetStatusBar())
       SetStatusText(_("Screenshot failed: ") + why, 0);
-    return 0;
+    return false;
   }
-  const wxString path = file.GetFullPath();
-  const int request = unityRendererHost->ipc()->requestScreenshot(QString::fromWCharArray(path.wc_str()), SCREENSHOT_WIDTH,
-                                                                  SCREENSHOT_HEIGHT);
-  if (request == 0)
-  {
-    why = _("the Unity viewport could not be asked");
-    if (GetStatusBar())
-      SetStatusText(_("Screenshot failed: ") + why, 0);
-    return 0;
-  }
-  m_screenshotRequest = request;
-  m_screenshotPath = path;
-  m_screenshotSentAt = timeGetTime();
+  LOG_INFO << "Screenshot saved:" << QString::fromWCharArray(file.GetFullPath().wc_str());
   if (GetStatusBar())
-    SetStatusText(_("Saving screenshot..."), 0);
-  return request;
-}
-
-void ModelViewer::OnUnityScreenshotSaved(const UnityIpcServer::ScreenshotResult & result)
-{
-  if (result.request != m_screenshotRequest || m_screenshotRequest == 0)
-    return;   // an answer nobody is waiting for any more (logged by the IPC server)
-  const wxString name = wxFileName(m_screenshotPath).GetFullName();
-  m_screenshotRequest = 0;
-  if (!GetStatusBar())
-    return;
-  if (result.ok)
-    SetStatusText(_("Screenshot saved: ") + name, 0);
-  else
-    SetStatusText(_("Screenshot failed: ") + wxString(result.error.toStdWString()), 0);
+    SetStatusText(_("Screenshot saved: ") + file.GetFullPath(), 0);
+  return true;
 }
 
 void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
@@ -8283,7 +5604,7 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
   // chosen), so this is their whole state; a command given one later combines it with this.
   if (needsModelViewer(event.GetId()))
     event.Enable(isModelsMode() && capabilityRefusal(event.GetId()).isEmpty());
-  else if (needsUnityViewport(event.GetId()))
+  else if (needsViewport(event.GetId()))
     event.Enable(!isTextureMode() && !isMapsMode());
   else if (isCapabilityGated(event.GetId()))
     event.Enable(capabilityRefusal(event.GetId()).isEmpty()); // both ways: a refusal ends (a load finishes)
@@ -8299,8 +5620,8 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       event.Check(animControl && interfaceManager.GetPane(animControl).IsShown());
       break;
     case ID_UI_SCREENSHOT:
-      // Something to capture, and no capture on its way (an older player is told why on the click).
-      event.Enable(isUnityViewportShowingModel() && m_screenshotRequest == 0);
+      // Something to capture.
+      event.Enable(isViewportShowingModel());
       break;
     // The viewer selector: all answered every time, so a switch made elsewhere (a menu load, a world model
     // loaded) or refused (during a client load) shows right.
@@ -8400,7 +5721,7 @@ QString ModelViewer::capabilityRefusal(int id) const
   return QString();
 }
 
-bool ModelViewer::needsUnityViewport(int id) const
+bool ModelViewer::needsViewport(int id) const
 {
   // The Model panel: a model's appearance and information, or a world model's.
   return id == ID_SHOW_CHAR;
@@ -8424,7 +5745,7 @@ bool ModelViewer::TryBefore(wxEvent & event)
   }
   if (event.GetEventType() == wxEVT_MENU &&
       ((!isModelsMode() && needsModelViewer(event.GetId())) ||
-       ((isTextureMode() || isMapsMode()) && needsUnityViewport(event.GetId()))))
+       ((isTextureMode() || isMapsMode()) && needsViewport(event.GetId()))))
   {
     LOG_INFO << "[viewport] a command refused in the"
              << (isTextureMode() ? "Textures" : isBuildingsMode() ? "Buildings" : isMapsMode() ? "Maps" : "Models") << "viewer, id"
@@ -8461,10 +5782,7 @@ void ModelViewer::UpdateTitle()
   if (isTextureMode())
     return;   // the Textures viewer leaves the title as it was
   wxString name;
-  if (isMapsMode() && m_maps && m_maps->mapId() >= 0)
-    name = wxString(((m_maps->mapName().isEmpty() ? m_maps->mapDirectory() : m_maps->mapName()) +
-                     QString(" [%1]").arg(m_maps->mapId())).toStdWString());
-  else if (isBuildingsMode() && canvasHasWorldModel())
+  if (isBuildingsMode() && canvasHasWorldModel())
     name = wxString(canvas->wmo->itemName().toStdWString());
   else if (isModelsMode() && canvasHasModel())
     name = wxString(const_cast<WoWModel *>(canvas->model())->name().toStdWString());
@@ -8472,125 +5790,6 @@ void ModelViewer::UpdateTitle()
                                         : wxString(GLOBALSETTINGS.appTitle()) + wxT("  -  ") + name;
   if (GetTitle() != title)
     SetTitle(title);
-}
-
-// THE UNCOVER FENCE begun (two questions in turn, the poll timer for its retries and limit); false when the player
-// cannot be asked, and there is nothing to wait for.
-bool ModelViewer::startUncoverFence()
-{
-  const int question = unityRendererHost && unityRendererHost->ipc() ? unityRendererHost->ipc()->requestRuntimeState() : 0;
-  if (question == 0)
-    return false;
-  m_uncoverFence = question;
-  m_uncoverFenceRounds = 2;
-  m_uncoverFenceClock.Start();
-  m_uncoverFenceAsked.Start();
-  m_playerContentPoll.Start(POLL_MS);   // the retries and the limit
-  return true;
-}
-
-// The fence answered (or given up): the waits it ended, and the viewport uncovered.
-void ModelViewer::endUncoverFence()
-{
-  m_uncoverFence = 0;
-  m_uncoverFenceRounds = 0;
-  m_mapObjectAwaited = 0;
-  m_modelAwaited = 0;
-  m_playerContentPoll.Stop();
-  UpdateUnityViewportState();
-}
-
-// A model built after a world model: the player is asked what it shows until it has the model, or has finished
-// without it, or MODEL_AWAIT_TIMEOUT_MS have gone by (PlayerContent). The uncover fence's retries and limit too.
-void ModelViewer::OnPlayerContentPoll(wxTimerEvent & WXUNUSED(event))
-{
-  // THE UNCOVER FENCE pending: asked again when unanswered for a while, given up after the limit.
-  if (m_uncoverFence != 0)
-  {
-    // A player gone meanwhile: the wait stays (the health check's notice, or the next player's onUnityReady, ends it).
-    if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isUnityReady())
-    {
-      m_playerContentPoll.Stop();
-      return;
-    }
-    if (m_uncoverFenceClock.Time() > MODEL_AWAIT_TIMEOUT_MS)
-    {
-      LOG_ERROR << "[viewport] the player did not answer the uncover fence; showing the viewport";
-      endUncoverFence();
-      return;
-    }
-    if (m_uncoverFenceAsked.Time() > FENCE_RETRY_MS)
-    {
-      const int question = unityRendererHost->ipc()->requestRuntimeState();
-      if (question != 0)
-      {
-        m_uncoverFence = question;
-        m_uncoverFenceAsked.Start();
-      }
-    }
-    return;
-  }
-  if (m_modelAwaited == 0 || !unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isUnityReady())
-  {
-    m_playerContentPoll.Stop();
-    return;
-  }
-  if (m_modelAwaitedClock.Time() > MODEL_AWAIT_TIMEOUT_MS)
-  {
-    LOG_ERROR << "[viewport] the player did not report model" << m_modelAwaited << "in"
-              << (int)(MODEL_AWAIT_TIMEOUT_MS / 1000) << "s; showing the viewport";
-    m_modelAwaited = 0;
-    m_uncoverFence = 0;
-    m_playerContent = PlayerContent::Unknown;
-    m_playerContentPoll.Stop();
-    UpdateUnityViewportState();
-    return;
-  }
-  m_playerContentQuery = unityRendererHost->ipc()->requestRuntimeState();
-}
-
-void ModelViewer::OnPlayerRuntimeState(const UnityIpcServer::RuntimeState & state)
-{
-  // THE UNCOVER FENCE answered: the next question, or -- the second answered -- the frame that draws the new content
-  // has been presented.
-  if (m_uncoverFence != 0 && state.query == m_uncoverFence)
-  {
-    if (--m_uncoverFenceRounds > 0)
-    {
-      const int question = unityRendererHost && unityRendererHost->ipc() ? unityRendererHost->ipc()->requestRuntimeState() : 0;
-      if (question != 0)
-      {
-        m_uncoverFence = question;
-        m_uncoverFenceAsked.Start();
-        return;
-      }
-    }
-    endUncoverFence();
-    return;
-  }
-  if (m_modelAwaited == 0 || m_uncoverFence != 0 || state.query == 0 || state.query != m_playerContentQuery || state.loading)
-    return;
-  if (state.modelFileDataID == m_modelAwaited)
-  {
-    m_playerContent = PlayerContent::Model;
-    m_playerContentPoll.Stop();
-    // Shown once the player has answered the fence (THE UNCOVER FENCE), in later frames.
-    if (startUncoverFence())
-      return;
-  }
-  else
-  {
-    m_playerContent = state.mapObjectFileDataID > 0 ? PlayerContent::MapObject
-                    : state.modelFileDataID > 0     ? PlayerContent::Model
-                                                    : PlayerContent::Nothing;
-    // Finished without it: the player still shows what it had (the world model), which must not pass for it.
-    LOG_ERROR << "[viewport] the player finished without model" << m_modelAwaited << "(it shows"
-              << state.modelFileDataID << "/ world model" << state.mapObjectFileDataID << ")";
-    m_modelAwaitedFailed = m_modelAwaited;
-  }
-  m_modelAwaited = 0;
-  m_playerContentPoll.Stop();
-  UpdateUnityViewportState();
 }
 
 // THE THEME. The palette in use (UiStyle) follows the Appearance preference, Windows' app mode (for
@@ -8684,7 +5883,11 @@ void ModelViewer::ApplyTheme()
   if (isChar && charControl && charControl->model)
     charControl->RefreshEquipment();
   Thaw();
+#ifdef __WXMSW__
   ::RedrawWindow((HWND)GetHWND(), nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN);
+#else
+  Refresh();
+#endif
 }
 
 void ModelViewer::OnThemeChangedOutside()
@@ -8705,9 +5908,13 @@ void ModelViewer::CreateThemedStatusBar()
   const int fields = 5;
   // wx shows a cut-off field's full text itself only on its native bar (and refuses a tooltip set by
   // hand while it would): UiEquipGenericStatusBar does it for its own.
+#ifdef __WXMSW__
   UseNativeStatusBar(!generic);
+#endif
   CreateStatusBar(fields, generic ? (wxSTB_DEFAULT_STYLE & ~wxSTB_SHOW_TIPS) : wxSTB_DEFAULT_STYLE);
+#ifdef __WXMSW__
   UseNativeStatusBar(true);
+#endif
   wxStatusBar * bar = GetStatusBar();
   int widths[fields] = { -1, 100, 50, 125, 125 };
   SetStatusWidths(fields, widths);
@@ -8734,6 +5941,7 @@ void ModelViewer::OnThemeRecheck(wxTimerEvent & WXUNUSED(event))
   OnThemeChangedOutside();
 }
 
+#ifdef __WXMSW__
 WXLRESULT ModelViewer::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
   // Windows' app mode or high contrast changed. wxWidgets passes the app mode's message on as a
@@ -8746,6 +5954,7 @@ WXLRESULT ModelViewer::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM l
     return result;
   return wxFrame::MSWWindowProc(message, wParam, lParam);
 }
+#endif
 
 void ModelViewer::OnKeyboardShortcuts(wxCommandEvent & WXUNUSED(event))
 {
@@ -8798,7 +6007,6 @@ void ModelViewer::ModelInfo()
  
   xml.close();
 }
-
 
 // Other things to export...
 void ModelViewer::OnExportOther(wxCommandEvent &event)
@@ -9116,27 +6324,9 @@ ModelViewer::CharacterVariantState ModelViewer::characterVariantState() const
     state.reason = wxString::Format(_("The %s model of the %s is not on this computer yet."), generationName(state.other), characterName(m->infos));
   else if (riderMount())
     state.reason = _("Dismount to change the model.");
-  else if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady() &&
-           !unityRendererHost->ipc()->playerKeepsView())
-    state.reason = _("The 3D viewport cannot keep its view while the model changes; update it to switch.");
   else
     state.enabled = true;
   return state;
-}
-
-void ModelViewer::HintVariantPartner()
-{
-  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerCachesAssets())
-    return;
-  // What the Model selector offers: a player character (no NPC), not mounted, whose other model is in the client and
-  // on this computer.
-  const CharacterVariantState state = characterVariantState();
-  WoWModel * m = riderModel();
-  RaceInfos partner;
-  if (!state.shown || !state.enabled || !m || !RaceInfos::getVariantPartner(m->infos, partner) || partner.modelFileID <= 0)
-    return;
-  if (unityRendererHost->ipc()->sendPrefetchAssets({ partner.modelFileID }))
-    m_assetHintLoad = m_unityLoadSerial;
 }
 
 void ModelViewer::SyncCharacterMenuChecks(const WoWModel * m)
@@ -9168,7 +6358,7 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
     why = state.reason.IsEmpty() ? _("That model is not available for this character.") : state.reason;
     return false;
   }
-  if (UnityAssetAccess::isClientLoading())
+  if (ClientState::isClientLoading())
   {
     why = _("A client is loading; switch the model once it has loaded.");
     return false;
@@ -9376,7 +6566,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
     return;
   }
 
-  std::wstring exporterLabel = fileMenu->GetLabel(event.GetId());
+  std::wstring exporterLabel = fileMenu->GetLabel(event.GetId()).ToStdWstring();
 
   PluginManager::iterator it = PLUGINMANAGER.begin();
   for (; it != PLUGINMANAGER.end(); ++it)
@@ -9542,28 +6732,4 @@ void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
 {
   SetStatusText(wxString::Format(wxT("Memory: %i Mo"), core::getMemoryUsed()), 4);
 
-  // A player that crashed, was closed from outside or dropped its connection is noticed here, on this
-  // existing two-second timer, rather than at the next model load: the viewport shows the restart
-  // notice instead of a frozen or empty rectangle.
-  if (unityRendererHost && unityRendererHost->checkPlayerHealth())
-  {
-    UpdateUnityViewportState();
-    if (charControl)
-      charControl->SyncModelVariant();
-  }
-
-  // A screenshot the player never answered: it went away, or it is stuck.
-  if (m_screenshotRequest != 0)
-  {
-    const bool connected = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
-    if (!connected || timeGetTime() - m_screenshotSentAt >= SCREENSHOT_TIMEOUT_MS)
-    {
-      LOG_ERROR << "Screenshot request" << m_screenshotRequest << "was not answered"
-                << (connected ? "in time" : "before the Unity viewport went away");
-      m_screenshotRequest = 0;
-      if (GetStatusBar())
-        SetStatusText(connected ? _("Screenshot failed: the Unity viewport did not answer")
-                                : _("Screenshot failed: the Unity viewport is not running"), 0);
-    }
-  }
 }

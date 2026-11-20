@@ -23,7 +23,7 @@
 #include "PluginManager.h"
 #include "UiControls.h"
 #include "UiStyle.h"
-#include "UnityAssetAccess.h"
+#include "ClientState.h"
 
 #include "logger/Logger.h"
 
@@ -313,9 +313,9 @@ bool NPCimporterDialog::importLink()
 
 bool NPCimporterDialog::loadById()
 {
-  if (!g_modelViewer || !UnityAssetAccess::hasActiveClient())
+  if (!g_modelViewer || !ClientState::hasActiveClient())
   {
-    setHint(UnityAssetAccess::isClientLoading() ? _("World of Warcraft is still loading: try again when it is done.")
+    setHint(ClientState::isClientLoading() ? _("World of Warcraft is still loading: try again when it is done.")
                                                 : _("Load World of Warcraft first: IDs are looked up in the loaded client."),
             true);
     return false;

@@ -299,7 +299,7 @@ void AnimationExportChoiceDialog::UpdateAppearance()
   for (auto * box : {m_cbMesh, m_cbSkeleton, m_cbSkinning})
   {
     box->Enable(!all);
-    box->SetToolTip(all ? _("Required for a complete customization package.") : wxEmptyString);
+    box->SetToolTip(all ? wxString(_("Required for a complete customization package.")) : wxString());
   }
   m_includeEquipment->Enable(all);
 }

@@ -37,7 +37,10 @@
 
 #include "UiStyle.h"
 
+#ifdef __WXMSW__
 #include <wx/msw/darkmode.h>
+#endif
+#include <wx/settings.h>
 
 #include <cmath>
 #include <map>
@@ -46,7 +49,9 @@
 #include <wx/popupwin.h>
 
 #include "UiArt.h"
+#ifdef __WXMSW__
 #include "WinTheme.h"
+#endif
 
 namespace UiStyle
 {
@@ -201,12 +206,20 @@ namespace UiStyle
 
   bool systemAppsDark()
   {
+#ifdef __WXMSW__
     return WinTheme::systemAppsMode() == WinTheme::AppsMode::Dark;   // Unknown counts as light
+#else
+    return wxSystemSettings::GetAppearance().IsSystemDark();
+#endif
   }
 
   bool highContrastOn()
   {
+#ifdef __WXMSW__
     return WinTheme::highContrastOn();
+#else
+    return false; // the system's own controls follow macOS / GTK contrast settings
+#endif
   }
 
   bool isDark(Theme preference, bool systemDark, bool highContrast)
@@ -283,6 +296,7 @@ namespace UiStyle
     return darkWanted() != (sessionDark == 1);
   }
 
+#ifdef __WXMSW__
   namespace
   {
     // wxWidgets' dark mode in the palette's colours: the native controls, the dialogs and the menu bar take
@@ -371,6 +385,8 @@ namespace UiStyle
   {
     return new PaletteDarkModeSettings;
   }
+
+#endif
 
   wxFont font(Type role)
   {

@@ -2,6 +2,8 @@
 
 #include "AnimExporter.h"
 
+#include <vector>
+
 
 #include "Attachment.h"
 #include "enums.h"
@@ -9,6 +11,30 @@
 #include "Quantize.h"
 
 #include "logger/Logger.h"
+#include "modelcanvas.h"
+
+namespace
+{
+  // One frame of the viewport at w x h, rows bottom-up as glReadPixels gave them: BGRA (4 bytes a pixel) or BGR (3).
+  bool grabFrame(int w, int h, int bytesPerPixel, unsigned char * out)
+  {
+    std::vector<unsigned char> rgba;
+    if (!g_canvas || !g_canvas->captureRGBA(w, h, false, rgba))
+      return false;
+    for (int y = 0; y < h; y++)
+    {
+      const unsigned char * src = &rgba[(size_t)(h - 1 - y) * w * 4];
+      unsigned char * dst = out + (size_t)y * w * bytesPerPixel;
+      for (int x = 0; x < w; x++, src += 4, dst += bytesPerPixel)
+      {
+        dst[0] = src[2]; dst[1] = src[1]; dst[2] = src[0];
+        if (bytesPerPixel == 4)
+          dst[3] = src[3];
+      }
+    }
+    return true;
+  }
+}
 
 #include "ximage.h"
 #include "ximagif.h"
@@ -175,33 +201,11 @@ void CAnimationExporter::CreateGif()
     }
   }
 
-  // CREATE OUR RENDERTOTEXTURE OBJECT
-  // -------------------------------------------
-  // if either are supported use our 'RenderTexture' object.
-  if (video.supportPBO || video.supportVBO)
+  // The frames are drawn offscreen at the viewport's size.
   {
-    g_canvas->rt = new RenderTexture();
-
-    if (!g_canvas->rt) {
-      LOG_ERROR << "RenderToTexture object is null!";
-      this->Show(false);
-      return;
-    }
-
-    g_canvas->rt->Init(0, 0, video.supportFBO);
-    
-    m_iWidth = g_canvas->rt->nWidth;
-    m_iHeight = g_canvas->rt->nHeight;
-    g_canvas->rt->BeginRender();
-  }
-  else
-  {
-    glReadBuffer(GL_BACK);
-    int screenSize[4]{ };
-    glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
-    m_iWidth = screenSize[2];
-    m_iHeight = screenSize[3];
-    return;
+    const wxSize px = g_canvas->pixelSize();
+    m_iWidth = px.x > 0 ? px.x : 512;
+    m_iHeight = px.y > 0 ? px.y : 512;
   }
   
   // Stop our animation
@@ -223,9 +227,7 @@ void CAnimationExporter::CreateGif()
 
     CxImage *newImage = new CxImage(0);
 
-    g_canvas->RenderToBuffer();
-
-    glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+    grabFrame((int)m_iWidth, (int)m_iHeight, 4, buffer);
     newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth*4), false);
 
     // not needed due to the code just below, which fixes the issue with particles
@@ -277,10 +279,8 @@ void CAnimationExporter::CreateGif()
     CxImage *newImage = new CxImage(0);
     CxImage *newImage2 = new CxImage(0);
     
-    g_canvas->RenderToBuffer();
     wxString stat;
-
-    glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+    grabFrame((int)m_iWidth, (int)m_iHeight, 4, buffer);
 
     newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth*4), false);
 
@@ -326,15 +326,6 @@ void CAnimationExporter::CreateGif()
   }
   wxDELETEA(buffer);
 
-#ifdef _WINDOWS
-  if (video.supportPBO || video.supportVBO) {
-    g_canvas->rt->EndRender();
-
-    // Clear RenderTexture object.
-    g_canvas->rt->Shutdown();
-    wxDELETE(g_canvas->rt);
-  }
-#endif
   if(!m_bPng){
   // CREATE THE ACTUAL MULTI-IMAGE GIF ANIMATION
   // ------------------------------------------------------
@@ -394,7 +385,6 @@ void CAnimationExporter::CreateGif()
   Show(false);
 
   video.render = true;
-  g_canvas->InitView();
 }
 
 
@@ -419,8 +409,8 @@ void CAnimationExporter::OnCheck(wxCommandEvent &event)
     txtSizeY->Enable(m_bShrink);
     if (m_bShrink)
     {
-      int screenSize[4]{ };
-      glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
+      const wxSize px = g_canvas ? g_canvas->pixelSize() : wxSize(512, 512);
+      const int screenSize[4] = { 0, 0, px.x, px.y };        // the width/height of the canvas
       txtSizeX->Clear();
       *txtSizeX << screenSize[2];
       txtSizeY->Clear();
@@ -455,30 +445,8 @@ void CAnimationExporter::CreateAvi(wxString fn)
   m_iTotalAnimFrames = g_canvas->model()->animManager->GetFrameCount();
   m_iTotalFrames = (m_iTotalAnimFrames / 25);
 
-  if (video.supportPBO || video.supportVBO) { // if either are supported use our 'RenderTexture' object.
-    g_canvas->rt = new RenderTexture();
-
-    if (!g_canvas->rt) {
-      LOG_ERROR << "RenderToTexture object is null!";
-      Show(false);
-      return;
-    }
-
-    g_canvas->rt->Init(512, 512, video.supportFBO);
-    
-    m_iWidth = g_canvas->rt->nWidth;
-    m_iHeight = g_canvas->rt->nHeight;
-
-    //canvas->rt->BeginRender();
-    //canvas->RenderToBuffer();
-    //rt->BindTexture(); 
-  } else {
-    glReadBuffer(GL_BACK);
-    int screenSize[4];
-    glGetIntegerv(GL_VIEWPORT, screenSize);        // get the width/height of the canvas
-    m_iWidth = screenSize[2];
-    m_iHeight = screenSize[3];
-  }
+  m_iWidth = 512;
+  m_iHeight = 512;
 
   // will crash program - prevent this from happening
   if (m_iTotalFrames > m_iTotalAnimFrames) {
@@ -521,8 +489,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 
   // Iterate through the frames saving the image to a buffer then writing it to the AVI
   for(unsigned int i=0; i<m_iTotalFrames; i++) {
-    g_canvas->RenderToBuffer();
-    glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
+    grabFrame((int)m_iWidth, (int)m_iHeight, 3, buffer);
     AviGen.AddFrame(buffer);
 
     // not needed due to the code just below
@@ -542,19 +509,10 @@ void CAnimationExporter::CreateAvi(wxString fn)
   // Clear our pixel data buffer.
   wxDELETEA(buffer);
 
-  // Clear the Render Texture object from memory if it exists.
-  if (g_canvas->rt) {
-    g_canvas->rt->EndRender();
-
-    // Clear RenderTexture object.
-    g_canvas->rt->Shutdown();
-    wxDELETE(g_canvas->rt);
-  }
 
   g_canvas->model()->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
   g_canvas->model()->animManager->Play();
   video.render = true;
-  g_canvas->InitView();
 }
 #else
 void CAnimationExporter::CreateAvi(wxString)

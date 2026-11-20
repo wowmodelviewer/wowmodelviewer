@@ -11,7 +11,7 @@
 #include "Game.h"
 #include "GameFile.h"
 #include "GameFolder.h"
-#include "UnityAssetAccess.h"
+#include "ClientState.h"
 #include "logger/Logger.h"
 
 namespace
@@ -49,7 +49,7 @@ void TextureCatalog::clear()
 bool TextureCatalog::rebuild()
 {
   clear();
-  if (!UnityAssetAccess::hasActiveClient())
+  if (!ClientState::hasActiveClient())
     return false;
 
   QElapsedTimer timer;

@@ -218,7 +218,7 @@ void ClientLoadingPanel::pump(bool force)
   // Painted now, then the event loop runs once: the window keeps answering Windows (it never turns "Not
   // Responding") and the bar's timer moves the slide. The user can reach nothing else meanwhile -- the chooser is
   // modal, its cards are put away, and a second load is refused (ModelViewer::m_clientLoading) -- and the renderer's
-  // requests for game files are refused while a client loads (UnityAssetAccess::ClientLoadGuard).
+  // requests for game files are refused while a client loads (ClientState::ClientLoadGuard).
   Refresh(false);
   Update();
   wxYieldIfNeeded();

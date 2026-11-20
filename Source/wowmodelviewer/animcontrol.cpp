@@ -2031,23 +2031,10 @@ void AnimControl::SetSkin(int num, int displayIdOverride)
   skinList->Select(num);
 
   SyncBLPSkinList();
-
-  // The embedded Unity viewport draws the same model from the same data, so it has to follow
-  // the same selection. This is the one funnel every skin change goes through -- the default
-  // chosen on model load, the dropdown, and SetSkinByDisplayID -- so hooking it here covers
-  // all three. No-op while no player is connected.
-  if (g_modelViewer)
-    g_modelViewer->SendCurrentSkinToUnity();
 }
 
-// Every animation change goes through here. The three callers are the default picked while a
-// model loads, the dropdown, and the loop control; funnelling them means the embedded Unity
-// viewport is told once, from one place, and cannot be left playing something the canvas is not.
-//
-// What is NOT covered, deliberately: a queued "next animation" chain advancing on its own, and
-// play/pause/speed. Those change what the canvas shows without any selection happening, and
-// following them needs the player to be driven per frame rather than per choice -- a different
-// milestone.
+// Every animation change goes through here: the default picked while a model loads, the dropdown, and the
+// loop control. The viewport draws the canvas's own animation state, so nothing else needs telling.
 void AnimControl::SelectAnimation(int index, int loops)
 {
   if (!g_selModel || index < 0 || index >= (int)g_selModel->anims.size())
@@ -2055,17 +2042,12 @@ void AnimControl::SelectAnimation(int index, int loops)
 
   g_selModel->currentAnim = index;
   g_selModel->animManager->SetAnim(0, index, loops);
-
-  if (g_modelViewer)
-    g_modelViewer->SendCurrentAnimationToUnity();
 }
 
-// The playback state has no single funnel to hook, so each control that changes it calls this.
-// Kept as one line here rather than repeated at every call site so the guard lives in one place.
+// The playback state's controls call this after a change. The viewport draws from the canvas's own animation
+// state every frame, so there is nothing to push; kept as the one place a future observer would hook.
 void AnimControl::PushAnimationState()
 {
-  if (g_modelViewer)
-    g_modelViewer->SendAnimationStateToUnity(true);
 }
 
 void AnimControl::pickAnimationLikeUser(int index)
@@ -2334,13 +2316,10 @@ void AnimControl::SetSingleSkin(int num, int texnum)
   LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
   g_selModel->updateTextureList(tex, base);
 
-  // Same reasoning as SetSkin: the Unity viewport draws the same model and has to follow the
-  // same textures. Recorded as well as pushed, because the caller clears the main selector's
-  // selection right after this -- so this map is the only remaining record of what is on screen.
+  // Recorded, because the caller clears the main selector's selection right after this -- so this map is the
+  // only remaining record of what is on screen (a saved character reads it).
   if (tex && (int)tex->fileDataId() > 0)
     singleSkinOverrides[base] = (int)tex->fileDataId();
-  if (g_modelViewer)
-    g_modelViewer->SendCurrentSkinToUnity();
 }
 
 int AnimControl::AddSkin(TextureGroup grp)

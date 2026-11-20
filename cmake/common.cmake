@@ -58,3 +58,13 @@ endmacro()
 macro(use_sqlite)
   list(APPEND src sqlite3.c)
 endmacro()
+
+# A plugin library (exporters, importers): Qt plugins the viewer loads from its plugin folder at start --
+# <exe>/plugins on Windows and Linux, the bundle's Contents/PlugIns on macOS.
+macro(wmv_plugin_output target)
+  if(APPLE)
+    set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<TARGET_BUNDLE_CONTENT_DIR:wowmodelviewer>/PlugIns")
+  elseif(UNIX)
+    set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:wowmodelviewer>/plugins")
+  endif()
+endmacro()

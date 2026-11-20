@@ -10,6 +10,7 @@
 
 #include "globalvars.h"
 #include "logger/Logger.h"
+#include "modelcanvas.h"
 #include "modelviewer.h"
 
 IMPLEMENT_CLASS(DisplaySettings, wxWindow)
@@ -68,65 +69,24 @@ DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
 
 void DisplaySettings::Update()
 {
+  // The renderer in use (the viewport's Vulkan device): there is one mode, and every feature these boxes name is
+  // part of the renderer, so they read as supported.
   oglMode->Clear();
-
-  for (size_t i=0; i<video.capsList.size(); i++) {
-    wxString mode = wxString::Format(wxT("Colour:%i Depth:%i Alpha:%i "), video.capsList[i].colour, video.capsList[i].zBuffer, video.capsList[i].alpha);
-
-    if (video.capsList[i].sampleBuffer)
-      mode.Append(wxString::Format(wxT("FSAA:%i "), video.capsList[i].aaSamples));
-
-    if (video.capsList[i].doubleBuffer)
-      mode.Append(wxT("DoubleBuffer "));
-
-#ifdef _WINDOWS
-    if (video.capsList[i].hwAcc == WGL_FULL_ACCELERATION_ARB)
-      mode.Append(wxT("Hardware mode"));
-    else if (video.capsList[i].hwAcc == WGL_GENERIC_ACCELERATION_ARB)
-      mode.Append(wxT("Emulation mode"));
-    else //WGL_NO_ACCELERATION_ARB
-      mode.Append(wxT("Software mode"));
-#endif
-
-    oglMode->Append(mode);
-  }
-
-  oglMode->SetSelection(video.capIndex);
+  const wmv::vk::Viewport * renderer = g_canvas ? g_canvas->renderer() : nullptr;
+  oglMode->Append(renderer ? wxString::FromUTF8(renderer->description().c_str())
+                           : (g_canvas && !g_canvas->rendererError().IsEmpty() ? g_canvas->rendererError()
+                                                                              : wxString(_("Vulkan (not started yet)"))));
+  oglMode->SetSelection(0);
 
   txtFov->SetValue(wxString::Format(wxT("%f"), video.fov));
 
-  // Toggle all the video options
-  chkBox[CHECK_DRAWRANGEELEMENTS]->Disable();
-  chkBox[CHECK_DRAWRANGEELEMENTS]->SetValue(video.supportDrawRangeElements);
-
   chkBox[CHECK_ENVMAPPING]->SetValue(video.useEnvMapping);
-
-  chkBox[CHECK_COMPRESSEDTEX]->Disable();
-  chkBox[CHECK_COMPRESSEDTEX]->SetValue(video.supportCompression);
-
-  chkBox[CHECK_MULTITEX]->Disable();
-  chkBox[CHECK_MULTITEX]->SetValue(video.supportMultiTex);
-
-  chkBox[CHECK_VBO]->Disable();
-  chkBox[CHECK_VBO]->SetValue(video.supportVBO);
-
-  chkBox[CHECK_FBO]->Disable();
-  chkBox[CHECK_FBO]->SetValue(video.supportFBO);
-
-  chkBox[CHECK_PBO]->Disable();
-  chkBox[CHECK_PBO]->SetValue(video.supportPBO);
-
-  chkBox[CHECK_NPOT]->Disable();
-  chkBox[CHECK_NPOT]->SetValue(video.supportNPOT);
-
-  chkBox[CHECK_PIXELSHADERS]->Disable();
-  chkBox[CHECK_PIXELSHADERS]->SetValue(video.supportFragProg);
-
-  chkBox[CHECK_VERTEXSHADERS]->Disable();
-  chkBox[CHECK_VERTEXSHADERS]->SetValue(video.supportVertexProg);
-
-  chkBox[CHECK_GLSLSHADERS]->Disable();
-  chkBox[CHECK_GLSLSHADERS]->SetValue(video.supportGLSL);
+  for (int box : { CHECK_DRAWRANGEELEMENTS, CHECK_COMPRESSEDTEX, CHECK_MULTITEX, CHECK_VBO, CHECK_FBO, CHECK_PBO,
+                   CHECK_NPOT, CHECK_PIXELSHADERS, CHECK_VERTEXSHADERS, CHECK_GLSLSHADERS })
+  {
+    chkBox[box]->Disable();
+    chkBox[box]->SetValue(renderer != nullptr);
+  }
 }
 
 void DisplaySettings::OnButton(wxCommandEvent &event)
@@ -134,10 +94,6 @@ void DisplaySettings::OnButton(wxCommandEvent &event)
   int id = event.GetId();
 
   if (id == ID_DISPLAY_SETTINGS_APPLY) {
-    if ((oglMode->GetSelection() != video.capIndex) && video.GetCompatibleWinMode(video.capsList[oglMode->GetSelection()])) {
-      LOG_INFO << "Graphics display mode changed.  Requires restart to take effect.";
-      wxMessageBox(wxT("Graphics display settings changed.\nWoW Model Viewer requires restarting to take effect."), wxT("Settings Changed"), wxICON_INFORMATION);
-    }
 
     double fov;
     txtFov->GetValue().ToDouble(&fov);

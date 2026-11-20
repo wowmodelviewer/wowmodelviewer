@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
+         AppPaths.cpp
          ArmoryImportDialog.cpp
          BlpInfo.cpp
          animcontrol.cpp
@@ -41,11 +42,6 @@ set(src  AnimationExportChoiceDialog.cpp
          ClientLoadingPanel.cpp
          LogStackWalker.cpp
          main.cpp
-         MapAssetWorker.cpp
-         MapsViewer.cpp
-         MapOverview.cpp
-         MapThumbnail.cpp
-         MapTilePanel.cpp
          modelcanvas.cpp
          modelcontrol.cpp
          ModelIdLookup.cpp
@@ -67,17 +63,16 @@ set(src  AnimationExportChoiceDialog.cpp
          UiControls.cpp
          UiIcons.cpp
          UiStyle.cpp
-         UnityAssetAccess.cpp
-         UnityCharacterScene.cpp
-         UnityIpcServer.cpp
-         UnityRendererHost.cpp
+         ClientState.cpp
          UserSkins.cpp
          util.cpp
          BackgroundColorDialog.cpp
          ViewportBackground.cpp
+         ViewportHost.cpp
          WinTheme.cpp)
 
 set(headers AnimationExportChoiceDialog.h
+            AppPaths.h
             ArmoryImportDialog.h
             BlpInfo.h
             animcontrol.h
@@ -113,11 +108,6 @@ set(headers AnimationExportChoiceDialog.h
             ClientLoadingPanel.h
             ClientLoadProgress.h
             LogStackWalker.h
-            MapAssetWorker.h
-            MapsViewer.h
-            MapOverview.h
-            MapThumbnail.h
-            MapTilePanel.h
             modelcanvas.h
             modelcontrol.h
             ModelIdLookup.h
@@ -140,10 +130,7 @@ set(headers AnimationExportChoiceDialog.h
             UiControls.h
             UiIcons.h
             UiStyle.h
-            UnityAssetAccess.h
-            UnityCharacterScene.h
-            UnityIpcServer.h
-            UnityRendererHost.h
+            ClientState.h
             UserSkins.h
             util.h
             BackgroundColorDialog.h
@@ -211,37 +198,40 @@ set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(NAME wowmodelviewer)
 
-# Embedded Unity renderer runtime IPC (UnityIpcServer): plain Winsock2 localhost server. Listed
-# FIRST so the socket calls bind to ws2_32 by name rather than to the wsock32 ordinals that the
-# wxWidgets library list would otherwise satisfy.
-if(WIN32)
-  set(WMV_UNITY_IPC_SOCKET_LIB ws2_32)
+# Windows-only parts: the AVI writer (Video for Windows) and the Windows theme probe.
+if(NOT WIN32)
+  list(REMOVE_ITEM src AVIGenerator.cpp WinTheme.cpp)
+  list(REMOVE_ITEM headers AVIGenerator.h WinTheme.h)
+  set(RES_FILES)
 endif()
 
-add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
+add_executable(${NAME} WIN32 MACOSX_BUNDLE ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-# This is a 32-bit build; loading a modern WoW's ~2M-entry listfile plus the
-# in-memory database easily exceeds the default 2 GB user address space. Allow
-# the process to use up to 4 GB on 64-bit Windows.
 if(MSVC)
-  set_target_properties(${NAME} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE")
+  # WIN32_LEAN_AND_MEAN stops <windows.h> (dragged in by wx) from including the legacy winsock.h, which otherwise
+  # collides with the winsock2.h that Qt Network uses (fd_set/timeval redefinitions).
+  target_compile_definitions(${NAME} PRIVATE WIN32_LEAN_AND_MEAN)
 endif()
 
-if(WMV_X64)
-  # GLEW (vcpkg 2.x) errors if any <GL/gl.h> is seen before <GL/glew.h>; wx and Qt both pull gl.h
-  # in, so force glew.h to the very top of every translation unit. WIN32_LEAN_AND_MEAN stops
-  # <windows.h> (dragged in by wx) from including the legacy winsock.h, which otherwise collides
-  # with the winsock2.h that Qt Network uses (fd_set/timeval redefinitions).
-  target_compile_definitions(${NAME} PRIVATE WIN32_LEAN_AND_MEAN)
-  target_compile_options(${NAME} PRIVATE "/FIGL/glew.h")
+if(APPLE)
+  # wxWidgets and Qt both forward-declare Cocoa classes (NSData, NSString, ...); in C++ their declarations collide,
+  # in Objective-C++ both are @class. So the viewer's sources compile as Objective-C++ here.
+  target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-x objective-c++ -fobjc-arc>)
+  set_target_properties(${NAME} PROPERTIES
+    OUTPUT_NAME "WoW Model Viewer"
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/installer/macos/Info.plist.in
+    MACOSX_BUNDLE_GUI_IDENTIFIER "net.wowmodelviewer.viewer"
+    MACOSX_BUNDLE_BUNDLE_NAME "WoW Model Viewer"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "1.2"
+    MACOSX_BUNDLE_BUNDLE_VERSION "1.2")
 endif()
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 target_link_libraries(${NAME}
-  ${WMV_UNITY_IPC_SOCKET_LIB}
+  wmvrender
   ${extralibs}
   Qt5::Xml
   Qt5::Gui
@@ -252,70 +242,96 @@ target_link_libraries(${NAME}
 
 
 
-install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+if(WIN32)
+  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
-# additional files needed to let WMV correctly works
-set(QT_BIN_DIR  ${QT_LOCATION}/bin)
-set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
-             ${QT_BIN_DIR}/Qt5Core.pdb
-             ${QT_BIN_DIR}/Qt5Cored.dll
-             ${QT_BIN_DIR}/Qt5Cored.pdb 
-             ${QT_BIN_DIR}/Qt5Gui.dll
-             ${QT_BIN_DIR}/Qt5Gui.pdb
-             ${QT_BIN_DIR}/Qt5Guid.dll
-             ${QT_BIN_DIR}/Qt5Guid.pdb
-             ${QT_BIN_DIR}/Qt5Network.dll
-             ${QT_BIN_DIR}/Qt5Network.pdb
-             ${QT_BIN_DIR}/Qt5Networkd.dll
-             ${QT_BIN_DIR}/Qt5Networkd.pdb
-             ${QT_BIN_DIR}/Qt5Widgets.dll
-             ${QT_BIN_DIR}/Qt5Widgets.pdb
-             ${QT_BIN_DIR}/Qt5Widgetsd.dll
-             ${QT_BIN_DIR}/Qt5Widgetsd.pdb
-             ${QT_BIN_DIR}/Qt5Xml.dll
-             ${QT_BIN_DIR}/Qt5Xml.pdb
-             ${QT_BIN_DIR}/Qt5Xmld.dll
-             ${QT_BIN_DIR}/Qt5Xmld.pdb)
+  # additional files needed to let WMV correctly works
+  set(QT_BIN_DIR  ${QT_LOCATION}/bin)
+  set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
+               ${QT_BIN_DIR}/Qt5Core.pdb
+               ${QT_BIN_DIR}/Qt5Cored.dll
+               ${QT_BIN_DIR}/Qt5Cored.pdb 
+               ${QT_BIN_DIR}/Qt5Gui.dll
+               ${QT_BIN_DIR}/Qt5Gui.pdb
+               ${QT_BIN_DIR}/Qt5Guid.dll
+               ${QT_BIN_DIR}/Qt5Guid.pdb
+               ${QT_BIN_DIR}/Qt5Network.dll
+               ${QT_BIN_DIR}/Qt5Network.pdb
+               ${QT_BIN_DIR}/Qt5Networkd.dll
+               ${QT_BIN_DIR}/Qt5Networkd.pdb
+               ${QT_BIN_DIR}/Qt5Widgets.dll
+               ${QT_BIN_DIR}/Qt5Widgets.pdb
+               ${QT_BIN_DIR}/Qt5Widgetsd.dll
+               ${QT_BIN_DIR}/Qt5Widgetsd.pdb
+               ${QT_BIN_DIR}/Qt5Xml.dll
+               ${QT_BIN_DIR}/Qt5Xml.pdb
+               ${QT_BIN_DIR}/Qt5Xmld.dll
+               ${QT_BIN_DIR}/Qt5Xmld.pdb)
 
-set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
-set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
-                        ${QT_PLUGIN_DIR}/platforms/qminimal.pdb
-                        ${QT_PLUGIN_DIR}/platforms/qminimald.dll
-                        ${QT_PLUGIN_DIR}/platforms/qminimald.pdb
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreen.pdb
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreend.dll
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreend.pdb
-                        ${QT_PLUGIN_DIR}/platforms/qwindows.dll
-                        ${QT_PLUGIN_DIR}/platforms/qwindows.pdb
-                        ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll
-                        ${QT_PLUGIN_DIR}/platforms/qwindowsd.pdb)
+  set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
+  set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
+                          ${QT_PLUGIN_DIR}/platforms/qminimal.pdb
+                          ${QT_PLUGIN_DIR}/platforms/qminimald.dll
+                          ${QT_PLUGIN_DIR}/platforms/qminimald.pdb
+                          ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
+                          ${QT_PLUGIN_DIR}/platforms/qoffscreen.pdb
+                          ${QT_PLUGIN_DIR}/platforms/qoffscreend.dll
+                          ${QT_PLUGIN_DIR}/platforms/qoffscreend.pdb
+                          ${QT_PLUGIN_DIR}/platforms/qwindows.dll
+                          ${QT_PLUGIN_DIR}/platforms/qwindows.pdb
+                          ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll
+                          ${QT_PLUGIN_DIR}/platforms/qwindowsd.pdb)
 
-set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qjpeg.pdb
-                          ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qjpegd.pdb
-                          ${QT_PLUGIN_DIR}/imageformats/qtga.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qtga.pdb
-                          ${QT_PLUGIN_DIR}/imageformats/qtgad.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qtgad.pdb)
+  set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
+                            ${QT_PLUGIN_DIR}/imageformats/qjpeg.pdb
+                            ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
+                            ${QT_PLUGIN_DIR}/imageformats/qjpegd.pdb
+                            ${QT_PLUGIN_DIR}/imageformats/qtga.dll
+                            ${QT_PLUGIN_DIR}/imageformats/qtga.pdb
+                            ${QT_PLUGIN_DIR}/imageformats/qtgad.dll
+                            ${QT_PLUGIN_DIR}/imageformats/qtgad.pdb)
 
-set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1.dll
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1.dll
-                ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
-                ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
+  set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
+                  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1.dll
+                  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1.dll
+                  ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
+                  ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
-set(files ${QT_FILES} ${EXTRA_FILES})
+  set(files ${QT_FILES} ${EXTRA_FILES})
 
-install(FILES ${files} DESTINATION ${BIN_DIR})
-install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
-install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
-install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
-install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
-install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)
-install(FILES ${wow12_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/12.0)
-# The WoWDBDefs table definitions: every table is checked against the loaded client's own layout through them
-# (WoWDatabase::refreshStructures), so they ship next to the executable (dbd/).
-file(GLOB wow_dbd_files ${CMAKE_SOURCE_DIR}/bin_support/dbd/*.dbd)
-install(FILES ${wow_dbd_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/dbd)
+  install(FILES ${files} DESTINATION ${BIN_DIR})
+  install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
+  install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
+  install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
+  install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
+  install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)
+  install(FILES ${wow12_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/12.0)
+  # The WoWDBDefs table definitions: every table is checked against the loaded client's own layout through them
+  # (WoWDatabase::refreshStructures), so they ship next to the executable (dbd/).
+  file(GLOB wow_dbd_files ${CMAKE_SOURCE_DIR}/bin_support/dbd/*.dbd)
+  install(FILES ${wow_dbd_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/dbd)
+endif()
+
+# THE RUNTIME DATA next to the program, so a build runs where it was built: the database schemas (games/wow/<ver>),
+# the table definitions (dbd/), the encryption key list, and the icon. On macOS inside the bundle's Resources; the
+# viewer links them into its per-user home folder at start (see app.cpp, the home folder).
+if(APPLE)
+  set(WMV_RUNTIME_DATA_DIR "$<TARGET_BUNDLE_CONTENT_DIR:${NAME}>/Resources")
+elseif(UNIX)
+  set(WMV_RUNTIME_DATA_DIR "$<TARGET_FILE_DIR:${NAME}>/share")
+endif()
+if(NOT WIN32)
+  add_custom_command(TARGET ${NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${WMV_RUNTIME_DATA_DIR}/games/wow" "${WMV_RUNTIME_DATA_DIR}/dbd"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2 "${WMV_RUNTIME_DATA_DIR}/games/wow/9.2"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0 "${WMV_RUNTIME_DATA_DIR}/games/wow/10.0"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1 "${WMV_RUNTIME_DATA_DIR}/games/wow/10.1"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bin_support/wow/12.0 "${WMV_RUNTIME_DATA_DIR}/games/wow/12.0"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bin_support/dbd "${WMV_RUNTIME_DATA_DIR}/dbd"
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv "${WMV_RUNTIME_DATA_DIR}/"
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.icns ${CMAKE_SOURCE_DIR}/bin_support/Icons/WMW-Midnight-26-256x256.png
+            ${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.xpm ${CMAKE_SOURCE_DIR}/bin_support/Splash/Splash-006-Midnight.png "${WMV_RUNTIME_DATA_DIR}/"
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/THIRD-PARTY-NOTICES.txt ${CMAKE_SOURCE_DIR}/LICENSE "${WMV_RUNTIME_DATA_DIR}/"
+    COMMENT "Staging the viewer's runtime data"
+    VERBATIM)
+endif()

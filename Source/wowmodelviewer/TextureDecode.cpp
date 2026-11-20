@@ -15,9 +15,17 @@
 #include "GameFolder.h"
 #include "Texture.h"
 #include "TextureCatalog.h"
-#include "UnityAssetAccess.h"
+#include "ClientState.h"
 #include "video.h"
 #include "logger/Logger.h"
+
+// The OpenGL enums the decoded formats are named by (Texture::sourceFormat).
+#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+#endif
 
 namespace
 {
@@ -49,7 +57,7 @@ namespace
     return error;
   }
 
-  TextureDecode::Source finish(const UnityAssetAccess::Result & r, GameFile * file)
+  TextureDecode::Source finish(const ClientState::Result & r, GameFile * file)
   {
     TextureDecode::Source s;
     if (!r.ok)
@@ -80,26 +88,23 @@ TextureDecode::Source TextureDecode::read(const TextureEntry & entry)
     return readId(entry.fileDataId);
   // readByPath resolves the path through the same name map as getFile(QString), so the bytes and
   // the file object decoded below are the same file.
-  const UnityAssetAccess::Result r = UnityAssetAccess::readByPath(entry.path);
+  const ClientState::Result r = ClientState::readByPath(entry.path);
   return finish(r, r.ok ? GAMEDIRECTORY.getFile(entry.path) : nullptr);
 }
 
 TextureDecode::Source TextureDecode::readId(int fileDataId)
 {
-  const UnityAssetAccess::Result r = UnityAssetAccess::readByFileDataID(fileDataId);
+  const ClientState::Result r = ClientState::readByFileDataID(fileDataId);
   // After a successful read the index holds the file under this id: a lookup, no second probe.
   return finish(r, r.ok ? GAMEDIRECTORY.getFile(fileDataId) : nullptr);
 }
 
-QString TextureDecode::decoderProblem(bool glReady, const BlpInfo & info)
+QString TextureDecode::decoderProblem(bool decoderReady, const BlpInfo &)
 {
-  if (!glReady)
-    return "The app's texture decoder is not running yet (its graphics context is not ready).";
-  // Without hardware DXT, Texture::load decodes DXT on the CPU (ddslib), whose DXT5 alpha and
-  // DXT3/5 colours come out wrong.
-  if (info.encoding == 2 && !video.supportCompression)
-    return "This graphics driver cannot decode DXT textures, and the app's software fallback gets "
-           "their colours and alpha wrong.";
+  // Every BLP encoding is decoded on the CPU (Texture::load), so only an app that has not finished starting
+  // has no decoder.
+  if (!decoderReady)
+    return "The app's texture decoder is not running yet.";
   return QString();
 }
 
@@ -120,52 +125,25 @@ TextureDecode::Pixels TextureDecode::decode(GameFile * file, const BlpInfo & inf
     return p;
   }
 
-  GLint previous = 0;
-  glGetIntegerv(GL_TEXTURE_BINDING_2D, &previous);
-  while (glGetError() != GL_NO_ERROR)
-  {
-  }
-
-  // The app's decoder, Texture::load, run the way TEXTUREMANAGER.add runs it, into a texture of the
-  // viewer's own. Not through the manager: it hands back whatever it already holds under the same
-  // name -- a model's texture, or one left from a client loaded before this one -- without reading
-  // this file.
-  GLuint id = 0;
-  glGenTextures(1, &id);
+  // The app's decoder, Texture::load, into a texture of the viewer's own. Not through the manager: it hands back
+  // whatever it already holds under the same name -- a model's texture, or one left from a client loaded before
+  // this one -- without reading this file.
   Texture texture(file);
-  texture.id = id;
   texture.load();
-  glBindTexture(GL_TEXTURE_2D, id);
   p.loadMs = timer.nsecsElapsed() / 1e6;
 
-  auto levelSize = [](int level, GLint & w, GLint & h)
-  {
-    w = h = 0;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &h);
-  };
-
-  GLint w0 = 0, h0 = 0, format = 0;
-  levelSize(0, w0, h0);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
-  // Levels down to 1 x 1 at most: asking for one past that may raise an error, which the read-back
-  // check below would then take for its own.
-  int possible = 1;
-  for (GLint side = (std::max)(w0, h0); side > 1; side /= 2)
-    possible++;
-  for (int level = 0; level < (std::min)(possible, 16); level++)
-  {
-    GLint w = 0, h = 0;
-    levelSize(level, w, h);
-    if (w <= 0 || h <= 0)
-      break;
-    p.levels++;
-  }
+  const int w0 = texture.w, h0 = texture.h;
+  p.levels = (int)texture.mips.size();
   p.width = w0;
   p.height = h0;
-  p.internalFormat = format;
+  p.internalFormat = (int)texture.sourceFormat;
 
-  if (w0 <= 0 || h0 <= 0)
+  auto levelSize = [&](int level, int & w, int & h) {
+    w = std::max(1, w0 >> level);
+    h = std::max(1, h0 >> level);
+  };
+
+  if (w0 <= 0 || h0 <= 0 || texture.mips.empty())
     p.error = "The texture decoder produced no image.";
   else if ((unsigned)w0 != info.width || (unsigned)h0 != info.height)
     p.error = QString("The texture decoder produced %1 x %2, but the file is %3 x %4.")
@@ -176,45 +154,36 @@ TextureDecode::Pixels TextureDecode::decode(GameFile * file, const BlpInfo & inf
     // Smaller levels only while the file holds them whole (BlpInfo::intactLevels).
     while (minSide > 0 && level + 1 < (std::min)(p.levels, info.intactLevels))
     {
-      GLint w = 0, h = 0;
+      int w = 0, h = 0;
       levelSize(level + 1, w, h);
       if ((std::max)(w, h) < minSide)
         break;
       level++;
     }
-    GLint w = 0, h = 0;
+    int w = 0, h = 0;
     levelSize(level, w, h);
-    // Cleared first, so a read-back that fails can never show what the memory held before.
-    QImage image(w, h, QImage::Format_ARGB32);
-    image.fill(0);
-    // Tightly packed rows, as the image holds them, whatever pack state the app left.
-    GLint alignment = 4, rowLength = 0, skipRows = 0, skipPixels = 0;
-    glGetIntegerv(GL_PACK_ALIGNMENT, &alignment);
-    glGetIntegerv(GL_PACK_ROW_LENGTH, &rowLength);
-    glGetIntegerv(GL_PACK_SKIP_ROWS, &skipRows);
-    glGetIntegerv(GL_PACK_SKIP_PIXELS, &skipPixels);
-    glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-    glGetTexImage(GL_TEXTURE_2D, level, GL_BGRA_EXT, GL_UNSIGNED_BYTE, image.bits());
-    const GLenum error = glGetError();
-    glPixelStorei(GL_PACK_ALIGNMENT, alignment);
-    glPixelStorei(GL_PACK_ROW_LENGTH, rowLength);
-    glPixelStorei(GL_PACK_SKIP_ROWS, skipRows);
-    glPixelStorei(GL_PACK_SKIP_PIXELS, skipPixels);
-    if (error != GL_NO_ERROR)
-      p.error = QString("Reading the decoded texture back failed (graphics error 0x%1).").arg(error, 0, 16);
+    const std::vector<unsigned char> & px = texture.mips[level];
+    if (px.size() != (size_t)w * h * 4)
+      p.error = "The decoded texture level has the wrong size.";
     else
     {
+      // RGBA bytes to QImage's ARGB32 (BGRA in memory).
+      QImage image(w, h, QImage::Format_ARGB32);
+      for (int y = 0; y < h; y++)
+      {
+        unsigned char * dst = image.scanLine(y);
+        const unsigned char * src = &px[(size_t)y * w * 4];
+        for (int x = 0; x < w; x++, src += 4, dst += 4)
+        {
+          dst[0] = src[2]; dst[1] = src[1]; dst[2] = src[0]; dst[3] = src[3];
+        }
+      }
       p.ok = true;
       p.image = image;
       p.level = level;
     }
   }
 
-  glBindTexture(GL_TEXTURE_2D, (GLuint)previous);
-  glDeleteTextures(1, &id);
   p.ms = timer.nsecsElapsed() / 1e6;
   return p;
 }

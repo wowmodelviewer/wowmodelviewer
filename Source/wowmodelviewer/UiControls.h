@@ -43,7 +43,13 @@
 // window stays what Windows reports for it.
 void UiSetAccessibleName(wxWindow * window, const wxString & name);
 
-class UiButton : public wxButton
+// THE BUTTONS' FACES. UiButton and UiColourSwatch ARE native push buttons on every platform, so Space, Enter, focus,
+// wxEVT_BUTTON and screen readers stay the system's. On Windows they are owner-drawn (MSWOnDraw); a native button
+// cannot be owner-drawn on macOS or GTK, so there the same paint() makes bitmap faces -- normal, under the mouse,
+// pressed, disabled, focused -- that the native button shows, made again whenever the button is refreshed.
+typedef wxButton UiButtonBase;
+
+class UiButton : public UiButtonBase
 {
 public:
   enum class Kind { Primary, Secondary, Subtle };
@@ -61,7 +67,15 @@ public:
   // The icon alone, square: the label stays the button's name for a screen reader.
   void SetIconOnly(bool iconOnly);
 
+#ifdef __WXMSW__
   bool MSWOnDraw(WXDRAWITEMSTRUCT * item) wxOVERRIDE;
+#else
+  void Refresh(bool eraseBackground = true, const wxRect * rect = nullptr) wxOVERRIDE;
+private:
+  void makeFaces();
+  wxSize m_facesFor;
+public:
+#endif
 
 protected:
   wxSize DoGetBestSize() const wxOVERRIDE;
@@ -84,7 +98,7 @@ private:
 // surface between it and the colour, and a check mark in black or white, whichever reads on the colour -- so the mark
 // does not depend on the ring's hue. Keyboard focus: a ring in the text colour inside the gap. Pressed: the colour
 // drawn a pixel smaller. Disabled: the colour faded towards what the swatch stands on, the outline quiet.
-class UiColourSwatch : public wxButton
+class UiColourSwatch : public UiButtonBase
 {
 public:
   // sizeDip: the whole swatch, ring and gap included (they are always reserved, so selecting one moves nothing).
@@ -96,7 +110,15 @@ public:
   void SetSelected(bool selected);
   bool IsSelected() const { return m_selected; }
 
+#ifdef __WXMSW__
   bool MSWOnDraw(WXDRAWITEMSTRUCT * item) wxOVERRIDE;
+#else
+  void Refresh(bool eraseBackground = true, const wxRect * rect = nullptr) wxOVERRIDE;
+private:
+  void makeFaces();
+  wxSize m_facesFor;
+public:
+#endif
 
 protected:
   wxSize DoGetBestSize() const wxOVERRIDE;
@@ -191,7 +213,9 @@ public:
 
   bool AcceptsFocusFromKeyboard() const wxOVERRIDE { return true; }
   // The arrow keys are the strip's (moving between tabs), not the dialog navigation's; Tab still moves on.
+#ifdef __WXMSW__
   WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
+#endif
 
 protected:
   wxSize DoGetBestSize() const wxOVERRIDE;
@@ -254,7 +278,9 @@ class UiSlider : public wxSlider
 {
 public:
   using wxSlider::wxSlider;
+#ifdef __WXMSW__
   bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result) wxOVERRIDE;
+#endif
 };
 
 // The status bar of the dark run is wx's own, in the panel colour (Windows' own dark status bar is black,
@@ -280,7 +306,9 @@ public:
   void attach(wxFrame * frame);
   // The frame's MSWWindowProc asks this FIRST: wxWidgets would take an owner-drawn item's data for a
   // wxMenuItem of its own. True when the message was a title's (the result in *result).
+#ifdef __WXMSW__
   bool handle(WXUINT message, WXWPARAM wParam, WXLPARAM lParam, WXLRESULT * result);
+#endif
 
 private:
   struct Title;
@@ -289,9 +317,11 @@ private:
 
   std::vector<std::unique_ptr<Title>> m_titles;
   wxFrame * m_owner = nullptr;
+#ifdef __WXMSW__
   WXHWND m_frame = nullptr;
   WXHMENU m_bar = nullptr;
   WXHBRUSH m_background = nullptr;
+#endif
 };
 
 #endif // UICONTROLS_H
