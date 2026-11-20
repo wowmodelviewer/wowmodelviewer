@@ -5,20 +5,19 @@
 .DESCRIPTION
   The release is an exact list of files, nothing found by a wildcard in a build folder: the program and its
   plugins from the CMake build (Release), the wxWidgets, Qt, OpenSSL and Visual C++ runtime DLLs it loads, the
-  Unity player, the data files from bin_support, and the licence texts and README. A file that is missing stops
+  data files from bin_support, and the licence texts and README. (The viewport draws with Vulkan through the
+  graphics driver's own vulkan-1.dll, which every current GPU driver installs; nothing of it is shipped.) A file that is missing stops
   the build. The staged folder is what the installer installs, file for file.
 
   Afterwards installer\dist holds WoWModelViewer-Setup-<version>.exe and its SHA-256 (.sha256), and the stage's
   own folder holds stage-manifest.csv: every staged file with its size and SHA-256.
 
 .EXAMPLE
-  .\build-installer.ps1 -BuildDir F:\build64 -PlayerDir F:\player\tools\unity-renderer -OpenSslDir F:\openssl_x64
+  .\build-installer.ps1 -BuildDir F:\build64 -OpenSslDir F:\openssl_x64
 #>
 param(
   # The CMake build folder, with the Release configuration built (wowmodelviewer, armory, wowhead, objexporter).
   [Parameter(Mandatory = $true)][string]$BuildDir,
-  # The built Unity player: the folder that holds UnityRenderer.exe.
-  [Parameter(Mandatory = $true)][string]$PlayerDir,
   # OpenSSL 1.1 for 64-bit Windows: libssl-1_1-x64.dll and libcrypto-1_1-x64.dll (Qt's network module loads them).
   [Parameter(Mandatory = $true)][string]$OpenSslDir,
   # Qt's bin folder. Default: the Qt the build was configured with (Qt5Core_DIR in its CMakeCache.txt).
@@ -27,7 +26,7 @@ param(
   [string]$WxDllDir = '',
   # The Visual C++ runtime (x64 Microsoft.VC14x.CRT). Default: the newest one under the Visual Studio installations.
   [string]$VcRedistDir = '',
-  [string]$Version = '1.1',
+  [string]$Version = '1.2',
   [string]$Stage = '',
   # Test builds only: another AppId and output name, so a test never touches a real installation.
   [string]$AppId = '',
@@ -88,24 +87,6 @@ foreach ($f in Get-ChildItem "$repo\bin_support\dbd" -Filter '*.dbd') { $files["
 $files['LICENSE.txt'] = "$repo\LICENSE"
 $files['THIRD-PARTY-NOTICES.txt'] = "$repo\THIRD-PARTY-NOTICES.txt"
 $files['README.txt'] = "$PSScriptRoot\README.txt"
-# The Unity player: what a Windows player build is made of (its program, the Unity runtime, DirectX 12 and
-# DirectStorage, Mono and the player's data), whole. Anything else in the folder -- the debug information Unity marks
-# as not for shipping, a log or a crash dump from a test run -- stays out.
-$playerRoot = (Get-Item -LiteralPath $PlayerDir).FullName.TrimEnd('\')
-foreach ($n in 'UnityRenderer.exe', 'UnityPlayer.dll', 'UnityCrashHandler64.exe', 'dstorage.dll', 'dstoragecore.dll') {
-  $files["tools\unity-renderer\$n"] = Join-Path $playerRoot $n
-}
-foreach ($d in 'D3D12', 'MonoBleedingEdge', 'UnityRenderer_Data') {
-  if (-not (Test-Path -LiteralPath (Join-Path $playerRoot $d) -PathType Container)) { Fail "no $d folder in $PlayerDir" }
-  foreach ($f in Get-ChildItem -LiteralPath (Join-Path $playerRoot $d) -Recurse -File) {
-    $files["tools\unity-renderer\" + $f.FullName.Substring($playerRoot.Length + 1)] = $f.FullName
-  }
-}
-$unexpected = Get-ChildItem -LiteralPath $playerRoot | Where-Object {
-  $_.Name -notin 'UnityRenderer.exe', 'UnityPlayer.dll', 'UnityCrashHandler64.exe', 'dstorage.dll', 'dstoragecore.dll',
-    'D3D12', 'MonoBleedingEdge', 'UnityRenderer_Data' -and $_.Name -notlike '*_DoNotShip' }
-if ($unexpected) { Write-Warning ("left out of the player: " + (($unexpected | ForEach-Object { $_.Name }) -join ', ')) }
-
 $missing = @($files.GetEnumerator() | Where-Object { -not (Test-Path -LiteralPath $_.Value -PathType Leaf) } | ForEach-Object { "  $($_.Key) <- $($_.Value)" })
 if ($missing.Count) { Fail ("missing files:`n" + ($missing -join "`n")) }
 
@@ -115,7 +96,7 @@ if ($exeVersion -ne $Version) { Fail "wowmodelviewer.exe is version '$exeVersion
 
 if (Test-Path $Stage) {
   # Only an earlier stage is replaced: a folder holding the staged program, or an empty one.
-  $isStage = (Test-Path (Join-Path $Stage 'wowmodelviewer.exe')) -and (Test-Path (Join-Path $Stage 'tools\unity-renderer\UnityRenderer.exe'))
+  $isStage = (Test-Path (Join-Path $Stage 'wowmodelviewer.exe')) -and (Test-Path (Join-Path $Stage 'stage-manifest.csv') -or (Test-Path (Join-Path $Stage 'core.dll')))
   if (-not $isStage -and (Get-ChildItem -LiteralPath $Stage -Force | Select-Object -First 1)) { Fail "$Stage exists and is not an earlier stage; choose another -Stage" }
   Remove-Item -LiteralPath $Stage -Recurse -Force
 }

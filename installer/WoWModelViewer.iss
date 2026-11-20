@@ -1,9 +1,9 @@
 ; WoW Model Viewer - Inno Setup script (Inno Setup 6.7 or later)
 ; -----------------------------------------------------------------------------------------------------------------
 ; Build it with installer\build-installer.ps1: that script stages the exact release folder (the program, its
-; runtime DLLs, the Unity player, the data files, the licence texts) and compiles this script against it:
+; runtime DLLs, the data files, the licence texts) and compiles this script against it:
 ;
-;   ISCC.exe /DStage=<staged folder> /DMyAppVersion=1.1 WoWModelViewer.iss
+;   ISCC.exe /DStage=<staged folder> /DMyAppVersion=1.2 WoWModelViewer.iss
 ;
 ; The installer is per-user (no administrator rights): the viewer keeps its settings, caches and the file list
 ; next to the program, so it must be installed where the user can write. {autopf} is then
@@ -13,7 +13,7 @@
   #error Define Stage (/DStage=<folder>): the staged release folder made by build-installer.ps1
 #endif
 #ifndef MyAppVersion
-  #define MyAppVersion "1.1"
+  #define MyAppVersion "1.2"
 #endif
 ; Test builds pass their own AppId so they never touch a real installation.
 #ifndef MyAppId
@@ -70,7 +70,7 @@ RedirectionGuard=no
 AppMutex=WoWModelViewer-B7E9F3A2-1C4D-4E8A-9F6B-2A3C5D7E9F10
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-; Windows 10 21H1 (build 19043), the oldest Windows the Unity 6 player supports.
+; Windows 10 21H1 (build 19043), the oldest Windows this release is built and tested for.
 MinVersion=10.0.19043
 LicenseFile={#Stage}\LICENSE.txt
 OutputDir=dist
@@ -118,7 +118,7 @@ Type: files; Name: "{app}\*.dll"; Check: ViewerWasHere
 Type: files; Name: "{app}\plugins\*.dll"; Check: ViewerWasHere
 Type: filesandordirs; Name: "{app}\platforms"; Check: ViewerWasHere
 Type: filesandordirs; Name: "{app}\imageformats"; Check: ViewerWasHere
-; The Unity player is replaced as a whole, so a file an older player had does not stay behind.
+; 1.1 and earlier shipped a Unity player here; the viewport is part of the program now, so the folder goes.
 Type: filesandordirs; Name: "{app}\tools\unity-renderer"; Check: ViewerWasHere
 ; 0.11.0's shortcuts, under the old name: only those that start the viewer being updated.
 Type: files; Name: "{userprograms}\WoW Model Viewer Midnight\WoW Model Viewer Midnight.lnk"; Check: ShortcutIntoApp('{userprograms}\WoW Model Viewer Midnight\WoW Model Viewer Midnight.lnk')
@@ -139,9 +139,9 @@ Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Description: "{cm:Launch
 Filename: "{app}\README.txt"; Description: "Show the README"; Flags: postinstall shellexec skipifsilent unchecked
 
 [Registry]
-; The viewport player (Unity) keeps its window settings under HKCU\Software\WoW Model Viewer. Nothing is written there
-; at install time; uninstalling removes them. (Uninstall goes through these in reverse: the player's key, then its
-; parent if that is empty then.)
+; The Unity viewport player of 1.1 and earlier kept its window settings under HKCU\Software\WoW Model Viewer. Nothing is
+; written there now; uninstalling still removes what an earlier version left. (Uninstall goes through these in reverse:
+; the player's key, then its parent if that is empty then.)
 Root: HKCU; Subkey: "Software\WoW Model Viewer"; Flags: uninsdeletekeyifempty dontcreatekey
 Root: HKCU; Subkey: "Software\WoW Model Viewer\WoW Model Viewer Renderer"; Flags: uninsdeletekey dontcreatekey
 

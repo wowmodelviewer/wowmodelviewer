@@ -45,8 +45,8 @@ NEW IN 1.1
 * The first load of each client after the update builds its database cache
   again, once.
 
-Version 1.0 brought the new viewport built on the Unity engine, Classic
-clients, the client chooser, the Textures and Buildings viewers and the new
+Version 1.2 draws the viewport natively with Vulkan (no Unity player) and
+also runs on macOS and Linux. Version 1.0 brought Classic clients, the client chooser, the Textures and Buildings viewers and the new
 look. The full list of changes is in the release notes on the project page.
 
 
@@ -69,8 +69,7 @@ KNOWN ISSUES
   shown in the viewport: they have no FileDataID, which the viewport needs.
 
 To report a problem, open an issue on the project page. Say which client and
-model you used, and attach userSettings\log.txt and
-userSettings\unityRenderer.log from this folder.
+model you used, and attach userSettings\log.txt from this folder.
 
 
 WHERE FILES ARE KEPT
