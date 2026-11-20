@@ -5,6 +5,7 @@
  */
 
 #include "WorldMapCatalog.h"
+#include <memory>
 
 #include <QCryptographicHash>
 #include <QElapsedTimer>

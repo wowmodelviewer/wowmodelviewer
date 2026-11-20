@@ -6,6 +6,7 @@
  */
 
 #include "CharTexture.h"
+#include <algorithm>
 
 
 #include <list>

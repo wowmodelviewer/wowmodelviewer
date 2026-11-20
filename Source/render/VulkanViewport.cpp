@@ -9,6 +9,7 @@
  */
 
 #include "VulkanViewport.h"
+#include <memory>
 
 #include "PlatformSurface.h" // before anything else: it sets the Vulkan platform
 #include "RenderList.h"

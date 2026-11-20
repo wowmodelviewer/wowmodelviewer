@@ -1,4 +1,5 @@
 #include "logger/Logger.h"
+#include <memory>
 
 #include <wx/evtloop.h>
 #include <wx/filename.h>

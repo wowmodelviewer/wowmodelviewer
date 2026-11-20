@@ -5,6 +5,7 @@
  */
 
 #include "LiquidCatalog.h"
+#include <memory>
 
 #include <algorithm>
 #include <map>

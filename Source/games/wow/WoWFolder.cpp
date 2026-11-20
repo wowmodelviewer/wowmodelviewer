@@ -6,6 +6,7 @@
  */
 
 #include "WoWFolder.h"
+#include <memory>
 
 #include <algorithm>
 

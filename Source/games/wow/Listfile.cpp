@@ -3,6 +3,8 @@
  */
 
 #include "Listfile.h"
+#include <memory>
+#include <functional>
 
 #include <algorithm>
 #include <cstring>

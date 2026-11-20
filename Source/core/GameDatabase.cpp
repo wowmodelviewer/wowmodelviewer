@@ -6,6 +6,7 @@
  */
 
 #include "GameDatabase.h"
+#include <functional>
 
 #include "dbfile.h"
 #include "CSVFile.h"

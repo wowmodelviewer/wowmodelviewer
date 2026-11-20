@@ -3,6 +3,7 @@
  */
 
 #include "TextureExport.h"
+#include <functional>
 
 #include <QCryptographicHash>
 #include <QDateTime>

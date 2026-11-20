@@ -1,4 +1,5 @@
 #include "CustomizationGeosetTest.h"
+#include <functional>
 
 // -customizationtest, every client: the geosets customization choices show, on the loaded client's own characters and
 // records. A ChrCustomizationGeoset element sets the VALUE of its geoset group (GeosetType; a GeosetID of 0 is "none")

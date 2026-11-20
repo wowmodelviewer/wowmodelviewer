@@ -1,4 +1,5 @@
 #include "app.h"
+#include <memory>
 
 #include <algorithm>
 #include <cctype>

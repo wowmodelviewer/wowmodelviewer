@@ -3,6 +3,7 @@
  */
 
 #include "TextureBrowse.h"
+#include <functional>
 
 #include <algorithm>
 #include <map>

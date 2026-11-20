@@ -6,6 +6,7 @@
  */
 
 #include "LightCatalog.h"
+#include <memory>
 
 #include <algorithm>
 #include <cmath>

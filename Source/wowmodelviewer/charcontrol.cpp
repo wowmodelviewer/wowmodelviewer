@@ -1,4 +1,5 @@
 #include "charcontrol.h"
+#include <algorithm>
 
 #include <wx/combobox.h>
 #include <wx/spinbutt.h>
