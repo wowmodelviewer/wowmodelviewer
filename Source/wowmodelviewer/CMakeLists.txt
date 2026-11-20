@@ -204,6 +204,8 @@ source_group("wow10.1" FILES ${wow10_1_files})
 source_group("wow12.0" FILES ${wow12_0_files})
 
 set(useful_files ${common_files} ${cmake_files} ${wow9_2_files} ${wow10_0_files} ${wow10_1_files} ${wow12_0_files})
+# The community listfile is not in git (the viewer downloads it), so list only what is there.
+list(FILTER useful_files EXCLUDE REGEX "listfile\\.csv$")
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 

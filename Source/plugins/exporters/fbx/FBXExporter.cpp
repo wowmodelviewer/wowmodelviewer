@@ -1042,7 +1042,7 @@ void FBXExporter::createMaterials()
               .arg(QString(m_p_model->getNameForTex(units[u])).section('/', -1).section('\\', -1).replace(".blp",""));
             QString rawFullpath = QString::fromStdWString(m_filename);
             rawFullpath = rawFullpath.left(rawFullpath.lastIndexOf('\\') + 1) + rawName;
-            exportGLTexture(glid, rawFullpath.toStdWString());
+            exportTexture(glid, rawFullpath.toStdWString());
             LOG_INFO << "[matdump] dumped raw unit" << u << "->" << qPrintable(rawFullpath);
           }
         }
@@ -1389,11 +1389,11 @@ void FBXExporter::createMaterials()
     if (tintIt != m_textureTints.end())
     {
       const float tintRGB[3] = { tintIt->second.r, tintIt->second.g, tintIt->second.b };
-      exportGLTexture(it.second, it.first, tintRGB, additive, transform);
+      exportTexture(it.second, it.first, tintRGB, additive, transform);
     }
     else
     {
-      exportGLTexture(it.second, it.first, nullptr, additive, transform);
+      exportTexture(it.second, it.first, nullptr, additive, transform);
     }
   }
 

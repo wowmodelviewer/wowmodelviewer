@@ -10,26 +10,19 @@ include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 #############################
 if(WIN32)
   include(${CMAKE_SOURCE_DIR}/cmake/windows.cmake)
+elseif(APPLE)
+  add_definitions(-D_MAC)
+else()
+  add_definitions(-D_LINUX)
 endif()
 
 ######################################
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  if(WMV_X64)
-    # x64: static GLEW (libglew32.lib). The static-md headers come first so GLEW_STATIC mode is used
-    # consistently; the x64-windows include still provides png/jpeg/zlib, and ThirdParty the vendored
-    # glm. No glew DLL to ship.
-    add_definitions(-DGLEW_STATIC)
-    include_directories(${WMV_VCPKG_X64_STATIC}/include)
-    include_directories(${WMV_VCPKG_X64}/include)
-    include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
-    list(APPEND extralibs opengl32 ${WMV_VCPKG_X64_STATIC}/lib/libglew32.lib)
-  else()
-    include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
-    add_definitions(-DGLEW_STATIC)
-    list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/ThirdParty/libs/glew32s.lib)
-  endif()
+  # The viewport is Vulkan; nothing links OpenGL any more. This keeps the vendored headers (glm) on
+  # the include path for the code that used to pull them in through GLEW.
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
 endmacro()
 
 macro(use_cximage)

@@ -24,6 +24,7 @@ set(src CharInfos.cpp
     Model.cpp
     NPCInfos.cpp
     Plugin.cpp
+    TextureSource.cpp
     PluginManager.cpp
     metaclasses/Component.cpp
     metaclasses/Event.cpp
@@ -52,6 +53,7 @@ set(headers CharInfos.h
       NPCInfos.h
       Plugin.h
       PluginManager.h
+      TextureSource.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
       metaclasses/Container.h

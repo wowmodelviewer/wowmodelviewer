@@ -418,7 +418,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
   LOG_INFO << "nb textures to export :" << texToExport.size();
 
   for(auto& it : texToExport)
-      exportGLTexture(it.second, it.first);
+      exportTexture(it.second, it.first);
 
   return true;
 }

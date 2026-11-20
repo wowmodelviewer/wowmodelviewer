@@ -66,31 +66,25 @@
 
 // Protected methods
 //--------------------------------------------------------------------
-void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename, const float * tintRGB,
-                                     bool alphaFromLuminance, AdditiveTransform transform) const
+void ExporterPlugin::exportTexture(TextureID id, std::wstring filename, const float * tintRGB,
+                                   bool alphaFromLuminance, AdditiveTransform transform) const
 {
-  LOG_INFO << "Exporting GL texture with id " << id << "in" << filename.c_str();
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, id);
-
-  GLint width = 0, height = 0;
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+  LOG_INFO << "Exporting texture with id " << id << "in" << QString::fromStdWString(filename);
+  int width = 0, height = 0;
+  std::vector<unsigned char> pixels;
+  if (!core::readTexturePixels(id, width, height, pixels) || width <= 0 || height <= 0)
+  {
+    LOG_ERROR << "[texexport] texture" << id << "has no pixels; nothing written to" << QString::fromStdWString(filename);
+    return;
+  }
   if (std::getenv("WMV_MATDUMP"))
-    LOG_INFO << "[texexport] id" << id << "GL_TEXTURE_2D level0 =" << width << "x" << height;
+    LOG_INFO << "[texexport] id" << id << "level0 =" << width << "x" << height;
 
-  unsigned char * pixels = new unsigned char[(size_t)width * (size_t)height * 4];
-  glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
-
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDisable(GL_TEXTURE_2D);
-
-  saveRGBABuffer(pixels, width, height, filename, tintRGB, alphaFromLuminance, transform);
-  delete[] pixels;
+  saveRGBABuffer(pixels.data(), width, height, filename, tintRGB, alphaFromLuminance, transform);
 }
 
 // pixelsBGRA: GL_BGRA_EXT byte order (0=B,1=G,2=R,3=A per pixel), width*height*4 bytes -- the
-// same layout exportGLTexture() reads back from a live GL texture, and what an offscreen bake
+// same layout exportTexture() reads back from a live GL texture, and what an offscreen bake
 // (see FBXExporter::bakeCombinerTexture) produces via glReadPixels(..., GL_BGRA, ...). Shared so
 // both a live-texture export and a baked/computed one go through identical tint + save logic.
 void ExporterPlugin::saveRGBABuffer(unsigned char * pixelsBGRA, int width, int height, std::wstring filename,
@@ -165,7 +159,11 @@ void ExporterPlugin::saveRGBABuffer(unsigned char * pixelsBGRA, int width, int h
   {
     CxImage *newImage = new CxImage(0);
     newImage->CreateFromArray(pixelsBGRA, width, height, 32, (width*4), true);
+#if defined(_WIN32)
     newImage->Save(filename.c_str(), CXIMAGE_FORMAT_TGA);
+#else
+    newImage->Save(QString::fromStdWString(filename).toStdString().c_str(), CXIMAGE_FORMAT_TGA);
+#endif
   }
   else
   {

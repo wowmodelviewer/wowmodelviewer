@@ -35,7 +35,7 @@
 // Qt
 
 // Externals
-#include "GL/glew.h"
+#include "TextureSource.h"
 
 // Other libraries
 
@@ -144,14 +144,14 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // tinted result the viewport shows). Alpha is left untouched unless alphaFromLuminance is set:
     // then alpha is rewritten to max(r,g,b) per pixel (AFTER the additive transform) -- so a DCC
     // without our add-on can still treat black as transparent via the file's own alpha.
-    void exportGLTexture(GLuint id, std::wstring filename, const float * tintRGB = nullptr,
+    void exportTexture(TextureID id, std::wstring filename, const float * tintRGB = nullptr,
                          bool alphaFromLuminance = false,
                          AdditiveTransform transform = AdditiveTransform::None) const;
 
     // Saves an already-in-memory RGBA pixel buffer (GL_BGRA_EXT byte order) instead of reading one
     // back from a live GL texture -- used for a texture computed on the fly (see FBXExporter's
     // multi-texture-combiner bake) rather than sampled directly from the GPU. Shares the same
-    // optional tint-multiply + save logic as exportGLTexture().
+    // optional tint-multiply + save logic as exportTexture().
     void saveRGBABuffer(unsigned char * pixelsBGRA, int width, int height, std::wstring filename,
                         const float * tintRGB = nullptr, bool alphaFromLuminance = false,
                         AdditiveTransform transform = AdditiveTransform::None) const;

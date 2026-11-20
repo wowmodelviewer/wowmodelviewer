@@ -8,6 +8,7 @@
 #ifndef _GAMEFILE_H_
 #define _GAMEFILE_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -84,7 +85,7 @@ class _GAMEFILE_API_ GameFile : public Component
     struct chunkHeader
     {
       char magic[4];
-      unsigned __int32 size;
+      uint32_t size;
     };
 
     struct Chunk

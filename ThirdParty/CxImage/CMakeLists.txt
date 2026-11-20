@@ -59,7 +59,13 @@ endif()
 
 add_library(cximage STATIC ${SRC_FILES})
 set_property(TARGET cximage PROPERTY FOLDER "ThirdParty libraries")
-if(WMV_X64)
+# CxImage predates C++17 ('register').
+set_target_properties(cximage PROPERTIES CXX_STANDARD 14)
+if(NOT WIN32)
+  find_package(PNG REQUIRED)
+  find_package(JPEG REQUIRED)
+  target_link_libraries(cximage PUBLIC PNG::PNG JPEG::JPEG)
+elseif(WMV_X64)
   target_link_libraries(cximage ${WMV_VCPKG_X64}/lib/jpeg.lib ${WMV_VCPKG_X64}/lib/libpng16.lib)
 else()
   target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/ThirdParty/lib/jpeg.lib

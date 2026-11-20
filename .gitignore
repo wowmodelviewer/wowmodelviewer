@@ -44,3 +44,6 @@ __pycache__/
 /ThirdParty/fbx_x64
 /ThirdParty/ossl_build
 /ThirdParty/openssl_x64
+
+# local CMake build trees
+/build-*/
