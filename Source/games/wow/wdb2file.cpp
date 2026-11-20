@@ -1,3 +1,4 @@
+#include <cstring>
 #include "wdb2file.h"
 
 #include "GameFile.h"

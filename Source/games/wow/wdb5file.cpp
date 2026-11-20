@@ -1,3 +1,4 @@
+#include <cstring>
 #include "wdb5file.h"
 
 #include "logger/Logger.h"

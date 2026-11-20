@@ -1,3 +1,4 @@
+#include <cstring>
 #include "wdc2file.h"
 
 #include "logger/Logger.h"

@@ -76,7 +76,6 @@ jobs:
         with:
           version: 5.15.2
           arch: win64_msvc2019_64
-          tools: 'tools_openssl_x64,qt.tools.openssl.win_x64'
           cache: true
       - name: Vulkan SDK
         uses: humbletim/install-vulkan-sdk@v1.2
@@ -93,6 +92,16 @@ jobs:
             Invoke-WebRequest "$base/$f" -OutFile $f
             7z x $f "-o$dest" -y | Out-Null
           }
+      - name: OpenSSL 1.1 (Qt 5.15's HTTPS)
+        shell: pwsh
+        run: |
+          # Qt 5.15 loads OpenSSL 1.1 at run time (not 3.x); Qt's own repository no longer carries it.
+          Invoke-WebRequest "https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-1.1.1w.zip" -OutFile openssl.zip
+          7z x openssl.zip -oopenssl -y | Out-Null
+          $dlls = Get-ChildItem -Recurse openssl -Include libssl-1_1-x64.dll, libcrypto-1_1-x64.dll | Where-Object { $_.FullName -match 'x64' }
+          if ($dlls.Count -lt 2) { throw "OpenSSL 1.1 x64 DLLs not found in the archive" }
+          New-Item -ItemType Directory -Force openssl-bin | Out-Null
+          $dlls | Copy-Item -Destination openssl-bin
       - name: libpng, libjpeg (vcpkg)
         run: C:\vcpkg\vcpkg.exe install libpng:x64-windows libjpeg-turbo:x64-windows zlib:x64-windows
       - name: Configure
@@ -115,8 +124,7 @@ jobs:
           & "$env:QT_ROOT_DIR/bin/windeployqt.exe" --release --compiler-runtime --no-translations --no-opengl-sw "$d/wowmodelviewer.exe" "$d/core.dll" "$d/wow.dll"
           Get-ChildItem "ThirdParty/wxWidgets33/lib/vc14x_x64_dll/wx*u_*.dll" | Where-Object { $_.Name -notmatch 'ud_' } | Copy-Item -Destination $d
           Copy-Item "C:/vcpkg/installed/x64-windows/bin/*.dll" $d
-          $ssl = Get-ChildItem -Recurse "$env:IQTA_TOOLS", "$env:QT_ROOT_DIR/../../Tools" -Include libssl-1_1-x64.dll, libcrypto-1_1-x64.dll -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'Win_x64|x64' } | Select-Object -First 2
-          $ssl | Copy-Item -Destination $d
+          Copy-Item "openssl-bin/*.dll" $d
           foreach ($v in '9.2','10.0','10.1','12.0') { Copy-Item -Recurse "bin_support/wow/$v" "$d/games/wow/$v" }
           Copy-Item "bin_support/dbd/*.dbd" "$d/dbd"
           Copy-Item "bin_support/Encryption/extraEncryptionKeys.csv", "LICENSE", "THIRD-PARTY-NOTICES.txt", "installer/README.txt" $d
