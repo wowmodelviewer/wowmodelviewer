@@ -42,6 +42,7 @@ public:
   void doDelete(TextureID id);
 
 private:
+  TextureID takeId();
   TextureID m_nextId;
 };
 

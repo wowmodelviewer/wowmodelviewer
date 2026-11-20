@@ -79,7 +79,9 @@ public:
         return;
 
       doDelete(id);
-      names.erase(names.find(i->itemName()));
+      auto named = names.find(i->itemName());
+      if (named != names.end() && named->second == id)
+        names.erase(named);
       items.erase(items.find(id));
 
       delete i;

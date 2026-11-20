@@ -47,7 +47,7 @@ TextureID TextureManager::add(GameFile * file)
   }
 
   Texture * tex = new Texture(file);
-  tex->id = m_nextId++;
+  tex->id = takeId();
   tex->load();
   do_add(name, tex->id, tex);
   return tex->id;
@@ -55,10 +55,12 @@ TextureID TextureManager::add(GameFile * file)
 
 TextureID TextureManager::create(const QString & name)
 {
-  Texture * tex = new Texture(name);
-  tex->id = m_nextId++;
-  // a unique key, so two composites with the same label never share an id
-  do_add(QString("%1#%2").arg(name).arg(tex->id), tex->id, tex);
+  const TextureID id = takeId();
+  // a unique key, so two composites with the same label never share an id (and del finds it by its item name)
+  const QString key = QString("%1#%2").arg(name).arg(id);
+  Texture * tex = new Texture(key);
+  tex->id = id;
+  do_add(key, tex->id, tex);
   return tex->id;
 }
 
@@ -69,6 +71,13 @@ bool TextureManager::setPixels(TextureID id, int width, int height, const unsign
     return false;
   tex->setPixels(width, height, pixels, format);
   return true;
+}
+
+TextureID TextureManager::takeId()
+{
+  if (m_nextId == 50000)
+    m_nextId++; // ModelRenderPass::INVALID_TEX, a sentinel the model code compares texture ids with
+  return m_nextId++;
 }
 
 Texture * TextureManager::texture(TextureID id) const
