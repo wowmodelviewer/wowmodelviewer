@@ -40,6 +40,10 @@ set_property(TARGET wmvrender PROPERTY FOLDER "libraries")
 target_include_directories(wmvrender PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/ThirdParty PRIVATE ${gen_dir} ${shader_dir})
 target_link_libraries(wmvrender PUBLIC Vulkan::Vulkan Qt5::Core ${extralibs})
 
+if(WIN32)
+  # vulkan_win32.h brings windows.h, whose min/max macros would break std::min/std::max here.
+  target_compile_definitions(wmvrender PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()
 if(APPLE)
   set_source_files_properties(PlatformSurfaceMac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
   target_link_libraries(wmvrender PUBLIC "-framework AppKit" "-framework QuartzCore" "-framework Metal")
