@@ -4,9 +4,9 @@ name: Build
 
 on:
   push:
-    branches: [ develop, 'native/**' ]
+    branches: [ develop ]
     tags: [ 'v*' ]
-  pull_request:
+  pull_request:   # (a branch is built through its pull request; develop and tags on push)
   workflow_dispatch:
 
 env:

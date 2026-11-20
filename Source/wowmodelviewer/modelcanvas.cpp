@@ -29,9 +29,6 @@
 
 #include "logger/Logger.h"
 
-#if defined(__WXGTK__)
-#  include <gtk/gtk.h>
-#endif
 
 IMPLEMENT_CLASS(ModelCanvas, wxWindow)
 BEGIN_EVENT_TABLE(ModelCanvas, wxWindow)
@@ -194,7 +191,7 @@ bool ModelCanvas::ensureRenderer()
 #elif defined(__WXMSW__)
   native = GetHWND();
 #elif defined(__WXGTK__)
-  native = GTKGetDrawingWindow();  // its GdkWindow
+  native = (void *)GTKGetDrawingWindow();  // its GdkWindow (opaque here: GTK's headers clash with Qt's macros)
 #endif
   std::string error;
   m_renderer = wmv::vk::Viewport::create(native, error);
