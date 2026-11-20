@@ -63,11 +63,12 @@ QString AppPaths::homeDir()
 #if defined(_WIN32)
   return executableDir();
 #else
-  if (QDir(executableDir() + "/userSettings").exists())
-    return executableDir(); // portable
 #if defined(__APPLE__)
   return QDir::homePath() + "/Library/Application Support/WoW Model Viewer";
 #else
+  // A portable install (a folder unpacked anywhere, run from there): a file named "portable" next to the program.
+  if (QFile::exists(executableDir() + "/portable"))
+    return executableDir();
   const QByteArray xdg = qgetenv("XDG_DATA_HOME");
   const QString base = xdg.isEmpty() ? QDir::homePath() + "/.local/share" : QString::fromLocal8Bit(xdg);
   return base + "/wowmodelviewer";

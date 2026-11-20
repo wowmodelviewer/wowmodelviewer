@@ -10,7 +10,7 @@
  *  - THE HOME FOLDER: everything the viewer writes -- userSettings/ (settings, logs), dbcache/, the downloaded
  *    listfile and keys, Exports/. Next to the executable on Windows (as it always was); on macOS
  *    ~/Library/Application Support/WoW Model Viewer, on Linux $XDG_DATA_HOME/wowmodelviewer (~/.local/share), or the
- *    executable's folder when it has a userSettings folder already (a portable install).
+ *    executable's folder when a file named "portable" is next to it (a portable install, Linux).
  *
  * The viewer runs with the home folder as its working directory, so every relative path the code has always used
  * (userSettings/Config.ini, dbcache/, listfile.csv, games/wow/12.0/database.xml, dbd/) still resolves: prepareHome()
