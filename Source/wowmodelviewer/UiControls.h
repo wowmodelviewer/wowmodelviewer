@@ -59,6 +59,11 @@ public:
 
   void SetKind(Kind kind);
   Kind GetKind() const { return m_kind; }
+#ifndef __WXMSW__
+  // The native button shows only the faces (wxBU_NOTEXT, which empties its label on macOS), so the label is kept here.
+  void SetLabel(const wxString & label) wxOVERRIDE;
+  wxString GetLabel() const wxOVERRIDE { return m_faceLabel; }
+#endif
   void SetIcon(UiIcon icon);
   // A button in a dense row: the compact height.
   void SetCompact(bool compact);
@@ -89,6 +94,8 @@ private:
   bool m_iconAfter = false;
   bool m_iconOnly = false;
   bool m_hot = false;
+  wxString m_faceLabel;   // the label, with its mnemonic (see SetLabel)
+  wxString labelText() const;
 };
 
 // A colour to pick. Like UiButton it IS a native push button, only painted here: Space, Enter, Tab, focus,

@@ -2435,12 +2435,15 @@ void ModelViewer::ApplyViewerStartupLayout()
 
   // The panels come up as they were left: Browse, Model and Animation keep the shown state the
   // saved layout restored (LoadLayout), all three on a first run. The empty viewport says what to
-  // do next itself (the Unity viewport's notice), so hiding the panels that do it is no longer the
+  // do next itself (the viewport's notice), so hiding the panels that do it is no longer the
   // way to make an empty application look tidy.
 
   // Take the screen, as a window: maximised, with its title bar, so it can be minimised, restored
   // and moved like any other (View > Fullscreen still gives the borderless mode).
   Maximize(true);
+
+  // What the viewport shows before anything is loaded: the empty viewer's prompt.
+  UpdateViewportState();
 }
 
 // Borderless fullscreen, keeping the MENU BAR.

@@ -101,8 +101,27 @@ void UiSetAccessibleName(wxWindow * window, const wxString & name)
 
 // ========================================================================================= button
 
+wxString UiButton::labelText() const
+{
+#ifdef __WXMSW__
+  return GetLabelText();
+#else
+  return wxControl::RemoveMnemonics(m_faceLabel);
+#endif
+}
+
+#ifndef __WXMSW__
+void UiButton::SetLabel(const wxString & label)
+{
+  m_faceLabel = label;
+  wxButton::SetLabel(label); // still the button's accessible name
+  InvalidateBestSize();
+  makeFaces();
+}
+#endif
+
 UiButton::UiButton(wxWindow * parent, wxWindowID id, const wxString & label, Kind kind, UiIcon icon, long style)
-  : m_kind(kind), m_icon(icon)
+  : m_kind(kind), m_icon(icon), m_faceLabel(label)
 {
 #ifdef __WXMSW__
   Create(parent, id, label, wxDefaultPosition, wxDefaultSize, style | wxBORDER_NONE);
@@ -170,7 +189,7 @@ void UiButton::SetIconOnly(bool iconOnly)
 
 wxSize UiButton::DoGetBestSize() const
 {
-  const wxString label = m_iconOnly ? wxString() : GetLabelText();
+  const wxString label = m_iconOnly ? wxString() : labelText();
   // The design's height, or more when Windows' text size makes the label taller.
   const int height = std::max(FromDIP(m_compact ? UiStyle::CompactButtonHeight : UiStyle::ButtonHeight),
                               GetCharHeight() + FromDIP(m_compact ? 6 : 10));
@@ -289,7 +308,7 @@ void UiButton::paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, boo
     }
   }
 
-  const wxString label = m_iconOnly ? wxString() : GetLabelText();
+  const wxString label = m_iconOnly ? wxString() : labelText();
   dc.SetFont(GetFont());
   const wxSize text = label.IsEmpty() ? wxSize(0, 0) : dc.GetTextExtent(label);
   const int iconSize = m_icon == UiIcon::None ? 0 : FromDIP(UiStyle::IconSize);
