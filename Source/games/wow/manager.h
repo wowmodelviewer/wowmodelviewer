@@ -122,14 +122,14 @@ public:
     return result;
   }
 
+  // Forget every item, whatever its reference count (a client change, where nothing that held one survives).
   void clear()
   {
-    for (size_t i=0; i<50; i++) {
-      if(items.find((const unsigned int)i) != items.end()) {
-        del((GLuint)i);
-      }
+    for (auto & it : items)
+    {
+      doDelete(it.first);
+      delete it.second;
     }
-    
     names.clear();
     items.clear();
   }

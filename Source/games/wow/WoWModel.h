@@ -62,26 +62,22 @@ class QXmlStreamReader;
 
 class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
-  // VBO Data
-  GLuint vbuf, nbuf, tbuf;
-  size_t vbufsize;
-
-  // Non VBO Data
-  GLuint dlist;
   bool forceAnim;
 
   // ===============================
   // Texture data
   // ===============================
-  std::vector<GLuint> textures;
+  std::vector<TextureID> textures;
   std::vector<int> specialTextures;
-  std::vector<GLuint> replaceTextures;
+  std::vector<TextureID> replaceTextures;
 
-  // Owned GL texture holding the composited eye (TextureType 19): the coloured iris and the
+  // Owned texture (TEXTUREMANAGER.create) holding the composited eye (TextureType 19): the coloured iris and the
   // Eyesight glow are separate customization textures that target the same replaceTextures
   // slot, so they are layered into this one texture instead of overwriting each other.
   // Recreated each refresh, freed here and in ~WoWModel.
-  GLuint eyeCompositeTex_ = 0;
+  TextureID eyeCompositeTex_ = 0;
+  // Owned texture holding the composited body (CharTexture::compose); created on the first refresh.
+  TextureID charCompositeTex_ = 0;
   QImage eyeCompositeImage_;     // the pixels uploaded into eyeCompositeTex_ (see eyeCompositeImage)
 
   // Bumped whenever refresh() or refreshMerging() has rebuilt what the model draws; see stateVersion().
@@ -122,8 +118,6 @@ private:
   void animate(ssize_t anim);
   void calcBones(ssize_t anim, size_t time);
 
-  void lightsOn(GLuint lbase);
-  void lightsOff(GLuint lbase);
 
   std::vector<uint16> boundTris;
   std::vector<glm::vec3> bounds;
@@ -382,12 +376,12 @@ public:
   const std::set<int> & equipmentHiddenGroups() const { return equipmentHiddenGroups_; }
   unsigned int stateVersion() const { return stateVersion_; }
   const QImage & eyeCompositeImage() const { return eyeCompositeImage_; }
-  GLuint eyeCompositeTexture() const { return eyeCompositeTex_; }
+  TextureID eyeCompositeTexture() const { return eyeCompositeTex_; }
   // The M2 texture TYPE of this model's own texture slot (0 = a file texture), or -1 out of range.
   int textureTypeForSlot(size_t slot) const;
   const std::vector<ModelVertex> & sourceVertices() const { return rawVertices; }
-  // The FileDataID behind a GL texture id the texture manager created, or 0.
-  static int fileDataIdForGLTexture(GLuint id);
+  // The FileDataID behind a texture id the texture manager created, or 0.
+  static int fileDataIdForTexture(TextureID id);
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setGeosetDisplayById(int geosetId, bool display); // toggle the exact geoset id(s); never id 0
@@ -407,7 +401,7 @@ public:
   void refresh();
   
   QString getNameForTex(uint16 tex);
-  GLuint getGLTexture(uint16 tex) const;
+  TextureID getTexture(uint16 tex) const;
   void dumpTextureStatus();
 
   friend _WOWMODEL_API_ std::ostream& operator<<(std::ostream& out, const WoWModel& m);

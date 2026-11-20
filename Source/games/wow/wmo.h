@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include "GL/glew.h"
+#include "TextureSource.h"
 #include "glm/glm.hpp"
 
 
@@ -38,7 +38,7 @@ struct WMOMaterial {
   float f1,f2;
   int dx[5];
   // read up to here -_-
-  GLuint tex;
+  TextureID tex;
 };
 
 struct WMOPV {

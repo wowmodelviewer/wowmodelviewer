@@ -105,9 +105,9 @@ size_t CASCFile::read(void* dest, size_t bytes)
   }
   else
   {
-    unsigned long result = 0;
-    if (!CascReadFile(m_handle, dest, bytes, &result))
-      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+    DWORD result = 0;
+    if (!CascReadFile(m_handle, dest, (DWORD)bytes, &result))
+      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetCascError();
 
     return result;
   }
@@ -122,7 +122,7 @@ void CASCFile::seek(size_t offset)
   else
   {
     if (CascSetFilePointer(m_handle, offset, 0, FILE_BEGIN) == CASC_INVALID_POS)
-      LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetLastError();
+      LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetCascError();
   }
 }
 
@@ -133,7 +133,7 @@ bool  CASCFile::openFile()
   {
     return true;
   }
-  LOG_ERROR << "Opening" << filepath << "(ID:" << m_fileDataId << ")" << "failed." << "Error" << GetLastError();
+  LOG_ERROR << "Opening" << filepath << "(ID:" << m_fileDataId << ")" << "failed." << "Error" << GetCascError();
   return false;
 }
 
@@ -153,7 +153,7 @@ bool CASCFile::getFileSize(unsigned long long & s)
   {
     // s is only written for a real size: the caller must never see CASC_INVALID_SIZE as one.
     const DWORD fileSize = CascGetFileSize(m_handle, 0);
-    const DWORD error = GetLastError(); // before logging, which can reset it
+    const DWORD error = GetCascError(); // before logging, which can reset it
 
     if (fileSize == CASC_INVALID_SIZE)
     {
@@ -171,10 +171,10 @@ bool CASCFile::getFileSize(unsigned long long & s)
 
 unsigned long CASCFile::readFile()
 {
-  unsigned long result = 0;
+  DWORD result = 0;
   
-  if (!CascReadFile(m_handle, buffer, size, &result))
-    LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+  if (!CascReadFile(m_handle, buffer, (DWORD)size, &result))
+    LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetCascError();
   
   return result;
 }

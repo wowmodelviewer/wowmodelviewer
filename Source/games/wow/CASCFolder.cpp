@@ -6,6 +6,8 @@
  */
 
 #include "CASCFolder.h"
+#include "TString.h"
+#include "TString.h"
 
 #ifndef __CASCLIB_SELF__
   #define __CASCLIB_SELF__
@@ -102,9 +104,9 @@ bool CASCFolder::setConfig(core::GameConfig config)
       openArgs.dwLocaleMask = it->second;
       openArgs.PfnProgressCallback = &onCascOpenProgress;
       openArgs.PtrProgressParam = this;
-      const std::wstring cascPath = cascParams.toStdWString();
+      const wmv::tstring cascPath = wmv::toTString(cascParams);
       const bool cascOpened = CascOpenStorageEx(cascPath.c_str(), &openArgs, false, &opened);
-      const DWORD openError = cascOpened ? ERROR_SUCCESS : GetLastError(); // before anything logs (that can reset it)
+      const DWORD openError = cascOpened ? ERROR_SUCCESS : GetCascError(); // before anything logs (that can reset it)
       core::LoadTimeline::instance().end("casc open", cascOpened ? QString() : QString("failed"));
       if (!cascOpened)
       {

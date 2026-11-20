@@ -285,7 +285,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
     {
       bool bound = false;
       for (auto * pass : model->passes)
-        if (model->textureTypeForSlot(pass->tex) == t.first && model->getGLTexture(pass->tex) != ModelRenderPass::INVALID_TEX)
+        if (model->textureTypeForSlot(pass->tex) == t.first && model->getTexture(pass->tex) != ModelRenderPass::INVALID_TEX)
           bound = true;
       if (t.first != 1 && !bound) model->updateTextureList(GAMEDIRECTORY.getFile((uint)t.second), t.first);
     }
@@ -322,7 +322,7 @@ bool FBXExporter::exportCustomizationPackage(WoWModel * source, const std::wstri
         found = true;
         const int type = copy->textureTypeForSlot(pass->tex);
         if (pass->textureCount > 1 || type != TEXTURE_UI_SKIN || fallbackTextures.count(type) ||
-            copy->getGLTexture(pass->tex) != ModelRenderPass::INVALID_TEX)
+            copy->getTexture(pass->tex) != ModelRenderPass::INVALID_TEX)
           dormant = false;
         unboundType = type;
       }

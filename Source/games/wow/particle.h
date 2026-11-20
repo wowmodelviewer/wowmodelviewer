@@ -19,7 +19,7 @@ class RibbonEmitter;
 
 #include <list>
 #include <ostream>
-#include "GL/glew.h"
+#include "TextureSource.h"
 #include "glm/glm.hpp"
 
 class Bone;
@@ -69,7 +69,7 @@ class _PARTICLE_API_ ParticleSystem
 {
   float mid, slowdown, rotation;
   glm::vec3 pos, tpos;
-  GLuint texture, texture2, texture3;
+  TextureID texture, texture2, texture3;
   ParticleEmitter *emitter;
   ParticleList particles;
   int order, ParticleType;
@@ -198,7 +198,7 @@ class RibbonEmitter
   glm::vec4 tcolor;
   float tabove, tbelow;
 
-  GLuint texture;
+  TextureID texture;
 
   std::list<RibbonSegment> segs;
 

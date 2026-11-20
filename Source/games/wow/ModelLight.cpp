@@ -29,24 +29,16 @@ void ModelLight::init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & gl
   UseAttenuation.init(mld.useAttenuation, f, global);
 }
 
-void ModelLight::setup(size_t time, GLuint l)
+void ModelLight::evaluate(size_t time, glm::vec4 & p, glm::vec4 & diffcol, glm::vec4 & ambcol)
 {
-  glm::vec4 ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-  glm::vec4 diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
-  glm::vec4 p;
-  if (type==MODELLIGHT_DIRECTIONAL) {
-    // directional
+  ambcol = glm::vec4(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
+  diffcol = glm::vec4(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+  if (type == MODELLIGHT_DIRECTIONAL)
     p = glm::vec4(tdir, 0.0f);
-  } else if (type==MODELLIGHT_POINT) {
-    // point
+  else
+  {
     p = glm::vec4(tpos, 1.0f);
-  } else {
-    p = glm::vec4(tpos, 1.0f);
-    LOG_ERROR << "Light type" << type << "is unknown.";
+    if (type != MODELLIGHT_POINT)
+      LOG_ERROR << "Light type" << type << "is unknown.";
   }
-  //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  glLightfv(l, GL_POSITION, glm::value_ptr(p));
-  glLightfv(l, GL_DIFFUSE, glm::value_ptr(diffcol));
-  glLightfv(l, GL_AMBIENT, glm::value_ptr(ambcol));
-  glEnable(l);
 }

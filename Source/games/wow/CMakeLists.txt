@@ -33,7 +33,7 @@ set(src animated.cpp
       ModelTransparency.cpp
       particle.cpp
       RaceInfos.cpp
-      RenderTexture.cpp
+      RenderList.cpp
       TabardDetails.cpp
       Texture.cpp
       TextureAnim.cpp
@@ -92,7 +92,7 @@ set(headers animated.h
       MpqFileProvider.h
       particle.h
       RaceInfos.h
-      RenderTexture.h
+      RenderList.h
       TabardDetails.h
       TextureAnim.h
       types.h
@@ -129,7 +129,7 @@ set(NAME wow)
 add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs} glu32)
+target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs})
 add_dependencies(${NAME} casc_static storm)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")

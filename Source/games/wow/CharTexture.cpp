@@ -42,7 +42,7 @@ void CharTexture::reset(unsigned int _layoutSizeId)
 
 #define DEBUG_TEXTURE 0 // 1 output component names, 2 save intermediate images on disk
 
-void CharTexture::compose(GLuint texID)
+void CharTexture::compose(TextureID texID)
 {
   if (m_components.empty())
     return;
@@ -68,15 +68,13 @@ void CharTexture::compose(GLuint texID)
 
   lastImage_ = img;
 
-  // good, upload this to video. constBits(), not bits(): img now shares its pixels with lastImage_,
-  // and the non-const accessor would detach -- deep-copy the whole composite -- just to be read.
-  glBindTexture(GL_TEXTURE_2D, texID);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.constBits());
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  // constBits(), not bits(): img now shares its pixels with lastImage_, and the non-const accessor would
+  // detach -- deep-copy the whole composite -- just to be read. QImage's ARGB32 is BGRA in memory.
+  const QImage argb = img.format() == QImage::Format_ARGB32 ? img : img.convertToFormat(QImage::Format_ARGB32);
+  TEXTUREMANAGER.setPixels(texID, argb.width(), argb.height(), argb.constBits(), TEXTURE_BGRA);
 }
 
-GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent> & layersIn,
+TextureID CharTexture::composeStackToTexture(const std::vector<CharTextureComponent> & layersIn,
                                           QImage * outImage)
 {
   std::vector<CharTextureComponent> layers = layersIn;
@@ -124,12 +122,9 @@ GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent
     *outImage = composite;
 
   // constBits(): composite may share its pixels with *outImage, as in compose().
-  GLuint id = 0;
-  glGenTextures(1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, composite.width(), composite.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, composite.constBits());
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  const QImage argb = composite.format() == QImage::Format_ARGB32 ? composite : composite.convertToFormat(QImage::Format_ARGB32);
+  const TextureID id = TEXTUREMANAGER.create("Eye composite");
+  TEXTUREMANAGER.setPixels(id, argb.width(), argb.height(), argb.constBits(), TEXTURE_BGRA);
   return id;
 }
 
@@ -307,9 +302,9 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
     return nullptr;
   }
 
-  auto * tempbuf = (unsigned char*)malloc(tex->w*tex->h * 4);
+  auto * tempbuf = (unsigned char*)calloc((size_t)tex->w * tex->h, 4);
 
-  tex->getPixels(tempbuf, GL_BGRA_EXT);
+  tex->getPixels(tempbuf, TEXTURE_BGRA);
   QImage decoded(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
 
   TEXTUREMANAGER.del(temptex);

@@ -6,8 +6,8 @@
  */
 
 #include "Bone.h"
+#include "RenderList.h"
 
-#include "GL/glew.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -38,8 +38,10 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 
     if (billboard)
     {
-      float modelview[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+      // The modelview the bones are drawn under (GL's GL_MODELVIEW_MATRIX), column-major like GL's.
+      const wmv::RenderList * list = wmv::RenderList::current();
+      const glm::mat4 mv = list ? list->modelView() : glm::mat4(1.0f);
+      const float * modelview = &mv[0][0];
 
       glm::vec3 vRight = glm::vec3(modelview[0], modelview[4], modelview[8]);
       glm::vec3 vUp = glm::vec3(modelview[1], modelview[5], modelview[9]); // Spherical billboarding

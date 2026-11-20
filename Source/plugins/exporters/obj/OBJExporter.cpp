@@ -411,7 +411,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-      texToExport[tex.toStdWString()] = model->getGLTexture(p->tex);
+      texToExport[tex.toStdWString()] = model->getTexture(p->tex);
     }
   }
 

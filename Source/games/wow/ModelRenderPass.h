@@ -12,6 +12,8 @@
 
 #include "glm/glm.hpp"
 
+#include "RenderList.h"
+
 class WoWModel;
 
 #ifdef _WIN32
@@ -99,30 +101,13 @@ public:
   bool init(bool forExport = false);
   int BlendValueForMode(int mode);
 
-  // bakeUVSpace: only affects the multi-texture combiner path (combinerActive). When true, each
-  // vertex's clip-space position is remapped to its own texture-unit-0 UV coordinate instead of
-  // its real 3D position, so an offscreen FBO capture rasterizes per-texel into texture space
-  // (see FBXExporter::bakeCombinerTexture, which renders this into a texture to export the
-  // combiner's real per-pixel output instead of dropping every texture but unit 0). Has no effect
-  // outside the combiner path.
+  // Appends this pass to the current render list (wmv::RenderList::current()), with 'material'.
+  // bakeUVSpace: each vertex's position is replaced by its unit-0 UV coordinate in clip space, so an
+  // offscreen capture rasterizes per-texel into texture space (the FBX exporter's combiner bake).
   void render(bool animated, bool bakeUVSpace = false);
 
-  // Recompute this pass's texture-animation matrices (unit 0 'texanim', combiner unit 1
-  // 'texanim2') for an arbitrary animation time and reload them into the GL texture matrices,
-  // exactly as the live path does per frame. resetToIdentity loads plain identity instead --
-  // the REST state, i.e. the un-scrolled look a static render (or a viewport whose animation
-  // hasn't ticked) shows. Only valid between init() and deinit(). Used by the exporter's
-  // multi-instant combiner bake to sweep an animated (scrolling) overlay across its whole
-  // cycle -- and deliberately a member here: it calls glActiveTexture, which resolves through
-  // GLEW and so must run from code compiled into this module (GLEW's function pointers are
-  // per-module and only ever initialised here; a plugin calling it directly crashes).
-  void updateTexAnimMatrices(size_t time, bool resetToIdentity = false);
-
-  // Switch the blend equation between per-channel MAX and the normal ADD. Used by the exporter's
-  // combiner bake so overlapping additive planes keep their brightest fragment instead of either
-  // overwriting each other (blend off) or clipping to white (accumulate). A member here for the
-  // same GLEW-per-module reason as updateTexAnimMatrices: glBlendEquation resolves through GLEW.
-  static void setMaxBlendEquation(bool enable);
+  // What init() resolved for this pass: textures, blend, depth, texture matrices and the combiner.
+  wmv::Material material;
 
   void deinit();
 

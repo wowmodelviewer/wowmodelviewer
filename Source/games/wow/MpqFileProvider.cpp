@@ -5,6 +5,7 @@
  */
 
 #include "MpqFileProvider.h"
+#include "TString.h"
 
 #include <algorithm>
 #include <set>
@@ -163,7 +164,7 @@ int wow::MpqFileProvider::init(const QString & dataRoot, const QString & locale)
   for (const QString & path : list)
   {
     HANDLE h = 0;
-    const std::wstring wpath = path.toStdWString();
+    const wmv::tstring wpath = wmv::toTString(path);
     if (SFileOpenArchive(wpath.c_str(), 0, MPQ_OPEN_READ_ONLY, &h))
     {
       Archive a;
@@ -175,7 +176,7 @@ int wow::MpqFileProvider::init(const QString & dataRoot, const QString & locale)
     }
     else
     {
-      LOG_WARNING << "[mpq]   FAILED to open" << path << "(StormLib error" << (int)GetLastError() << ")";
+      LOG_WARNING << "[mpq]   FAILED to open" << path << "(StormLib error" << (int)SErrGetLastError() << ")";
     }
   }
 
@@ -223,7 +224,7 @@ bool wow::MpqFileProvider::closeFile(void * handle)
 {
   if (!handle)
     return false;
-  return SFileCloseFile(handle) != FALSE;
+  return SFileCloseFile(handle) != false;
 }
 
 QString wow::MpqFileProvider::archiveListString() const

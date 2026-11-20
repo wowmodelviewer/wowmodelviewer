@@ -3,7 +3,6 @@
 
 #include "glm/glm.hpp"
 
-typedef int GLint;
 
 class GameFile;
 
@@ -18,9 +17,7 @@ struct WMOLight {
   glm::vec4 fcolor;
 
   void init(GameFile &f);
-  void setup(GLint light);
 
-  static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol);
 };
 
 #endif

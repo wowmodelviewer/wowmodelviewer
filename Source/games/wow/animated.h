@@ -1,6 +1,7 @@
 #ifndef ANIMATED_H
 #define ANIMATED_H
 
+#include <iostream>
 #include <map>
 #include <cstring>
 #include <utility>

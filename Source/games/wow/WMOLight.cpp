@@ -4,38 +4,6 @@
 
 #include "GameFile.h"
 
-#include "GL/glew.h"
-
-void WMOLight::setup(GLint light)
-{
-  // not used right now -_-
-
-  GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
-  GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
-
-  glLightfv(light, GL_AMBIENT, LightAmbient);
-  glLightfv(light, GL_DIFFUSE, glm::value_ptr(fcolor));
-  glLightfv(light, GL_POSITION, LightPosition);
-
-  glEnable(light);
-}
-
-void WMOLight::setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol)
-{
-  glm::vec4 position(dir, 0);
-  //glm::vec4 position(0,1,0,0);
-
-  glm::vec4 ambient = glm::vec4(lcol * 0.3f, 1);
-  //glm::vec4 ambient = glm::vec4(0.101961f, 0.062776f, 0, 1);
-  glm::vec4 diffuse = glm::vec4(lcol, 1);
-  //glm::vec4 diffuse = glm::vec4(0.439216f, 0.266667f, 0, 1);
-
-  glLightfv(light, GL_AMBIENT, glm::value_ptr(ambient));
-  glLightfv(light, GL_DIFFUSE, glm::value_ptr(diffuse));
-  glLightfv(light, GL_POSITION, glm::value_ptr(position));
-
-  glEnable(light);
-}
 
 void WMOLight::init(GameFile &f)
 {

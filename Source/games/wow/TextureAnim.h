@@ -20,7 +20,8 @@ public:
 
   void calc(ssize_t anim, size_t time);
   void init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global);
-  void setup(ssize_t anim);
+  // The texture matrix for the values calc() computed (what setup() used to load into GL_TEXTURE).
+  glm::mat4 matrix(ssize_t anim) const;
 };
 
 

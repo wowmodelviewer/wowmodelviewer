@@ -505,7 +505,7 @@ bool FBXExporter::bakeCombinerTexture(WoWModel * model, ModelRenderPass * pass,
   for (int u = 0; u < pass->textureCount && u < 4; ++u)
   {
     uint16 tIndex = (u == 0) ? pass->tex : (u == 1) ? pass->tex2 : (u == 2) ? pass->tex3 : pass->tex4;
-    GLuint glTex = model->getGLTexture(tIndex);
+    GLuint glTex = model->getTexture(tIndex);
     if (glTex == ModelRenderPass::INVALID_TEX)
       continue;
     glBindTexture(GL_TEXTURE_2D, glTex);
@@ -617,7 +617,7 @@ bool FBXExporter::bakeCombinerTexture(WoWModel * model, ModelRenderPass * pass,
     const uint16 unitIdx[4] = { pass->tex, pass->tex2, pass->tex3, pass->tex4 };
     for (int u = 0; u < pass->textureCount && u < 4; ++u)
     {
-      const GLuint glTex = model->getGLTexture(unitIdx[u]);
+      const GLuint glTex = model->getTexture(unitIdx[u]);
       if (glTex == ModelRenderPass::INVALID_TEX || savedMinFilters.count(glTex))
         continue;
       glBindTexture(GL_TEXTURE_2D, glTex);
@@ -815,7 +815,7 @@ std::vector<FBXUnitMeta> FBXExporter::exportRawUnits(WoWModel * model, ModelRend
     }
 
     const uint16 texIdx = unitTex[u];
-    const GLuint glid = model->getGLTexture(texIdx);
+    const GLuint glid = model->getTexture(texIdx);
     if (texIdx == ModelRenderPass::INVALID_TEX || glid == ModelRenderPass::INVALID_TEX)
     {
       units.push_back(um); // no texture for this unit; keep it for uvSource/role alignment
@@ -953,7 +953,7 @@ void FBXExporter::createMaterials()
         const int gi = pass->geoIndex;
         const int gid = (gi >= 0 && gi < (int)m_p_model->geosets.size()) ? (int)m_p_model->geosets[gi]->id : -1;
         // pass->ecol / ocol are already set by init() from the color animation track.
-        const GLuint glid = m_p_model->getGLTexture(pass->tex);
+        const GLuint glid = m_p_model->getTexture(pass->tex);
         LOG_INFO << "[matdump] pass" << (int)i << "geoset" << gid << "(idx" << gi << ")"
                  << " tex=" << qPrintable(m_p_model->getNameForTex(pass->tex)) << "(idx" << (int)pass->tex << ")"
                  << " glId=" << (unsigned)glid << (glid == ModelRenderPass::INVALID_TEX ? "(INVALID)" : "")
@@ -1036,7 +1036,7 @@ void FBXExporter::createMaterials()
           for (int u = 0; u < 4; u++)
           {
             if (units[u] == ModelRenderPass::INVALID_TEX) continue;
-            const GLuint glid = m_p_model->getGLTexture(units[u]);
+            const GLuint glid = m_p_model->getTexture(units[u]);
             if (glid == ModelRenderPass::INVALID_TEX) continue;
             QString rawName = QString("rawtex_pass%1_unit%2_%3.png").arg(i).arg(u)
               .arg(QString(m_p_model->getNameForTex(units[u])).section('/', -1).section('\\', -1).replace(".blp",""));
@@ -1090,7 +1090,7 @@ void FBXExporter::createMaterials()
       if (baked)
         m_bakedTextures[tex_fullpath_filename.toStdWString()] = { std::move(bakedPixelsBGRA), bakedW, bakedH };
       else
-        m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getGLTexture(pass->tex);
+        m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getTexture(pass->tex);
       if (hasColorTint)
         m_textureTints[tex_fullpath_filename.toStdWString()] = { pass->ecol.r, pass->ecol.g, pass->ecol.b };
       if (additive)
@@ -1218,8 +1218,8 @@ void FBXExporter::createMaterials()
               }
               LOG_INFO << "[matdump-item] slot" << (int)It->first << " model=" << qPrintable(model->name())
                        << " pass" << (int)i
-                       << " tex=" << qPrintable(model->getNameForTex(pass->tex)) << "(idx" << (int)pass->tex << ", glId" << (unsigned)model->getGLTexture(pass->tex) << ")"
-                       << " TEX2=" << qPrintable(model->getNameForTex(pass->tex2)) << "(idx" << (int)pass->tex2 << ", glId" << (unsigned)model->getGLTexture(pass->tex2) << ")"
+                       << " tex=" << qPrintable(model->getNameForTex(pass->tex)) << "(idx" << (int)pass->tex << ", glId" << (unsigned)model->getTexture(pass->tex) << ")"
+                       << " TEX2=" << qPrintable(model->getNameForTex(pass->tex2)) << "(idx" << (int)pass->tex2 << ", glId" << (unsigned)model->getTexture(pass->tex2) << ")"
                        << " tex3=" << (int)pass->tex3 << " tex4=" << (int)pass->tex4
                        << " combiner=" << (int)pass->combinerActive
                        << " textureCount=" << pass->textureCount << " pixelShader=" << pass->pixelShader
@@ -1306,7 +1306,7 @@ void FBXExporter::createMaterials()
             if (baked)
               m_bakedTextures[tex_fullpath_filename.toStdWString()] = { std::move(bakedPixelsBGRA), bakedW, bakedH };
             else
-              m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getGLTexture(pass->tex);
+              m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getTexture(pass->tex);
             if (hasColorTint)
               m_textureTints[tex_fullpath_filename.toStdWString()] = { pass->ecol.r, pass->ecol.g, pass->ecol.b };
             if (additive)

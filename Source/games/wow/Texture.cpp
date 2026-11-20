@@ -1,26 +1,84 @@
-
 #define _TEXTURE_CPP_
 #include "Texture.h"
 #undef _TEXTURE_CPP_
 
 #include "GameFile.h"
-#include "video.h"
 
 #include <QImage>
 
-#include "GL/glew.h"
+#include <algorithm>
+#include <cstring>
 
 #include "ddslib.h"
 
+namespace
+{
+  enum DxtFormat { DXT1_RGB, DXT1_RGBA, DXT3, DXT5 };
+
+  // The ddslib decoders walk whole 4x4 blocks only, so a level smaller than a block (the 2x2 and 1x1 tail of a
+  // mip chain) decodes into a block-aligned scratch image that is then cropped.
+  void decodeDxt(DxtFormat format, unsigned int width, unsigned int height, unsigned char * src,
+                 std::vector<unsigned char> & out)
+  {
+    const unsigned int pw = (width + 3) & ~3u, ph = (height + 3) & ~3u;
+    std::vector<unsigned char> scratch((size_t)pw * ph * 4, 0);
+    switch (format)
+    {
+    case DXT1_RGB:
+    case DXT1_RGBA: DDSDecompressDXT1(src, (int)pw, (int)ph, scratch.data()); break;
+    case DXT3:      DDSDecompressDXT3(src, (int)pw, (int)ph, scratch.data()); break;
+    case DXT5:      DDSDecompressDXT5(src, (int)pw, (int)ph, scratch.data()); break;
+    }
+    out.resize((size_t)width * height * 4);
+    for (unsigned int y = 0; y < height; y++)
+      std::memcpy(&out[(size_t)y * width * 4], &scratch[(size_t)y * pw * 4], (size_t)width * 4);
+    if (format == DXT1_RGB) // no alpha in the format: what GL's RGB DXT1 upload showed
+      for (size_t i = 3; i < out.size(); i += 4)
+        out[i] = 0xff;
+  }
+}
+
 Texture::Texture(GameFile * f)
-: ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f)
+: ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f), generation(0)
 {
 }
 
-void Texture::getPixels(unsigned char* buf, unsigned int format)
+Texture::Texture(const QString & name)
+: ManagedItem(name), w(0), h(0), id(0), compressed(false), file(nullptr), generation(0)
 {
-  glBindTexture(GL_TEXTURE_2D, id);
-  glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buf);
+}
+
+void Texture::getPixels(unsigned char * buf, unsigned int format) const
+{
+  if (mips.empty() || !buf)
+    return;
+  const std::vector<unsigned char> & level = mips[0];
+  if (format == TEXTURE_BGRA)
+  {
+    for (size_t i = 0; i + 3 < level.size(); i += 4)
+    {
+      buf[i] = level[i + 2]; buf[i + 1] = level[i + 1]; buf[i + 2] = level[i]; buf[i + 3] = level[i + 3];
+    }
+  }
+  else
+    std::memcpy(buf, level.data(), level.size());
+}
+
+void Texture::setPixels(int width, int height, const unsigned char * pixels, unsigned int format)
+{
+  w = width;
+  h = height;
+  compressed = false;
+  mips.assign(1, std::vector<unsigned char>());
+  if (width > 0 && height > 0 && pixels)
+  {
+    std::vector<unsigned char> & level = mips[0];
+    level.assign(pixels, pixels + (size_t)width * height * 4);
+    if (format == TEXTURE_BGRA)
+      for (size_t i = 0; i + 3 < level.size(); i += 4)
+        std::swap(level[i], level[i + 2]);
+  }
+  generation++;
 }
 
 void Texture::load()
@@ -28,11 +86,8 @@ void Texture::load()
   // Vars
   int offsets[16], sizes[16], type = 0;
   uint width = 0, height = 0;
-  GLint format = 0;
   char attr[4];
-
-  // bind the texture
-  glBindTexture(GL_TEXTURE_2D, id);
+  mips.clear();
 
   if (!file || !file->open() || file->isEof()) 
   {
@@ -74,7 +129,6 @@ void Texture::load()
     */
     LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type=" << type;
 
-    BYTE *buffer = NULL;
     unsigned char *buf = new unsigned char[sizes[0]];
 
     file->seek(offsets[0]);
@@ -90,10 +144,9 @@ void Texture::load()
     image = image.mirrored();
     image = image.convertToFormat(QImage::Format_RGBA8888);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-    delete buffer;
-    buffer = nullptr;
+    w = image.width();
+    h = image.height();
+    mips.emplace_back(image.constBits(), image.constBits() + (size_t)w * h * 4);
     delete [] buf;
     buf = nullptr;
   }
@@ -115,31 +168,27 @@ void Texture::load()
       The image data are formatted using DXT5 compression.
       */
       // encoding 2, directx compressed
-      unsigned char *ucbuf = NULL;
-      if (!video.supportCompression)
-        ucbuf = new unsigned char[width*height * 4];
-
-      format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+      DxtFormat format = DXT1_RGBA;
       int blocksize = 8;
 
       // guesswork here :(
       // new alpha bit depth == 4 for DXT3, alfred 2008/10/11
       if (attr[1] == 8 || attr[1] == 4) 
       {
-        format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+        format = DXT3;
         blocksize = 16;
       }
      
       if(attr[1] == 0 && attr[2] == 0)
 	  {
-        format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+        format = DXT1_RGB;
       }
       
 
       // Fix to the BLP2 format required in WoW 2.0 thanks to Linghuye (creator of MyWarCraftStudio)
       if (attr[1] == 8 && attr[2] == 7) 
       {
-        format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+        format = DXT5;
         blocksize = 16;
       }
 
@@ -157,17 +206,12 @@ void Texture::load()
           file->seek(offsets[i]);
           file->read(buf, sizes[i]);
 
-          int size = ((width + 3) / 4) * ((height + 3) / 4) * blocksize;
+          const size_t size = (size_t)((width + 3) / 4) * ((height + 3) / 4) * blocksize;
+          if (size > (size_t)sizes[i])
+            break; // a truncated level: keep the ones before it
 
-          if (video.supportCompression) 
-          {
-            glCompressedTexImage2DARB(GL_TEXTURE_2D, (GLint)i, format, width, height, 0, size, buf);
-          }
-          else 
-          {
-            decompressDXTC(format, width, height, size, buf, ucbuf);
-            glTexImage2D(GL_TEXTURE_2D, (GLint)i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ucbuf);
-          }
+          mips.emplace_back();
+          decodeDxt(format, width, height, buf, mips.back());
 
         }
         else
@@ -180,11 +224,6 @@ void Texture::load()
 
       delete [] buf;
       buf = nullptr;
-      if (!video.supportCompression)
-      {
-        delete ucbuf;
-    ucbuf = nullptr;
-      }
 
     }
     else if (attr[0] == 1) 
@@ -270,7 +309,8 @@ void Texture::load()
             }
           }
 
-          glTexImage2D(GL_TEXTURE_2D, (GLint)i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
+          const unsigned char * bytes = reinterpret_cast<const unsigned char *>(buf2);
+          mips.emplace_back(bytes, bytes + (size_t)width * height * 4);
 
         }
         else break;
@@ -291,100 +331,5 @@ void Texture::load()
   }
 
   file->close();
-  /*
-  // TODO: Add proper support for mipmaps
-  if (hasmipmaps) {
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  } else {
-  */
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //}
-}
-
-/*
-struct Color {
-unsigned char r, g, b;
-};
-*/
-
-void Texture::decompressDXTC(GLint format, int W, int H, size_t size, unsigned char *src, unsigned char *dest)
-{
-  // DXT1 Textures, currently being handles by our routine below
-  if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) 
-  {
-    DDSDecompressDXT1(src, W, H, dest);
-    return;
-  }
-
-  // DXT3 Textures
-  if (format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) 
-  {
-    DDSDecompressDXT3(src, W, H, dest);
-    return;
-  }
-
-  // DXT5 Textures
-  if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)  
-  {
-    //DXT5UnpackAlphaValues(src, w, h, dest);
-    DDSDecompressDXT5(src, W, H, dest);
-    return;
-  }
-
-  /*
-  // sort of copied from linghuye
-  int bsx = (w<4) ? w : 4;
-  int bsy = (h<4) ? h : 4;
-
-  for(int y=0; y<h; y += bsy) {
-  for(int x=0; x<w; x += bsx) {
-  //unsigned long alpha = 0;
-  //unsigned int a0 = 0, a1 = 0;
-
-  unsigned int c0 = *(unsigned short*)(src + 0);
-  unsigned int c1 = *(unsigned short*)(src + 2);
-  src += 4;
-
-  Color color[4];
-  color[0].b = (unsigned char) ((c0 >> 11) & 0x1f) << 3;
-  color[0].g = (unsigned char) ((c0 >>  5) & 0x3f) << 2;
-  color[0].r = (unsigned char) ((c0      ) & 0x1f) << 3;
-  color[1].b = (unsigned char) ((c1 >> 11) & 0x1f) << 3;
-  color[1].g = (unsigned char) ((c1 >>  5) & 0x3f) << 2;
-  color[1].r = (unsigned char) ((c1      ) & 0x1f) << 3;
-
-  if(c0 > c1 || format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) {
-  color[2].r = (color[0].r * 2 + color[1].r) / 3;
-  color[2].g = (color[0].g * 2 + color[1].g) / 3;
-  color[2].b = (color[0].b * 2 + color[1].b) / 3;
-  color[3].r = (color[0].r + color[1].r * 2) / 3;
-  color[3].g = (color[0].g + color[1].g * 2) / 3;
-  color[3].b = (color[0].b + color[1].b * 2) / 3;
-  } else {
-  color[2].r = (color[0].r + color[1].r) / 2;
-  color[2].g = (color[0].g + color[1].g) / 2;
-  color[2].b = (color[0].b + color[1].b) / 2;
-  color[3].r = 0;
-  color[3].g = 0;
-  color[3].b = 0;
-  }
-
-  for (ssize_t j=0; j<bsy; j++) {
-  unsigned int index = *src++;
-  unsigned char* dd = dest + (w*(y+j)+x)*4;
-  for (size_t i=0; i<bsx; i++) {
-  *dd++ = color[index & 0x03].b;
-  *dd++ = color[index & 0x03].g;
-  *dd++ = color[index & 0x03].r;
-  //if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)  {
-  *dd++ = ((index & 0x03) == 3 && c0 <= c1) ? 0 : 255;
-  //}
-  index >>= 2;
-  }
-  }
-  }
-  }
-  */
+  generation++;
 }

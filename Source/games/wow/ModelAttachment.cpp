@@ -6,10 +6,10 @@
  */
 
 #include "ModelAttachment.h"
+#include "RenderList.h"
 
 #include "Bone.h"
 #include "WoWModel.h"
-#include "GL/glew.h"
 
 #include "glm/gtc/type_ptr.hpp"
 
@@ -24,14 +24,14 @@ void ModelAttachment::init(ModelAttachmentDef &mad)
 
 void ModelAttachment::setup() const
 {
-  glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
-  glTranslatef(pos.x, pos.y, pos.z);
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->multiply(model->bones[bone].mat);
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->translate(pos);
 }
 
 void ModelAttachment::setupParticle() const
 {
-  glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
-  glTranslatef(pos.x, pos.y, pos.z);
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->multiply(model->bones[bone].mat);
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->translate(pos);
 }
 
 

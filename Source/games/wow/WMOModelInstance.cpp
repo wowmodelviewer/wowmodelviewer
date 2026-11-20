@@ -5,7 +5,7 @@
 #include "ModelManager.h"
 #include "WoWModel.h"
 
-#include "GL/glew.h"
+#include "RenderList.h"
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -49,26 +49,19 @@ void WMOModelInstance::init(int fileDataID, GameFile &f)
   readDoodadTransform(*this, f);
 }
 
-void glQuaternionRotate(const glm::vec3& vdir, float w)
-{
-  glm::fquat q(w, vdir);
-  glm::mat4 m = glm::inverse(glm::toMat4(q));
-  glMultMatrixf(glm::value_ptr(m));
-}
-
 void WMOModelInstance::draw()
 {
-  if (!model) return;
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!model || !list) return;
 
-  glPushMatrix();
-
-  glTranslatef(pos.x, pos.y, pos.z);
-  glm::vec3 vdir(-dir.z, dir.x, dir.y);
-  glQuaternionRotate(vdir, w);
-  glScalef(sc, -sc, -sc);
+  list->push();
+  list->translate(pos);
+  const glm::vec3 vdir(-dir.z, dir.x, dir.y);
+  list->multiply(glm::inverse(glm::toMat4(glm::fquat(w, vdir))));
+  list->scale(glm::vec3(sc, -sc, -sc));
 
   model->draw();
-  glPopMatrix();
+  list->pop();
 }
 
 void WMOModelInstance::loadModel(ModelManager &mm)

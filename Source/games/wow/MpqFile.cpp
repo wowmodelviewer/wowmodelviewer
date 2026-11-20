@@ -72,7 +72,7 @@ unsigned long wow::MpqFile::readFile()
   DWORD result = 0;
   // size is 64-bit but SFileReadFile takes a DWORD; every real WoW MPQ file is far below 4 GB
   // (same assumption CASCFile makes with CascReadFile), so the cast is safe in practice.
-  // SFileReadFile returns FALSE at end-of-file even when it filled the buffer, so only treat a
+  // SFileReadFile returns false at end-of-file even when it filled the buffer, so only treat a
   // zero-byte read as a real failure.
   if (!SFileReadFile(m_handle, buffer, static_cast<DWORD>(size), &result, nullptr) && result == 0)
     LOG_ERROR << "[mpq] Reading" << filepath << "failed.";
@@ -119,7 +119,7 @@ bool wow::MpqFile::doPostCloseOperation()
   {
     void * saved = m_handle;
     m_handle = 0;
-    return SFileCloseFile(saved) != FALSE;
+    return SFileCloseFile(saved) != false;
   }
   return true;
 }

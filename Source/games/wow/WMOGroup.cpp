@@ -43,14 +43,9 @@ struct WMOGroupHeader {
   int32 unk3; // Always 0?
 };
 
-void setGLColor(unsigned int col)
+static glm::vec4 vertexColour(unsigned int col)
 {
-  //glColor4ubv((GLubyte*)(&col));
-  GLubyte r, g, b;
-  r = (col & 0x00FF0000) >> 16;
-  g = (col & 0x0000FF00) >> 8;
-  b = (col & 0x000000FF);
-  glColor4ub(r, g, b, 1);
+  return glm::vec4(((col & 0x00FF0000) >> 16) / 255.0f, ((col & 0x0000FF00) >> 8) / 255.0f, (col & 0x000000FF) / 255.0f, 1.0f);
 }
 
 
@@ -346,19 +341,8 @@ void WMOGroup::initDisplayList()
 
   initLighting(nLR, useLights);
 
-  dl = glGenLists(1);
-  glNewList(dl, GL_COMPILE);
-  glDisable(GL_BLEND);
-
-  glColor4f(1, 1, 1, 1);
-
-  //  float xr=0,xg=0,xb=0;
-  //  if (flags & 0x0040) xr = 1;
-  //  if (flags & 0x2000) xg = 1;
-  //  if (flags & 0x8000) xb = 1;
-  //  glColor4f(xr,xg,xb,1);
-
-  // assume that texturing is on, for unit 1
+  // The batches, recorded once (GL compiled them into a display list); draw() appends them each frame.
+  m_batches.clear();
 
   for (size_t b = 0; b<nBatches; b++) {
     WMOBatch *batch = &batches[b];
@@ -367,78 +351,39 @@ void WMOGroup::initDisplayList()
     // batch flag 0x2 is set the index is the 16-bit value in the second bounding box (a[5] ==
     // possibleBox2[2]); otherwise it's the 8-bit 'texture' field. Matches the reference implementation:
     //   matID = (flags & 2) ? possibleBox2[2] : materialID
-    // Using the 8-bit field unconditionally bound the wrong material -> wrong textures.
     const uint32 matID = (batch->flags & 0x2) ? batch->a[5] : batch->texture;
     if (matID >= wmo->nTextures)
       continue; // out-of-range material id -> skip (don't index wmo->mat out of bounds)
     WMOMaterial *mat = &wmo->mat[matID];
 
-    // NOTE: a dead "build IndiceToVerts" loop used to live here. The array was allocated and
-    // written but never read anywhere, and its `i <= batch->indexCount` bound wrote one element
-    // past `new uint32[nIndices]` (for the last batch, index nIndices) -- the exact heap
-    // corruption that crashed on retail WMOs. The reference implementation has no such mapping; removed entirely.
-
-    // setup texture
-    glBindTexture(GL_TEXTURE_2D, mat->tex);
-
-    bool atest = (mat->transparent) != 0;
-
-    if (atest) {
-      glEnable(GL_ALPHA_TEST);
-      float aval = 0;
-      if (mat->flags & 0x80) aval = 0.3f;
-      if (mat->flags & 0x01) aval = 0.0f;
-      glAlphaFunc(GL_GREATER, aval);
+    wmv::Material m;
+    m.tex[0] = mat->tex;
+    m.unlit = hascv;
+    if (mat->transparent)
+    {
+      m.alphaTest = true;
+      m.alphaRef = 0.0f;
+      if (mat->flags & 0x80) m.alphaRef = 0.3f;
+      if (mat->flags & 0x01) m.alphaRef = 0.0f;
     }
+    m.cull = !(mat->flags & WMO_MATERIAL_CULL);
+    if ((mat->flags & 0x10) && !hascv) // overbright
+      m.emissive = glm::vec4(1, 1, 1, 1);
 
-    if (mat->flags & WMO_MATERIAL_CULL)
-      glDisable(GL_CULL_FACE);
-    else
-      glEnable(GL_CULL_FACE);
-
-    //    float fr,fg,fb;
-    //    fr = rand()/(float)RAND_MAX;
-    //    fg = rand()/(float)RAND_MAX;
-    //    fb = rand()/(float)RAND_MAX;
-    //    glColor4f(fr,fg,fb,1);
-
-    bool overbright = ((mat->flags & 0x10) && !hascv);
-    if (overbright) {
-      // TODO: use emissive color from the WMO Material instead of 1,1,1,1
-      GLfloat em[4] = { 1, 1, 1, 1 };
-      glMaterialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    // render
-    glBegin(GL_TRIANGLES);
+    const uint32_t first = m_batches.indexMark();
     for (size_t t = 0, i = batch->indexStart; t<batch->indexCount; t++, i++) {
       if (i >= nIndices) break;          // batch index range runs past the index buffer
       uint32 a = indices[i];
       if (a >= nVertices) continue;      // bad vertex index -> skip (no out-of-bounds read)
-      if (indoor && hascv && cv)
-        setGLColor(cv[a]);
-      if (normals)
-        glNormal3f(normals[a].x, normals[a].y, normals[a].z);
-      if (texcoords)
-        glTexCoord2fv(glm::value_ptr(texcoords[a]));
-      glVertex3f(vertices[a].x, vertices[a].y, vertices[a].z); // direct Z-up, matching M2
+      wmv::Vertex v;
+      v.pos = vertices[a];               // direct Z-up, matching M2
+      v.normal = normals ? normals[a] : glm::vec3(0, 0, 1);
+      v.uv0 = v.uv1 = texcoords ? texcoords[a] : glm::vec2(0.0f);
+      v.color = (indoor && hascv && cv) ? vertexColour(cv[a]) : glm::vec4(1.0f);
+      m_batches.addIndex(m_batches.addVertex(v));
     }
-    glEnd();
-
-    if (overbright) {
-      GLfloat em[4] = { 0, 0, 0, 1 };
-      glMaterialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    if (atest) {
-      glDisable(GL_ALPHA_TEST);
-    }
+    m_batches.draw(m, first);
   }
-
-  glColor4f(1, 1, 1, 1);
-  glEnable(GL_CULL_FACE);
-
-  glEndList();
 
   gf.close();
 
@@ -451,7 +396,6 @@ void WMOGroup::initDisplayList()
 
 void WMOGroup::initLighting(int nLR, short *useLights)
 {
-  dl_light = 0;
   // "real" lighting?
   if ((flags & 0x2000) && hascv) {
 
@@ -493,16 +437,8 @@ void WMOGroup::draw()
 
   visible = true;
 
-  if (hascv) {
-    glDisable(GL_LIGHTING);
-  }
-  //setupFog();
-
-  glCallList(dl);
-
-  if (hascv) {
-    glEnable(GL_LIGHTING);
-  }
+  if (wmv::RenderList * list = wmv::RenderList::current())
+    list->append(m_batches);
 }
 
 void WMOGroup::drawDoodads(int doodadset)
@@ -522,7 +458,6 @@ void WMOGroup::drawDoodads(int doodadset)
   */
 
   // draw doodads
-  glColor4f(1, 1, 1, 1);
   for (size_t i = 0; i<nDoodads; i++) {
     short dd = ddr[i];
 
@@ -539,21 +474,11 @@ void WMOGroup::drawDoodads(int doodadset)
 
       WMOModelInstance &mi = wmo->modelis[dd];
 
-      if (!outdoorLights) {
-        glDisable(GL_LIGHT0);
-        WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
-      }
-      else {
-        glEnable(GL_LIGHT0);
-      }
-
+      // (GL lit an indoor doodad with its nearest WMO light; the viewport lights every model alike.)
+      (void)mi;
       wmo->modelis[dd].draw();
     }
   }
-
-  glDisable(GL_LIGHT2);
-
-  glColor4f(1, 1, 1, 1);
 
 }
 
@@ -603,7 +528,7 @@ void WMOGroup::setupFog()
 // these used to be set first -- and ~WMOGroup -> cleanup() still reads dl_light and deletes
 // batches, so leaving them to chance deleted an uninitialised pointer when the WMO was replaced.
 WMOGroup::WMOGroup() :
-wmo(NULL), flags(0), dl(0), dl_light(0), center(0.0f), rad(0.0f), num(-1), fog(-1), nDoodads(0),
+wmo(NULL), flags(0), center(0.0f), rad(0.0f), num(-1), fog(-1), nDoodads(0),
 ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
 indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
 nIndices(0), nBatches(0), cv(NULL), batches(NULL), VertexColors(NULL),
@@ -620,10 +545,7 @@ WMOGroup::~WMOGroup()
 
 void WMOGroup::cleanup()
 {
-  if (dl) glDeleteLists(dl, 1);
-  dl = 0;
-  if (dl_light) glDeleteLists(dl_light, 1);
-  dl_light = 0;
+  m_batches.clear();
   ok = false;
 
   delete vertices;

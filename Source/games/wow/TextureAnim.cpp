@@ -7,7 +7,8 @@
 
 #include "TextureAnim.h"
 
-#include "GL/glew.h"
+#include "glm/gtc/matrix_transform.hpp"
+
 
 void TextureAnim::calc(ssize_t anim, size_t time)
 {
@@ -22,18 +23,16 @@ void TextureAnim::calc(ssize_t anim, size_t time)
   }
 }
 
-void TextureAnim::setup(ssize_t anim)
+glm::mat4 TextureAnim::matrix(ssize_t anim) const
 {
-  glLoadIdentity();
-  if (trans.uses(anim)) {
-    glTranslatef(tval.x, tval.y, tval.z);
-  }
-  if (rot.uses(anim)) {
-    glRotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
-  }
-  if (scale.uses(anim)) {
-    glScalef(sval.x, sval.y, sval.z);
-  }
+  glm::mat4 m(1.0f);
+  if (trans.uses(anim))
+    m = glm::translate(m, tval);
+  if (rot.uses(anim))
+    m = glm::rotate(m, glm::radians(rval.x), glm::vec3(0, 0, 1)); // as the GL path did: rval.x degrees about z
+  if (scale.uses(anim))
+    m = glm::scale(m, sval);
+  return m;
 }
 
 void TextureAnim::init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global)

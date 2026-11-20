@@ -80,7 +80,7 @@ namespace
     return QString("%1%2").arg(kind).arg((qulonglong)(quintptr)m, 0, 16);
   }
 
-  // One texture binding, from the GL texture a render pass binds -- WoWModel::getGLTexture, the call
+  // One texture binding, from the GL texture a render pass binds -- WoWModel::getTexture, the call
   // ModelRenderPass::init makes -- so the answer is the host's own binding by construction.
   //   name 0                     the body composite (CharTexture::compose uploads into name 0)
   //   the eye composite's name   the eye composite
@@ -106,7 +106,7 @@ namespace
       summary.images++;
       return true;
     }
-    const int fdid = WoWModel::fileDataIdForGLTexture(id);
+    const int fdid = WoWModel::fileDataIdForTexture(id);
     if (fdid <= 0)
       return false;
     t["fileDataID"] = fdid;
@@ -132,7 +132,7 @@ namespace
   {
     if (id == ModelRenderPass::INVALID_TEX || id == 0)
       return false;
-    const int fdid = WoWModel::fileDataIdForGLTexture(id);
+    const int fdid = WoWModel::fileDataIdForTexture(id);
     if (fdid <= 0)
       return false;
     t["fileDataID"] = fdid;
@@ -224,7 +224,7 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
     QJsonObject body;
     QJsonArray textures;
     for (int slot = 0; slot < ownTextureCount(character); slot++)
-      addTexture(textures, slot, character->textureTypeForSlot(slot), character->getGLTexture((uint16)slot),
+      addTexture(textures, slot, character->textureTypeForSlot(slot), character->getTexture((uint16)slot),
                  character, imageRef, summary);
     summary.bodyTextures = textures.size();
     body["textures"] = textures;
@@ -282,7 +282,7 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
         const size_t combined = (size_t)part.mergeIndex * TEXTURE_MAX + (size_t)slot;
         if (combined > 0xFFFF)
           break;
-        addTexture(textures, slot, part.model->textureTypeForSlot(slot), character->getGLTexture((uint16)combined),
+        addTexture(textures, slot, part.model->textureTypeForSlot(slot), character->getTexture((uint16)combined),
                    character, imageRef, summary);
       }
       o["textures"] = textures;
@@ -330,7 +330,7 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
       o["scale"] = m->scale_;
       QJsonArray textures;
       for (int slot = 0; slot < ownTextureCount(m); slot++)
-        addTexture(textures, slot, m->textureTypeForSlot(slot), m->getGLTexture((uint16)slot),
+        addTexture(textures, slot, m->textureTypeForSlot(slot), m->getTexture((uint16)slot),
                    character, imageRef, summary);
       o["textures"] = textures;
       const size_t own = std::min(m->ownGeosetCount(), m->geosets.size());
@@ -374,7 +374,7 @@ QJsonObject UnityCharacterScene::buildMount(WoWModel * character, const Mount & 
   // rider model). Applied by the host to the rider mesh.
   o["riderScale"] = character->scale_;
 
-  // The mount's own slots, as its render passes bind them (WoWModel::getGLTexture). A model that did not load
+  // The mount's own slots, as its render passes bind them (WoWModel::getTexture). A model that did not load
   // has no texture table to read.
   QJsonArray textures;
   const int slotCount = m->ok ? ownTextureCount(m) : 0;
@@ -383,7 +383,7 @@ QJsonObject UnityCharacterScene::buildMount(WoWModel * character, const Mount & 
     QJsonObject t;
     t["slot"] = slot;
     t["type"] = m->textureTypeForSlot(slot);
-    if (mountBinding(t, m->getGLTexture((uint16)slot)))
+    if (mountBinding(t, m->getTexture((uint16)slot)))
       textures.append(t);
   }
   o["textures"] = textures;
@@ -424,7 +424,7 @@ quint64 UnityCharacterScene::signature(WoWModel * character, const Mount * mount
   for (size_t i = 0; i < character->geosets.size(); i++)
     f.add(character->geosets[i] && character->geosets[i]->display ? 1 : 0);
   for (int slot = 0; slot < ownTextureCount(character); slot++)
-    f.add(character->getGLTexture((uint16)slot));
+    f.add(character->getTexture((uint16)slot));
   // Attached items change without the character refreshing: View > Attachments' render and scale, a
   // selection that re-skins an item model, its own geoset checkboxes.
   for (const AttachedModel & a : attachedModels(character))
@@ -435,7 +435,7 @@ quint64 UnityCharacterScene::signature(WoWModel * character, const Mount * mount
     f.add(a.model->mirrored_ ? 1 : 0);
     f.add((quint64)(a.model->scale_ * 1000.0f));
     for (int slot = 0; slot < ownTextureCount(a.model); slot++)
-      f.add(a.model->getGLTexture((uint16)slot));
+      f.add(a.model->getTexture((uint16)slot));
     for (size_t i = 0; i < a.model->geosets.size(); i++)
       f.add(a.model->geosets[i] && a.model->geosets[i]->display ? 1 : 0);
   }
@@ -453,7 +453,7 @@ quint64 UnityCharacterScene::signature(WoWModel * character, const Mount * mount
     f.add((quint64)(qint64)(character->scale_ * 1000.0f));
     const int slotCount = m->ok ? ownTextureCount(m) : 0;
     for (int slot = 0; slot < slotCount; slot++)
-      f.add(m->getGLTexture((uint16)slot));
+      f.add(m->getTexture((uint16)slot));
     for (size_t i = 0; i < m->geosets.size(); i++)
       f.add(m->geosets[i] && m->geosets[i]->display ? 1 : 0);
     const bool colours = replacesParticleColors(m);

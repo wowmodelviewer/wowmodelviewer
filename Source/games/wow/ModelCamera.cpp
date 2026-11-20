@@ -6,11 +6,13 @@
  */
 
 #include "ModelCamera.h"
+#include "RenderList.h"
+
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "database.h"
 #include "video.h" // video global var
 #include "logger/Logger.h"
-#include "GL/glew.h"
 
 void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)
 {
@@ -40,24 +42,16 @@ void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint
   fov = 0.95f;
 }
 
-void ModelCamera::setup(size_t time)
+void ModelCamera::setup(float aspect, size_t time)
 {
-  if (!ok) return;
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!ok || !list) return;
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(fov * 34.5f, (GLfloat)video.xRes/(GLfloat)video.yRes, nearclip, farclip*5);
+  list->projection = glm::perspective(glm::radians(fov * 34.5f), aspect, nearclip, farclip * 5);
 
-  glm::vec3 p = pos + tPos.getValue(0, time);
-  glm::vec3 t = target + tTarget.getValue(0, time);
-
-  glm::vec3 u(0,1,0);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gluLookAt(p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z);
-  //float roll = rot.getValue(0, time) / PI * 180.0f;
-  //glRotatef(roll, 0, 0, 1);
+  const glm::vec3 p = pos + tPos.getValue(0, time);
+  const glm::vec3 t = target + tTarget.getValue(0, time);
+  list->view = glm::lookAt(p, t, glm::vec3(0, 1, 0));
 }
 
 

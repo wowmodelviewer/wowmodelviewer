@@ -1,6 +1,7 @@
 #include "Bone.h"
 
 #include "particle.h"
+#include "RenderList.h"
 
 #include "GlobalSettings.h"
 #include "WoWModel.h"
@@ -60,7 +61,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   rotation = mta.p.rotation;
   pos = mta.pos;
   tpos = mta.pos;
-  texture = model->getGLTexture(mta.texture);
+  texture = model->getTexture(mta.texture);
   blend = mta.blend;
   rows = mta.rows;
   if (rows == 0)
@@ -92,9 +93,9 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   {
     //  when multitexture is flagged, three textures are packed into the one uint16
     //  (5 bits each, plus one bit left over):
-    texture  = model->getGLTexture(mta.texture & 0x1f);
-    texture2 = model->getGLTexture((mta.texture >> 5) & 0x1f);
-    texture3 = model->getGLTexture((mta.texture >> 10) & 0x1f);
+    texture  = model->getTexture(mta.texture & 0x1f);
+    texture2 = model->getTexture((mta.texture >> 5) & 0x1f);
+    texture3 = model->getTexture((mta.texture >> 10) & 0x1f);
   }
 
   billboard = !(flags & MODELPARTICLE_FLAGS_DONOTBILLBOARD);
@@ -297,99 +298,41 @@ void ParticleSystem::setup(size_t anim, size_t time)
 
 void ParticleSystem::draw()
 {
-  // ALPHA BLENDING
-  // blend mode
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list)
+    return;
+
   if (blend < 0)
     blend = 0;
   else if (blend > 7)
     blend = 2;
+
+  wmv::Material m;
+  m.unlit = true;
+  m.cull = false;
+  m.depthWrite = false;
+  m.wrapS = m.wrapT = true;
   switch (blend)
   {
-    case BM_OPAQUE:            // 0
-      glDisable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_TRANSPARENT:      // 1
-      glDisable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
-      glBlendFunc(GL_ONE, GL_ZERO);
-      break;
-    case BM_ALPHA_BLEND:      // 2
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_ADDITIVE:         // 3
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_COLOR, GL_ONE);
-      break;
-    case BM_ADDITIVE_ALPHA:   // 4
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      break;
-    case BM_MODULATE:        // 5
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_ZERO);
-      break;
-    case BM_MODULATEX2:        // 6
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    case BM_7:                // 7, new in WoD
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    default:
-      LOG_ERROR << "Unknown blendmode:" << blend;
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    case BM_OPAQUE:         m.blend = wmv::BLEND_OPAQUE; m.depthWrite = true; break;
+    case BM_TRANSPARENT:    m.blend = wmv::BLEND_ALPHA_KEY; m.alphaTest = true; m.alphaRef = 0.5f; m.depthWrite = true; break;
+    case BM_ALPHA_BLEND:    m.blend = wmv::BLEND_ALPHA; m.blendEnabled = true; break;
+    case BM_ADDITIVE:       m.blend = wmv::BLEND_ADD_COLOR; m.blendEnabled = true; break;
+    case BM_ADDITIVE_ALPHA: m.blend = wmv::BLEND_ADD_ALPHA; m.blendEnabled = true; break;
+    case BM_MODULATE:       m.blend = wmv::BLEND_MODULATE; m.blendEnabled = true; break;
+    case BM_MODULATEX2:     m.blend = wmv::BLEND_MODULATE_2X; m.blendEnabled = true; break;
+    case BM_7:              m.blend = wmv::BLEND_7; m.blendEnabled = true; break;
+    default:                m.blend = wmv::BLEND_MODULATE_2X; m.blendEnabled = true; break;
+  }
+  m.tex[0] = texture;
+  if (multitexture)
+  {
+    m.particleMultiTexture = true;
+    m.tex[1] = texture2;
+    m.tex[2] = texture3;
+    m.textureCount = 1 + (texture2 ? 1 : 0) + (texture3 ? 1 : 0);
   }
 
-  if (!multitexture)
-  {
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  }
-  else
-  {
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
-    glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 4.0);
-    glTexEnvf(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 4.0);
-    if (texture2)
-    {
-      glActiveTextureARB(GL_TEXTURE1_ARB);
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, texture2);
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
-      glActiveTextureARB(GL_TEXTURE0_ARB);
-    }
-    if (texture3)
-    {
-      glActiveTextureARB(GL_TEXTURE2_ARB);
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, texture3);
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
-      glActiveTextureARB(GL_TEXTURE0_ARB);
-    }
-  }
   glm::vec3 vRight(1,0,0);
   glm::vec3 vUp(0,0,1);
 
@@ -400,12 +343,10 @@ void ParticleSystem::draw()
 
   if (billboard)
   {
-    float modelview[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-
-    vRight = glm::vec3(modelview[0], modelview[4], modelview[8]);
-    vUp = glm::vec3(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-    //vUp = glm::vec3(0,1,0); // Cylindrical billboarding
+    // The camera's right and up in the space the particles are drawn in (GL's modelview rows).
+    const glm::mat4 mv = list->modelView();
+    vRight = glm::vec3(mv[0][0], mv[1][0], mv[2][0]);
+    vUp = glm::vec3(mv[0][1], mv[1][1], mv[2][1]); // Spherical billboarding
   }
 
   /*
@@ -415,16 +356,14 @@ void ParticleSystem::draw()
    * 2  seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
    */
 
-  glm::vec3 vert1, vert2, vert3, vert4, Pos;
+  glm::vec3 vert[4], Pos;
   float size;
 
-  glBegin(GL_QUADS);
-
+  const uint32_t first = list->indexMark();
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it)
   {
     if (it->tile >= tiles.size()) // bounds guard (tiles.size()-1 underflows when tiles is empty)
       break;
-    glColor4fv(glm::value_ptr(it->color));
     size = it->size;
     if (doNotTrail)
       Pos = it->tpos;
@@ -432,79 +371,42 @@ void ParticleSystem::draw()
       Pos = it->pos;
     if (ParticleType == 0 || ParticleType > 1)
     {
-      // TODO: figure out type 2 (deeprun tram subway sign)
-      // - doesn't seem to be any different from 0 -_- regular particles
       if (billboard)
       {
-
-        vert1 = Pos - (vRight + vUp) * size;
-        vert2 = Pos + (vRight - vUp) * size;
-        vert3 = Pos + (vRight + vUp) * size;
-        vert4 = Pos - (vRight - vUp) * size;
+        vert[0] = Pos - (vRight + vUp) * size;
+        vert[1] = Pos + (vRight - vUp) * size;
+        vert[2] = Pos + (vRight + vUp) * size;
+        vert[3] = Pos - (vRight - vUp) * size;
       }
       else
       {
-        vert1 = Pos + it->corners[0] * size;
-        vert2 = Pos + it->corners[1] * size;
-        vert3 = Pos + it->corners[2] * size;
-        vert4 = Pos + it->corners[3] * size;
+        for (int k = 0; k < 4; k++)
+          vert[k] = Pos + it->corners[k] * size;
       }
     }
-    else if (ParticleType == 1)
+    else
     {
-      vert1 = Pos + bv0 * size;
-      vert2 = Pos + bv1 * size;
-      vert3 = it->origin + bv1 * size;
-      vert4 = it->origin + bv0 * size;
+      vert[0] = Pos + bv0 * size;
+      vert[1] = Pos + bv1 * size;
+      vert[2] = it->origin + bv1 * size;
+      vert[3] = it->origin + bv0 * size;
     }
 
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
-    if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
-    if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
-    glVertex3fv(glm::value_ptr(vert1));
-
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
-    if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
-    if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
-    glVertex3fv(glm::value_ptr(vert2));
-
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
-    if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
-    if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
-    glVertex3fv(glm::value_ptr(vert3));
-
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
-    if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
-    if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
-    glVertex3fv(glm::value_ptr(vert4));
+    wmv::Vertex v[4];
+    for (int k = 0; k < 4; k++)
+    {
+      v[k].pos = vert[k];
+      v[k].normal = glm::vec3(0, 0, 1);
+      v[k].uv0 = v[k].uv1 = tiles[it->tile].tc[k];
+      v[k].color = it->color;
+    }
+    // GL_QUADS as two triangles
+    const uint32_t base = list->addVertices(v, 4);
+    const uint32_t quad[6] = { 0, 1, 2, 0, 2, 3 };
+    for (uint32_t q : quad)
+      list->addIndex(base + q);
   }
-  glEnd();
-
-  glActiveTextureARB(GL_TEXTURE0_ARB);
-  glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 1.0);
-  glTexEnvf(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1.0);
-  glDisable(GL_TEXTURE_2D);
-  if (texture2)
-  {
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-  }
-  if (texture3)
-  {
-    glActiveTextureARB(GL_TEXTURE2_ARB);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-  }
-  glActiveTextureARB(GL_TEXTURE0_ARB);
+  list->draw(m, first, wmv::PRIM_TRIANGLES, 1);
 }
 
 //Generates the rotation matrix based on spread
@@ -752,7 +654,7 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<u
   parent = &(model->bones[(mta.bone >= 0 && (size_t)mta.bone < model->bones.size()) ? mta.bone : 0]);
   int *texlist = (int*)(f->getBuffer() + mta.ofsTextures);
   // just use the first texture for now; most models I've checked only had one
-  texture = model->getGLTexture(texlist[0]);
+  texture = model->getTexture(texlist[0]);
 
   tpos = pos = mta.pos;
 
@@ -823,58 +725,56 @@ void RibbonEmitter::setup(size_t anim, size_t time)
 
 void RibbonEmitter::draw()
 {
-  /*
-  // placeholders
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  glColor4f(1,1,1,1);
-  glBegin(GL_TRIANGLES);
-  glVertex3fv(tpos);
-  glVertex3fv(tpos + glm::vec3(1,1,0));
-  glVertex3fv(tpos + glm::vec3(-1,1,0));
-  glEnd();
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_LIGHTING);
-   */
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list || segs.empty())
+    return;
 
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glEnable(GL_BLEND);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_ALPHA_TEST);
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  glColor4fv(glm::value_ptr(tcolor));
+  wmv::Material m;
+  m.tex[0] = texture;
+  m.blend = wmv::BLEND_ADD_ALPHA;
+  m.blendEnabled = true;
+  m.unlit = true;
+  m.cull = false;
+  m.depthWrite = false;
+  m.color = tcolor;
 
-  glBegin(GL_QUAD_STRIP);
+  // GL_QUAD_STRIP: a pair of vertices per segment, two triangles between consecutive pairs.
+  std::vector<wmv::Vertex> strip;
+  auto add = [&](const glm::vec3 & p, float u, float v) {
+    wmv::Vertex vx;
+    vx.pos = p;
+    vx.normal = glm::vec3(0, 0, 1);
+    vx.uv0 = vx.uv1 = glm::vec2(u, v);
+    vx.color = glm::vec4(1.0f);
+    strip.push_back(vx);
+  };
+
   std::list<RibbonSegment>::iterator it = segs.begin();
   float l = 0;
-  for (; it != segs.end(); ++it) {
-    float u = l/length;
-
-    glTexCoord2f(u,0);
-    glVertex3fv(glm::value_ptr(it->pos + tabove * it->up));
-    glTexCoord2f(u,1);
-    glVertex3fv(glm::value_ptr(it->pos - tbelow * it->up));
-
+  for (; it != segs.end(); ++it)
+  {
+    const float u = l / length;
+    add(it->pos + tabove * it->up, u, 0);
+    add(it->pos - tbelow * it->up, u, 1);
     l += it->len;
   }
 
-  if (segs.size() > 1) {
+  if (segs.size() > 1)
+  {
     // last segment...?
     --it;
-    glTexCoord2f(1,0);
-    glVertex3fv(glm::value_ptr(it->pos + tabove * it->up + (it->len/it->len0) * it->back));
-    glTexCoord2f(1,1);
-    glVertex3fv(glm::value_ptr(it->pos - tbelow * it->up + (it->len/it->len0) * it->back));
+    add(it->pos + tabove * it->up + (it->len / it->len0) * it->back, 1, 0);
+    add(it->pos - tbelow * it->up + (it->len / it->len0) * it->back, 1, 1);
   }
-  glEnd();
 
-  glColor4f(1,1,1,1);
-  glEnable(GL_LIGHTING);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDepthMask(GL_TRUE);
+  const uint32_t base = list->addVertices(strip.data(), strip.size());
+  const uint32_t first = list->indexMark();
+  for (uint32_t i = 0; i + 3 < strip.size(); i += 2)
+  {
+    list->addIndex(base + i); list->addIndex(base + i + 1); list->addIndex(base + i + 2);
+    list->addIndex(base + i + 2); list->addIndex(base + i + 1); list->addIndex(base + i + 3);
+  }
+  list->draw(m, first, wmv::PRIM_TRIANGLES, 1);
 }
 
 

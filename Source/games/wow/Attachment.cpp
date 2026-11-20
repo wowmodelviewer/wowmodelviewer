@@ -6,9 +6,9 @@
  */
 
 #include "Attachment.h"
+#include "RenderList.h"
 
 #include <string>
-#include "GL/glew.h"
 
 #include "displayable.h"
 #include "Game.h"
@@ -38,7 +38,7 @@ Attachment::~Attachment()
 
 void Attachment::draw()
 {
-  glPushMatrix();
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->push();
   if (model_)
   {
     setup();
@@ -49,19 +49,19 @@ void Attachment::draw()
   for (auto& c : children)
     c->draw();
 
-  glPopMatrix();
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->pop();
 }
 
 void Attachment::drawParticles()
 {
-  glPushMatrix();
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->push();
 
   if (model_)
   {
     auto *m = dynamic_cast<WoWModel*>(model_);
     if (!m)
     {
-      glPopMatrix();
+      if (wmv::RenderList * rl = wmv::RenderList::current()) rl->pop();
       return;
     }
 
@@ -75,7 +75,7 @@ void Attachment::drawParticles()
   for (size_t i = 0; i < children.size(); i++)
     children[i]->drawParticles();
 
-  glPopMatrix();
+  if (wmv::RenderList * rl = wmv::RenderList::current()) rl->pop();
 }
 
 

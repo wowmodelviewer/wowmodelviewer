@@ -34,7 +34,8 @@ struct _MODELCAMERA_API_ ModelCamera
 
   void init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname);
   void initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname);
-  void setup(size_t time=0);
+  // Sets the current render list's camera to this model camera, for a viewport of the given aspect ratio.
+  void setup(float aspect, size_t time=0);
 
   ModelCamera():ok(false), pos(glm::vec3()), target(glm::vec3()),
       nearclip(0), farclip(0), fov(0) {}

@@ -21,6 +21,7 @@
 #include "ModelTransparency.h"
 #include "Texture.h"
 #include "TextureManager.h"
+#include "RenderList.h"
 #include "video.h"
 
 #include "logger/Logger.h"
@@ -31,7 +32,6 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"
 
-#define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
 enum TextureFlags
 {
@@ -62,61 +62,6 @@ void WoWModel::dumpTextureStatus()
   LOG_INFO << "-----------------------------------------";
 }
 
-void
-glGetAll()
-{
-  GLint bled;
-  LOG_INFO << "glGetAll Information";
-  LOG_INFO << "GL_ALPHA_TEST:" << glIsEnabled(GL_ALPHA_TEST);
-  LOG_INFO << "GL_BLEND:" << glIsEnabled(GL_BLEND);
-  LOG_INFO << "GL_CULL_FACE:" << glIsEnabled(GL_CULL_FACE);
-  glGetIntegerv(GL_FRONT_FACE, &bled);
-  if (bled == GL_CW)
-  {
-    LOG_INFO << "glFrontFace: GL_CW";
-  }
-  else if (bled == GL_CCW)
-  {
-    LOG_INFO << "glFrontFace: GL_CCW";
-  }
-  LOG_INFO << "GL_DEPTH_TEST:" << glIsEnabled(GL_DEPTH_TEST);
-  LOG_INFO << "GL_DEPTH_WRITEMASK:" << glIsEnabled(GL_DEPTH_WRITEMASK);
-  LOG_INFO << "GL_COLOR_MATERIAL:" << glIsEnabled(GL_COLOR_MATERIAL);
-  LOG_INFO << "GL_LIGHT0:" << glIsEnabled(GL_LIGHT0);
-  LOG_INFO << "GL_LIGHT1:" << glIsEnabled(GL_LIGHT1);
-  LOG_INFO << "GL_LIGHT2:" << glIsEnabled(GL_LIGHT2);
-  LOG_INFO << "GL_LIGHT3:" << glIsEnabled(GL_LIGHT3);
-  LOG_INFO << "GL_LIGHTING:" << glIsEnabled(GL_LIGHTING);
-  LOG_INFO << "GL_TEXTURE_2D:" << glIsEnabled(GL_TEXTURE_2D);
-  glGetIntegerv(GL_BLEND_SRC, &bled);
-  LOG_INFO << "GL_BLEND_SRC:" << bled;
-  glGetIntegerv(GL_BLEND_DST, &bled);
-  LOG_INFO << "GL_BLEND_DST:" << bled;
-}
-
-void glInitAll()
-{
-  glDisable(GL_ALPHA_TEST);
-  glDisable(GL_BLEND);
-  glDisable(GL_COLOR_MATERIAL);
-  //glEnable(GL_CULL_FACE);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_DEPTH_TEST);
-  glDisable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-  glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-  glLightfv(GL_LIGHT0, GL_SPECULAR, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-  glDisable(GL_LIGHT1);
-  glDisable(GL_LIGHT2);
-  glDisable(GL_LIGHT3);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glBlendFunc(GL_ONE, GL_ZERO);
-  glFrontFace(GL_CCW);
-  //glDepthMask(GL_TRUE);
-  glDepthFunc(GL_NEVER);
-}
 
 WoWModel::WoWModel(GameFile * file, bool forceAnim):
 ManagedItem(""),
@@ -139,8 +84,6 @@ gamefile(file)
   for (size_t i = 0; i < BONE_MAX; i++)
     keyBoneLookup[i] = -1;
 
-  dlist = 0;
-
   hasCamera = false;
   hasParticles = false;
   replaceParticleColors = false;
@@ -160,8 +103,6 @@ gamefile(file)
   mirrored_ = false;
 
   charModelDetails.Reset();
-
-  vbuf = nbuf = tbuf = 0;
 
   origVertices.clear();
   vertices = 0;
@@ -208,7 +149,9 @@ WoWModel::~WoWModel()
   mergedModels.clear();
 
   if (eyeCompositeTex_ != 0)
-    glDeleteTextures(1, &eyeCompositeTex_);
+    TEXTUREMANAGER.del(eyeCompositeTex_);
+  if (charCompositeTex_ != 0)
+    TEXTUREMANAGER.del(charCompositeTex_);
 
   // Free any models held in the re-merge cache (these are NOT in mergedModels, so the
   // merge cleanup below won't reach them).
@@ -226,28 +169,10 @@ WoWModel::~WoWModel()
     // No matter what I try though I can't find the memory to unload.
     if (header.nTextures)
     {
-      // For character models, the texture isn't loaded into the texture manager, manually remove it. (A character's
-      // slot 1 is name 0, the composite; an item model's or merged part's is INVALID_TEX -- a legal GL name another
-      // texture can hold in a long session -- or a texture the manager owns. Delete only what is neither.)
-      const GLuint skin = replaceTextures[1];
-      if (skin != 0 && skin != ModelRenderPass::INVALID_TEX && TEXTUREMANAGER.items.find(skin) == TEXTUREMANAGER.items.end())
-        glDeleteTextures(1, &skin);
       delete animManager; animManager = 0;
 
       if (animated)
       {
-        // unload all sorts of crap
-        // Need this if statement because VBO supported
-        // cards have already deleted it.
-        if (video.supportVBO)
-        {
-          glDeleteBuffersARB(1, &nbuf);
-          glDeleteBuffersARB(1, &vbuf);
-          glDeleteBuffersARB(1, &tbuf);
-
-          vertices = NULL;
-        }
-
         delete[] normals; normals = 0;
         delete[] vertices; vertices = 0;
         delete[] texCoords; texCoords = 0;
@@ -272,7 +197,9 @@ WoWModel::~WoWModel()
       }
       else
       {
-        glDeleteLists(dlist, 1);
+        delete[] normals; normals = 0;
+        delete[] vertices; vertices = 0;
+        delete[] texCoords; texCoords = 0;
       }
     }
   }
@@ -869,17 +796,8 @@ void WoWModel::initCommon()
 
 void WoWModel::initStatic()
 {
-  dlist = glGenLists(1);
-  glNewList(dlist, GL_COMPILE);
-
-  drawModel();
-
-  glEndList();
-
-  // clean up vertices, indices etc
-  delete[] vertices; vertices = 0;
-  delete[] normals; normals = 0;
-  indices.clear();
+  // A static model keeps its geometry and is drawn by the same path as an animated one (GL compiled it into a
+  // display list and freed it).
 }
 
 void WoWModel::initRaceInfos()
@@ -1295,37 +1213,10 @@ void WoWModel::initAnimated()
     }
   }
 
-  const size_t size = (origVertices.size() * sizeof(float));
-  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
-
   texCoords = new glm::vec2[origVertices.size()];
   auto ov_it = origVertices.begin();
   for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
     texCoords[i] = ov_it->texcoords;
-
-  if (video.supportVBO)
-  {
-    // Vert buffer
-    glGenBuffersARB(1, &vbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-    delete[] vertices; vertices = 0;
-
-    // Texture buffer
-    glGenBuffersARB(1, &tbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
-    delete[] texCoords; texCoords = 0;
-
-    // normals buffer
-    glGenBuffersARB(1, &nbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-    delete[] normals; normals = 0;
-
-    // clean bind
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  }
 
   if (header.nTexAnims > 0)
   {
@@ -2398,14 +2289,6 @@ void WoWModel::animate(ssize_t Anim)
 
   if (animGeometry)
   { 
-    if (video.supportVBO)
-    {
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-      glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
-
-      vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
-
-    }
 
     // transform vertices
     auto ov_it = origVertices.begin();
@@ -2438,16 +2321,7 @@ void WoWModel::animate(ssize_t Anim)
       }
 
       vertices[i] = v;
-      if (video.supportVBO)
-        vertices[origVertices.size() + i] = glm::normalize(n); // shouldn't these be normal by default?
-      else
-        normals[i] = n;
-    }
-
-    // clear bind
-    if (video.supportVBO)
-    {
-      glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+      normals[i] = glm::normalize(n);
     }
   }
 
@@ -2476,91 +2350,46 @@ void WoWModel::animate(ssize_t Anim)
     it.calc(Anim, t);
 }
 
+// The model's own transform on the render list's matrix stack: what drawModel and drawParticles both apply.
+// (drawParticles applies only the y rotation, as the GL path did.)
+static void pushModelTransform(wmv::RenderList & list, const glm::vec3 & pos, const glm::vec3 & rot, float scale,
+                               bool mirrored, bool particles)
+{
+  list.push();
+  glm::vec3 scaling(scale, scale, scale);
+  if (mirrored)
+    scaling.y *= -1.0f;
+  if (particles)
+  {
+    if (scaling != glm::vec3(1.0f))
+      list.scale(scaling);
+    if (rot != glm::vec3(0.0f))
+      list.rotate(rot.y, glm::vec3(0, 1, 0));
+    if (pos != glm::vec3(0.0f))
+      list.translate(pos);
+    return;
+  }
+  if (scaling != glm::vec3(1.0f))
+    list.scale(scaling);
+  if (pos != glm::vec3(0.0f))
+    list.translate(pos);
+  if (rot != glm::vec3(0.0f))
+  {
+    list.rotate(rot.x, glm::vec3(1, 0, 0));
+    list.rotate(rot.y, glm::vec3(0, 1, 0));
+    list.rotate(rot.z, glm::vec3(0, 0, 1));
+  }
+}
+
 inline void WoWModel::drawModel()
 {
-  glPushMatrix();
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list)
+    return;
 
-  glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
-  if (mirrored_)
-  {
-    glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
-    scaling.y *= -1.0f;
-  }
-  else
-  {
-    glFrontFace(GL_CCW);
-  }
+  pushModelTransform(*list, pos_, rot_, scale_, mirrored_, false);
 
-  // no need to scale if its already 100%
-  // scaling manually set from model control panel
-  if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
-    glScalef(scaling.x, scaling.y, scaling.z);
-
-  if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
-    glTranslatef(pos_.x, pos_.y, pos_.z);
-
-
-  if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
-  {
-    glRotatef(rot_.x, 1.0f, 0.0f, 0.0f);
-    glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
-    glRotatef(rot_.z, 0.0f, 0.0f, 1.0f);
-  }
-
-
-  if (showModel && (alpha_ != 1.0f))
-  {
-    glDisable(GL_COLOR_MATERIAL);
-
-    float a[] = { 1.0f, 1.0f, 1.0f, alpha_ };
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, a);
-
-    glEnable(GL_BLEND);
-    //glDisable(GL_DEPTH_TEST);
-    //glDepthMask(GL_FALSE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  }
-
-  if (!showTexture || video.useMasking)
-    glDisable(GL_TEXTURE_2D);
-  else
-    glEnable(GL_TEXTURE_2D);
-
-  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-  if (video.supportVBO && animated)
-  {
-    // bind / point to the vertex normals buffer
-    if (animGeometry)
-    {
-      glNormalPointer(GL_FLOAT, 0, GL_BUFFER_OFFSET(vbufsize));
-    }
-    else
-    {
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-      glNormalPointer(GL_FLOAT, 0, 0);
-    }
-
-    // Bind the vertex buffer
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
-    // Bind the texture coordinates buffer
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-    glTexCoordPointer(2, GL_FLOAT, 0, 0);
-
-  }
-  else if (animated)
-  {
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glNormalPointer(GL_FLOAT, 0, normals);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-  }
-
-  // Display in wireframe mode?
-  if (showWireframe)
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-  // Render the various parts of the model.
-  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  const size_t firstDraw = list->draws.size();
   for (auto it : passes)
   {
     if (it->init())
@@ -2570,26 +2399,25 @@ inline void WoWModel::drawModel()
     }
   }
 
-  if (showWireframe)
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  // clean bind
-  if (video.supportVBO && animated)
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
-  if (showModel && (alpha_ != 1.0f))
+  // The whole model faded (the model panel's alpha): every pass blends with that opacity, as GL's material
+  // alpha did. Masking draws silhouettes, so no textures.
+  for (size_t i = firstDraw; i < list->draws.size(); i++)
   {
-    float a[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, a);
-
-    glDisable(GL_BLEND);
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthMask(GL_TRUE);
-    glEnable(GL_COLOR_MATERIAL);
+    wmv::Material & m = list->draws[i].material;
+    if (alpha_ != 1.0f)
+    {
+      m.color.w *= alpha_;
+      if (!m.blendEnabled)
+      {
+        m.blend = wmv::BLEND_ALPHA;
+        m.blendEnabled = true;
+      }
+    }
+    if (video.useMasking)
+      m.textured = false;
   }
 
-  glPopMatrix();
-  // done with all render ops
+  list->pop();
 }
 
 inline void WoWModel::draw()
@@ -2597,13 +2425,7 @@ inline void WoWModel::draw()
   if (!ok)
     return;
 
-  if (!animated)
-  {
-    if (showModel)
-      glCallList(dlist);
-
-  }
-  else
+  if (animated)
   {
     if (ind)
     {
@@ -2617,40 +2439,19 @@ inline void WoWModel::draw()
         //animcalc = true; // Not sure what this is really for but it breaks WMO animation
       }
     }
-
-    if (showModel)
-      drawModel();
   }
+
+  if (showModel)
+    drawModel();
 
   if (!video.useMasking && (showBounds || showBones))
   {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-
     if (showBounds)
       drawBoundingVolume();
 
     if (showBones)
       drawBones();
-
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
   }
-}
-
-// These aren't really needed in the model viewer.. only wowmapviewer
-void WoWModel::lightsOn(GLuint lbase)
-{
-  // setup lights
-  for (uint i = 0, l = lbase; i < lights.size(); i++)
-    lights[i].setup(animtime, (GLuint)l++);
-}
-
-// These aren't really needed in the model viewer.. only wowmapviewer
-void WoWModel::lightsOff(GLuint lbase)
-{
-  for (uint i = 0, l = lbase; i < lights.size(); i++)
-    glDisable((GLenum)l++);
 }
 
 // Updates our particles within models.
@@ -2667,23 +2468,45 @@ void WoWModel::updateEmitters(float dt)
   }
 }
 
+namespace
+{
+  wmv::Material lineMaterial(bool depthTest)
+  {
+    wmv::Material m;
+    m.unlit = true;
+    m.textured = false;
+    m.depthTest = depthTest;
+    m.depthWrite = depthTest;
+    return m;
+  }
+
+  wmv::Vertex colouredVertex(const glm::vec3 & p, const glm::vec4 & c)
+  {
+    wmv::Vertex v;
+    v.pos = p;
+    v.normal = glm::vec3(0, 1, 0);
+    v.uv0 = v.uv1 = glm::vec2(0.0f);
+    v.color = c;
+    return v;
+  }
+}
 
 // Draws the "bones" of models  (skeletal animation)
 void WoWModel::drawBones()
 {
-  glDisable(GL_DEPTH_TEST);
-  glBegin(GL_LINES);
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list)
+    return;
+  const uint32_t first = list->indexMark();
   for (auto it : bones)
   {
-    //for (size_t i=30; i<40; i++) {
-    if (it.parent != -1)
+    if (it.parent != -1 && it.parent < (int)bones.size())
     {
-      glVertex3fv(glm::value_ptr(it.transPivot));
-      glVertex3fv(glm::value_ptr(bones[it.parent].transPivot));
+      list->addIndex(list->addVertex(colouredVertex(it.transPivot, glm::vec4(1.0f))));
+      list->addIndex(list->addVertex(colouredVertex(bones[it.parent].transPivot, glm::vec4(1.0f))));
     }
   }
-  glEnd();
-  glEnable(GL_DEPTH_TEST);
+  list->draw(lineMaterial(false), first, wmv::PRIM_LINES, 1);
 }
 
 // Sets up the models attachments
@@ -2705,61 +2528,44 @@ void WoWModel::setupAtt2(int id)
 // Draws the Bounding Volume, which is used for Collision detection.
 void WoWModel::drawBoundingVolume()
 {
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glBegin(GL_TRIANGLES);
-  for (uint i = 0; i < boundTris.size(); i++)
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list)
+    return;
+  // GL drew the triangles in line mode: each triangle's three edges.
+  const uint32_t first = list->indexMark();
+  for (uint i = 0; i + 2 < boundTris.size(); i += 3)
   {
-    size_t v = boundTris[i];
-    if (v < bounds.size())
-      glVertex3fv(glm::value_ptr(bounds[v]));
-    else
-      glVertex3f(0, 0, 0);
+    glm::vec3 c[3];
+    for (int k = 0; k < 3; k++)
+    {
+      const size_t v = boundTris[i + k];
+      c[k] = v < bounds.size() ? bounds[v] : glm::vec3(0.0f);
+    }
+    for (int k = 0; k < 3; k++)
+    {
+      list->addIndex(list->addVertex(colouredVertex(c[k], glm::vec4(1.0f))));
+      list->addIndex(list->addVertex(colouredVertex(c[(k + 1) % 3], glm::vec4(1.0f))));
+    }
   }
-  glEnd();
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  list->draw(lineMaterial(true), first, wmv::PRIM_LINES);
 }
 
 // Renders our particles into the pipeline.
 void WoWModel::drawParticles()
 {
-  if (hasParticles && showParticles)
-  {
-    glPushMatrix();
+  wmv::RenderList * list = wmv::RenderList::current();
+  if (!list || !hasParticles || !showParticles)
+    return;
 
-    glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
-    if (mirrored_)
-    {
-      glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
-      scaling.y *= -1.0f;
-    }
-    else
-    {
-      glFrontFace(GL_CCW);
-    }
+  pushModelTransform(*list, pos_, rot_, scale_, mirrored_, true);
 
-    // no need to scale if its already 100%
-    // scaling manually set from model control panel
-    if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
-      glScalef(scaling.x, scaling.y, scaling.z);
+  for (auto & it : particleSystems)
+    it.draw();
 
-    if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
-      glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
+  for (auto & it : ribbons)
+    it.draw();
 
-    //glRotatef(45.0f, 1,0,0);
-
-    if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
-      glTranslatef(pos_.x, pos_.y, pos_.z);
-
-    // draw particle systems
-    for (auto & it : particleSystems)
-      it.draw();
-
-    // draw ribbons
-    for (auto & it : ribbons)
-      it.draw();
-
-    glPopMatrix();
-  }
+  list->pop();
 }
 
 WoWItem * WoWModel::getItem(CharSlots slot)
@@ -2855,7 +2661,7 @@ void WoWModel::updateTextureList(GameFile * Tex, int special)
       // evicted and re-decoded. The previous del-then-add order evicted the
       // texture (refcount -> 0) and forced a full CASC read + BLP decode on every
       // apply -- the bulk of the character-load texture cost.
-      const GLuint newId = TEXTUREMANAGER.add(Tex);
+      const TextureID newId = TEXTUREMANAGER.add(Tex);
       if (replaceTextures[special] != ModelRenderPass::INVALID_TEX)
         TEXTUREMANAGER.del(replaceTextures[special]);
 
@@ -2924,17 +2730,17 @@ int WoWModel::boundSpecialFileDataId(int special) const
   if (special < 0 || (size_t)special >= replaceTextures.size())
     return 0;
 
-  return fileDataIdForGLTexture(replaceTextures[special]);
+  return fileDataIdForTexture(replaceTextures[special]);
 }
 
-int WoWModel::fileDataIdForGLTexture(GLuint id)
+int WoWModel::fileDataIdForTexture(TextureID id)
 {
   if (id == ModelRenderPass::INVALID_TEX)
     return 0;
 
   // TEXTUREMANAGER only ever stores Texture instances (TextureManager::add), so this cast is
   // sound; the map is the manager's own index from GL id to the item it created.
-  std::map<GLuint, ManagedItem *>::const_iterator it = TEXTUREMANAGER.items.find(id);
+  std::map<TextureID, ManagedItem *>::const_iterator it = TEXTUREMANAGER.items.find(id);
   if (it == TEXTUREMANAGER.items.end() || !it->second)
     return 0;
 
@@ -3486,30 +3292,6 @@ void WoWModel::refreshMerging()
     ++i;
   }
 
-  const size_t size = (origVertices.size() * sizeof(float));
-  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
-
-  if (video.supportVBO)
-  {
-    glDeleteBuffersARB(1, &nbuf);
-    glDeleteBuffersARB(1, &vbuf);
-
-    // Vert buffer
-    glGenBuffersARB(1, &vbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-    delete[] vertices; vertices = 0;
-
-    // normals buffer
-    glGenBuffersARB(1, &nbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-    delete[] normals; normals = 0;
-
-    // clean bind
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  }
-
   stateVersion_++;
 }
 
@@ -3630,7 +3412,7 @@ void WoWModel::refresh()
   // the blue glow, not the coloured iris, once the Eyesight option was restored).
   if (eyeCompositeTex_ != 0)
   {
-    glDeleteTextures(1, &eyeCompositeTex_);
+    TEXTUREMANAGER.del(eyeCompositeTex_);
     eyeCompositeTex_ = 0;
     eyeCompositeImage_ = QImage();
   }
@@ -3826,7 +3608,9 @@ void WoWModel::refresh()
   }
 
   // finalize character texture
-  const GLuint charTex = 0;
+  if (charCompositeTex_ == 0)
+    charCompositeTex_ = TEXTUREMANAGER.create("Body composite");
+  const TextureID charTex = charCompositeTex_;
   tex.compose(charTex);
 
   // set replacable textures
@@ -3854,10 +3638,10 @@ QString WoWModel::getNameForTex(uint16 Tex)
   if (specialTextures[Tex] == TEXTURE_SKIN)
     return "Body.blp";
   else
-    return TEXTUREMANAGER.get(getGLTexture(Tex));
+    return TEXTUREMANAGER.get(getTexture(Tex));
 }
 
-GLuint WoWModel::getGLTexture(uint16 Tex) const
+TextureID WoWModel::getTexture(uint16 Tex) const
 {
   if (Tex >= specialTextures.size())
     return ModelRenderPass::INVALID_TEX;
@@ -4297,7 +4081,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "  <TextureLists>" << endl;
   for (auto it : m.passes)
   {
-    GLuint tex = m.getGLTexture(it->tex);
+    TextureID tex = m.getTexture(it->tex);
     if (tex != ModelRenderPass::INVALID_TEX)
       out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>" << endl;
   }

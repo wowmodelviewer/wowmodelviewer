@@ -337,10 +337,7 @@ WMO::WMO(QString name, uint32 rootFileDataID, bool metadata) :
 
     m->tex = TEXTUREMANAGER.add(texFile);
     textures.push_back(texname);
-
-    // need repeat turned on
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // (WMO textures repeat: every wmv::Material wraps by default.)
   }
 
   delete[] texbuf;

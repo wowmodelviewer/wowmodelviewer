@@ -12,7 +12,6 @@
 
 class GameFile;
 
-#include "GL/glew.h" // GLuint
 #include "glm/glm.hpp"
 
 struct ModelLight 
@@ -25,7 +24,8 @@ struct ModelLight
   Animated<int> UseAttenuation;
 
   void init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global);
-  void setup(size_t time, GLuint l);
+  // The light at a time: position (w = 0 for a directional light), diffuse and ambient colours.
+  void evaluate(size_t time, glm::vec4 & position, glm::vec4 & diffuse, glm::vec4 & ambient);
 };
 
 

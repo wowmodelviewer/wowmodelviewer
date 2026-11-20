@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include "GL/glew.h"
+#include "TextureSource.h"
 
 #include <QImage>
 
@@ -57,7 +57,7 @@ class _CHARTEXTURE_API_ CharTexture
     void addLayer(GameFile * file, int region, int layer, int blendMode = 1);
     void addComponent(CharTextureComponent c) { m_components.push_back(c); }
 
-    void compose(GLuint texID);
+    void compose(TextureID texID);
 
     // The image the last compose() uploaded, exactly as uploaded (QImage::Format_ARGB32 memory
     // layout, top row first), or a null image before the first compose. Kept for the embedded Unity
@@ -83,9 +83,9 @@ class _CHARTEXTURE_API_ CharTexture
     // coloured iris and the Eyesight glow are separate textures that must be composited rather
     // than overwrite each other in one replaceTextures slot. Layers are applied in 'layer'
     // order (lowest first = base); 'region' is ignored (each layer fills the whole image).
-    // The caller OWNS the returned texture and must glDeleteTextures() it.
+    // The caller OWNS the returned texture and releases it with TEXTUREMANAGER.del().
     // outImage, when given, receives the composited image as uploaded (see lastImage()).
-    static GLuint composeStackToTexture(const std::vector<CharTextureComponent> & layers,
+    static TextureID composeStackToTexture(const std::vector<CharTextureComponent> & layers,
                                         QImage * outImage = nullptr);
 
   private:

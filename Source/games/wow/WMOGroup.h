@@ -4,7 +4,7 @@
 #include <string>
 
 #include "types.h"
-#include "GL/glew.h"
+#include "RenderList.h"
 #include "glm/glm.hpp"
 
 class GameFile;
@@ -25,7 +25,7 @@ class WMOGroup
 {
   WMO *wmo;
   int flags;
-  GLuint dl, dl_light;
+  wmv::RenderList m_batches; // the group's triangles by material, recorded at load
   glm::vec3 center;
   float rad;
   int num;

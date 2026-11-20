@@ -8,49 +8,77 @@
 #include "GameFile.h"
 #include "Texture.h"
 
-#include "GL/glew.h"
-
 _TEXTUREMANAGER_API_ TextureManager TEXTUREMANAGER;
 
-GLuint TextureManager::add(GameFile * file)
+namespace
 {
-  GLuint id = 0;
+  bool readPixels(TextureID id, int & width, int & height, std::vector<unsigned char> & bgra)
+  {
+    const Texture * tex = TEXTUREMANAGER.texture(id);
+    if (!tex || tex->mips.empty() || tex->w <= 0 || tex->h <= 0)
+      return false;
+    width = tex->w;
+    height = tex->h;
+    bgra.resize((size_t)width * height * 4);
+    tex->getPixels(bgra.data(), TEXTURE_BGRA);
+    return true;
+  }
+}
 
-  if(!file)
+TextureManager::TextureManager()
+: m_nextId(1)
+{
+  core::setTexturePixelReader(&readPixels);
+}
+
+TextureID TextureManager::add(GameFile * file)
+{
+  if (!file)
     return 0;
 
-  QString name = file->fullname();
+  const QString name = file->fullname();
 
   // if the item already exists, return the existing ID
-  if (names.find(name) != names.end()) {
-    id = names[name];
-    items[id]->addref();
-    return id;
+  auto found = names.find(name);
+  if (found != names.end())
+  {
+    items[found->second]->addref();
+    return found->second;
   }
 
-  // Else, create the texture
-
-  Texture *tex = new Texture(file);
-  if (tex) {
-    // clear old texture memory from vid card
-    glDeleteTextures(1, &id);
-    // create new texture and put it in memory
-    glGenTextures(1, &id);
-
-    tex->id = id;
-    tex->load();
-
-    do_add(name, id, tex);
-    return id;
-  }
-
-  return 0;
+  Texture * tex = new Texture(file);
+  tex->id = m_nextId++;
+  tex->load();
+  do_add(name, tex->id, tex);
+  return tex->id;
 }
-//#define SAVE_BLP
 
-void TextureManager::doDelete(GLuint id)
+TextureID TextureManager::create(const QString & name)
 {
-  if (glIsTexture(id)) {
-    glDeleteTextures(1, &id);
-  }
+  Texture * tex = new Texture(name);
+  tex->id = m_nextId++;
+  // a unique key, so two composites with the same label never share an id
+  do_add(QString("%1#%2").arg(name).arg(tex->id), tex->id, tex);
+  return tex->id;
+}
+
+bool TextureManager::setPixels(TextureID id, int width, int height, const unsigned char * pixels, unsigned int format)
+{
+  Texture * tex = texture(id);
+  if (!tex)
+    return false;
+  tex->setPixels(width, height, pixels, format);
+  return true;
+}
+
+Texture * TextureManager::texture(TextureID id) const
+{
+  auto it = items.find(id);
+  return it == items.end() ? nullptr : static_cast<Texture *>(it->second);
+}
+
+void TextureManager::doDelete(TextureID)
+{
+  // The pixels go with the Texture item, which Manager::del deletes; the viewport drops its GPU copy when it
+  // no longer sees the id.
 }
