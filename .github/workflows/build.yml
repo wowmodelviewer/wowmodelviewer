@@ -125,6 +125,11 @@ jobs:
           Get-ChildItem "ThirdParty/wxWidgets33/lib/vc14x_x64_dll/wx*u_*.dll" | Where-Object { $_.Name -notmatch 'ud_' } | Copy-Item -Destination $d
           Copy-Item "C:/vcpkg/installed/x64-windows/bin/*.dll" $d
           Copy-Item "openssl-bin/*.dll" $d
+          # The Visual C++ runtime, so the program starts on a PC without the redistributable installed.
+          $vs = & "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath
+          $crt = Get-ChildItem "$vs/VC/Redist/MSVC/*/x64/Microsoft.VC14*.CRT" | Sort-Object FullName | Select-Object -Last 1
+          if (-not $crt) { throw "no Visual C++ runtime folder found" }
+          Copy-Item "$($crt.FullName)/vcruntime140.dll", "$($crt.FullName)/vcruntime140_1.dll", "$($crt.FullName)/msvcp140.dll" $d
           foreach ($v in '9.2','10.0','10.1','12.0') { Copy-Item -Recurse "bin_support/wow/$v" "$d/games/wow/$v" }
           Copy-Item "bin_support/dbd/*.dbd" "$d/dbd"
           Copy-Item "bin_support/Encryption/extraEncryptionKeys.csv", "LICENSE", "THIRD-PARTY-NOTICES.txt", "installer/README.txt" $d
