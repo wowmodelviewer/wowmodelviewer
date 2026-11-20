@@ -43,7 +43,9 @@ endif()
 set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets 3.2 COMPONENTS net aui xml adv core base REQUIRED)
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ThirdParty/include)
+# (ThirdParty/include, old copies of libpng/libjpeg/zlib headers and the FBX SDK's, is not on the global path: those
+# headers would shadow the libraries' own. Its users add it themselves.)
+include_directories(${wxWidgets_INCLUDE_DIRS})
 
 # The viewport.
 find_package(Vulkan REQUIRED COMPONENTS glslc)

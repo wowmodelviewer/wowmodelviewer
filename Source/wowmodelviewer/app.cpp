@@ -3647,7 +3647,9 @@ bool WowModelViewApp::OnInit()
 #else
     // macOS and GTK draw the native controls in the system's appearance, which the app can set for itself.
     const bool dark = UiStyle::darkWanted();
+#if wxCHECK_VERSION(3, 3, 0)
     SetAppearance(dark ? Appearance::Dark : Appearance::Light);
+#endif
     UiStyle::fixSessionTheme(dark, false);
 #endif
   }
