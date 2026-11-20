@@ -1,3 +1,7 @@
+> **Historical.** This fork no longer embeds a Unity player: the viewport is drawn natively with Vulkan
+> (see `docs/native-port/README.md`). This document describes the Unity viewport of upstream 1.1 and stays as the
+> reference for behaviour still to be ported (its lighting rig, the world viewer).
+
 # Embedded Unity Renderer
 
 ## Direction (read this first)

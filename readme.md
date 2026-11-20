@@ -1,31 +1,41 @@
 # WoW Model Viewer
 
-WoW Model Viewer is a free Windows program for viewing the 3D models of World of Warcraft from your own game
-installation. It shows creatures, NPCs, items, mounts, spell effects and buildings, and playable characters with
-their customization, equipment and animations. It reads Retail and Classic clients installed through Battle.net,
-draws its viewport with an embedded renderer built on the Unity engine, lets you browse the game's textures, and
-exports models to OBJ, textures to PNG or BLP, and screenshots to PNG.
+WoW Model Viewer is a free program for macOS, Windows and Linux for viewing the 3D models of World of Warcraft from
+your own game installation. It shows creatures, NPCs, items, mounts, spell effects and buildings, and playable
+characters with their customization, equipment and animations. It reads Retail, Classic, Classic Era, Anniversary and
+WoW Forever clients installed through Battle.net (on Linux: through Wine or Proton), draws its viewport natively with
+Vulkan (MoltenVK on macOS), lets you browse the game's textures, and exports models to OBJ, textures to PNG or BLP, and
+screenshots to PNG.
 
 ## Download and install
 
-Download the installer from the [Releases page](https://github.com/wowmodelviewer/wowmodelviewer/releases) and
-run it.
+Download the build for your system from the [Releases page](https://github.com/hsmith-dev/wowmodelviewer/releases).
+Nothing is code-signed with a publisher identity, so each system asks once whether to trust it. Only download from the
+Releases page; each release lists the SHA-256 of every file.
 
-- **Requirements:** Windows 10 (version 21H1 or later) or Windows 11, 64-bit; a graphics card with DirectX 11 or
-  12 support and its vendor's current driver (the viewport needs it); World of Warcraft installed through
-  Battle.net.
-- **Per-user install, no administrator rights.** The installer installs for your Windows account only, under
-  `%LOCALAPPDATA%\Programs` by default; you can choose another folder, as long as you can write to it (the viewer
-  keeps its settings and downloads next to itself, so Program Files will not work). Running it over version 1.0
-  or 0.11.0 upgrades that install in place, in its folder, and keeps your settings.
-- **Not code-signed.** Windows SmartScreen may show "Windows protected your PC". Choose **More info**, then
-  **Run anyway**. Only download the installer from the Releases page above; each release lists the installer's
-  SHA-256.
-- To uninstall, use Windows Settings > Apps > Installed apps.
+- **macOS** (12 Monterey or later, Apple silicon or Intel): open the `.dmg` and drag **WoW Model Viewer** to
+  Applications. The app carries an ad-hoc signature only (no Apple Developer ID, no notarization), so the first time,
+  right-click it and choose **Open**, then **Open** again (or System Settings > Privacy & Security > **Open Anyway**).
+- **Windows** (10 21H1 or later, 64-bit): run the installer. It installs for your account only, under
+  `%LOCALAPPDATA%\Programs`. SmartScreen may show "Windows protected your PC": choose **More info**, then **Run
+  anyway**. Uninstall from Settings > Apps > Installed apps.
+- **Linux** (x86-64, with X11 or XWayland): make the `.AppImage` executable (`chmod +x`) and run it. A Vulkan driver
+  for your GPU is needed (Mesa's RADV/ANV, or NVIDIA's), as for running the game itself under Proton.
+
+All systems need a GPU with a Vulkan driver (on macOS, any Mac that runs Monterey: MoltenVK translates to Metal) and World
+of Warcraft installed.
+
+**Which installations are found.** File > Load World of Warcraft lists every client it finds: Retail and its PTR/Beta,
+Classic (Mists of Pandaria Classic...), Classic Era, Anniversary and WoW Forever -- any product in an installation's
+`.build.info`, each in its `_name_` folder. It looks in Battle.net's own list of installs, in the usual folders
+(`/Applications/World of Warcraft` on macOS, `Program Files` on Windows) and, on Linux, in every Wine or Proton prefix
+it can find: `$WINEPREFIX`, `~/.wine`, Steam's Proton prefixes in every Steam library (native and Flatpak), Lutris
+(`~/Games`), Heroic and Bottles. **Browse for another installation...** opens any other folder.
+
 
 ## First steps
 
-1. Start WoW Model Viewer from the Start menu. It opens with an empty viewport.
+1. Start WoW Model Viewer (the Start menu, Applications, or the AppImage). It opens with an empty viewport.
 2. Choose **File > Load World of Warcraft**. The "Choose World of Warcraft" window shows each installed product
    as a card, found through Battle.net and the folders you used before. Click a card, or select it and press
    Enter. A product whose game data is not on the computer is listed with the reason; start it once from
@@ -61,81 +71,88 @@ WoW Model Viewer has no update check, no account and no analytics. It connects o
 - **Importing an item from an Armory item link** (Import from URL in the item picker): to the WoW Model Viewer
   website, for the item's details.
 
-If a download fails, or stalls for 30 seconds, the viewer keeps the copies already on disk. The viewport player
-(`tools\unity-renderer`) talks only to the viewer, over a connection on this computer (127.0.0.1); its Unity
-analytics and diagnostics are turned off.
+If a download fails, or stalls for 30 seconds, the viewer keeps the copies already on disk. The viewport is part of the
+program itself and connects to nothing.
 
 ## Where files are kept
 
-The viewer keeps everything it writes in its program folder, next to `wowmodelviewer.exe`:
+Everything the viewer writes is kept in one folder of your own:
 
-- `userSettings\Config.ini`: settings and the window layout.
-- `userSettings\log.txt`: the viewer's log (**File > View Log**), and `userSettings\unityRenderer.log`: the
-  viewport player's log.
-- `userSettings\ArmoryRealms.json`: realm lists for Armory import, kept for a week.
-- `dbcache\`: one database cache per client build, at most six. You can delete it; it is built again on the next
-  load.
-- `listfile.csv` (with `listfile.csv.etag` and `listfile.csv.order`) and `extraEncryptionKeys.csv`: the
-  downloaded file list and encryption keys.
-- `Exports\Textures\`: the textures the Texture Viewer's **Quick export** saves, each in its folder from the game
-  (`creature\bear\bearskinblack.png`). **Options > Settings... > Export** chooses another folder.
+- **macOS:** `~/Library/Application Support/WoW Model Viewer`
+- **Linux:** `~/.local/share/wowmodelviewer` (`$XDG_DATA_HOME`), or the program's own folder when a file named
+  `portable` sits next to it
+- **Windows:** the program folder, next to `wowmodelviewer.exe`
 
-The viewport player also keeps its window settings (and the Unity engine's own session counters) in the registry,
-under `HKEY_CURRENT_USER\Software\WoW Model Viewer`. Uninstalling removes all of these too, except `Exports\`:
-the textures you exported stay.
+In it:
 
-## Known issues in 1.1
+- `userSettings/Config.ini`: settings and the window layout; `userSettings/log.txt`: the log (**File > View Log**).
+- `userSettings/ArmoryRealms.json`: realm lists for Armory import, kept for a week.
+- `dbcache/`: one database cache per client build, at most six. You can delete it; it is built again on the next load.
+- `listfile.csv` (with `listfile.csv.etag` and `listfile.csv.order`) and `extraEncryptionKeys.csv`: the downloaded
+  file list and encryption keys.
+- `Exports/Textures/`: what the Texture Viewer's **Quick export** saves. **Options > Settings... > Export** chooses
+  another folder.
 
-- The **Models** button of the viewer selector in the command bar sometimes shows no icon. Only the icon is
-  affected.
-- FBX export is not included (0.11.0 had it), and neither is the Blender add-on installer that went with it. OBJ
-  export (**File > Export Model**) remains.
-- Classic Beta: many of its items have no name in the client's own data and are listed as "Unnamed item" (the item
-  filter finds them by ID), and **Character > Load Item Set** equips only the pieces that have a name.
-- A character or equipment file saved with 1.0 while a replaced item still showed the previous item's look may keep
-  that look: remove the item from its slot, choose it again and save the file again.
+On macOS and Linux the folder also holds links (`games`, `dbd`) to the database schemas inside the program. To remove
+everything, delete the folder.
+
+
+## Known issues
+
+- **Maps** (the world viewer) is not available yet: the viewport rebuilt natively draws models, characters and
+  buildings; terrain, liquids, sky and fog follow in a later version. Browse still lists each client's maps.
+- The viewport lights models with a fixed preview rig; the Lighting panel's lights are kept but not used.
+- FBX export is not included (it needs Autodesk's SDK). OBJ export (**File > Export Model**) remains.
+- Classic Beta and WoW Forever (the 1.60 clients): items without a name in the client's own data are listed as
+  "Unnamed item".
 - **Character > Load Start Outfit** lists no outfits in any client.
-- Models from a legacy MPQ client cannot be shown in the viewport: they have no FileDataID, which the viewport
-  needs.
-- The installer is not code-signed, so SmartScreen may warn before it runs (see Download and install).
+- Nothing is signed with a publisher identity (see Download and install).
 
-To report a problem, open an issue on the
-[issue tracker](https://github.com/wowmodelviewer/wowmodelviewer/issues). Say which client and model you used,
-and attach `userSettings\log.txt` and `userSettings\unityRenderer.log`.
+To report a problem, open an issue on the [issue tracker](https://github.com/hsmith-dev/wowmodelviewer/issues). Say
+which system, client and model you used, and attach `userSettings/log.txt`.
+
 
 ## Building from source
 
-The viewer is C++ built with CMake. The viewport is a separate Unity player.
+The viewer is C++17 built with CMake (3.21 or newer): wxWidgets 3.3 for the interface, Qt 5 (Core, Gui, Network, Xml,
+Widgets) for data and networking, and Vulkan for the viewport (its shaders are compiled with `glslc` at build time).
+CascLib, StormLib and CxImage are in `ThirdParty`. `.github/workflows/build.yml` builds all three systems and is the
+reference for the exact steps.
 
-You need:
-
-- Visual Studio 2022 with the C++ desktop workload (x64), and CMake 3.16 or newer.
-- Qt 5.13.2 for MSVC 2017 64-bit.
-- wxWidgets 3.3.3: the official prebuilt x64 binaries for vc14x (headers, Dev and ReleaseDLL), unpacked in
-  `ThirdParty\wxWidgets33`, which is not in git.
-- GLEW from vcpkg, triplet `x64-windows-static-md`, and libjpeg-turbo and libpng from vcpkg, triplet `x64-windows`
-  (CxImage links their `jpeg.lib` and `libpng16.lib`).
-
-Point the build at your Qt and vcpkg installs (see the top of `CMakeLists.txt`), then:
+**macOS** (Xcode command line tools, Homebrew):
 
 ```
-cmake -S . -B build64 -G "Visual Studio 17 2022" -A x64
-cmake --build build64 --config Release
+brew install cmake ninja qt@5 wxwidgets molten-vk vulkan-loader vulkan-headers shaderc libpng jpeg-turbo
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+open "build/Source/wowmodelviewer/WoW Model Viewer.app"
+installer/macos/make-bundle.sh build dist     # the self-contained, ad-hoc-signed app and its .dmg
 ```
 
-If configuring stops on `bin_support\wow\listfile.csv`, which is not in git, put a copy of the community file
-list there first. The FBX exporter in `Source\plugins\exporters\fbx` needs the Autodesk FBX SDK, which is not in
-the repository; it is built only when the SDK is there (`WMV_BUILD_FBX_EXPORTER`) and is not part of the release.
+**Linux** (Ubuntu 24.04 package names; wxWidgets 3.3 built from source when the distribution has 3.2):
 
-The viewport player's scripts and shaders are in `Tools\UnityRendererProject`, whose README describes how to
-build them into `tools\unity-renderer\UnityRenderer.exe` next to `wowmodelviewer.exe`. The 1.1 player is built
-with Unity 6000.5.9f1 and the Universal Render Pipeline; like 1.0's, it takes its screenshot code
-(`WmvScreenshot.cs` and `Resources\WmvScreenshotMatte.shader`) from branch `feature/unity-screenshot-glow-alpha`.
+```
+sudo apt install cmake ninja-build qtbase5-dev libgtk-3-dev libx11-dev libvulkan-dev glslc libpng-dev libjpeg-dev
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DwxWidgets_CONFIG_EXECUTABLE=<wx prefix>/bin/wx-config
+cmake --build build
+installer/linux/make-appimage.sh build <wx prefix> dist
+```
 
-To make the installer, install Inno Setup 6.7 or later and run `installer\build-installer.ps1` with the build
-folder, the built player and the OpenSSL 1.1.1 x64 DLLs. It stages the release folder file by file (the list in
-the script is also what a build needs next to `wowmodelviewer.exe` to run) and writes
-`installer\dist\WoWModelViewer-Setup-<version>.exe` with its SHA-256.
+**Windows** (Visual Studio 2022, x64): Qt 5.15 for MSVC, the official wxWidgets 3.3 binaries (headers, Dev and
+ReleaseDLL) unpacked in `ThirdParty\wxWidgets33`, the LunarG Vulkan SDK, and libpng/libjpeg from vcpkg:
+
+```
+vcpkg install libpng:x64-windows libjpeg-turbo:x64-windows zlib:x64-windows
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake ^
+      -DQT_LOCATION=<Qt>/5.15.2/msvc2019_64 -DWMV_VCPKG_X64=<vcpkg>/installed/x64-windows
+cmake --build build --config Release
+```
+
+A headless run renders a model to a picture, which is how the viewport is checked without a window:
+`wowmodelviewer -mo creature/chicken/chicken.m2 -screenshot chicken.png` (it loads the first client found).
+`WMV_RENDER_DEBUG=1` logs what each capture draws; `WMV_VULKAN_VALIDATION=1` turns on Vulkan's validation layer.
+See `docs/native-port/README.md` for how the viewport is built.
+
 
 ## Licence
 
@@ -143,9 +160,8 @@ WoW Model Viewer is free software: you can redistribute it and/or modify it unde
 Public License, version 3 or (at your option) any later version. It comes with no warranty. See
 [LICENSE](LICENSE).
 
-The program includes components by other authors, among them Qt, wxWidgets and the Unity runtime, each under its
-own licence. See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which the installer also puts in the
-program folder.
+The program includes components by other authors, among them Qt, wxWidgets, the Vulkan loader and MoltenVK, each under
+its own licence. See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which every package also carries.
 
 ## Not affiliated with Blizzard
 
