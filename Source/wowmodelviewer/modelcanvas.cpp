@@ -356,6 +356,22 @@ bool ModelCanvas::captureRGBA(int w, int h, bool transparent, std::vector<unsign
   }
   wmv::RenderList list;
   buildFrame(list, (float)w / (float)h, !transparent);
+  static const bool debug = getenv("WMV_RENDER_DEBUG") != nullptr;
+  if (debug)
+  {
+    const glm::vec3 eye = camera.position(), look = camera.lookAt();
+    LOG_INFO << "[render] capture" << w << "x" << h << "draws" << (int)list.draws.size() << "vertices"
+             << (int)list.vertices.size() << "indices" << (int)list.indices.size() << "camera" << eye.x << eye.y << eye.z
+             << "->" << look.x << look.y << look.z << "model" << (model_ ? 1 : 0)
+             << "showModel" << (model_ ? (int)model_->showModel : -1);
+    for (size_t i = 0; i < list.draws.size() && i < 12; i++)
+    {
+      const wmv::Draw & d = list.draws[i];
+      LOG_INFO << "[render]   draw" << (int)i << "indices" << (int)d.indexCount << "blend" << (int)d.material.blend
+               << "tex" << d.material.tex[0] << "ps" << d.material.pixelShader << "alpha" << d.material.color.w
+               << "cull" << d.material.cull;
+    }
+  }
   return m_renderer->capture(list, frameSettings(transparent), w, h, rgba);
 }
 

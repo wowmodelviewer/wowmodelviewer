@@ -3694,9 +3694,8 @@ bool WowModelViewApp::OnInit()
   wxHandleFatalExceptions(true);
 
 
-  wxString execPath = wxStandardPaths::Get().GetExecutablePath();
-  wxFileName fname(execPath);
-  wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings");
+  // userSettings in the home folder (the working directory: the exe's folder on Windows, AppPaths::homeDir elsewhere).
+  wxString userPath = wxGetCwd() + SLASH + wxT("userSettings");
   wxFileName::Mkdir(userPath, 0777, wxPATH_MKDIR_FULL);
 
   // Application Info
@@ -4046,6 +4045,10 @@ bool WowModelViewApp::OnInit()
       LOGGER.addChild(new WMVLog::LogOutputConsole());
     }
   }
+#else
+  // A terminal already is the console: the log goes to it too.
+  if (displayConsole)
+    LOGGER.addChild(new WMVLog::LogOutputConsole());
 #endif
 
   // -------

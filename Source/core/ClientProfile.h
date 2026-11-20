@@ -71,7 +71,10 @@ namespace core
     ClassicBeta,   // wow_classic_beta
     ClassicEra,    // wow_classic_era
     ClassicEraPTR, // wow_classic_era_ptr
-    LegacyMpq      // a pre-Battle.net install opened from its MPQ archives
+    LegacyMpq,     // a pre-Battle.net install opened from its MPQ archives
+    ClassicAnniversary,    // wow_anniversary (the Anniversary realms' client, _anniversary_)
+    ClassicAnniversaryPTR, // wow_anniversary_ptr
+    Forever                // wowf (World of Warcraft: Forever, _forever_; the 1.60 line of the Classic Beta)
   };
 
   // The on-disk archive backend the client ships its data in.

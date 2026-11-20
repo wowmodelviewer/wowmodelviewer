@@ -1354,7 +1354,9 @@ namespace
         g.uvSource = glm::ivec4(m.uvSource[0], m.uvSource[1], m.uvSource[2], m.uvSource[3]);
         g.pixelShader = m.pixelShader;
         g.egxBlendMode = m.egxBlendMode;
-        g.flags = (m.unlit ? FLAG_UNLIT : 0) | (m.textured ? FLAG_TEXTURED : 0) | (m.alphaTest ? FLAG_ALPHA_TEST : 0) |
+        static const bool noAlphaTest = getenv("WMV_DEBUG_NOALPHATEST") != nullptr;
+        g.flags = (m.unlit ? FLAG_UNLIT : 0) | (m.textured ? FLAG_TEXTURED : 0) |
+                  (m.alphaTest && !noAlphaTest ? FLAG_ALPHA_TEST : 0) |
                   (m.particleMultiTexture ? FLAG_PARTICLE_MULTITEX : 0) | (m.screenSpace ? FLAG_SCREEN_SPACE : 0) |
                   (m.twoSided && !m.cull ? FLAG_TWO_SIDED : 0);
         g.textureCount = m.textureCount;
@@ -1449,10 +1451,11 @@ namespace
         if (dr.indexCount == 0)
           continue;
         const wmv::Material & m = dr.material;
+        static const bool noCull = getenv("WMV_DEBUG_NOCULL") != nullptr;
         PipelineKey key;
         key.blend = (uint8_t)m.blend;
         key.blendEnabled = m.blendEnabled;
-        key.cull = m.cull;
+        key.cull = m.cull && !noCull;
         key.frontCW = m.frontFaceCW;
         key.depthTest = m.depthTest;
         key.depthWrite = m.depthWrite;

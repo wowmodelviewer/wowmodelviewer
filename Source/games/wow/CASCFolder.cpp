@@ -6,6 +6,9 @@
  */
 
 #include "CASCFolder.h"
+
+#include <QDir>
+#include <QFileInfo>
 #include "TString.h"
 #include "TString.h"
 
@@ -39,8 +42,8 @@ void CASCFolder::init(const QString &path)
 {
   m_folder = path;
 
-  if(m_folder.endsWith("\\"))
-    m_folder.remove(m_folder.size()-1,1);
+  while (m_folder.endsWith("\\") || m_folder.endsWith("/"))
+    m_folder.chop(1);
 
   initBuildInfo();
 }
@@ -440,7 +443,8 @@ quint64 CASCFolder::nextStorageGeneration()
 void CASCFolder::initBuildInfo()
 {
   m_configs.clear();
-  QString buildinfofile = m_folder + "\\..\\.build.info";
+  // The install folder above Data (CascLib opens "<Data>*<product>").
+  QString buildinfofile = QFileInfo(m_folder).dir().absoluteFilePath(".build.info");
   LOG_INFO << "buildinfofile : " << buildinfofile;
 
   QFile file(buildinfofile);

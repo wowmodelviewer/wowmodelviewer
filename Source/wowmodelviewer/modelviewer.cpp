@@ -3381,7 +3381,15 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   wxStopWatch total, step;
   ClientState::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   if (gamePath.IsEmpty() || !wxDirExists(gamePath))
-    getGamePath();
+  {
+    // An install found on this computer (Battle.net's list, the usual folders, Wine and Proton prefixes) before
+    // the folder chooser.
+    const QStringList roots = ClientInstallations::candidateRoots();
+    if (!roots.isEmpty())
+      gamePath = QDir::toNativeSeparators(roots.first() + "/Data/").toStdWString();
+    else
+      getGamePath();
+  }
   const QString dataPath = QString::fromWCharArray(gamePath.c_str());
 
   // THE FOLDER. The loaded one when it is this same installation's CASC folder (opening another of its products

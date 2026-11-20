@@ -13,7 +13,6 @@
 
 #include <wx/colordlg.h>
 
-#include "GL/glew.h"
 
 extern const size_t MAX_LIGHTS;
 
@@ -200,11 +199,6 @@ void LightControl::Init()
 
   // Turn on the first light by default
   lights[0].enabled = true;
-  glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, glm::value_ptr(lights[0].diffuse));
-  glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(lights[0].ambience));
-  glLightfv(GL_LIGHT0, GL_SPECULAR, glm::value_ptr(lights[0].specular));
-  glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(lights[0].pos));
 
   Update();
 }
@@ -223,7 +217,6 @@ void LightControl::SetAmbience()
 {
   lights[activeLight].ambience = DoSetColour(lights[activeLight].ambience);
 
-  glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
 
   wxColour col((unsigned char)(lights[activeLight].ambience.x*255.0f), (unsigned char)(lights[activeLight].ambience.y*255.0f), (unsigned char)(lights[activeLight].ambience.z*255.0f));
   ambience->SetBackgroundColour(col);
@@ -234,7 +227,6 @@ void LightControl::SetDiffuse()
   lights[activeLight].diffuse = DoSetColour(lights[activeLight].diffuse);
 
   // Update the opengl scene lighting
-  glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
   
   wxColour col((unsigned char)(lights[activeLight].diffuse.x*255.0f), (unsigned char)(lights[activeLight].diffuse.y*255.0f), (unsigned char)(lights[activeLight].diffuse.z*255.0f));
   diffuse->SetBackgroundColour(col);
@@ -254,7 +246,6 @@ void LightControl::SetSpecular()
 {
   lights[activeLight].specular = DoSetColour(lights[activeLight].specular);
 
-  glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
 
   wxColour col((unsigned char)(lights[activeLight].specular.x*255.0f), (unsigned char)(lights[activeLight].specular.y*255.0f), (unsigned char)(lights[activeLight].specular.z*255.0f));
   specular->SetBackgroundColour(col);
@@ -287,9 +278,6 @@ void LightControl::OnButton(wxCommandEvent &event)
     lights[activeLight].linear_int = 0.0f;
     lights[activeLight].quadradic_int = 0.0f;
 
-    glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
-    glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
-    glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
 
     Update();
   }
@@ -331,12 +319,6 @@ void LightControl::OnCheck(wxCommandEvent &event)
   if (event.GetId() == ID_LIGHTENABLED) {
     lights[activeLight].enabled = event.IsChecked();
 
-    GLuint light = GL_LIGHT0 + activeLight;
-    if (lights[activeLight].enabled) 
-      glEnable(light);
-    else
-      glDisable(light);
-
   } else if (event.GetId() == ID_LIGHTRELATIVE) {
     lights[activeLight].relative = event.IsChecked();
   }
@@ -349,8 +331,6 @@ void LightControl::OnRadio(wxCommandEvent &event)
   qintensity->Enable(false);
   alpha->Enable(false);
 
-  GLuint lightID = GL_LIGHT0 + activeLight;
-
   if (event.GetId() == ID_LIGHTPOSITIONAL) {
     lights[activeLight].type = LIGHT_POSITIONAL;
     lights[activeLight].pos.w = 1.0f;
@@ -359,11 +339,7 @@ void LightControl::OnRadio(wxCommandEvent &event)
     lintensity->Enable(true);
     qintensity->Enable(true);
 
-    glLightf(lightID, GL_CONSTANT_ATTENUATION, lights[activeLight].constant_int);
-    glLightf(lightID, GL_LINEAR_ATTENUATION, lights[activeLight].linear_int);
-    glLightf(lightID, GL_QUADRATIC_ATTENUATION, lights[activeLight].quadradic_int);
 
-    glLightf(lightID, GL_SPOT_CUTOFF, 180.0f);
 
   } else if(event.GetId() == ID_LIGHTSPOT) {
     lights[activeLight].type = LIGHT_SPOT;
@@ -372,8 +348,6 @@ void LightControl::OnRadio(wxCommandEvent &event)
     alpha->Enable(true);
 
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);          // This seems to have no effect?
-    glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
 
   } else if(event.GetId() == ID_LIGHTDIRECTIONAL) {
@@ -397,22 +371,15 @@ void LightControl::OnScroll(wxScrollEvent &event)
   //
   // Update our light settings here
   // instead of calling it every frame
-  GLuint lightID = GL_LIGHT0 + activeLight;
 
   if (lights[activeLight].type == LIGHT_POSITIONAL) {    // Attenuation is ignored for directional lighting, so only set if its positional
-    glLightf(lightID, GL_CONSTANT_ATTENUATION, lights[activeLight].constant_int);
-    glLightf(lightID, GL_LINEAR_ATTENUATION, lights[activeLight].linear_int);
-    glLightf(lightID, GL_QUADRATIC_ATTENUATION, lights[activeLight].quadradic_int);
 
-    glLightf(lightID, GL_SPOT_CUTOFF, 180.0f);
     //glLightf(lightID, GL_SPOT_EXPONENT, 0.0f);  
 
   } else if (lights[activeLight].type == LIGHT_DIRECTIONAL) { // Directional
   
   } else { // its a spot light
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);          // This seems to have no effect?
-    glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
   }
 }
@@ -534,7 +501,6 @@ void LightControl::Update()
   alpha->Enable(false);
 
   // Update the lighting
-  GLuint lightID = GL_LIGHT0 + activeLight;
 
   if (lights[activeLight].type == LIGHT_POSITIONAL) {
     positional->SetValue(true);
@@ -542,70 +508,27 @@ void LightControl::Update()
     lintensity->Enable(true);
     qintensity->Enable(true);
 
-    glLightf(lightID, GL_CONSTANT_ATTENUATION, lights[activeLight].constant_int);
-    glLightf(lightID, GL_LINEAR_ATTENUATION, lights[activeLight].linear_int);
-    glLightf(lightID, GL_QUADRATIC_ATTENUATION, lights[activeLight].quadradic_int);
 
-    glLightf(lightID, GL_SPOT_CUTOFF, 180.0f);
 
   } else if(lights[activeLight].type == LIGHT_SPOT) {
     spot->SetValue(true);
     alpha->Enable(true);
     
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);            // This seems to have no effect?
-    glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
 
   } else if(lights[activeLight].type == LIGHT_DIRECTIONAL) {
-    glLightf(lightID, GL_SPOT_CUTOFF, 180.0f);
 
     directional->SetValue(true);
   }
 
   //glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
-  glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
-  glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
-  glLightfv(GL_LIGHT0+activeLight, GL_POSITION, glm::value_ptr(lights[activeLight].pos));
 }
 
+// The viewport lights every model with its own preview rig (the renderer's FrameSettings); the light panel's
+// lights are kept as settings, for the day the viewport takes them.
 void LightControl::UpdateGL()
 {
-  float tar[3] = {0.0f, -1.0f, 0.0f};
-  // Update the lighting
-  for (size_t i=0; i<MAX_LIGHTS; i++) {
-    GLuint lightID = GL_LIGHT0 + (GLuint)i;
-
-    if (lights[i].enabled)
-      glEnable(lightID);
-    else
-      glDisable(lightID);
-
-    glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, glm::value_ptr(lights[i].diffuse));
-    glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, glm::value_ptr(lights[i].ambience));
-    glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, glm::value_ptr(lights[i].specular));
-    glLightfv(GL_LIGHT0+activeLight, GL_POSITION, glm::value_ptr(lights[i].pos));
-
-    glLightf(lightID, GL_CONSTANT_ATTENUATION, 1.0f);
-    glLightf(lightID, GL_LINEAR_ATTENUATION, 0.0f);
-    glLightf(lightID, GL_QUADRATIC_ATTENUATION, 0.0f);
-    glLightf(lightID, GL_SPOT_CUTOFF, 180.0f);
-
-    glLightfv(lightID, GL_SPOT_DIRECTION, tar);
-
-    if (lights[i].type == LIGHT_POSITIONAL) {
-      glLightf(lightID, GL_CONSTANT_ATTENUATION, lights[activeLight].constant_int);
-      glLightf(lightID, GL_LINEAR_ATTENUATION, lights[activeLight].linear_int);
-      glLightf(lightID, GL_QUADRATIC_ATTENUATION, lights[activeLight].quadradic_int);
-
-    } else if(lights[activeLight].type == LIGHT_SPOT) {
-      //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);            // This seems to have no effect?
-      glLightf(lightID, GL_SPOT_CUTOFF, lights[i].arc);      // Lighting arc
-      glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[i].target));  // Lighting target
-
-    }  
-  }
 }
 
 // --

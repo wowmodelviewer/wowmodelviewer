@@ -44,6 +44,16 @@ namespace core
     if (p == "wow_classic_era") return ProductFamily::ClassicEra;
     if (p == "wow_classic_era_ptr") return ProductFamily::ClassicEraPTR;
     if (p == "mpq") return ProductFamily::LegacyMpq;
+    if (p == "wow_anniversary") return ProductFamily::ClassicAnniversary;
+    if (p == "wow_anniversary_ptr") return ProductFamily::ClassicAnniversaryPTR;
+    if (p == "wowf") return ProductFamily::Forever;
+    // A product Blizzard adds later, by the family its code says it belongs to (its own folder, _name_, is found the
+    // same way as any other's: ClientInstallations reads every product of .build.info).
+    if (p.startsWith("wow_classic_era")) return p.contains("ptr") ? ProductFamily::ClassicEraPTR : ProductFamily::ClassicEra;
+    if (p.startsWith("wow_anniversary")) return p.contains("ptr") ? ProductFamily::ClassicAnniversaryPTR
+                                                                  : ProductFamily::ClassicAnniversary;
+    if (p.startsWith("wow_classic")) return p.contains("ptr") ? ProductFamily::ClassicPTR : ProductFamily::Classic;
+    if (p.startsWith("wowf")) return ProductFamily::Forever;
     return ProductFamily::Unknown;
   }
 
@@ -62,6 +72,9 @@ namespace core
       case ProductFamily::ClassicBeta:
       case ProductFamily::ClassicEra:
       case ProductFamily::ClassicEraPTR:
+      case ProductFamily::ClassicAnniversary:
+      case ProductFamily::ClassicAnniversaryPTR:
+      case ProductFamily::Forever:
         // The Classic re-release lines, by major.minor: Classic Era 1.13-1.15 (tested: 1.15.9.70003), Burning
         // Crusade Classic 2.5, Wrath Classic 3.4, Cataclysm Classic 4.4, Mists of Pandaria Classic 5.5 (5.5.4.70032
         // is listed on this machine). Any other Classic version (e.g. the 1.60.1 Classic Beta) claims no expansion.
@@ -107,7 +120,9 @@ namespace core
   bool ClientProfile::isClassicFamily() const
   {
     return family == ProductFamily::Classic || family == ProductFamily::ClassicPTR || family == ProductFamily::ClassicBeta ||
-           family == ProductFamily::ClassicEra || family == ProductFamily::ClassicEraPTR;
+           family == ProductFamily::ClassicEra || family == ProductFamily::ClassicEraPTR ||
+           family == ProductFamily::ClassicAnniversary || family == ProductFamily::ClassicAnniversaryPTR ||
+           family == ProductFamily::Forever;
   }
 
   bool ClientProfile::isRetailFamily() const
@@ -130,6 +145,9 @@ namespace core
       case ProductFamily::ClassicEra:    return "Classic Era";
       case ProductFamily::ClassicEraPTR: return "Classic Era PTR";
       case ProductFamily::LegacyMpq:     return "Legacy";
+      case ProductFamily::ClassicAnniversary:    return "Anniversary";
+      case ProductFamily::ClassicAnniversaryPTR: return "Anniversary PTR";
+      case ProductFamily::Forever:               return "WoW Forever";
       default:                           return QString();
     }
   }

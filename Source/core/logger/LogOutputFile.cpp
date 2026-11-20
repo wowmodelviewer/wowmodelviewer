@@ -68,6 +68,8 @@ void LogOutputFile::write(const QString & message)
   QMutexLocker locker(&mutex);
   QTextStream out(&m_logFile);
   out << message << "\n";
+  out.flush();
+  m_logFile.flush(); // a crash keeps the lines before it
 }
 
 // Protected methods

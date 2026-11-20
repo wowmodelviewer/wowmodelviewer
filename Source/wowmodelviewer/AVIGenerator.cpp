@@ -4,7 +4,6 @@
 
 #include "AVIGenerator.h"
 
-#include "GL/glew.h"
 
 #include "logger/Logger.h"
 
@@ -302,7 +301,8 @@ void CAVIGenerator::GetFrame()
 
   // Update The Texture
   //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bih.biWidth, bih.biHeight, GL_RGB8, GL_UNSIGNED_BYTE, pData);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, bih.biWidth, bih.biHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, pData);
+  // (The frame used to be uploaded as the archived OpenGL viewport's background; nothing shows an AVI background now.)
+  (void)pData;
   delete[] pData;
 
   m_iCurFrame++;

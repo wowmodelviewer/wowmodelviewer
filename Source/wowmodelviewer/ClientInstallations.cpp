@@ -10,6 +10,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSettings>
+
+#include <functional>
 #include <QTextStream>
 
 #include "util.h"            // gamePath, cfgPath
@@ -30,7 +32,7 @@ core::GameConfig InstalledClient::config() const
 
 QString InstalledClient::dataPath() const
 {
-  return QDir::toNativeSeparators(root) + "\\Data\\";
+  return QDir::toNativeSeparators(root + "/Data/");
 }
 
 namespace
@@ -49,7 +51,10 @@ namespace
       case core::ProductFamily::ClassicBeta:   return 6;
       case core::ProductFamily::ClassicEra:    return 7;
       case core::ProductFamily::ClassicEraPTR: return 8;
-      default:                                 return 9;
+      case core::ProductFamily::ClassicAnniversary:    return 9;
+      case core::ProductFamily::ClassicAnniversaryPTR: return 10;
+      case core::ProductFamily::Forever:               return 11;
+      default:                                 return 12;
     }
   }
 
@@ -235,6 +240,122 @@ std::vector<InstalledClient> ClientInstallations::discover(const QString & anyPa
   return found;
 }
 
+namespace
+{
+  // Battle.net's install list (Agent/product.db) is a protobuf record per product holding its install folder as a
+  // plain string. The folders are read as the printable runs that look like absolute paths; each is then checked for
+  // a .build.info, so a wrong guess costs nothing. mapPath turns a Windows path into this computer's (a Wine
+  // prefix's C:/ into its drive_c); it returns "" for a path it cannot place.
+  QStringList pathsInProductDb(const QString & productDb, const std::function<QString(const QString &)> & mapPath)
+  {
+    QStringList paths;
+    QFile file(productDb);
+    if (!file.open(QIODevice::ReadOnly))
+      return paths;
+    const QByteArray bytes = file.read(8 * 1024 * 1024);
+    QByteArray run;
+    auto flush = [&]() {
+      if (run.size() >= 3)
+      {
+        const QString s = QString::fromUtf8(run);
+        const bool unixPath = s.startsWith('/');
+        const bool windowsPath = s.size() > 2 && s[1] == ':' && (s[2] == '/' || s[2] == '\\') && s[0].isLetter();
+        if (unixPath || windowsPath)
+        {
+          const QString mapped = mapPath ? mapPath(QDir::fromNativeSeparators(s)) : s;
+          if (!mapped.isEmpty() && !paths.contains(mapped))
+            paths << mapped;
+        }
+      }
+      run.clear();
+    };
+    for (char c : bytes)
+    {
+      if ((unsigned char)c >= 0x20 && (unsigned char)c < 0x7f)
+        run.append(c);
+      else
+        flush();
+    }
+    flush();
+    return paths;
+  }
+
+#if !defined(_WIN32) && !defined(__APPLE__)
+  // A Windows path of a Wine prefix on this computer: C:/x is <prefix>/drive_c/x, another drive through the prefix's
+  // dosdevices links (d: -> /mnt/games, say).
+  QString inPrefix(const QString & prefix, const QString & windowsPath)
+  {
+    if (windowsPath.size() < 3 || windowsPath[1] != ':')
+      return QString();
+    const QChar drive = windowsPath[0].toLower();
+    const QString rest = windowsPath.mid(2);
+    if (drive == 'c' && QDir(prefix + "/drive_c").exists())
+      return prefix + "/drive_c" + rest;
+    const QString device = prefix + "/dosdevices/" + drive + ":";
+    if (QFileInfo(device).exists())
+      return QFileInfo(device).canonicalFilePath() + rest;
+    return QString();
+  }
+
+  // Every Wine prefix worth looking in: the default one, Proton's (Steam, in every library it lists), Lutris's
+  // (~/Games), Heroic's and Bottles' (native and Flatpak).
+  QStringList winePrefixes()
+  {
+    QStringList prefixes;
+    auto add = [&prefixes](const QString & p) {
+      if (QDir(p + "/drive_c").exists() && !prefixes.contains(p))
+        prefixes << p;
+    };
+    auto addChildren = [&add](const QString & dir, const QString & sub = QString()) {
+      for (const QString & child : QDir(dir).entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+        add(dir + "/" + child + sub);
+    };
+    const QString home = QDir::homePath();
+    const QByteArray wineprefix = qgetenv("WINEPREFIX");
+    if (!wineprefix.isEmpty())
+      add(QString::fromLocal8Bit(wineprefix));
+    add(home + "/.wine");
+    addChildren(home + "/.local/share/wineprefixes");
+    addChildren(home + "/Games");                       // Lutris: ~/Games/<game>
+    addChildren(home + "/Games/Heroic/Prefixes");       // Heroic: ~/Games/Heroic/Prefixes/<game>
+    addChildren(home + "/Games/Heroic/Prefixes/default");
+    addChildren(home + "/.local/share/bottles/bottles");
+    addChildren(home + "/.var/app/com.usebottles.bottles/data/bottles/bottles");
+    addChildren(home + "/.var/app/com.heroicgameslauncher.hgl/config/heroic/Prefixes");
+
+    // Steam: its own library and the others libraryfolders.vdf names; Proton keeps a prefix per game (a
+    // non-Steam game too) at steamapps/compatdata/<id>/pfx.
+    QStringList libraries;
+    for (const QString & root : { home + "/.steam/steam", home + "/.local/share/Steam", home + "/.steam/root",
+                                  home + "/.var/app/com.valvesoftware.Steam/.local/share/Steam" })
+    {
+      if (!QDir(root + "/steamapps").exists())
+        continue;
+      libraries << QDir(root).canonicalPath();
+      QFile vdf(root + "/steamapps/libraryfolders.vdf");
+      if (vdf.open(QIODevice::ReadOnly | QIODevice::Text))
+      {
+        const QString text = QString::fromUtf8(vdf.readAll());
+        int at = 0;
+        while ((at = text.indexOf("\"path\"", at)) >= 0)
+        {
+          const int open = text.indexOf('"', at + 6);
+          const int close = open >= 0 ? text.indexOf('"', open + 1) : -1;
+          if (close < 0)
+            break;
+          libraries << QDir(text.mid(open + 1, close - open - 1).replace("\\\\", "\\")).canonicalPath();
+          at = close + 1;
+        }
+      }
+    }
+    libraries.removeDuplicates();
+    for (const QString & lib : libraries)
+      addChildren(lib + "/steamapps/compatdata", "/pfx");
+    return prefixes;
+  }
+#endif
+}
+
 QStringList ClientInstallations::candidateRoots()
 {
   QStringList roots;
@@ -259,6 +380,31 @@ QStringList ClientInstallations::candidateRoots()
     DWORD size = sizeof(value);
     if (RegGetValueW(HKEY_LOCAL_MACHINE, key, L"InstallPath", RRF_RT_REG_SZ, nullptr, value, &size) == ERROR_SUCCESS)
       add(QString::fromWCharArray(value));
+  }
+  // Battle.net's own list of what it installed.
+  {
+    const QByteArray programData = qgetenv("ProgramData");
+    const QString agent = (programData.isEmpty() ? QString("C:/ProgramData") : QString::fromLocal8Bit(programData)) +
+                          "/Battle.net/Agent/product.db";
+    for (const QString & p : pathsInProductDb(agent, nullptr))
+      add(p);
+  }
+  add("C:/Program Files (x86)/World of Warcraft");
+  add("C:/Program Files/World of Warcraft");
+#elif defined(__APPLE__)
+  for (const QString & p : pathsInProductDb("/Users/Shared/Battle.net/Agent/product.db", nullptr))
+    add(p);
+  add("/Applications/World of Warcraft");
+  add(QDir::homePath() + "/Applications/World of Warcraft");
+#else
+  // Linux: World of Warcraft runs in a Wine or Proton prefix; Battle.net's list inside each prefix says where.
+  for (const QString & prefix : winePrefixes())
+  {
+    for (const QString & p : pathsInProductDb(prefix + "/drive_c/ProgramData/Battle.net/Agent/product.db",
+                                              [&prefix](const QString & w) { return inPrefix(prefix, w); }))
+      add(p);
+    add(prefix + "/drive_c/Program Files (x86)/World of Warcraft");
+    add(prefix + "/drive_c/Program Files/World of Warcraft");
   }
 #endif
   return roots;

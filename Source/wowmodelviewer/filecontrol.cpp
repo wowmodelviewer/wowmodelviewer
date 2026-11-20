@@ -1034,20 +1034,10 @@ void FileControl::ClearCanvas()
     g_selModel = NULL;
   }
 
-#ifdef _DEBUG
-  GLenum err=glGetError();
-  if (err)
-    LOG_ERROR << "An OpenGL error occured." << err;
   LOG_INFO << "Clearing textures from previous model...";
-#endif
   // Texture clearing and debugging
   TEXTUREMANAGER.clear();
 
-#ifdef _DEBUG
-  err = glGetError();
-  if (err)
-    LOG_ERROR << "An OpenGL error occured." << err;
-#endif
 
   modelviewer->isModel = false;
   modelviewer->isChar = false;
