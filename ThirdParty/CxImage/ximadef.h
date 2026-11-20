@@ -58,6 +58,12 @@
  #define CXIMAGE_SUPPORT_WINDOWS 0
 #endif
 
+// The standard headers first, while min and max are still plain names: libstdc++'s templates use both.
+#include <algorithm>
+#include <deque>
+#include <string>
+#include <vector>
+
 #ifndef min
 #define min(a,b) (((a)<(b))?(a):(b))
 #endif

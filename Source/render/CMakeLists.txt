@@ -37,7 +37,7 @@ use_wow()
 
 add_library(wmvrender STATIC ${src} ${headers} ${shader_headers})
 set_property(TARGET wmvrender PROPERTY FOLDER "libraries")
-target_include_directories(wmvrender PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${gen_dir} ${shader_dir})
+target_include_directories(wmvrender PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/ThirdParty PRIVATE ${gen_dir} ${shader_dir})
 target_link_libraries(wmvrender PUBLIC Vulkan::Vulkan Qt5::Core ${extralibs})
 
 if(APPLE)
