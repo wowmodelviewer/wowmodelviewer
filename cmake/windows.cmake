@@ -10,3 +10,6 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   
 # force Unicode compilation
 add_definitions(-DUNICODE -D_UNICODE)
+
+# C++17's std::byte collides with the Windows SDK's byte wherever 'using namespace std' precedes windows.h.
+add_definitions(-D_HAS_STD_BYTE=0)

@@ -13,7 +13,7 @@ Download the build for your system from the [Releases page](https://github.com/h
 Nothing is code-signed with a publisher identity, so each system asks once whether to trust it. Only download from the
 Releases page; each release lists the SHA-256 of every file.
 
-- **macOS** (12 Monterey or later, Apple silicon or Intel): open the `.dmg` and drag **WoW Model Viewer** to
+- **macOS** (12 Monterey or later, Apple silicon; an Intel Mac can build from source): open the `.dmg` and drag **WoW Model Viewer** to
   Applications. The app carries an ad-hoc signature only (no Apple Developer ID, no notarization), so the first time,
   right-click it and choose **Open**, then **Open** again (or System Settings > Privacy & Security > **Open Anyway**).
 - **Windows** (10 21H1 or later, 64-bit): run the installer. It installs for your account only, under

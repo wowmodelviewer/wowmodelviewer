@@ -5,6 +5,7 @@ name: Build
 on:
   push:
     branches: [ develop, 'native/**' ]
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
@@ -28,7 +29,7 @@ jobs:
         with:
           name: wowmodelviewer-macos
           path: dist/*.dmg
-          if-no-files-found: warn
+          if-no-files-found: error
 
   linux:
     runs-on: ubuntu-24.04
@@ -64,7 +65,7 @@ jobs:
         with:
           name: wowmodelviewer-linux
           path: dist/*.AppImage
-          if-no-files-found: warn
+          if-no-files-found: error
 
   windows:
     runs-on: windows-2022
@@ -75,6 +76,7 @@ jobs:
         with:
           version: 5.15.2
           arch: win64_msvc2019_64
+          tools: 'tools_openssl_x64,qt.tools.openssl.win_x64'
           cache: true
       - name: Vulkan SDK
         uses: humbletim/install-vulkan-sdk@v1.2
@@ -102,10 +104,47 @@ jobs:
           -DWMV_VCPKG_X64=C:/vcpkg/installed/x64-windows
       - name: Build
         run: cmake --build build --config Release
+      - name: Package (portable zip)
+        shell: pwsh
+        run: |
+          $b = "build/Source"
+          $d = "dist/WoWModelViewer"
+          New-Item -ItemType Directory -Force "$d/plugins", "$d/games/wow", "$d/dbd" | Out-Null
+          Copy-Item "$b/wowmodelviewer/Release/wowmodelviewer.exe", "$b/core/Release/core.dll", "$b/games/wow/Release/wow.dll" $d
+          Copy-Item "$b/plugins/importers/armory/Release/armory.dll", "$b/plugins/importers/wowhead/Release/wowhead.dll", "$b/plugins/exporters/obj/Release/objexporter.dll" "$d/plugins"
+          & "$env:QT_ROOT_DIR/bin/windeployqt.exe" --release --compiler-runtime --no-translations --no-opengl-sw "$d/wowmodelviewer.exe" "$d/core.dll" "$d/wow.dll"
+          Get-ChildItem "ThirdParty/wxWidgets33/lib/vc14x_x64_dll/wx*u_*.dll" | Where-Object { $_.Name -notmatch 'ud_' } | Copy-Item -Destination $d
+          Copy-Item "C:/vcpkg/installed/x64-windows/bin/*.dll" $d
+          $ssl = Get-ChildItem -Recurse "$env:IQTA_TOOLS", "$env:QT_ROOT_DIR/../../Tools" -Include libssl-1_1-x64.dll, libcrypto-1_1-x64.dll -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'Win_x64|x64' } | Select-Object -First 2
+          $ssl | Copy-Item -Destination $d
+          foreach ($v in '9.2','10.0','10.1','12.0') { Copy-Item -Recurse "bin_support/wow/$v" "$d/games/wow/$v" }
+          Copy-Item "bin_support/dbd/*.dbd" "$d/dbd"
+          Copy-Item "bin_support/Encryption/extraEncryptionKeys.csv", "LICENSE", "THIRD-PARTY-NOTICES.txt", "installer/README.txt" $d
+          Compress-Archive -Path "$d" -DestinationPath "dist/WoWModelViewer-1.2-Windows-x64.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: wowmodelviewer-windows
-          path: |
-            build/Source/wowmodelviewer/Release/*.exe
-            build/Source/**/Release/*.dll
-          if-no-files-found: warn
+          path: dist/*.zip
+          if-no-files-found: error
+
+  # A tag v* publishes the three builds as a GitHub Release (a pre-release while the tag has a '-': v1.2.0-preview.1).
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ macos, linux, windows ]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        run: cd artifacts && sha256sum * | tee SHA256SUMS.txt
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          body_path: installer/RELEASE-NOTES.md
