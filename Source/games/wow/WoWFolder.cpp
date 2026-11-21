@@ -44,7 +44,8 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   // client has is decided here, from its own storage.
   bool reused = false;
   std::shared_ptr<const Listfile> list =
-    Listfile::get(core::Game::instance().configFolder() + filename, [this](float fraction) {
+    Listfile::get(QDir::isAbsolutePath(filename) ? filename : core::Game::instance().configFolder() + filename,
+                  [this](float fraction) {
       if (m_loadProgressCb)
         m_loadProgressCb(LoadPhase::ReadingListfile, fraction);
     }, reused);

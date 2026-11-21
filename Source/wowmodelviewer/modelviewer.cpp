@@ -3637,7 +3637,7 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     // (Not asked twice: a first start has just downloaded it.)
     const bool listAnswered =
       listAnsweredEarly ||
-      refreshCommunityListfile(core::Game::instance().configFolder() + "../../../listfile.csv", progress);
+      refreshCommunityListfile(QDir::current().absoluteFilePath(QStringLiteral("listfile.csv")), progress);
     // Only real answers spare the next hour's loads from asking: offline, or after a failed request, every load asks
     // again, as it always did.
     if (keysAnswered && listAnswered)
@@ -3664,7 +3664,9 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     });
   }
   timeline.begin("file index");
-  GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
+  // In the working directory (the home folder), by absolute path: games/ may be a link into the program's own
+  // folder, so a path climbing out of the config folder would land there.
+  GAMEDIRECTORY.initFromListfile(QDir::current().absoluteFilePath(QStringLiteral("listfile.csv")));
   timeline.end("file index");
   GAMEDIRECTORY.setLoadProgressCallback(core::GameFolder::LoadReport());
   const long listfileMs = step.Time();
