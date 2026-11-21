@@ -32,6 +32,29 @@ for p in "$APP/Contents/PlugIns/"*.dylib; do EXTRA+=("-executable=$p"); done
 "$QT/bin/macdeployqt" "$APP" "${EXTRA[@]}" -always-overwrite \
   -libpath="$BUILD/Source/core" -libpath="$BUILD/Source/games/wow" -libpath="$BREW/lib"
 
+# macdeployqt copies a library once per name it is linked by: Homebrew's wx libraries are linked both as
+# libwx_x-3.3.dylib and as their real file libwx_x-3.3.4.0.0.dylib, so two copies of wx would load (two wxApps: a
+# blank viewport). Keep the short name, point every reference to the long one at it, and drop the long copy.
+FW="$APP/Contents/Frameworks"
+for long in "$FW"/*-[0-9]*.[0-9]*.[0-9]*.[0-9]*.dylib; do
+  [ -e "$long" ] || continue
+  lname=$(basename "$long")
+  sname=$(echo "$lname" | sed -E 's/-([0-9]+\.[0-9]+)\.[0-9.]+\.dylib$/-\1.dylib/')
+  [ "$sname" != "$lname" ] || continue
+  [ -e "$FW/$sname" ] || mv "$long" "$FW/$sname"
+  rm -f "$long"
+  for f in "$APP/Contents/MacOS/"* "$FW"/*.dylib "$APP/Contents/PlugIns/"*.dylib "$APP/Contents/PlugIns/"*/*.dylib; do
+    [ -f "$f" ] || continue
+    otool -L "$f" 2>/dev/null | tail -n +2 | awk '{print $1}' | { grep "/$lname\$" || true; } | while read -r ref; do
+      install_name_tool -change "$ref" "${ref%/*}/$sname" "$f" 2>/dev/null || true
+    done
+  done
+  install_name_tool -id "@executable_path/../Frameworks/$sname" "$FW/$sname" 2>/dev/null || true
+done
+if ls "$FW"/*-[0-9]*.[0-9]*.[0-9]*.[0-9]*.dylib >/dev/null 2>&1; then
+  echo "error: a library is still bundled under two names:" >&2; ls "$FW" >&2; exit 1
+fi
+
 # MoltenVK, the Vulkan driver, found by the loader through the bundle's own ICD manifest.
 cp "$MOLTENVK/lib/libMoltenVK.dylib" "$APP/Contents/Frameworks/"
 mkdir -p "$APP/Contents/Resources/vulkan/icd.d"
