@@ -56,7 +56,15 @@ set(src animated.cpp
       WoWItem.cpp
       WoWModel.cpp
       WorldMapCatalog.cpp
-      WotlkDbc.cpp)
+      WotlkDbc.cpp
+      world/AdtModel.cpp
+      world/AdtParser.cpp
+      world/ByteCursor.cpp
+      world/LiquidFormat.cpp
+      world/TerrainLayout.cpp
+      world/WdtParser.cpp
+      world/WorldChunks.cpp
+      world/WorldPlacements.cpp)
 
 set(headers animated.h
       AnimManager.h
@@ -116,7 +124,17 @@ set(headers animated.h
       WoWItem.h
       WoWModel.h
       WorldMapCatalog.h
-      WotlkDbc.h)
+      WotlkDbc.h
+      world/AdtModel.h
+      world/AdtParser.h
+      world/ByteCursor.h
+      world/LiquidFormat.h
+      world/TerrainLayout.h
+      world/WdtParser.h
+      world/WorldApi.h
+      world/WorldChunks.h
+      world/WorldPlacements.h
+      world/WorldText.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -137,3 +155,12 @@ add_dependencies(${NAME} casc_static storm)
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+
+# Headless checks of the world-format parsers (world/), on synthetic ADT/WDT bytes: run worldparse_test.
+option(WMV_BUILD_TESTS "Build the wow library's headless test programs" ON)
+if(WMV_BUILD_TESTS)
+  add_executable(worldparse_test world/tests/worldparse_test.cpp)
+  set_property(TARGET worldparse_test PROPERTY FOLDER "tests")
+  target_include_directories(worldparse_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(worldparse_test ${NAME})
+endif()
