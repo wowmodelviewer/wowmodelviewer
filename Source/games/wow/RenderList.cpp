@@ -17,6 +17,7 @@ void wmv::RenderList::clear()
   vertices.clear();
   indices.clear();
   draws.clear();
+  terrain.clear();
   m_stack.assign(1, glm::mat4(1.0f));
 }
 
@@ -84,8 +85,19 @@ void wmv::RenderList::draw(const Material & material, uint32_t firstIndex, Primi
   draws.push_back(d);
 }
 
+void wmv::RenderList::drawTerrain(const TerrainMaterial & tm, uint32_t firstIndex, const Material & state)
+{
+  if (firstIndex >= indices.size())
+    return;
+  terrain.push_back(tm);
+  draw(state, firstIndex);
+  draws.back().terrain = (int)terrain.size() - 1;
+}
+
 void wmv::RenderList::append(const RenderList & other)
 {
+  const int tbase = (int)terrain.size();
+  terrain.insert(terrain.end(), other.terrain.begin(), other.terrain.end());
   const uint32_t vbase = (uint32_t)vertices.size();
   const uint32_t ibase = (uint32_t)indices.size();
   vertices.insert(vertices.end(), other.vertices.begin(), other.vertices.end());
@@ -97,6 +109,8 @@ void wmv::RenderList::append(const RenderList & other)
     Draw c = d;
     c.firstIndex += ibase;
     c.model = m_stack.back() * d.model;
+    if (c.terrain >= 0)
+      c.terrain += tbase;
     draws.push_back(c);
   }
 }

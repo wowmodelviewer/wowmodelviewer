@@ -8,16 +8,17 @@ set(gen_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${gen_dir})
 
 set(shader_headers)
-foreach(stage vert frag)
-  set(src ${shader_dir}/model.${stage})
-  set(spv ${gen_dir}/model.${stage}.spv)
-  set(hdr ${gen_dir}/model_${stage}_spv.h)
+foreach(shader model.vert model.frag terrain.vert terrain.frag)
+  string(REPLACE "." "_" name ${shader})
+  set(src ${shader_dir}/${shader})
+  set(spv ${gen_dir}/${shader}.spv)
+  set(hdr ${gen_dir}/${name}_spv.h)
   add_custom_command(
     OUTPUT ${hdr}
     COMMAND Vulkan::glslc --target-env=vulkan1.1 -O -I ${shader_dir} ${src} -o ${spv}
-    COMMAND ${CMAKE_COMMAND} -DIN=${spv} -DOUT=${hdr} -DNAME=model_${stage}_spv -P ${CMAKE_SOURCE_DIR}/cmake/embed_spirv.cmake
-    DEPENDS ${src} ${shader_dir}/common.glsl ${CMAKE_SOURCE_DIR}/cmake/embed_spirv.cmake
-    COMMENT "Compiling viewport shader model.${stage}"
+    COMMAND ${CMAKE_COMMAND} -DIN=${spv} -DOUT=${hdr} -DNAME=${name}_spv -P ${CMAKE_SOURCE_DIR}/cmake/embed_spirv.cmake
+    DEPENDS ${src} ${shader_dir}/common.glsl ${shader_dir}/terrain_common.glsl ${CMAKE_SOURCE_DIR}/cmake/embed_spirv.cmake
+    COMMENT "Compiling viewport shader ${shader}"
     VERBATIM)
   list(APPEND shader_headers ${hdr})
 endforeach()

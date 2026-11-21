@@ -29,6 +29,8 @@
 
 #include "model_vert_spv.h"
 #include "model_frag_spv.h"
+#include "terrain_vert_spv.h"
+#include "terrain_frag_spv.h"
 
 namespace
 {
@@ -61,6 +63,26 @@ namespace
     float pad1;
   };
   static_assert(sizeof(GpuDrawData) == 416, "GpuDrawData must match common.glsl");
+
+  // One terrain chunk's material (terrain_common.glsl TerrainDrawData, std430).
+  struct GpuTerrainData
+  {
+    glm::mat4 mvp;
+    glm::mat4 modelView;
+    glm::mat4 normalMatrix;
+    glm::vec4 repeats[2];
+    glm::vec4 phaseU[2];
+    glm::vec4 phaseV[2];
+    glm::vec4 heightScale[2];
+    glm::vec4 heightOffset[2];
+    glm::vec4 hasHeight[2];
+    glm::vec4 missing[2];
+    int32_t layerCount;
+    int32_t useHeights;
+    int32_t hasMccv;
+    int32_t flags;
+  };
+  static_assert(sizeof(GpuTerrainData) == 432, "GpuTerrainData must match terrain_common.glsl");
 
   struct GpuFrameData
   {
@@ -410,11 +432,11 @@ namespace
   struct PipelineKey
   {
     uint8_t blend;
-    bool blendEnabled, cull, frontCW, depthTest, depthWrite, lines, wireframe;
+    bool blendEnabled, cull, frontCW, depthTest, depthWrite, lines, wireframe, terrain = false;
     uint32_t pack() const
     {
       return (uint32_t)blend | (blendEnabled << 8) | (cull << 9) | (frontCW << 10) | (depthTest << 11) |
-             (depthWrite << 12) | (lines << 13) | (wireframe << 14);
+             (depthWrite << 12) | (lines << 13) | (wireframe << 14) | (terrain << 15);
     }
   };
 
@@ -425,7 +447,7 @@ namespace
     VkSemaphore imageAvailable = VK_NULL_HANDLE;
     VkDescriptorPool pool = VK_NULL_HANDLE;
     uint32_t poolCapacity = 0;
-    Buffer vertices, indices, draws, frame;
+    Buffer vertices, indices, draws, frame, terrain;
   };
 
   // ------------------------------------------------------------------------------------------------ viewport
@@ -690,7 +712,7 @@ namespace
     bool createLayouts()
     {
       VkDevice d = m_c.device;
-      VkDescriptorSetLayoutBinding frameBindings[2] = {};
+      VkDescriptorSetLayoutBinding frameBindings[3] = {};
       frameBindings[0].binding = 0;
       frameBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
       frameBindings[0].descriptorCount = 1;
@@ -699,8 +721,12 @@ namespace
       frameBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       frameBindings[1].descriptorCount = 1;
       frameBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+      frameBindings[2].binding = 2; // the terrain chunks' materials
+      frameBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+      frameBindings[2].descriptorCount = 1;
+      frameBindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
       VkDescriptorSetLayoutCreateInfo lci = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-      lci.bindingCount = 2;
+      lci.bindingCount = 3;
       lci.pBindings = frameBindings;
       if (vkCreateDescriptorSetLayout(d, &lci, nullptr, &m_frameSetLayout) != VK_SUCCESS)
         return false;
@@ -725,7 +751,25 @@ namespace
       plci.pSetLayouts = sets;
       plci.pushConstantRangeCount = 1;
       plci.pPushConstantRanges = &pcr;
-      return vkCreatePipelineLayout(d, &plci, nullptr, &m_pipelineLayout) == VK_SUCCESS;
+      if (vkCreatePipelineLayout(d, &plci, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+        return false;
+
+      // terrain: 8 layer textures, 8 height textures, 2 alpha maps, the repeat and the clamp sampler
+      VkDescriptorSetLayoutBinding tb[5] = {};
+      const uint32_t counts[5] = { 8, 8, 2, 1, 1 };
+      for (uint32_t i = 0; i < 5; i++)
+      {
+        tb[i].binding = i;
+        tb[i].descriptorType = i < 3 ? VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLER;
+        tb[i].descriptorCount = counts[i];
+        tb[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+      }
+      lci.bindingCount = 5;
+      lci.pBindings = tb;
+      if (vkCreateDescriptorSetLayout(d, &lci, nullptr, &m_terrainSetLayout) != VK_SUCCESS)
+        return false;
+      sets[1] = m_terrainSetLayout;
+      return vkCreatePipelineLayout(d, &plci, nullptr, &m_terrainLayout) == VK_SUCCESS;
     }
 
     VkRenderPass makeRenderPass(VkImageLayout finalLayout)
@@ -820,7 +864,9 @@ namespace
     {
       m_vert = shaderModule(model_vert_spv, sizeof(model_vert_spv));
       m_frag = shaderModule(model_frag_spv, sizeof(model_frag_spv));
-      return m_vert && m_frag;
+      m_terrainVert = shaderModule(terrain_vert_spv, sizeof(terrain_vert_spv));
+      m_terrainFrag = shaderModule(terrain_frag_spv, sizeof(terrain_frag_spv));
+      return m_vert && m_frag && m_terrainVert && m_terrainFrag;
     }
 
     bool createSamplers()
@@ -845,7 +891,13 @@ namespace
           if (vkCreateSampler(m_c.device, &sci, nullptr, &m_samplers[s][t]) != VK_SUCCESS)
             return false;
         }
-      return true;
+      // the terrain's alpha maps: bilinear, clamped, no mips
+      VkSamplerCreateInfo aci = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+      aci.magFilter = aci.minFilter = VK_FILTER_LINEAR;
+      aci.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+      aci.addressModeU = aci.addressModeV = aci.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+      aci.maxLod = 0.0f;
+      return vkCreateSampler(m_c.device, &aci, nullptr, &m_alphaSampler) == VK_SUCCESS;
     }
 
     // ---------------------------------------------------------------- one-time commands
@@ -903,32 +955,42 @@ namespace
     // current generation. Levels the texture lacks are made by blits.
     void uploadTextures(VkCommandBuffer cmd, const wmv::RenderList & list)
     {
+      auto upload = [&](TextureID id) {
+        if (id == 0)
+          return;
+        const Texture * tex = TEXTUREMANAGER.texture(id);
+        if (!tex || tex->mips.empty() || tex->w <= 0 || tex->h <= 0)
+          return;
+        auto it = m_textures.find(id);
+        if (it != m_textures.end())
+        {
+          it->second.lastUsedFrame = m_frameCounter;
+          if (it->second.generation == tex->generation)
+            return;
+          retire(it->second.image);
+          m_textures.erase(it);
+        }
+        GpuTexture g;
+        if (uploadTexture(cmd, *tex, g.image))
+        {
+          g.generation = tex->generation;
+          g.lastUsedFrame = m_frameCounter;
+          m_textures[id] = g;
+        }
+      };
       for (const wmv::Draw & d : list.draws)
         for (int u = 0; u < 4; u++)
+          upload(d.material.tex[u]);
+      for (const wmv::TerrainMaterial & t : list.terrain)
+      {
+        for (int k = 0; k < t.layerCount && k < wmv::TerrainMaterial::MaxLayers; k++)
         {
-          const TextureID id = d.material.tex[u];
-          if (id == 0)
-            continue;
-          const Texture * tex = TEXTUREMANAGER.texture(id);
-          if (!tex || tex->mips.empty() || tex->w <= 0 || tex->h <= 0)
-            continue;
-          auto it = m_textures.find(id);
-          if (it != m_textures.end())
-          {
-            it->second.lastUsedFrame = m_frameCounter;
-            if (it->second.generation == tex->generation)
-              continue;
-            retire(it->second.image);
-            m_textures.erase(it);
-          }
-          GpuTexture g;
-          if (uploadTexture(cmd, *tex, g.image))
-          {
-            g.generation = tex->generation;
-            g.lastUsedFrame = m_frameCounter;
-            m_textures[id] = g;
-          }
+          upload(t.layer[k]);
+          upload(t.height[k]);
         }
+        upload(t.alpha[0]);
+        upload(t.alpha[1]);
+      }
     }
 
     bool uploadTexture(VkCommandBuffer cmd, const Texture & tex, Image & out)
@@ -1058,10 +1120,10 @@ namespace
       VkPipelineShaderStageCreateInfo stages[2] = {};
       stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
       stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-      stages[0].module = m_vert;
+      stages[0].module = key.terrain ? m_terrainVert : m_vert;
       stages[0].pName = "main";
       stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-      stages[1].module = m_frag;
+      stages[1].module = key.terrain ? m_terrainFrag : m_frag;
       stages[1].pName = "main";
 
       VkVertexInputBindingDescription binding = { 0, sizeof(wmv::Vertex), VK_VERTEX_INPUT_RATE_VERTEX };
@@ -1160,7 +1222,7 @@ namespace
       gpci.pDepthStencilState = &ds;
       gpci.pColorBlendState = &cbs;
       gpci.pDynamicState = &dy;
-      gpci.layout = m_pipelineLayout;
+      gpci.layout = key.terrain ? m_terrainLayout : m_pipelineLayout;
       gpci.renderPass = pass;
       VkPipeline p = VK_NULL_HANDLE;
       if (vkCreateGraphicsPipelines(m_c.device, VK_NULL_HANDLE, 1, &gpci, nullptr, &p) != VK_SUCCESS)
@@ -1320,7 +1382,9 @@ namespace
       if (!ensureBuffer(m_c, f.vertices, vbytes, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) ||
           !ensureBuffer(m_c, f.indices, ibytes, VK_BUFFER_USAGE_INDEX_BUFFER_BIT) ||
           !ensureBuffer(m_c, f.draws, dbytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) ||
-          !ensureBuffer(m_c, f.frame, sizeof(GpuFrameData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT))
+          !ensureBuffer(m_c, f.frame, sizeof(GpuFrameData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) ||
+          !ensureBuffer(m_c, f.terrain, std::max<size_t>(list.terrain.size(), 1) * sizeof(GpuTerrainData),
+                        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT))
         return fail("The frame's buffers could not be allocated.");
       if (!list.vertices.empty())
         std::memcpy(f.vertices.mapped, list.vertices.data(), list.vertices.size() * sizeof(wmv::Vertex));
@@ -1370,6 +1434,35 @@ namespace
         g.pad0 = g.pad1 = 0.0f;
       }
 
+      // the terrain chunks' materials, indexed by the draw's terrain index
+      GpuTerrainData * gt = static_cast<GpuTerrainData *>(f.terrain.mapped);
+      for (size_t i = 0; i < list.draws.size(); i++)
+      {
+        const wmv::Draw & dr = list.draws[i];
+        if (dr.terrain < 0 || dr.terrain >= (int)list.terrain.size())
+          continue;
+        const wmv::TerrainMaterial & tm = list.terrain[dr.terrain];
+        GpuTerrainData & t = gt[dr.terrain];
+        t.modelView = gd[i].modelView;
+        t.mvp = gd[i].mvp;
+        t.normalMatrix = gd[i].normalMatrix;
+        for (int k = 0; k < 8; k++)
+        {
+          const bool used = k < tm.layerCount;
+          t.repeats[k / 4][k % 4] = used ? tm.repeats[k] : 0.0f;
+          t.phaseU[k / 4][k % 4] = used ? tm.phaseU[k] : 0.0f;
+          t.phaseV[k / 4][k % 4] = used ? tm.phaseV[k] : 0.0f;
+          t.heightScale[k / 4][k % 4] = used ? tm.heightScale[k] : 0.0f;
+          t.heightOffset[k / 4][k % 4] = used ? tm.heightOffset[k] : 1.0f;
+          t.hasHeight[k / 4][k % 4] = used && tm.height[k] && m_textures.count(tm.height[k]) ? 1.0f : 0.0f;
+          t.missing[k / 4][k % 4] = used && !(tm.layer[k] && m_textures.count(tm.layer[k])) ? 1.0f : 0.0f;
+        }
+        t.layerCount = tm.layerCount;
+        t.useHeights = tm.useHeights ? 1 : 0;
+        t.hasMccv = tm.hasMccv ? 1 : 0;
+        t.flags = dr.material.unlit ? 1 : 0;
+      }
+
       GpuFrameData fd;
       const glm::vec3 keyView = glm::normalize(glm::mat3(list.view) * settings.keyDirection);
       fd.keyDirView = glm::vec4(keyView, 0.0f);
@@ -1385,14 +1478,16 @@ namespace
         if (f.pool)
           vkDestroyDescriptorPool(d, f.pool, nullptr);
         f.poolCapacity = std::max(setsNeeded * 2, 256u);
-        VkDescriptorPoolSize sizes[3] = {
-          { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
+        VkDescriptorPoolSize sizes[5] = {
+          { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2 },
           { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
           { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, f.poolCapacity * 4 },
+          { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, f.poolCapacity * 18 },
+          { VK_DESCRIPTOR_TYPE_SAMPLER, f.poolCapacity * 2 },
         };
         VkDescriptorPoolCreateInfo dpci = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
         dpci.maxSets = f.poolCapacity;
-        dpci.poolSizeCount = 3;
+        dpci.poolSizeCount = 5;
         dpci.pPoolSizes = sizes;
         vkCreateDescriptorPool(d, &dpci, nullptr, &f.pool);
       }
@@ -1408,9 +1503,14 @@ namespace
         return fail("The frame's descriptors could not be allocated.");
       VkDescriptorBufferInfo drawsInfo = { f.draws.buffer, 0, VK_WHOLE_SIZE };
       VkDescriptorBufferInfo frameInfo = { f.frame.buffer, 0, sizeof(GpuFrameData) };
-      VkWriteDescriptorSet writes[2] = {};
-      writes[0].sType = writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-      writes[0].dstSet = writes[1].dstSet = frameSet;
+      VkDescriptorBufferInfo terrainInfo = { f.terrain.buffer, 0, VK_WHOLE_SIZE };
+      VkWriteDescriptorSet writes[3] = {};
+      writes[0].sType = writes[1].sType = writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      writes[0].dstSet = writes[1].dstSet = writes[2].dstSet = frameSet;
+      writes[2].dstBinding = 2;
+      writes[2].descriptorCount = 1;
+      writes[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+      writes[2].pBufferInfo = &terrainInfo;
       writes[0].dstBinding = 0;
       writes[0].descriptorCount = 1;
       writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -1419,7 +1519,7 @@ namespace
       writes[1].descriptorCount = 1;
       writes[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       writes[1].pBufferInfo = &frameInfo;
-      vkUpdateDescriptorSets(d, 2, writes, 0, nullptr);
+      vkUpdateDescriptorSets(d, 3, writes, 0, nullptr);
 
       // ---- the pass
       VkClearValue clears[3] = {};
@@ -1443,8 +1543,6 @@ namespace
       VkDeviceSize zero = 0;
       vkCmdBindVertexBuffers(f.cmd, 0, 1, &f.vertices.buffer, &zero);
       vkCmdBindIndexBuffer(f.cmd, f.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-      vkCmdBindDescriptorSets(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &frameSet, 0, nullptr);
-
       VkPipeline bound = VK_NULL_HANDLE;
       for (uint32_t i : order)
       {
@@ -1462,6 +1560,7 @@ namespace
         key.depthWrite = m.depthWrite;
         key.lines = dr.primitive == wmv::PRIM_LINES;
         key.wireframe = m.wireframe;
+        key.terrain = dr.terrain >= 0 && dr.terrain < (int)list.terrain.size();
         VkPipeline p = pipeline(key, pass);
         if (!p)
           continue;
@@ -1470,6 +1569,47 @@ namespace
           vkCmdBindPipeline(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, p);
           bound = p;
         }
+        const int32_t index = key.terrain ? (int32_t)dr.terrain : (int32_t)i;
+
+        if (key.terrain)
+        {
+          const wmv::TerrainMaterial & tm = list.terrain[dr.terrain];
+          VkDescriptorSet ts;
+          dsai.pSetLayouts = &m_terrainSetLayout;
+          if (vkAllocateDescriptorSets(d, &dsai, &ts) != VK_SUCCESS)
+            break;
+          VkDescriptorImageInfo img[18], smp[2];
+          for (int k = 0; k < 8; k++)
+          {
+            const bool used = k < tm.layerCount;
+            img[k] = { VK_NULL_HANDLE, textureView(used ? tm.layer[k] : 0, true), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+            img[8 + k] = { VK_NULL_HANDLE, textureView(used ? tm.height[k] : 0, true),
+                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+          }
+          for (int a = 0; a < 2; a++)
+            img[16 + a] = { VK_NULL_HANDLE, textureView(tm.alpha[a], true), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+          smp[0] = { m_samplers[0][0], VK_NULL_HANDLE, VK_IMAGE_LAYOUT_UNDEFINED };
+          smp[1] = { m_alphaSampler, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_UNDEFINED };
+          VkWriteDescriptorSet w[5] = {};
+          const uint32_t first[5] = { 0, 8, 16, 0, 1 }, count[5] = { 8, 8, 2, 1, 1 };
+          for (uint32_t b = 0; b < 5; b++)
+          {
+            w[b].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            w[b].dstSet = ts;
+            w[b].dstBinding = b;
+            w[b].descriptorCount = count[b];
+            w[b].descriptorType = b < 3 ? VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLER;
+            w[b].pImageInfo = b < 3 ? &img[first[b]] : &smp[first[b]];
+          }
+          vkUpdateDescriptorSets(d, 5, w, 0, nullptr);
+          vkCmdBindDescriptorSets(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_terrainLayout, 0, 1, &frameSet, 0, nullptr);
+          vkCmdBindDescriptorSets(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_terrainLayout, 1, 1, &ts, 0, nullptr);
+          vkCmdPushConstants(f.cmd, m_terrainLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                             sizeof(index), &index);
+          vkCmdDrawIndexed(f.cmd, dr.indexCount, 1, dr.firstIndex, 0, 0);
+          continue;
+        }
+        vkCmdBindDescriptorSets(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &frameSet, 0, nullptr);
 
         VkDescriptorSet texSet;
         dsai.pSetLayouts = &m_texSetLayout;
@@ -1493,7 +1633,6 @@ namespace
         vkUpdateDescriptorSets(d, 4, tw, 0, nullptr);
         vkCmdBindDescriptorSets(f.cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 1, 1, &texSet, 0, nullptr);
 
-        const int32_t index = (int32_t)i;
         vkCmdPushConstants(f.cmd, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                            sizeof(index), &index);
         vkCmdDrawIndexed(f.cmd, dr.indexCount, 1, dr.firstIndex, 0, 0);
@@ -1521,7 +1660,7 @@ namespace
       m_white.destroy(d);
       for (auto & f : m_frames)
       {
-        f.vertices.destroy(d); f.indices.destroy(d); f.draws.destroy(d); f.frame.destroy(d);
+        f.vertices.destroy(d); f.indices.destroy(d); f.draws.destroy(d); f.frame.destroy(d); f.terrain.destroy(d);
         if (f.pool) vkDestroyDescriptorPool(d, f.pool, nullptr);
         if (f.fence) vkDestroyFence(d, f.fence, nullptr);
         if (f.imageAvailable) vkDestroySemaphore(d, f.imageAvailable, nullptr);
@@ -1532,6 +1671,11 @@ namespace
       for (auto & row : m_samplers) for (VkSampler s : row) if (s) vkDestroySampler(d, s, nullptr);
       if (m_vert) vkDestroyShaderModule(d, m_vert, nullptr);
       if (m_frag) vkDestroyShaderModule(d, m_frag, nullptr);
+      if (m_terrainVert) vkDestroyShaderModule(d, m_terrainVert, nullptr);
+      if (m_terrainFrag) vkDestroyShaderModule(d, m_terrainFrag, nullptr);
+      if (m_alphaSampler) vkDestroySampler(d, m_alphaSampler, nullptr);
+      if (m_terrainLayout) vkDestroyPipelineLayout(d, m_terrainLayout, nullptr);
+      if (m_terrainSetLayout) vkDestroyDescriptorSetLayout(d, m_terrainSetLayout, nullptr);
       if (m_presentPass) vkDestroyRenderPass(d, m_presentPass, nullptr);
       if (m_capturePass) vkDestroyRenderPass(d, m_capturePass, nullptr);
       if (m_pipelineLayout) vkDestroyPipelineLayout(d, m_pipelineLayout, nullptr);
@@ -1567,6 +1711,10 @@ namespace
     VkDescriptorSetLayout m_frameSetLayout = VK_NULL_HANDLE, m_texSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkShaderModule m_vert = VK_NULL_HANDLE, m_frag = VK_NULL_HANDLE;
+    VkShaderModule m_terrainVert = VK_NULL_HANDLE, m_terrainFrag = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_terrainSetLayout = VK_NULL_HANDLE;
+    VkPipelineLayout m_terrainLayout = VK_NULL_HANDLE;
+    VkSampler m_alphaSampler = VK_NULL_HANDLE;
     VkSampler m_samplers[2][2] = {};
     std::unordered_map<uint64_t, VkPipeline> m_pipelines;
 

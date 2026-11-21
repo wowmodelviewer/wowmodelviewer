@@ -108,6 +108,25 @@ namespace wmv
     float metalTight = 55.0f;
   };
 
+  // A terrain chunk's texture material (the World viewer): up to 8 layers composited by the client's height mix
+  // (docs/world-viewer/04-terrain-materials.md; the CPU twin is world/TerrainMaterial). Drawn by the renderer's terrain
+  // pipeline; vertices carry the chunk's cell UV (0..8, u east, v south) in uv0 and MCCV / 127 in color.
+  struct TerrainMaterial
+  {
+    static const int MaxLayers = 8;
+    int layerCount = 0;
+    TextureID layer[MaxLayers] = {};      // diffuse; 0 = missing (drawn as a magenta/black checker)
+    TextureID height[MaxLayers] = {};     // MHID height texture (its alpha), 0 = none
+    float repeats[MaxLayers] = {};        // texture repeats per chunk (8 / 2^n of the MTXP scale nibble)
+    float phaseU[MaxLayers] = {};         // frac(ix * repeats), frac(iy * repeats) of the chunk
+    float phaseV[MaxLayers] = {};
+    float heightScale[MaxLayers] = {};    // MTXP words 1, 2 (0, 1 without MTXP)
+    float heightOffset[MaxLayers] = {};
+    bool useHeights = false;              // MPHD 0x80: height textures and MTXP values enter the mix
+    bool hasMccv = false;                 // the vertex colours are the chunk's MCCV (else white)
+    TextureID alpha[2] = {};              // RGBA 64x64: layers 1..4 in R, G, B, A; layers 5..7 in the second's R, G, B
+  };
+
   struct Draw
   {
     Primitive primitive = PRIM_TRIANGLES;
@@ -116,6 +135,7 @@ namespace wmv
     glm::mat4 model = glm::mat4(1.0f); // the modelview stack's top (without the camera) when recorded
     Material material;
     int layer = 0;             // drawn in increasing layer order, then in recording order (0 = scene)
+    int terrain = -1;          // >= 0: a terrain chunk, RenderList::terrain[terrain] (material's blend/depth/cull apply)
   };
 
   class _RENDERLIST_API_ RenderList
@@ -156,6 +176,10 @@ namespace wmv
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
     std::vector<Draw> draws;
+    std::vector<TerrainMaterial> terrain;
+
+    // A terrain chunk's draw of the indices added since firstIndex, with its texture material.
+    void drawTerrain(const TerrainMaterial & tm, uint32_t firstIndex, const Material & state = Material());
 
     // The list the model code is recording into, or nullptr outside a frame.
     static RenderList * current();
